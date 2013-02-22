@@ -8,9 +8,9 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>hoccer-talk-client</artifactId>
+  <artifactId>hoccer-talk-common</artifactId>
 
-  <name>Hoccer Talk Client</name>
+  <name>Hoccer Talk Common</name>
 
   <packaging>jar</packaging>
 
@@ -20,28 +20,18 @@
 
   <dependencies>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.16</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.0.6</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-websocket</artifactId>
-      <version>${jetty.version}</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.0.6</version>
     </dependency>
     <dependency>
       <groupId>better</groupId>
       <artifactId>better-jsonrpc-common</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>better</groupId>
-      <artifactId>better-jsonrpc-ws-client</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>hoccer</groupId>
-      <artifactId>hoccer-talk-common</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
@@ -55,14 +45,6 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
-        </configuration>
-      </plugin>
-      <plugin>            
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-        <version>2.1.1</version>
-        <configuration>
-          <webXml>src\main\webapp\WEB-INF\web.xml</webXml>        
         </configuration>
       </plugin>
     </plugins>
