@@ -8,6 +8,9 @@ public class TalkClient {
 	/** GCM registration token */
 	String gcmRegistration;
 	
+	/** GCM android application package */
+	String gcmPackage;
+	
 	public TalkClient(String clientId) {
 		this.clientId = clientId;
 	}
@@ -26,6 +29,14 @@ public class TalkClient {
 
 	public void setGcmRegistration(String gcmRegistration) {
 		this.gcmRegistration = gcmRegistration;
+	}
+
+	public String getGcmPackage() {
+		return gcmPackage;
+	}
+
+	public void setGcmPackage(String gcmPackage) {
+		this.gcmPackage = gcmPackage;
 	}
 	
 }

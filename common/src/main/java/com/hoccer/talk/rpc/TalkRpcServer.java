@@ -19,6 +19,6 @@ public interface TalkRpcServer {
 	void requestIncomingDelivery(boolean wanted);
 	
 	void deliveryRequest(TalkMessage m, TalkDelivery[] d);
-	void deliveryConfirm(TalkDelivery d);
+	void deliveryConfirm(String messageId);
 	
 }
