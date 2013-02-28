@@ -14,11 +14,8 @@ import com.hoccer.talk.model.TalkMessage;
 public interface TalkRpcServer {
 	
 	void identify(String clientId);
-	
-	void requestOutgoingDelivery(boolean wanted);
-	void requestIncomingDelivery(boolean wanted);
-	
-	void deliveryRequest(TalkMessage m, TalkDelivery[] d);
-	void deliveryConfirm(String messageId);
+
+	TalkDelivery[] deliveryRequest(TalkMessage m, TalkDelivery[] d);
+	TalkDelivery   deliveryConfirm(String messageId);
 	
 }

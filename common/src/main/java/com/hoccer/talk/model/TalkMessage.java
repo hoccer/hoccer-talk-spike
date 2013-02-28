@@ -7,11 +7,17 @@ package com.hoccer.talk.model;
  * @author ingo
  */
 public class TalkMessage {
-	
+
+    /** Server-assigned message id */
 	String messageId;
 
+    /** Sender-assigned message tag/id */
+    String messageTag;
+
+    /** Client id of the sender */
 	String senderId;
-	
+
+    /** Message body */
 	String body;
 
 	public String getMessageId() {
@@ -21,6 +27,14 @@ public class TalkMessage {
 	public void setMessageId(String messageId) {
 		this.messageId = messageId;
 	}
+
+    public String getMessageTag() {
+        return messageTag;
+    }
+
+    public void setMessageTag(String messageTag) {
+        this.messageTag = messageTag;
+    }
 
 	public String getSenderId() {
 		return senderId;
