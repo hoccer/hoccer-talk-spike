@@ -15,6 +15,9 @@ public interface TalkRpcServer {
 	
 	void identify(String clientId);
 
+    // XXX temporary for spiking
+    String[] getAllClients();
+
 	TalkDelivery[] deliveryRequest(TalkMessage m, TalkDelivery[] d);
 	TalkDelivery   deliveryConfirm(String messageId);
 	

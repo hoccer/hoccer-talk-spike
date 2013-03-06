@@ -1,16 +1,28 @@
 package com.hoccer.talk.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+@DatabaseTable(tableName="client")
 public class TalkClient {
 	
 	/** Server-assigned client ID */
+    @DatabaseField
 	String clientId;
 	
 	/** GCM registration token */
+    @DatabaseField
 	String gcmRegistration;
 	
 	/** GCM android application package */
+    @DatabaseField
 	String gcmPackage;
-	
+
+    public TalkClient() {
+
+    }
+
 	public TalkClient(String clientId) {
 		this.clientId = clientId;
 	}
