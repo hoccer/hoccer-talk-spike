@@ -22,7 +22,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>2.0.6</version>
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>better</groupId>
@@ -33,7 +33,7 @@
     <dependency>
       <groupId>com.j256.ormlite</groupId>
       <artifactId>ormlite-core</artifactId>
-      <version>4.43</version>
+      <version>${ormlite.version}</version>
     </dependency>
   </dependencies>
   
