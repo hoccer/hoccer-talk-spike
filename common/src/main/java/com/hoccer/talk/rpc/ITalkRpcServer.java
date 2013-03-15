@@ -11,7 +11,7 @@ import com.hoccer.talk.model.TalkMessage;
  * 
  * @author ingo
  */
-public interface TalkRpcServer {
+public interface ITalkRpcServer {
 	
 	void identify(String clientId);
 

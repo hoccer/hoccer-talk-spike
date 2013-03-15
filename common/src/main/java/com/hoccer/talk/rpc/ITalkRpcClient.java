@@ -15,7 +15,7 @@ import com.hoccer.talk.model.TalkMessage;
  * @author ingo
  *
  */
-public interface TalkRpcClient {
+public interface ITalkRpcClient {
 	
 	@JsonRpcNotification
 	void incomingDelivery(TalkDelivery d, TalkMessage m);
