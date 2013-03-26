@@ -18,6 +18,9 @@ public interface ITalkRpcServer {
     // XXX temporary for spiking
     String[] getAllClients();
 
+    void registerGcm(String registeredPackage, String registrationId);
+    void unregisterGcm();
+
 	TalkDelivery[] deliveryRequest(TalkMessage m, TalkDelivery[] d);
 	TalkDelivery   deliveryConfirm(String messageId);
 	
