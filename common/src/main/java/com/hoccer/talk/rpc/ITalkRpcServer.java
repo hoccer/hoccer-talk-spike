@@ -21,6 +21,9 @@ public interface ITalkRpcServer {
     void registerGcm(String registeredPackage, String registrationId);
     void unregisterGcm();
 
+    void registerApns(String registrationToken);
+    void unregisterApns();
+
 	TalkDelivery[] deliveryRequest(TalkMessage m, TalkDelivery[] d);
 	TalkDelivery   deliveryConfirm(String messageId);
 	

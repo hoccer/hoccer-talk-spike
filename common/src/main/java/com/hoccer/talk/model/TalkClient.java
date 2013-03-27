@@ -19,6 +19,10 @@ public class TalkClient {
     @DatabaseField
 	String gcmPackage;
 
+    /** APNS registration token */
+    @DatabaseField
+    String apnsToken;
+
     public TalkClient() {
 
     }
@@ -26,6 +30,14 @@ public class TalkClient {
 	public TalkClient(String clientId) {
 		this.clientId = clientId;
 	}
+
+    boolean isGcmCapable() {
+        return gcmPackage != null && gcmRegistration != null;
+    }
+
+    boolean isApnsCapable() {
+        return apnsToken != null;
+    }
 
 	public String getClientId() {
 		return clientId;
@@ -50,5 +62,13 @@ public class TalkClient {
 	public void setGcmPackage(String gcmPackage) {
 		this.gcmPackage = gcmPackage;
 	}
-	
+
+    public String getApnsToken() {
+        return apnsToken;
+    }
+
+    public void setApnsToken(String apnsToken) {
+        this.apnsToken = apnsToken;
+    }
+
 }
