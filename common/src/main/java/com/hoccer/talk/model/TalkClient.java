@@ -31,11 +31,11 @@ public class TalkClient {
 		this.clientId = clientId;
 	}
 
-    boolean isGcmCapable() {
+    public boolean isGcmCapable() {
         return gcmPackage != null && gcmRegistration != null;
     }
 
-    boolean isApnsCapable() {
+    public boolean isApnsCapable() {
         return apnsToken != null;
     }
 
