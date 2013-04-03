@@ -29,6 +29,8 @@ public class TalkDelivery {
     public static final String STATE_DELIVERED  = "delivered";
     public static final String STATE_FAILED     = "failed";
 
+    private String _id;
+
     @DatabaseField
 	String messageId;
 

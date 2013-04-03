@@ -1,6 +1,7 @@
 package com.hoccer.talk.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -17,6 +18,8 @@ public class TalkMessage {
     public static String FIELD_MESSAGE_TAG = "messageTag";
     public static String FIELD_SENDER_ID   = "senderId";
     public static String FIELD_BODY        = "body";
+
+    private String _id;
 
     /** Server-assigned message id */
     @DatabaseField

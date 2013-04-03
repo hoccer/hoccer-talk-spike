@@ -1,12 +1,15 @@
 package com.hoccer.talk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName="client")
 public class TalkClient {
-	
+
+    private String _id;
+
 	/** Server-assigned client ID */
     @DatabaseField
 	String clientId;
@@ -31,10 +34,12 @@ public class TalkClient {
 		this.clientId = clientId;
 	}
 
+    @JsonIgnore
     public boolean isGcmCapable() {
         return gcmPackage != null && gcmRegistration != null;
     }
 
+    @JsonIgnore
     public boolean isApnsCapable() {
         return apnsToken != null;
     }
