@@ -12,6 +12,7 @@ import com.hoccer.talk.model.TalkMessage;
  * @author ingo
  */
 public interface ITalkRpcServer {
+
 	
 	void identify(String clientId);
 
@@ -23,6 +24,10 @@ public interface ITalkRpcServer {
 
     void registerApns(String registrationToken);
     void unregisterApns();
+
+    String generateToken(String tokenPurpose, int secondsValid);
+
+    boolean pairByToken(String secret);
 
 	TalkDelivery[] deliveryRequest(TalkMessage m, TalkDelivery[] d);
 	TalkDelivery   deliveryConfirm(String messageId);
