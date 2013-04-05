@@ -37,6 +37,9 @@ public class TalkMessage {
     @DatabaseField
 	String body;
 
+    /** Attachment of message */
+    TalkAttachment attachment;
+
     public TalkMessage() {
     }
 
@@ -71,5 +74,13 @@ public class TalkMessage {
 	public void setBody(String body) {
 		this.body = body;
 	}
-	
+
+    public TalkAttachment getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(TalkAttachment attachment) {
+        this.attachment = attachment;
+    }
+
 }
