@@ -37,8 +37,23 @@ public class TalkMessage {
     @DatabaseField
 	String body;
 
-    /** Attachment of message */
-    TalkAttachment attachment;
+
+/* XXX START OF ATTACHMENT HACK */
+
+    /** URL of attached file */
+    String attachmentUrl;
+
+    /** MIME type of attached file */
+    String attachmentMimeType;
+
+    /** String-encoded size of attached file */
+    String attachmentSize;
+
+    /** Media-type of attached file (sort of like the first half of MIME type, but consistent) */
+    String attachmentMediaType;
+
+/* XXX END OF ATTACHMENT HACK */
+
 
     public TalkMessage() {
     }
@@ -75,12 +90,41 @@ public class TalkMessage {
 		this.body = body;
 	}
 
-    public TalkAttachment getAttachment() {
-        return attachment;
+
+/* XXX START OF ATTACHMENT HACK */
+
+    public String getAttachmentUrl() {
+        return attachmentUrl;
     }
 
-    public void setAttachment(TalkAttachment attachment) {
-        this.attachment = attachment;
+    public void setAttachmentUrl(String attachmentUrl) {
+        this.attachmentUrl = attachmentUrl;
     }
+
+    public String getAttachmentMimeType() {
+        return attachmentMimeType;
+    }
+
+    public void setAttachmentMimeType(String attachmentMimeType) {
+        this.attachmentMimeType = attachmentMimeType;
+    }
+
+    public String getAttachmentSize() {
+        return attachmentSize;
+    }
+
+    public void setAttachmentSize(String attachmentSize) {
+        this.attachmentSize = attachmentSize;
+    }
+
+    public String getAttachmentMediaType() {
+        return attachmentMediaType;
+    }
+
+    public void setAttachmentMediaType(String attachmentMediaType) {
+        this.attachmentMediaType = attachmentMediaType;
+    }
+
+/* XXX END OF ATTACHMENT HACK */
 
 }
