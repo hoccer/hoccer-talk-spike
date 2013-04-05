@@ -1,5 +1,7 @@
 package com.hoccer.talk.model;
 
+import java.util.Date;
+
 public class TalkRelationship {
 
     public static final String STATE_NONE    = "none";
@@ -27,6 +29,8 @@ public class TalkRelationship {
 
     String state;
 
+    Date lastChanged;
+
     public TalkRelationship() {
     }
 
@@ -52,6 +56,14 @@ public class TalkRelationship {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public Date getLastChanged() {
+        return lastChanged;
+    }
+
+    public void setLastChanged(Date lastChanged) {
+        this.lastChanged = lastChanged;
     }
 
 }
