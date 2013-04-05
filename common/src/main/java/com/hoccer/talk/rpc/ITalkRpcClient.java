@@ -16,7 +16,10 @@ import com.hoccer.talk.model.TalkMessage;
  *
  */
 public interface ITalkRpcClient {
-	
+
+    @JsonRpcNotification
+    void pushNotRegistered();
+
 	@JsonRpcNotification
 	void incomingDelivery(TalkDelivery d, TalkMessage m);
 	

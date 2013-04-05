@@ -34,6 +34,12 @@ public class TalkClient {
 		this.clientId = clientId;
 	}
 
+
+    @JsonIgnore
+    public boolean isPushCapable() {
+        return isGcmCapable() || isApnsCapable();
+    }
+
     @JsonIgnore
     public boolean isGcmCapable() {
         return gcmPackage != null && gcmRegistration != null;
@@ -43,6 +49,7 @@ public class TalkClient {
     public boolean isApnsCapable() {
         return apnsToken != null;
     }
+
 
 	public String getClientId() {
 		return clientId;
