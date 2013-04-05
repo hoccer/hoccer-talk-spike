@@ -52,6 +52,9 @@ public class TalkMessage {
     /** Media-type of attached file (sort of like the first half of MIME type, but consistent) */
     String attachmentMediaType;
 
+    /** Aspect ratio of attached file */
+    double attachmentAspectRatio;
+
 /* XXX END OF ATTACHMENT HACK */
 
 
@@ -125,6 +128,14 @@ public class TalkMessage {
         this.attachmentMediaType = attachmentMediaType;
     }
 
-/* XXX END OF ATTACHMENT HACK */
+    public double getAttachmentAspectRatio() {
+        return attachmentAspectRatio;
+    }
+
+    public void setAttachmentAspectRatio(double attachmentAspectRatio) {
+        this.attachmentAspectRatio = attachmentAspectRatio;
+    }
+
+    /* XXX END OF ATTACHMENT HACK */
 
 }
