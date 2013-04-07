@@ -24,6 +24,9 @@ public interface ITalkRpcServer {
      */
     String[] getAllClients();
 
+    /** Retrieves established relationships changes after given date */
+    TalkRelationship[] getRelationships(Date lastKnown);
+
     /** Register for GCM push with the given parameters */
     void registerGcm(String registeredPackage, String registrationId);
 
