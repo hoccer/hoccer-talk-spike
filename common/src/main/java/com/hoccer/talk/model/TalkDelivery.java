@@ -43,6 +43,9 @@ public class TalkDelivery {
     @DatabaseField
     String state;
 
+    @DatabaseField
+    String keyCiphertext;
+
 
     public TalkDelivery() {
         this.state = STATE_NEW;
@@ -78,6 +81,14 @@ public class TalkDelivery {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getKeyCiphertext() {
+        return keyCiphertext;
+    }
+
+    public void setKeyCiphertext(String keyCiphertext) {
+        this.keyCiphertext = keyCiphertext;
     }
 
 }
