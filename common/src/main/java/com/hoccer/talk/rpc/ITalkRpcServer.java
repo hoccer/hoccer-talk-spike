@@ -43,6 +43,9 @@ public interface ITalkRpcServer {
     /** Update client presence */
     void updatePresence(TalkPresence presence);
 
+    /** Retrieve presences changed after given date */
+    TalkPresence[] getPresences(Date lastKnown);
+
     /** Generate a secret token for the given purpose */
     String generateToken(String tokenPurpose, int secondsValid);
 
