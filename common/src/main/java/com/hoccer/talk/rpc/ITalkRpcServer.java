@@ -1,9 +1,6 @@
 package com.hoccer.talk.rpc;
 
-import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.talk.model.TalkMessage;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.talk.model.*;
 
 import java.util.Date;
 
@@ -39,6 +36,12 @@ public interface ITalkRpcServer {
 
     /** Clear APNS registration */
     void unregisterApns();
+
+    /** Update key */
+    void updateKey(TalkKey key);
+
+    /** Get key for given client with given keyid */
+    TalkKey getKey(String clientId, String keyId);
 
     /** Update client presence */
     void updatePresence(TalkPresence presence);
