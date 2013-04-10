@@ -14,6 +14,8 @@ public class TalkPresence {
 
     Date timestamp;
 
+    String avatarUrl;
+
     public TalkPresence() {
     }
 
@@ -47,6 +49,14 @@ public class TalkPresence {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
 }
