@@ -4,6 +4,7 @@ import better.jsonrpc.annotations.JsonRpcNotification;
 
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.model.TalkMessage;
+import com.hoccer.talk.model.TalkPresence;
 
 /**
  * This is the RPC interface exposed by clients.
@@ -25,5 +26,8 @@ public interface ITalkRpcClient {
 	
 	@JsonRpcNotification
 	void outgoingDelivery(TalkDelivery d);
+
+    @JsonRpcNotification
+    void presenceUpdated(TalkPresence presence);
 	
 }
