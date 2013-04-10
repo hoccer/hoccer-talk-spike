@@ -2,6 +2,7 @@ package com.hoccer.talk.rpc;
 
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.model.TalkMessage;
+import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
 
 import java.util.Date;
@@ -38,6 +39,9 @@ public interface ITalkRpcServer {
 
     /** Clear APNS registration */
     void unregisterApns();
+
+    /** Update client presence */
+    void updatePresence(TalkPresence presence);
 
     /** Generate a secret token for the given purpose */
     String generateToken(String tokenPurpose, int secondsValid);

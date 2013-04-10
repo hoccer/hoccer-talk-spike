@@ -1,5 +1,7 @@
 package com.hoccer.talk.model;
 
+import java.util.Date;
+
 public class TalkPresence {
 
     private String _id;
@@ -9,6 +11,8 @@ public class TalkPresence {
     String clientName;
 
     String clientStatus;
+
+    Date timestamp;
 
     public TalkPresence() {
     }
@@ -35,6 +39,14 @@ public class TalkPresence {
 
     public void setClientStatus(String clientStatus) {
         this.clientStatus = clientStatus;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
 }
