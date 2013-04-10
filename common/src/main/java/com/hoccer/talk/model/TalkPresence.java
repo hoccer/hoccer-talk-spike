@@ -16,7 +16,7 @@ public class TalkPresence {
 
     String avatarUrl;
 
-    String keyFingerprint;
+    String keyId;
 
     public TalkPresence() {
     }
@@ -61,12 +61,12 @@ public class TalkPresence {
         this.avatarUrl = avatarUrl;
     }
 
-    public String getKeyFingerprint() {
-        return keyFingerprint;
+    public String getKeyId() {
+        return keyId;
     }
 
-    public void setKeyFingerprint(String keyFingerprint) {
-        this.keyFingerprint = keyFingerprint;
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
     }
 
 }
