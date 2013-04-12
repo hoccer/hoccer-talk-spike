@@ -4,8 +4,8 @@ import java.util.Date;
 
 public class TalkPresence {
 
-    public final static String STATUS_ONLINE = "online";
-    public final static String STATUS_OFFLINE = "offline";
+    public final static String CONN_STATUS_ONLINE = "online";
+    public final static String CONN_STATUS_OFFLINE = "offline";
 
     private String _id;
 
@@ -20,6 +20,8 @@ public class TalkPresence {
     String avatarUrl;
 
     String keyId;
+
+    String connectionStatus;
 
     public TalkPresence() {
     }
@@ -72,4 +74,11 @@ public class TalkPresence {
         this.keyId = keyId;
     }
 
+    public String getConnectionStatus() {
+        return connectionStatus;
+    }
+
+    public void setConnectionStatus(String connectionStatus) {
+        this.connectionStatus = connectionStatus;
+    }
 }
