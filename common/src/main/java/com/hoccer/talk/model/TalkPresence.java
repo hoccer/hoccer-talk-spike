@@ -4,6 +4,9 @@ import java.util.Date;
 
 public class TalkPresence {
 
+    public final static String STATUS_ONLINE = "online";
+    public final static String STATUS_OFFLINE = "offline";
+
     private String _id;
 
     String clientId;
