@@ -13,6 +13,12 @@ public class TalkClient {
 	/** Server-assigned client ID */
     @DatabaseField
 	String clientId;
+
+    /** SRP salt */
+    String srpSalt;
+
+    /** SRP verifier */
+    String srpVerifier;
 	
 	/** GCM registration token */
     @DatabaseField
@@ -59,7 +65,23 @@ public class TalkClient {
 		this.clientId = clientId;
 	}
 
-	public String getGcmRegistration() {
+    public String getSrpSalt() {
+        return srpSalt;
+    }
+
+    public void setSrpSalt(String srpSalt) {
+        this.srpSalt = srpSalt;
+    }
+
+    public String getSrpVerifier() {
+        return srpVerifier;
+    }
+
+    public void setSrpVerifier(String srpVerifier) {
+        this.srpVerifier = srpVerifier;
+    }
+
+    public String getGcmRegistration() {
 		return gcmRegistration;
 	}
 

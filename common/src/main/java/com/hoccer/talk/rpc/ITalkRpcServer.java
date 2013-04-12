@@ -18,6 +18,11 @@ public interface ITalkRpcServer {
 	void identify(String clientId);
 
     /**
+     * Register a new client with the given SRP parameters
+     */
+    String srpRegister(String verifier, String salt);
+
+    /**
      * Initiate SRP login
      *
      * Client passes public value A.
