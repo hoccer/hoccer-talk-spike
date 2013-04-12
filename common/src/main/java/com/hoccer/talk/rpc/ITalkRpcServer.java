@@ -90,6 +90,9 @@ public interface ITalkRpcServer {
     /** Unblock the given client */
     void unblockClient(String clientId);
 
+    /** Depair the given client */
+    void depairClient(String clientId);
+
     /** Request delivery of the given message */
 	TalkDelivery[] deliveryRequest(TalkMessage m, TalkDelivery[] d);
 
