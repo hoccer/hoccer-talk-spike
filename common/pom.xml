@@ -35,6 +35,12 @@
       <artifactId>ormlite-core</artifactId>
       <version>${ormlite.version}</version>
     </dependency>
+    <!-- Bouncy Castle (needed for SRP auth) -->
+    <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk15on</artifactId>
+        <version>1.48</version>
+    </dependency>
   </dependencies>
   
   <build>
