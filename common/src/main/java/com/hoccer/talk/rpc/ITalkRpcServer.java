@@ -18,6 +18,16 @@ public interface ITalkRpcServer {
 	void identify(String clientId);
 
     /**
+     * Generate a new client ID for registration
+     *
+     * The ID will be remembered as part of connection state,
+     * so SRP setup must happen on the same connection.
+     *
+     * @return a new client id
+     */
+    String generateId();
+
+    /**
      * Register a new client with the given SRP parameters
      */
     String srpRegister(String verifier, String salt);
