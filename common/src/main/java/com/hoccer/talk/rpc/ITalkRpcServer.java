@@ -17,6 +17,35 @@ public interface ITalkRpcServer {
 	/** Unauthenticated login for initial development */
 	void identify(String clientId);
 
+    /**
+     * Initiate SRP login
+     *
+     * Client passes public value A.
+     *
+     * After this call we have a shared secret K.
+     *
+     * @return public value B
+     */
+    String srpPhase1(String clientId, String A);
+
+    /**
+     * Finish SRP login
+     *
+     * Client passes evidence that it has K, called M1.
+     *
+     * Iff M1 could be verified to be proof of K,
+     * the server will prove knowledge of K by returning M2.
+     *
+     * Authentication has succeeded if M2 is returned
+     * and can be verified by the client to be proof of K.
+     *
+     * If authentication fails then either null will be
+     * returned or an error response will be sent.
+     *
+     * @return evidence value M2
+     */
+    String srpPhase2(String M1);
+
     /** Temporary hack which better not be documented
          XXX this MUST be removed before release
      */
