@@ -84,6 +84,12 @@ public interface ITalkRpcServer {
     /** Perform token-based client pairing */
     boolean pairByToken(String secret);
 
+    /** Block the given client */
+    void blockClient(String clientId);
+
+    /** Unblock the given client */
+    void unblockClient(String clientId);
+
     /** Request delivery of the given message */
 	TalkDelivery[] deliveryRequest(TalkMessage m, TalkDelivery[] d);
 
