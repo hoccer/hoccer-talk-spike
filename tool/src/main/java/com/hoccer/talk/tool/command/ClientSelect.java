@@ -8,8 +8,8 @@ import com.hoccer.talk.tool.TalkToolContext;
 
 import java.util.List;
 
-@CLICommand(name = "select", description = "Select client instances")
-public class Select extends TalkToolCommand {
+@CLICommand(name = "cselect", description = "Select clients")
+public class ClientSelect extends TalkToolCommand {
 
     @Parameter(description = "Select all clients", names = "-a")
     boolean pAll;

@@ -18,12 +18,12 @@ public class TalkTool extends CommandLineApplication<TalkToolContext> {
     }
 
     @Override
-    protected void shutdown() {
+    protected CLIContext createContext() {
+        return new TalkToolContext(this);
     }
 
     @Override
-    protected CLIContext createContext() {
-        return new TalkToolContext(this);
+    protected void shutdown() {
     }
 
 }

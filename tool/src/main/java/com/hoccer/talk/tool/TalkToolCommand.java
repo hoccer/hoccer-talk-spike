@@ -16,7 +16,7 @@ public abstract class TalkToolCommand extends Command<TalkToolContext> {
             usage();
         } else {
             try {
-                run();
+                run(context);
             } catch (Exception t) {
                 t.printStackTrace();
                 return CommandResult.ERROR;
@@ -25,7 +25,7 @@ public abstract class TalkToolCommand extends Command<TalkToolContext> {
         return CommandResult.OK;
     }
 
-    protected void run() throws Exception {
+    protected void run(TalkToolContext context) throws Exception {
         System.out.println("Command not implemented");
     }
 
