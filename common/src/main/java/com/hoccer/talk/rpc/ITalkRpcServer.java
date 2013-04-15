@@ -61,11 +61,6 @@ public interface ITalkRpcServer {
      */
     String srpPhase2(String M1);
 
-    /** Temporary hack which better not be documented
-         XXX this MUST be removed before release
-     */
-    String[] getAllClients();
-
     /** Retrieves established relationships changes after given date */
     TalkRelationship[] getRelationships(Date lastKnown);
 
