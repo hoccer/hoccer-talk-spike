@@ -9,6 +9,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>srp</module>
     <module>common</module>
     <module>client</module>
     <module>server</module>
