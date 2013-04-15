@@ -1,4 +1,4 @@
-package com.hoccer.talk.util;
+package com.hoccer.talk.srp;
 
 import org.bouncycastle.crypto.Digest;
 
