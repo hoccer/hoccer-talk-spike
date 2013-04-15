@@ -1,6 +1,5 @@
 package com.hoccer.talk.util;
 
-import com.sun.xml.internal.messaging.saaj.soap.ver1_1.Message1_1Impl;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.agreement.srp.SRP6Client;
 
