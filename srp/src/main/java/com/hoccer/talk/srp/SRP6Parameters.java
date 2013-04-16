@@ -90,7 +90,12 @@ public class SRP6Parameters {
     public final BigInteger N;
     public final BigInteger g;
 
-    public SRP6Parameters(String hexN, String hexg) {
+    public SRP6Parameters(BigInteger N, BigInteger g) {
+        this.N = N;
+        this.g = g;
+    }
+
+    protected SRP6Parameters(String hexN, String hexg) {
         this.N = new BigInteger(hexN, 16);
         this.g = new BigInteger(hexg, 16);
     }
