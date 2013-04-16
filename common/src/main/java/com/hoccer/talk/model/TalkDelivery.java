@@ -38,6 +38,9 @@ public class TalkDelivery {
     String messageTag;
 
     @DatabaseField
+    String senderId;
+
+    @DatabaseField
 	String receiverId;
 
     @DatabaseField
@@ -65,6 +68,14 @@ public class TalkDelivery {
 
     public void setMessageTag(String messageTag) {
         this.messageTag = messageTag;
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 
     public String getReceiverId() {
