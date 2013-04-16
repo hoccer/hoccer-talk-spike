@@ -27,6 +27,7 @@ public class TalkDelivery {
     public static final String STATE_NEW        = "new";
     public static final String STATE_DELIVERING = "delivering";
     public static final String STATE_DELIVERED  = "delivered";
+    public static final String STATE_CONFIRMED  = "confirmed";
     public static final String STATE_FAILED     = "failed";
 
     private String _id;

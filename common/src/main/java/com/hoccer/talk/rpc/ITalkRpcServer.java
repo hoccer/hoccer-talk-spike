@@ -108,5 +108,8 @@ public interface ITalkRpcServer {
 
     /** Confirm reception of the message with the given id */
 	TalkDelivery   deliveryConfirm(String messageId);
+
+    /** Confirm reception of outgoing message delivery confirmation */
+    TalkDelivery   deliveryAcknowledge(String messageId, String recipientId);
 	
 }
