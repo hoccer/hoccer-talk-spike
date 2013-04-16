@@ -22,9 +22,11 @@
       <jetty.version>8.1.7.v20120910</jetty.version>
       <jackson.version>2.0.6</jackson.version>
 
+      <junit.version>4.11</junit.version>
       <log4j.version>1.2.16</log4j.version>
       <metrics.version>2.2.0</metrics.version>
       <jcommander.version>1.30</jcommander.version>
+      <bouncycastle.version>1.48</bouncycastle.version>
 
       <android.platform.version>4.2.2_r2</android.platform.version>
       <android.supportv4.version>12</android.supportv4.version>
