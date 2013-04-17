@@ -121,6 +121,6 @@ public interface ITalkRpcServer {
      * It can also be the ID of another client, in which case the
      * corresponding outgoing message will be aborted.
      */
-    TalkDelivery deliveryAbort(String receiverId, String messageId);
+    TalkDelivery deliveryAbort(String messageId, String recipientId);
 	
 }
