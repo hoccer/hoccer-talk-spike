@@ -111,5 +111,16 @@ public interface ITalkRpcServer {
 
     /** Confirm reception of outgoing message delivery confirmation */
     TalkDelivery   deliveryAcknowledge(String messageId, String recipientId);
+
+    /**
+     * Reject/abort a delivery
+     *
+     * The receiverId can be the ID of the connected client, in which
+     * case this method will abort an incoming delivery that got stuck.
+     *
+     * It can also be the ID of another client, in which case the
+     * corresponding outgoing message will be aborted.
+     */
+    TalkDelivery deliveryAbort(String receiverId, String messageId);
 	
 }
