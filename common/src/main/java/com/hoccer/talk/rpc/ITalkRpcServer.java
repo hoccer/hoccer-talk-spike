@@ -76,6 +76,9 @@ public interface ITalkRpcServer {
     /** Clear APNS registration */
     void unregisterApns();
 
+    /** Hint about unread message count for use with APNS */
+    void hintApnsUnreadMessage(int numUnreadMessages);
+
     /** Update key */
     void updateKey(TalkKey key);
 

@@ -32,6 +32,10 @@ public class TalkClient {
     @DatabaseField
     String apnsToken;
 
+    /** APNS unread message count */
+    @DatabaseField
+    int apnsUnreadMessages;
+
     public TalkClient() {
 
     }
@@ -105,4 +109,11 @@ public class TalkClient {
         this.apnsToken = apnsToken;
     }
 
+    public int getApnsUnreadMessages() {
+        return apnsUnreadMessages;
+    }
+
+    public void setApnsUnreadMessages(int apnsUnreadMessages) {
+        this.apnsUnreadMessages = apnsUnreadMessages;
+    }
 }
