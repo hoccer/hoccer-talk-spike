@@ -101,6 +101,7 @@ public class SRP6VectorsRfc5054 {
 
         // SERVER generates credentials
         BigInteger B = server.generateServerCredentials();
+        
         // check server credentials
         BigInteger refB = new BigInteger(B_HEX, 16);
         Assert.assertEquals("Incorrect server credentials", refB, B);
