@@ -41,7 +41,7 @@ public class SRP6VerifyingServer extends SRP6Server {
             return null;
         }
 
-        M2 = SRP6Verification.calculateM2(digest, A, M1);
+        M2 = SRP6Verification.calculateM2(digest, A, M1, K);
 
         return M2;
     }

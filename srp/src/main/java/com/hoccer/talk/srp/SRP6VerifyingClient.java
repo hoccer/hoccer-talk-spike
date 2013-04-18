@@ -37,7 +37,7 @@ public class SRP6VerifyingClient extends SRP6Client {
     }
 
     public boolean verifyServer(byte[] M2s) {
-        M2 = SRP6Verification.calculateM2(digest, A, M1);
+        M2 = SRP6Verification.calculateM2(digest, A, M1, K);
         return Arrays.equals(M2, M2s);
     }
 
