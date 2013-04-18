@@ -18,6 +18,7 @@ public class TalkMessage {
     public static String FIELD_MESSAGE_TAG = "messageTag";
     public static String FIELD_SENDER_ID   = "senderId";
     public static String FIELD_BODY        = "body";
+    public static String FIELD_ATTACHMENT  = "attachment";
 
     private String _id;
 
@@ -36,6 +37,9 @@ public class TalkMessage {
     /** Message body */
     @DatabaseField
 	String body;
+
+    /** Message attachment */
+    String attachment;
 
 
 /* XXX START OF ATTACHMENT HACK */
@@ -93,6 +97,13 @@ public class TalkMessage {
 		this.body = body;
 	}
 
+    public String getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(String attachment) {
+        this.attachment = attachment;
+    }
 
 /* XXX START OF ATTACHMENT HACK */
 
