@@ -1,7 +1,5 @@
 package com.hoccer.talk.model;
 
-import com.j256.ormlite.field.DatabaseField;
-
 public class TalkAttachment {
 
     /** URL of attached file */
@@ -11,7 +9,7 @@ public class TalkAttachment {
     String mimeType;
 
     /** String-encoded size of attached file */
-    String size;
+    String contentSize;
 
     /** Media-type of attached file (sort of like the first half of MIME type, but consistent) */
     String mediaType;
@@ -38,12 +36,12 @@ public class TalkAttachment {
         this.mimeType = mimeType;
     }
 
-    public String getSize() {
-        return size;
+    public String getContentSize() {
+        return contentSize;
     }
 
-    public void setSize(String size) {
-        this.size = size;
+    public void setContentSize(String contentSize) {
+        this.contentSize = contentSize;
     }
 
     public String getMediaType() {
@@ -61,5 +59,5 @@ public class TalkAttachment {
     public void setAspectRatio(double aspectRatio) {
         this.aspectRatio = aspectRatio;
     }
-    
+
 }
