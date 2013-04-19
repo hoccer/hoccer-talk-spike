@@ -20,6 +20,13 @@ import com.hoccer.talk.model.TalkRelationship;
 public interface ITalkRpcClient {
 
     /**
+     * The obligatory equivalent of ping
+     *
+     * The server may use this to measure RTT on the connection
+     */
+    void ping();
+
+    /**
      * Sent on login if the client has no push config
      */
     @JsonRpcNotification
