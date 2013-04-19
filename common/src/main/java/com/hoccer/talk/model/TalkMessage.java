@@ -42,26 +42,6 @@ public class TalkMessage {
     String attachment;
 
 
-/* XXX START OF ATTACHMENT HACK */
-
-    /** URL of attached file */
-    String attachmentUrl;
-
-    /** MIME type of attached file */
-    String attachmentMimeType;
-
-    /** String-encoded size of attached file */
-    String attachmentSize;
-
-    /** Media-type of attached file (sort of like the first half of MIME type, but consistent) */
-    String attachmentMediaType;
-
-    /** Aspect ratio of attached file */
-    double attachmentAspectRatio;
-
-/* XXX END OF ATTACHMENT HACK */
-
-
     public TalkMessage() {
     }
 
@@ -104,49 +84,5 @@ public class TalkMessage {
     public void setAttachment(String attachment) {
         this.attachment = attachment;
     }
-
-/* XXX START OF ATTACHMENT HACK */
-
-    public String getAttachmentUrl() {
-        return attachmentUrl;
-    }
-
-    public void setAttachmentUrl(String attachmentUrl) {
-        this.attachmentUrl = attachmentUrl;
-    }
-
-    public String getAttachmentMimeType() {
-        return attachmentMimeType;
-    }
-
-    public void setAttachmentMimeType(String attachmentMimeType) {
-        this.attachmentMimeType = attachmentMimeType;
-    }
-
-    public String getAttachmentSize() {
-        return attachmentSize;
-    }
-
-    public void setAttachmentSize(String attachmentSize) {
-        this.attachmentSize = attachmentSize;
-    }
-
-    public String getAttachmentMediaType() {
-        return attachmentMediaType;
-    }
-
-    public void setAttachmentMediaType(String attachmentMediaType) {
-        this.attachmentMediaType = attachmentMediaType;
-    }
-
-    public double getAttachmentAspectRatio() {
-        return attachmentAspectRatio;
-    }
-
-    public void setAttachmentAspectRatio(double attachmentAspectRatio) {
-        this.attachmentAspectRatio = attachmentAspectRatio;
-    }
-
-    /* XXX END OF ATTACHMENT HACK */
 
 }
