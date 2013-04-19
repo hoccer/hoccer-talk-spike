@@ -16,6 +16,9 @@ public class TalkAttachment {
     /** Media-type of attached file (sort of like the first half of MIME type, but consistent) */
     String mediaType;
 
+    /** Aspect-ratio for pretty client views */
+    double aspectRatio;
+
     public TalkAttachment() {
     }
 
@@ -51,4 +54,12 @@ public class TalkAttachment {
         this.mediaType = mediaType;
     }
 
+    public double getAspectRatio() {
+        return aspectRatio;
+    }
+
+    public void setAspectRatio(double aspectRatio) {
+        this.aspectRatio = aspectRatio;
+    }
+    
 }
