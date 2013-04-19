@@ -23,7 +23,7 @@ import java.security.SecureRandom;
  * and Diffie-Hellman parameter combinations.
  *
  */
-public class SRP6Functional {
+public class SRP6FunctionalTest {
 
     // shared RNG
     SecureRandom random = new SecureRandom();

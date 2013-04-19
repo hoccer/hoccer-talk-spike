@@ -18,7 +18,7 @@ import java.security.SecureRandom;
  * are considered unsafe.
  *
  */
-public class SRP6SafeguardsClient {
+public class SRP6ClientSafeguardsTest {
 
     static Digest digest;
     static SecureRandom random;

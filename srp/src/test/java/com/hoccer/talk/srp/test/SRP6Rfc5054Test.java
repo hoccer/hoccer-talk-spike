@@ -27,7 +27,7 @@ import java.security.SecureRandom;
  * phase since SRP-TLS (RFC5054) does not use it.
  *
  */
-public class SRP6VectorsRfc5054 {
+public class SRP6Rfc5054Test {
 
     // pass null in case something tries to use random,
     // which we don't want for this vector test
