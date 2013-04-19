@@ -5,6 +5,9 @@ public class TalkAttachment {
     /** URL of attached file */
     String url;
 
+    /** Name of file */
+    String filename;
+
     /** MIME type of attached file */
     String mimeType;
 
@@ -26,6 +29,14 @@ public class TalkAttachment {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     public String getMimeType() {
