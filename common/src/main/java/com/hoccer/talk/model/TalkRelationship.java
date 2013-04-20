@@ -1,7 +1,11 @@
 package com.hoccer.talk.model;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
 import java.util.Date;
 
+@DatabaseTable(tableName="relationship")
 public class TalkRelationship {
 
     public static final String STATE_NONE    = "none";
@@ -23,12 +27,16 @@ public class TalkRelationship {
 
     private String _id;
 
+    @DatabaseField
     String clientId;
 
+    @DatabaseField
     String otherClientId;
 
+    @DatabaseField
     String state;
 
+    @DatabaseField
     Date lastChanged;
 
     public TalkRelationship() {

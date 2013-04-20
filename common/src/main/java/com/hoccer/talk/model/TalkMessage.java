@@ -39,6 +39,7 @@ public class TalkMessage {
 	String body;
 
     /** Message attachment */
+    @DatabaseField
     String attachment;
 
 

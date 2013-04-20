@@ -19,10 +19,12 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName="delivery")
 public class TalkDelivery {
 
-    public static final String FIELD_MESSAGE_ID  = "messageId";
-    public static final String FIELD_MESSAGE_TAG = "messageTag";
-    public static final String FIELD_RECEIVER_ID = "receiverId";
-    public static final String FIELD_STATE       = "state";
+    public static final String FIELD_MESSAGE_ID     = "messageId";
+    public static final String FIELD_MESSAGE_TAG    = "messageTag";
+    public static final String FIELD_RECEIVER_ID    = "receiverId";
+    public static final String FIELD_STATE          = "state";
+    public static final String FIELD_KEY_ID         = "keyId";
+    public static final String FIELD_KEY_CIPHERTEXT = "keyCiphertext";
 
     public static final String STATE_NEW        = "new";
     public static final String STATE_DELIVERING = "delivering";
@@ -53,7 +55,6 @@ public class TalkDelivery {
 
     @DatabaseField
     String keyCiphertext;
-
 
     public TalkDelivery() {
         this.state = STATE_NEW;

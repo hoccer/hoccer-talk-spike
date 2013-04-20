@@ -1,23 +1,39 @@
 package com.hoccer.talk.model;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+/**
+ * Attachments are files sent along with messages
+ *
+ * These objects are transferred only in encrypted form,
+ * so the server never encounters them.
+ */
+@DatabaseTable(tableName="attachment")
 public class TalkAttachment {
 
     /** URL of attached file */
+    @DatabaseField
     String url;
 
     /** Name of file */
+    @DatabaseField
     String filename;
 
     /** MIME type of attached file */
+    @DatabaseField
     String mimeType;
 
     /** String-encoded size of attached file */
+    @DatabaseField
     String contentSize;
 
     /** Media-type of attached file (sort of like the first half of MIME type, but consistent) */
+    @DatabaseField
     String mediaType;
 
     /** Aspect-ratio for pretty client views */
+    @DatabaseField
     double aspectRatio;
 
     public TalkAttachment() {

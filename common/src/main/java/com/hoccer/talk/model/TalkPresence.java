@@ -1,7 +1,11 @@
 package com.hoccer.talk.model;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
 import java.util.Date;
 
+@DatabaseTable(tableName="presence")
 public class TalkPresence {
 
     public final static String CONN_STATUS_ONLINE = "online";
@@ -9,18 +13,25 @@ public class TalkPresence {
 
     private String _id;
 
+    @DatabaseField
     String clientId;
 
+    @DatabaseField
     String clientName;
 
+    @DatabaseField
     String clientStatus;
 
+    @DatabaseField
     Date timestamp;
 
+    @DatabaseField
     String avatarUrl;
 
+    @DatabaseField
     String keyId;
 
+    @DatabaseField
     String connectionStatus;
 
     public TalkPresence() {
@@ -81,4 +92,5 @@ public class TalkPresence {
     public void setConnectionStatus(String connectionStatus) {
         this.connectionStatus = connectionStatus;
     }
+
 }

@@ -5,6 +5,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+/**
+ * These objects represent clients in the server database
+ *
+ * They contain authentication tokens and push registration data.
+ *
+ * The client never encounters these objects.
+ */
 @DatabaseTable(tableName="client")
 public class TalkClient {
 
@@ -15,9 +22,11 @@ public class TalkClient {
 	String clientId;
 
     /** SRP salt */
+    @DatabaseField
     String srpSalt;
 
     /** SRP verifier */
+    @DatabaseField
     String srpVerifier;
 	
 	/** GCM registration token */
