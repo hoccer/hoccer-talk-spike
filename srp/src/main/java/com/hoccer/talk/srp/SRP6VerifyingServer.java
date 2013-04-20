@@ -37,13 +37,13 @@ public class SRP6VerifyingServer extends SRP6Server {
     public byte[] verifyClient(byte[] M1c) {
         M1 = SRP6Verification.calculateM1(digest, N, g, I, s, A, B, K);
 
-        if(!Arrays.equals(M1, M1c)) {
-            return null;
-        }
-
         M2 = SRP6Verification.calculateM2(digest, A, M1, K);
 
-        return M2;
+        if(!Arrays.equals(M1, M1c)) {
+            return null;
+        } else {
+            return M2;
+        }
     }
 
 }
