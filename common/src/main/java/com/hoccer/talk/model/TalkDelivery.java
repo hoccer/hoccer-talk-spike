@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.Date;
+
 /**
  * Delivery objects represent the receiver-dependent
  * envelope of a given message and contain
@@ -55,6 +57,12 @@ public class TalkDelivery {
 
     @DatabaseField
     String keyCiphertext;
+
+    @DatabaseField
+    Date timeAccepted;
+
+    @DatabaseField
+    Date timeChanged;
 
     public TalkDelivery() {
         this.state = STATE_NEW;
@@ -114,6 +122,22 @@ public class TalkDelivery {
 
     public void setKeyCiphertext(String keyCiphertext) {
         this.keyCiphertext = keyCiphertext;
+    }
+
+    public Date getTimeAccepted() {
+        return timeAccepted;
+    }
+
+    public void setTimeAccepted(Date timeAccepted) {
+        this.timeAccepted = timeAccepted;
+    }
+
+    public Date getTimeChanged() {
+        return timeChanged;
+    }
+
+    public void setTimeChanged(Date timeChanged) {
+        this.timeChanged = timeChanged;
     }
 
 }
