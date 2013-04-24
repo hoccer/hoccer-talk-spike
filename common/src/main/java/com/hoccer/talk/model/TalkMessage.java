@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.Date;
+
 /**
  * Message objects represent messages including the
  * receiver-independent envelope
@@ -41,6 +43,10 @@ public class TalkMessage {
     /** Message attachment */
     @DatabaseField
     String attachment;
+
+    /** Time the message was sent */
+    @DatabaseField
+    Date timeSent;
 
 
     public TalkMessage() {
@@ -86,4 +92,12 @@ public class TalkMessage {
         this.attachment = attachment;
     }
 
+    public Date getTimeSent() {
+        return timeSent;
+    }
+
+    public void setTimeSent(Date timeSent) {
+        this.timeSent = timeSent;
+    }
+    
 }
