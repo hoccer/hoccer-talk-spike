@@ -28,6 +28,10 @@ public class TalkClient {
     /** SRP verifier */
     @DatabaseField
     String srpVerifier;
+
+    /** SRP secret (CLIENT ONLY) */
+    @DatabaseField
+    String srpSecret;
 	
 	/** GCM registration token */
     @DatabaseField
@@ -92,6 +96,14 @@ public class TalkClient {
 
     public void setSrpVerifier(String srpVerifier) {
         this.srpVerifier = srpVerifier;
+    }
+
+    public String getSrpSecret() {
+        return srpSecret;
+    }
+
+    public void setSrpSecret(String srpSecret) {
+        this.srpSecret = srpSecret;
     }
 
     public String getGcmRegistration() {
