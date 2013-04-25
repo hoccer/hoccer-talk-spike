@@ -13,10 +13,12 @@ public class TalkToolClientDatabase implements ITalkClientDatabase {
 
     @Override
     public TalkClient getClient() {
-        if(mClient == null) {
-            mClient = new TalkClient(UUID.randomUUID().toString());
-        }
         return mClient;
+    }
+
+    @Override
+    public void saveClient(TalkClient client) {
+        mClient = client;
     }
 
     @Override
