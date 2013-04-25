@@ -18,20 +18,23 @@
   </modules>
 
   <properties>
-      <java.version>1.6</java.version>
-      <jetty.version>8.1.10.v20130312</jetty.version>
-      <jackson.version>2.0.6</jackson.version>
+    <!-- Java source language version -->
+    <java.version>1.6</java.version>
 
-      <junit.version>4.11</junit.version>
-      <log4j.version>1.2.16</log4j.version>
-      <metrics.version>2.2.0</metrics.version>
-      <jcommander.version>1.30</jcommander.version>
-      <bouncycastle.version>1.48</bouncycastle.version>
+    <!-- Generic dependencies -->
+    <jetty.version>8.1.10.v20130312</jetty.version>
+    <jackson.version>2.0.6</jackson.version>
+    <junit.version>4.11</junit.version>
+    <log4j.version>1.2.16</log4j.version>
+    <metrics.version>2.2.0</metrics.version>
+    <ormlite.version>4.43</ormlite.version>
+    <jcommander.version>1.30</jcommander.version>
+    <bouncycastle.version>1.48</bouncycastle.version>
 
-      <android.platform.version>4.2.2_r2</android.platform.version>
-      <android.supportv4.version>12</android.supportv4.version>
-      <actionbarsherlock.version>4.2.0</actionbarsherlock.version>
-      <ormlite.version>4.43</ormlite.version>
+    <!-- Android-specific dependencies -->
+    <android.platform.version>4.2.2_r2</android.platform.version>
+    <android.supportv4.version>12</android.supportv4.version>
+    <actionbarsherlock.version>4.2.0</actionbarsherlock.version>
   </properties>
   
 </project>
