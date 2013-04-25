@@ -2,6 +2,7 @@ package com.hoccer.talk.tool.command;
 
 import better.cli.annotations.CLICommand;
 import better.cli.console.Console;
+import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
@@ -28,7 +29,8 @@ public class ClientList extends TalkToolCommand {
             String[] columns = new String[COLUMN_COUNT];
             columns[0] = Integer.toString(client.getId());
             columns[1] = client.getClient().getStateString();
-            columns[2] = client.getDatabase().getClient().getClientId();
+            TalkClient c = client.getDatabase().getClient();
+            columns[2] = (c == null) ? "null" : c.getClientId();
             rows[i] = columns;
         }
         PrintUtils.printTable(rows);
