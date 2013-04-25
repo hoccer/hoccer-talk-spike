@@ -61,6 +61,9 @@ public interface ITalkRpcServer {
      */
     String srpPhase2(String M1);
 
+    /** Hello call */
+    TalkServerInfo hello(TalkClientInfo clientInfo);
+
     /** Retrieves established relationships changes after given date */
     TalkRelationship[] getRelationships(Date lastKnown);
 
