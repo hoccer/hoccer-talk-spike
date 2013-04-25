@@ -43,6 +43,12 @@
         <artifactId>bcprov-jdk15on</artifactId>
         <version>1.48</version>
     </dependency>
+    <!-- Apache Commons Codec (BASE64 and hex encoding) -->
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>${commons-codec.version}</version>
+    </dependency>
   </dependencies>
   
   <build>

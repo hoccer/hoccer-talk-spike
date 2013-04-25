@@ -30,6 +30,7 @@
     <ormlite.version>4.43</ormlite.version>
     <jcommander.version>1.30</jcommander.version>
     <bouncycastle.version>1.48</bouncycastle.version>
+    <commons-codec.version>1.7</commons-codec.version>
 
     <!-- Android-specific dependencies -->
     <android.platform.version>4.2.2_r2</android.platform.version>
