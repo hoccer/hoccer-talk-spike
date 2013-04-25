@@ -19,17 +19,19 @@
   </properties>
 
   <dependencies>
+    <!-- Jackson annotations for JSON mapping -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
       <version>${jackson.version}</version>
     </dependency>
+    <!-- JSON-RPC annotations for protocol definition -->
     <dependency>
       <groupId>better</groupId>
       <artifactId>better-jsonrpc-annotations</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
-    <!-- ORM library for database management -->
+    <!-- ORM library for database management (should be just annotations, upstream doesn't separate them) -->
     <dependency>
       <groupId>com.j256.ormlite</groupId>
       <artifactId>ormlite-core</artifactId>
