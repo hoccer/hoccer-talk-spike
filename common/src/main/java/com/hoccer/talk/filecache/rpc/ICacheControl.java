@@ -1,4 +1,4 @@
-package com.hoccer.talk.filecache.control;
+package com.hoccer.talk.filecache.rpc;
 
 public interface ICacheControl {
 
