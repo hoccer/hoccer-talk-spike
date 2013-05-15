@@ -10,10 +10,10 @@ public interface ICacheControl {
 
     void deleteFile(String fileId);
 
-    static class FileHandles {
-        String fileId;
-        String uploadId;
-        String downloadId;
+    public static class FileHandles {
+        public String fileId;
+        public String uploadId;
+        public String downloadId;
     }
 
 }
