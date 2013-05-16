@@ -1,8 +1,9 @@
-package com.hoccer.filecache.control;
+package com.hoccer.talk.filecache.control;
 
 import better.jsonrpc.server.JsonRpcServer;
 import better.jsonrpc.websocket.JsonRpcWsConnection;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hoccer.talk.filecache.rpc.ICacheControl;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketServlet;
 
@@ -28,7 +29,7 @@ public class ControlServlet extends WebSocketServlet {
 
     @Override
     public WebSocket doWebSocketConnect(HttpServletRequest request, String protocol) {
-        if(protocol.equals("com.hoccer.filecache.control.v1")) {
+        if(protocol.equals("com.hoccer.talk.filecache.control.v1")) {
             JsonRpcWsConnection connection = new JsonRpcWsConnection();
             ControlConnection handler = new ControlConnection(this, connection);
             connection.bindServer(mRpcServer, handler);
