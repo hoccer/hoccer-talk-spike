@@ -45,7 +45,7 @@
 
     <!-- Android-specific dependencies -->
     <android.platform.version>4.2.2_r2</android.platform.version>
-    <android.supportv4.version>12</android.supportv4.version>
+    <android.supportv4.version>13</android.supportv4.version>
     <actionbarsherlock.version>4.2.0</actionbarsherlock.version>
   </properties>
   
