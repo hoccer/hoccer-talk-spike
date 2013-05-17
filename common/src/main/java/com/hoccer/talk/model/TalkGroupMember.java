@@ -20,8 +20,6 @@ public class TalkGroupMember {
 
     private String groupKeyCipherText; // XXX should be named "encryptedGroupKey"
 
-    private String pubkeyId;
-
     private Date lastChanged;
 
     public TalkGroupMember() {
@@ -74,14 +72,6 @@ public class TalkGroupMember {
 
     public void setGroupKeyCipherText(String groupKeyCipherText) {
         this.groupKeyCipherText = groupKeyCipherText;
-    }
-
-    public String getPubkeyId() {
-        return pubkeyId;
-    }
-
-    public void setPubkeyId(String pubkeyId) {
-        this.pubkeyId = pubkeyId;
     }
 
     public Date getLastChanged() {
