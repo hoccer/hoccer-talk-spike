@@ -128,5 +128,15 @@ public interface ITalkRpcServer {
      * corresponding outgoing message will be aborted.
      */
     TalkDelivery deliveryAbort(String messageId, String recipientId);
-	
+
+    String createGroup(String groupTag);
+
+    void deleteGroup(String groupId);
+
+    void addGroupMember(TalkGroupMember member);
+    void removeGroupMember(TalkGroupMember member);
+    void updateGroupMember(TalkGroupMember member);
+
+    TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown);
+
 }

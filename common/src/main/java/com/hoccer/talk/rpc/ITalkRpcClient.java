@@ -2,10 +2,7 @@ package com.hoccer.talk.rpc;
 
 import better.jsonrpc.annotations.JsonRpcNotification;
 
-import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.talk.model.TalkMessage;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.talk.model.*;
 
 /**
  * This is the RPC interface exposed by clients.
@@ -64,5 +61,8 @@ public interface ITalkRpcClient {
      */
     @JsonRpcNotification
     void relationshipUpdated(TalkRelationship relationship);
+
+    @JsonRpcNotification
+    void groupMemberUpdated(TalkGroupMember member);
 
 }
