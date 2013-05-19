@@ -28,6 +28,7 @@
     <junit.version>4.11</junit.version>
     <jongo.version>0.4</jongo.version>
     <log4j.version>1.2.16</log4j.version>
+    <slf4j.version>1.7.5</slf4j.version>
     <mongo.version>2.10.1</mongo.version>
     <metrics.version>2.2.0</metrics.version>
     <postgresql.version>9.1-901.jdbc4</postgresql.version>
