@@ -1,12 +1,14 @@
 package com.hoccer.talk.model;
 
+import java.util.Date;
+
 public class TalkGroup {
 
     public String groupId;
 
     public String groupName;
 
-    public String groupKeyId;
+    public Date lastChanged;
 
     public TalkGroup() {
 
@@ -28,11 +30,12 @@ public class TalkGroup {
         this.groupName = groupName;
     }
 
-    public String getGroupKeyId() {
-        return groupKeyId;
+    public Date getLastChanged() {
+        return lastChanged;
     }
 
-    public void setGroupKeyId(String groupKeyId) {
-        this.groupKeyId = groupKeyId;
+    public void setLastChanged(Date lastChanged) {
+        this.lastChanged = lastChanged;
     }
+
 }

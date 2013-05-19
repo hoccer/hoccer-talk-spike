@@ -130,13 +130,13 @@ public interface ITalkRpcServer {
     TalkDelivery deliveryAbort(String messageId, String recipientId);
 
     String createGroup(String groupTag);
-
+    TalkGroup[] getGroups(Date lastKnown);
+    void updateGroup(TalkGroup group);
     void deleteGroup(String groupId);
 
+    TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown);
     void addGroupMember(TalkGroupMember member);
     void removeGroupMember(TalkGroupMember member);
     void updateGroupMember(TalkGroupMember member);
-
-    TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown);
 
 }
