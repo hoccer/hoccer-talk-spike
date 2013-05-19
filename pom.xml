@@ -24,7 +24,7 @@
 
     <!-- Generic dependencies -->
     <jetty.version>8.1.10.v20130312</jetty.version>
-    <jackson.version>2.0.6</jackson.version>
+    <jackson.version>2.2.1</jackson.version>
     <junit.version>4.11</junit.version>
     <jongo.version>0.4</jongo.version>
     <log4j.version>1.2.16</log4j.version>
