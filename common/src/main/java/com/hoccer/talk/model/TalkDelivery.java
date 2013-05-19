@@ -67,6 +67,12 @@ public class TalkDelivery {
     @DatabaseField
     Date timeChanged;
 
+    @DatabaseField
+    Date timeUpdatedOut;
+
+    @DatabaseField
+    Date timeUpdatedIn;
+
     public TalkDelivery() {
         this.state = STATE_NEW;
     }
@@ -151,4 +157,19 @@ public class TalkDelivery {
         this.timeChanged = timeChanged;
     }
 
+    public Date getTimeUpdatedOut() {
+        return timeUpdatedOut;
+    }
+
+    public void setTimeUpdatedOut(Date timeUpdatedOut) {
+        this.timeUpdatedOut = timeUpdatedOut;
+    }
+
+    public Date getTimeUpdatedIn() {
+        return timeUpdatedIn;
+    }
+
+    public void setTimeUpdatedIn(Date timeUpdatedIn) {
+        this.timeUpdatedIn = timeUpdatedIn;
+    }
 }
