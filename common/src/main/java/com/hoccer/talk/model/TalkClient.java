@@ -1,9 +1,10 @@
 package com.hoccer.talk.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+
+import java.util.Date;
 
 /**
  * These objects represent clients in the server database
@@ -49,8 +50,16 @@ public class TalkClient {
     @DatabaseField
     int apnsUnreadMessages;
 
-    public TalkClient() {
+    @DatabaseField
+    Date timeRegistered;
 
+    @DatabaseField
+    Date timeLastLogin;
+
+    @DatabaseField
+    Date timeLastPush;
+
+    public TalkClient() {
     }
 
 	public TalkClient(String clientId) {
@@ -136,5 +145,29 @@ public class TalkClient {
 
     public void setApnsUnreadMessages(int apnsUnreadMessages) {
         this.apnsUnreadMessages = apnsUnreadMessages;
+    }
+
+    public Date getTimeRegistered() {
+        return timeRegistered;
+    }
+
+    public void setTimeRegistered(Date timeRegistered) {
+        this.timeRegistered = timeRegistered;
+    }
+
+    public Date getTimeLastLogin() {
+        return timeLastLogin;
+    }
+
+    public void setTimeLastLogin(Date timeLastLogin) {
+        this.timeLastLogin = timeLastLogin;
+    }
+
+    public Date getTimeLastPush() {
+        return timeLastPush;
+    }
+
+    public void setTimeLastPush(Date timeLastPush) {
+        this.timeLastPush = timeLastPush;
     }
 }
