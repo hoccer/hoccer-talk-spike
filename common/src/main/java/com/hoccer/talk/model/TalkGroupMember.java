@@ -4,7 +4,10 @@ import java.util.Date;
 
 public class TalkGroupMember {
 
-    public static final String ROLE_NONE  = "none";
+    public static final String STATE_NONE    = "none";
+    public static final String STATE_INVITED = "invited";
+    public static final String STATE_JOINED  = "joined";
+
     public static final String ROLE_ADMIN = "admin";
     public static final String ROLE_MEMBER = "member";
 
@@ -23,7 +26,8 @@ public class TalkGroupMember {
     private Date lastChanged;
 
     public TalkGroupMember() {
-
+        this.role = ROLE_MEMBER;
+        this.state = STATE_NONE;
     }
 
     public String getClientId() {
