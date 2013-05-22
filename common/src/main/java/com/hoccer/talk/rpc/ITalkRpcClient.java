@@ -62,9 +62,19 @@ public interface ITalkRpcClient {
     @JsonRpcNotification
     void relationshipUpdated(TalkRelationship relationship);
 
+    /**
+     * Sent to notify an update to a group
+     *
+     * @param group that has changed
+     */
     @JsonRpcNotification
     void groupUpdated(TalkGroup group);
 
+    /**
+     * Sent to notify an update to a group membership
+     *
+     * @param groupMember that has changed
+     */
     @JsonRpcNotification
     void groupMemberUpdated(TalkGroupMember groupMember);
 
