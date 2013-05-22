@@ -14,11 +14,11 @@ public class TalkGroupMember {
 
     private String role;
 
-    private String status; // XXX should be named "state"
+    private String state;
 
     private String invitationSecret;
 
-    private String groupKeyCipherText; // XXX should be named "encryptedGroupKey"
+    private String encryptedGroupKey;
 
     private Date lastChanged;
 
@@ -50,12 +50,12 @@ public class TalkGroupMember {
         this.role = role;
     }
 
-    public String getStatus() {
-        return status;
+    public String getState() {
+        return state;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setState(String state) {
+        this.state = state;
     }
 
     public String getInvitationSecret() {
@@ -66,12 +66,12 @@ public class TalkGroupMember {
         this.invitationSecret = invitationSecret;
     }
 
-    public String getGroupKeyCipherText() {
-        return groupKeyCipherText;
+    public String getEncryptedGroupKey() {
+        return encryptedGroupKey;
     }
 
-    public void setGroupKeyCipherText(String groupKeyCipherText) {
-        this.groupKeyCipherText = groupKeyCipherText;
+    public void setEncryptedGroupKey(String encryptedGroupKey) {
+        this.encryptedGroupKey = encryptedGroupKey;
     }
 
     public Date getLastChanged() {
