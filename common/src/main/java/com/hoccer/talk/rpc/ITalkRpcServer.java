@@ -129,7 +129,7 @@ public interface ITalkRpcServer {
      */
     TalkDelivery deliveryAbort(String messageId, String recipientId);
 
-    String createGroup(String groupTag);
+    String createGroup(TalkGroup group);
     TalkGroup[] getGroups(Date lastKnown);
     void updateGroup(TalkGroup group);
     void deleteGroup(String groupId);

@@ -8,6 +8,10 @@ public class TalkGroup {
 
     public String groupName;
 
+    public String groupTag;
+
+    public String groupAvatarUrl;
+
     public Date lastChanged;
 
     public TalkGroup() {
@@ -28,6 +32,22 @@ public class TalkGroup {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public String getGroupTag() {
+        return groupTag;
+    }
+
+    public void setGroupTag(String groupTag) {
+        this.groupTag = groupTag;
+    }
+
+    public String getGroupAvatarUrl() {
+        return groupAvatarUrl;
+    }
+
+    public void setGroupAvatarUrl(String groupAvatarUrl) {
+        this.groupAvatarUrl = groupAvatarUrl;
     }
 
     public Date getLastChanged() {
