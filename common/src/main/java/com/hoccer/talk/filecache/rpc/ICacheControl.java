@@ -4,9 +4,9 @@ public interface ICacheControl {
 
     void deleteAccount(String accountId);
 
-    FileHandles createFileForStorage(String accountId, int fileSize);
+    FileHandles createFileForStorage(String accountId, String contentType, int contentLength);
 
-    FileHandles createFileForTransfer(String accountId, int fileSize);
+    FileHandles createFileForTransfer(String accountId, String contentType, int contentLength);
 
     void deleteFile(String fileId);
 
