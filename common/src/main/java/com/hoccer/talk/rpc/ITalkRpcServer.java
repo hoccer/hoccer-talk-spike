@@ -139,4 +139,12 @@ public interface ITalkRpcServer {
     void removeGroupMember(TalkGroupMember member);
     void updateGroupMember(TalkGroupMember member);
 
+    FileHandles createFileForStorage(int contentLength);
+    FileHandles createFileForTransfer(int contentLength);
+
+    public static final class FileHandles {
+        public String uploadUrl;
+        public String downloadUrl;
+    }
+
 }
