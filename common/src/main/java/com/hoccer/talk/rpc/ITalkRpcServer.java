@@ -141,8 +141,9 @@ public interface ITalkRpcServer {
 
     TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown);
     void addGroupMember(TalkGroupMember member);
-    void removeGroupMember(TalkGroupMember member);
     void updateGroupMember(TalkGroupMember member);
+    void removeGroupMember(String groupId, String clientId);
+
 
     FileHandles createFileForStorage(int contentLength);
     FileHandles createFileForTransfer(int contentLength);
