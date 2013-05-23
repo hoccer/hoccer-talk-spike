@@ -28,7 +28,7 @@ public class TalkToolClient {
     }
 
     public void stop() {
-        mClient.deactivateNow();
+        mClient.deactivate();
     }
 
     public void wake() {
