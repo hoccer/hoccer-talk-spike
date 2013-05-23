@@ -4,15 +4,17 @@ import java.util.Date;
 
 public class TalkGroup {
 
-    public String groupId;
+    private String _id;
 
-    public String groupName;
+    String groupId;
 
-    public String groupTag;
+    String groupName;
 
-    public String groupAvatarUrl;
+    String groupTag;
 
-    public Date lastChanged;
+    String groupAvatarUrl;
+
+    Date lastChanged;
 
     public TalkGroup() {
 

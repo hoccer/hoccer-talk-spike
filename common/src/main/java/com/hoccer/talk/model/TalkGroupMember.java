@@ -13,17 +13,19 @@ public class TalkGroupMember {
     public static final String ROLE_ADMIN = "admin";
     public static final String ROLE_MEMBER = "member";
 
-    private String groupId;
+    private String _id;
 
-    private String clientId;
+    String groupId;
 
-    private String role;
+    String clientId;
 
-    private String state;
+    String role;
 
-    private String encryptedGroupKey;
+    String state;
 
-    private Date lastChanged;
+    String encryptedGroupKey;
+
+    Date lastChanged;
 
     public TalkGroupMember() {
         this.role = ROLE_MEMBER;
