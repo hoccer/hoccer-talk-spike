@@ -36,6 +36,10 @@ public class TalkMessage {
     @DatabaseField
 	String senderId;
 
+    /** Message salt */
+    @DatabaseField
+    String salt;
+
     /** Message body */
     @DatabaseField
 	String body;
@@ -76,7 +80,15 @@ public class TalkMessage {
 		this.senderId = senderId;
 	}
 
-	public String getBody() {
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
+    public String getBody() {
 		return body;
 	}
 
