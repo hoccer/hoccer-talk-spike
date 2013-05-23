@@ -75,6 +75,10 @@ public class TalkDelivery {
 
     public TalkDelivery() {
         this.state = STATE_NEW;
+        this.timeAccepted = new Date(0);
+        this.timeChanged = new Date(0);
+        this.timeUpdatedIn = new Date(0);
+        this.timeUpdatedOut = new Date(0);
     }
 
 	public String getMessageId() {
