@@ -30,6 +30,14 @@ public class TalkGroupMember {
         this.state = STATE_NONE;
     }
 
+    public boolean isAdmin() {
+        return this.state.equals(STATE_JOINED) && this.role.equals(ROLE_ADMIN);
+    }
+
+    public boolean isMember() {
+        return this.state.equals(STATE_JOINED) && (this.role.equals(ROLE_ADMIN) || this.role.equals(ROLE_MEMBER));
+    }
+
     public String getClientId() {
         return clientId;
     }

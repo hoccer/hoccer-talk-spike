@@ -42,6 +42,14 @@ public class TalkRelationship {
     public TalkRelationship() {
     }
 
+    public boolean isFriend() {
+        return state.equals(STATE_FRIEND);
+    }
+
+    public boolean isBlocked() {
+        return state.equals(STATE_BLOCKED);
+    }
+
     public String getClientId() {
         return clientId;
     }
