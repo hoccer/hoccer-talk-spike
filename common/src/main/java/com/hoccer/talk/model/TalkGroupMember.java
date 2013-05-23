@@ -38,6 +38,14 @@ public class TalkGroupMember {
         return this.state.equals(STATE_JOINED) && (this.role.equals(ROLE_ADMIN) || this.role.equals(ROLE_MEMBER));
     }
 
+    public boolean isJoined() {
+        return this.state.equals(STATE_JOINED);
+    }
+
+    public boolean isInvited() {
+        return this.state.equals(STATE_INVITED);
+    }
+
     public String getClientId() {
         return clientId;
     }
