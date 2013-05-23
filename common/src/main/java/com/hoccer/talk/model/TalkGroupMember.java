@@ -1,5 +1,7 @@
 package com.hoccer.talk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Date;
 
 public class TalkGroupMember {
@@ -30,18 +32,22 @@ public class TalkGroupMember {
         this.state = STATE_NONE;
     }
 
+    @JsonIgnore
     public boolean isAdmin() {
         return this.state.equals(STATE_JOINED) && this.role.equals(ROLE_ADMIN);
     }
 
+    @JsonIgnore
     public boolean isMember() {
         return this.state.equals(STATE_JOINED) && (this.role.equals(ROLE_ADMIN) || this.role.equals(ROLE_MEMBER));
     }
 
+    @JsonIgnore
     public boolean isJoined() {
         return this.state.equals(STATE_JOINED);
     }
 
+    @JsonIgnore
     public boolean isInvited() {
         return this.state.equals(STATE_INVITED);
     }

@@ -1,5 +1,6 @@
 package com.hoccer.talk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -42,10 +43,12 @@ public class TalkRelationship {
     public TalkRelationship() {
     }
 
+    @JsonIgnore
     public boolean isFriend() {
         return state.equals(STATE_FRIEND);
     }
 
+    @JsonIgnore
     public boolean isBlocked() {
         return state.equals(STATE_BLOCKED);
     }
