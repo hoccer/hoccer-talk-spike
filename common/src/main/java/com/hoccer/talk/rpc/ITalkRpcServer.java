@@ -139,8 +139,12 @@ public interface ITalkRpcServer {
     void joinGroup(String groupId);
     void leaveGroup(String groupId);
 
+    void updateGroupName(String groupId, String name);
+    void updateGroupAvatar(String groupId, String avatarUrl);
+    void updateGroupRole(String groupId, String clientId, String role);
+    void updateGroupKey(String groupId, String clientId, String key);
+
     TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown);
-    void addGroupMember(TalkGroupMember member);
     void updateGroupMember(TalkGroupMember member);
     void removeGroupMember(String groupId, String clientId);
 
