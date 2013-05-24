@@ -142,7 +142,7 @@ public interface ITalkRpcServer {
     void updateGroupName(String groupId, String name);
     void updateGroupAvatar(String groupId, String avatarUrl);
     void updateGroupRole(String groupId, String clientId, String role);
-    void updateGroupKey(String groupId, String clientId, String key);
+    void updateGroupKey(String groupId, String clientId, String keyId, String key);
 
     TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown);
     void updateGroupMember(TalkGroupMember member);
