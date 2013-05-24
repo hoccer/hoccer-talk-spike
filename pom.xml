@@ -30,7 +30,7 @@
     <log4j.version>1.2.16</log4j.version>
     <slf4j.version>1.7.5</slf4j.version>
     <mongo.version>2.10.1</mongo.version>
-    <metrics.version>2.2.0</metrics.version>
+    <metrics.version>3.0.0-BETA2</metrics.version>
     <postgresql.version>9.1-901.jdbc4</postgresql.version>
     <ormlite.version>4.43</ormlite.version>
     <servlet.version>3.0.1</servlet.version>
