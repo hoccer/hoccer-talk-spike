@@ -27,6 +27,8 @@ public class TalkGroupMember {
 
     String state;
 
+    String memberKeyId;
+
     String encryptedGroupKey;
 
     Date lastChanged;
@@ -86,6 +88,14 @@ public class TalkGroupMember {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getMemberKeyId() {
+        return memberKeyId;
+    }
+
+    public void setMemberKeyId(String memberKeyId) {
+        this.memberKeyId = memberKeyId;
     }
 
     public String getEncryptedGroupKey() {
