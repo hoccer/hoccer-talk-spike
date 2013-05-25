@@ -48,6 +48,10 @@ public class TalkMessage {
     @DatabaseField
     String attachment;
 
+    /** Attachment URL (for housekeeping) */
+    @DatabaseField
+    String attachmentUrl;
+
     /** Time the message was sent */
     @DatabaseField
     Date timeSent;
@@ -102,6 +106,14 @@ public class TalkMessage {
 
     public void setAttachment(String attachment) {
         this.attachment = attachment;
+    }
+
+    public String getAttachmentUrl() {
+        return attachmentUrl;
+    }
+
+    public void setAttachmentUrl(String attachmentUrl) {
+        this.attachmentUrl = attachmentUrl;
     }
 
     public Date getTimeSent() {
