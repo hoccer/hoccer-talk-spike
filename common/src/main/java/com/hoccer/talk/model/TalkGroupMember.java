@@ -1,9 +1,12 @@
 package com.hoccer.talk.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
 
+@DatabaseTable(tableName = "groupMember")
 public class TalkGroupMember {
 
     public static final String STATE_NONE    = "none";
@@ -19,18 +22,25 @@ public class TalkGroupMember {
 
     private String _id;
 
+    @DatabaseField
     String groupId;
 
+    @DatabaseField
     String clientId;
 
+    @DatabaseField
     String role;
 
+    @DatabaseField
     String state;
 
+    @DatabaseField
     String memberKeyId;
 
+    @DatabaseField
     String encryptedGroupKey;
 
+    @DatabaseField
     Date lastChanged;
 
     public TalkGroupMember() {

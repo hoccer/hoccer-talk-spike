@@ -19,7 +19,7 @@ public class TalkClient {
     private String _id;
 
 	/** Server-assigned client ID */
-    @DatabaseField
+    @DatabaseField(id = true)
 	String clientId;
 
     /** SRP salt */
@@ -27,7 +27,7 @@ public class TalkClient {
     String srpSalt;
 
     /** SRP verifier */
-    @DatabaseField
+    @DatabaseField(width = 512)
     String srpVerifier;
 
     /** SRP secret (CLIENT ONLY) */

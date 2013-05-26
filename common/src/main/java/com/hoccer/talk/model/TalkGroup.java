@@ -1,19 +1,28 @@
 package com.hoccer.talk.model;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
 import java.util.Date;
 
+@DatabaseTable(tableName = "group")
 public class TalkGroup {
 
     private String _id;
 
+    @DatabaseField(id = true)
     String groupId;
 
+    @DatabaseField
     String groupName;
 
+    @DatabaseField
     String groupTag;
 
+    @DatabaseField
     String groupAvatarUrl;
 
+    @DatabaseField
     Date lastChanged;
 
     public TalkGroup() {

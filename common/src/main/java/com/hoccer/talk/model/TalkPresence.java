@@ -13,7 +13,7 @@ public class TalkPresence {
 
     private String _id;
 
-    @DatabaseField
+    @DatabaseField(id = true)
     String clientId;
 
     @DatabaseField
