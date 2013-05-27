@@ -153,6 +153,7 @@ public interface ITalkRpcServer {
     FileHandles createFileForTransfer(int contentLength);
 
     public static final class FileHandles {
+        public String fileId;
         public String uploadUrl;
         public String downloadUrl;
     }

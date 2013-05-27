@@ -1,7 +1,5 @@
 package com.hoccer.talk.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -48,9 +46,9 @@ public class TalkMessage {
     @DatabaseField
     String attachment;
 
-    /** Attachment URL (for housekeeping) */
+    /** Attachment file id (for housekeeping) */
     @DatabaseField
-    String attachmentUrl;
+    String attachmentFileId;
 
     /** Time the message was sent */
     @DatabaseField
@@ -108,12 +106,12 @@ public class TalkMessage {
         this.attachment = attachment;
     }
 
-    public String getAttachmentUrl() {
-        return attachmentUrl;
+    public String getAttachmentFileId() {
+        return attachmentFileId;
     }
 
-    public void setAttachmentUrl(String attachmentUrl) {
-        this.attachmentUrl = attachmentUrl;
+    public void setAttachmentFileId(String attachmentFileId) {
+        this.attachmentFileId = attachmentFileId;
     }
 
     public Date getTimeSent() {
