@@ -14,9 +14,6 @@ import java.util.Date;
  */
 public interface ITalkRpcServer {
 
-	/** Unauthenticated login for initial development */
-	void identify(String clientId);
-
     /**
      * Generate a new client ID for registration
      *
