@@ -9,9 +9,10 @@ import java.util.Date;
 @DatabaseTable(tableName = "groupMember")
 public class TalkGroupMember {
 
-    public static final String STATE_NONE    = "none";
-    public static final String STATE_INVITED = "invited";
-    public static final String STATE_JOINED  = "joined";
+    public static final String STATE_NONE          = "none";
+    public static final String STATE_INVITED       = "invited";
+    public static final String STATE_JOINED        = "joined";
+    public static final String STATE_GROUP_REMOVED = "groupRemoved";
 
     public static final String ROLE_ADMIN = "admin";
     public static final String ROLE_MEMBER = "member";
@@ -66,6 +67,11 @@ public class TalkGroupMember {
     @JsonIgnore
     public boolean isInvited() {
         return this.state.equals(STATE_INVITED);
+    }
+
+    @JsonIgnore
+    public boolean isGroupRemoved() {
+        return this.state.equals(STATE_GROUP_REMOVED);
     }
 
     public String getClientId() {

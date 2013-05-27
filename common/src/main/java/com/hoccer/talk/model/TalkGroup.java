@@ -14,6 +14,9 @@ public class TalkGroup {
     public static final String FIELD_GROUP_AVATAR_URL = "groupAvatarUrl";
     public static final String FIELD_LAST_CHANGED     = "lastChanged";
 
+    public static final String STATE_NONE   = "none";
+    public static final String STATE_EXISTS = "exists";
+
     private String _id;
 
     @DatabaseField(id = true)
@@ -27,6 +30,9 @@ public class TalkGroup {
 
     @DatabaseField
     String groupAvatarUrl;
+
+    @DatabaseField
+    String state;
 
     @DatabaseField
     Date lastChanged;
@@ -65,6 +71,14 @@ public class TalkGroup {
 
     public void setGroupAvatarUrl(String groupAvatarUrl) {
         this.groupAvatarUrl = groupAvatarUrl;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     public Date getLastChanged() {
