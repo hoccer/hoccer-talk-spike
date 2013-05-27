@@ -21,12 +21,18 @@ import java.util.Date;
 @DatabaseTable(tableName="delivery")
 public class TalkDelivery {
 
-    public static final String FIELD_MESSAGE_ID     = "messageId";
-    public static final String FIELD_MESSAGE_TAG    = "messageTag";
-    public static final String FIELD_RECEIVER_ID    = "receiverId";
-    public static final String FIELD_STATE          = "state";
-    public static final String FIELD_KEY_ID         = "keyId";
-    public static final String FIELD_KEY_CIPHERTEXT = "keyCiphertext";
+    public static final String FIELD_MESSAGE_ID       = "messageId";
+    public static final String FIELD_MESSAGE_TAG      = "messageTag";
+    public static final String FIELD_SENDER_ID        = "senderId";
+    public static final String FIELD_RECEIVER_ID      = "receiverId";
+    public static final String FIELD_GROUP_ID         = "groupId";
+    public static final String FIELD_STATE            = "state";
+    public static final String FIELD_KEY_ID           = "keyId";
+    public static final String FIELD_KEY_CIPHERTEXT   = "keyCiphertext";
+    public static final String FIELD_TIME_ACCEPTED    = "timeAccepted";
+    public static final String FIELD_TIME_CHANGED     = "timeChanged";
+    public static final String FIELD_TIME_UPDATED_OUT = "timeUpdatedOut";
+    public static final String FIELD_TIME_UPDATED_IN  = "timeUpdatedIn";
 
     public static final String STATE_NEW        = "new";
     public static final String STATE_DELIVERING = "delivering";

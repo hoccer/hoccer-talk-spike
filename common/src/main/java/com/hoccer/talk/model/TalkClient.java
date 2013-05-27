@@ -16,6 +16,19 @@ import java.util.Date;
 @DatabaseTable(tableName="client")
 public class TalkClient {
 
+    public static final String FIELD_CLIENT_ID            = "clientId";
+    public static final String FIELD_SRP_SALT             = "srpSalt";
+    public static final String FIELD_SRP_VERIFIER         = "srpVerifier";
+    public static final String FIELD_SRP_SECRET           = "srpSecret";
+    public static final String FIELD_GCM_REGISTRATION     = "gcmRegistration";
+    public static final String FIELD_GCM_PACKAGE          = "gcmPackage";
+    public static final String FIELD_APNS_TOKEN           = "apnsToken";
+    public static final String FIELD_APNS_UNREAD_MESSAGES = "apnsUnreadMessages";
+    public static final String FIELD_TIME_REGISTERED      = "timeRegistered";
+    public static final String FIELD_TIME_LAST_LOGIN      = "timeLastLogin";
+    public static final String FIELD_TIME_LAST_PUSH       = "timeLastPush";
+
+    /** Object ID for jongo */
     private String _id;
 
 	/** Server-assigned client ID */

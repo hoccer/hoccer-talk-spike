@@ -8,6 +8,12 @@ import java.util.Date;
 @DatabaseTable(tableName = "group")
 public class TalkGroup {
 
+    public static final String FIELD_GROUP_ID         = "groupId";
+    public static final String FIELD_GROUP_NAME       = "groupName";
+    public static final String FIELD_GROUP_TAG        = "groupTag";
+    public static final String FIELD_GROUP_AVATAR_URL = "groupAvatarUrl";
+    public static final String FIELD_LAST_CHANGED     = "lastChanged";
+
     private String _id;
 
     @DatabaseField(id = true)
