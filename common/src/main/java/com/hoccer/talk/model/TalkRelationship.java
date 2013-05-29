@@ -28,6 +28,9 @@ public class TalkRelationship {
 
     private String _id;
 
+    @DatabaseField(generatedId = true)
+    private long relationshipId;
+
     @DatabaseField
     String clientId;
 

@@ -1,12 +1,10 @@
 package com.hoccer.talk.tool.command;
 
 import better.cli.annotations.CLICommand;
-import better.cli.console.Console;
-import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
-import com.hoccer.talk.tool.util.PrintUtils;
+import better.cli.utils.PrintUtils;
 
 import java.util.List;
 
@@ -15,7 +13,7 @@ public class ClientList extends TalkToolCommand {
 
     final int      COLUMN_COUNT = 3;
     final String[] COLUMN_NAMES = new String[] {
-        "ID", "State", "CID"
+        "id", "state", "clientId"
     };
 
     @Override
@@ -29,8 +27,8 @@ public class ClientList extends TalkToolCommand {
             String[] columns = new String[COLUMN_COUNT];
             columns[0] = Integer.toString(client.getId());
             columns[1] = client.getClient().getStateString();
-            TalkClient c = client.getDatabase().getClient();
-            columns[2] = (c == null) ? "null" : c.getClientId();
+            String c = client.getDatabase().findSelfContact(true).getClientId();
+            columns[2] = (c == null) ? "" : c;
             rows[i] = columns;
         }
         PrintUtils.printTable(rows);

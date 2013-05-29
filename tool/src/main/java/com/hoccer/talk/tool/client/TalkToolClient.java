@@ -1,7 +1,11 @@
 package com.hoccer.talk.tool.client;
 
 import com.hoccer.talk.client.HoccerTalkClient;
+import com.hoccer.talk.client.TalkClientDatabase;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.tool.TalkToolContext;
+
+import java.sql.SQLException;
 
 public class TalkToolClient {
 
@@ -11,7 +15,7 @@ public class TalkToolClient {
 
     HoccerTalkClient mClient;
 
-    TalkToolClientDatabase mDatabase;
+    TalkToolClientDatabase mDatabaseBackend;
 
     public TalkToolClient(TalkToolContext context) {
         mContext = context;
@@ -19,8 +23,8 @@ public class TalkToolClient {
     }
 
     public void initialize() {
-        mDatabase = new TalkToolClientDatabase();
-        mClient = new HoccerTalkClient(mContext.getExecutor(), mDatabase);
+        mDatabaseBackend = new TalkToolClientDatabase(this);
+        mClient = new HoccerTalkClient(mContext.getExecutor(), mDatabaseBackend);
     }
 
     public void start() {
@@ -43,8 +47,21 @@ public class TalkToolClient {
         return mClient;
     }
 
-    public TalkToolClientDatabase getDatabase() {
-        return mDatabase;
+    public TalkToolClientDatabase getDatabaseBackend() {
+        return mDatabaseBackend;
+    }
+
+    public TalkClientDatabase getDatabase() {
+        return mClient.getDatabase();
+    }
+
+    public String getClientId() {
+        try {
+            TalkClientContact self = mClient.getDatabase().findSelfContact(true);
+            return self.getClientId();
+        } catch (SQLException e) {
+        }
+        return null;
     }
 
 }

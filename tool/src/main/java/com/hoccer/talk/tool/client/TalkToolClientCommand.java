@@ -12,17 +12,17 @@ public class TalkToolClientCommand extends TalkToolCommand {
     @Parameter(description = "Run on all clients", names = "-a")
     boolean pAllClients;
 
-    @Parameter(description = "Run on specified client only", names = "-c")
-    String pSpecificClient;
+    @Parameter(description = "Run on specified clients", names = "-c")
+    List<String> pSpecificClients;
 
     private List<TalkToolClient> selectClients(TalkToolContext context) {
-        if(pSpecificClient != null) {
-            return new ArrayList<TalkToolClient>();
-        }
         if(pAllClients) {
             return context.getClients();
         }
-        return new ArrayList<TalkToolClient>();
+        if(pSpecificClients != null) {
+            return context.getClientsBySelectors(pSpecificClients);
+        }
+        return context.getSelectedClients();
     }
 
     @Override

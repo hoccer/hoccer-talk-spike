@@ -15,13 +15,14 @@
     <orderEntry type="library" name="Maven: jline:jline:0.9.94" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:3.8.1" level="project" />
     <orderEntry type="library" name="Maven: com.beust:jcommander:1.30" level="project" />
+    <orderEntry type="module" module-name="better-cli-log4j" />
+    <orderEntry type="library" name="Maven: log4j:log4j:1.2.16" level="project" />
     <orderEntry type="module" module-name="hoccer-talk-client" />
     <orderEntry type="module" module-name="better-jsonrpc-common" />
     <orderEntry type="module" module-name="better-jsonrpc-annotations" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.1.4" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.1.4" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.1.4" level="project" />
-    <orderEntry type="library" name="Maven: log4j:log4j:1.2.16" level="project" />
     <orderEntry type="module" module-name="better-jsonrpc-websocket" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-websocket:8.1.10.v20130312" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-util:8.1.10.v20130312" level="project" />
@@ -34,6 +35,8 @@
     <orderEntry type="module" module-name="hoccer-talk-srp" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-log4j12:1.7.5" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.5" level="project" />
+    <orderEntry type="library" name="Maven: com.j256.ormlite:ormlite-jdbc:4.43" level="project" />
+    <orderEntry type="library" name="Maven: org.xerial:sqlite-jdbc:3.7.2" level="project" />
   </component>
 </module>
 

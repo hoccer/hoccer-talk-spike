@@ -23,6 +23,9 @@ public class TalkGroupMember {
 
     private String _id;
 
+    @DatabaseField(generatedId = true)
+    private long memberId;
+
     @DatabaseField
     String groupId;
 
