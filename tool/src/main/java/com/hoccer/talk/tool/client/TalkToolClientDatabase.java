@@ -12,10 +12,13 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.jdbc.JdbcPooledConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
 public class TalkToolClientDatabase implements ITalkClientDatabaseBackend {
+
+    Logger LOG = Logger.getLogger(TalkToolClientDatabase.class);
 
     TalkToolClient mClient;
 
@@ -44,6 +47,7 @@ public class TalkToolClientDatabase implements ITalkClientDatabaseBackend {
     public ConnectionSource getConnectionSource() {
         if(mCs == null) {
             String url = "jdbc:sqlite:talk-client-" + mClient.getId() + ".db";
+            LOG.debug("Creating connsource for " + url);
 
             try {
                 mCs = new JdbcConnectionSource(url);
@@ -56,6 +60,7 @@ public class TalkToolClientDatabase implements ITalkClientDatabaseBackend {
 
     @Override
     public <D extends Dao<T, ?>, T> D getDao(Class<T> clazz) throws SQLException {
+        LOG.debug("Creating dao for " + clazz.getSimpleName());
         return DaoManager.createDao(getConnectionSource(), clazz);
     }
 
