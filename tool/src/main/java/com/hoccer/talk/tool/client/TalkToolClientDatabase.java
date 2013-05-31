@@ -33,6 +33,7 @@ public class TalkToolClientDatabase implements ITalkClientDatabaseBackend {
         TableUtils.createTable(cs, TalkPresence.class);
         TableUtils.createTable(cs, TalkRelationship.class);
         TableUtils.createTable(cs, TalkGroup.class);
+        TableUtils.createTable(cs, TalkGroupMember.class);
 
         TableUtils.createTable(cs, TalkClientMessage.class);
         TableUtils.createTable(cs, TalkMessage.class);
