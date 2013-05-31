@@ -4,6 +4,7 @@ import better.cli.annotations.CLICommand;
 import better.cli.console.Console;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.talk.tool.client.TalkToolClient;
@@ -61,6 +62,11 @@ public class ClientStatus extends TalkToolClientCommand {
                     if(group != null) {
                         System.out.println("    name \"" + group.getGroupName() + "\""
                                             + " state " + group.getState());
+                    }
+                    TalkGroupMember member = contact.getGroupMember();
+                    if(member != null) {
+                        System.out.println("    state " + member.getState()
+                                            + " role " + member.getRole());
                     }
                 }
             }
