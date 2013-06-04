@@ -2,6 +2,7 @@ package com.hoccer.talk.tool.command;
 
 import better.cli.annotations.CLICommand;
 import com.beust.jcommander.Parameter;
+import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import com.hoccer.talk.tool.client.TalkToolClientCommand;
 
@@ -14,7 +15,7 @@ public class ClientSetStatus extends TalkToolClientCommand {
     List<String> pStatus;
 
     @Override
-    public void runOnClient(TalkToolClient client) {
+    public void runOnClient(TalkToolContext context, TalkToolClient client) {
         client.getClient().setClientStatus(pStatus.get(0));
     }
 

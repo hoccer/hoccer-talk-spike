@@ -9,6 +9,8 @@ import java.util.List;
 
 public class TalkToolClientCommand extends TalkToolCommand {
 
+    TalkToolContext mContext;
+
     @Parameter(description = "Run on all clients", names = "-a")
     boolean pAllClients;
 
@@ -29,11 +31,11 @@ public class TalkToolClientCommand extends TalkToolCommand {
     protected void run(TalkToolContext context) throws Exception {
         List<TalkToolClient> clients = selectClients(context);
         for(TalkToolClient client: clients) {
-            runOnClient(client);
+            runOnClient(context, client);
         }
     }
 
-    public void runOnClient(TalkToolClient client) {
+    public void runOnClient(TalkToolContext context, TalkToolClient client) throws Exception {
         System.out.println("Command unimplemented");
     }
 

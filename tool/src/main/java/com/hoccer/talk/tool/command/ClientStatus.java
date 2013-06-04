@@ -7,6 +7,7 @@ import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import com.hoccer.talk.tool.client.TalkToolClientCommand;
 
@@ -17,7 +18,7 @@ import java.util.List;
 public class ClientStatus extends TalkToolClientCommand {
 
     @Override
-    public void runOnClient(TalkToolClient client) {
+    public void runOnClient(TalkToolContext context, TalkToolClient client) {
         System.out.println("client #" + client.getId());
 
         String clientId = client.getClientId();
