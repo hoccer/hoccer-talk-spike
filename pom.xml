@@ -27,7 +27,7 @@
     <jackson.version>2.1.4</jackson.version>
     <junit.version>4.11</junit.version>
     <jongo.version>0.4</jongo.version>
-    <log4j.version>1.2.16</log4j.version>
+    <log4j.version>1.2.17</log4j.version>
     <slf4j.version>1.7.5</slf4j.version>
     <mongo.version>2.10.1</mongo.version>
     <metrics.version>3.0.0-BETA2</metrics.version>
