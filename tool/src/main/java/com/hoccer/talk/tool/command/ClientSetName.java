@@ -16,6 +16,7 @@ public class ClientSetName extends TalkToolClientCommand {
 
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) {
-        client.getClient().setClientName(pName.get(0));
+        client.getClient().setClientString(pName.get(0), null);
     }
+
 }

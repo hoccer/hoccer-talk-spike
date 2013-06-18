@@ -16,7 +16,7 @@ public class ClientSetStatus extends TalkToolClientCommand {
 
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) {
-        client.getClient().setClientStatus(pStatus.get(0));
+        client.getClient().setClientString(null, pStatus.get(0));
     }
 
 }

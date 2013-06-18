@@ -38,7 +38,7 @@ public class ClientPair extends TalkToolCommand {
     }
 
     private void pairClients(TalkToolClient generator, TalkToolClient consumer) {
-        consumer.getClient().pairByToken(generator.getClient().generatePairingToken());
+        consumer.getClient().performTokenPairing(generator.getClient().generatePairingToken());
     }
 
 }
