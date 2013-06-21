@@ -145,38 +145,4 @@ public class AESCryptor {
         return new CipherOutputStream(os, c);
     }
 
-    public void testAES() throws Exception {
-        byte[] testsalt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-                15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-                30, 31, 32 };
-        byte[] testkey = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-                15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-                30, 31};
-
-        byte[] nulliv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-        System.out.println("AES encryption/decryption Testing:");
-        System.out.println("salt=" + Base64.encodeBase64String(testsalt));
-        System.out.println("salt=" + RSACryptor.toHex(testsalt));
-
-        Cipher c = makeCipher(testkey, testsalt, nulliv, Cipher.ENCRYPT_MODE, "AES");
-        byte[] encrypted = crypt(c, new String("test").getBytes("UTF-8"));
-
-        System.out.println("AES-encrypted=" + Base64.encodeBase64String(encrypted));
-        System.out.println("AES-encrypted=" + RSACryptor.toHex(encrypted));
-
-        Cipher d = makeCipher(testkey, testsalt, nulliv, Cipher.DECRYPT_MODE, "AES");
-        byte[] decrypted = crypt(d, encrypted);
-        System.out.println("AES-decrypted=" + new String(decrypted));
-
-        String myClearText = "This is a new Text";
-        String myCipherText = encryptString(testkey, testsalt, myClearText);
-        String myDecipheredText = decryptString(testkey, testkey, myCipherText);
-
-        if (!myClearText.equals(myDecipheredText)) {
-            System.out.println("ERROR: encryption/decryption failed, myDecipheredText=" + myDecipheredText);
-        }
-
-        System.out.println("done test");
-    }
 }
