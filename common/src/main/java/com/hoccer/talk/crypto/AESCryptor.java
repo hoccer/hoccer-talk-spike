@@ -88,8 +88,8 @@ public class AESCryptor {
             NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException, UnsupportedEncodingException,
             InvalidAlgorithmParameterException {
-
-        byte[] result = encrypt(secret_key, salt, cleartext.getBytes("UTF-8"));
+        byte[] clearbytes = cleartext.getBytes("UTF-8");
+        byte[] result = encrypt(secret_key, salt, clearbytes);
         return Base64.encodeBase64String(result);
     }
 
