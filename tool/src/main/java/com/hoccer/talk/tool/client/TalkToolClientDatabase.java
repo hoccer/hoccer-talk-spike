@@ -3,6 +3,7 @@ package com.hoccer.talk.tool.client;
 import com.hoccer.talk.client.ITalkClientDatabaseBackend;
 import com.hoccer.talk.client.TalkClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientMembership;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSelf;
 import com.hoccer.talk.model.*;
@@ -37,6 +38,8 @@ public class TalkToolClientDatabase implements ITalkClientDatabaseBackend {
         TableUtils.createTable(cs, TalkRelationship.class);
         TableUtils.createTable(cs, TalkGroup.class);
         TableUtils.createTable(cs, TalkGroupMember.class);
+
+        TableUtils.createTable(cs, TalkClientMembership.class);
 
         TableUtils.createTable(cs, TalkClientMessage.class);
         TableUtils.createTable(cs, TalkMessage.class);
