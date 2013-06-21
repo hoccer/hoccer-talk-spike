@@ -41,7 +41,7 @@
     <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk15on</artifactId>
-        <version>1.48</version>
+        <version>${bouncycastle.version}</version>
     </dependency>
     <!-- Apache Commons Codec (BASE64 and hex encoding) -->
     <dependency>
