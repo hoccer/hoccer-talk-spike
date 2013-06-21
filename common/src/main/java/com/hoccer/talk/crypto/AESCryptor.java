@@ -26,14 +26,14 @@ import java.security.spec.InvalidKeySpecException;
 
 public class AESCryptor {
 
-    public static byte[] getRawKey(byte[] secret_key, byte[] salt)  {
+    public static byte[] getRawKey(byte[] secret_key, byte[] salt) throws InvalidKeyException {
         if (salt == null) {
             return secret_key;
         }
         return xor(secret_key, salt);
     }
 
-    public static byte[] xor(byte[] a, byte[]b) throws InvalidKeyException{
+    public static byte[] xor(byte[] a, byte[]b) throws InvalidKeyException {
         if (a.length != b.length) {
             throw new InvalidKeyException();
         }
@@ -98,13 +98,13 @@ public class AESCryptor {
                                  String encrypted_b64) throws NoSuchPaddingException,
             NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException, IOException,
-            InvalidAlgorithmParameterException {
-        byte[] encrypted = Base64.decode(encrypted_b64);
+            InvalidAlgorithmParameterException, InvalidKeyException {
+        byte[] encrypted = Base64.decodeBase64(encrypted_b64);
         byte[] result = decrypt(secret_key, salt, encrypted);
         return Base64.encodeBase64String(result);
 
     }
-    public static String decrypt(byte[] secret_key, byte[] salt,
+    public static byte[] decrypt(byte[] secret_key, byte[] salt,
                                  byte[] ciphertext) throws NoSuchPaddingException,
             NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException, IOException,
@@ -131,7 +131,9 @@ public class AESCryptor {
 
     }
 
-    public static int calcEncryptedSize(int plainSize, byte[] secret_key, byte[] salt) {
+    public static int calcEncryptedSize(int plainSize, byte[] secret_key, byte[] salt)
+            throws InvalidKeyException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+                    NoSuchPaddingException, UnsupportedEncodingException {
         byte[] nulliv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         Cipher encryptionCipher = makeCipher(secret_key, salt, nulliv, Cipher.ENCRYPT_MODE, "AES");
         return encryptionCipher.getOutputSize(plainSize);
@@ -180,9 +182,6 @@ public class AESCryptor {
             System.out.println("done test");
 
         } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (InvalidKeyException e) {

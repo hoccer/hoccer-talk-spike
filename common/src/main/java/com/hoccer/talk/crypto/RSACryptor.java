@@ -300,10 +300,10 @@ public class RSACryptor {
             String mySecretNoPadding = "m4n8SOqu8Z6amloq8tg9hS/fhguhyNOrikBhyJIwQxHJLF00yfw7mSYapYkT71edyrZWZBWzVUUCjYhC40To7u8YFuqSQkdSDF1ALWtXtGYlBOtZPFRxSqVDgo/jb7mZXgyxjtbqIi5W7TQoqBFLts5o5wXXk2BY=";
             String mySecretPCKS1 = "I5dIaAiB9OScIs2zqvGCVh2J26gX6fE/ggT5qEizhS4gfrmG3y/M1lLMR0Y8H1nyGFkerjRLgiHPAbS0OawEJbWaA2qtSzTa2Jlo6yuOx3ZAjwr4ojlPZDmkwn6sy1As2il+9twNtPyQmN0fk7c7j3Ni1plY1y5mf8lMJooHfSk=";
 
-            byte[] pubBytes = Base64.decode(myPubKey);
+            byte[] pubBytes = Base64.decodeBase64(myPubKey);
             pubBytes = wrapRSA1024_X509(pubBytes);
 
-            byte[] privBytes = Base64.decode(myPrivKey);
+            byte[] privBytes = Base64.decodeBase64(myPrivKey);
             privBytes = wrapRSA1024_PKCS8(privBytes);
 
             System.out.println("RSA-pub-ts-mod[" + pubenc.length + "]:"
@@ -334,7 +334,7 @@ public class RSACryptor {
             System.out.println("RSA-priv-ts:"
                     + Base64.encodeBase64String(privateKey.getEncoded()));
 
-            byte[] iosBytes = Base64.decode(mySecretPCKS1);
+            byte[] iosBytes = Base64.decodeBase64(mySecretPCKS1);
             byte[] decr3 = decryptRSA(privateKey, iosBytes);
             System.out.println("RSA-decrypted-sec:" + new String(decr3));
 
@@ -363,9 +363,6 @@ public class RSACryptor {
             // // TODO Auto-generated catch block
             // e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
