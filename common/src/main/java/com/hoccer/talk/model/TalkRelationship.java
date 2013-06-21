@@ -47,6 +47,11 @@ public class TalkRelationship {
     }
 
     @JsonIgnore
+    public boolean isRelated() {
+        return !state.equals(STATE_NONE);
+    }
+
+    @JsonIgnore
     public boolean isFriend() {
         return state.equals(STATE_FRIEND);
     }
