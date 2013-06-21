@@ -15,8 +15,9 @@ import java.util.Date;
 @DatabaseTable(tableName = "token")
 public class TalkToken {
 
-    public static final String PURPOSE_PAIRING = "pairing";
+    public static final String PURPOSE_PAIRING      = "pairing";
 
+    public static final String STATE_SPENT  = "spent";
     public static final String STATE_USED   = "used";
     public static final String STATE_UNUSED = "unused";
 
@@ -53,7 +54,21 @@ public class TalkToken {
     @DatabaseField
     Date expiryTime;
 
+    /** How often the token has been used */
+    @DatabaseField
+    int useCount;
+
+    /** How often the token may be used at most */
+    @DatabaseField
+    int maxUseCount;
+
+    /** Number of times this token has been used */
+
     public TalkToken() {
+    }
+
+    public boolean isUsable() {
+        return !state.equals(STATE_SPENT);
     }
 
     public String getClientId() {
@@ -104,4 +119,19 @@ public class TalkToken {
         this.expiryTime = expiryTime;
     }
 
+    public int getUseCount() {
+        return useCount;
+    }
+
+    public void setUseCount(int useCount) {
+        this.useCount = useCount;
+    }
+
+    public int getMaxUseCount() {
+        return maxUseCount;
+    }
+
+    public void setMaxUseCount(int maxUseCount) {
+        this.maxUseCount = maxUseCount;
+    }
 }

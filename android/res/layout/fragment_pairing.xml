@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+  <TextView
+          android:layout_height="wrap_content"
+          android:layout_width="match_parent"
+          android:text="Give this pairing code to someone else:"
+          android:textAlignment="center"/>
+
+  <TextView
+          android:id="@+id/pairing_token_text"
+          android:layout_height="wrap_content"
+          android:layout_width="match_parent"/>
+
+  <TextView
+          android:layout_height="wrap_content"
+          android:layout_width="match_parent"
+          android:text="Or enter someone elses code here:"/>
+
+  <EditText
+          android:id="@+id/pairing_token_edit"
+          android:layout_height="wrap_content"
+          android:layout_width="match_parent"
+          android:inputType="text|textNoSuggestions"
+          android:imeOptions="actionDone"
+          android:hint="Pairing code"/>
+
+  <Button
+          android:id="@+id/pairing_token_pair"
+          android:layout_height="wrap_content"
+          android:layout_width="match_parent"
+          android:text="Pair with token"/>
+
+</LinearLayout>

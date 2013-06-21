@@ -5,7 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 import better.jsonrpc.client.JsonRpcClient;
 import better.jsonrpc.server.JsonRpcServer;
 
-import com.hoccer.talk.logging.HoccerLoggers;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketHandler;
@@ -60,6 +59,7 @@ public class TalkRpcConnectionHandler extends WebSocketHandler {
             // create talk high-level connection object
             TalkRpcConnection rpcConnection = new TalkRpcConnection(mTalkServer, connection, request);
             // configure the connection
+            connection.setMaxIdleTime(1800 * 1000);
             connection.bindClient(new JsonRpcClient());
             connection.bindServer(mRpcServer, new TalkRpcHandler(mTalkServer, rpcConnection));
             // return the raw connection (will be called by server for incoming messages)

@@ -1,7 +1,6 @@
 package com.hoccer.talk.android.fragment;
 
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -14,8 +13,8 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.widget.SearchView;
 import com.hoccer.talk.android.R;
 import com.hoccer.talk.android.ITalkActivity;
+import com.hoccer.talk.android.TalkFragment;
 import com.hoccer.talk.android.database.AndroidTalkDatabase;
-import com.hoccer.talk.logging.HoccerLoggers;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -23,15 +22,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.model.TalkMessage;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
+import org.apache.log4j.Logger;
 
-public class MessagingFragment extends SherlockFragment
+/**
+ * Fragment for conversations
+ */
+public class MessagingFragment extends TalkFragment
         implements View.OnClickListener, SearchView.OnQueryTextListener {
 
-	private static final Logger LOG =
-			HoccerLoggers.getLogger(MessagingFragment.class);
+	private static final Logger LOG = Logger.getLogger(MessagingFragment.class);
 
 	ITalkActivity mActivity;
 
@@ -66,14 +69,13 @@ public class MessagingFragment extends SherlockFragment
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		LOG.info("onCreateView()");
+        super.onCreateView(inflater, container, savedInstanceState);
 
 		View v = inflater.inflate(R.layout.fragment_messaging, container, false);
 
 		mMessageList = (ListView)v.findViewById(R.id.messaging_message_list);
-		mMessageList.setAdapter(mActivity.makeMessageListAdapter());
 
         mTextEdit = (EditText)v.findViewById(R.id.messaging_composer_text);
 
@@ -89,7 +91,10 @@ public class MessagingFragment extends SherlockFragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         LOG.info("onCreateOptionsMenu()");
+        super.onCreateOptionsMenu(menu, inflater);
+
         SherlockFragmentActivity activity = getSherlockActivity();
+
         inflater.inflate(R.menu.fragment_messaging, menu);
 
         SearchManager searchManager = (SearchManager) activity.getSystemService(Context.SEARCH_SERVICE);
@@ -102,16 +107,12 @@ public class MessagingFragment extends SherlockFragment
     }
 
     @Override
-    public void onPause() {
-        LOG.info("onPause()");
-        super.onPause();
+    public void onResume() {
+        super.onResume();
+        LOG.info("onResume()");
+        // do this late so activity has database initialized
+        mMessageList.setAdapter(getTalkActivity().makeMessageListAdapter());
     }
-
-	@Override
-	public void onResume() {
-		LOG.info("onResume()");
-		super.onResume();
-	}
 
     @Override
     public void onClick(View v) {
@@ -136,6 +137,10 @@ public class MessagingFragment extends SherlockFragment
         return true;
     }
 
+    public void converseWithContact(TalkClientContact contact) {
+        LOG.info("converseWithContact(" + contact.getClientContactId() + ")");
+    }
+
     private void clearComposedMessage() {
         mTextEdit.setText(null);
     }
@@ -157,38 +162,6 @@ public class MessagingFragment extends SherlockFragment
 
         // log to help debugging
         LOG.info("created message with tag " + message.getMessageTag());
-
-//        // save new objects to database
-//        try {
-//            LOG.info("saving message to database");
-//            TransactionManager.callInTransaction(mDatabase.getConnectionSource(),
-//                new Callable<Void>() {
-//                    @Override
-//                    public Void call() throws Exception {
-//                        // save the message itself
-//                        mDatabase.getMessageDao().create(message);
-//                        // save related deliveries
-//                        for(int i = 0; i < deliveries.length; i++) {
-//                            mDatabase.getDeliveryDao().create(deliveries[i]);
-//                        }
-//                        return null;
-//                    }
-//                });
-//        } catch (SQLException e) {
-//            // XXX fail horribly
-//            e.printStackTrace();
-//            return;
-//        }
-//
-//        // notify the client service so it'll start delivery
-//        try {
-//            LOG.info("notifying service");
-//            mActivity.getTalkClientService().messageCreated(message.getMessageTag());
-//        } catch (RemoteException e) {
-//            // XXX fail horribly
-//            e.printStackTrace();
-//            return;
-//        }
 
         // clear the composer UI to prepare it for the next message
         clearComposedMessage();

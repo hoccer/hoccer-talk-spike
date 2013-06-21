@@ -94,6 +94,9 @@ public interface ITalkRpcServer {
     /** Generate a secret token for the given purpose */
     String generateToken(String tokenPurpose, int secondsValid);
 
+    /** Generate a secret token for the given purpose */
+    String generatePairingToken(int maxUseCount, int secondsValid);
+
     /** Perform token-based client pairing */
     boolean pairByToken(String secret);
 

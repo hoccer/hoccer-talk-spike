@@ -21,6 +21,7 @@ import java.util.Date;
 @DatabaseTable(tableName="delivery")
 public class TalkDelivery {
 
+    public static final String FIELD_DELIVERY_ID      = "deliveryId";
     public static final String FIELD_MESSAGE_ID       = "messageId";
     public static final String FIELD_MESSAGE_TAG      = "messageTag";
     public static final String FIELD_SENDER_ID        = "senderId";
@@ -42,6 +43,9 @@ public class TalkDelivery {
     public static final String STATE_ABORTED    = "aborted";
 
     private String _id;
+
+    @DatabaseField(generatedId = true)
+    private long deliveryId;
 
     @DatabaseField
 	String messageId;

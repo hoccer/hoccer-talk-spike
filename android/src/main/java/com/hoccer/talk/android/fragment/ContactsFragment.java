@@ -1,86 +1,109 @@
 package com.hoccer.talk.android.fragment;
 
-import java.util.logging.Logger;
-
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
+import android.os.RemoteException;
+import android.widget.AdapterView;
+import android.widget.Button;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.hoccer.talk.android.R;
-import com.hoccer.talk.android.ITalkActivity;
-import com.hoccer.talk.android.database.AndroidTalkDatabase;
-import com.hoccer.talk.logging.HoccerLoggers;
+import com.hoccer.talk.android.TalkFragment;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.hoccer.talk.client.model.TalkClientContact;
+import org.apache.log4j.Logger;
 
-public class ContactsFragment extends SherlockFragment {
+import java.sql.SQLException;
 
-	private static final Logger LOG =
-			HoccerLoggers.getLogger(ContactsFragment.class);
-	
-	ITalkActivity mActivity;
+/**
+ * Fragment that shows a list of contacts
+ *
+ * This currently shows only contact data but should also be able to show
+ * recent conversations for use as a "conversations" view.
+ */
+public class ContactsFragment extends TalkFragment implements View.OnClickListener {
 
-    AndroidTalkDatabase mDatabase;
-	
+	private static final Logger LOG = Logger.getLogger(ContactsFragment.class);
+
 	ListView mContactList;
-	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		LOG.info("onCreate()");
-		super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-	}
-	
-	@Override
-	public void onAttach(Activity activity) {
-		LOG.info("onAttach()");
-		super.onAttach(activity);
-		
-		if (activity instanceof ITalkActivity) {
-			mActivity = (ITalkActivity) activity;
-		} else {
-			throw new ClassCastException(
-				activity.toString() + " must implement ITalkActivity");
-		}
+    Button mFindContactsButton;
+    Button mCreateGroupButton;
 
-        mDatabase = OpenHelperManager.getHelper(activity, AndroidTalkDatabase.class);
-	}
+    public ContactsFragment() {
+    }
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		LOG.info("onCreateView()");
 		View v = inflater.inflate(R.layout.fragment_contacts, container, false);
-		
+
+        // the contact list itself
 		mContactList = (ListView)v.findViewById(R.id.contacts_contact_list);
-		mContactList.setAdapter(mActivity.makeContactListAdapter());
-		
+        mContactList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TalkClientContact contact = (TalkClientContact)parent.getItemAtPosition(position);
+                getTalkActivity().showContactProfile(contact);
+            }
+        });
+
+        // button leading to pairing activity
+        mFindContactsButton = (Button)v.findViewById(R.id.contacts_find_contacts_button);
+        mFindContactsButton.setOnClickListener(this);
+
+        // button for creating new groups
+        mCreateGroupButton = (Button)v.findViewById(R.id.contacts_create_group_button);
+        mCreateGroupButton.setOnClickListener(this);
+
 		return v;
 	}
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         LOG.info("onCreateOptionsMenu()");
-        SherlockFragmentActivity activity = getSherlockActivity();
-        inflater.inflate(R.menu.fragment_messaging, menu);
+        inflater.inflate(R.menu.fragment_contacts, menu);
     }
 
 	@Override
 	public void onResume() {
-		LOG.info("onResume()");
-		super.onResume();
-	}
-	
-	@Override
-	public void onPause() {
-		LOG.info("onPause()");
-		super.onPause();
-	}
+        super.onResume();
+        LOG.info("onResume()");
+        // do this late so activity has database initialized
+        mContactList.setAdapter(getTalkActivity().makeContactListAdapter());
+    }
 
+    @Override
+    public void onClick(View v) {
+        if(v == mFindContactsButton) {
+            getTalkActivity().showPairing();
+        }
+        if(v == mCreateGroupButton) {
+            try {
+                getTalkService().createGroup();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void onGroupCreationSucceeded(int contactId) {
+        LOG.info("onGroupCreationSucceeded(" + contactId + ")");
+        try {
+            TalkClientContact contact = getTalkDatabase().findClientContactById(contactId);
+            if(contact != null) {
+                getTalkActivity().showContactProfile(contact);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onGroupCreationFailed() {
+    }
 }

@@ -6,9 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.MetricSet;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.hoccer.talk.logging.HoccerLoggers;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.server.delivery.DeliveryAgent;
 
@@ -214,6 +213,7 @@ public class TalkServer {
     private ObjectMapper createObjectMapper() {
         ObjectMapper result = new ObjectMapper();
         result.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        result.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return result;
     }
 
