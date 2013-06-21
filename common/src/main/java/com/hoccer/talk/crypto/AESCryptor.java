@@ -101,9 +101,9 @@ public class AESCryptor {
             InvalidAlgorithmParameterException, InvalidKeyException {
         byte[] encrypted = Base64.decodeBase64(encrypted_b64);
         byte[] result = decrypt(secret_key, salt, encrypted);
-        return Base64.encodeBase64String(result);
-
+        return new String(result, "UTF-8");
     }
+
     public static byte[] decrypt(byte[] secret_key, byte[] salt,
                                  byte[] ciphertext) throws NoSuchPaddingException,
             NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
