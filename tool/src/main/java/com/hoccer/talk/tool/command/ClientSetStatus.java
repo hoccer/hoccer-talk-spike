@@ -11,7 +11,7 @@ import java.util.List;
 @CLICommand(name = "csetstatus", description = "Set the status of a client")
 public class ClientSetStatus extends TalkToolClientCommand {
 
-    @Parameter(description = "Status to set")
+    @Parameter(description = "<status>", required = true)
     List<String> pStatus;
 
     @Override

@@ -11,7 +11,7 @@ import java.util.List;
 @CLICommand(name = "csetname", description = "Set the name of a client")
 public class ClientSetName extends TalkToolClientCommand {
 
-    @Parameter(description = "Name to set")
+    @Parameter(description = "<name>", required = true)
     List<String> pName;
 
     @Override
