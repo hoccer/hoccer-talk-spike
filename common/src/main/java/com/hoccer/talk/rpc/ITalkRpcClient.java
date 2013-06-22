@@ -24,6 +24,13 @@ public interface ITalkRpcClient {
     void ping();
 
     /**
+     * Alert the user immediately showing the given message
+     * @param message
+     */
+    @JsonRpcNotification
+    void alertUser(String message);
+
+    /**
      * Sent on login if the client has no push config
      */
     @JsonRpcNotification
