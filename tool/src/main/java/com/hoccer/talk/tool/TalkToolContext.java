@@ -66,12 +66,11 @@ public class TalkToolContext extends CLIContext {
     }
 
     public List<TalkToolClient> getClientsBySelectors(List<String> selectors) {
-        ArrayList<TalkToolClient> clients = new ArrayList<TalkToolClient>();
-        for(String name: selectors) {
+        ArrayList<TalkToolClient> clients = new ArrayList<TalkToolClient>(selectors.size());
+        for(int i = 0; i < selectors.size(); i++) {
+            String name = selectors.get(i);
             TalkToolClient client = getClientBySelector(name);
-            if(client != null) {
-                clients.add(client);
-            }
+            clients.add(i, client);
         }
         return clients;
     }

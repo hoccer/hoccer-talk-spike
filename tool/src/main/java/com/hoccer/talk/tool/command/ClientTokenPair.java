@@ -6,16 +6,20 @@ import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import com.hoccer.talk.tool.client.TalkToolClientCommand;
 
+import java.util.List;
+
 @CLICommand(name = "ctpair", description = "Pair with a token")
 public class ClientTokenPair extends TalkToolClientCommand {
 
-    @Parameter(description = "<Token>", required = true)
-    String pToken;
+    @Parameter(description = "<token>...", required = true)
+    List<String> pTokens;
 
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) throws Exception {
-        System.out.println("client " + client.getId() + " token " + pToken);
-        client.getClient().performTokenPairing(pToken);
+        for(String token: pTokens) {
+            System.out.println("client " + client.getId() + " token " + token);
+            client.getClient().performTokenPairing(token);
+        }
     }
 
 }

@@ -8,32 +8,20 @@ import com.hoccer.talk.tool.client.TalkToolClient;
 
 import java.util.List;
 
-@CLICommand(name = "cpair", description = "Pair clients using token exchange")
+@CLICommand(name = "cpair", description = "Pair clients using automatic token exchange")
 public class ClientPair extends TalkToolCommand {
-
-    @Parameter(names = "-r", description = "Randomized pairing")
-    boolean pRandomized;
 
     @Parameter(description = "Clients to pair")
     List<String> pClients;
 
     @Override
     protected void run(TalkToolContext context) throws Exception {
-        List<TalkToolClient> clients;
-        if(pClients == null || pClients.isEmpty()) {
-            clients = context.getSelectedClients();
-        } else {
-            clients = context.getClientsBySelectors(pClients);
+        List<TalkToolClient> clients = context.getClientsBySelectors(pClients);
+        if((clients.size() % 2) != 0) {
+            throw new Exception("Clients must be supplied in pairs");
         }
-        if(pRandomized) {
-
-        } else {
-            if((clients.size() % 2) != 0) {
-                throw new Exception("Clients must be supplied in pairs");
-            }
-            for(int i = 0; i < clients.size(); i += 2) {
-                pairClients(clients.get(i), clients.get(i+1));
-            }
+        for(int i = 0; i < clients.size(); i += 2) {
+            pairClients(clients.get(i), clients.get(i+1));
         }
     }
 

@@ -37,37 +37,47 @@ public class ClientStatus extends TalkToolClientCommand {
             }
             for(TalkClientContact contact: contacts) {
                 if(contact.isSelf()) {
-                    System.out.println("  contact self " + contact.getClientId());
+                    System.out.println("  contact " + contact.getClientContactId() + ": self " + contact.getClientId());
                     TalkPresence presence = contact.getClientPresence();
                     if(presence != null) {
                         System.out.println("    name \"" + presence.getClientName() + "\""
                                             + " status \"" + presence.getClientStatus() + "\"");
+                    } else {
+                        System.out.println("    no presence");
                     }
                 }
                 if(contact.isClient()) {
-                    System.out.println("  contact client " + contact.getClientId());
+                    System.out.println("  contact " + contact.getClientContactId() + ": client " + contact.getClientId());
                     TalkRelationship relationship = contact.getClientRelationship();
                     if(relationship != null) {
                         System.out.println("    relationship " + relationship.getState());
+                    } else {
+                        System.out.println("    no relationship");
                     }
                     TalkPresence presence = contact.getClientPresence();
                     if(presence != null) {
                         System.out.println("    name \"" + presence.getClientName() + "\""
                                             + " status \"" + presence.getClientStatus() + "\""
                                             + " connState " + presence.getConnectionStatus());
+                    } else {
+                        System.out.println("    no presence");
                     }
                 }
                 if(contact.isGroup()) {
-                    System.out.println("  contact group " + contact.getGroupId());
+                    System.out.println("  contact " + contact.getClientContactId() + ": group " + contact.getGroupId());
                     TalkGroup group = contact.getGroupPresence();
                     if(group != null) {
                         System.out.println("    name \"" + group.getGroupName() + "\""
                                             + " state " + group.getState());
+                    } else {
+                        System.out.println("    no presence");
                     }
                     TalkGroupMember member = contact.getGroupMember();
                     if(member != null) {
                         System.out.println("    state " + member.getState()
                                             + " role " + member.getRole());
+                    } else {
+                        System.out.println("    no membership");
                     }
                 }
             }
