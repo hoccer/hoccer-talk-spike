@@ -16,6 +16,8 @@ public class TalkClientInfo {
 
     String deviceModel;
 
+    String supportTag;
+
     public TalkClientInfo() {
     }
 
@@ -83,4 +85,11 @@ public class TalkClientInfo {
         this.deviceModel = deviceModel;
     }
 
+    public String getSupportTag() {
+        return supportTag;
+    }
+
+    public void setSupportTag(String supportTag) {
+        this.supportTag = supportTag;
+    }
 }
