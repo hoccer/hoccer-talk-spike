@@ -1,5 +1,6 @@
 package com.hoccer.talk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -89,6 +90,11 @@ public class TalkDelivery {
         this.timeChanged = new Date(0);
         this.timeUpdatedIn = new Date(0);
         this.timeUpdatedOut = new Date(0);
+    }
+
+    @JsonIgnore
+    public boolean isFinished() {
+        return state.equals(STATE_ABORTED) || state.equals(STATE_FAILED) || state.equals(STATE_CONFIRMED);
     }
 
 	public String getMessageId() {
