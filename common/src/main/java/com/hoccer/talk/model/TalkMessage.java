@@ -54,6 +54,10 @@ public class TalkMessage {
     @DatabaseField
     Date timeSent;
 
+    /** Total number of deliveries for this message */
+    @DatabaseField
+    int numDeliveries;
+
 
     public TalkMessage() {
     }
@@ -121,5 +125,13 @@ public class TalkMessage {
     public void setTimeSent(Date timeSent) {
         this.timeSent = timeSent;
     }
-    
+
+    public int getNumDeliveries() {
+        return numDeliveries;
+    }
+
+    public void setNumDeliveries(int numDeliveries) {
+        this.numDeliveries = numDeliveries;
+    }
+
 }
