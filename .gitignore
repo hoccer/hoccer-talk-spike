@@ -9,3 +9,4 @@
 **/gen-external-apklibs
 **/target
 **/run
+**/proguard_logs
