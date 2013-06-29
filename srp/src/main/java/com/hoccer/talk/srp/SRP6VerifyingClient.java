@@ -36,9 +36,11 @@ public class SRP6VerifyingClient extends SRP6Client {
         return M1;
     }
 
-    public boolean verifyServer(byte[] M2s) {
+    public void verifyServer(byte[] M2s) throws CryptoException {
         M2 = SRP6Verification.calculateM2(digest, A, M1, K);
-        return Arrays.equals(M2, M2s);
+        if(!Arrays.equals(M2, M2s)) {
+            throw new CryptoException("Incorrect server verifier M2");
+        }
     }
 
 }
