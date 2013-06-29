@@ -44,6 +44,7 @@
     <bson4jackson.version>2.2.0</bson4jackson.version>
 
     <!-- Ingos projects -->
+    <better.cli.version>0.1-SNAPSHOT</better.cli.version>
     <better.jsonrpc.version>0.0.1-SNAPSHOT</better.jsonrpc.version>
 
     <!-- Android-specific dependencies -->
