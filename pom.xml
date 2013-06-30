@@ -22,6 +22,12 @@
     <!-- Java source language version -->
     <java.version>1.6</java.version>
 
+    <!-- Maven plugins -->
+    <maven-compiler.version>2.4</maven-compiler.version>
+    <maven-assembly.version>2.4</maven-assembly.version>
+    <maven-surefire.version>2.14.1</maven-surefire.version>
+    <maven-android.version>3.6.0</maven-android.version>
+
     <!-- Generic dependencies -->
     <jetty.version>8.1.10.v20130312</jetty.version>
     <jackson.version>2.1.4</jackson.version>
@@ -44,13 +50,14 @@
     <bson4jackson.version>2.2.0</bson4jackson.version>
 
     <!-- Ingos projects -->
-    <better.cli.version>0.1-SNAPSHOT</better.cli.version>
-    <better.jsonrpc.version>0.0.1-SNAPSHOT</better.jsonrpc.version>
+    <better-cli.version>0.1-SNAPSHOT</better-cli.version>
+    <better-jsonrpc.version>0.0.1-SNAPSHOT</better-jsonrpc.version>
 
     <!-- Android-specific dependencies -->
     <android.platform.version>4.2.2_r2</android.platform.version>
     <android.supportv4.version>13</android.supportv4.version>
     <actionbarsherlock.version>4.3.1</actionbarsherlock.version>
+    <log4j-android.version>1.2.17-1</log4j-android.version>
   </properties>
   
 </project>
