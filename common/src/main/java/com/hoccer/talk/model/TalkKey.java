@@ -19,13 +19,16 @@ public class TalkKey {
 
     private String _id;
 
+    @DatabaseField(generatedId = true)
+    private long keyObjectId;
+
     @DatabaseField
     private String clientId;
 
     @DatabaseField
     private String keyId;
 
-    @DatabaseField
+    @DatabaseField(width = 1024)
     private String key;
 
     @DatabaseField
