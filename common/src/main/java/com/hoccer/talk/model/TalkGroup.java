@@ -12,33 +12,42 @@ public class TalkGroup {
     public static final String FIELD_GROUP_NAME       = "groupName";
     public static final String FIELD_GROUP_TAG        = "groupTag";
     public static final String FIELD_GROUP_AVATAR_URL = "groupAvatarUrl";
+    public static final String FIELD_STATE            = "state";
     public static final String FIELD_LAST_CHANGED     = "lastChanged";
 
     public static final String STATE_NONE   = "none";
     public static final String STATE_EXISTS = "exists";
 
+    public static boolean isValidState(String state) {
+        if(state != null) {
+            if(state.equals(STATE_NONE) || state.equals(STATE_EXISTS)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private String _id;
 
-    @DatabaseField(id = true)
+    @DatabaseField(columnName = FIELD_GROUP_ID, id = true)
     String groupId;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_GROUP_NAME)
     String groupName;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_GROUP_TAG)
     String groupTag;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_GROUP_AVATAR_URL)
     String groupAvatarUrl;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_STATE)
     String state;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_LAST_CHANGED)
     Date lastChanged;
 
     public TalkGroup() {
-
     }
 
     public String getGroupId() {

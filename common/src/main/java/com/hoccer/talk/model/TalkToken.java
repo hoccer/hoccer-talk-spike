@@ -22,8 +22,21 @@ public class TalkToken {
     public static final String STATE_UNUSED = "unused";
 
     public static boolean isValidPurpose(String purpose) {
-        if(purpose.equals(PURPOSE_PAIRING)) {
-            return true;
+        if(purpose != null) {
+            if(purpose.equals(PURPOSE_PAIRING)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isValidState(String state) {
+        if(state != null) {
+            if(state.equals(STATE_SPENT)
+                || state.equals(STATE_USED)
+                || state.equals(STATE_UNUSED)) {
+                return true;
+            }
         }
         return false;
     }

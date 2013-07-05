@@ -43,45 +43,59 @@ public class TalkDelivery {
     public static final String STATE_FAILED     = "failed";
     public static final String STATE_ABORTED    = "aborted";
 
+    public static boolean isValidState(String state) {
+        if(state != null) {
+            if(state.equals(STATE_NEW)
+                    || state.equals(STATE_DELIVERING)
+                    || state.equals(STATE_DELIVERED)
+                    || state.equals(STATE_CONFIRMED)
+                    || state.equals(STATE_FAILED)
+                    || state.equals(STATE_ABORTED)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private String _id;
 
-    @DatabaseField(generatedId = true)
-    private long deliveryId;
+    @DatabaseField(columnName = FIELD_DELIVERY_ID, id = true)
+    private String deliveryId;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_MESSAGE_ID)
 	String messageId;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_MESSAGE_TAG)
     String messageTag;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_SENDER_ID)
     String senderId;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_RECEIVER_ID)
 	String receiverId;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_GROUP_ID, canBeNull = true)
     String groupId;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_STATE)
     String state;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_KEY_ID)
     String keyId;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_KEY_CIPHERTEXT)
     String keyCiphertext;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_TIME_ACCEPTED)
     Date timeAccepted;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_TIME_CHANGED, canBeNull = true)
     Date timeChanged;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_TIME_UPDATED_OUT, canBeNull = true)
     Date timeUpdatedOut;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_TIME_UPDATED_IN, canBeNull = true)
     Date timeUpdatedIn;
 
     public TalkDelivery() {

@@ -32,44 +32,47 @@ public class TalkClient {
     private String _id;
 
 	/** Server-assigned client ID */
-    @DatabaseField(id = true)
+    @DatabaseField(columnName = FIELD_CLIENT_ID, id = true)
 	String clientId;
 
     /** SRP salt */
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_SRP_SALT)
     String srpSalt;
 
     /** SRP verifier */
-    @DatabaseField(width = 512)
+    @DatabaseField(columnName = FIELD_SRP_VERIFIER, width = 512)
     String srpVerifier;
 
-    /** SRP secret (CLIENT ONLY) */
-    @DatabaseField
+    /** SRP secret (CLIENT ONLY) */ // XXX needed?
+    @DatabaseField(columnName = FIELD_SRP_SECRET, canBeNull = true)
     String srpSecret;
 	
 	/** GCM registration token */
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_GCM_REGISTRATION, canBeNull = true)
 	String gcmRegistration;
 	
 	/** GCM android application package */
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_GCM_PACKAGE, canBeNull = true)
 	String gcmPackage;
 
     /** APNS registration token */
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_APNS_TOKEN, canBeNull = true)
     String apnsToken;
 
     /** APNS unread message count */
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_APNS_UNREAD_MESSAGES)
     int apnsUnreadMessages;
 
-    @DatabaseField
+    /** Time of registration */
+    @DatabaseField(columnName = FIELD_TIME_REGISTERED, canBeNull = false)
     Date timeRegistered;
 
-    @DatabaseField
+    /** Time of last login */
+    @DatabaseField(columnName = FIELD_TIME_LAST_LOGIN, canBeNull = true)
     Date timeLastLogin;
 
-    @DatabaseField
+    /** Time of last push notification */
+    @DatabaseField(columnName = FIELD_TIME_LAST_PUSH, canBeNull = true)
     Date timeLastPush;
 
     public TalkClient() {
