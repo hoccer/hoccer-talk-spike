@@ -23,8 +23,9 @@ import java.security.SecureRandom;
  *
  * Only externally visible values are tested.
  *
- * Note that these vectors do not include a verification
- * phase since SRP-TLS (RFC5054) does not use it.
+ * Note that the secret S as well as client verification
+ * values are not provided in the RFC and have therefore
+ * been generated using this test.
  *
  */
 public class SRP6Rfc5054Test {
@@ -64,6 +65,18 @@ public class SRP6Rfc5054Test {
         "6C6DA04453728610D0C6DDB58B318885D7D82C7F8DEB75CE7BD4FBAA"+
         "37089E6F9C6059F388838E7A00030B331EB76840910440B1B27AAEAE"+
         "EB4012B7D7665238A8E3FB004B117B58";
+
+    // our own vectors generated using this test
+    static final String S_HEX =
+        "00b0dc82babcf30674ae450c0287745e7990a3381f63b387aaf271a1"+
+        "0d233861e359b48220f7c4693c9ae12b0a6f67809f0876e2d013800d"+
+        "6c41bb59b6d5979b5c00a172b4a2a5903a0bdcaf8a709585eb2afafa"+
+        "8f3499b200210dcc1f10eb33943cd67fc88a2f39a4be5bec4ec0a321"+
+        "2dc346d7e474b29ede8a469ffeca686e5a";
+    static final String M1_HEX =
+        "3f3bc67169ea71302599cf1b0f5d408b7b65d347";
+    static final String M2_HEX =
+        "9cab3c575a11de37d3ac1421a9f009236a48eb55";
 
     @Test
     public void testVector() throws CryptoException {
@@ -106,15 +119,29 @@ public class SRP6Rfc5054Test {
         BigInteger refB = new BigInteger(B_HEX, 16);
         Assert.assertEquals("Incorrect server credentials", refB, B);
 
+        // check secret on both sides
+        BigInteger refS = new BigInteger(S_HEX, 16);
         // SERVER computes secret, verifying client credentials
         BigInteger serverS = server.calculateSecret(A);
-
+        Assert.assertEquals("Server has computed incorrect secret", refS, serverS);
         // CLIENT computes secret, verifying server credentials
         BigInteger clientS = client.calculateSecret(B);
+        Assert.assertEquals("Client has computed incorrect secret", refS, clientS);
+        // verify that secrets match
+        Assert.assertEquals("clientSecret != serverSecret", serverS, serverS);
 
-        // verify that credentials match
-        Assert.assertEquals("clientSecret != serverSecret", serverS, clientS);
+        // CLIENT generates M1
+        byte[] refM1 = Utils.fromHexString(M1_HEX);
+        byte[] clientM1 = client.calculateVerifier();
+        Assert.assertArrayEquals("Incorrect client M1", clientM1, refM1);
 
+        // SERVER generates M2
+        byte[] refM2 = Utils.fromHexString(M2_HEX);
+        byte[] serverM2 = server.verifyClient(clientM1);
+        Assert.assertArrayEquals("Incorrect server M2", serverM2, refM2);
+
+        // CLIENT verifies M2
+        client.verifyServer(serverM2);
     }
 
     /** Mock client overriding private value selection */
