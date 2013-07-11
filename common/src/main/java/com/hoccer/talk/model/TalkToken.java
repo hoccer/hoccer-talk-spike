@@ -75,8 +75,6 @@ public class TalkToken {
     @DatabaseField
     int maxUseCount;
 
-    /** Number of times this token has been used */
-
     public TalkToken() {
     }
 
