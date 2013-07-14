@@ -13,6 +13,9 @@ public class TalkPrivateKey {
     public static final String FIELD_KEY = "key";
     public static final String FIELD_TIMESTAMP = "timestamp";
 
+    @DatabaseField(generatedId = true)
+    private long privateKeyId;
+
     @DatabaseField(columnName = FIELD_CLIENT_ID)
     private String clientId;
 

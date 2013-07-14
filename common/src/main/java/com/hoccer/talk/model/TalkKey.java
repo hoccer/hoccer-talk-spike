@@ -20,7 +20,7 @@ public class TalkKey {
     private String _id;
 
     @DatabaseField(generatedId = true)
-    private long keyObjectId;
+    private long publicKeyId;
 
     @DatabaseField
     private String clientId;
