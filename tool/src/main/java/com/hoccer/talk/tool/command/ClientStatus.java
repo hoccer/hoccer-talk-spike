@@ -3,10 +3,7 @@ package com.hoccer.talk.tool.command;
 import better.cli.annotations.CLICommand;
 import better.cli.console.Console;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.talk.model.*;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import com.hoccer.talk.tool.client.TalkToolClientCommand;
@@ -45,6 +42,16 @@ public class ClientStatus extends TalkToolClientCommand {
                     } else {
                         System.out.println("    no presence");
                     }
+                    TalkPrivateKey privKey = contact.getPrivateKey();
+                    if(privKey != null) {
+                        System.out.println("    private key with id " + privKey.getKeyId());
+                    }
+                    TalkKey pubKey = contact.getPublicKey();
+                    if(pubKey != null) {
+                        System.out.println("    public key with id " + pubKey.getKeyId());
+                    } else {
+                        System.out.println("    no public key");
+                    }
                 }
                 if(contact.isClient()) {
                     System.out.println("  contact " + contact.getClientContactId() + ": client " + contact.getClientId());
@@ -61,6 +68,12 @@ public class ClientStatus extends TalkToolClientCommand {
                                             + " connState " + presence.getConnectionStatus());
                     } else {
                         System.out.println("    no presence");
+                    }
+                    TalkKey pubKey = contact.getPublicKey();
+                    if(pubKey != null) {
+                        System.out.println("    public key with id " + pubKey.getKeyId());
+                    } else {
+                        System.out.println("    no public key");
                     }
                 }
                 if(contact.isGroup()) {
