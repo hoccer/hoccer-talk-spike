@@ -9,6 +9,8 @@
 package com.hoccer.talk.crypto;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -22,6 +24,8 @@ import java.util.Arrays;
 
 
 public class RSACryptor {
+
+    private static Digest FINGERPRINT_DIGEST = new SHA256Digest();
 
     public static byte[] decryptRSA(PrivateKey priv, byte[] encrypted)
             throws NoSuchPaddingException, NoSuchAlgorithmException,
@@ -92,6 +96,22 @@ public class RSACryptor {
         RSAPrivateKeySpec priv = fact.getKeySpec(privkey,
                 RSAPrivateKeySpec.class);
         return priv;
+    }
+
+    private static byte[] sha256(byte[] bytes)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        byte[] out = null;
+        synchronized (FINGERPRINT_DIGEST) {
+            out = new byte[FINGERPRINT_DIGEST.getDigestSize()];
+            FINGERPRINT_DIGEST.reset();
+            FINGERPRINT_DIGEST.update(bytes, 0, bytes.length);
+            FINGERPRINT_DIGEST.doFinal(out, 0);
+        }
+        return out;
+    }
+
+    public static String calcKeyId(byte[] unwrappedPubKey) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        return RSACryptor.toHex(RSACryptor.shorten(sha256(unwrappedPubKey),8));
     }
 
     public static String toString(RSAPrivateKeySpec priv) {
