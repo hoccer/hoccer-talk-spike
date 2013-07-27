@@ -59,8 +59,8 @@ public class TalkDelivery {
 
     private String _id;
 
-    @DatabaseField(columnName = FIELD_DELIVERY_ID, id = true)
-    private String deliveryId;
+    @DatabaseField(columnName = FIELD_DELIVERY_ID, generatedId = true)
+    private int deliveryId;
 
     @DatabaseField(columnName = FIELD_MESSAGE_ID)
 	String messageId;

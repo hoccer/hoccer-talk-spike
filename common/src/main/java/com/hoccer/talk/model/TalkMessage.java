@@ -22,8 +22,11 @@ public class TalkMessage {
 
     private String _id;
 
+    @DatabaseField(generatedId = true)
+    int dbMessageId;
+
     /** Server-assigned message id */
-    @DatabaseField(id = true)
+    @DatabaseField
 	String messageId;
 
     /** Sender-assigned message tag/id */
