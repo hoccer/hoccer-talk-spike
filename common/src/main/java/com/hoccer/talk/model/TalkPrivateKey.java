@@ -1,8 +1,15 @@
 package com.hoccer.talk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hoccer.talk.crypto.RSACryptor;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import org.apache.commons.codec.binary.Base64;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 
 @DatabaseTable(tableName = "privateKey")
@@ -29,6 +36,22 @@ public class TalkPrivateKey {
     private Date timestamp;
 
     public TalkPrivateKey() {
+    }
+
+    @JsonIgnore
+    public PrivateKey getAsNative() {
+        PrivateKey key = null;
+        try {
+            byte[] decoded = Base64.decodeBase64(this.key);
+            key = RSACryptor.makePrivateRSA1024Key(decoded);
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return key;
     }
 
     public String getClientId() {
