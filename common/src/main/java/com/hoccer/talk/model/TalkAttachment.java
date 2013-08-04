@@ -12,6 +12,9 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName="attachment")
 public class TalkAttachment {
 
+    @DatabaseField(generatedId = true)
+    private int attachmentId;
+
     /** URL of attached file */
     @DatabaseField
     String url;
