@@ -26,6 +26,9 @@ import java.security.spec.InvalidKeySpecException;
 
 public class AESCryptor {
 
+    public static final byte[] NULL_SALT = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
     public static byte[] getRawKey(byte[] secret_key, byte[] salt) throws InvalidKeyException {
         if (salt == null) {
             return secret_key;
