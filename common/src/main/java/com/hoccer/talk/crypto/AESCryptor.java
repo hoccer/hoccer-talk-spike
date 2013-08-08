@@ -126,7 +126,7 @@ public class AESCryptor {
         return encrypted;
     }
 
-    public static InputStream encryptingInputStream(InputStream is, byte[] secret_key, byte[] salt) throws Exception {
+    public static CipherInputStream encryptingInputStream(InputStream is, byte[] secret_key, byte[] salt) throws Exception {
 
         byte[] nulliv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         Cipher encryptionCipher = makeCipher(secret_key, salt, nulliv, Cipher.ENCRYPT_MODE, "AES");
@@ -142,7 +142,7 @@ public class AESCryptor {
         return encryptionCipher.getOutputSize(plainSize);
     }
 
-    public static OutputStream decryptingOutputStream(OutputStream os, byte[] secret_key, byte[] salt) throws Exception {
+    public static CipherOutputStream decryptingOutputStream(OutputStream os, byte[] secret_key, byte[] salt) throws Exception {
         byte[] nulliv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         Cipher c = makeCipher(secret_key, salt, nulliv, Cipher.DECRYPT_MODE, "AES");
         return new CipherOutputStream(os, c);

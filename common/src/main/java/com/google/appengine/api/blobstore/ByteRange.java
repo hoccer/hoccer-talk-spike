@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  *
  */
 public class ByteRange {
-  private long start;
+  private Long start;
   private Long end;
   private Long total;
 
@@ -28,11 +28,22 @@ public class ByteRange {
                                                               INVALID_RANGE_HEADER_REGEX +
                                                               "\\s*$");
 
-  static final String CONTENT_RANGE_UNIT_REGEX = "([^\\s]+)";
-  static final String VALID_CONTENT_RANGE_HEADER_REGEX =
-      BYTES_UNIT + "\\s+(\\d+)-(\\d+)/(\\d+)";
-  static final Pattern CONTENT_RANGE_HEADER_PATTERN = Pattern.compile(
-      "^\\s*" + VALID_CONTENT_RANGE_HEADER_REGEX + "\\s*$");
+  static final String FULL_CONTENT_RANGE_HEADER_REGEX =
+      BYTES_UNIT + "\\s*=?(\\d+)-(\\d+)/(\\d+)";
+  static final Pattern FULL_CONTENT_RANGE_HEADER_PATTERN = Pattern.compile(
+      "^\\s*" + FULL_CONTENT_RANGE_HEADER_REGEX + "\\s*$");
+  static final String STAR_SIZE_CONTENT_RANGE_HEADER_REGEX =
+      BYTES_UNIT + "\\s*=?\\*/(\\d+)";
+  static final Pattern STAR_SIZE_CONTENT_RANGE_HEADER_PATTERN = Pattern.compile(
+      "^\\s*" + STAR_SIZE_CONTENT_RANGE_HEADER_REGEX + "\\s*$");
+  static final String STAR_CONTENT_RANGE_HEADER_REGEX =
+      BYTES_UNIT + "\\s*=?\\*";
+  static final Pattern STAR_CONTENT_RANGE_HEADER_PATTERN = Pattern.compile(
+      "^\\s*" + STAR_CONTENT_RANGE_HEADER_REGEX + "\\s*$");
+
+  public ByteRange() {
+      this(null, null, null);
+  }
 
   /**
    * Constructor.
@@ -41,7 +52,7 @@ public class ByteRange {
    * of the blob.
    */
   public ByteRange(long start) {
-    this(start, null, null);
+    this(Long.valueOf(start), null, null);
   }
 
   /**
@@ -52,7 +63,7 @@ public class ByteRange {
    * by end is included in the response.
    */
   public ByteRange(long start, long end) {
-    this(start, Long.valueOf(end), null);
+    this(Long.valueOf(start), Long.valueOf(end), null);
 
     if (start < 0) {
       throw new IllegalArgumentException("If end is provided, start must be positive.");
@@ -64,7 +75,7 @@ public class ByteRange {
   }
 
   public ByteRange(long start, long end, long total) {
-      this(start, Long.valueOf(end), Long.valueOf(total));
+      this(Long.valueOf(start), Long.valueOf(end), Long.valueOf(total));
 
       if(start >= total) {
           throw new IllegalArgumentException("If total is provided, start must be less than total.");
@@ -75,10 +86,14 @@ public class ByteRange {
       }
   }
 
-  protected ByteRange(long start, Long end, Long total) {
+  protected ByteRange(Long start, Long end, Long total) {
     this.start = start;
     this.end = end;
     this.total = total;
+  }
+
+  public boolean hasStart() {
+    return start != null;
   }
 
   /**
@@ -157,6 +172,25 @@ public class ByteRange {
     return result;
   }
 
+  public String toContentRangeString() {
+      StringBuilder sb = new StringBuilder();
+      sb.append("bytes ");
+      if(start != null) {
+          sb.append(start);
+          sb.append("-");
+          if(end != null) {
+              sb.append(end);
+          }
+      } else {
+          sb.append("*");
+      }
+      if(total != null) {
+          sb.append("/");
+          sb.append(total);
+      }
+      return sb.toString();
+  }
+
   /**
    * Parse byte range from header.
    *
@@ -228,12 +262,24 @@ public class ByteRange {
    * @throws RangeFormatException Unable to parse header because of invalid format.
    */
   public static ByteRange parseContentRange(String contentRange) {
-    Matcher matcher = CONTENT_RANGE_HEADER_PATTERN.matcher(contentRange);
-    if (!matcher.matches()) {
-      throw new RangeFormatException("Invalid content-range format: " + contentRange);
+    Matcher matcher;
+    matcher = FULL_CONTENT_RANGE_HEADER_PATTERN.matcher(contentRange);
+    if (matcher.matches()) {
+        return new ByteRange(Long.parseLong(matcher.group(1)), Long.parseLong(matcher.group(2)), Long.parseLong(matcher.group(3)));
+    } else {
+        matcher = STAR_SIZE_CONTENT_RANGE_HEADER_PATTERN.matcher(contentRange);
+        if(matcher.matches()) {
+            return new ByteRange(null, null, Long.parseLong(matcher.group(1)));
+        } else {
+            matcher = STAR_CONTENT_RANGE_HEADER_PATTERN.matcher(contentRange);
+            if(matcher.matches()) {
+                return new ByteRange(null, null, null);
+            }
+        }
     }
 
-    return new ByteRange(Long.parseLong(matcher.group(1)), Long.parseLong(matcher.group(2)), Long.parseLong(matcher.group(3)));
+      throw new RangeFormatException("Invalid content-range format: " + contentRange);
+
   }
 
   @Override
