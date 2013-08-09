@@ -40,6 +40,7 @@ public class TalkAttachment {
     double aspectRatio;
 
     public TalkAttachment() {
+        this.aspectRatio = 1.0;
     }
 
     public String getUrl() {
