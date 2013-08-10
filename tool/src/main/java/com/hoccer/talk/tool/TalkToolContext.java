@@ -2,11 +2,8 @@ package com.hoccer.talk.tool;
 
 import better.cli.CLIContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hoccer.talk.client.TalkClientDatabase;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.tool.client.TalkToolClient;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;

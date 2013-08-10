@@ -1,9 +1,13 @@
 package com.hoccer.talk.tool.command;
 
 import better.cli.annotations.CLICommand;
-import better.cli.console.Console;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.*;
+import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkKey;
+import com.hoccer.talk.model.TalkPresence;
+import com.hoccer.talk.model.TalkPrivateKey;
+import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import com.hoccer.talk.tool.client.TalkToolClientCommand;

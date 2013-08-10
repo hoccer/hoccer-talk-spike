@@ -1,10 +1,10 @@
 package com.hoccer.talk.tool.command;
 
 import better.cli.annotations.CLICommand;
+import better.cli.utils.PrintUtils;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
-import better.cli.utils.PrintUtils;
 
 import java.util.List;
 

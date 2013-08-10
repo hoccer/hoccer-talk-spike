@@ -4,7 +4,6 @@ import com.beust.jcommander.Parameter;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TalkToolClientCommand extends TalkToolCommand {
