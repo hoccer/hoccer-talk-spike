@@ -3,7 +3,6 @@ package com.hoccer.talk.srp.test;
 import com.hoccer.talk.srp.SRP6Parameters;
 import com.hoccer.talk.srp.SRP6VerifyingClient;
 import com.hoccer.talk.srp.SRP6VerifyingServer;
-import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.agreement.srp.SRP6VerifierGenerator;
 import org.bouncycastle.crypto.digests.SHA1Digest;

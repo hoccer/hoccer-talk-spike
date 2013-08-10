@@ -7,8 +7,8 @@ import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.agreement.srp.SRP6VerifierGenerator;
 import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.junit.Test;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
