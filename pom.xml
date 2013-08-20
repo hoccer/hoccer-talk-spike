@@ -49,6 +49,7 @@
     <commons-codec.version>1.7</commons-codec.version>
     <bson4jackson.version>2.2.0</bson4jackson.version>
     <apache.httpclient.version>4.0.3</apache.httpclient.version>
+    <ez-vcard.version>0.8.3</ez-vcard.version>
 
     <!-- Ingos projects -->
     <better-cli.version>0.1-SNAPSHOT</better-cli.version>
