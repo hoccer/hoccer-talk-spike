@@ -77,6 +77,11 @@ public class TalkGroupMember {
         return this.state.equals(STATE_GROUP_REMOVED);
     }
 
+    @JsonIgnore
+    public boolean isInvolved() {
+        return !this.state.equals(STATE_NONE);
+    }
+
     public String getClientId() {
         return clientId;
     }
