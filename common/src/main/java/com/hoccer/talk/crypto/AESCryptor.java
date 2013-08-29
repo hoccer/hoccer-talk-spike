@@ -30,6 +30,8 @@ import java.security.SecureRandom;
 
 public class AESCryptor {
 
+    public static final int KEY_SIZE = 32; // in bytes
+
     public static final byte[] NULL_SALT = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
