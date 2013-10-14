@@ -29,8 +29,8 @@
     <maven-android.version>3.6.0</maven-android.version>
 
     <!-- Generic dependencies -->
-    <jetty.version>8.1.10.v20130312</jetty.version>
-    <jackson.version>2.1.4</jackson.version>
+    <jetty.version>8.1.13.v20130916</jetty.version>
+    <jackson.version>2.1.5</jackson.version>
     <junit.version>4.11</junit.version>
     <jongo.version>0.4</jongo.version>
     <log4j.version>1.2.17</log4j.version>
