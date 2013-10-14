@@ -24,7 +24,7 @@ public class TalkToolClient {
 
     public void initialize() {
         mDatabaseBackend = new TalkToolClientDatabase(this);
-        mClient = new HoccerTalkClient(mContext.getExecutor(), mDatabaseBackend);
+        //mClient = new HoccerTalkClient(mContext.getExecutor(), mDatabaseBackend);
     }
 
     public void start() {
