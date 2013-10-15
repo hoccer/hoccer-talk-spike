@@ -1,6 +1,6 @@
 package com.hoccer.talk.tool.client;
 
-import com.hoccer.talk.client.ITalkClientDatabaseBackend;
+import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMembership;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class TalkToolClientDatabase implements ITalkClientDatabaseBackend {
+public class TalkToolClientDatabase implements IXoClientDatabaseBackend {
 
     Logger LOG = Logger.getLogger(TalkToolClientDatabase.class);
 

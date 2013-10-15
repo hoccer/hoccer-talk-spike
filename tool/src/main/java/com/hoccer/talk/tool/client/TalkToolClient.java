@@ -1,7 +1,7 @@
 package com.hoccer.talk.tool.client;
 
-import com.hoccer.talk.client.HoccerTalkClient;
-import com.hoccer.talk.client.TalkClientDatabase;
+import com.hoccer.talk.client.XoClient;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.tool.TalkToolContext;
 
@@ -13,7 +13,7 @@ public class TalkToolClient {
 
     int mId;
 
-    HoccerTalkClient mClient;
+    XoClient mClient;
 
     TalkToolClientDatabase mDatabaseBackend;
 
@@ -43,7 +43,7 @@ public class TalkToolClient {
         return mId;
     }
 
-    public HoccerTalkClient getClient() {
+    public XoClient getClient() {
         return mClient;
     }
 
@@ -51,7 +51,7 @@ public class TalkToolClient {
         return mDatabaseBackend;
     }
 
-    public TalkClientDatabase getDatabase() {
+    public XoClientDatabase getDatabase() {
         return mClient.getDatabase();
     }
 
