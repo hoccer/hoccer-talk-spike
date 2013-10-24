@@ -5,7 +5,6 @@ public enum ContentState {
     SELECTED,
     /* content being downloaded in various states */
     DOWNLOAD_NEW,
-    DOWNLOAD_STARTED,
     DOWNLOAD_IN_PROGRESS,
     DOWNLOAD_PAUSED,
     DOWNLOAD_COMPLETE,
