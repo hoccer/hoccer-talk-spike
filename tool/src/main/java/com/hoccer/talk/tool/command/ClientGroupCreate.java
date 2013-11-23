@@ -9,6 +9,6 @@ import com.hoccer.talk.tool.client.TalkToolClientCommand;
 public class ClientGroupCreate extends TalkToolClientCommand {
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) {
-        client.getClient().createGroup();
+        // XXX client.getClient().createGroup();
     }
 }
