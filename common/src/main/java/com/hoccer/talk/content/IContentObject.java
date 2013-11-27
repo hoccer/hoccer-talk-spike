@@ -9,6 +9,7 @@ public interface IContentObject {
     public boolean isContentAvailable();
 
     public ContentState getContentState();
+    public ContentDisposition getContentDisposition();
 
     /** Length of active transfer */
     public int getTransferLength();
