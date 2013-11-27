@@ -5,14 +5,16 @@ public enum ContentState {
     SELECTED,
     /* content being downloaded in various states */
     DOWNLOAD_NEW,
-    DOWNLOAD_IN_PROGRESS,
-    DOWNLOAD_PAUSED,
+    DOWNLOAD_DOWNLOADING,
+    DOWNLOAD_DECRYPTING,
+    DOWNLOAD_DETECTING,
     DOWNLOAD_COMPLETE,
     DOWNLOAD_FAILED,
     /* content being uploaded in various states */
     UPLOAD_NEW,
-    UPLOAD_IN_PROGRESS,
-    UPLOAD_PAUSED,
+    UPLOAD_REGISTERING,
+    UPLOAD_ENCRYPTING,
+    UPLOAD_UPLOADING,
     UPLOAD_COMPLETE,
     UPLOAD_FAILED,
 }
