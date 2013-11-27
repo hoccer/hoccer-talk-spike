@@ -9,6 +9,7 @@ public enum ContentState {
     DOWNLOAD_DECRYPTING,
     DOWNLOAD_DETECTING,
     DOWNLOAD_COMPLETE,
+    DOWNLOAD_PAUSED,
     DOWNLOAD_FAILED,
     /* content being uploaded in various states */
     UPLOAD_NEW,
@@ -16,5 +17,6 @@ public enum ContentState {
     UPLOAD_ENCRYPTING,
     UPLOAD_UPLOADING,
     UPLOAD_COMPLETE,
+    UPLOAD_PAUSED,
     UPLOAD_FAILED,
 }
