@@ -25,8 +25,8 @@ public interface IContentObject {
     /** The MIME content type, if known */
     public String getContentType();
 
-    /** Local URL, if available. Must work with URLConnection. */
-    public String getContentUrl();
+    /** Data URL, if available */
+    public String getContentDataUrl();
 
     /** Content length */
     public int getContentLength();
