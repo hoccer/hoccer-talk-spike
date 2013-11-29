@@ -1,5 +1,7 @@
 .project
 .settings
+build.log
+build-log.xml
 **/*.iml
 **/.project
 **/.settings
@@ -10,3 +12,4 @@
 **/target
 **/run
 **/proguard_logs
+**/git_properties
