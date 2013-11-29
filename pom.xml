@@ -66,7 +66,7 @@
     <android.gmaps.version>17_r3</android.gmaps.version>
     <actionbarsherlock.version>4.4.0</actionbarsherlock.version>
     <log4j-android.version>1.2.17-1</log4j-android.version>
-    <universal.image.loader.version>1.8.6</universal.image.loader.version>
+    <universal.image.loader.version>1.9.0</universal.image.loader.version>
   </properties>
   
 </project>
