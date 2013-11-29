@@ -52,7 +52,9 @@
     <apache.httpclient.version>4.0.3</apache.httpclient.version>
     <apache.tika.version>1.4</apache.tika.version>
     <ez-vcard.version>0.8.3</ez-vcard.version>
+    <guava.version>15.0</guava.version>
     <zxing.version>2.2</zxing.version>
+    <findbugs.version>2.0.2</findbugs.version>
 
     <!-- Ingos projects -->
     <better-cli.version>0.1-SNAPSHOT</better-cli.version>
