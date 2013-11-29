@@ -52,6 +52,7 @@
     <apache.httpclient.version>4.0.3</apache.httpclient.version>
     <apache.tika.version>1.4</apache.tika.version>
     <ez-vcard.version>0.8.3</ez-vcard.version>
+    <zxing.version>2.2</zxing.version>
 
     <!-- Ingos projects -->
     <better-cli.version>0.1-SNAPSHOT</better-cli.version>
@@ -63,6 +64,7 @@
     <android.gmaps.version>17_r3</android.gmaps.version>
     <actionbarsherlock.version>4.4.0</actionbarsherlock.version>
     <log4j-android.version>1.2.17-1</log4j-android.version>
+    <universal.image.loader.version>1.8.6</universal.image.loader.version>
   </properties>
   
 </project>
