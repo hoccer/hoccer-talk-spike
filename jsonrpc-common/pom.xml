@@ -8,9 +8,15 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>hoccer-talk-common</artifactId>
+  <artifactId>better-jsonrpc-common</artifactId>
 
-  <name>Hoccer Talk Common</name>
+  <name>Better JSON-RPC Common</name>
+
+  <description>
+    This package contains the core of the Better JSON-RPC implementation.
+    It supports both servers and clients as well as a local-only transport.
+    For actual use you will also need a transport implementation.
+  </description>
 
   <packaging>jar</packaging>
 
@@ -19,37 +25,32 @@
   </properties>
 
   <dependencies>
-    <!-- Jackson annotations for JSON mapping -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <!-- JSON-RPC annotations for protocol definition -->
     <dependency>
       <groupId>hoccer</groupId>
       <artifactId>better-jsonrpc-annotations</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
-    <!-- ORM library for database management (should be just annotations, upstream doesn't separate them) -->
     <dependency>
-      <groupId>com.j256.ormlite</groupId>
-      <artifactId>ormlite-core</artifactId>
-      <version>${ormlite.version}</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
-    <!-- Bouncy Castle (needed for SRP auth) -->
     <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk15on</artifactId>
-        <version>${bouncycastle.version}</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
-    <!-- Apache Commons Codec (BASE64 and hex encoding) -->
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>${commons-codec.version}</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
+      <optional>true</optional>
     </dependency>
-    <!-- JUnit for testing -->
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

@@ -9,6 +9,9 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>jsonrpc-annotations</module>
+    <module>jsonrpc-common</module>
+    <module>jsonrpc-websocket</module>
     <module>srp</module>
     <module>common</module>
     <module>client</module>
