@@ -67,7 +67,7 @@
     <!-- Android-specific dependencies -->
     <android.platform.version>4.2.2_r2</android.platform.version>
     <android.supportv4.version>19.0.1</android.supportv4.version>
-    <android.gms.version>13.0.0</android.gms.version>
+    <android.gms.version>13</android.gms.version>
     <android.gmaps.version>17_r3</android.gmaps.version>
     <actionbarsherlock.version>4.4.0</actionbarsherlock.version>
     <log4j-android.version>1.2.17-1</log4j-android.version>
