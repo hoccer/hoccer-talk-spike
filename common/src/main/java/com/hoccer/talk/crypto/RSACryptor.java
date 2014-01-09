@@ -151,12 +151,119 @@ public class RSACryptor {
         return concat(header, pure_DER_rsa_pub_key);
     }
 
+    public static byte[] wrapRSA_X509(byte[] pure_DER_rsa_pub_key)
+            throws InvalidKeyException
+    {
+        int bitstringEncLength;
+        if ((pure_DER_rsa_pub_key.length + 1) < 128) {
+            bitstringEncLength = 1;
+        }
+        else {
+            bitstringEncLength = ((pure_DER_rsa_pub_key.length + 1) / 256) + 2;
+        }
+        byte[] oidSequence = toByte("300d06092a864886f70d0101010500");
+
+        byte[] encKey = toByte("30");
+        int i = oidSequence.length + 2 + bitstringEncLength + pure_DER_rsa_pub_key.length;
+        encKey = concat(encKey,ASNEncodedLength(i));
+
+        encKey = concat(encKey,oidSequence);
+
+        encKey = concat(encKey,toByte("03"));
+        encKey = concat(encKey,ASNEncodedLength(pure_DER_rsa_pub_key.length + 1));
+        encKey = concat(encKey,toByte("00"));
+        encKey = concat(encKey,pure_DER_rsa_pub_key);
+
+        return encKey;
+    }
+
+
+    public static byte[] ASNEncodedLength(int length) {
+        // System.out.println("ASNEncodedLength(" + length+")");
+        byte[] buf;
+        if (length < 128)
+        {
+            buf = new byte[1];
+            buf[0] = (byte)length;
+            return buf;
+        }
+
+        int i = (length / 256) + 1;
+        buf = new byte[i+1];
+
+        // System.out.println("ASNEncodedLength i = " + i);
+
+        buf[0] = (byte)(i + 0x80);
+        for (int j = 0 ; j < i; ++j)
+        {
+            // System.out.println("ASNEncodedLength j = " + j + " i-j="+(i-j));
+            buf[i - j] = (byte)(length & 0xFF);
+            length = length >> 8;
+        }
+
+        return buf;
+    }
+
     public static byte[] unwrapRSA1024_X509(byte[] X509_rsa_pub_key)
             throws InvalidKeyException {
         if (X509_rsa_pub_key.length > 150 + 21) {
             throw new InvalidKeyException("Key too long");
         }
         return skip(X509_rsa_pub_key, 22);
+    }
+
+    public static byte[] unwrapRSA_X509(byte[] X509_rsa_pub_key) throws InvalidKeyException
+    {
+        //System.out.println("unwrapRSA_X509:" + toHex(X509_rsa_pub_key));
+
+        // Skip ASN.1 public key header
+        int len = X509_rsa_pub_key.length;
+        if (len == 0) {
+            throw new InvalidKeyException("Empty key");
+        }
+
+        int  idx    = 0;
+
+        if (X509_rsa_pub_key[idx++] != 0x30) {
+            throw new InvalidKeyException("Bad byte at 0");
+        }
+
+        // System.out.println("unwrapRSA_X509: compare " + (X509_rsa_pub_key[idx]&0xff) + " > " + (int)0x80);
+
+        if ((X509_rsa_pub_key[idx]&0xff) > 0x80) {
+            idx += (X509_rsa_pub_key[idx]&0xff) - 0x80 + 1;
+            // System.out.println("unwrapRSA_X509: calculated idx" + idx);
+        }
+        else {
+            idx++;
+            // System.out.println("unwrapRSA_X509: incremented idx" + idx);
+        }
+        // PKCS #1 rsaEncryption szOID_RSA_RSA
+        byte[] seqiod = toByte("300d06092a864886f70d0101010500");
+
+        for (int i = 0; i < 15;++i) {
+            if (X509_rsa_pub_key[idx+i] != seqiod[i]) {
+                // System.out.println("X509_rsa_pub_key["+(idx+i)+"]=" + toHex(X509_rsa_pub_key[idx+i])+", seqiod["+i+"]="+toHex(seqiod[i]));
+                throw new InvalidKeyException("Bad byte in header");
+            }
+        }
+        idx += 15;
+
+        if (X509_rsa_pub_key[idx++] != 0x03) {
+            throw new InvalidKeyException("Bad byte after header");
+        }
+
+        if ((X509_rsa_pub_key[idx]&0xff) > 0x80) {
+            idx += (X509_rsa_pub_key[idx]&0xff) - 0x80 + 1;
+        }
+        else {
+            idx++;
+        }
+
+        if (X509_rsa_pub_key[idx++] != '\0') {
+            throw new InvalidKeyException("Bad byte at start of key");
+        }
+        return skip(X509_rsa_pub_key, idx);
     }
 
     public static byte[] wrapRSA1024_PKCS8(byte[] pure_DER_rsa_priv_key)
@@ -263,6 +370,12 @@ public class RSACryptor {
         for (int i = 0; i < buf.length; i++) {
             appendHex(result, buf[i]);
         }
+        return result.toString();
+    }
+
+    public static String toHex(byte theByte) {
+        StringBuffer result = new StringBuffer(2);
+        appendHex(result, theByte);
         return result.toString();
     }
 

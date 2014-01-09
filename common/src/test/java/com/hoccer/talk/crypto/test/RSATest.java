@@ -48,6 +48,17 @@ public class RSATest {
         byte[] pubencIOS = RSACryptor.unwrapRSA1024_X509(pubenc);
         System.out.println("RSA-pub-IOS[" + pubencIOS.length + ":"
                 + Base64.encodeBase64String(pubencIOS));
+
+        byte[] pubencIOS_X = RSACryptor.unwrapRSA_X509(pubenc);
+        System.out.println("RSA-pub-IOS[" + pubencIOS.length + ":"
+                + Base64.encodeBase64String(pubencIOS_X));
+
+        if (Arrays.equals(pubencIOS,pubencIOS_X)) {
+            System.out.println("X509-UnWrapper RSA 1024 ok");
+        }  else {
+            System.out.println("X509-UnWrapper RSA 1024 failed ###########");
+        }
+
         byte[] privencIOS = RSACryptor.unwrapRSA1024_PKCS8(privenc);
         System.out.println("RSA-priv-IOS[" + privencIOS.length + "]:"
                 + Base64.encodeBase64String(privencIOS));
@@ -75,8 +86,16 @@ public class RSATest {
         String mySecretNoPadding = "m4n8SOqu8Z6amloq8tg9hS/fhguhyNOrikBhyJIwQxHJLF00yfw7mSYapYkT71edyrZWZBWzVUUCjYhC40To7u8YFuqSQkdSDF1ALWtXtGYlBOtZPFRxSqVDgo/jb7mZXgyxjtbqIi5W7TQoqBFLts5o5wXXk2BY=";
         String mySecretPCKS1 = "I5dIaAiB9OScIs2zqvGCVh2J26gX6fE/ggT5qEizhS4gfrmG3y/M1lLMR0Y8H1nyGFkerjRLgiHPAbS0OawEJbWaA2qtSzTa2Jlo6yuOx3ZAjwr4ojlPZDmkwn6sy1As2il+9twNtPyQmN0fk7c7j3Ni1plY1y5mf8lMJooHfSk=";
 
-        byte[] pubBytes = Base64.decodeBase64(myPubKey);
-        pubBytes = RSACryptor.wrapRSA1024_X509(pubBytes);
+        byte[] pubWBytes = Base64.decodeBase64(myPubKey);
+        byte[] pubBytes = RSACryptor.wrapRSA1024_X509(pubWBytes);
+        byte[] pubXBytes = RSACryptor.wrapRSA_X509(pubWBytes);
+        if (Arrays.equals(pubBytes,pubXBytes)) {
+            System.out.println("X509-Wrapper RSA 1024 ok");
+        }  else {
+            System.out.println("X509-UnWrapper RSA 1024 failed ###########");
+            System.out.println("pubBytes :" + RSACryptor.toHex(pubBytes));
+            System.out.println("pubXBytes:"+ RSACryptor.toHex(pubXBytes));
+        }
 
         byte[] privBytes = Base64.decodeBase64(myPrivKey);
         privBytes = RSACryptor.wrapRSA1024_PKCS8(privBytes);
@@ -112,6 +131,62 @@ public class RSATest {
         byte[] iosBytes = Base64.decodeBase64(mySecretPCKS1);
         byte[] decr3 = RSACryptor.decryptRSA(privateKey, iosBytes);
         System.out.println("RSA-decrypted-sec:" + new String(decr3));
+
+        testRSA2048();
     }
 
+    public void testRSA2048() throws Exception {
+        System.out.println("******* Testing RSA 2048 ***********");
+
+
+        KeyPair kp = RSACryptor.generateRSAKeyPair(2048);
+        // LOG.finest("RSA" + toString(getPrivateKeySpec(kp)));
+        // LOG.finest("RSA" + toString(getPublicKeySpec(kp)));
+        String encr = RSACryptor.encryptRSA(kp.getPublic(), "blafasel12345678");
+        byte[] encrIOS = RSACryptor.encryptRSA(kp.getPublic(),
+                "blafasel12345678".getBytes("UTF-8"));
+        System.out.println("RSA-encrypted-iOS:" + Base64.encodeBase64String(encrIOS));
+
+        // LOG.finest("RSA-encrypted:" + encr);
+        String decr = RSACryptor.decryptRSA(kp.getPrivate(), encr);
+        System.out.println("RSA-decrypted:" + decr);
+
+        byte[] pubenc = kp.getPublic().getEncoded();
+        byte[] privenc = kp.getPrivate().getEncoded();
+        System.out.println("RSA-pub-ts[" + pubenc.length + "]:"
+                + Base64.encodeBase64String(pubenc));
+        // LOG.finest("RSA-pub-ts[" + pubenc.length + "]:" + toHex(pubenc));
+        System.out.println("RSA-priv-ts[" + privenc.length + "]:"
+                + Base64.encodeBase64String(privenc));
+        // LOG.finest("RSA-priv-ts[" + privenc.length + "]:" +
+        // toHex(privenc));
+
+
+        byte[] pubencIOS_X = RSACryptor.unwrapRSA_X509(pubenc);
+        System.out.println("RSA-pub-IOS[" + pubencIOS_X.length + ":"
+                + Base64.encodeBase64String(pubencIOS_X));
+
+
+       // byte[] privencIOS = RSACryptor.unwrapRSA1024_PKCS8(privenc);
+       // System.out.println("RSA-priv-IOS[" + privencIOS.length + "]:"
+       //         + Base64.encodeBase64String(privencIOS));
+
+        byte[] pubWrapped = RSACryptor.wrapRSA_X509(pubencIOS_X);
+        // byte[] privWrapped = RSACryptor.wrapRSA1024_PKCS8(privencIOS);
+        System.out.println("RSA-pubWrapped-ts[" + pubWrapped.length + "]:"
+                + Base64.encodeBase64String(pubWrapped));
+        // LOG.finest("RSA-pub-ts[" + pubWrapped + "]:" +
+        // toHex(pubWrapped));
+        //System.out.println("RSA-privWrapped-ts[" + privWrapped.length + "]:"
+        //        + Base64.encodeBase64String(privWrapped));
+        // LOG.finest("RSA-priv-ts[" + privWrapped + "]:" +
+        // toHex(privWrapped));
+        boolean pubOK = Arrays.equals(pubWrapped, pubenc);
+        //boolean privOK = Arrays.equals(privWrapped, privenc);
+        //System.out.println("RSA-wrapper-OK priv:[" + privOK + "]:" + " pub:["
+        //        + pubOK + "]:");
+        System.out.println("RSA-wrapper-OK pub:["
+                + pubOK + "]:");
+
+         }
 }
