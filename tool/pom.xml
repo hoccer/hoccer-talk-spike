@@ -27,13 +27,13 @@
     </dependency>
     <!-- CLI library -->
     <dependency>
-      <groupId>better</groupId>
+      <groupId>hoccer</groupId>
       <artifactId>better-cli-api</artifactId>
       <version>${better-cli.version}</version>
     </dependency>
     <!-- CLI support for log4j configuration -->
     <dependency>
-      <groupId>better</groupId>
+      <groupId>hoccer</groupId>
       <artifactId>better-cli-log4j</artifactId>
       <version>${better-cli.version}</version>
     </dependency>
