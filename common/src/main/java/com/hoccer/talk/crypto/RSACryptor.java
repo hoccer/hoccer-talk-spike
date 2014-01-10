@@ -133,7 +133,7 @@ public class RSACryptor {
         return result;
     }
 
-    public static byte[] wrapRSA1024_X509(byte[] pure_DER_rsa_pub_key)
+    public static byte[] wrapRSA1024_X509_deprecated(byte[] pure_DER_rsa_pub_key)
             throws InvalidKeyException {
         if (pure_DER_rsa_pub_key.length > 150) {
             throw new InvalidKeyException("Key too long, not RSA1024");
@@ -204,7 +204,7 @@ public class RSACryptor {
         return buf;
     }
 
-    public static byte[] unwrapRSA1024_X509(byte[] X509_rsa_pub_key)
+    public static byte[] unwrapRSA1024_X509_deprecated(byte[] X509_rsa_pub_key)
             throws InvalidKeyException {
         if (X509_rsa_pub_key.length > 150 + 21) {
             throw new InvalidKeyException("Key too long");
@@ -294,13 +294,24 @@ public class RSACryptor {
         return skip(PKCS8_rsa_priv_key, 26);
     }
 
-    public static PublicKey makePublicRSA1024Key(byte[] pure_DER_rsa_pub_key)
+    public static PublicKey makePublicRSA1024Key_deprecated(byte[] pure_DER_rsa_pub_key)
             throws NoSuchAlgorithmException, InvalidKeyException,
             InvalidKeySpecException {
         KeyFactory kf = KeyFactory.getInstance("RSA");
 
         X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(
-                wrapRSA1024_X509(pure_DER_rsa_pub_key));
+                wrapRSA1024_X509_deprecated(pure_DER_rsa_pub_key));
+        PublicKey myPublicKey = kf.generatePublic(pubSpec);
+        return myPublicKey;
+    }
+
+    public static PublicKey makePublicRSAKey(byte[] pure_DER_rsa_pub_key)
+            throws NoSuchAlgorithmException, InvalidKeyException,
+            InvalidKeySpecException {
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+
+        X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(
+                wrapRSA_X509(pure_DER_rsa_pub_key));
         PublicKey myPublicKey = kf.generatePublic(pubSpec);
         return myPublicKey;
     }
