@@ -34,9 +34,9 @@
 
 	<dependencies>
         <dependency>
-          <groupId>better</groupId>
+          <groupId>hoccer</groupId>
           <artifactId>better-cli-api</artifactId>
-          <version>0.1-SNAPSHOT</version>
+          <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
           <groupId>log4j</groupId>
