@@ -49,7 +49,7 @@ public class TalkKey {
         PublicKey key = null;
         try {
             byte[] decoded = Base64.decode(this.key);
-            key = RSACryptor.makePublicRSA1024Key(decoded);
+            key = RSACryptor.makePublicRSAKey(decoded);
         } catch (InvalidKeyException e) {
             e.printStackTrace();
         } catch (InvalidKeySpecException e) {
