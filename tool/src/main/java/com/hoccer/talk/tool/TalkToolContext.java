@@ -3,6 +3,7 @@ package com.hoccer.talk.tool;
 import better.cli.CLIContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.tool.client.TalkToolClient;
+import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -26,6 +27,8 @@ public class TalkToolContext extends CLIContext {
 
     List<TalkToolClient> mSelectedClients;
 
+    WebSocketClientFactory mWSClientFactory;
+
     public TalkToolContext(TalkTool app) {
         super(app);
         mMapper = new ObjectMapper();
@@ -34,6 +37,13 @@ public class TalkToolContext extends CLIContext {
         mClients = new Vector<TalkToolClient>();
         mClientsById = new Hashtable<Integer, TalkToolClient>();
         mSelectedClients = new Vector<TalkToolClient>();
+        mWSClientFactory = new WebSocketClientFactory();
+        try {
+            mWSClientFactory.start();
+        } catch (Exception e) {
+            // XXX
+            e.printStackTrace();
+        }
     }
 
     public ScheduledExecutorService getExecutor() {
@@ -42,6 +52,10 @@ public class TalkToolContext extends CLIContext {
 
     public ObjectMapper getMapper() {
         return mMapper;
+    }
+
+    public WebSocketClientFactory getWSClientFactory() {
+        return mWSClientFactory;
     }
 
     public List<TalkToolClient> getClients() {
