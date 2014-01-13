@@ -15,6 +15,8 @@ public class TalkToolClient {
 
     XoClient mClient;
 
+    TalkToolClientHost mHost;
+
     TalkToolClientDatabase mDatabaseBackend;
 
     public TalkToolClient(TalkToolContext context) {
@@ -24,7 +26,8 @@ public class TalkToolClient {
 
     public void initialize() {
         mDatabaseBackend = new TalkToolClientDatabase(this);
-        //mClient = new HoccerTalkClient(mContext.getExecutor(), mDatabaseBackend);
+        mHost = new TalkToolClientHost(this);
+        mClient = new XoClient(mHost);
     }
 
     public void start() {
@@ -41,6 +44,10 @@ public class TalkToolClient {
 
     public int getId() {
         return mId;
+    }
+
+    public TalkToolContext getContext() {
+        return mContext;
     }
 
     public XoClient getClient() {

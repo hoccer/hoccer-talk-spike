@@ -2,9 +2,12 @@ package com.hoccer.talk.tool.client;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMembership;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSelf;
+import com.hoccer.talk.client.model.TalkClientSmsToken;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.talk.model.TalkGroupMember;
@@ -52,6 +55,11 @@ public class TalkToolClientDatabase implements IXoClientDatabaseBackend {
 
         TableUtils.createTable(cs, TalkKey.class);
         TableUtils.createTable(cs, TalkPrivateKey.class);
+
+        TableUtils.createTable(cs, TalkClientDownload.class);
+        TableUtils.createTable(cs, TalkClientUpload.class);
+
+        TableUtils.createTable(cs, TalkClientSmsToken.class);
     }
 
     @Override
