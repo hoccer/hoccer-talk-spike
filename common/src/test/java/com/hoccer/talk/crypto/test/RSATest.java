@@ -105,9 +105,11 @@ public class RSATest {
         System.out.println("RSA-priv-ts-mod[" + privenc.length + "]:"
                 + Base64.encodeBase64String(privBytes));
         System.out.println("RSA-pub-ts-mod[" + pubenc.length + "]:"
-                + Hex.encodeHexString(pubBytes));
+//                + Hex.encodeHexString(pubBytes));
+                + new String(Hex.encodeHex(pubBytes)));
         System.out.println("RSA-priv-ts-mod[" + privenc.length + "]:"
-                + Hex.encodeHexString(privBytes));
+//                + Hex.encodeHexString(privBytes));
+                + new String(Hex.encodeHex(privBytes)));
 
         KeyFactory kf = KeyFactory.getInstance("RSA");
 
