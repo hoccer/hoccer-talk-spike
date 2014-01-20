@@ -6,6 +6,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.commons.codec.binary.Base64;
 
+import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -42,7 +43,9 @@ public class TalkPrivateKey {
     public PrivateKey getAsNative() {
         PrivateKey key = null;
         try {
-            byte[] decoded = Base64.decodeBase64(this.key);
+//            byte[] decoded = Base64.decodeBase64(this.key);
+//            Base64.decodeBase64(this.key.getBytes(Charset.forName("UTF-8")));
+            byte[] decoded =  Base64.decodeBase64(this.key.getBytes(Charset.forName("UTF-8")));
             key = RSACryptor.makePrivateRSA1024Key(decoded);
         } catch (InvalidKeyException e) {
             e.printStackTrace();
