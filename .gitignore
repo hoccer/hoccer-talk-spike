@@ -13,3 +13,5 @@ build-log.xml
 **/run
 **/proguard_logs
 **/git_properties
+
+/filecache/development.conf
