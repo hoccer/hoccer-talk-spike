@@ -99,7 +99,8 @@ public class AESCryptor {
             InvalidAlgorithmParameterException {
         byte[] clearbytes = cleartext.getBytes("UTF-8");
         byte[] result = encrypt(secret_key, salt, clearbytes);
-        return Base64.encodeBase64String(result);
+//        return Base64.encodeBase64String(result);
+        return new String(Base64.encodeBase64(result));
     }
 
 
