@@ -15,3 +15,5 @@ build-log.xml
 **/git_properties
 
 /filecache/development.conf
+
+/server/standalone.conf
