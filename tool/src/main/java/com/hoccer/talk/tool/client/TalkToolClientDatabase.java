@@ -1,21 +1,8 @@
 package com.hoccer.talk.tool.client;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMembership;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSelf;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
-import com.hoccer.talk.model.TalkKey;
-import com.hoccer.talk.model.TalkMessage;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.talk.model.TalkPrivateKey;
-import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.talk.client.model.*;
+import com.hoccer.talk.model.*;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -28,9 +15,7 @@ import java.sql.SQLException;
 public class TalkToolClientDatabase implements IXoClientDatabaseBackend {
 
     Logger LOG = Logger.getLogger(TalkToolClientDatabase.class);
-
     TalkToolClient mClient;
-
     JdbcConnectionSource mCs;
 
     public TalkToolClientDatabase(TalkToolClient client) {
@@ -64,7 +49,7 @@ public class TalkToolClientDatabase implements IXoClientDatabaseBackend {
 
     @Override
     public ConnectionSource getConnectionSource() {
-        if(mCs == null) {
+        if (mCs == null) {
             String url = "jdbc:sqlite:talk-client-" + mClient.getId() + ".db";
             LOG.debug("Creating connsource for " + url);
 

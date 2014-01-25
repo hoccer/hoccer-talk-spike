@@ -14,7 +14,6 @@ public class ClientGroupInvite extends TalkToolClientCommand {
 
     @Parameter(names = "-g", description = "Group to invite to", required = true)
     String pGroup;
-
     @Parameter(names = "-t", description = "Target of invitation", required = true)
     String pTarget;
 
@@ -27,7 +26,7 @@ public class ClientGroupInvite extends TalkToolClientCommand {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if(target != null && group != null) {
+        if (target != null && group != null) {
             client.getClient().inviteClientToGroup(group.getGroupId(), target.getClientId());
         } else {
             throw new Exception("Need to provide valid target and group");

@@ -17,17 +17,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TalkToolContext extends CLIContext {
 
     ObjectMapper mMapper;
-
     ScheduledExecutorService mExecutor;
-
     AtomicInteger mClientIdCounter;
-
     List<TalkToolClient> mClients;
-
     Hashtable<Integer, TalkToolClient> mClientsById;
-
     List<TalkToolClient> mSelectedClients;
-
     WebSocketClientFactory mWSClientFactory;
 
     public TalkToolContext(TalkTool app) {
@@ -79,7 +73,7 @@ public class TalkToolContext extends CLIContext {
 
     public List<TalkToolClient> getClientsBySelectors(List<String> selectors) {
         ArrayList<TalkToolClient> clients = new ArrayList<TalkToolClient>(selectors.size());
-        for(int i = 0; i < selectors.size(); i++) {
+        for (int i = 0; i < selectors.size(); i++) {
             String name = selectors.get(i);
             TalkToolClient client = getClientBySelector(name);
             clients.add(i, client);
@@ -94,7 +88,7 @@ public class TalkToolContext extends CLIContext {
             client = getClientById(id);
         } catch (NumberFormatException e) {
         }
-        if(client == null) {
+        if (client == null) {
             client = getClientByClientId(selector);
         }
         return client;
@@ -105,9 +99,9 @@ public class TalkToolContext extends CLIContext {
     }
 
     public TalkToolClient getClientByClientId(String clientId) {
-        for(TalkToolClient client: mClients) {
+        for (TalkToolClient client : mClients) {
             String id = client.getClientId();
-            if(id != null && id.equals(clientId)) {
+            if (id != null && id.equals(clientId)) {
                 return client;
             }
         }
