@@ -40,26 +40,26 @@ public class TalkToolClientDatabase implements IXoClientDatabaseBackend {
     public void initializeDb() throws SQLException {
         ConnectionSource cs = getConnectionSource();
 
-        TableUtils.createTable(cs, TalkClientContact.class);
-        TableUtils.createTable(cs, TalkClientSelf.class);
-        TableUtils.createTable(cs, TalkPresence.class);
-        TableUtils.createTable(cs, TalkRelationship.class);
-        TableUtils.createTable(cs, TalkGroup.class);
-        TableUtils.createTable(cs, TalkGroupMember.class);
+        TableUtils.createTableIfNotExists(cs, TalkClientContact.class);
+        TableUtils.createTableIfNotExists(cs, TalkClientSelf.class);
+        TableUtils.createTableIfNotExists(cs, TalkPresence.class);
+        TableUtils.createTableIfNotExists(cs, TalkRelationship.class);
+        TableUtils.createTableIfNotExists(cs, TalkGroup.class);
+        TableUtils.createTableIfNotExists(cs, TalkGroupMember.class);
 
-        TableUtils.createTable(cs, TalkClientMembership.class);
+        TableUtils.createTableIfNotExists(cs, TalkClientMembership.class);
 
-        TableUtils.createTable(cs, TalkClientMessage.class);
-        TableUtils.createTable(cs, TalkMessage.class);
-        TableUtils.createTable(cs, TalkDelivery.class);
+        TableUtils.createTableIfNotExists(cs, TalkClientMessage.class);
+        TableUtils.createTableIfNotExists(cs, TalkMessage.class);
+        TableUtils.createTableIfNotExists(cs, TalkDelivery.class);
 
-        TableUtils.createTable(cs, TalkKey.class);
-        TableUtils.createTable(cs, TalkPrivateKey.class);
+        TableUtils.createTableIfNotExists(cs, TalkKey.class);
+        TableUtils.createTableIfNotExists(cs, TalkPrivateKey.class);
 
-        TableUtils.createTable(cs, TalkClientDownload.class);
-        TableUtils.createTable(cs, TalkClientUpload.class);
+        TableUtils.createTableIfNotExists(cs, TalkClientDownload.class);
+        TableUtils.createTableIfNotExists(cs, TalkClientUpload.class);
 
-        TableUtils.createTable(cs, TalkClientSmsToken.class);
+        TableUtils.createTableIfNotExists(cs, TalkClientSmsToken.class);
     }
 
     @Override
