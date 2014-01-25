@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -70,7 +71,7 @@ public class TalkToolContext extends CLIContext {
         this.mSelectedClients = new Vector<TalkToolClient>(selectedClients);
     }
 
-    public void addClient(TalkToolClient client) {
+    public void addClient(TalkToolClient client) throws SQLException {
         mClients.add(client);
         mClientsById.put(client.getId(), client);
         client.initialize();
