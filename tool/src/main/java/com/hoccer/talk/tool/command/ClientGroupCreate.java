@@ -5,7 +5,7 @@ import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import com.hoccer.talk.tool.client.TalkToolClientCommand;
 
-@CLICommand(name = "cgcreate", description = "Creates a new group")
+@CLICommand(name = "cgcreate", description = "Creates a new group - not yet implemented")
 public class ClientGroupCreate extends TalkToolClientCommand {
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) {

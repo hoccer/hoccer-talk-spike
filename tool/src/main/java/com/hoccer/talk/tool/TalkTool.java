@@ -9,12 +9,12 @@ import better.cli.exceptions.CLIInitException;
 @CLIEntry
 public class TalkTool extends CommandLineApplication<TalkToolContext> {
 
-    public static void main(String[] args) {
-        EntryPoint.main(args);
-    }
-
     public TalkTool() throws CLIInitException {
         super();
+    }
+
+    public static void main(String[] args) {
+        EntryPoint.main(args);
     }
 
     @Override

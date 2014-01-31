@@ -9,18 +9,16 @@ import java.util.List;
 public class TalkToolClientCommand extends TalkToolCommand {
 
     TalkToolContext mContext;
-
     @Parameter(description = "Run on all clients", names = "-a")
     boolean pAllClients;
-
     @Parameter(description = "Run on specified clients", names = "-c")
     List<String> pSpecificClients;
 
     private List<TalkToolClient> selectClients(TalkToolContext context) {
-        if(pAllClients) {
+        if (pAllClients) {
             return context.getClients();
         }
-        if(pSpecificClients != null) {
+        if (pSpecificClients != null) {
             return context.getClientsBySelectors(pSpecificClients);
         }
         return context.getSelectedClients();
@@ -29,7 +27,8 @@ public class TalkToolClientCommand extends TalkToolCommand {
     @Override
     protected void run(TalkToolContext context) throws Exception {
         List<TalkToolClient> clients = selectClients(context);
-        for(TalkToolClient client: clients) {
+        for (TalkToolClient client : clients) {
+            System.out.println("client #" + client.getId());
             runOnClient(context, client);
         }
     }
