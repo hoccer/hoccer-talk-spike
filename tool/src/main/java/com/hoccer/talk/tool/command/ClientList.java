@@ -11,9 +11,9 @@ import java.util.List;
 @CLICommand(name = "clist", description = "List clients")
 public class ClientList extends TalkToolCommand {
 
-    final int      COLUMN_COUNT = 3;
-    final String[] COLUMN_NAMES = new String[] {
-        "id", "state", "clientId"
+    final int COLUMN_COUNT = 3;
+    final String[] COLUMN_NAMES = new String[]{
+            "id", "state", "clientId"
     };
 
     @Override
@@ -22,8 +22,8 @@ public class ClientList extends TalkToolCommand {
         int numLines = clients.size() + 1;
         String[][] rows = new String[numLines][];
         rows[0] = COLUMN_NAMES;
-        for(int i = 1; i < numLines; i++) {
-            TalkToolClient client = clients.get(i-1);
+        for (int i = 1; i < numLines; i++) {
+            TalkToolClient client = clients.get(i - 1);
             String[] columns = new String[COLUMN_COUNT];
             columns[0] = Integer.toString(client.getId());
             columns[1] = client.getClient().getStateString();

@@ -16,7 +16,7 @@ public class ClientTokenPair extends TalkToolClientCommand {
 
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) throws Exception {
-        for(String token: pTokens) {
+        for (String token : pTokens) {
             System.out.println("client " + client.getId() + " token " + token);
             client.getClient().performTokenPairing(token);
         }

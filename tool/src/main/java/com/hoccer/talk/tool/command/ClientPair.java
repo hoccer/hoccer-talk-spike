@@ -8,7 +8,7 @@ import com.hoccer.talk.tool.client.TalkToolClient;
 
 import java.util.List;
 
-@CLICommand(name = "cpair", description = "Pair clients using automatic token exchange")
+@CLICommand(name = "cpair", description = "Pair clients using automatic token exchange.")
 public class ClientPair extends TalkToolCommand {
 
     @Parameter(description = "Clients to pair")
@@ -17,11 +17,11 @@ public class ClientPair extends TalkToolCommand {
     @Override
     protected void run(TalkToolContext context) throws Exception {
         List<TalkToolClient> clients = context.getClientsBySelectors(pClients);
-        if((clients.size() % 2) != 0) {
+        if ((clients.size() % 2) != 0) {
             throw new Exception("Clients must be supplied in pairs");
         }
-        for(int i = 0; i < clients.size(); i += 2) {
-            pairClients(clients.get(i), clients.get(i+1));
+        for (int i = 0; i < clients.size(); i += 2) {
+            pairClients(clients.get(i), clients.get(i + 1));
         }
     }
 

@@ -14,7 +14,6 @@ import java.util.concurrent.ScheduledExecutorService;
 public class TalkToolClientHost implements IXoClientHost {
 
     private static final Logger LOG = Logger.getLogger(TalkToolClientHost.class);
-
     TalkToolClient mClient;
 
     public TalkToolClientHost(TalkToolClient client) {

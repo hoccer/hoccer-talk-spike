@@ -12,16 +12,15 @@ public class ClientSelect extends TalkToolCommand {
 
     @Parameter(description = "Select all clients", names = "-a")
     boolean pAll;
-
     @Parameter(description = "<name> ...")
     List<String> pName;
 
     @Override
     protected void run(TalkToolContext context) throws Exception {
-        if(pAll) {
+        if (pAll) {
             context.setSelectedClients(context.getClients());
         } else {
-            if(pName != null && !pName.isEmpty()) {
+            if (pName != null && !pName.isEmpty()) {
                 context.setSelectedClients(context.getClientsBySelectors(pName));
             }
         }

@@ -7,12 +7,12 @@ import com.beust.jcommander.Parameter;
 public abstract class TalkToolCommand extends Command<TalkToolContext> {
 
     @Parameter(description = "Show command help",
-                names = {"-h"}, help = true)
+            names = {"-h"}, help = true)
     boolean pHelp;
 
     @Override
     protected CommandResult innerExecute(TalkToolContext context) {
-        if(pHelp) {
+        if (pHelp) {
             usage();
         } else {
             try {
