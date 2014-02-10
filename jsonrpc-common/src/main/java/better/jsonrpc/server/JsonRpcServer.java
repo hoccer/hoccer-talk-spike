@@ -95,7 +95,7 @@ public class JsonRpcServer {
         ObjectMapper mapper = connection.getMapper();
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("RPC-Sercer Request: " + node.toString());
+			LOG.debug("RPC-Server Request: " + node.toString());
 		}
 
 		// validate request

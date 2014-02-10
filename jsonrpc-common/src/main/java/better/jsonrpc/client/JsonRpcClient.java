@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JsonRpcClient {
 
     /** Default request timeout (msecs) */
-    public static final long DEFAULT_REQUEST_TIMEOUT = 15 * 1000;
+    public static final long DEFAULT_REQUEST_TIMEOUT = 5 * 1000;
 
     /** Global logger for clients */
 	private static final Logger LOG = Logger.getLogger(JsonRpcClient.class);
