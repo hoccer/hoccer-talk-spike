@@ -111,7 +111,7 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     /** Host of this client */
-    IXoClientHost mHost;
+    protected IXoClientHost mHost;
 
     /* The database instance we use */
     XoClientDatabase mDatabase;
@@ -133,7 +133,7 @@ public class XoClient implements JsonRpcConnection.Listener {
     /** Factory for underlying websocket connections */
     WebSocketClientFactory mClientFactory;
     /** JSON-RPC client instance */
-	JsonRpcWsClient mConnection;
+    protected JsonRpcWsClient mConnection;
     /* RPC handler for notifications */
 	TalkRpcClientImpl mHandler;
     /* RPC proxy bound to our server */
@@ -210,16 +210,7 @@ public class XoClient implements JsonRpcConnection.Listener {
         // create websocket client
         WebSocketClient wsClient = host.getWebSocketFactory().newWebSocketClient();
 
-        // create json-rpc client
-        String protocol = XoClientConfiguration.USE_BSON_PROTOCOL
-                ? XoClientConfiguration.PROTOCOL_STRING_BSON
-                : XoClientConfiguration.PROTOCOL_STRING_JSON;
-        mConnection = new JsonRpcWsClient(uri, protocol, wsClient, rpcMapper);
-        mConnection.setMaxIdleTime(XoClientConfiguration.CONNECTION_IDLE_TIMEOUT);
-        mConnection.setSendKeepAlives(XoClientConfiguration.KEEPALIVE_ENABLED);
-        if(XoClientConfiguration.USE_BSON_PROTOCOL) {
-            mConnection.setSendBinaryMessages(true);
-        }
+        createJsonRpcClient(uri, wsClient, rpcMapper);
 
         // create client-side RPC handler object
         mHandler = new TalkRpcClientImpl();
@@ -244,6 +235,19 @@ public class XoClient implements JsonRpcConnection.Listener {
         // ensure we have a self contact
         ensureSelfContact();
     }
+
+    protected void createJsonRpcClient(URI uri, WebSocketClient wsClient, ObjectMapper rpcMapper) {
+        String protocol = XoClientConfiguration.USE_BSON_PROTOCOL
+                ? XoClientConfiguration.PROTOCOL_STRING_BSON
+                : XoClientConfiguration.PROTOCOL_STRING_JSON;
+        mConnection = new JsonRpcWsClient(uri, protocol, wsClient, rpcMapper);
+        mConnection.setMaxIdleTime(XoClientConfiguration.CONNECTION_IDLE_TIMEOUT);
+        mConnection.setSendKeepAlives(XoClientConfiguration.KEEPALIVE_ENABLED);
+        if(XoClientConfiguration.USE_BSON_PROTOCOL) {
+            mConnection.setSendBinaryMessages(true);
+        }
+    }
+
 
     private void ensureSelfContact() {
         try {
@@ -1403,7 +1407,12 @@ public class XoClient implements JsonRpcConnection.Listener {
                 LOG.debug("delivering " + i);
                 TalkDelivery[] delivery = new TalkDelivery[1];
                 delivery[0] = deliveries[i];
-                TalkDelivery[] resultingDeliveries = mServerRpc.deliveryRequest(messages[i], delivery);
+                TalkDelivery[] resultingDeliveries = new TalkDelivery[0];
+                try {
+                    resultingDeliveries = mServerRpc.deliveryRequest(messages[i], delivery);
+                } catch (Exception ex) {
+                    LOG.debug("Caugth exception " + ex.getMessage());
+                }
                 for(int j = 0; j < resultingDeliveries.length; j++) {
                     updateOutgoingDelivery(resultingDeliveries[j]);
                 }
@@ -1823,7 +1832,6 @@ public class XoClient implements JsonRpcConnection.Listener {
             LOG.trace("using client key for encryption");
             // generate message key
             plainKey = AESCryptor.makeRandomBytes(AESCryptor.KEY_SIZE);
-            LOG.debug("ENCRYPTING: plain key size: " + plainKey.length);
             // get public key for encrypting the key
             TalkKey talkPublicKey = receiver.getPublicKey();
             if(talkPublicKey == null) {
@@ -1839,7 +1847,6 @@ public class XoClient implements JsonRpcConnection.Listener {
             // encrypt the message key
             try {
                 byte[] encryptedKey = RSACryptor.encryptRSA(publicKey, plainKey);
-                LOG.debug("ENCRYPTING: encrypted key size: " + encryptedKey.length);
                 delivery.setKeyId(talkPublicKey.getKeyId());
 //                delivery.setKeyCiphertext(Base64.encodeBase64String(encryptedKey));
                 delivery.setKeyCiphertext(new String(Base64.encodeBase64(encryptedKey)));

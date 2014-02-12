@@ -26,6 +26,11 @@ public class TalkToolClientHost implements IXoClientHost {
     }
 
     @Override
+    public ScheduledExecutorService getIncomingBackgroundExecutor() {
+        return null;
+    }
+
+    @Override
     public IXoClientDatabaseBackend getDatabaseBackend() {
         return mClient.getDatabaseBackend();
     }
