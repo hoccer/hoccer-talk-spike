@@ -50,7 +50,7 @@ public class ClientMessage extends TalkToolCommand {
     }
 
     private void sendMessage(TalkToolClient generator, TalkToolClient consumer, String messageText) {
-        Console.info("<ClientMessage::sendMessage> sender: " + generator.getClient() + ", recipient: " + consumer.getClient() + ", message: " + messageText);
+        Console.info("<ClientMessage::sendMessage> sender-id: '" + generator.getClientId() + "', recipient-id: '" + consumer.getClientId() + "', message: '" + messageText + "'");
 
         // check if relationship exists
         // XXX TODO: implement a relationship-check in XOClient,
