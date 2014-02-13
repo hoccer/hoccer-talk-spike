@@ -66,60 +66,8 @@ public class ClientMessage extends TalkToolCommand {
         if (recipientContact == null) {
             Console.warn("<ClientMessage::sendMessage> the sender has no relationship to the recipient. Doing nothing.");
         } else {
-            generator.getClient().requestDelivery(composeMessage(generator, consumer, messageText));
+            TalkClientMessage clientMessage = generator.getClient().composeClientMessage(recipientContact, messageText);
+            generator.getClient().requestDelivery(clientMessage);
         }
-    }
-
-    private TalkClientMessage composeMessage(TalkToolClient sender, TalkToolClient recipient, String messageText) {
-        XoClientDatabase db = sender.getDatabase();
-
-        final TalkClientContact senderContact = sender.getClient().getSelfContact();
-        TalkClientContact recipientContact;
-
-        try {
-            recipientContact = sender.getDatabase().findContactByClientId(recipient.getClientId(), false);
-        } catch (SQLException e) {
-            recipientContact = null;
-            e.printStackTrace();
-        }
-
-        final TalkClientMessage clientMessage = new TalkClientMessage();
-        final TalkMessage message = new TalkMessage();
-        final TalkDelivery delivery = new TalkDelivery();
-
-        final String messageTag = UUID.randomUUID().toString();
-
-        message.setMessageTag(messageTag);
-        message.setBody(messageText);
-
-        delivery.setMessageTag(messageTag);
-
-        if(recipientContact.isGroup()) {
-            delivery.setGroupId(recipientContact.getGroupId());
-        }
-        if(recipientContact.isClient()) {
-            delivery.setReceiverId(recipientContact.getClientId());
-        }
-
-        clientMessage.markAsSeen();
-        clientMessage.setText(messageText);
-        clientMessage.setMessageTag(messageTag);
-        clientMessage.setConversationContact(recipientContact);
-        clientMessage.setSenderContact(senderContact);
-        clientMessage.setMessage(message);
-        clientMessage.setOutgoingDelivery(delivery);
-
-        try {
-            db.saveMessage(message);
-            db.saveDelivery(delivery);
-            db.saveClientMessage(clientMessage);
-        } catch (SQLException e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            Console.error("sql error -> exception: '" + e + "', " + sw.toString());
-        }
-
-        return clientMessage;
     }
 }
