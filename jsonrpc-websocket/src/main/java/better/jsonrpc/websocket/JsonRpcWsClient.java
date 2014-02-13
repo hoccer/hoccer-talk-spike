@@ -107,8 +107,9 @@ public class JsonRpcWsClient extends JsonRpcWsConnection
     /** {@inheritDoc} */
     @Override
     public void sendRequest(final ObjectNode request) throws IOException {
-        if(mExecutor == null) {
+        if (mExecutor == null) {
             super.sendRequest(request);
+            return;
         }
         mExecutor.execute(new Runnable() {
             @Override
@@ -124,8 +125,9 @@ public class JsonRpcWsClient extends JsonRpcWsConnection
     /** {@inheritDoc} */
     @Override
     public void sendResponse(final ObjectNode response) throws IOException {
-        if(mExecutor == null) {
+        if (mExecutor == null) {
             super.sendResponse(response);
+            return;
         }
         mExecutor.execute(new Runnable() {
             @Override
@@ -141,8 +143,9 @@ public class JsonRpcWsClient extends JsonRpcWsConnection
     /** {@inheritDoc} */
     @Override
     public void sendNotification(final ObjectNode notification) throws IOException {
-        if(mExecutor == null) {
+        if (mExecutor == null) {
             super.sendNotification(notification);
+            return;
         }
         mExecutor.execute(new Runnable() {
             @Override
