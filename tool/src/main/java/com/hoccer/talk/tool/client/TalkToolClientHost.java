@@ -66,5 +66,5 @@ public class TalkToolClientHost implements IXoClientHost {
     public String getSupportTag() {
         return null;
     }
-    
+
 }
