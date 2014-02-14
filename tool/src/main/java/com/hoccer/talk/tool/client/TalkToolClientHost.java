@@ -57,14 +57,4 @@ public class TalkToolClientHost implements IXoClientHost {
         return conn.getInputStream();
     }
 
-    @Override
-    public boolean isSupportModeEnabled() {
-        return false;
-    }
-
-    @Override
-    public String getSupportTag() {
-        return null;
-    }
-
 }
