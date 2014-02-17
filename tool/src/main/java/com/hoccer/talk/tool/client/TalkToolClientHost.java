@@ -2,6 +2,8 @@ package com.hoccer.talk.tool.client;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
+import com.hoccer.talk.client.XoClientConfiguration;
+
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
@@ -48,6 +50,11 @@ public class TalkToolClientHost implements IXoClientHost {
                 LOG.error("uncaught exception on thread " + thread.toString(), ex);
             }
         };
+    }
+
+    @Override
+    public String getServerUri() {
+        return XoClientConfiguration.SERVER_URI;
     }
 
     @Override
