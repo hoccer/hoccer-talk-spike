@@ -18,16 +18,7 @@ import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.crypto.RSACryptor;
-import com.hoccer.talk.model.TalkAttachment;
-import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
-import com.hoccer.talk.model.TalkKey;
-import com.hoccer.talk.model.TalkMessage;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.talk.model.TalkPrivateKey;
-import com.hoccer.talk.model.TalkRelationship;
-import com.hoccer.talk.model.TalkToken;
+import com.hoccer.talk.model.*;
 import com.hoccer.talk.rpc.ITalkRpcClient;
 import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.srp.SRP6Parameters;
@@ -111,7 +102,7 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     /** Host of this client */
-    protected IXoClientHost mHost;
+    protected IXoClientHost mClientHost;
 
     /* The database instance we use */
     XoClientDatabase mDatabase;
@@ -171,15 +162,19 @@ public class XoClient implements JsonRpcConnection.Listener {
     /**
      * Create a Hoccer Talk client using the given client database
      */
-	public XoClient(IXoClientHost host) {
+    public XoClient(IXoClientHost host) {
+        initialize(host);
+    }
+
+    public void initialize(IXoClientHost host) {
         // remember the host
-        mHost = host;
+        mClientHost = host;
 
         // fetch executor and db immediately
         mExecutor = host.getBackgroundExecutor();
 
         // create and initialize the database
-        mDatabase = new XoClientDatabase(mHost.getDatabaseBackend());
+        mDatabase = new XoClientDatabase(mClientHost.getDatabaseBackend());
         try {
             mDatabase.initialize();
         } catch (SQLException e) {
@@ -189,9 +184,9 @@ public class XoClient implements JsonRpcConnection.Listener {
         // create URI object referencing the server
         URI uri = null;
         try {
-            uri = new URI(XoClientConfiguration.SERVER_URI);
+            uri = new URI(mClientHost.getServerUri());
         } catch (URISyntaxException e) {
-            // won't happen
+            LOG.error("uri is wrong", e);
         }
 
         // create JSON object mapper
@@ -227,7 +222,7 @@ public class XoClient implements JsonRpcConnection.Listener {
         mConnection.addListener(this);
 
         // create RPC proxy
-		mServerRpc = mConnection.makeProxy(ITalkRpcServer.class);
+        mServerRpc = mConnection.makeProxy(ITalkRpcServer.class);
 
         // create transfer agent
         mTransferAgent = new XoTransferAgent(this);
@@ -313,7 +308,7 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     public IXoClientHost getHost() {
-        return mHost;
+        return mClientHost;
     }
 
     public XoClientDatabase getDatabase() {
@@ -507,6 +502,37 @@ public class XoClient implements JsonRpcConnection.Listener {
         mState = STATE_INACTIVE;
     }
 
+    public void hello() {
+
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                TalkClientInfo clientInfo = new TalkClientInfo();
+                clientInfo.setClientName(mClientHost.getClientName());
+                clientInfo.setClientTime(mClientHost.getClientTime());
+                clientInfo.setClientLanguage(mClientHost.getClientLanguage());
+                clientInfo.setClientVersion(mClientHost.getClientVersion());
+                clientInfo.setDeviceModel(mClientHost.getDeviceModel());
+                clientInfo.setSystemName(mClientHost.getSystemName());
+                clientInfo.setSystemLanguage(mClientHost.getSystemLanguage());
+                clientInfo.setSystemVersion(mClientHost.getSystemVersion());
+                if (mClientHost.isSupportModeEnabled()) {
+                    clientInfo.setSupportTag(mClientHost.getSupportTag());
+                }
+
+                LOG.debug("Hello: Saying hello to the server.");
+                TalkServerInfo talkServerInfo = mServerRpc.hello(clientInfo);
+                if (talkServerInfo != null) {
+                    LOG.debug("Hello: Current server time: " + talkServerInfo.getServerTime().toString());
+                    LOG.debug("Hello: Server switched to supportMode: " + talkServerInfo.isSupportMode());
+                }
+
+            }
+        });
+
+    }
+
     /**
      * Register the given GCM push information with the server
      * @param packageName
@@ -597,29 +623,29 @@ public class XoClient implements JsonRpcConnection.Listener {
 
     public void setGroupName(final TalkClientContact group, final String groupName) {
        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                LOG.debug("changing group name");
-                TalkGroup presence = group.getGroupPresence();
-                if(presence == null) {
-                    LOG.error("group has no presence");
-                    return;
-                }
-                presence.setGroupName(groupName);
-                if(group.isGroupRegistered()) {
-                    try {
-                        mDatabase.saveGroup(presence);
-                        mDatabase.saveContact(group);
-                        LOG.debug("sending new group presence");
-                        mServerRpc.updateGroup(presence);
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-                }
-                for(IXoContactListener listener: mContactListeners) {
-                    listener.onGroupPresenceChanged(group);
-                }
-            }
+           @Override
+           public void run() {
+               LOG.debug("changing group name");
+               TalkGroup presence = group.getGroupPresence();
+               if (presence == null) {
+                   LOG.error("group has no presence");
+                   return;
+               }
+               presence.setGroupName(groupName);
+               if (group.isGroupRegistered()) {
+                   try {
+                       mDatabase.saveGroup(presence);
+                       mDatabase.saveContact(group);
+                       LOG.debug("sending new group presence");
+                       mServerRpc.updateGroup(presence);
+                   } catch (SQLException e) {
+                       LOG.error("sql error", e);
+                   }
+               }
+               for (IXoContactListener listener : mContactListeners) {
+                   listener.onGroupPresenceChanged(group);
+               }
+           }
        });
     }
 
@@ -1170,6 +1196,8 @@ public class XoClient implements JsonRpcConnection.Listener {
             public void run() {
                 Date never = new Date(0);
                 try {
+                    LOG.debug("sync: HELLO");
+                    hello();
                     LOG.debug("sync: updating presence");
                     sendPresence();
                     LOG.debug("sync: syncing presences");
@@ -1232,6 +1260,58 @@ public class XoClient implements JsonRpcConnection.Listener {
                 mDisconnectFuture = null;
             }
         }, 0, TimeUnit.SECONDS);
+    }
+
+    public TalkClientMessage composeClientMessage(TalkClientContact contact, String messageText) {
+        return composeClientMessage(contact, messageText, null);
+    }
+
+    public TalkClientMessage composeClientMessage(TalkClientContact contact, String messageText, TalkClientUpload upload) {
+        XoClientDatabase db = getDatabase();
+        // construct message and delivery objects
+        final TalkClientMessage clientMessage = new TalkClientMessage();
+        final TalkMessage message = new TalkMessage();
+        final TalkDelivery delivery = new TalkDelivery();
+
+        final String messageTag = message.generateMessageTag();
+        message.setBody(messageText);
+
+        delivery.setMessageTag(messageTag);
+
+        if (contact.isGroup()) {
+            delivery.setGroupId(contact.getGroupId());
+        }
+        if (contact.isClient()) {
+            delivery.setReceiverId(contact.getClientId());
+        }
+
+        clientMessage.markAsSeen();
+        clientMessage.setText(messageText);
+        clientMessage.setMessageTag(messageTag);
+        clientMessage.setConversationContact(contact);
+        clientMessage.setSenderContact(getSelfContact());
+        clientMessage.setMessage(message);
+        clientMessage.setOutgoingDelivery(delivery);
+
+        if (upload != null) {
+            clientMessage.setAttachmentUpload(upload);
+        }
+
+        try {
+            if (upload != null) {
+                db.saveClientUpload(upload);
+            }
+            db.saveMessage(message);
+            db.saveDelivery(delivery);
+            db.saveClientMessage(clientMessage);
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        }
+
+        // log to help debugging
+        LOG.debug("created message with id " + clientMessage.getClientMessageId() + " and tag " + message.getMessageTag());
+
+        return clientMessage;
     }
 
 

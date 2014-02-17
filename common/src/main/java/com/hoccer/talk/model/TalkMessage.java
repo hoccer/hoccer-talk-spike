@@ -4,6 +4,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Message objects represent messages including the
@@ -79,6 +80,11 @@ public class TalkMessage {
 
     public void setMessageTag(String messageTag) {
         this.messageTag = messageTag;
+    }
+
+    public String generateMessageTag() {
+        this.messageTag = UUID.randomUUID().toString();
+        return this.messageTag;
     }
 
 	public String getSenderId() {
