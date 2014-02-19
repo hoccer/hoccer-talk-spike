@@ -1,11 +1,14 @@
 package com.hoccer.xo.android.base;
 
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.database.Cursor;
+import android.provider.MediaStore;
 import android.os.RemoteException;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
@@ -38,8 +41,10 @@ import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
+import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -61,8 +66,6 @@ public abstract class XoActivity extends SherlockFragmentActivity {
     public final static int REQUEST_SCAN_BARCODE = IntentIntegrator.REQUEST_CODE; // XXX dirty
 
     protected Logger LOG = null;
-
-    private ActionBar mActionBar;
 
     /** Executor for background tasks */
     ScheduledExecutorService mBackgroundExecutor;
@@ -93,11 +96,16 @@ public abstract class XoActivity extends SherlockFragmentActivity {
 
     boolean mUpEnabled = false;
 
+    private ActionBar mActionBar;
+
+    private String mBarcodeToken = null;
+
     public XoActivity() {
         LOG = Logger.getLogger(getClass());
     }
 
     protected abstract int getLayoutResource();
+
     protected abstract int getMenuResource();
 
     public XoClient getXoClient() {
@@ -243,7 +251,58 @@ public abstract class XoActivity extends SherlockFragmentActivity {
         return true;
     }
 
-    private String mBarcodeToken = null;
+    private Intent selectedAvatarPreprocessing(Intent data) {
+        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+        Uri selectedContent = data.getData();
+        Cursor cursor = getBaseContext().getContentResolver().query(
+                selectedContent, filePathColumn, null, null, null);
+        cursor.moveToFirst();
+        int dataIndex = cursor.getColumnIndex(filePathColumn[0]);
+        String filePath = cursor.getString(dataIndex);
+        cursor.close();
+
+        File source = new File(filePath);
+        File destination = new File(XoApplication.getAttachmentDirectory().getPath() + File.separator + source.getName());
+
+        BitmapFactory.Options opt = new BitmapFactory.Options();
+        opt.inSampleSize = 4;
+        Bitmap bmp = BitmapFactory.decodeFile(filePath, opt);
+        try {
+            FileOutputStream out = new FileOutputStream(destination);
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Uri uri = getImageContentUri(getBaseContext(), destination);
+        data.setData(uri);
+        return data;
+    }
+
+
+    private Uri getImageContentUri(Context context, File imageFile) {
+        String filePath = imageFile.getAbsolutePath();
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                new String[] { MediaStore.Images.Media._ID },
+                MediaStore.Images.Media.DATA + "=? ",
+                new String[] { filePath }, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            int id = cursor.getInt(cursor
+                    .getColumnIndex(MediaStore.MediaColumns._ID));
+            Uri baseUri = Uri.parse("content://media/external/images/media");
+            return Uri.withAppendedPath(baseUri, "" + id);
+        } else {
+            if (imageFile.exists()) {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.DATA, filePath);
+                return context.getContentResolver().insert(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            } else {
+                return null;
+            }
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -256,6 +315,7 @@ public abstract class XoActivity extends SherlockFragmentActivity {
 
         if(requestCode == REQUEST_SELECT_AVATAR) {
             if(mAvatarSelection != null) {
+                data = selectedAvatarPreprocessing(data);
                 IContentObject co = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection, data);
                 if(co != null) {
                     LOG.debug("selected avatar " + co.getContentDataUrl());
@@ -354,40 +414,6 @@ public abstract class XoActivity extends SherlockFragmentActivity {
         }
     }
 
-    /**
-     * Connection to our backend service
-     */
-    public class MainServiceConnection implements ServiceConnection {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LOG.debug("onServiceConnected()");
-            mService = (IXoClientService)service;
-            scheduleKeepAlive();
-            try {
-                mService.wake();
-            } catch (RemoteException e) {
-                LOG.error("remote error", e);
-            }
-            for(IXoFragment fragment: mTalkFragments) {
-                fragment.onServiceConnected();
-            }
-            if(mBarcodeToken != null) {
-                // XXX perform token pairing with callback
-                getXoClient().performTokenPairing(mBarcodeToken);
-                mBarcodeToken = null;
-            }
-        }
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            LOG.debug("onServiceDisconnected()");
-            shutdownKeepAlive();
-            mService = null;
-            for(IXoFragment fragment: mTalkFragments) {
-                fragment.onServiceDisconnected();
-            }
-        }
-    }
-
     public IXoClientService getXoService() {
         return mService;
     }
@@ -396,13 +422,13 @@ public abstract class XoActivity extends SherlockFragmentActivity {
         return mDatabase;
     }
 
-    public ConversationAdapter makeConversationAdapter() {
-        return new ConversationAdapter(this);
-    }
-
     public ContactsAdapter makeContactListAdapter() {
         return new RichContactsAdapter(this);
     }
+
+//    public ConversationAdapter makeConversationAdapter() {
+//        return new ConversationAdapter(this);
+//    }
 
     public void wakeClient() {
         if(mService != null) {
@@ -511,6 +537,40 @@ public abstract class XoActivity extends SherlockFragmentActivity {
     }
 
     public void hackReturnedFromDialog() {
+    }
+
+    /**
+     * Connection to our backend service
+     */
+    public class MainServiceConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LOG.debug("onServiceConnected()");
+            mService = (IXoClientService)service;
+            scheduleKeepAlive();
+            try {
+                mService.wake();
+            } catch (RemoteException e) {
+                LOG.error("remote error", e);
+            }
+            for(IXoFragment fragment: mTalkFragments) {
+                fragment.onServiceConnected();
+            }
+            if(mBarcodeToken != null) {
+                // XXX perform token pairing with callback
+                getXoClient().performTokenPairing(mBarcodeToken);
+                mBarcodeToken = null;
+            }
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            LOG.debug("onServiceDisconnected()");
+            shutdownKeepAlive();
+            mService = null;
+            for(IXoFragment fragment: mTalkFragments) {
+                fragment.onServiceDisconnected();
+            }
+        }
     }
 
 }

@@ -23,7 +23,7 @@ public class ClientGroupLeave extends TalkToolClientCommand {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if(group != null) {
+        if (group != null) {
             client.getClient().leaveGroup(group.getGroupId());
         } else {
             throw new Exception("Need to provide valid group");

@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JsonRpcClient {
 
     /** Default request timeout (msecs) */
-    public static final long DEFAULT_REQUEST_TIMEOUT = 15 * 1000;
+    public static final long DEFAULT_REQUEST_TIMEOUT = 5 * 1000;
 
     /** Global logger for clients */
 	private static final Logger LOG = Logger.getLogger(JsonRpcClient.class);
@@ -133,7 +133,7 @@ public class JsonRpcClient {
     public void sendRequest(JsonRpcConnection connection, ObjectNode request) throws Exception {
         // log request
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Request: " + request.toString());
+            LOG.debug("RPC-Client Requset: " + request.toString());
         }
         // send it
         connection.sendRequest(request);
@@ -294,7 +294,7 @@ public class JsonRpcClient {
 			String id = idNode.asText();
             // log response
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Response: " + response.toString());
+                LOG.debug("RPC-Client Response: " + response.toString());
             }
             // retrieve the request from the client table
             JsonRpcClientRequest req = null;

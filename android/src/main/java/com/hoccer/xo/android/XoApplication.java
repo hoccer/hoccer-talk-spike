@@ -35,32 +35,27 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     /** global executor for client background activity (initialized in onCreate) */
     private static ScheduledExecutorService EXECUTOR = null;
-
+    /** global executor for incoming connections */
+    private static ScheduledExecutorService INCOMING_EXECUTOR = null;
     /** global xo host */
     private static IXoClientHost CLIENT_HOST = null;
     /** global xo client (initialized in onCreate) */
     private static XoClient CLIENT = null;
-
     /** root of user-visible storage (initialized in onCreate) */
     private static File EXTERNAL_STORAGE = null;
     /** root of app-private storage (initialized in onCreate) */
     private static File INTERNAL_STORAGE = null;
-
     /** uncaught exception handler for the client and us */
     private static Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER = null;
-
     private static DisplayImageOptions CONTENT_IMAGE_OPTIONS = null;
-
     /** @return common executor for background tasks */
     public static ScheduledExecutorService getExecutor() {
         return EXECUTOR;
     }
-
     /** @return the xo client */
     public static XoClient getXoClient() {
         return CLIENT;
     }
-
     /**
      * @return user-visible storage directory
      */
@@ -156,6 +151,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // initialize logging system
         XoLogging.initialize(this);
+        XoConfiguration.initialize(this);
 
         // configure ormlite to use log4j
         System.setProperty("com.j256.ormlite.logger.type", "LOG4J");
@@ -228,11 +224,15 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         EXECUTOR = Executors.newScheduledThreadPool(
                         XoConfiguration.CLIENT_THREADS,
                         tfb.build());
+        ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
+        tfb2.setNameFormat("receiving client-%d");
+        tfb2.setUncaughtExceptionHandler(this);
+        INCOMING_EXECUTOR = Executors.newScheduledThreadPool(XoConfiguration.CLIENT_THREADS, tfb2.build());
 
         // create client instance
         LOG.info("creating client");
-        CLIENT_HOST = new XoHost(this);
-        XoClient client = new XoClient(CLIENT_HOST);
+        CLIENT_HOST = new XoAndroidClientHost(this);
+        XoClient client = new XoAndroidClient(CLIENT_HOST);
         client.setAvatarDirectory(getAvatarDirectory().toString());
         client.setAttachmentDirectory(getAttachmentDirectory().toString());
         client.setEncryptedUploadDirectory(getEncryptedUploadDirectory().toString());
@@ -264,6 +264,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         LOG.info("shutting down logging");
         XoLogging.shutdown();
+        LOG.info("shutting down configuration");
+        XoConfiguration.shutdown();
     }
 
     @Override
@@ -295,4 +297,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         }
     }
 
+    public static ScheduledExecutorService getIncomingExecutor() {
+        return INCOMING_EXECUTOR;
+    }
+
+    public static void reinitializeXoClient() {
+        if(CLIENT != null) {
+            CLIENT.initialize(CLIENT_HOST);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.ProfileActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.SimpleContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
@@ -29,6 +31,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.UUID;
 
@@ -45,6 +48,7 @@ public class ProfileFragment extends XoFragment
         PROFILE,
         CREATE_GROUP,
         CREATE_SELF,
+        CONFIRM_SELF
     }
 
     Mode mMode;
@@ -176,9 +180,11 @@ public class ProfileFragment extends XoFragment
         }
         if(v == mSelfRegisterButton) {
             LOG.debug("onClick(selfRegister)");
-            if(mContact != null && mContact.isSelf() && !mContact.isSelfRegistered()) {
+            if(mContact != null && mContact.isSelf()) {
                 mContact.updateSelfConfirmed();
                 getXoClient().register();
+                ProfileActivity activity = (ProfileActivity) getXoActivity();
+                activity.confirmSelf();
             }
         }
         if(v == mUserBlockButton) {
@@ -298,6 +304,13 @@ public class ProfileFragment extends XoFragment
         update(mContact);
     }
 
+    public void confirmSelf() {
+        LOG.debug("confirmSelf()");
+        mMode = Mode.CONFIRM_SELF;
+        mContact = getXoClient().getSelfContact();
+        update(mContact);
+    }
+
     public void createGroup() {
         LOG.debug("createGroup()");
         mMode = Mode.CREATE_GROUP;
@@ -334,19 +347,16 @@ public class ProfileFragment extends XoFragment
             if(avatarDownload != null) {
                 if(avatarDownload.isContentAvailable()) {
                     avatarUrl = avatarDownload.getDataFile();
+                    Uri uri = Uri.fromFile(new File(avatarUrl));
+                    avatarUrl = uri.toString();
                 }
             }
         }
         LOG.debug("avatar is " + avatarUrl);
-        DisplayImageOptions.Builder b = new DisplayImageOptions.Builder();
-        b.imageScaleType(ImageScaleType.IN_SAMPLE_INT);
-        mAvatarImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-//        mAvatarImage.setScaleX(0.5f);
-//        mAvatarImage.setScaleY(0.5f);
         ImageLoader.getInstance().displayImage(avatarUrl, mAvatarImage);
 
         // self operations
-        int selfRegistrationVisibility = contact.isSelf() && !contact.isSelfRegistered() ? View.VISIBLE : View.GONE;
+        int selfRegistrationVisibility = contact.isSelf() && mMode == Mode.CREATE_SELF ? View.VISIBLE : View.GONE;
         mSelfRegisterButton.setVisibility(selfRegistrationVisibility);
         // client operations
         int clientVisibility = contact.isClient() ? View.VISIBLE : View.GONE;

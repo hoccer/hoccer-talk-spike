@@ -18,10 +18,14 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.field.DataType;
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.Where;
+
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -104,7 +108,8 @@ public class XoClientDatabase {
         mGroupMembers.createOrUpdate(member);
     }
 
-    public void saveClientMessage(TalkClientMessage message) throws SQLException {
+    public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
+        message.setProgressState(false);
         mClientMessages.createOrUpdate(message);
     }
 
@@ -112,7 +117,7 @@ public class XoClientDatabase {
         mMessages.createOrUpdate(message);
     }
 
-    public void saveDelivery(TalkDelivery delivery) throws SQLException {
+    public synchronized void saveDelivery(TalkDelivery delivery) throws SQLException {
         mDeliveries.createOrUpdate(delivery);
     }
 
@@ -189,7 +194,7 @@ public class XoClientDatabase {
         return contact;
     }
 
-    public TalkClientContact findContactByClientId(String clientId, boolean create) throws SQLException {
+    public synchronized TalkClientContact findContactByClientId(String clientId, boolean create) throws SQLException {
         TalkClientContact contact = null;
 
         contact = mClientContacts.queryBuilder()
@@ -206,7 +211,7 @@ public class XoClientDatabase {
         return contact;
     }
 
-    public TalkClientContact findContactByGroupId(String groupId, boolean create) throws SQLException {
+    public synchronized TalkClientContact findContactByGroupId(String groupId, boolean create) throws SQLException {
         TalkClientContact contact = null;
 
         contact = mClientContacts.queryBuilder()
@@ -231,21 +236,30 @@ public class XoClientDatabase {
                 .queryForFirst();
     }
 
-    public List<TalkClientMessage> findMessagesForDelivery() throws SQLException {
-        List<TalkDelivery> newDeliveries = mDeliveries.queryForEq(TalkDelivery.FIELD_STATE, TalkDelivery.STATE_NEW);
+    public synchronized List<TalkClientMessage> findMessagesForDelivery() throws SQLException {
+        List<TalkDelivery> newDeliveries = mDeliveries.queryForEq(TalkDelivery.FIELD_STATE,
+                TalkDelivery.STATE_NEW);
 
         List<TalkClientMessage> messages = new ArrayList<TalkClientMessage>();
         try {
-        for(TalkDelivery d: newDeliveries) {
-            TalkClientMessage m = mClientMessages.queryBuilder()
-                                    .where().eq("outgoingDelivery" + "_id", d)
-                                    .queryForFirst();
-            if(m != null) {
-                messages.add(m);
-            } else {
-                LOG.error("no message for delivery for tag " + d.getMessageTag());
+            int inProgressCount = 0;
+            for (TalkDelivery d : newDeliveries) {
+                TalkClientMessage m = mClientMessages.queryBuilder()
+                        .where().eq("outgoingDelivery" + "_id", d)
+                        .queryForFirst();
+                if (m != null) {
+                    if (!m.isInProgress()) {
+                        m.setProgressState(true);
+                        mClientMessages.createOrUpdate(m);
+                        messages.add(m);
+                    } else {
+                        inProgressCount++;
+                    }
+                } else {
+                    LOG.error("no message for delivery for tag " + d.getMessageTag());
+                }
             }
-        }
+            LOG.debug(Integer.toString(inProgressCount) + " Messages still in Progress");
         } catch (Throwable t) {
             LOG.error("SQL fnord", t);
         }
@@ -253,7 +267,7 @@ public class XoClientDatabase {
         return messages;
     }
 
-    public TalkClientMessage findMessageByMessageId(String messageId, boolean create) throws SQLException {
+    public synchronized TalkClientMessage findMessageByMessageId(String messageId, boolean create) throws SQLException {
         TalkClientMessage message = null;
 
         message = mClientMessages.queryBuilder()
@@ -262,13 +276,14 @@ public class XoClientDatabase {
 
         if(create && message == null) {
             message = new TalkClientMessage();
+            message.setMessageId(messageId);
             mClientMessages.create(message);
         }
 
         return message;
     }
 
-    public TalkClientMessage findMessageByMessageTag(String messageTag, boolean create) throws SQLException {
+    public synchronized TalkClientMessage findMessageByMessageTag(String messageTag, boolean create) throws SQLException {
         TalkClientMessage message = null;
 
         message = mClientMessages.queryBuilder()
@@ -285,6 +300,20 @@ public class XoClientDatabase {
 
     public List<TalkClientMessage> findMessagesByContactId(int contactId) throws SQLException {
         return mClientMessages.queryForEq("conversationContact_id", contactId);
+    }
+
+    public List<TalkClientMessage> findMessagesByContactId(int contactId, long count, long offset) throws SQLException {
+        QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
+        builder.limit(count);
+        builder.orderBy("timestamp", false);
+        builder.offset(offset);
+        Where<TalkClientMessage, Integer> where = builder.where();
+        where.eq("conversationContact_id", contactId);
+        builder.setWhere(where);
+        builder.orderBy("clientMessageId", true);
+        List<TalkClientMessage> messages = mClientMessages.query(builder.prepare());
+        Collections.reverse(messages);
+        return messages;
     }
 
     public Vector<Integer> findMessageIdsByContactId(int contactId) throws SQLException {

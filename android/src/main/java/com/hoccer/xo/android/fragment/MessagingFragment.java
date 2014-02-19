@@ -1,56 +1,76 @@
 package com.hoccer.xo.android.fragment;
 
+import com.actionbarsherlock.widget.SearchView;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.adapter.ConversationAdapter;
+import com.hoccer.xo.android.base.XoAdapter;
+import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.android.view.OnOverscrollListener;
+import com.hoccer.xo.android.view.OverscrollListView;
+import com.hoccer.xo.release.R;
+
+import org.apache.log4j.Logger;
+
+import android.animation.Animator;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.actionbarsherlock.widget.SearchView;
-import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.base.XoListFragment;
-import com.hoccer.xo.release.R;
-import com.hoccer.xo.android.adapter.ConversationAdapter;
-import com.hoccer.talk.client.model.TalkClientContact;
-import org.apache.log4j.Logger;
 
 /**
  * Fragment for conversations
  */
 public class MessagingFragment extends XoListFragment
-    implements SearchView.OnQueryTextListener,
-               XoAdapter.AdapterReloadListener {
+        implements SearchView.OnQueryTextListener,
+        XoAdapter.AdapterReloadListener, OnOverscrollListener, View.OnTouchListener {
 
-	private static final Logger LOG = Logger.getLogger(MessagingFragment.class);
+    private static final Logger LOG = Logger.getLogger(MessagingFragment.class);
 
-	ListView mMessageList;
+    private static final int OVERSCROLL_THRESHOLD = -5;
 
-    TextView mEmptyText;
+    private OverscrollListView mMessageList;
 
-    TalkClientContact mContact;
+    private TextView mEmptyText;
 
-    ConversationAdapter mAdapter;
+    private TalkClientContact mContact;
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		LOG.debug("onCreateView()");
+    private ConversationAdapter mAdapter;
+
+    private View mOverscrollIndicator;
+
+    private boolean mInOverscroll = false;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        LOG.debug("onCreateView()");
         super.onCreateView(inflater, container, savedInstanceState);
 
-		View v = inflater.inflate(R.layout.fragment_messaging, container, false);
+        View view = inflater.inflate(R.layout.fragment_messaging, container, false);
 
-		mMessageList = (ListView)v.findViewById(android.R.id.list);
-        mEmptyText = (TextView)v.findViewById(R.id.messaging_empty);
+        mMessageList = (OverscrollListView) view.findViewById(android.R.id.list);
+        mMessageList.setOverScrollMode(ListView.OVER_SCROLL_IF_CONTENT_SCROLLS);
+        mMessageList.addOverScrollListener(this);
+        mMessageList.setOnTouchListener(this);
+        mMessageList.setMaxOverScrollY(150);
+//        mMessageList.setOverscrollHeader(getResources().getDrawable(R.drawable.ic_light_av_replay));
+        mEmptyText = (TextView) view.findViewById(R.id.messaging_empty);
+        mOverscrollIndicator = view.findViewById(R.id.overscroll_indicator);
 
-		return v;
-	}
+        return view;
+    }
 
     @Override
     public void onResume() {
         LOG.debug("onResume()");
         super.onResume();
 
-        if(mAdapter == null) {
-            mAdapter = getXoActivity().makeConversationAdapter();
+        if (mAdapter == null) {
+            mAdapter = new ConversationAdapter(getXoActivity());
             mAdapter.setAdapterReloadListener(this);
             mAdapter.onCreate();
             mAdapter.requestReload();
@@ -59,7 +79,7 @@ public class MessagingFragment extends XoListFragment
 
         mAdapter.onResume();
 
-        if(mContact != null) {
+        if (mContact != null) {
             mAdapter.converseWithContact(mContact);
         }
     }
@@ -75,7 +95,7 @@ public class MessagingFragment extends XoListFragment
     public void onDestroy() {
         LOG.debug("onDestroy()");
         super.onDestroy();
-        if(mAdapter != null) {
+        if (mAdapter != null) {
             mAdapter.onDestroy();
             mAdapter = null;
         }
@@ -108,9 +128,56 @@ public class MessagingFragment extends XoListFragment
     public void converseWithContact(TalkClientContact contact) {
         LOG.debug("converseWithContact(" + contact.getClientContactId() + ")");
         mContact = contact;
-        if(mAdapter != null) {
+        if (mAdapter != null) {
             mAdapter.converseWithContact(contact);
         }
     }
 
+    @Override
+    public void onOverscroll(int deltaX, int deltaY, boolean clampedX, boolean clampedY) {
+        if (deltaY < OVERSCROLL_THRESHOLD && !mInOverscroll && clampedY) {
+            mInOverscroll = true;
+            mAdapter.loadNextMessages();
+        }
+    }
+
+    private void animateOverscroll() {
+        mOverscrollIndicator.setVisibility(View.VISIBLE);
+        mOverscrollIndicator.animate().scaleX(0.0f).setDuration(0).start();
+        mOverscrollIndicator.animate().scaleX(1.0f).setDuration(3000)
+                .setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        Log.d("zalem", "start animation");
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mOverscrollIndicator.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                }).start();
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            mInOverscroll = false;
+        }
+        return false;
+    }
 }

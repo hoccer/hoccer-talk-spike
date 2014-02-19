@@ -14,20 +14,19 @@ public class ClientCreate extends TalkToolCommand {
 
     @Parameter(description = "Number of clients to create", names = "-n")
     int pNumClients = 1;
-
     @Parameter(description = "Select clients after creation", names = "-s")
-    boolean pSelectClients;
+    boolean pSelectClients = false;
 
     @Override
     protected void run(TalkToolContext context) throws Exception {
         Console.info("Creating " + pNumClients + " clients");
         ArrayList<TalkToolClient> clients = new ArrayList<TalkToolClient>();
-        for(int i = 0; i < pNumClients; i++) {
+        for (int i = 0; i < pNumClients; i++) {
             TalkToolClient client = new TalkToolClient(context);
             context.addClient(client);
             clients.add(client);
         }
-        if(pSelectClients) {
+        if (pSelectClients) {
             context.setSelectedClients(clients);
         }
     }

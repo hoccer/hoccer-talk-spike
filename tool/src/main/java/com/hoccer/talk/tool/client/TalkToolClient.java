@@ -24,8 +24,9 @@ public class TalkToolClient {
         mId = context.generateId();
     }
 
-    public void initialize() {
+    public void initialize() throws SQLException {
         mDatabaseBackend = new TalkToolClientDatabase(this);
+        mDatabaseBackend.initializeDb();
         mHost = new TalkToolClientHost(this);
         mClient = new XoClient(mHost);
     }

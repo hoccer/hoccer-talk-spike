@@ -7,7 +7,7 @@ import com.hoccer.talk.tool.client.TalkToolClientCommand;
 
 import java.sql.SQLException;
 
-@CLICommand(name = "cinit", description = "Initialize the database of the client")
+@CLICommand(name = "cinit", description = "Initialize the database of the client - normaly not necessary.")
 public class ClientInit extends TalkToolClientCommand {
 
     @Override
