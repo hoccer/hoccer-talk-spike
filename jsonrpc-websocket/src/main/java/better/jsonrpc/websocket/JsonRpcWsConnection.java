@@ -14,40 +14,58 @@ public class JsonRpcWsConnection extends JsonRpcConnection
         implements WebSocket, WebSocket.OnTextMessage, WebSocket.OnBinaryMessage {
 
     private static final String KEEPALIVE_REQUEST_STRING = "k";
-    private static final byte[] KEEPALIVE_REQUEST_BINARY = new byte[] {'k'};
+    private static final byte[] KEEPALIVE_REQUEST_BINARY = new byte[]{'k'};
     private static final String KEEPALIVE_RESPONSE_STRING = "a";
-    private static final byte[] KEEPALIVE_RESPONSE_BINARY = new byte[] {'a'};
-	
-	/** Currently active websocket connection */
-	private Connection mConnection;
+    private static final byte[] KEEPALIVE_RESPONSE_BINARY = new byte[]{'a'};
 
-    /** Max idle time for the connection */
+    /**
+     * Currently active websocket connection
+     */
+    private Connection mConnection;
+
+    /**
+     * Max idle time for the connection
+     */
     private int mMaxIdleTime = 300 * 1000;
 
-    /** Max test message size */
+    /**
+     * Max test message size
+     */
     private int mMaxTextMessageSize = 1 << 16;
 
-    /** Max binary message size */
+    /**
+     * Max binary message size
+     */
     private int mMaxBinaryMessageSize = 1 << 16;
 
-    /** Whether to accept binary messages */
+    /**
+     * Whether to accept binary messages
+     */
     private boolean mAcceptBinaryMessages = true;
 
-    /** Whether to accept text messages */
+    /**
+     * Whether to accept text messages
+     */
     private boolean mAcceptTextMessages = true;
 
-    /** Whether to send binary messages (text is the default) */
+    /**
+     * Whether to send binary messages (text is the default)
+     */
     private boolean mSendBinaryMessages = false;
 
-    /** Whether to send keep-alive frames */
+    /**
+     * Whether to send keep-alive frames
+     */
     private boolean mSendKeepAlives = false;
 
-    /** Whether to answer keep-alive requests */
+    /**
+     * Whether to answer keep-alive requests
+     */
     private boolean mAnswerKeepAlives = false;
-	
-	public JsonRpcWsConnection(ObjectMapper mapper) {
-		super(mapper);
-	}
+
+    public JsonRpcWsConnection(ObjectMapper mapper) {
+        super(mapper);
+    }
 
     public int getMaxIdleTime() {
         return mMaxIdleTime;
@@ -117,33 +135,33 @@ public class JsonRpcWsConnection extends JsonRpcConnection
     }
 
     @Override
-	public boolean isConnected() {
-		return mConnection != null && mConnection.isOpen();
-	}
-	
-	public void disconnect() {
-		if(mConnection != null && mConnection.isOpen()) {
-			mConnection.close();
-		}
-	}
-	
-	public void transmit(String data) throws IOException {
-		if(mConnection != null && mConnection.isOpen()) {
-			mConnection.sendMessage(data);
-		}
-	}
+    public boolean isConnected() {
+        return mConnection != null && mConnection.isOpen();
+    }
+
+    public void disconnect() {
+        if (mConnection != null && mConnection.isOpen()) {
+            mConnection.close();
+        }
+    }
+
+    public void transmit(String data) throws IOException {
+        if (mConnection != null && mConnection.isOpen()) {
+            mConnection.sendMessage(data);
+        }
+    }
 
     public void transmit(byte[] data, int offset, int length) throws IOException {
-        if(mConnection != null && mConnection.isOpen()) {
+        if (mConnection != null && mConnection.isOpen()) {
             mConnection.sendMessage(data, offset, length);
         }
     }
 
     public void transmit(JsonNode node) throws IOException {
-        if(LOG.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             LOG.trace("[" + mConnectionId + "] transmitting \"" + node.toString() + "\"");
         }
-        if(mSendBinaryMessages) {
+        if (mSendBinaryMessages) {
             byte[] data = getMapper().writeValueAsBytes(node);
             transmit(data, 0, data.length);
         } else {
@@ -152,55 +170,55 @@ public class JsonRpcWsConnection extends JsonRpcConnection
         }
     }
 
-	@Override
-	public void onOpen(Connection connection) {
-        if(LOG.isDebugEnabled()) {
-		    LOG.debug("[" + mConnectionId + "] connection open");
+    @Override
+    public void onOpen(Connection connection) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("[" + mConnectionId + "] connection open");
         }
-		super.onOpen();
-		mConnection = connection;
+        super.onOpen();
+        mConnection = connection;
         applyConnectionParameters();
-	}
+    }
 
-	@Override
-	public void onClose(int closeCode, String message) {
-        if(LOG.isDebugEnabled()) {
-		    LOG.debug("[" + mConnectionId + "] connection close " + closeCode + "/" + message);
+    @Override
+    public void onClose(int closeCode, String message) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("[" + mConnectionId + "] connection close " + closeCode + "/" + message);
         }
-		super.onClose();
-		mConnection = null;
-	}
+        super.onClose();
+        mConnection = null;
+    }
 
     private void onMessage(JsonNode message) {
-        if(LOG.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             LOG.trace("[" + mConnectionId + "] received \"" + message.toString() + "\"");
         }
-        if(message.isObject()) {
+        if (message.isObject()) {
             ObjectNode messageObj = ObjectNode.class.cast(message);
 
             // requests and notifications
-            if(messageObj.has("method")) {
-                if(messageObj.has("id")) {
+            if (messageObj.has("method")) {
+                if (messageObj.has("id")) {
                     handleRequest(messageObj);
                 } else {
                     handleNotification(messageObj);
                 }
             }
             // responses
-            if(messageObj.has("result") || messageObj.has("error")) {
-                if(messageObj.has("id")) {
+            if (messageObj.has("result") || messageObj.has("error")) {
+                if (messageObj.has("id")) {
                     handleResponse(messageObj);
                 }
             }
         }
     }
-	
-	@Override
-	public void onMessage(String data) {
-        if(mAcceptTextMessages) {
+
+    @Override
+    public void onMessage(String data) {
+        if (mAcceptTextMessages) {
             // answer keep-alive requests
-            if(mAnswerKeepAlives) {
-                if(data.equals(KEEPALIVE_REQUEST_STRING)) {
+            if (mAnswerKeepAlives) {
+                if (data.equals(KEEPALIVE_REQUEST_STRING)) {
                     try {
                         transmit(KEEPALIVE_RESPONSE_STRING);
                     } catch (IOException e) {
@@ -216,15 +234,15 @@ public class JsonRpcWsConnection extends JsonRpcConnection
                 e.printStackTrace();
             }
         }
-	}
+    }
 
     @Override
     public void onMessage(byte[] data, int offset, int length) {
-        if(mAcceptBinaryMessages) {
+        if (mAcceptBinaryMessages) {
             // handle keep-alive frames
-            if(length == 1) {
-                if(data[offset] == 'k') {
-                    if(mAnswerKeepAlives) {
+            if (length == 1) {
+                if (data[offset] == 'k') {
+                    if (mAnswerKeepAlives) {
                         try {
                             transmit(KEEPALIVE_RESPONSE_BINARY, 0, KEEPALIVE_RESPONSE_BINARY.length);
                         } catch (IOException e) {
@@ -232,7 +250,7 @@ public class JsonRpcWsConnection extends JsonRpcConnection
                         }
                     }
                 }
-                if(data[offset] == 'a') {
+                if (data[offset] == 'a') {
                     // ignore for now
                 }
                 return;
@@ -249,7 +267,7 @@ public class JsonRpcWsConnection extends JsonRpcConnection
     }
 
     private void applyConnectionParameters() {
-        if(mConnection != null) {
+        if (mConnection != null) {
             mConnection.setMaxIdleTime(mMaxIdleTime);
             mConnection.setMaxTextMessageSize(mMaxTextMessageSize);
             mConnection.setMaxBinaryMessageSize(mMaxBinaryMessageSize);
@@ -257,28 +275,28 @@ public class JsonRpcWsConnection extends JsonRpcConnection
     }
 
     public void sendKeepAlive() throws IOException {
-        if(mSendKeepAlives) {
-            if(mSendBinaryMessages) {
+        if (mSendKeepAlives) {
+            if (mSendBinaryMessages) {
                 transmit(KEEPALIVE_REQUEST_BINARY, 0, KEEPALIVE_REQUEST_BINARY.length);
             } else {
                 transmit(KEEPALIVE_REQUEST_STRING);
             }
         }
     }
-	
-	@Override
-	public void sendRequest(ObjectNode request) throws IOException {
-        transmit(request);
-	}
 
-	@Override
-	public void sendResponse(ObjectNode response) throws IOException {
+    @Override
+    public void sendRequest(ObjectNode request) throws IOException {
+        transmit(request);
+    }
+
+    @Override
+    public void sendResponse(ObjectNode response) throws IOException {
         transmit(response);
-	}
-	
-	@Override
-	public void sendNotification(ObjectNode notification) throws IOException {
-		transmit(notification);
-	}
-	
+    }
+
+    @Override
+    public void sendNotification(ObjectNode notification) throws IOException {
+        transmit(notification);
+    }
+
 }
