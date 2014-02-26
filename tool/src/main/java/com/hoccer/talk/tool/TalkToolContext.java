@@ -27,7 +27,8 @@ public class TalkToolContext extends CLIContext {
     public TalkToolContext(TalkTool app) {
         super(app);
         mMapper = new ObjectMapper();
-        mExecutor = Executors.newScheduledThreadPool(8);
+        //mExecutor = Executors.newSingleThreadExecutor();
+        mExecutor = Executors.newScheduledThreadPool(1);
         mClientIdCounter = new AtomicInteger(0);
         mClients = new Vector<TalkToolClient>();
         mClientsById = new Hashtable<Integer, TalkToolClient>();
