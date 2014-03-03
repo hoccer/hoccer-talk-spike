@@ -51,9 +51,9 @@
     </dependency>
     <!-- SQlite -->
     <dependency>
-      <groupId>org.xerial</groupId>
-      <artifactId>sqlite-jdbc</artifactId>
-      <version>${sqlite-jdbc.version}</version>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>${h2-jdbc.version}</version>
     </dependency>
   </dependencies>
   

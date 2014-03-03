@@ -50,7 +50,7 @@ public class TalkToolClientDatabase implements IXoClientDatabaseBackend {
     @Override
     public ConnectionSource getConnectionSource() {
         if (mCs == null) {
-            String url = "jdbc:sqlite:talk-client-" + mClient.getId() + ".db";
+            String url = "jdbc:h2:mem:talk-client-" + mClient.getId();
             LOG.debug("Creating connsource for " + url);
 
             try {
