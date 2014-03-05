@@ -1,7 +1,9 @@
 package com.hoccer.talk.tool;
 
 import better.cli.CLIContext;
+import com.beust.jcommander.Parameter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
@@ -24,6 +26,10 @@ public class TalkToolContext extends CLIContext {
     List<TalkToolClient> mSelectedClients;
     WebSocketClientFactory mWSClientFactory;
 
+    @Parameter(names={"-s", "-server"},
+               description = "Talkserver to use (complete uri)")
+    private String server = XoClientConfiguration.SERVER_URI;
+
     public TalkToolContext(TalkTool app) {
         super(app);
         mMapper = new ObjectMapper();
@@ -40,6 +46,11 @@ public class TalkToolContext extends CLIContext {
             // XXX
             e.printStackTrace();
         }
+
+    }
+
+    public String getServer() {
+        return server;
     }
 
     public ScheduledExecutorService getExecutor() {

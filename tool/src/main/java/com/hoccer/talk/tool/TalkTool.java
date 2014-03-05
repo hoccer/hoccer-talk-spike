@@ -5,21 +5,27 @@ import better.cli.CommandLineApplication;
 import better.cli.EntryPoint;
 import better.cli.annotations.CLIEntry;
 import better.cli.exceptions.CLIInitException;
+import com.beust.jcommander.JCommander;
 
 @CLIEntry
 public class TalkTool extends CommandLineApplication<TalkToolContext> {
+
+    static String[] mRawArgs;
 
     public TalkTool() throws CLIInitException {
         super();
     }
 
     public static void main(String[] args) {
+        mRawArgs = args;
         EntryPoint.main(args);
     }
 
     @Override
     protected CLIContext createContext() {
-        return new TalkToolContext(this);
+        TalkToolContext context = new TalkToolContext(this);
+        JCommander commander = new JCommander(context, mRawArgs);
+        return context;
     }
 
     @Override
