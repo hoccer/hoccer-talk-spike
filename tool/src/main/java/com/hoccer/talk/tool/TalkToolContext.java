@@ -1,7 +1,9 @@
 package com.hoccer.talk.tool;
 
 import better.cli.CLIContext;
+import com.beust.jcommander.Parameter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
@@ -24,9 +26,19 @@ public class TalkToolContext extends CLIContext {
     List<TalkToolClient> mSelectedClients;
     WebSocketClientFactory mWSClientFactory;
 
+    @Parameter(names={"-s", "-server"},
+               description = "Talkserver to use (complete uri)")
+    private String server = XoClientConfiguration.SERVER_URI;
+
+    @Parameter(names="-dbfile",
+               description = "If true database is stored in a file. By default memory mode is used.",
+               arity = 1)
+    private boolean dbfile = false;
+
     public TalkToolContext(TalkTool app) {
         super(app);
         mMapper = new ObjectMapper();
+        //mExecutor = Executors.newSingleThreadExecutor();
         mExecutor = Executors.newScheduledThreadPool(8);
         mClientIdCounter = new AtomicInteger(0);
         mClients = new Vector<TalkToolClient>();
@@ -39,6 +51,15 @@ public class TalkToolContext extends CLIContext {
             // XXX
             e.printStackTrace();
         }
+
+    }
+
+    public Boolean isDbModeFile() {
+        return dbfile;
+    }
+
+    public String getServer() {
+        return server;
     }
 
     public ScheduledExecutorService getExecutor() {

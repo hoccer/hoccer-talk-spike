@@ -44,6 +44,7 @@
     <mongo.version>2.10.1</mongo.version>
     <metrics.version>3.0.0-BETA2</metrics.version>
     <sqlite-jdbc.version>3.7.2</sqlite-jdbc.version>
+    <h2-jdbc.version>1.3.175</h2-jdbc.version>
     <postgresql.version>9.1-901.jdbc4</postgresql.version>
     <ormlite.version>4.43</ormlite.version>
     <servlet.version>3.0.1</servlet.version>

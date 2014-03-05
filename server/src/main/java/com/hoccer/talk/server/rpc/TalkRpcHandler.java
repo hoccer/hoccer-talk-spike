@@ -105,11 +105,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
         }
 
-        TalkServerInfo si = new TalkServerInfo();
-        si.setServerTime(new Date());
-        si.setSupportMode(mConnection.isSupportMode());
+        TalkServerInfo serverInfo = new TalkServerInfo();
+        serverInfo.setServerTime(new Date());
+        serverInfo.setSupportMode(mConnection.isSupportMode());
 
-        return si;
+        return serverInfo;
     }
 
     @Override
@@ -556,6 +556,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 result = line;
             }
         } catch (IOException ioe) {
+            LOG.error("Error in running 'pwgen'!", ioe);
         }
         return result;
     }
