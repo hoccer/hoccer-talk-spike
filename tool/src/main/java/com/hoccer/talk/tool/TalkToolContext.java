@@ -30,6 +30,11 @@ public class TalkToolContext extends CLIContext {
                description = "Talkserver to use (complete uri)")
     private String server = XoClientConfiguration.SERVER_URI;
 
+    @Parameter(names="-dbfile",
+               description = "If true database is stored in a file. By default memory mode is used.",
+               arity = 1)
+    private boolean dbfile = false;
+
     public TalkToolContext(TalkTool app) {
         super(app);
         mMapper = new ObjectMapper();
@@ -47,6 +52,10 @@ public class TalkToolContext extends CLIContext {
             e.printStackTrace();
         }
 
+    }
+
+    public Boolean isDbModeFile() {
+        return dbfile;
     }
 
     public String getServer() {

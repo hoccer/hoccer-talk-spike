@@ -9,7 +9,8 @@ public class ClientConfig extends TalkToolCommand {
 
     @Override
     protected void run(TalkToolContext context) throws Exception {
-        System.out.println("server: " + context.getServer());
+        System.out.println("- server: " + context.getServer());
+        System.out.println("- store DB in file: " + context.isDbModeFile());
     }
 
 }
