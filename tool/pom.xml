@@ -11,6 +11,7 @@
   <artifactId>hoccer-talk-tool</artifactId>
 
   <name>Hoccer Talk Tool</name>
+  <version>1.0.0</version>
 
   <packaging>jar</packaging>
 
@@ -54,6 +55,12 @@
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <version>${h2-jdbc.version}</version>
+    </dependency>
+    <!-- bouncy castle crypto library -->
+    <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk15on</artifactId>
+        <version>${bouncycastle.version}</version>
     </dependency>
   </dependencies>
   

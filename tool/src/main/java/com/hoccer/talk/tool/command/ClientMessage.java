@@ -10,6 +10,7 @@ import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+// import java.security.Provider;
 import java.security.Security;
 import java.sql.SQLException;
 import java.util.List;
@@ -33,6 +34,12 @@ public class ClientMessage extends TalkToolCommand {
     @Override
     protected void run(TalkToolContext context) throws Exception {
         List<TalkToolClient> clients = context.getClientsBySelectors(pClients);
+
+        /*Provider[] provs = Security.getProviders();
+        for(Provider prov: provs) {
+            Console.info(prov.toString());
+        }*/
+
         if (clients.size() != 2) {
             throw new Exception("Clients mus be supplied in a pair (sender, recipient)");
         }
