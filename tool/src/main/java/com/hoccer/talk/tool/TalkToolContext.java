@@ -34,7 +34,7 @@ public class TalkToolContext extends CLIContext {
         super(app);
         mMapper = new ObjectMapper();
         //mExecutor = Executors.newSingleThreadExecutor();
-        mExecutor = Executors.newScheduledThreadPool(1);
+        mExecutor = Executors.newScheduledThreadPool(8);
         mClientIdCounter = new AtomicInteger(0);
         mClients = new Vector<TalkToolClient>();
         mClientsById = new Hashtable<Integer, TalkToolClient>();
