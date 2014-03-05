@@ -3,22 +3,16 @@ package com.hoccer.talk.tool.command;
 import better.cli.annotations.CLICommand;
 import better.cli.console.Console;
 import com.beust.jcommander.Parameter;
-import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.talk.model.TalkMessage;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.security.Security;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.UUID;
 
 @CLICommand(name = "cmessage", description = "Send a text message from one client to another.")
 public class ClientMessage extends TalkToolCommand {
@@ -28,7 +22,7 @@ public class ClientMessage extends TalkToolCommand {
     @Parameter(description = "Clients for message exchange")
     List<String> pClients;
 
-    @Parameter(description = "Message being sent, defaults to '" + DEFAULT_MESSAGE + "'", names="-m")
+    @Parameter(description = "Message being sent, defaults to '" + DEFAULT_MESSAGE + "'", names = "-m")
     String pMessage;
 
     // this is obviously needed for message encryption
