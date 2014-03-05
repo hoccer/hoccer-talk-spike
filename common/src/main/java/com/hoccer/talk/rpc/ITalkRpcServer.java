@@ -490,6 +490,10 @@ public interface ITalkRpcServer {
      */
     void updateGroupKey(String groupId, String clientId, String keyId, String key);
 
+    // TODO: void updateGroupKey2(String groupId, String clientId, String sharedKeyId, String publicKeyId, String cryptedSharedKey);
+    // TODO: void updateGroupKeys(String groupId, String sharedKeyId, String[] clientIds, String[] publicKeyIds, String[] cryptedSharedKeys);
+    // TODO: void updateGroupKeys(String groupId, String sharedKeyId, GroupKey[] groupKeys);
+
     /** Retrieve members of a group changed after given date
      * @param groupId denotes the group to retrieve the members of
      * @param lastKnown is the date in milliseconds since start of year 1970
