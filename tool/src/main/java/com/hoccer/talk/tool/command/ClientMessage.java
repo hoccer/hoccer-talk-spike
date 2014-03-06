@@ -15,7 +15,7 @@ import java.security.Security;
 import java.sql.SQLException;
 import java.util.List;
 
-@CLICommand(name = "cmessage", description = "Send a text message from one client to another.")
+@CLICommand(name = "cmessage", description = "Send a text message from one client to another, use: cmessage <sender_id> <recipient_id> -m <message_string>")
 public class ClientMessage extends TalkToolCommand {
 
     private final String DEFAULT_MESSAGE = "Hello World";

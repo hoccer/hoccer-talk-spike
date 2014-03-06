@@ -8,7 +8,7 @@ import com.hoccer.talk.tool.client.TalkToolClient;
 
 import java.util.List;
 
-@CLICommand(name = "cpair", description = "Pair clients using automatic token exchange.")
+@CLICommand(name = "cpair", description = "Pair clients using automatic token exchange, use: cpair <client1_id> <client2_id>")
 public class ClientPair extends TalkToolCommand {
 
     @Parameter(description = "Clients to pair")
