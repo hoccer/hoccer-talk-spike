@@ -11,6 +11,7 @@ public class ClientConfig extends TalkToolCommand {
     protected void run(TalkToolContext context) throws Exception {
         System.out.println("- server: " + context.getServer());
         System.out.println("- store DB in file: " + context.isDbModeFile());
+        System.out.println("- threadpool size: " + context.getThreadPoolSize());
     }
 
 }
