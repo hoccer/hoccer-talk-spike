@@ -35,11 +35,16 @@ public class TalkToolContext extends CLIContext {
                arity = 1)
     private boolean dbfile = false;
 
+    @Parameter(names="-poolsize",
+            description = "CorePoolSize for the ScheduledExecutorService. Default is 8.",
+            arity = 1)
+    private Integer poolsize = 8;
+
     public TalkToolContext(TalkTool app) {
         super(app);
         mMapper = new ObjectMapper();
         //mExecutor = Executors.newSingleThreadExecutor();
-        mExecutor = Executors.newScheduledThreadPool(8);
+        mExecutor = Executors.newScheduledThreadPool(this.getThreadPoolSize());
         mClientIdCounter = new AtomicInteger(0);
         mClients = new Vector<TalkToolClient>();
         mClientsById = new Hashtable<Integer, TalkToolClient>();
@@ -60,6 +65,10 @@ public class TalkToolContext extends CLIContext {
 
     public String getServer() {
         return server;
+    }
+
+    public Integer getThreadPoolSize() {
+        return poolsize;
     }
 
     public ScheduledExecutorService getExecutor() {

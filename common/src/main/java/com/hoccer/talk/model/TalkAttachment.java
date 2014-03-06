@@ -12,14 +12,15 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName="attachment")
 public class TalkAttachment {
 
+    /** internal id, not transfered */
     @DatabaseField(generatedId = true)
     private int attachmentId;
 
-    /** URL of attached file */
+    /** The download URL of attached file */
     @DatabaseField
     String url;
 
-    /** Name of file */
+    /** An optional file name for the attachment; the receiver must make sure that it does not collide with other file names */
     @DatabaseField
     String filename;
 
@@ -27,15 +28,15 @@ public class TalkAttachment {
     @DatabaseField
     String mimeType;
 
-    /** String-encoded size of attached file */
+    /** String of decimal digits denoting the size of attached file in bytes */
     @DatabaseField
     String contentSize;
 
-    /** Media-type of attached file (sort of like the first half of MIME type, but consistent) */
+    /** Media-type of attached file, currently image, video, audio, contact, geolocation, data */
     @DatabaseField
     String mediaType;
 
-    /** Aspect-ratio for pretty client views */
+    /** Aspect-ratio for the preview of an attachment */
     @DatabaseField
     double aspectRatio;
 
