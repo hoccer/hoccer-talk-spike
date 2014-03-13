@@ -5,17 +5,23 @@ import better.cli.console.Console;
 import com.beust.jcommander.Parameter;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 // import java.security.Provider;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.security.Security;
 import java.sql.SQLException;
 import java.util.List;
 
-@CLICommand(name = "cmessage", description = "Send a text message from one client to another, use: cmessage <sender_id> <recipient_id> -m <message_string>")
+@CLICommand(name = "cmessage", description = "Send a text message from one client to another, use: cmessage <sender_id> <recipient_id> -m <message_string> -f <path_to_file>")
 public class ClientMessage extends TalkToolCommand {
 
     private final String DEFAULT_MESSAGE = "Hello World";
@@ -25,6 +31,9 @@ public class ClientMessage extends TalkToolCommand {
 
     @Parameter(description = "Message being sent, defaults to '" + DEFAULT_MESSAGE + "'", names = "-m")
     String pMessage;
+
+    @Parameter(description = "Path to file to be attached to the message (optional)", names = "-f")
+    String pAttachmentPath;
 
     // this is obviously needed for message encryption
     static {
@@ -41,16 +50,40 @@ public class ClientMessage extends TalkToolCommand {
         }*/
 
         if (clients.size() != 2) {
-            throw new Exception("Clients mus be supplied in a pair (sender, recipient)");
+            throw new Exception("Clients must be supplied in a pair (sender, recipient)");
         }
         if (pMessage == null || pMessage.isEmpty()) {
             pMessage = DEFAULT_MESSAGE;
             Console.warn("No message provided. Using default messageText.");
         }
-        sendMessage(clients.get(0), clients.get(1), pMessage);
+
+        TalkClientUpload attachmentUpload;
+        if (pAttachmentPath == null || pAttachmentPath.isEmpty()) {
+            attachmentUpload = null;
+        } else {
+            // XXX TODO: upload directory - should be a constant somewhere
+            String uploadDir = "/Users/kristine/projects/artcom/hoccer/talk-tool-files/files/upload";
+            clients.get(0).getClient().setEncryptedUploadDirectory(uploadDir);
+
+            Console.info("Creating attachment for file: '" + pAttachmentPath + "'");
+
+            File file = new File(pAttachmentPath);
+            String url = file.getAbsolutePath();
+            String contentUrl = url; // in android this makes a difference
+            String contentType = "image/png"; // XXX TODO: calculate filetype (Files.probeContentType(FileSystems.getDefault().getPath(url)?)
+            String mediaType = "image";
+            double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
+            int contentLength = (int)file.length();
+            
+            Console.info("---- url: " + url + ", contentType: " + contentType + ", length: " + contentLength);
+
+            attachmentUpload = new TalkClientUpload();
+            attachmentUpload.initializeAsAttachment(contentUrl, url, contentType, mediaType, aspectRatio, contentLength);
+        }
+        sendMessage(clients.get(0), clients.get(1), pMessage, attachmentUpload);
     }
 
-    private void sendMessage(TalkToolClient generator, TalkToolClient consumer, String messageText) {
+    private void sendMessage(TalkToolClient generator, TalkToolClient consumer, String messageText, TalkClientUpload attachment) {
         Console.info("<ClientMessage::sendMessage> sender-id: '" + generator.getClientId() + "', recipient-id: '" + consumer.getClientId() + "', message: '" + messageText + "'");
 
         // check if relationship exists
@@ -67,7 +100,7 @@ public class ClientMessage extends TalkToolCommand {
         if (recipientContact == null) {
             Console.warn("<ClientMessage::sendMessage> the sender has no relationship to the recipient. Doing nothing.");
         } else {
-            TalkClientMessage clientMessage = generator.getClient().composeClientMessage(recipientContact, messageText);
+            TalkClientMessage clientMessage = generator.getClient().composeClientMessage(recipientContact, messageText, attachment);
             generator.getClient().requestDelivery(clientMessage);
         }
     }
