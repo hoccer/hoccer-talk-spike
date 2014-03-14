@@ -266,7 +266,7 @@ public class RSACryptor {
         return skip(X509_rsa_pub_key, idx);
     }
 
-    public static byte[] wrapRSA1024_PKCS8(byte[] pure_DER_rsa_priv_key)
+    public static byte[] wrapRSA1024_PKCS8_deprecated(byte[] pure_DER_rsa_priv_key)
             throws InvalidKeyException {
         if (pure_DER_rsa_priv_key.length > 650) {
             throw new InvalidKeyException("Key too long, not RSA1024");
@@ -286,12 +286,29 @@ public class RSACryptor {
         return concat(header, pure_DER_rsa_priv_key);
     }
 
-    public static byte[] unwrapRSA1024_PKCS8(byte[] PKCS8_rsa_priv_key)
+    public static byte[] wrapRSA_PKCS8(byte[] pure_DER_rsa_priv_key)
+            throws InvalidKeyException {
+        if (pure_DER_rsa_priv_key.length < 100) {
+            throw new InvalidKeyException("key too short");
+        }
+
+        return pure_DER_rsa_priv_key;
+    }
+
+    public static byte[] unwrapRSA1024_PKCS8_deprecated(byte[] PKCS8_rsa_priv_key)
             throws InvalidKeyException {
         if (PKCS8_rsa_priv_key.length > 650 + 25) {
             throw new InvalidKeyException("Key too long");
         }
         return skip(PKCS8_rsa_priv_key, 26);
+    }
+
+    public static byte[] unwrapRSA_PKCS8(byte[] PKCS8_rsa_priv_key)
+            throws InvalidKeyException {
+        if (PKCS8_rsa_priv_key.length == 0) {
+            throw new InvalidKeyException("Key too long");
+        }
+        return PKCS8_rsa_priv_key;
     }
 
     public static PublicKey makePublicRSA1024Key_deprecated(byte[] pure_DER_rsa_pub_key)
@@ -316,13 +333,24 @@ public class RSACryptor {
         return myPublicKey;
     }
 
-    public static PrivateKey makePrivateRSA1024Key(byte[] pure_DER_rsa_priv_key)
+    public static PrivateKey makePrivateRSA1024Key_deprecated(byte[] pure_DER_rsa_priv_key)
             throws NoSuchAlgorithmException, InvalidKeyException,
             InvalidKeySpecException {
         KeyFactory kf = KeyFactory.getInstance("RSA");
 
         PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(
-                wrapRSA1024_PKCS8(pure_DER_rsa_priv_key));
+                wrapRSA1024_PKCS8_deprecated(pure_DER_rsa_priv_key));
+        PrivateKey myPrivateKey = kf.generatePrivate(privSpec);
+        return myPrivateKey;
+    }
+
+    public static PrivateKey makePrivateRSAKey(byte[] pure_DER_rsa_priv_key)
+            throws NoSuchAlgorithmException, InvalidKeyException,
+            InvalidKeySpecException {
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+
+        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(
+                wrapRSA_PKCS8(pure_DER_rsa_priv_key));
         PrivateKey myPrivateKey = kf.generatePrivate(privSpec);
         return myPrivateKey;
     }
