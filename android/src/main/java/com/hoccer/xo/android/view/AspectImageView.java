@@ -6,7 +6,6 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import com.hoccer.xo.release.R;
-import org.apache.log4j.Logger;
 
 /**
  * Image view that can enforce an aspect ratio and a maximum height
@@ -17,11 +16,9 @@ import org.apache.log4j.Logger;
  */
 public class AspectImageView extends ImageView {
 
-    private static final Logger LOG = Logger.getLogger(AspectImageView.class);
+    private double mAspectRatio = 0.0;
 
-    double mAspectRatio = 0.0;
-
-    int mMaxHeight = Integer.MAX_VALUE;
+    private int mMaxHeight = Integer.MAX_VALUE;
 
     public AspectImageView(Context context) {
         super(context);
@@ -45,7 +42,8 @@ public class AspectImageView extends ImageView {
             R.styleable.AspectView,
             0, 0);
        try {
-           mAspectRatio = a.getFloat(R.styleable.AspectView_aspectRatio, 0.0f);
+           float aspectRatio = a.getFloat(R.styleable.AspectView_aspectRatio, 0.0f);
+           setAspectRatio(aspectRatio);
        } finally {
            a.recycle();
        }
@@ -114,5 +112,4 @@ public class AspectImageView extends ImageView {
         // set new dimensions
         setMeasuredDimension(width, height);
     }
-
 }

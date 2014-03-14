@@ -1,23 +1,27 @@
 package com.hoccer.xo.android.content;
 
-import android.app.Activity;
-import android.content.Context;
-import android.util.AttributeSet;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.content.res.Resources;
+import android.os.Handler;
+import android.os.Message;
+import android.widget.*;
 import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.view.AttachmentTransferControlView;
 import com.hoccer.xo.release.R;
+
 import org.apache.log4j.Logger;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.util.AttributeSet;
+import android.view.View;
+
 
 /**
  * Content view
@@ -41,7 +45,7 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
 
     ContentRegistry mRegistry;
 
-    IContentObject mObject;
+    IContentObject mContent;
     ContentViewer<?> mViewer;
 
     ContentState mPreviousContentState;
@@ -50,16 +54,11 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
 
     View mContentChild;
 
-    LinearLayout mContentFooter;
-
-    ImageView mContentType;
+    RelativeLayout mContentFooter;
 
     TextView mContentDescription;
-    TextView mContentStatus;
 
-    Button mActionButton;
-
-    ProgressBar mTransferProgress;
+    AttachmentTransferControlView mTransferProgress;
 
     TransferAction mTransferAction = TransferAction.NONE;
 
@@ -76,6 +75,22 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
      */
     int mMaxContentHeight = Integer.MAX_VALUE;
 
+    private boolean mWaitUntilOperationIsFinished = false;
+    private  Handler mUploadHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (!mTransferProgress.isGoneAfterFinished()) {
+                mUploadHandler.sendEmptyMessageDelayed(0, 500);
+            } else {
+                updateFooter(ContentState.SELECTED);
+                mContentWrapper.setVisibility(View.VISIBLE);
+                mContentChild.setEnabled(true);
+                mContentChild.invalidate();
+                mWaitUntilOperationIsFinished = false;
+            }
+        }
+    };
+
     /**
      * Standard view constructor
      *
@@ -90,6 +105,19 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
         }
         // initialize views
         initView(context);
+        applyAttributes(context, attrs);
+    }
+
+    private void applyAttributes(Context context, AttributeSet attributes) {
+        TypedArray a = context.getTheme().obtainStyledAttributes(attributes, R.styleable.AspectLimits, 0, 0);
+        try {
+            float maxHeightDp = a.getDimension(R.styleable.AspectLimits_maxHeight, -1f);
+
+            mMaxContentHeight = a.getDimensionPixelSize(R.styleable.AspectLimits_maxHeight, Integer.MAX_VALUE);
+
+        } finally {
+            a.recycle();
+        }
     }
 
     private void initView(Context context) {
@@ -98,13 +126,10 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
         if(!isInEditMode()) {
             mContentWrapper.removeAllViews();
         }
-        mContentFooter = (LinearLayout)findViewById(R.id.content_footer);
-        mContentType = (ImageView)findViewById(R.id.content_type_image);
+        mContentFooter = (RelativeLayout)findViewById(R.id.content_footer);
         mContentDescription = (TextView)findViewById(R.id.content_description_text);
-        mContentStatus = (TextView)findViewById(R.id.content_status_text);
-        mActionButton = (Button)findViewById(R.id.content_action_button);
-        mActionButton.setOnClickListener(this);
-        mTransferProgress = (ProgressBar)findViewById(R.id.content_progress);
+        mTransferProgress = (AttachmentTransferControlView)findViewById(R.id.content_progress);
+        mTransferProgress.setOnClickListener(this);
     }
 
     public int getMaxContentHeight() {
@@ -117,37 +142,38 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if(v == mActionButton) {
+        if(v == mTransferProgress) {
             switch(mTransferAction) {
             case REQUEST_DOWNLOAD:
-                mActionButton.setEnabled(false);
-                if(mObject instanceof TalkClientDownload) {
-                    TalkClientDownload download = (TalkClientDownload)mObject;
+                mTransferProgress.setEnabled(false);
+                if(mContent instanceof TalkClientDownload) {
+                    TalkClientDownload download = (TalkClientDownload)mContent;
                     XoApplication.getXoClient().requestDownload(download);
                 }
                 break;
             case CANCEL_DOWNLOAD:
-                mActionButton.setEnabled(false);
-                if(mObject instanceof TalkClientDownload) {
-                    TalkClientDownload download = (TalkClientDownload)mObject;
+                mTransferProgress.setEnabled(false);
+                if(mContent instanceof TalkClientDownload) {
+                    TalkClientDownload download = (TalkClientDownload)mContent;
                     XoApplication.getXoClient().cancelDownload(download);
                 }
                 break;
             case REQUEST_UPLOAD:
-                mActionButton.setEnabled(false);
-                if(mObject instanceof TalkClientUpload) {
-                    TalkClientUpload upload = (TalkClientUpload)mObject;
+                mTransferProgress.setEnabled(false);
+                if(mContent instanceof TalkClientUpload) {
+                    TalkClientUpload upload = (TalkClientUpload)mContent;
                     XoApplication.getXoClient().getTransferAgent().requestUpload(upload);
                 }
                 break;
             case CANCEL_UPLOAD:
-                mActionButton.setEnabled(false);
-                if(mObject instanceof TalkClientUpload) {
-                    TalkClientUpload upload = (TalkClientUpload)mObject;
+                mTransferProgress.setEnabled(false);
+                if(mContent instanceof TalkClientUpload) {
+                    TalkClientUpload upload = (TalkClientUpload)mContent;
                     XoApplication.getXoClient().getTransferAgent().cancelUpload(upload);
                 }
             }
         }
+        mTransferProgress.invalidate();
     }
 
     private ContentState getTrueContentState(IContentObject object) {
@@ -182,56 +208,65 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
         return state;
     }
 
-    public void displayContent(Activity activity, IContentObject object) {
-        if(object.getContentDataUrl() != null) {
-            LOG.debug("displayContent(" + object.getContentDataUrl() + ")");
+    public void displayContent(Activity activity, IContentObject content, TalkClientMessage message) {
+        if(content.getContentDataUrl() != null) {
+            LOG.debug("displayContent(" + content.getContentDataUrl() + ")");
         }
 
-        boolean available = object.isContentAvailable();
-        ContentState state = getTrueContentState(object);
-        ContentDisposition disposition = object.getContentDisposition();
-        ContentViewer<?> viewer = mRegistry.selectViewerForContent(object);
+        ContentState state = getTrueContentState(content);
+        ContentViewer<?> viewer = mRegistry.selectViewerForContent(content);
 
         // determine if the content url has changed so
         // we know if we need to re-instantiate child views
-        boolean contentChanged = hasContentChanged(object);
+        boolean contentChanged = hasContentChanged(content);
         boolean stateChanged = hasStateChanged(contentChanged, state);
         boolean viewerChanged = hasViewerChanged(viewer);
         ContentViewer<?> oldViewer = mViewer;
 
         // remember the new object
-        mObject = object;
+        mContent = content;
         mViewer = viewer;
         mPreviousContentState = state;
 
-        boolean footerVisible = updateFooter(state);
-
         // description
-        mContentDescription.setText(mRegistry.getContentDescription(object));
-        String stateText = getStateText(state);
+        mContentDescription.setText(mRegistry.getContentDescription(content));
         doDownAndUploadActions(state);
-        updateProgressBar(state, object);
+        updateProgressBar(state, content);
+        boolean footerVisible = true;
+        if (mWaitUntilOperationIsFinished) {
+            mUploadHandler.sendEmptyMessage(0);
+        } else {
+            footerVisible = updateFooter(state);
+        }
+
         removeChildViewIfContentHasChanged(contentChanged, stateChanged);
         try {
-            updateContentView(viewerChanged, oldViewer, activity, object);
+            updateContentView(viewerChanged, oldViewer, activity, content, message);
         } catch (NullPointerException exception) {
             LOG.error("probably received an unkown media-type", exception);
             return;
         }
-        if(viewerChanged || contentChanged || stateChanged) {
-            mViewer.updateView(mContentChild, this, object);
+        if(viewerChanged || contentChanged || stateChanged){
+            boolean isLightTheme = message != null ? message.isIncoming() : true;
+            mViewer.updateView(mContentChild, this, content, isLightTheme);
         }
-        int visibility = isInEditMode() ? GONE : VISIBLE;
-        mContentWrapper.setVisibility(visibility);
+//        int visibility = isInEditMode() ? GONE : VISIBLE;
+//        mContentWrapper.setVisibility(visibility);
 
         // disable content child when we are showing the footer
         if(mContentChild != null) {
             mContentChild.setEnabled(!footerVisible);
+            if (footerVisible) {
+                mContentWrapper.setVisibility(View.INVISIBLE);
+            } else {
+                mContentWrapper.setVisibility(View.VISIBLE);
+            }
         }
     }
 
-    private void updateContentView(boolean viewerChanged, ContentViewer<?> oldViewer, Activity activity,
-                                   IContentObject object) {
+    private void updateContentView(boolean viewerChanged, ContentViewer<?> oldViewer,
+            Activity activity,
+            IContentObject object, TalkClientMessage message) {
         if(viewerChanged || mContentChild == null) {
             // remove old
             if(mContentChild != null) {
@@ -241,19 +276,26 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
                 oldViewer.returnView(activity, v);
             }
             // add new
-            mContentChild = mViewer.getViewForObject(activity, this, object);
+            mContentChild = mViewer.getViewForObject(activity, this, object, message.isIncoming());
             mContentWrapper.addView(mContentChild,
                     new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT));
+            mContentWrapper.setVisibility(View.INVISIBLE);
         }
     }
 
     private void removeChildViewIfContentHasChanged(boolean contentChanged, boolean stateChanged) {
-        if(contentChanged || stateChanged) {
+        if(contentChanged) {
             if(mContentChild != null) {
                 mContentWrapper.removeView(mContentChild);
                 mContentChild = null;
+            }
+        }
+        if (stateChanged) {
+            if(mContentChild != null) {
+                mContentWrapper.requestLayout();
+                mContentWrapper.invalidate();
             }
         }
     }
@@ -275,8 +317,8 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
     }
 
     private boolean hasContentChanged(IContentObject object) {
-        if(mObject != null) {
-            String oldUrl = mObject.getContentDataUrl();
+        if(mContent != null) {
+            String oldUrl = mContent.getContentDataUrl();
             String newUrl = object.getContentDataUrl();
             if(oldUrl != null && newUrl != null) {
                 if(oldUrl.equals(newUrl)) {
@@ -300,30 +342,80 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
     }
 
     private void updateProgressBar(ContentState state, IContentObject object) {
+        int length = 0;
+        int progress = 0;
+        Resources res = getResources();
         switch (state) {
-            case DOWNLOAD_DECRYPTING:
-                break;
             case DOWNLOAD_DETECTING:
                 break;
-            case UPLOAD_REGISTERING:
-                break;
-            case UPLOAD_ENCRYPTING:
+            case DOWNLOAD_NEW:
                 mTransferProgress.setVisibility(VISIBLE);
-                mTransferProgress.setIndeterminate(true);
+                mTransferProgress.prepareToDownload();
+                mTransferProgress.setText(res.getString(R.string.transfer_state_pause));
+                mTransferProgress.pause();
                 break;
             case DOWNLOAD_PAUSED:
+                length = object.getTransferLength();
+                progress = object.getTransferProgress();
+                mTransferProgress.setMax(length);
+                mTransferProgress.setProgressImmediately(progress);
+                mTransferProgress.setText(res.getString(R.string.transfer_state_pause));
+                mTransferProgress.prepareToDownload();
+                mTransferProgress.pause();
                 break;
             case DOWNLOAD_DOWNLOADING:
-                break;
-            case UPLOAD_PAUSED:
-                break;
-            case UPLOAD_UPLOADING:
-                int length = object.getTransferLength();
-                int progress = object.getTransferProgress();
-                mTransferProgress.setVisibility(VISIBLE);
-                mTransferProgress.setIndeterminate(false);
+                length = object.getTransferLength();
+                progress = object.getTransferProgress();
+                if (length == 0 || progress == 0) {
+                    length = 360;
+                    progress = 18;
+                }
+                mTransferProgress.prepareToDownload();
+                mTransferProgress.setText(res.getString(R.string.transfer_state_downloading));
                 mTransferProgress.setMax(length);
                 mTransferProgress.setProgress(progress);
+                break;
+            case DOWNLOAD_DECRYPTING:
+                length = object.getTransferLength();
+                mTransferProgress.setText(res.getString(R.string.transfer_state_decrypting));
+                mTransferProgress.setProgress(length);
+                mTransferProgress.spin();
+                mWaitUntilOperationIsFinished = true;
+                break;
+            case DOWNLOAD_COMPLETE:
+                mTransferProgress.finishSpinningAndProceed();
+            case UPLOAD_REGISTERING:
+                break;
+            case UPLOAD_NEW:
+                mTransferProgress.prepareToUpload();
+                mTransferProgress.setText(res.getString(R.string.transfer_state_encrypting));
+                mTransferProgress.setVisibility(VISIBLE);
+                break;
+            case UPLOAD_ENCRYPTING:
+                mTransferProgress.prepareToUpload();
+                mTransferProgress.setText(res.getString(R.string.transfer_state_encrypting));
+                mTransferProgress.setVisibility(VISIBLE);
+                mTransferProgress.spin();
+                break;
+            case UPLOAD_PAUSED:
+                length = object.getTransferLength();
+                progress = object.getTransferProgress();
+                mTransferProgress.setMax(length);
+                mTransferProgress.setProgressImmediately(progress);
+                mTransferProgress.setText(res.getString(R.string.transfer_state_pause));
+                mTransferProgress.pause();
+                break;
+            case UPLOAD_UPLOADING:
+                mTransferProgress.finishSpinningAndProceed();
+                mTransferProgress.setText(res.getString(R.string.transfer_state_uploading));
+                mWaitUntilOperationIsFinished = true;
+                length = object.getTransferLength();
+                progress = object.getTransferProgress();
+                mTransferProgress.setMax(length);
+                mTransferProgress.setProgress(progress);
+                break;
+            case UPLOAD_COMPLETE:
+                mTransferProgress.completeAndGone();
                 break;
             default:
                 mTransferProgress.setVisibility(GONE);
@@ -332,48 +424,37 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
     }
 
     private void doDownAndUploadActions(ContentState state) {
-        mActionButton.setEnabled(true);
-        mActionButton.setVisibility(VISIBLE);
+        mTransferProgress.setEnabled(true);
         mTransferAction = TransferAction.NONE;
         switch(state) {
             case DOWNLOAD_NEW:
-                mActionButton.setText("Download");
                 mTransferAction = TransferAction.REQUEST_DOWNLOAD;
                 break;
             case DOWNLOAD_PAUSED:
-                mActionButton.setText("Continue");
                 mTransferAction = TransferAction.REQUEST_DOWNLOAD;
                 break;
             case DOWNLOAD_DECRYPTING:
-                mActionButton.setText("Cancel");
                 mTransferAction = TransferAction.CANCEL_DOWNLOAD;
                 break;
             case DOWNLOAD_DETECTING:
-                mActionButton.setEnabled(false);
-                mActionButton.setText("Cancel");
+                mTransferProgress.setEnabled(false);
                 break;
             case DOWNLOAD_DOWNLOADING:
-                mActionButton.setText("Cancel");
                 mTransferAction = TransferAction.CANCEL_DOWNLOAD;
                 break;
             case UPLOAD_NEW:
-                mActionButton.setText("Upload");
                 mTransferAction = TransferAction.REQUEST_UPLOAD;
                 break;
             case UPLOAD_PAUSED:
-                mActionButton.setText("Continue");
                 mTransferAction = TransferAction.REQUEST_UPLOAD;
                 break;
             case UPLOAD_REGISTERING:
-                mActionButton.setEnabled(false);
-                mActionButton.setText("Cancel");
+                mTransferProgress.setEnabled(false);
                 break;
             case UPLOAD_ENCRYPTING:
-                mActionButton.setText("Cancel");
                 mTransferAction = TransferAction.CANCEL_UPLOAD;
                 break;
             case UPLOAD_UPLOADING:
-                mActionButton.setText("Cancel");
                 mTransferAction = TransferAction.CANCEL_UPLOAD;
                 break;
             case SELECTED:
@@ -387,70 +468,16 @@ public class ContentView extends LinearLayout implements View.OnClickListener {
             case DOWNLOAD_COMPLETE:
                 break;
             default:
-                mActionButton.setVisibility(GONE);
                 break;
         }
-    }
-
-    private String getStateText(ContentState state) {
-        String stateText = null;
-        switch(state) {
-            case DOWNLOAD_NEW:
-                stateText = "Available for download";
-                break;
-            case DOWNLOAD_DOWNLOADING:
-                stateText = "Downloading...";
-                break;
-            case DOWNLOAD_DECRYPTING:
-                stateText = "Decrypting...";
-                break;
-            case DOWNLOAD_DETECTING:
-                stateText = "Analyzing...";
-                break;
-            case DOWNLOAD_COMPLETE:
-                stateText = "Download complete";
-                break;
-            case DOWNLOAD_FAILED:
-                stateText = "Download failed";
-                break;
-            case DOWNLOAD_PAUSED:
-                stateText = "Download paused";
-                break;
-            case UPLOAD_NEW:
-                stateText = "New upload";
-                break;
-            case UPLOAD_REGISTERING:
-                stateText = "Registering...";
-                break;
-            case UPLOAD_ENCRYPTING:
-                stateText = "Encrypting...";
-                break;
-            case UPLOAD_UPLOADING:
-                stateText = "Uploading...";
-                break;
-            case UPLOAD_COMPLETE:
-                stateText = "Upload complete";
-                break;
-            case UPLOAD_PAUSED:
-                stateText = "Upload paused";
-                break;
-            case UPLOAD_FAILED:
-                stateText = "Upload failed";
-                break;
-        }
-        if(stateText == null) {
-            mContentStatus.setVisibility(GONE);
-        } else {
-            mContentStatus.setVisibility(VISIBLE);
-            mContentStatus.setText(stateText);
-        }
-        return stateText;
     }
 
     public void clear() {
         mContentWrapper.removeAllViews();
         mContentChild = null;
-        mObject = null;
+        mContent = null;
     }
 
+
+    
 }

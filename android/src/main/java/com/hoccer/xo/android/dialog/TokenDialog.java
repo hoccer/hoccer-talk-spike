@@ -1,7 +1,14 @@
 package com.hoccer.xo.android.dialog;
 
+import com.hoccer.talk.client.model.TalkClientSmsToken;
+import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.release.R;
+
+import org.apache.log4j.Logger;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -9,13 +16,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.widget.TextView;
-import com.actionbarsherlock.app.SherlockDialogFragment;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.release.R;
-import org.apache.log4j.Logger;
 
-public class TokenDialog extends SherlockDialogFragment implements DialogInterface.OnClickListener {
+public class TokenDialog extends DialogFragment implements DialogInterface.OnClickListener {
 
     private static final Logger LOG = Logger.getLogger(TokenDialog.class);
 
@@ -38,7 +40,6 @@ public class TokenDialog extends SherlockDialogFragment implements DialogInterfa
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(mToken.getSender()));
 
         String name = mToken.getSender();
-        String photo = "content://" + R.drawable.avatar_default_contact;
 
         Cursor cursor = resolver.query(uri,
                 new String[] {
@@ -52,25 +53,23 @@ public class TokenDialog extends SherlockDialogFragment implements DialogInterfa
             name = cursor.getString(nameIndex);
         }
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getSherlockActivity());
-
-        // XXX i18n mess
-        builder.setTitle("Invitation");
+        builder.setTitle(R.string.contacts_sms_invitation);
         builder.setCancelable(true);
-        builder.setNegativeButton("Decline", this);
-        builder.setPositiveButton("Accept", this);
-        builder.setNeutralButton("Cancel", this);
+        builder.setNegativeButton(R.string.common_decline, this);
+        builder.setPositiveButton(R.string.common_accept, this);
+        builder.setNeutralButton(R.string.common_cancel, this);
 
-        builder.setMessage(name + " has sent you an invitation via SMS.\nDo you wish to accept?");
+        String description = getResources().getString(R.string.contacts_sms_invitation_description);
+        builder.setMessage(name + " " + description);
 
+        TextView bodyTextView = (TextView) mActivity.getLayoutInflater().inflate(R.layout.view_sms_invite_dialog, null);
         String body = mToken.getBody();
-        TextView bodyText = new TextView(getSherlockActivity());
         if(body != null) {
-            bodyText.setText(body);
-            builder.setView(bodyText);
+            bodyTextView.setText(body);
+            builder.setView(bodyTextView);
         }
-
         return builder.create();
     }
 

@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="TransferWheel">
+        <attr name="outerWheelSize" format="dimension"/>
+        <attr name="innerWheelSize" format="dimension"/>
+        <attr name="wheelDiameter" format="dimension"/>
+        <attr name="wheelColor" format="color"/>
+        <attr name="textMargin" format="dimension"/>
+        <attr name="textSize" format="integer"/>
+        <attr name="text" format="string"/>
+    </declare-styleable>
     <declare-styleable name="AspectView">
        <attr name="aspectRatio" format="float"/>
     </declare-styleable>
     <declare-styleable name="AspectLimits">
         <attr name="maxHeight" format="dimension"/>
+    </declare-styleable>
+    <declare-styleable name="AvatarView">
+        <attr name="defaultAvatarImageUrl" format="string"/>
+        <attr name="cornerRadius" format="float"/>
     </declare-styleable>
 </resources>

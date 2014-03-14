@@ -13,7 +13,6 @@ import android.widget.SimpleAdapter;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.audio.ButtonAudioViewer;
 import com.hoccer.xo.android.content.audio.MusicSelector;
-import com.hoccer.xo.android.content.data.DataSelector;
 import com.hoccer.xo.android.content.data.DataViewer;
 import com.hoccer.xo.android.content.image.ImageSelector;
 import com.hoccer.xo.android.content.image.ImageViewer;
@@ -95,7 +94,7 @@ public class ContentRegistry {
         initializeSelector(new MusicSelector());
         initializeSelector(new ContactSelector());
         initializeSelector(new MapsLocationSelector());
-        initializeSelector(new DataSelector());
+//        initializeSelector(new DataSelector());
 
         mAttachmentViewers.add(new ImageViewer());
         mAttachmentViewers.add(new VideoViewer());
@@ -141,9 +140,9 @@ public class ContentRegistry {
 
         String sizeString = "";
         if(object.getContentLength() > 0) {
-            sizeString = " (" + humanReadableByteCount(object.getContentLength(), true) + ")";
+            sizeString = " —" + humanReadableByteCount(object.getContentLength(), true);
         } else if (object.getTransferLength() > 0) {
-            sizeString = " (" + humanReadableByteCount(object.getTransferLength(), true) + ")";
+            sizeString = " —" + humanReadableByteCount(object.getTransferLength(), true);
         }
 
         return mediaTypeString + sizeString;
@@ -167,10 +166,10 @@ public class ContentRegistry {
      * @param view that will host the returned view
      * @return a View set up for the given content
      */
-    public View createViewForContent(Activity activity, IContentObject contentObject, ContentView view) {
+    public View createViewForContent(Activity activity, IContentObject contentObject, ContentView view, boolean isLightTheme) {
         ContentViewer viewer = selectViewerForContent(contentObject);
         if(viewer != null) {
-            return viewer.getViewForObject(activity, view, contentObject);
+            return viewer.getViewForObject(activity, view, contentObject, isLightTheme);
         }
         return null;
     }

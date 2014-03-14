@@ -14,13 +14,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.release.R;
-import org.apache.commons.codec.binary.Base64OutputStream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,7 +33,7 @@ public class MapsLocationActivity extends XoActivity
 
     public static final String EXTRA_GEOJSON = "com.hoccer.xo.android.GEOJSON";
 
-    SupportMapFragment mMapFragment;
+    MapFragment mMapFragment;
 
     GoogleMap mMap;
 
@@ -72,7 +71,7 @@ public class MapsLocationActivity extends XoActivity
         super.onResume();
         // get the map fragment
         if(mMapFragment == null) {
-            mMapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.maps_location_map);
+            mMapFragment = (MapFragment)getFragmentManager().findFragmentById(R.id.maps_location_map);
         }
         // get and configure the map behind the fragment
         if(mMap == null) {

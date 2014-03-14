@@ -1,17 +1,18 @@
 package com.hoccer.xo.android.activity;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.CompositionFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.release.R;
+
+import android.app.ActionBar;
+import android.app.FragmentManager;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import java.sql.SQLException;
 
@@ -42,13 +43,13 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         super.onCreate(savedInstanceState);
 
         // get action bar (for setting title)
-        mActionBar = getSupportActionBar();
+        mActionBar = getActionBar();
 
         // enable up navigation
         enableUpNavigation();
 
         // get our primary fragment
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentManager fragmentManager = getFragmentManager();
         mMessagingFragment = (MessagingFragment) fragmentManager.findFragmentById(R.id.activity_messaging_fragment);
         mMessagingFragment.setRetainInstance(true);
         mCompositionFragment = (CompositionFragment) fragmentManager.findFragmentById(R.id.activity_messaging_composer);
@@ -99,8 +100,9 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         if(mContact != null) {
             MenuItem clientItem = menu.findItem(R.id.menu_profile_client);
             clientItem.setVisible(mContact.isClient());
-            MenuItem groupItem = menu.findItem(R.id.menu_profile_group);
+            MenuItem groupItem = menu.findItem(R.id.menu_single_profile);
             groupItem.setVisible(mContact.isGroup());
+//            getActionBar().setIcon(android.R.color.transparent);
         }
 
         return result;
@@ -111,7 +113,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
         switch (item.getItemId()) {
             case R.id.menu_profile_client:
-            case R.id.menu_profile_group:
+            case R.id.menu_single_profile:
                 if(mContact != null) {
                     showContactProfile(mContact);
                 }
