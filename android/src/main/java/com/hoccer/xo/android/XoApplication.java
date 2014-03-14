@@ -97,14 +97,16 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     }
 
     public static File getAvatarDirectory() {
-        return new File(INTERNAL_STORAGE, XoConfiguration.INTERNAL_AVATARS);
+        return new File(EXTERNAL_STORAGE, XoConfiguration.INTERNAL_AVATARS);
     }
 
     public static File getAvatarLocation(TalkClientDownload download) {
         if(download.getState() == TalkClientDownload.State.COMPLETE) {
+            File avatarDir = getAvatarDirectory();
+            ensureDirectory(avatarDir);
             String dataFile = download.getDataFile();
             if(dataFile != null) {
-                return new File(getAvatarDirectory(), dataFile);
+                return new File(avatarDir, dataFile);
             }
         }
         return null;
@@ -197,7 +199,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
                 .cacheInMemory(false)
                 .imageScaleType(ImageScaleType.IN_SAMPLE_INT)
                 .bitmapConfig(Bitmap.Config.RGB_565)
-                //.delayBeforeLoading(250)
+                .considerExifParams(true)
                 .build();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
                 .threadPoolSize(2)
@@ -208,13 +210,12 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         LOG.info("setting up directory structure");
         ensureDirectory(getAttachmentDirectory());
         ensureDirectory(getAvatarDirectory());
-        ensureNomedia(getAvatarDirectory());
         ensureDirectory(getGeneratedDirectory());
-        ensureNomedia(getGeneratedDirectory());
+        ensureNoMedia(getGeneratedDirectory());
         ensureDirectory(getEncryptedUploadDirectory());
-        ensureNomedia(getEncryptedUploadDirectory());
+        ensureNoMedia(getEncryptedUploadDirectory());
         ensureDirectory(getEncryptedDownloadDirectory());
-        ensureNomedia(getEncryptedDownloadDirectory());
+        ensureNoMedia(getEncryptedDownloadDirectory());
 
         // create executor
         LOG.info("creating background executor");
@@ -279,19 +280,23 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     public static void ensureDirectory(File directory) {
         if(!directory.exists()) {
             LOG.info("creating directory " + directory.toString());
-            directory.mkdirs();
+            if (!directory.mkdirs()) {
+                LOG.info("Error creating directory " + directory.toString());
+            }
         }
     }
 
-    public static void ensureNomedia(File directory) {
+    public static void ensureNoMedia(File directory) {
         if(directory.exists()) {
-            File nomedia = new File(directory, ".nomedia");
-            if(!nomedia.exists()) {
-                LOG.info("creating nomedia marker " + nomedia.toString());
+            File noMedia = new File(directory, ".nomedia");
+            if(!noMedia.exists()) {
+                LOG.info("creating noMedia marker " + noMedia.toString());
                 try {
-                    nomedia.createNewFile();
+                    if (!noMedia.createNewFile()) {
+                        LOG.info("Error creating directory " + noMedia.toString());
+                    }
                 } catch (IOException e) {
-                    LOG.error("error creating " + nomedia.toString(), e);
+                    LOG.error("error creating " + noMedia.toString(), e);
                 }
             }
         }

@@ -3,10 +3,8 @@ package com.hoccer.xo.android.content.data;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.Toast;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +39,7 @@ public class DataViewer extends ContentViewer<Button> {
     }
 
     @Override
-    protected void updateViewInternal(final Button view, ContentView contentView, final IContentObject contentObject) {
+    protected void updateViewInternal(final Button view, ContentView contentView, final IContentObject contentObject, boolean isLightTheme) {
         if(contentObject.isContentAvailable()) {
             view.setVisibility(View.VISIBLE);
             view.setOnClickListener(new View.OnClickListener() {

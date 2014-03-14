@@ -5,19 +5,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Contacts adapter for the main contact list
@@ -39,7 +38,7 @@ public class RichContactsAdapter extends ContactsAdapter {
 
     @Override
     protected int getGroupLayout() {
-        return R.layout.item_contact_group;
+        return R.layout.item_contact_client;
     }
 
     @Override
@@ -49,7 +48,7 @@ public class RichContactsAdapter extends ContactsAdapter {
 
     @Override
     protected int getTokenLayout() {
-        return R.layout.item_contact_smsinvite;
+        return R.layout.item_contact_sms_invite;
     }
 
     @Override
@@ -59,7 +58,7 @@ public class RichContactsAdapter extends ContactsAdapter {
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(token.getSender()));
 
         String name = token.getSender();
-        String photo = "content://" + R.drawable.avatar_default_contact;
+        String photo = "drawable://" + R.drawable.avatar_default_contact;
 
         Cursor cursor = resolver.query(uri,
                 new String[] {
@@ -79,36 +78,41 @@ public class RichContactsAdapter extends ContactsAdapter {
             }
         }
 
-        TextView nameText = (TextView)view.findViewById(R.id.smsinvite_name);
+        TextView nameText = (TextView)view.findViewById(R.id.sms_invite_name);
         nameText.setText(name);
-        ImageView photoImage = (ImageView)view.findViewById(R.id.smsinvite_icon);
-        ImageLoader.getInstance().displayImage(photo, photoImage);
+        AvatarView avatarView = (AvatarView)view.findViewById(R.id.sms_invite_icon);
+        avatarView.setAvatarImage(photo);
     }
 
     protected void updateContact(final View view, final TalkClientContact contact) {
         LOG.debug("updateContact(" + contact.getClientContactId() + ")");
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
+        AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         nameView.setText(contact.getName());
         TextView typeView = (TextView) view.findViewById(R.id.contact_type);
 
-        if(contact.isClient()) {
-            TalkPresence presence = contact.getClientPresence();
-            TextView connectedView = (TextView) view.findViewById(R.id.contact_connected);
-            if(connectedView != null) {
-                if(presence != null && presence.getConnectionStatus().equals("online")) {
-                    connectedView.setVisibility(View.VISIBLE);
-                } else {
-                    connectedView.setVisibility(View.GONE);
-                }
-            }
-        }
+        avatarView.setContact(contact);
         if(contact.isGroup()) {
             if(contact.isGroupInvited()) {
-                typeView.setText("Group Invite"); // XXX i18n
+                typeView.setText(R.string.common_group_invite);
             } else {
                 typeView.setText(R.string.common_group);
             }
         }
+        String lastMessageTime = "";
+        try {
+            TalkClientMessage message = mDatabase.findLatestMessageByContactId(contact.getClientContactId());
+            if(message != null) {
+                Date messageTime = message.getTimestamp();
+                SimpleDateFormat sdf = new SimpleDateFormat("EEE HH:mm");
+                lastMessageTime = sdf.format(messageTime);
+            }
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        }
+
+        TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
+        lastMessageTimeView.setText(lastMessageTime);
 
         long unseenMessages = 0;
         try {
@@ -143,22 +147,12 @@ public class RichContactsAdapter extends ContactsAdapter {
             lastMessageText.setVisibility(View.GONE);
         }
 
-        ImageView iconView = (ImageView) view.findViewById(R.id.contact_icon);
-        iconView.setOnClickListener(new View.OnClickListener() {
+        avatarView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mActivity.showContactProfile(contact);
             }
         });
-        String avatarUri = contact.getAvatarContentUrl();
-        if(avatarUri == null) {
-            if(contact.isGroup()) {
-                avatarUri = "content://" + R.drawable.avatar_default_group;
-            } else {
-                avatarUri = "content://" + R.drawable.avatar_default_contact;
-            }
-        }
-        ImageLoader.getInstance().displayImage(avatarUri, iconView);
     }
 
     private String chooseAttachmentType(String attachmentType) {

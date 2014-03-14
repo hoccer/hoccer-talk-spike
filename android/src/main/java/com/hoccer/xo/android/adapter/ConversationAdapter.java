@@ -11,13 +11,13 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.content.ContentView;
+import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.sql.SQLException;
@@ -346,77 +346,42 @@ public class ConversationAdapter extends XoAdapter
     private void updateViewOutgoing(View view, TalkClientMessage message) {
         LOG.trace("updateViewOutgoing(" + message.getClientMessageId() + ")");
         updateViewCommon(view, message);
+        if(mContact.isGroup()) {
+            View avatar = view.findViewById(R.id.message_avatar);
+            avatar.setVisibility(View.GONE);
+        }
     }
 
     private void updateViewIncoming(View view, TalkClientMessage message) {
         LOG.trace("updateViewIncoming(" + message.getClientMessageId() + ")");
+        if(mContact.isGroup()) {
+            TextView contactName = (TextView) view.findViewById(R.id.tv_message_name);
+            String name = message.getSenderContact().getName();
+            contactName.setText(name);
+            contactName.setVisibility(View.VISIBLE);
+        }
         updateViewCommon(view, message);
     }
 
     private void updateViewCommon(View view, TalkClientMessage message) {
         final TalkClientContact sendingContact = message.getSenderContact();
-
         if (!message.isSeen()) {
             markMessageAsSeen(message);
         }
-
-        TextView text = (TextView) view.findViewById(R.id.message_text);
-        String textString = message.getText();
-        if (textString == null) {
-            text.setText(""); // XXX
+        setMessageText(view, message);
+        setTimestamp(view, message);
+        if(mContact.isGroup()) {
+            setAvatar(view, sendingContact);
         } else {
-            text.setText(textString);
-            if (textString.length() > 0) {
-                text.setVisibility(View.VISIBLE);
-            } else {
-                text.setVisibility(View.GONE);
-            }
+            View avatar = view.findViewById(R.id.message_avatar);
+            avatar.setVisibility(View.GONE);
         }
+        setAttachment(view, message);
+    }
 
-        TextView timestamp = (TextView) view.findViewById(R.id.message_time);
-        Date time = message.getTimestamp();
-        if (time != null) {
-            timestamp.setVisibility(View.VISIBLE);
-            timestamp.setText(DateUtils.getRelativeDateTimeString(
-                    mActivity,
-                    message.getTimestamp().getTime(),
-                    DateUtils.MINUTE_IN_MILLIS,
-                    DateUtils.WEEK_IN_MILLIS,
-                    0
-            ));
-        } else {
-            timestamp.setVisibility(View.GONE);
-        }
-
-        final ImageView avatar = (ImageView) view.findViewById(R.id.message_avatar);
-        String avatarUri = null;
-        if (sendingContact != null) {
-            avatar.setOnClickListener(new View.OnClickListener() {
-                final TalkClientContact contact = sendingContact;
-
-                @Override
-                public void onClick(View v) {
-                    if (!contact.isSelf()) {
-                        mActivity.showContactProfile(contact);
-                    }
-                }
-            });
-            avatarUri = sendingContact.getAvatarContentUrl();
-            if (avatarUri == null) {
-                if (sendingContact.isGroup()) {
-                    avatarUri = "content://" + R.drawable.avatar_default_group;
-                }
-            }
-        }
-        if (avatarUri == null) {
-            avatarUri = "content://" + R.drawable.avatar_default_contact;
-        }
-        loadAvatar(avatar, avatarUri);
-
+    private void setAttachment(View view, TalkClientMessage message) {
         ContentView contentView = (ContentView) view.findViewById(R.id.message_content);
-
         int displayHeight = mResources.getDisplayMetrics().heightPixels;
-        // XXX better place for this? also we might want to use the measured height of our list view
         contentView.setMaxContentHeight(Math.round(displayHeight * 0.8f));
 
         IContentObject contentObject = null;
@@ -434,12 +399,58 @@ public class ConversationAdapter extends XoAdapter
             contentView.clear();
         } else {
             contentView.setVisibility(View.VISIBLE);
-            contentView.displayContent(mActivity, contentObject);
+            contentView.displayContent(mActivity, contentObject, message);
         }
     }
 
-    private void loadAvatar(ImageView view, String url) {
-        ImageLoader.getInstance().displayImage(url, view);
+    private void setAvatar(View view, final TalkClientContact sendingContact) {
+        final AvatarView avatarView = (AvatarView) view.findViewById(R.id.message_avatar);
+        avatarView.setContact(sendingContact);
+        avatarView.setVisibility(View.VISIBLE);
+        if (sendingContact != null) {
+            avatarView.setOnClickListener(new View.OnClickListener() {
+                final TalkClientContact contact = sendingContact;
+
+                @Override
+                public void onClick(View v) {
+                    if (!contact.isSelf()) {
+                        mActivity.showContactProfile(contact);
+                    }
+                }
+            });
+        }
+    }
+
+    private void setMessageText(View view, TalkClientMessage message) {
+        TextView text = (TextView) view.findViewById(R.id.message_text);
+        String textString = message.getText();
+        if (textString == null) {
+            text.setText(""); // XXX
+        } else {
+            text.setText(textString);
+            if (textString.length() > 0) {
+                text.setVisibility(View.VISIBLE);
+            } else {
+                text.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void setTimestamp(View view, TalkClientMessage message) {
+        TextView timestamp = (TextView) view.findViewById(R.id.message_time);
+        Date time = message.getTimestamp();
+        if (time != null) {
+            timestamp.setVisibility(View.VISIBLE);
+            timestamp.setText(DateUtils.getRelativeDateTimeString(
+                    mActivity,
+                    message.getTimestamp().getTime(),
+                    DateUtils.MINUTE_IN_MILLIS,
+                    DateUtils.WEEK_IN_MILLIS,
+                    0
+            ));
+        } else {
+            timestamp.setVisibility(View.GONE);
+        }
     }
 
     private void markMessageAsSeen(final TalkClientMessage message) {

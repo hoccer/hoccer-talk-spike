@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.fragment;
 
-import com.actionbarsherlock.widget.SearchView;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.ConversationAdapter;
 import com.hoccer.xo.android.base.XoAdapter;
@@ -15,10 +14,13 @@ import android.animation.Animator;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 /**
@@ -62,6 +64,12 @@ public class MessagingFragment extends XoListFragment
         mOverscrollIndicator = view.findViewById(R.id.overscroll_indicator);
 
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
     }
 
     @Override
