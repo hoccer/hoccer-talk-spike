@@ -27,9 +27,9 @@ public class CryptoJSON {
         byte[] salt = AESCryptor.makeRandomBytes(32);
         byte[] key = AESCryptor.make256BitKeyFromPassword_PBKDF2WithHmacSHA256(password, salt);
         byte[] cipherText = AESCryptor.encrypt(key,null,plainText);
-        System.out.println("key=" + CryptoUtils.toHex(key));
-        System.out.println("salt="+CryptoUtils.toHex(salt));
-        System.out.println("ciphered="+CryptoUtils.toHex(cipherText));
+//        System.out.println("key=" + CryptoUtils.toHex(key));
+//        System.out.println("salt="+CryptoUtils.toHex(salt));
+//        System.out.println("ciphered="+CryptoUtils.toHex(cipherText));
         String cipherTextString = new String(Base64.encodeBase64(cipherText));
         String saltString = new String(Base64.encodeBase64(salt));
 

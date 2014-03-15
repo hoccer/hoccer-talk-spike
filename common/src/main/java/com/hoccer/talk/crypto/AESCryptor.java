@@ -81,7 +81,7 @@ public class AESCryptor {
                                  byte[] cleartext) throws NoSuchPaddingException,
             NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException, UnsupportedEncodingException,
-            InvalidAlgorithmParameterException, ShortBufferException {
+            InvalidAlgorithmParameterException {
 
         byte[] nulliv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         Cipher c = makeCipher(secret_key, salt, nulliv, Cipher.ENCRYPT_MODE, "AES");
@@ -93,7 +93,7 @@ public class AESCryptor {
                                  byte[] ciphertext) throws NoSuchPaddingException,
             NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException, IOException,
-            InvalidAlgorithmParameterException, ShortBufferException {
+            InvalidAlgorithmParameterException {
         byte[] nulliv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         Cipher c = makeCipher(secret_key, salt, nulliv, Cipher.DECRYPT_MODE, "AES");
         byte[] result = crypt(c, ciphertext);
@@ -102,7 +102,7 @@ public class AESCryptor {
 
     public static byte[] crypt(Cipher cipher, byte[] text)
             throws NoSuchPaddingException, NoSuchAlgorithmException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, ShortBufferException {
+            InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
 //        System.out.println("text="+RSACryptor.toHex(text));
 //        System.out.println("text len="+text.length);
 
@@ -121,7 +121,7 @@ public class AESCryptor {
                                  String cleartext) throws NoSuchPaddingException,
             NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException, UnsupportedEncodingException,
-            InvalidAlgorithmParameterException, ShortBufferException {
+            InvalidAlgorithmParameterException {
         byte[] clearbytes = cleartext.getBytes("UTF-8");
         byte[] result = encrypt(secret_key, salt, clearbytes);
 //        return Base64.encodeBase64String(result);
@@ -133,7 +133,7 @@ public class AESCryptor {
                                  String encrypted_b64) throws NoSuchPaddingException,
             NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException, IOException,
-            InvalidAlgorithmParameterException, InvalidKeyException, ShortBufferException {
+            InvalidAlgorithmParameterException, InvalidKeyException {
         byte[] encrypted = Base64.decodeBase64(encrypted_b64);
         byte[] result = decrypt(secret_key, salt, encrypted);
         return new String(result, "UTF-8");
