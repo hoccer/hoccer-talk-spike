@@ -57,13 +57,13 @@ public class RSACryptor {
     public static String decryptRSA(PrivateKey priv, String encrypted)
             throws NoSuchPaddingException, NoSuchAlgorithmException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        return new String(decryptRSA(priv, toByte(encrypted)));
+        return new String(decryptRSA(priv, CryptoUtils.toByte(encrypted)));
     }
 
     public static String encryptRSA(PublicKey pub, String clear)
             throws NoSuchPaddingException, NoSuchAlgorithmException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        return toHex(encryptRSA(pub, clear.getBytes()));
+        return CryptoUtils.toHex(encryptRSA(pub, clear.getBytes()));
     }
 
     public static KeyPair generateRSAKeyPair(int len)
@@ -118,7 +118,7 @@ public class RSACryptor {
     }
 
     public static String calcKeyId(byte[] unwrappedPubKey) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        return RSACryptor.toHex(RSACryptor.shorten(sha256(unwrappedPubKey),8));
+        return CryptoUtils.toHex(CryptoUtils.shorten(sha256(unwrappedPubKey),8));
     }
 
     public static String toString(RSAPrivateKeySpec priv) {
@@ -138,7 +138,7 @@ public class RSACryptor {
         if (pure_DER_rsa_pub_key.length > 150) {
             throw new InvalidKeyException("Key too long, not RSA1024");
         }
-        byte[] header = toByte("30819f300d06092a864886f70d010101050003818d00");
+        byte[] header = CryptoUtils.toByte("30819f300d06092a864886f70d010101050003818d00");
         byte seq1LenIndex = 2;
         byte seq2LenIndex = 20;
 
@@ -148,7 +148,7 @@ public class RSACryptor {
         header[seq1LenIndex] = seq1Len;
         header[seq2LenIndex] = seq2Len;
 
-        return concat(header, pure_DER_rsa_pub_key);
+        return CryptoUtils.concat(header, pure_DER_rsa_pub_key);
     }
 
     public static byte[] wrapRSA_X509(byte[] pure_DER_rsa_pub_key)
@@ -161,18 +161,18 @@ public class RSACryptor {
         else {
             bitstringEncLength = ((pure_DER_rsa_pub_key.length + 1) / 256) + 2;
         }
-        byte[] oidSequence = toByte("300d06092a864886f70d0101010500");
+        byte[] oidSequence = CryptoUtils.toByte("300d06092a864886f70d0101010500");
 
-        byte[] encKey = toByte("30");
+        byte[] encKey = CryptoUtils.toByte("30");
         int i = oidSequence.length + 2 + bitstringEncLength + pure_DER_rsa_pub_key.length;
-        encKey = concat(encKey,ASNEncodedLength(i));
+        encKey = CryptoUtils.concat(encKey,ASNEncodedLength(i));
 
-        encKey = concat(encKey,oidSequence);
+        encKey = CryptoUtils.concat(encKey,oidSequence);
 
-        encKey = concat(encKey,toByte("03"));
-        encKey = concat(encKey,ASNEncodedLength(pure_DER_rsa_pub_key.length + 1));
-        encKey = concat(encKey,toByte("00"));
-        encKey = concat(encKey,pure_DER_rsa_pub_key);
+        encKey = CryptoUtils.concat(encKey,CryptoUtils.toByte("03"));
+        encKey = CryptoUtils.concat(encKey,ASNEncodedLength(pure_DER_rsa_pub_key.length + 1));
+        encKey = CryptoUtils.concat(encKey,CryptoUtils.toByte("00"));
+        encKey = CryptoUtils.concat(encKey,pure_DER_rsa_pub_key);
 
         return encKey;
     }
@@ -209,7 +209,7 @@ public class RSACryptor {
         if (X509_rsa_pub_key.length > 150 + 21) {
             throw new InvalidKeyException("Key too long");
         }
-        return skip(X509_rsa_pub_key, 22);
+        return CryptoUtils.skip(X509_rsa_pub_key, 22);
     }
 
     public static byte[] unwrapRSA_X509(byte[] X509_rsa_pub_key) throws InvalidKeyException
@@ -239,7 +239,7 @@ public class RSACryptor {
             // System.out.println("unwrapRSA_X509: incremented idx" + idx);
         }
         // PKCS #1 rsaEncryption szOID_RSA_RSA
-        byte[] seqiod = toByte("300d06092a864886f70d0101010500");
+        byte[] seqiod = CryptoUtils.toByte("300d06092a864886f70d0101010500");
 
         for (int i = 0; i < 15;++i) {
             if (X509_rsa_pub_key[idx+i] != seqiod[i]) {
@@ -263,7 +263,7 @@ public class RSACryptor {
         if (X509_rsa_pub_key[idx++] != '\0') {
             throw new InvalidKeyException("Bad byte at start of key");
         }
-        return skip(X509_rsa_pub_key, idx);
+        return CryptoUtils.skip(X509_rsa_pub_key, idx);
     }
 
     public static byte[] wrapRSA1024_PKCS8_deprecated(byte[] pure_DER_rsa_priv_key)
@@ -271,7 +271,7 @@ public class RSACryptor {
         if (pure_DER_rsa_priv_key.length > 650) {
             throw new InvalidKeyException("Key too long, not RSA1024");
         }
-        byte[] header = toByte("30820278020100300d06092a864886f70d010101050004820262");
+        byte[] header = CryptoUtils.toByte("30820278020100300d06092a864886f70d010101050004820262");
         byte seq1LenIndex = 2;
         byte seq2LenIndex = 24;
 
@@ -283,7 +283,7 @@ public class RSACryptor {
         header[seq2LenIndex] = (byte) (seq2Len / 255);
         header[seq2LenIndex + 1] = (byte) (seq2Len % 255);
 
-        return concat(header, pure_DER_rsa_priv_key);
+        return CryptoUtils.concat(header, pure_DER_rsa_priv_key);
     }
 
     public static byte[] wrapRSA_PKCS8(byte[] pure_DER_rsa_priv_key)
@@ -300,7 +300,7 @@ public class RSACryptor {
         if (PKCS8_rsa_priv_key.length > 650 + 25) {
             throw new InvalidKeyException("Key too long");
         }
-        return skip(PKCS8_rsa_priv_key, 26);
+        return CryptoUtils.skip(PKCS8_rsa_priv_key, 26);
     }
 
     public static byte[] unwrapRSA_PKCS8(byte[] PKCS8_rsa_priv_key)
@@ -355,73 +355,6 @@ public class RSACryptor {
         return myPrivateKey;
     }
 
-    public static byte[] concat(byte[] first, byte[] second) {
-        byte[] result = new byte[first.length + second.length];
-        System.arraycopy(first, 0, result, 0, first.length);
-        System.arraycopy(second, 0, result, first.length, second.length);
-        return result;
-    }
 
-    public static byte[] shorten(byte[] array, int length) {
-        if (length == array.length) {
-            return array;
-        }
-        byte[] result = new byte[length];
-        System.arraycopy(array, 0, result, 0, length);
-        return result;
-    }
-
-    public static byte[] skip(byte[] array, int skiplength) {
-        byte[] result = new byte[array.length - skiplength];
-        System.arraycopy(array, skiplength, result, 0, result.length);
-        return result;
-    }
-
-    public static byte[] overwrite(byte[] array, byte[] into, int offset) {
-        byte[] result = new byte[into.length];
-        System.arraycopy(into, 0, result, 0, into.length);
-        System.arraycopy(array, 0, result, offset, array.length);
-        return result;
-    }
-
-    // String conversion
-    public static String toHex(String txt) {
-        return toHex(txt.getBytes());
-    }
-
-    public static String fromHex(String hex) {
-        return new String(toByte(hex));
-    }
-
-    public static byte[] toByte(String hexString) {
-        int len = hexString.length() / 2;
-        byte[] result = new byte[len];
-        for (int i = 0; i < len; i++)
-            result[i] = Integer.valueOf(hexString.substring(2 * i, 2 * i + 2),
-                    16).byteValue();
-        return result;
-    }
-
-    public static String toHex(byte[] buf) {
-        if (buf == null)
-            return "";
-        StringBuffer result = new StringBuffer(2 * buf.length);
-        for (int i = 0; i < buf.length; i++) {
-            appendHex(result, buf[i]);
-        }
-        return result.toString();
-    }
-
-    public static String toHex(byte theByte) {
-        StringBuffer result = new StringBuffer(2);
-        appendHex(result, theByte);
-        return result.toString();
-    }
-
-    private final static String HEX = "0123456789abcdef";
-
-    private static void appendHex(StringBuffer sb, byte b) {
-        sb.append(HEX.charAt((b >> 4) & 0x0f)).append(HEX.charAt(b & 0x0f));
-    }
 
 }

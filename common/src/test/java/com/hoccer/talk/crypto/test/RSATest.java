@@ -1,5 +1,6 @@
 package com.hoccer.talk.crypto.test;
 
+import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.talk.crypto.RSACryptor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -93,8 +94,8 @@ public class RSATest {
             System.out.println("X509-Wrapper RSA 1024 ok");
         }  else {
             System.out.println("X509-UnWrapper RSA 1024 failed ###########");
-            System.out.println("pubBytes :" + RSACryptor.toHex(pubBytes));
-            System.out.println("pubXBytes:"+ RSACryptor.toHex(pubXBytes));
+            System.out.println("pubBytes :" + CryptoUtils.toHex(pubBytes));
+            System.out.println("pubXBytes:"+ CryptoUtils.toHex(pubXBytes));
         }
 
         byte[] privBytes = Base64.decodeBase64(myPrivKey);
