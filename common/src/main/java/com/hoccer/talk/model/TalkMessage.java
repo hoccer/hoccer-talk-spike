@@ -91,7 +91,6 @@ public class TalkMessage {
 
             // timeSent
             String timeSent = String.valueOf(getTimeSent().getTime());
-            System.out.println("timeSent=" +timeSent);
             md.update(timeSent.getBytes(utf8));
 
             // body
