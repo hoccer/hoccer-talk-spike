@@ -115,4 +115,9 @@ public class TalkToolClientHost implements IXoClientHost {
         return null;
     }
 
+    @Override
+    public int getRSAKeysize() {
+        return 1024;
+    }
+
 }

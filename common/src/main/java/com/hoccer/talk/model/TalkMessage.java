@@ -99,7 +99,7 @@ public class TalkMessage {
             // attachment
             if(getAttachment() != null) {
                 md.update(getAttachment().getBytes(utf8));
-                md.update(getAttachmentFileId().getBytes(utf8));
+                //md.update(getAttachmentFileId().getBytes(utf8));
             }
             // salt
             if (getSalt() != null && getSalt().length()>0) {
