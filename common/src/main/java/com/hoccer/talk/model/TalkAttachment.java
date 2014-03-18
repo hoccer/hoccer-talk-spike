@@ -9,7 +9,7 @@ import com.j256.ormlite.table.DatabaseTable;
  * These objects are transferred only in encrypted form,
  * so the server never encounters them.
  */
-@DatabaseTable(tableName="attachment")
+@DatabaseTable(tableName = "attachment")
 public class TalkAttachment {
 
     /** internal id, not transfered */
@@ -18,27 +18,40 @@ public class TalkAttachment {
 
     /** The download URL of attached file */
     @DatabaseField
+    private
     String url;
 
-    /** An optional file name for the attachment; the receiver must make sure that it does not collide with other file names */
+    /**
+     * An optional file name for the attachment; the receiver must make sure that it does not
+     * collide with other file names
+     */
     @DatabaseField
+    private
     String filename;
 
     /** MIME type of attached file */
     @DatabaseField
+    private
     String mimeType;
 
     /** String of decimal digits denoting the size of attached file in bytes */
     @DatabaseField
+    private
     String contentSize;
 
     /** Media-type of attached file, currently image, video, audio, contact, geolocation, data */
     @DatabaseField
+    private
     String mediaType;
 
     /** Aspect-ratio for the preview of an attachment */
     @DatabaseField
+    private
     double aspectRatio;
+
+    @DatabaseField
+    private
+    String hmac;
 
     public TalkAttachment() {
         this.aspectRatio = 1.0;
@@ -92,4 +105,11 @@ public class TalkAttachment {
         this.aspectRatio = aspectRatio;
     }
 
+    public String getHmac() {
+        return hmac;
+    }
+
+    public void setHmac(String hmac) {
+        this.hmac = hmac;
+    }
 }
