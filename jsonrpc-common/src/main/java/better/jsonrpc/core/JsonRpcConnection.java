@@ -73,9 +73,14 @@ public abstract class JsonRpcConnection {
 
 
     /**
-     * Connection listeners
+     * Connection State listeners
      */
     Vector<Listener> mListeners = new Vector<Listener>();
+
+    /**
+     * Connection Events listeners
+     */
+    Vector<ConnectionEventListener> mConnectionEventListeners = new Vector<ConnectionEventListener>();
 
 
     /**
@@ -221,9 +226,16 @@ public abstract class JsonRpcConnection {
     public void handleRequest(ObjectNode request) {
         if (mServer != null) {
             try {
+                for (ConnectionEventListener l : mConnectionEventListeners) {
+                    l.onPreHandleRequest(this, request);
+                }
                 mServer.handleRequest(mServerHandler, request, this);
             } catch (Throwable throwable) {
                 LOG.error("Exception handling request", throwable);
+            } finally {
+                for (ConnectionEventListener l : mConnectionEventListeners) {
+                    l.onPostHandleRequest(this, request);
+                }
             }
         }
     }
@@ -247,9 +259,16 @@ public abstract class JsonRpcConnection {
     public void handleNotification(ObjectNode notification) {
         if (mServer != null) {
             try {
+                for (ConnectionEventListener l : mConnectionEventListeners) {
+                    l.onPreHandleNotification(this, notification);
+                }
                 mServer.handleRequest(mServerHandler, notification, this);
             } catch (Throwable throwable) {
                 LOG.error("Exception handling notification", throwable);
+            } finally {
+                for (ConnectionEventListener l : mConnectionEventListeners) {
+                    l.onPostHandleNotification(this, notification);
+                }
             }
         }
     }
@@ -261,6 +280,45 @@ public abstract class JsonRpcConnection {
         public void onOpen(JsonRpcConnection connection);
 
         public void onClose(JsonRpcConnection connection);
+
+    }
+
+    /**
+     * Interface of connection event listeners
+     */
+    public interface ConnectionEventListener {
+
+        /**
+         * Gets fired imediately *before* a request is handled
+         *
+         * @param connection
+         * @param request
+         */
+        public void onPreHandleRequest(JsonRpcConnection connection, ObjectNode request);
+
+        /**
+         * Gets fired immediately *after* a request was handled
+         *
+         * @param connection
+         * @param request
+         */
+        public void onPostHandleRequest(JsonRpcConnection connection, ObjectNode request);
+
+        /**
+         * Get fired immediately *before* a notification is handled
+         *
+         * @param connection
+         * @param notification
+         */
+        public void onPreHandleNotification(JsonRpcConnection connection, ObjectNode notification);
+
+        /**
+         * Gets fired immediately *after* a notification was handled
+         *
+         * @param connection
+         * @param notification
+         */
+        public void onPostHandleNotification(JsonRpcConnection connection, ObjectNode notification);
     }
 
     /**
@@ -279,6 +337,25 @@ public abstract class JsonRpcConnection {
      */
     public void removeListener(Listener l) {
         mListeners.remove(l);
+    }
+
+
+    /**
+     * Add a connection event listener
+     *
+     * @param l ConnectionEventListener
+     */
+    public void addConnectionEventListener(ConnectionEventListener l) {
+        mConnectionEventListeners.add(l);
+    }
+
+    /**
+     * Remove the given connection event listener
+     *
+     * @param l ConnectionEventListener
+     */
+    public void removeConnectionEventListener(ConnectionEventListener l) {
+        mConnectionEventListeners.remove(l);
     }
 
 }
