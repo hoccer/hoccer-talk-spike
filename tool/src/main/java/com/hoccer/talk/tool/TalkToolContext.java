@@ -18,6 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class TalkToolContext extends CLIContext {
 
+    private final String DEFAULT_FILES_DIR = "/files";
+    private final String UPLOAD_DIR = "/upload";
+    private final String DOWNLOAD_DIR = "/download";
+
     ObjectMapper mMapper;
     ScheduledExecutorService mExecutor;
     AtomicInteger mClientIdCounter;
@@ -36,9 +40,14 @@ public class TalkToolContext extends CLIContext {
     private boolean dbfile = false;
 
     @Parameter(names="-poolsize",
-            description = "CorePoolSize for the ScheduledExecutorService. Default is 8.",
-            arity = 1)
+               description = "CorePoolSize for the ScheduledExecutorService. Default is 8.",
+               arity = 1)
     private Integer poolsize = 8;
+
+    @Parameter(names="-filesdir",
+               description = "Directory path where encrypted files for upload and download will be stored. Default is '/files'",
+               arity = 1)
+    private String filesdir = DEFAULT_FILES_DIR;
 
     public TalkToolContext(TalkTool app) {
         super(app);
@@ -57,6 +66,14 @@ public class TalkToolContext extends CLIContext {
             e.printStackTrace();
         }
 
+    }
+
+    public  String getUploadDir() {
+        return filesdir + UPLOAD_DIR;
+    }
+
+    public  String getDownloadDir() {
+        return filesdir + DOWNLOAD_DIR;
     }
 
     public Boolean isDbModeFile() {

@@ -12,6 +12,8 @@ public class ClientConfig extends TalkToolCommand {
         System.out.println("- server: " + context.getServer());
         System.out.println("- store DB in file: " + context.isDbModeFile());
         System.out.println("- threadpool size: " + context.getThreadPoolSize());
+        System.out.println("- upload directory: " + context.getUploadDir());
+        System.out.println("- download directory: " + context.getDownloadDir());
     }
 
 }
