@@ -9,77 +9,56 @@ import java.util.UUID;
 /**
  * Message objects represent messages including the
  * receiver-independent envelope
- *
+ * 
  * @author ingo
  */
-@DatabaseTable(tableName = "message")
+@DatabaseTable(tableName="message")
 public class TalkMessage {
 
-    public static String FIELD_MESSAGE_ID = "messageId";
+    public static String FIELD_MESSAGE_ID  = "messageId";
     public static String FIELD_MESSAGE_TAG = "messageTag";
-    public static String FIELD_SENDER_ID = "senderId";
-    public static String FIELD_BODY = "body";
-    public static String FIELD_ATTACHMENT = "attachment";
+    public static String FIELD_SENDER_ID   = "senderId";
+    public static String FIELD_BODY        = "body";
+    public static String FIELD_ATTACHMENT  = "attachment";
 
     private String _id;
 
     @DatabaseField(generatedId = true)
     int dbMessageId;
 
-    /**
-     * Server-assigned message id
-     */
+    /** Server-assigned message id */
     @DatabaseField
-    String messageId;
+	String messageId;
 
-    /**
-     * Sender-assigned message tag/id
-     */
+    /** Sender-assigned message tag/id */
     @DatabaseField
     String messageTag;
 
-    // TODO: add hMacMessage - possibly replaces messageTag
-    // TODO: add hMacMessageSignature - RSA signature produced by sender
-
-    /**
-     * Client id of the sender
-     */
+    /** Client id of the sender */
     @DatabaseField
-    String senderId;
+	String senderId;
 
-    /**
-     * Message salt
-     */
+    /** Message salt */
     @DatabaseField
     String salt;
 
-    /**
-     * Message body
-     */
+    /** Message body */
     @DatabaseField
-    String body;
+	String body;
 
-    /**
-     * Message attachment
-     */
+    /** Message attachment */
     @DatabaseField
     String attachment;
 
-    /**
-     * Attachment file id (for housekeeping)
-     */
+    /** Attachment file id (for housekeeping) */
     @DatabaseField
     String attachmentFileId;
 
-    /**
-     * Time the message was sent
-     */
+    /** Time the message was sent */
     @DatabaseField
     Date timeSent;
 
-    /**
-     * Total number of deliveries for this message
-     */
+    /** Total number of deliveries for this message */
     @DatabaseField
     int numDeliveries;
 
@@ -87,13 +66,13 @@ public class TalkMessage {
     public TalkMessage() {
     }
 
-    public String getMessageId() {
-        return messageId;
-    }
+	public String getMessageId() {
+		return messageId;
+	}
 
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
-    }
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
+	}
 
     public String getMessageTag() {
         return messageTag;
@@ -108,13 +87,13 @@ public class TalkMessage {
         return this.messageTag;
     }
 
-    public String getSenderId() {
-        return senderId;
-    }
+	public String getSenderId() {
+		return senderId;
+	}
 
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
-    }
+	public void setSenderId(String senderId) {
+		this.senderId = senderId;
+	}
 
     public String getSalt() {
         return salt;
@@ -125,12 +104,12 @@ public class TalkMessage {
     }
 
     public String getBody() {
-        return body;
-    }
+		return body;
+	}
 
-    public void setBody(String body) {
-        this.body = body;
-    }
+	public void setBody(String body) {
+		this.body = body;
+	}
 
     public String getAttachment() {
         return attachment;
