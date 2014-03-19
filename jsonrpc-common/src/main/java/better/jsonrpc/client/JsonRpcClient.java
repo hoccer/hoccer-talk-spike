@@ -133,7 +133,7 @@ public class JsonRpcClient {
     public void sendRequest(JsonRpcConnection connection, ObjectNode request) throws Exception {
         // log request
         if (LOG.isDebugEnabled()) {
-            LOG.debug("RPC-Client Requset: " + request.toString());
+            LOG.debug("RPC-Client Request: " + request.toString());
         }
         // send it
         connection.sendRequest(request);
