@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>hoccer</groupId>
+    <artifactId>hoccer-talk</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>integration-tests</artifactId>
+
+  <dependencies>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>${junit.version}</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>com.github.joelittlejohn.embedmongo</groupId>
+          <artifactId>embedmongo-maven-plugin</artifactId>
+          <version>${embedmongo-maven-plugin.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>hoccer</groupId>
+          <artifactId>hoccer-talk-server</artifactId>
+          <version>${hoccer-talk-server.version}</version>
+      </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${maven-failsafe.version}</version>
+      </plugin>
+        <plugin>
+          <groupId>com.github.joelittlejohn.embedmongo</groupId>
+          <artifactId>embedmongo-maven-plugin</artifactId>
+          <version>${embedmongo-maven-plugin.version}</version>
+          <executions>
+            <execution>
+                <id>start</id>
+                <goals>
+                    <goal>start</goal>
+                </goals>
+            </execution>
+            <execution>
+                <id>stop</id>
+                <goals>
+                    <goal>stop</goal>
+                </goals>
+            </execution>
+          </executions>
+        </plugin>
+    </plugins>
+  </build>
+</project>
