@@ -25,6 +25,8 @@ public class ClientCreate extends TalkToolCommand {
             TalkToolClient client = new TalkToolClient(context);
             context.addClient(client);
             clients.add(client);
+            client.getClient().setEncryptedDownloadDirectory(context.getDownloadDir());
+            // XXX TODO: for use with nginx it seems that an own SSL configuration is needed (see android code: XoSsl)
         }
         if (pSelectClients) {
             context.setSelectedClients(clients);

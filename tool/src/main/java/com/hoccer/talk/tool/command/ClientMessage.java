@@ -53,26 +53,22 @@ public class ClientMessage extends TalkToolCommand {
             Console.warn("No message provided. Using default messageText.");
         }
 
-        TalkClientUpload attachmentUpload = createAttachment(clients.get(0), context.getUploadDir());
+        TalkClientUpload attachmentUpload = createAttachment(clients.get(0));
         sendMessage(clients.get(0), clients.get(1), pMessage, attachmentUpload);
     }
 
-    private TalkClientUpload createAttachment(TalkToolClient sender, String uploadDir) {
+    private TalkClientUpload createAttachment(TalkToolClient sender) {
         if (pAttachmentPath == null || pAttachmentPath.isEmpty()) {
             return null;
         } else {
-            sender.getClient().setEncryptedUploadDirectory(uploadDir);
-
-            Console.info("Creating attachment for file: '" + pAttachmentPath + "'");
+            Console.info("<ClientMessage::createAttachment> Creating attachment for file: '" + pAttachmentPath + "'");
             File file = new File(pAttachmentPath);
             String url = file.getAbsolutePath();
             String contentUrl = url; // in android this makes a difference
-            String contentType = "image/png"; // XXX TODO: calculate filetype
-            String mediaType = "image";
+            String contentType = "image/*"; // XXX TODO: calculate filetype
+            String mediaType = "image"; // seems to be only needed in android
             double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
             int contentLength = (int)file.length();
-
-            Console.info("---- url: " + url + ", contentType: " + contentType + ", length: " + contentLength);
 
             TalkClientUpload attachmentUpload = new TalkClientUpload();
             attachmentUpload.initializeAsAttachment(contentUrl, url, contentType, mediaType, aspectRatio, contentLength);
