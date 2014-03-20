@@ -82,17 +82,14 @@ public class GroupProfileActivity extends XoActivity implements IXoContactListen
         MenuItem rejectInvitation = menu.findItem(R.id.menu_group_profile_reject_invitation);
         MenuItem joinGroup = menu.findItem(R.id.menu_group_profile_join);
         MenuItem leaveGroup = menu.findItem(R.id.menu_group_profile_leave);
-        editGroup.setVisible(false);
+        editGroup.setVisible(true);
         rejectInvitation.setVisible(false);
         joinGroup.setVisible(false);
         leaveGroup.setVisible(false);
 
         TalkClientContact contact = mGroupProfileFragment.getContact();
-        if (contact.isEditable()) {
-            if (mMode == Mode.PROFILE) {
-                editGroup.setVisible(true);
-            }
-        } else {
+        if (!contact.isEditable()) {
+            editGroup.setVisible(false);
             if (contact.isGroupInvited()) {
                 rejectInvitation.setVisible(true);
                 joinGroup.setVisible(true);
@@ -100,6 +97,7 @@ public class GroupProfileActivity extends XoActivity implements IXoContactListen
                 leaveGroup.setVisible(true);
             }
         }
+
         return result;
     }
 
