@@ -12,11 +12,7 @@ import com.hoccer.talk.tool.client.TalkToolClient;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 // import java.security.Provider;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.security.Security;
 import java.sql.SQLException;
 import java.util.List;
@@ -57,41 +53,42 @@ public class ClientMessage extends TalkToolCommand {
             Console.warn("No message provided. Using default messageText.");
         }
 
-        TalkClientUpload attachmentUpload;
-        if (pAttachmentPath == null || pAttachmentPath.isEmpty()) {
-            attachmentUpload = null;
-        } else {
-            // XXX TODO: upload directory - should be a constant somewhere
-            String uploadDir = "/Users/kristine/projects/artcom/hoccer/talk-tool-files/files/upload";
-            clients.get(0).getClient().setEncryptedUploadDirectory(uploadDir);
-
-            Console.info("Creating attachment for file: '" + pAttachmentPath + "'");
-
-            File file = new File(pAttachmentPath);
-            String url = file.getAbsolutePath();
-            String contentUrl = url; // in android this makes a difference
-            String contentType = "image/png"; // XXX TODO: calculate filetype (Files.probeContentType(FileSystems.getDefault().getPath(url)?)
-            String mediaType = "image";
-            double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
-            int contentLength = (int)file.length();
-            
-            Console.info("---- url: " + url + ", contentType: " + contentType + ", length: " + contentLength);
-
-            attachmentUpload = new TalkClientUpload();
-            attachmentUpload.initializeAsAttachment(contentUrl, url, contentType, mediaType, aspectRatio, contentLength);
-        }
+        TalkClientUpload attachmentUpload = createAttachment(clients.get(0), context.getUploadDir());
         sendMessage(clients.get(0), clients.get(1), pMessage, attachmentUpload);
     }
 
-    private void sendMessage(TalkToolClient generator, TalkToolClient consumer, String messageText, TalkClientUpload attachment) {
-        Console.info("<ClientMessage::sendMessage> sender-id: '" + generator.getClientId() + "', recipient-id: '" + consumer.getClientId() + "', message: '" + messageText + "'");
+    private TalkClientUpload createAttachment(TalkToolClient sender, String uploadDir) {
+        if (pAttachmentPath == null || pAttachmentPath.isEmpty()) {
+            return null;
+        } else {
+            sender.getClient().setEncryptedUploadDirectory(uploadDir);
+
+            Console.info("Creating attachment for file: '" + pAttachmentPath + "'");
+            File file = new File(pAttachmentPath);
+            String url = file.getAbsolutePath();
+            String contentUrl = url; // in android this makes a difference
+            String contentType = "image/png"; // XXX TODO: calculate filetype
+            String mediaType = "image";
+            double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
+            int contentLength = (int)file.length();
+
+            Console.info("---- url: " + url + ", contentType: " + contentType + ", length: " + contentLength);
+
+            TalkClientUpload attachmentUpload = new TalkClientUpload();
+            attachmentUpload.initializeAsAttachment(contentUrl, url, contentType, mediaType, aspectRatio, contentLength);
+            return attachmentUpload;
+        }
+    }
+
+    private void sendMessage(TalkToolClient sender, TalkToolClient recipient, String messageText, TalkClientUpload attachment) {
+        Console.info("<ClientMessage::sendMessage> sender-id: '" + sender.getClientId() + "', recipient-id: '" + recipient.getClientId() + "', message: '" + messageText + "'");
 
         // check if relationship exists
         // XXX TODO: implement a relationship-check in XOClient,
-        //           e.g. generator.isKnownRelationship(TalkToolClient consumer)
+        //           e.g. sender.isKnownRelationship(TalkToolClient recipient)
         TalkClientContact recipientContact;
         try {
-            recipientContact = generator.getDatabase().findContactByClientId(consumer.getClientId(), false);
+            recipientContact = sender.getDatabase().findContactByClientId(recipient.getClientId(), false);
         } catch (SQLException e) {
             recipientContact = null;
             e.printStackTrace();
@@ -100,8 +97,8 @@ public class ClientMessage extends TalkToolCommand {
         if (recipientContact == null) {
             Console.warn("<ClientMessage::sendMessage> the sender has no relationship to the recipient. Doing nothing.");
         } else {
-            TalkClientMessage clientMessage = generator.getClient().composeClientMessage(recipientContact, messageText, attachment);
-            generator.getClient().requestDelivery(clientMessage);
+            TalkClientMessage clientMessage = sender.getClient().composeClientMessage(recipientContact, messageText, attachment);
+            sender.getClient().requestDelivery(clientMessage);
         }
     }
 }
