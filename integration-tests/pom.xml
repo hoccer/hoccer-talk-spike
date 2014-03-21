@@ -26,6 +26,21 @@
           <artifactId>hoccer-talk-server</artifactId>
           <version>${hoccer-talk-server.version}</version>
       </dependency>
+      <dependency>
+          <groupId>hoccer</groupId>
+          <artifactId>hoccer-talk-client</artifactId>
+          <version>0.0.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+          <version>${h2-jdbc.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>com.google.code.tempus-fugit</groupId>
+          <artifactId>tempus-fugit</artifactId>
+          <version>1.1</version>
+      </dependency>
   </dependencies>
   <build>
     <plugins>

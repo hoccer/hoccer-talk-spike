@@ -1,5 +1,8 @@
 package com.hoccer.talk;
 
+import com.google.code.tempusfugit.temporal.*;
+import com.hoccer.talk.client.IXoClientHost;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.TalkServerConfiguration;
@@ -8,6 +11,7 @@ import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
 import com.mongodb.Mongo;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.mongo.tests.MongodForTestsFactory;
+import junit.framework.Assert;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.DefaultHandler;
@@ -21,16 +25,24 @@ import org.junit.runners.JUnit4;
 
 import java.net.InetSocketAddress;
 
+import com.google.code.tempusfugit.temporal.Condition;
+import com.google.code.tempusfugit.temporal.WaitFor;
+
+import static com.google.code.tempusfugit.temporal.Duration.seconds;
+import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
-public class ITDummy {
+public class ITSingleClient {
 
     private MongodForTestsFactory factory;
     private Mongo mongo;
     private TalkServer ts;
     private Server s;
+    private Connector serverConnector;
 
     @Before
     public void setup() throws Exception {
@@ -49,15 +61,17 @@ public class ITDummy {
         int port = 3000;
         while (true) {
             try {
-                Connector connector=new SelectChannelConnector();
-                connector.setPort(port);
-                s.setConnectors(new Connector[]{connector});
+                serverConnector=new SelectChannelConnector();
+                serverConnector.setPort(port);
+                s.setConnectors(new Connector[]{serverConnector});
                 s.start();
                 break;
             } catch (java.net.BindException ex) {
                 port++;
             }
         }
+
+
     }
 
     @After
@@ -69,14 +83,29 @@ public class ITDummy {
             factory.shutdown();
     }
   @Test
-  public void thisFirstTest() throws InterruptedException {
-    assertEquals(2, 1+1);
-      sleep(60000);
+  public void clientConnectAndDisconnectTest() throws Exception {
+      // create client
+      IXoClientHost host = new TestClientHost(serverConnector);
+      final XoClient c = new XoClient(host);
+      assertFalse(c.isAwake());
+      c.wake();
+      assertTrue(c.isAwake());
+
+      waitOrTimeout(new Condition() {
+          @Override
+          public boolean isSatisfied() {
+              return XoClient.STATE_ACTIVE == c.getState();
+          }
+      }, Timeout.timeout(seconds(2)));
+
+      c.deactivate();
+      waitOrTimeout(new Condition() {
+          @Override
+          public boolean isSatisfied() {
+              return XoClient.STATE_INACTIVE == c.getState();
+          }
+      }, Timeout.timeout(seconds(2)));
   }
 
-  @Test
-  public void thisfailTest() {
-    assertEquals(2, 2);
-  }
 }
 
