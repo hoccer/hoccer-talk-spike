@@ -1,6 +1,7 @@
 package com.hoccer.talk.tool.client;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.dao.Dao;
@@ -24,27 +25,7 @@ public class TalkToolClientDatabase implements IXoClientDatabaseBackend {
 
     public void initializeDb() throws SQLException {
         ConnectionSource cs = getConnectionSource();
-
-        TableUtils.createTableIfNotExists(cs, TalkClientContact.class);
-        TableUtils.createTableIfNotExists(cs, TalkClientSelf.class);
-        TableUtils.createTableIfNotExists(cs, TalkPresence.class);
-        TableUtils.createTableIfNotExists(cs, TalkRelationship.class);
-        TableUtils.createTableIfNotExists(cs, TalkGroup.class);
-        TableUtils.createTableIfNotExists(cs, TalkGroupMember.class);
-
-        TableUtils.createTableIfNotExists(cs, TalkClientMembership.class);
-
-        TableUtils.createTableIfNotExists(cs, TalkClientMessage.class);
-        TableUtils.createTableIfNotExists(cs, TalkMessage.class);
-        TableUtils.createTableIfNotExists(cs, TalkDelivery.class);
-
-        TableUtils.createTableIfNotExists(cs, TalkKey.class);
-        TableUtils.createTableIfNotExists(cs, TalkPrivateKey.class);
-
-        TableUtils.createTableIfNotExists(cs, TalkClientDownload.class);
-        TableUtils.createTableIfNotExists(cs, TalkClientUpload.class);
-
-        TableUtils.createTableIfNotExists(cs, TalkClientSmsToken.class);
+        XoClientDatabase.createTables(cs);
     }
 
     @Override
