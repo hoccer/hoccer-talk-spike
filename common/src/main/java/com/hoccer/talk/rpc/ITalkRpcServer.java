@@ -1,14 +1,6 @@
 package com.hoccer.talk.rpc;
 
-import com.hoccer.talk.model.TalkClientInfo;
-import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
-import com.hoccer.talk.model.TalkKey;
-import com.hoccer.talk.model.TalkMessage;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.talk.model.TalkRelationship;
-import com.hoccer.talk.model.TalkServerInfo;
+import com.hoccer.talk.model.*;
 
 import java.util.Date;
 
@@ -569,6 +561,32 @@ public interface ITalkRpcServer {
         public String uploadUrl;
         public String downloadUrl;
     }
+
+    /** provide environment record for location based grouping
+     * @param environment denotes the geoposition and other environment data for grouping
+     * @return a group id for a transient group id the client is in
+     * @talk.preconditions client must be logged in
+     * @talk.preconditions.server
+     * @talk.preconditions.client
+     * @talk.behavior.server store environment and group
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects changes environment, creates, destroys or modifies groups and adds or removes group members
+     * @talk.errors.server
+     */
+    String updateEnvironment(TalkEnvironment environment);
+
+    /** end participation in location based grouping
+     * @param clientId optional own client id
+     * @param groupId the group id returned by updateEnvironment
+     * @talk.preconditions client must be logged in
+     * @talk.preconditions.server
+     * @talk.preconditions.client
+     * @talk.behavior.server remove client from group and destroy group if client is last member
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects changes environment, creates, destroys or modifies groups and adds or removes group members
+     * @talk.errors.server
+     */
+    void destroyEnvironment(String clientId, String groupId);
 
 }
 
