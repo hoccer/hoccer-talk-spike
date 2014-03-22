@@ -121,4 +121,15 @@ public class TalkEnvironment {
     public void setGeoLocation(Double[] geoLocation) {
         this.geoLocation = geoLocation;
     }
+
+    public void updateWith(TalkEnvironment environment) {
+        this.clientId = environment.clientId;
+        this.groupId = environment.groupId;
+        this.timestamp = environment.timestamp;
+        this.locationType = environment.locationType;
+        this.geoLocation = environment.getGeoLocation();
+        this.accuracy = environment.accuracy;
+        this.bssids = environment.bssids;
+        this.identifiers = environment.identifiers;
+    }
 }
