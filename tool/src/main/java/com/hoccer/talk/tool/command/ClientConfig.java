@@ -9,12 +9,11 @@ public class ClientConfig extends TalkToolCommand {
 
     @Override
     protected void run(TalkToolContext context) throws Exception {
-        System.out.println("- server: " + context.getServer());
-        System.out.println("- store DB in file: " + context.isDbModeFile());
-        System.out.println("- threadpool size: " + context.getThreadPoolSize());
-        System.out.println("- upload directory: " + context.getUploadDir());
-        System.out.println("- download directory: " + context.getDownloadDir());
-        System.out.println("- ssl enabled: " + context.isSslEnabled());
+        System.out.println("- server: " + context.getApplication().getServer());
+        System.out.println("- store DB in file: " + context.getApplication().isDbModeFile());
+        System.out.println("- upload directory: " + context.getApplication().getUploadDir());
+        System.out.println("- download directory: " + context.getApplication().getDownloadDir());
+        System.out.println("- ssl enabled: " + context.getApplication().isSslEnabled());
     }
 
 }

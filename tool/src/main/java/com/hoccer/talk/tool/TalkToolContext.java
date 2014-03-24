@@ -2,7 +2,6 @@ package com.hoccer.talk.tool;
 
 import better.cli.CLIContext;
 import better.cli.console.Console;
-import com.beust.jcommander.Parameter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.client.HttpClientWithKeystore;
 import com.hoccer.talk.client.XoClientConfiguration;
@@ -23,12 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class TalkToolContext extends CLIContext {
 
-    private final String DEFAULT_FILES_DIR = "/files";
-    private final String UPLOAD_DIR = "/upload";
-    private final String DOWNLOAD_DIR = "/download";
-
     private static KeyStore KEYSTORE = null;
 
+    TalkTool mApplication;
     ObjectMapper mMapper;
     ScheduledExecutorService mExecutor;
     AtomicInteger mClientIdCounter;
@@ -36,30 +32,6 @@ public class TalkToolContext extends CLIContext {
     Hashtable<Integer, TalkToolClient> mClientsById;
     List<TalkToolClient> mSelectedClients;
     WebSocketClientFactory mWSClientFactory;
-
-    @Parameter(names={"-s", "-server"},
-               description = "Talkserver to use (complete uri)")
-    private String server = XoClientConfiguration.SERVER_URI;
-
-    @Parameter(names="-dbfile",
-               description = "If true database is stored in a file. By default memory mode is used.",
-               arity = 1)
-    private boolean dbfile = false;
-
-    @Parameter(names="-poolsize",
-               description = "CorePoolSize for the ScheduledExecutorService. Default is 8.",
-               arity = 1)
-    private Integer poolsize = 8;
-
-    @Parameter(names="-filesdir",
-               description = "Directory path where encrypted files for upload and download will be stored. Default is '/files'",
-               arity = 1)
-    private String filesdir = DEFAULT_FILES_DIR;
-
-    @Parameter(names="-sslenabled",
-            description = "Enables ssl. By default is false.",
-            arity = 1)
-    private boolean sslenabled = false;
 
 
     private static KeyStore getKeyStore() {
@@ -70,7 +42,6 @@ public class TalkToolContext extends CLIContext {
     }
 
     private static void initializeSsl() {
-        Console.info("Initializing ssl...");
         try {
             // get the keystore
             KeyStore ks = KeyStore.getInstance("BKS");
@@ -91,7 +62,6 @@ public class TalkToolContext extends CLIContext {
     }
 
     private static void configureSsl(WebSocketClientFactory wsClientFactory) {
-        Console.info("Configuring ssl...");
         SslContextFactory sslcFactory = wsClientFactory.getSslContextFactory();
         sslcFactory.setTrustAll(false);
         sslcFactory.setKeyStore(getKeyStore());
@@ -105,52 +75,34 @@ public class TalkToolContext extends CLIContext {
 
     public TalkToolContext(TalkTool app) {
         super(app);
-        Console.info("setting up TalkToolContext...");
+        Console.info("- setting up TalkToolContext...");
+        mApplication = app;
         mMapper = new ObjectMapper();
-        //mExecutor = Executors.newSingleThreadExecutor();
-        mExecutor = Executors.newScheduledThreadPool(this.getThreadPoolSize());
+        mExecutor = Executors.newScheduledThreadPool(8);
         mClientIdCounter = new AtomicInteger(0);
         mClients = new Vector<TalkToolClient>();
         mClientsById = new Hashtable<Integer, TalkToolClient>();
         mSelectedClients = new Vector<TalkToolClient>();
         mWSClientFactory = new WebSocketClientFactory();
+    }
 
-        if (this.isSslEnabled()) { // XXX Fix-me: this is to early
-            initializeSsl();
-            configureSsl(mWSClientFactory);
-        }
+    public void setupSsl() {
+        Console.info("- setting up ssl...");
+        initializeSsl();
+        configureSsl(mWSClientFactory);
+    }
 
+    public void start() {
         try {
+            Console.info("- starting WebsocketClientFactory...");
             mWSClientFactory.start();
         } catch (Exception e) {
-            // XXX
             e.printStackTrace();
         }
     }
 
-
-    public  Boolean isSslEnabled() {
-        return sslenabled;
-    }
-
-    public  String getUploadDir() {
-        return filesdir + UPLOAD_DIR;
-    }
-
-    public  String getDownloadDir() {
-        return filesdir + DOWNLOAD_DIR;
-    }
-
-    public Boolean isDbModeFile() {
-        return dbfile;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public Integer getThreadPoolSize() {
-        return poolsize;
+    public TalkTool getApplication() {
+        return mApplication;
     }
 
     public ScheduledExecutorService getExecutor() {

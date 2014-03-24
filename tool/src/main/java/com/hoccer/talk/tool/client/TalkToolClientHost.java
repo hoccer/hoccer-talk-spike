@@ -55,7 +55,7 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public String getServerUri() {
-        return mClient.getContext().getServer();
+        return mClient.getContext().getApplication().getServer();
     }
 
     @Override
