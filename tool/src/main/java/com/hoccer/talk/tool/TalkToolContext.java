@@ -1,12 +1,17 @@
 package com.hoccer.talk.tool;
 
 import better.cli.CLIContext;
+import better.cli.console.Console;
 import com.beust.jcommander.Parameter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hoccer.talk.client.HttpClientWithKeystore;
 import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.tool.client.TalkToolClient;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
+import java.io.InputStream;
+import java.security.KeyStore;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -21,6 +26,8 @@ public class TalkToolContext extends CLIContext {
     private final String DEFAULT_FILES_DIR = "/files";
     private final String UPLOAD_DIR = "/upload";
     private final String DOWNLOAD_DIR = "/download";
+
+    private static KeyStore KEYSTORE = null;
 
     ObjectMapper mMapper;
     ScheduledExecutorService mExecutor;
@@ -49,8 +56,56 @@ public class TalkToolContext extends CLIContext {
                arity = 1)
     private String filesdir = DEFAULT_FILES_DIR;
 
+    @Parameter(names="-sslenabled",
+            description = "Enables ssl. By default is false.",
+            arity = 1)
+    private boolean sslenabled = false;
+
+
+    private static KeyStore getKeyStore() {
+        if(KEYSTORE == null) {
+            throw new RuntimeException("SSL security not initialized");
+        }
+        return KEYSTORE;
+    }
+
+    private static void initializeSsl() {
+        Console.info("Initializing ssl...");
+        try {
+            // get the keystore
+            KeyStore ks = KeyStore.getInstance("BKS");
+            // load keys
+            InputStream input = TalkToolContext.class.getClassLoader().getResourceAsStream("ssl_bks");
+            try {
+                ks.load(input, "password".toCharArray());
+            } finally {
+                input.close();
+            }
+            // configure HttpClient
+            HttpClientWithKeystore.initializeSsl(ks);
+
+            KEYSTORE = ks;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void configureSsl(WebSocketClientFactory wsClientFactory) {
+        Console.info("Configuring ssl...");
+        SslContextFactory sslcFactory = wsClientFactory.getSslContextFactory();
+        sslcFactory.setTrustAll(false);
+        sslcFactory.setKeyStore(getKeyStore());
+        sslcFactory.setEnableCRLDP(false);
+        sslcFactory.setEnableOCSP(false);
+        sslcFactory.setSessionCachingEnabled(XoClientConfiguration.TLS_SESSION_CACHE_ENABLED);
+        sslcFactory.setSslSessionCacheSize(XoClientConfiguration.TLS_SESSION_CACHE_SIZE);
+        sslcFactory.setIncludeCipherSuites(XoClientConfiguration.TLS_CIPHERS);
+        sslcFactory.setIncludeProtocols(XoClientConfiguration.TLS_PROTOCOLS);
+    }
+
     public TalkToolContext(TalkTool app) {
         super(app);
+        Console.info("setting up TalkToolContext...");
         mMapper = new ObjectMapper();
         //mExecutor = Executors.newSingleThreadExecutor();
         mExecutor = Executors.newScheduledThreadPool(this.getThreadPoolSize());
@@ -59,13 +114,23 @@ public class TalkToolContext extends CLIContext {
         mClientsById = new Hashtable<Integer, TalkToolClient>();
         mSelectedClients = new Vector<TalkToolClient>();
         mWSClientFactory = new WebSocketClientFactory();
+
+        if (this.isSslEnabled()) { // XXX Fix-me: this is to early
+            initializeSsl();
+            configureSsl(mWSClientFactory);
+        }
+
         try {
             mWSClientFactory.start();
         } catch (Exception e) {
             // XXX
             e.printStackTrace();
         }
+    }
 
+
+    public  Boolean isSslEnabled() {
+        return sslenabled;
     }
 
     public  String getUploadDir() {

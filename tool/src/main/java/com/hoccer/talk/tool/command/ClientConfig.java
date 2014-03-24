@@ -14,6 +14,7 @@ public class ClientConfig extends TalkToolCommand {
         System.out.println("- threadpool size: " + context.getThreadPoolSize());
         System.out.println("- upload directory: " + context.getUploadDir());
         System.out.println("- download directory: " + context.getDownloadDir());
+        System.out.println("- ssl enabled: " + context.isSslEnabled());
     }
 
 }
