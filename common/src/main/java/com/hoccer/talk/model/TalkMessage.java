@@ -20,7 +20,7 @@ import java.util.UUID;
 /**
  * Message objects represent messages including the
  * receiver-independent envelope
- *
+ * 
  * @author ingo
  */
 @DatabaseTable(tableName="message")
@@ -37,60 +37,39 @@ public class TalkMessage {
     @DatabaseField(generatedId = true)
     int dbMessageId;
 
-    /**
-     * Server-assigned message id
-     */
+    /** Server-assigned message id */
     @DatabaseField
-    String messageId;
+	String messageId;
 
-    /**
-     * Sender-assigned message tag/id
-     */
+    /** Sender-assigned message tag/id */
     @DatabaseField
     String messageTag;
 
-    // TODO: add hMacMessage - possibly replaces messageTag
-    // TODO: add hMacMessageSignature - RSA signature produced by sender
-
-    /**
-     * Client id of the sender
-     */
+    /** Client id of the sender */
     @DatabaseField
-    String senderId;
+	String senderId;
 
-    /**
-     * Message salt
-     */
+    /** Message salt */
     @DatabaseField
     String salt;
 
-    /**
-     * Message body
-     */
+    /** Message body */
     @DatabaseField
-    String body;
+	String body;
 
-    /**
-     * Message attachment
-     */
+    /** Message attachment */
     @DatabaseField
     String attachment;
 
-    /**
-     * Attachment file id (for housekeeping)
-     */
+    /** Attachment file id (for housekeeping) */
     @DatabaseField
     String attachmentFileId;
 
-    /**
-     * Time the message was sent
-     */
+    /** Time the message was sent */
     @DatabaseField
     Date timeSent;
 
-    /**
-     * Total number of deliveries for this message
-     */
+    /** Total number of deliveries for this message */
     @DatabaseField
     int numDeliveries;
 

@@ -25,6 +25,7 @@ public class ClientCreate extends TalkToolCommand {
             TalkToolClient client = new TalkToolClient(context);
             context.addClient(client);
             clients.add(client);
+            client.getClient().setEncryptedDownloadDirectory(context.getApplication().getDownloadDir());
         }
         if (pSelectClients) {
             context.setSelectedClients(clients);

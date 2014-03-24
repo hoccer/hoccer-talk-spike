@@ -1,6 +1,7 @@
 package com.hoccer.talk.server.push;
 
 import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkDelivery;
@@ -21,34 +22,34 @@ public class PushRequest {
 
     private static final Logger LOG = Logger.getLogger(PushAgent.class);
 
-    private final PushAgent mAgent;
+    PushAgent mAgent;
 
-    private final String mClientId;
-    private TalkClient mClient;
+    String mClientId;
+	TalkClient mClient;
 
-    private TalkServerConfiguration mConfig;
+    TalkServerConfiguration mConfig;
 
-    public PushRequest(PushAgent agent, String clientId) {
+	public PushRequest(PushAgent agent, String clientId) {
         mAgent = agent;
         mConfig = mAgent.getConfiguration();
         mClientId = clientId;
-    }
+	}
 
     public void perform() {
         LOG.debug("pushing " + mClientId);
         // get up-to-date client object
         mClient = mAgent.getDatabase().findClientById(mClientId);
-        if (mClient == null) {
+        if(mClient == null) {
             LOG.warn("client " + mClientId + " does not exist");
             return;
         }
         // try to perform push
-        if (mConfig.isGcmEnabled() && mClient.isGcmCapable()) {
+        if(mConfig.isGcmEnabled() && mClient.isGcmCapable()) {
             performGcm();
-        } else if (mConfig.isApnsEnabled() && mClient.isApnsCapable()) {
+        } else if(mConfig.isApnsEnabled() && mClient.isApnsCapable()) {
             performApns();
         } else {
-            if (mClient.isPushCapable()) {
+            if(mClient.isPushCapable()) {
                 LOG.warn("client " + mClient + " push not available");
             } else {
                 LOG.info("client " + mClientId + " has no registration");
@@ -66,7 +67,15 @@ public class PushRequest {
                 .build();
         Sender gcmSender = mAgent.getGcmSender();
         try {
-            gcmSender.send(message, mClient.getGcmRegistration(), 10);
+            Result res = gcmSender.send(message, mClient.getGcmRegistration(), 10);
+            if (res.getMessageId() != null) {
+                if ( res.getCanonicalRegistrationId() != null ) {
+                    LOG.warn("GCM returned a canonical registration id - we should do something with it");
+                }
+                LOG.debug("GCM push successful, return message id "+res.getMessageId());
+            } else {
+                LOG.error("GCM push returned error '"+res.getErrorCodeName()+"'");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -94,5 +103,5 @@ public class PushRequest {
         b.sound("default");
         apnsService.push(mClient.getApnsToken(), b.build());
     }
-
+	
 }

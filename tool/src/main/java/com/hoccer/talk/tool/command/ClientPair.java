@@ -26,7 +26,8 @@ public class ClientPair extends TalkToolCommand {
     }
 
     private void pairClients(TalkToolClient generator, TalkToolClient consumer) {
-        consumer.getClient().performTokenPairing(generator.getClient().generatePairingToken());
+        String token = generator.getClient().generatePairingToken();
+        consumer.getClient().performTokenPairing(token);
     }
 
 }

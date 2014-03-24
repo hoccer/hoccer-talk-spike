@@ -1,12 +1,16 @@
 package com.hoccer.talk.tool;
 
 import better.cli.CLIContext;
-import com.beust.jcommander.Parameter;
+import better.cli.console.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hoccer.talk.client.HttpClientWithKeystore;
 import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.tool.client.TalkToolClient;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
+import java.io.InputStream;
+import java.security.KeyStore;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -18,6 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class TalkToolContext extends CLIContext {
 
+    private static KeyStore KEYSTORE = null;
+
+    TalkTool mApplication;
     ObjectMapper mMapper;
     ScheduledExecutorService mExecutor;
     AtomicInteger mClientIdCounter;
@@ -26,49 +33,76 @@ public class TalkToolContext extends CLIContext {
     List<TalkToolClient> mSelectedClients;
     WebSocketClientFactory mWSClientFactory;
 
-    @Parameter(names={"-s", "-server"},
-               description = "Talkserver to use (complete uri)")
-    private String server = XoClientConfiguration.SERVER_URI;
 
-    @Parameter(names="-dbfile",
-               description = "If true database is stored in a file. By default memory mode is used.",
-               arity = 1)
-    private boolean dbfile = false;
+    private static KeyStore getKeyStore() {
+        if(KEYSTORE == null) {
+            throw new RuntimeException("SSL security not initialized");
+        }
+        return KEYSTORE;
+    }
 
-    @Parameter(names="-poolsize",
-            description = "CorePoolSize for the ScheduledExecutorService. Default is 8.",
-            arity = 1)
-    private Integer poolsize = 8;
+    private static void initializeSsl() {
+        try {
+            // get the keystore
+            KeyStore ks = KeyStore.getInstance("BKS");
+            // load keys
+            InputStream input = TalkToolContext.class.getClassLoader().getResourceAsStream("ssl_bks");
+            try {
+                ks.load(input, "password".toCharArray());
+            } finally {
+                input.close();
+            }
+            // configure HttpClient
+            HttpClientWithKeystore.initializeSsl(ks);
+
+            KEYSTORE = ks;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void configureSsl(WebSocketClientFactory wsClientFactory) {
+        SslContextFactory sslcFactory = wsClientFactory.getSslContextFactory();
+        sslcFactory.setTrustAll(false);
+        sslcFactory.setKeyStore(getKeyStore());
+        sslcFactory.setEnableCRLDP(false);
+        sslcFactory.setEnableOCSP(false);
+        sslcFactory.setSessionCachingEnabled(XoClientConfiguration.TLS_SESSION_CACHE_ENABLED);
+        sslcFactory.setSslSessionCacheSize(XoClientConfiguration.TLS_SESSION_CACHE_SIZE);
+        sslcFactory.setIncludeCipherSuites(XoClientConfiguration.TLS_CIPHERS);
+        sslcFactory.setIncludeProtocols(XoClientConfiguration.TLS_PROTOCOLS);
+    }
 
     public TalkToolContext(TalkTool app) {
         super(app);
+        Console.info("- setting up TalkToolContext...");
+        mApplication = app;
         mMapper = new ObjectMapper();
-        //mExecutor = Executors.newSingleThreadExecutor();
-        mExecutor = Executors.newScheduledThreadPool(this.getThreadPoolSize());
+        mExecutor = Executors.newScheduledThreadPool(8);
         mClientIdCounter = new AtomicInteger(0);
         mClients = new Vector<TalkToolClient>();
         mClientsById = new Hashtable<Integer, TalkToolClient>();
         mSelectedClients = new Vector<TalkToolClient>();
         mWSClientFactory = new WebSocketClientFactory();
+    }
+
+    public void setupSsl() {
+        Console.info("- setting up ssl...");
+        initializeSsl();
+        configureSsl(mWSClientFactory);
+    }
+
+    public void start() {
         try {
+            Console.info("- starting WebsocketClientFactory...");
             mWSClientFactory.start();
         } catch (Exception e) {
-            // XXX
             e.printStackTrace();
         }
-
     }
 
-    public Boolean isDbModeFile() {
-        return dbfile;
-    }
-
-    public String getServer() {
-        return server;
-    }
-
-    public Integer getThreadPoolSize() {
-        return poolsize;
+    public TalkTool getApplication() {
+        return mApplication;
     }
 
     public ScheduledExecutorService getExecutor() {
