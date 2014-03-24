@@ -31,6 +31,9 @@ public class ClientMessage extends TalkToolCommand {
     @Parameter(description = "Path to file to be attached to the message (optional)", names = "-f")
     String pAttachmentPath;
 
+    @Parameter(description = "Number of messages being send (optional, default is 1)", names = "-n")
+    int pNumMessages = 1;
+
     // this is obviously needed for message encryption
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -53,22 +56,47 @@ public class ClientMessage extends TalkToolCommand {
             Console.warn("No message provided. Using default messageText.");
         }
 
-        TalkClientUpload attachmentUpload = createAttachment(clients.get(0));
-        sendMessage(clients.get(0), clients.get(1), pMessage, attachmentUpload);
+        // FIX-ME: actually attachment should be created per pNumMessages. But when pNumMessages > 1 and same file is selected twice
+        // this leads to: "java.lang.IllegalStateException: Invalid use of SingleClientConnManager: connection still allocated."
+        TalkClientUpload attachmentUpload = createAttachment(getUploadFile());
+        for (int i = 0; i < pNumMessages; ++i) {
+            sendMessage(clients.get(0), clients.get(1), pMessage, attachmentUpload);
+        }
     }
 
-    private TalkClientUpload createAttachment(TalkToolClient sender) {
+    private File getUploadFile() {
         if (pAttachmentPath == null || pAttachmentPath.isEmpty()) {
             return null;
         } else {
-            Console.info("<ClientMessage::createAttachment> Creating attachment for file: '" + pAttachmentPath + "'");
-            File file = new File(pAttachmentPath);
-            String url = file.getAbsolutePath();
+            File fileToPath = new File(pAttachmentPath);
+            if (!fileToPath.exists()) {
+                Console.warn("Specified attachment (" + pAttachmentPath + ") does not exist. Ignoring attachment.");
+                return null;
+            }
+            if (fileToPath.isFile()) {
+                return fileToPath;
+            } else if (fileToPath.isDirectory()) {
+                File[] filesList = fileToPath.listFiles();
+                int randomIdx = (int)Math.round(Math.random() * (filesList.length - 1));
+                File randomFile = filesList[randomIdx];
+                Console.info("Attachment-path is directory -> randomly selected: '" + randomFile + "' for upload.");
+                return randomFile;
+            }
+            return null;
+        }
+    }
+
+    private TalkClientUpload createAttachment(File fileToUpload) {
+        if (fileToUpload == null) {
+            return null;
+        } else {
+            Console.info("<ClientMessage::createAttachment> Creating attachment for file: '" + fileToUpload.getAbsolutePath() + "'");
+            String url = fileToUpload.getAbsolutePath();
             String contentUrl = url; // in android this makes a difference
             String contentType = "image/*"; // XXX TODO: calculate filetype
             String mediaType = "image"; // seems to be only needed in android
             double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
-            int contentLength = (int)file.length();
+            int contentLength = (int)fileToUpload.length();
 
             TalkClientUpload attachmentUpload = new TalkClientUpload();
             attachmentUpload.initializeAsAttachment(contentUrl, url, contentType, mediaType, aspectRatio, contentLength);
