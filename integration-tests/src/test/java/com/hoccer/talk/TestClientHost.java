@@ -21,15 +21,15 @@ public class TestClientHost implements IXoClientHost {
     private final ScheduledExecutorService mExecutor;
     private final IXoClientDatabaseBackend mDatabaseBackend;
     private final WebSocketClientFactory mWSClientFactory;
-    private final Connector mServer;
+    private final TestServer mServer;
     private ErrorManager LOG;
 
-    public TestClientHost(Connector server) throws Exception {
+    public TestClientHost(TestServer testServer) throws Exception {
         mExecutor = Executors.newScheduledThreadPool(10);
         mDatabaseBackend = new TestClientDatabaseBackend();
         mWSClientFactory = new WebSocketClientFactory();
         mWSClientFactory.start();
-        mServer = server;
+        mServer = testServer;
     }
     @Override
     public ScheduledExecutorService getBackgroundExecutor() {
@@ -63,7 +63,7 @@ public class TestClientHost implements IXoClientHost {
 
     @Override
     public String getServerUri() {
-        return "ws://127.0.0.1:"+mServer.getPort();
+        return "ws://127.0.0.1:"+mServer.getServerConnector().getPort();
     }
 
     @Override
