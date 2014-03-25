@@ -246,9 +246,16 @@ public abstract class JsonRpcConnection {
     public void handleResponse(ObjectNode response) {
         if (mClient != null) {
             try {
+                for (ConnectionEventListener l : mConnectionEventListeners) {
+                    l.onPreHandleResponse(this, response);
+                }
                 mClient.handleResponse(response, this);
             } catch (Throwable throwable) {
                 LOG.error("Exception handling response", throwable);
+            } finally {
+                for (ConnectionEventListener l : mConnectionEventListeners) {
+                    l.onPostHandleResponse(this, response);
+                }
             }
         }
     }
@@ -319,6 +326,22 @@ public abstract class JsonRpcConnection {
          * @param notification
          */
         public void onPostHandleNotification(JsonRpcConnection connection, ObjectNode notification);
+
+        /**
+         * Gets fired immediately *before* a response is handled
+         *
+         * @param connection
+         * @param response
+         */
+        public void onPreHandleResponse(JsonRpcConnection connection, ObjectNode response);
+
+        /**
+         * Gets fired immediately *after* a response was handled
+         *
+         * @param connection
+         * @param response
+         */
+        public void onPostHandleResponse(JsonRpcConnection connection, ObjectNode response);
     }
 
     /**
