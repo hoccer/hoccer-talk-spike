@@ -47,7 +47,7 @@ public class TalkMessage {
 	String body;
 
     /** Message attachment */
-    @DatabaseField
+    @DatabaseField(width = 1024)
     String attachment;
 
     /** Attachment file id (for housekeeping) */
