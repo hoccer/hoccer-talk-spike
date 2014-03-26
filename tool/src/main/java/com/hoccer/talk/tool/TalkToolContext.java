@@ -75,7 +75,7 @@ public class TalkToolContext extends CLIContext {
 
     public TalkToolContext(TalkTool app) {
         super(app);
-        Console.info("- setting up TalkToolContext...");
+        Console.debug("- setting up TalkToolContext...");
         mApplication = app;
         mMapper = new ObjectMapper();
         mExecutor = Executors.newScheduledThreadPool(8);
@@ -87,14 +87,14 @@ public class TalkToolContext extends CLIContext {
     }
 
     public void setupSsl() {
-        Console.info("- setting up ssl...");
+        Console.debug("- setting up ssl...");
         initializeSsl();
         configureSsl(mWSClientFactory);
     }
 
     public void start() {
         try {
-            Console.info("- starting WebsocketClientFactory...");
+            Console.debug("- starting WebsocketClientFactory...");
             mWSClientFactory.start();
         } catch (Exception e) {
             e.printStackTrace();
