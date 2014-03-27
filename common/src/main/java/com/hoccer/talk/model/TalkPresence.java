@@ -11,6 +11,7 @@ public class TalkPresence {
     public final static String CONN_STATUS_ONLINE = "online";
     public final static String CONN_STATUS_OFFLINE = "offline";
 
+    // required for OrmLite!
     private String _id;
 
     @DatabaseField(id = true)
