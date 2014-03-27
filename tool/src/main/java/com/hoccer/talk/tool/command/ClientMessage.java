@@ -79,7 +79,7 @@ public class ClientMessage extends TalkToolCommand {
             Files.copy(originalFile.toPath(), newFile.toPath());
             return newFile;
         } catch (FileAlreadyExistsException e) {
-            Console.warn("WARN <ClientMessage::retrieveFile> File (" + newFile.getAbsolutePath() + ") already exists. Continuing anyway.");
+            Console.debug("<ClientMessage::retrieveFile> File (" + newFile.getAbsolutePath() + ") already exists. Continuing anyway.");
             return newFile;
         } catch (IOException e) {
             e.printStackTrace();
