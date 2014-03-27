@@ -1,10 +1,10 @@
-package com.hoccer.talk.tool.client;
+package com.hoccer.talk;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
-import com.hoccer.talk.client.XoClientConfiguration;
-
-import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import java.io.IOException;
@@ -12,20 +12,28 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.logging.ErrorManager;
 
-public class TalkToolClientHost implements IXoClientHost {
+public class TestClientHost implements IXoClientHost {
 
-    private static final Logger LOG = Logger.getLogger(TalkToolClientHost.class);
-    TalkToolClient mClient;
+    private final ScheduledExecutorService mExecutor;
+    private final IXoClientDatabaseBackend mDatabaseBackend;
+    private final WebSocketClientFactory mWSClientFactory;
+    private final TestServer mServer;
+    private ErrorManager LOG;
 
-    public TalkToolClientHost(TalkToolClient client) {
-        mClient = client;
+    public TestClientHost(TestServer testServer) throws Exception {
+        mExecutor = Executors.newScheduledThreadPool(10);
+        mDatabaseBackend = new TestClientDatabaseBackend();
+        mWSClientFactory = new WebSocketClientFactory();
+        mWSClientFactory.start();
+        mServer = testServer;
     }
-
     @Override
     public ScheduledExecutorService getBackgroundExecutor() {
-        return mClient.getContext().getExecutor();
+        return mExecutor;
     }
 
     @Override
@@ -35,12 +43,12 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public IXoClientDatabaseBackend getDatabaseBackend() {
-        return mClient.getDatabaseBackend();
+        return mDatabaseBackend;
     }
 
     @Override
     public WebSocketClientFactory getWebSocketFactory() {
-        return mClient.getContext().getWSClientFactory();
+        return mWSClientFactory;
     }
 
     @Override
@@ -48,14 +56,14 @@ public class TalkToolClientHost implements IXoClientHost {
         return new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
-                LOG.error("uncaught exception on thread " + thread.toString(), ex);
+                Assert.fail(ex.toString());
             }
         };
     }
 
     @Override
     public String getServerUri() {
-        return mClient.getContext().getApplication().getServer();
+        return "ws://127.0.0.1:"+mServer.getServerConnector().getPort();
     }
 
     @Override
@@ -114,5 +122,4 @@ public class TalkToolClientHost implements IXoClientHost {
     public String getSystemVersion() {
         return null;
     }
-
 }

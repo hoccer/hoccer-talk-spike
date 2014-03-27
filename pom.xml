@@ -21,9 +21,14 @@
     <module>filecache</module>
 	<module>tool</module>
 	<module>android</module>
+	<module>integration-tests</module>
   </modules>
 
   <properties>
+    <!-- general encoding settings -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
     <!-- Java source language version -->
     <java.version>1.6</java.version>
 
@@ -31,8 +36,10 @@
     <maven-compiler.version>2.4</maven-compiler.version>
     <maven-assembly.version>2.4</maven-assembly.version>
     <maven-surefire.version>2.14.1</maven-surefire.version>
+    <maven-failsafe.version>2.17</maven-failsafe.version>
     <maven-android.version>3.8.2</maven-android.version>
     <git-commit-id.version>2.1.7</git-commit-id.version>
+    <embedmongo-maven-plugin.version>0.1.10</embedmongo-maven-plugin.version>
 
     <!-- Generic dependencies -->
     <jetty.version>8.1.13.v20130916</jetty.version>
@@ -70,13 +77,35 @@
     <better-jsonrpc.version>0.0.1-SNAPSHOT</better-jsonrpc.version>
 
     <!-- Android-specific dependencies -->
-    <android.platform.version>4.2.2_r2</android.platform.version>
+    <android.platform.version>4.4.2_r2</android.platform.version>
     <android.supportv4.version>19.0.1</android.supportv4.version>
     <android.gms.version>14.0.0</android.gms.version>
     <android.gmaps.version>17_r3</android.gmaps.version>
     <actionbarsherlock.version>4.4.0</actionbarsherlock.version>
     <log4j-android.version>1.2.17-1</log4j-android.version>
     <universal.image.loader.version>1.9.0</universal.image.loader.version>
+
+    <!-- Hoccer Release Versions -->
+    <hoccer-talk-server.version>1.0.5</hoccer-talk-server.version>
   </properties>
-  
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${maven-failsafe.version}</version>
+          <executions>
+            <execution>
+              <id>integration-test</id>
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
