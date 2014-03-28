@@ -48,7 +48,7 @@ public class OrmliteBackend extends CacheBackend {
     public void start() {
         try {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("creating connection source for " + mConfiguration.getOrmliteUrl());
+                LOG.debug("creating connection source for: '" + mConfiguration.getOrmliteUrl() + "'");
             }
             mConnectionSource = new JdbcConnectionSource(mConfiguration.getOrmliteUrl(),
                                                          mConfiguration.getOrmliteUser(),
@@ -68,12 +68,9 @@ public class OrmliteBackend extends CacheBackend {
         } catch (SQLException e) {
             LOG.error("Error initializing ormlite", e);
         }
-        mExpiryExecutor.scheduleAtFixedRate(new Runnable() {
+        mExpiryExecutor.scheduleAtFixedRate(new Runnable() { // XXX CHANGE
             @Override
             public void run() {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("deleting expired files");
-                }
                 deleteExpiredFiles();
             }
         }, 10, 60, TimeUnit.SECONDS);
@@ -181,7 +178,7 @@ public class OrmliteBackend extends CacheBackend {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("get by fileId " + id + " found " + (res != null ? "yes" : "no"));
+            LOG.debug("found file by file-id '" + id + "'? -> " + (res != null ? "yes" : "no"));
         }
 
         // return whatever we got
@@ -205,7 +202,7 @@ public class OrmliteBackend extends CacheBackend {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("get by uploadId " + id + " found " + (res != null ? "yes" : "no"));
+            LOG.debug("found file by upload-id '" + id + "'? -> " + (res != null ? "yes" : "no"));
         }
 
         return res;
@@ -228,7 +225,7 @@ public class OrmliteBackend extends CacheBackend {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("get by downloadId " + id + " found " + (res != null ? "yes" : "no"));
+            LOG.debug("found file by download-id '" + id + "'? -> " + (res != null ? "yes" : "no"));
         }
 
         return res;
@@ -240,8 +237,8 @@ public class OrmliteBackend extends CacheBackend {
 
         try {
             res = mDao.queryBuilder().where()
-                            .eq("accountId", accountId)
-                       .query();
+                      .eq("accountId", accountId)
+                      .query();
         } catch (SQLException e) {
             LOG.error("SQL exception", e);
         }
@@ -256,7 +253,7 @@ public class OrmliteBackend extends CacheBackend {
     }
 
     private void deleteExpiredFiles() {
-        LOG.info("querying for expired files");
+        LOG.info("querying for expired files...");
         Date now = new Date();
         List<CacheFile> files = null;
         try {
@@ -291,5 +288,4 @@ public class OrmliteBackend extends CacheBackend {
             }
         }
     }
-
 }
