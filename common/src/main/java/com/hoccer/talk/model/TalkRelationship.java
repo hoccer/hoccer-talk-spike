@@ -82,6 +82,7 @@ public class TalkRelationship {
     }
 
     public void setState(String state) {
+        // TODO: validate state here (isValidState)
         this.state = state;
     }
 

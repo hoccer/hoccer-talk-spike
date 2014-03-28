@@ -91,6 +91,7 @@ public class TalkPresence {
     }
 
     public void setConnectionStatus(String connectionStatus) {
+        // TODO: validate connection status
         this.connectionStatus = connectionStatus;
     }
 

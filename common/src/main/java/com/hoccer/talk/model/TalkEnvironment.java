@@ -101,6 +101,7 @@ public class TalkEnvironment {
     }
 
     public void setLocationType(String locationType) {
+        // TODO: validate location Type
         this.locationType = locationType;
     }
 

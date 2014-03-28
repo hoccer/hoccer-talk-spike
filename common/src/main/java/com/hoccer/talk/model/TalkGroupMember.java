@@ -117,6 +117,7 @@ public class TalkGroupMember {
     }
 
     public void setState(String state) {
+        // TODO: validate state
         this.state = state;
     }
 

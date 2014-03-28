@@ -103,6 +103,7 @@ public class TalkGroup {
     }
 
     public void setState(String state) {
+        // TODO: validate state (e.g. with isValidState)
         this.state = state;
     }
 
