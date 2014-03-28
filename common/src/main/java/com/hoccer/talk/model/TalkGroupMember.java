@@ -45,6 +45,12 @@ public class TalkGroupMember {
     String encryptedGroupKey;
 
     @DatabaseField
+    String sharedKeyId;
+
+    @DatabaseField
+    String sharedKeyIdSalt;
+
+    @DatabaseField
     Date lastChanged;
 
     public TalkGroupMember() {
@@ -138,4 +144,19 @@ public class TalkGroupMember {
         this.lastChanged = lastChanged;
     }
 
+    public String getSharedKeyId() {
+        return sharedKeyId;
+    }
+
+    public void setSharedKeyId(String sharedKeyId) {
+        this.sharedKeyId = sharedKeyId;
+    }
+
+    public String getSharedKeyIdSalt() {
+        return sharedKeyIdSalt;
+    }
+
+    public void setSharedKeyIdSalt(String sharedKeyIdSalt) {
+        this.sharedKeyIdSalt = sharedKeyIdSalt;
+    }
 }

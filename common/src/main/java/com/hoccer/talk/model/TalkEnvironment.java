@@ -32,8 +32,13 @@ public class TalkEnvironment {
     @DatabaseField
     String groupId;
 
+    // client provided timestamp
     @DatabaseField
     Date timestamp;
+
+    // server provided timestamp
+    @DatabaseField
+    Date timeReceived;
 
     // indicates what was used on the client to determine the location
     @DatabaseField
@@ -58,6 +63,7 @@ public class TalkEnvironment {
     public TalkEnvironment() {
     }
 
+
     public String getClientId() {
         return clientId;
     }
@@ -80,6 +86,14 @@ public class TalkEnvironment {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public Date getTimeReceived() {
+        return timeReceived;
+    }
+
+    public void setTimeReceived(Date timeReceived) {
+        this.timeReceived = timeReceived;
     }
 
     public String getLocationType() {
@@ -126,6 +140,7 @@ public class TalkEnvironment {
         this.clientId = environment.clientId;
         this.groupId = environment.groupId;
         this.timestamp = environment.timestamp;
+        this.timeReceived = environment.timeReceived;
         this.locationType = environment.locationType;
         this.geoLocation = environment.getGeoLocation();
         this.accuracy = environment.accuracy;

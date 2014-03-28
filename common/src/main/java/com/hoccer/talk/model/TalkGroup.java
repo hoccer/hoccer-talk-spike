@@ -18,6 +18,10 @@ public class TalkGroup {
     public static final String STATE_NONE   = "none";
     public static final String STATE_EXISTS = "exists";
 
+    public static final String GROUP_TYPE_USER   = "user";
+    public static final String GROUP_TYPE_NEARBY = "nearby";
+
+
     public static boolean isValidState(String state) {
         if(state != null) {
             if(state.equals(STATE_NONE) || state.equals(STATE_EXISTS)) {
@@ -46,6 +50,18 @@ public class TalkGroup {
 
     @DatabaseField(columnName = FIELD_LAST_CHANGED)
     Date lastChanged;
+
+    @DatabaseField
+    String groupType;
+
+    @DatabaseField
+    String sharedKeyId;
+
+    @DatabaseField
+    String sharedKeyIdSalt;
+
+    @DatabaseField
+    String keySupplier;
 
     public TalkGroup() {
     }
@@ -98,4 +114,35 @@ public class TalkGroup {
         this.lastChanged = lastChanged;
     }
 
+    public String getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(String groupType) {
+        this.groupType = groupType;
+    }
+
+    public String getSharedKeyId() {
+        return sharedKeyId;
+    }
+
+    public void setSharedKeyId(String sharedKeyId) {
+        this.sharedKeyId = sharedKeyId;
+    }
+
+    public String getSharedKeyIdSalt() {
+        return sharedKeyIdSalt;
+    }
+
+    public void setSharedKeyIdSalt(String sharedKeyIdSalt) {
+        this.sharedKeyIdSalt = sharedKeyIdSalt;
+    }
+
+    public String getKeySupplier() {
+        return keySupplier;
+    }
+
+    public void setKeySupplier(String keySupplier) {
+        this.keySupplier = keySupplier;
+    }
 }
