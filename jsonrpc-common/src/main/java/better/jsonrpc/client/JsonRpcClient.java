@@ -145,7 +145,7 @@ public class JsonRpcClient {
     public void sendNotification(JsonRpcConnection connection, ObjectNode notification) throws Exception {
         // log notification
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Notification: " + notification.toString());
+            LOG.debug("Notification (for connectionId '" + connection.getConnectionId() + "'): " + notification.toString());
         }
         // send it
         connection.sendNotification(notification);
