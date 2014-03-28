@@ -482,9 +482,24 @@ public interface ITalkRpcServer {
      */
     void updateGroupKey(String groupId, String clientId, String keyId, String key);
 
-    // TODO: void updateGroupKey2(String groupId, String clientId, String sharedKeyId, String publicKeyId, String cryptedSharedKey);
-    // TODO: void updateGroupKeys(String groupId, String sharedKeyId, String[] clientIds, String[] publicKeyIds, String[] cryptedSharedKeys);
-    // TODO: void updateGroupKeys(String groupId, String sharedKeyId, GroupKey[] groupKeys);
+    /** Update the encrypted shared symmetric group keys for a specified clients;
+     it is a group admins responsibility to distribute the shared group key to all members
+     * @param groupId denotes the group the key belongs to
+     * @param sharedKeyId denotes is a truncated secure hash of the shared key
+     * @param sharedKeyIdSalt is some random data used in the computation of the secure hash of the shared key
+     * @param clientIds is an array of client ids the keys are encrypted for
+     * @param publicKeyIds is an array matching the clientIds array with key ids of the cryptedSharedKeys
+     * @param cryptedSharedKeys are the b64 encoded cyphertexts of the shared group key, encrypted with the client's public key
+     * @return a list of group member client ids where sharedKeyId does not match after updating
+     * @talk.preconditions client must be logged in, connected client must be admin member of the group
+     * @talk.preconditions.server
+     * @talk.preconditions.client
+     * @talk.behavior.server Update group keys and notify the members of the change
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects Update group keys for the specified members, update group key information
+     * @talk.errors.server
+     */
+    String[] updateGroupKeys(String groupId, String sharedKeyId, String sharedKeyIdSalt, String[] clientIds, String[] publicKeyIds, String[] cryptedSharedKeys);
 
     /** Retrieve members of a group changed after given date
      * @param groupId denotes the group to retrieve the members of
