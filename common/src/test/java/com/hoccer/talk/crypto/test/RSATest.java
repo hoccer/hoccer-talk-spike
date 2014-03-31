@@ -1,5 +1,6 @@
 package com.hoccer.talk.crypto.test;
 
+import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.talk.crypto.RSACryptor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -59,12 +60,12 @@ public class RSATest {
             System.out.println("X509-UnWrapper RSA 1024 failed ###########");
         }
 
-        byte[] privencIOS = RSACryptor.unwrapRSA1024_PKCS8(privenc);
+        byte[] privencIOS = RSACryptor.unwrapRSA1024_PKCS8_deprecated(privenc);
         System.out.println("RSA-priv-IOS[" + privencIOS.length + "]:"
                 + Base64.encodeBase64String(privencIOS));
 
         byte[] pubWrapped = RSACryptor.wrapRSA1024_X509_deprecated(pubencIOS);
-        byte[] privWrapped = RSACryptor.wrapRSA1024_PKCS8(privencIOS);
+        byte[] privWrapped = RSACryptor.wrapRSA1024_PKCS8_deprecated(privencIOS);
         System.out.println("RSA-pubWrapped-ts[" + pubWrapped.length + "]:"
                 + Base64.encodeBase64String(pubWrapped));
         // LOG.finest("RSA-pub-ts[" + pubWrapped + "]:" +
@@ -93,12 +94,12 @@ public class RSATest {
             System.out.println("X509-Wrapper RSA 1024 ok");
         }  else {
             System.out.println("X509-UnWrapper RSA 1024 failed ###########");
-            System.out.println("pubBytes :" + RSACryptor.toHex(pubBytes));
-            System.out.println("pubXBytes:"+ RSACryptor.toHex(pubXBytes));
+            System.out.println("pubBytes :" + CryptoUtils.toHex(pubBytes));
+            System.out.println("pubXBytes:"+ CryptoUtils.toHex(pubXBytes));
         }
 
         byte[] privBytes = Base64.decodeBase64(myPrivKey);
-        privBytes = RSACryptor.wrapRSA1024_PKCS8(privBytes);
+        privBytes = RSACryptor.wrapRSA1024_PKCS8_deprecated(privBytes);
 
         System.out.println("RSA-pub-ts-mod[" + pubenc.length + "]:"
                 + Base64.encodeBase64String(pubBytes));

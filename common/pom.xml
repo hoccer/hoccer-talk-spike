@@ -25,7 +25,17 @@
       <artifactId>jackson-annotations</artifactId>
       <version>${jackson.version}</version>
     </dependency>
-    <!-- JSON-RPC annotations for protocol definition -->
+      <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+          <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+          <version>${jackson.version}</version>
+      </dependency>
+      <!-- JSON-RPC annotations for protocol definition -->
     <dependency>
       <groupId>hoccer</groupId>
       <artifactId>better-jsonrpc-annotations</artifactId>
