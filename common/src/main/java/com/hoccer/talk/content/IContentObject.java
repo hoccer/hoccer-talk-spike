@@ -34,4 +34,6 @@ public interface IContentObject {
     /** Content length */
     public int getContentLength();
 
+    /** hash over content */
+    public String getContentHmac();
 }
