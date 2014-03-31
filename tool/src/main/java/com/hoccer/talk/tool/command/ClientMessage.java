@@ -6,9 +6,11 @@ import com.beust.jcommander.Parameter;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
+import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 // import java.security.Provider;
@@ -87,20 +89,33 @@ public class ClientMessage extends TalkToolCommand {
         return null;
     }
 
+    private String getContentHmac(String contentDataUrl) {
+        byte[] hmac = new byte[0];
+        String contentHmac = null;
+        try {
+            hmac = CryptoUtils.computeHmac(contentDataUrl);
+            contentHmac = new String(Base64.encodeBase64(hmac));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return contentHmac;
+    }
+
     private TalkClientUpload createAttachment(File fileToUpload) {
         if (fileToUpload == null) {
             return null;
         } else {
             Console.info("<ClientMessage::createAttachment> Creating attachment for file: '" + fileToUpload.getAbsolutePath() + "'");
             String url = fileToUpload.getAbsolutePath();
-            String contentUrl = url; // in android this makes a difference
             String contentType = "image/*"; // XXX TODO: calculate filetype
             String mediaType = "image"; // seems to be only needed in android
             double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
             int contentLength = (int)fileToUpload.length();
+            String contentHmac = getContentHmac("file://" + url);
 
             TalkClientUpload attachmentUpload = new TalkClientUpload();
-            attachmentUpload.initializeAsAttachment(contentUrl, url, contentType, mediaType, aspectRatio, contentLength);
+            attachmentUpload.initializeAsAttachment(url, url, contentType, mediaType, aspectRatio, contentLength, contentHmac);
             return attachmentUpload;
         }
     }
