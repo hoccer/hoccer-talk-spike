@@ -122,4 +122,9 @@ public class TestClientHost implements IXoClientHost {
     public String getSystemVersion() {
         return null;
     }
+
+    @Override
+    public int getRSAKeysize() {
+        return 0;
+    }
 }
