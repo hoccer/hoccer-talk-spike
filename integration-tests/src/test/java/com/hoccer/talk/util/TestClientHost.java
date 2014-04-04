@@ -1,10 +1,8 @@
-package com.hoccer.talk;
+package com.hoccer.talk.util;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
 import org.junit.Assert;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import java.io.IOException;
@@ -21,10 +19,10 @@ public class TestClientHost implements IXoClientHost {
     private final ScheduledExecutorService mExecutor;
     private final IXoClientDatabaseBackend mDatabaseBackend;
     private final WebSocketClientFactory mWSClientFactory;
-    private final TestServer mServer;
+    private final TestTalkServer mServer;
     private ErrorManager LOG;
 
-    public TestClientHost(TestServer testServer) throws Exception {
+    public TestClientHost(TestTalkServer testServer) throws Exception {
         mExecutor = Executors.newScheduledThreadPool(10);
         mDatabaseBackend = new TestClientDatabaseBackend();
         mWSClientFactory = new WebSocketClientFactory();

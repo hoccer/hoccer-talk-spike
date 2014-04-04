@@ -1,4 +1,4 @@
-package com.hoccer.talk;
+package com.hoccer.talk.util;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.XoClientDatabase;
