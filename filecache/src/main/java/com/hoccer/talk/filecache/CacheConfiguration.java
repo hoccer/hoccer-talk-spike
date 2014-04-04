@@ -25,6 +25,29 @@ public class CacheConfiguration {
     private String  mOrmliteUser     = "talk";
     private String  mOrmlitePassword = "talk";
 
+    private int mCleanupFilesDelay = 10; // in seconds
+    private int mCleanupFilesInterval = 60; // in seconds
+
+    private int mStorageFileExpiryTime = 365 * 24 * 3600; // 1 year (in seconds)
+    private int mTransferFileExpiryTime = 3 * 7 * 24 * 3600; // 3 weeks (in seconds)
+
+
+    public int getStorageFileExpiryTime() {
+        return mStorageFileExpiryTime;
+    }
+
+    public int getTransferFileExpiryTime() {
+        return mTransferFileExpiryTime;
+    }
+
+    public int getCleanupFilesDelay() {
+        return mCleanupFilesDelay;
+    }
+
+    public int getCleanupFilesInterval() {
+        return mCleanupFilesInterval;
+    }
+
     public int getServerThreads() {
         return mServerThreads;
     }
@@ -130,17 +153,22 @@ public class CacheConfiguration {
     public void report() {
         LOG.info("Current configuration:" +
                 "\n - WebServer Configuration:" +
-                MessageFormat.format("\n   * listen address:                     ''{0}''", mListenAddress) +
-                MessageFormat.format("\n   * listen port:                        ''{0}''", Long.toString(mListenPort)) +
-                MessageFormat.format("\n   * threads:                            ''{0}''", mServerThreads) +
+                MessageFormat.format("\n   * listen address:                        ''{0}''", mListenAddress) +
+                MessageFormat.format("\n   * listen port:                           ''{0}''", Long.toString(mListenPort)) +
+                MessageFormat.format("\n   * threads:                               ''{0}''", mServerThreads) +
                 "\n - Database Configuration:" +
-                MessageFormat.format("\n   * database backend:                   ''{0}''", mDatabaseBackend) +
-                MessageFormat.format("\n   * ormlite url:                        ''{0}''", mOrmliteUrl) +
-                MessageFormat.format("\n   * ormlite user:                       ''{0}''", mOrmliteUser) +
-                MessageFormat.format("\n   * ormlite pass:                       ''{0}''", mOrmlitePassword) +
+                MessageFormat.format("\n   * database backend:                      ''{0}''", mDatabaseBackend) +
+                MessageFormat.format("\n   * ormlite url:                           ''{0}''", mOrmliteUrl) +
+                MessageFormat.format("\n   * ormlite user:                          ''{0}''", mOrmliteUser) +
+                MessageFormat.format("\n   * ormlite pass:                          ''{0}''", mOrmlitePassword) +
+                "\n - Expiry/Cleaning Configuration:" +
+                MessageFormat.format("\n   * storage file expiry time (in days):    ''{0}''", Long.toString(mStorageFileExpiryTime / 3600 / 24)) +
+                MessageFormat.format("\n   * transfer file expiry time (in days):   ''{0}''", Long.toString(mTransferFileExpiryTime / 3600 / 24)) +
+                MessageFormat.format("\n   * files cleanup delay (in s):            ''{0}''", Long.toString(mCleanupFilesDelay)) +
+                MessageFormat.format("\n   * files cleanup interval (in s):         ''{0}''", Long.toString(mCleanupFilesInterval)) +
                 "\n - Other:" +
-                MessageFormat.format("\n   * data directory: ''{0}''", mDataDirectory) +
-                MessageFormat.format("\n   * data checkpoint interval: ''{0}''", Long.toString(mDataCheckpointInterval))
+                MessageFormat.format("\n   * data directory:                        ''{0}''", mDataDirectory) +
+                MessageFormat.format("\n   * data checkpoint interval:              ''{0}''", Long.toString(mDataCheckpointInterval))
         );
     }
 

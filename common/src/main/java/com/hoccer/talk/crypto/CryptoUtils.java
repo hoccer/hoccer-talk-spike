@@ -4,6 +4,11 @@
 
 package com.hoccer.talk.crypto;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Enumeration;
@@ -149,6 +154,39 @@ public class CryptoUtils {
             }
         } catch (Exception e) {
             System.out.println(e);
+        }
+    }
+
+    public static byte[] computeHmac(String contentDataUrl) throws Exception {
+        InputStream is = null;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA256");
+            is = new URL(contentDataUrl).openStream();
+
+            DigestInputStream digestInputStream = new DigestInputStream(is, digest);
+
+            byte[] buffer = new byte[8192];
+            int bytesRead = 1;
+            int totalBytesRead = 0;
+
+            while ((bytesRead = digestInputStream.read(buffer)) != -1) {
+                totalBytesRead+=bytesRead;
+            }
+            System.out.println("[CryptoUtils::computeHmac] digested "+totalBytesRead+" bytes");
+
+            return digest.digest();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         }
     }
 
