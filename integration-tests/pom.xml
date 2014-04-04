@@ -28,6 +28,11 @@
       </dependency>
       <dependency>
           <groupId>hoccer</groupId>
+          <artifactId>hoccer-talk-filecache</artifactId>
+          <version>${hoccer-talk-filecache.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>hoccer</groupId>
           <artifactId>hoccer-talk-client</artifactId>
           <version>0.0.1-SNAPSHOT</version>
       </dependency>
