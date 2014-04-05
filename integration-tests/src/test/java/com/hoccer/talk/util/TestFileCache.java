@@ -4,6 +4,7 @@ import com.hoccer.talk.filecache.CacheBackend;
 import com.hoccer.talk.filecache.CacheConfiguration;
 import com.hoccer.talk.filecache.CacheMain;
 import com.hoccer.talk.filecache.db.MemoryBackend;
+import com.hoccer.talk.filecache.db.OrmliteBackend;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.TalkServerConfiguration;
@@ -36,8 +37,8 @@ public class TestFileCache {
 
         CacheMain main = new CacheMain();
 
-        db = new MemoryBackend(configuration);
-
+        db = new OrmliteBackend(configuration);
+        db.start();
         // create jetty instance
         s = new Server();
         s.setThreadPool(new QueuedThreadPool(configuration.getServerThreads()));

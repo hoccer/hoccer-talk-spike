@@ -6,20 +6,21 @@ import com.hoccer.talk.server.TalkServerConfiguration;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.mongo.tests.MongodForTestsFactory;
 
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 
 public class IntegrationTest {
 
     private static MongodForTestsFactory factory;
-
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    private Path tempDir;
 
     @BeforeClass
     public static void setUpClass() throws IOException {
@@ -31,7 +32,16 @@ public class IntegrationTest {
         if (factory != null) {
             factory.shutdown();
         }
+    }
 
+    @Before
+    public void createTempFolder() throws IOException {
+        tempDir = Files.createTempDirectory("IT-");
+    }
+
+    @After
+    public void deleteTempFolder() throws IOException {
+        FileUtils.deleteDirectory(tempDir.toFile());
     }
 
     public TestTalkServer createTalkServer() throws Exception {
@@ -42,7 +52,7 @@ public class IntegrationTest {
         TalkServerConfiguration configuration = new TalkServerConfiguration();
         if (fc != null) {
             int port = fc.getServerConnector().getPort();
-            configuration.setFilecacheControlUrl("http://localhost:"+port+"/control");
+            configuration.setFilecacheControlUrl("ws://localhost:"+port+"/control");
             configuration.setFilecacheDownloadBase("http://localhost:" + port + "/download/");
             configuration.setFilecacheUploadBase("http://localhost:" + port + "/upload/");
         }
@@ -51,7 +61,9 @@ public class IntegrationTest {
 
     public TestFileCache createFileCache() throws Exception {
         CacheConfiguration configuration = new CacheConfiguration();
-        configuration.setDataDirectory(temporaryFolder.toString());
+        configuration.setOrmliteUrl("jdbc:h2:mem");
+        configuration.setOrmliteInitDb(true);
+        configuration.setDataDirectory(tempDir.toString());
         return new TestFileCache(configuration);
     }
 
