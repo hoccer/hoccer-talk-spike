@@ -123,6 +123,6 @@ public class TestClientHost implements IXoClientHost {
 
     @Override
     public int getRSAKeysize() {
-        return 0;
+        return 1024;
     }
 }
