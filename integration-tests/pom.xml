@@ -48,11 +48,31 @@
       </dependency>
   </dependencies>
   <build>
+      <testResources>
+          <testResource>
+              <directory>res</directory>
+              <filtering>true</filtering>
+          </testResource>
+      </testResources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${maven-failsafe.version}</version>
+          <executions>
+              <execution>
+                  <id>integration-test</id>
+                  <goals>
+                      <goal>integration-test</goal>
+                  </goals>
+              </execution>
+              <execution>
+                  <id>verify</id>
+                  <goals>
+                      <goal>verify</goal>
+                  </goals>
+              </execution>
+          </executions>
       </plugin>
         <plugin>
           <groupId>com.github.joelittlejohn.embedmongo</groupId>
