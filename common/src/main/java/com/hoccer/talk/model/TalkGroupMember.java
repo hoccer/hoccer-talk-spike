@@ -51,6 +51,9 @@ public class TalkGroupMember {
     String sharedKeyIdSalt;
 
     @DatabaseField
+    String keySupplier;
+
+    @DatabaseField
     Date lastChanged;
 
     public TalkGroupMember() {
@@ -159,5 +162,13 @@ public class TalkGroupMember {
 
     public void setSharedKeyIdSalt(String sharedKeyIdSalt) {
         this.sharedKeyIdSalt = sharedKeyIdSalt;
+    }
+
+    public String getKeySupplier() {
+        return keySupplier;
+    }
+
+    public void setKeySupplier(String keySupplier) {
+        this.keySupplier = keySupplier;
     }
 }

@@ -11,6 +11,7 @@ public class TalkGroup {
     public static final String FIELD_GROUP_ID         = "groupId";
     public static final String FIELD_GROUP_NAME       = "groupName";
     public static final String FIELD_GROUP_TAG        = "groupTag";
+    public static final String FIELD_GROUP_TYPE       = "groupType";
     public static final String FIELD_GROUP_AVATAR_URL = "groupAvatarUrl";
     public static final String FIELD_STATE            = "state";
     public static final String FIELD_LAST_CHANGED     = "lastChanged";
@@ -62,6 +63,9 @@ public class TalkGroup {
 
     @DatabaseField
     String keySupplier;
+
+    @DatabaseField
+    Date keyDate;
 
     public TalkGroup() {
     }
@@ -145,5 +149,13 @@ public class TalkGroup {
 
     public void setKeySupplier(String keySupplier) {
         this.keySupplier = keySupplier;
+    }
+
+    public Date getKeyDate() {
+        return keyDate;
+    }
+
+    public void setKeyDate(Date keyDate) {
+        this.keyDate = keyDate;
     }
 }
