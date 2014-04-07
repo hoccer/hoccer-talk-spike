@@ -92,7 +92,7 @@ public class TalkDelivery {
     String keyId;
 
     /** the public key encrypted cipherText of the shared symmetric (e.g. AES) key the message body and attachment is encrypted with, b64-encoded */
-    @DatabaseField(columnName = FIELD_KEY_CIPHERTEXT)
+    @DatabaseField(columnName = FIELD_KEY_CIPHERTEXT, width = 1024)
     String keyCiphertext;
 
     /** the server generated time stamp of the point in the message has been accepted by the server; this field denotes the official time ordering of all messages in a chat */
