@@ -105,7 +105,7 @@ public class JsonRpcServer {
         ObjectMapper mapper = connection.getMapper();
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("RPC-Server Request: " + node.toString());
+            LOG.debug("RPC-Server Request (for connectionId '" + connection.getConnectionId() + "'): " + node.toString());
         }
 
         // validate request
