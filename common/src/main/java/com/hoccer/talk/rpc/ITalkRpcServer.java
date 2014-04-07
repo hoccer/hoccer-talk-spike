@@ -491,7 +491,8 @@ public interface ITalkRpcServer {
      * @param clientIds is an array of client ids the keys are encrypted for
      * @param publicKeyIds is an array matching the clientIds array with key ids of the cryptedSharedKeys
      * @param cryptedSharedKeys are the b64 encoded cyphertexts of the shared group key, encrypted with the client's public key
-     * @return a list of group member client ids where sharedKeyId does not match after updating
+     * @return a list of group member client ids where sharedKeyId does not match after updating if the groupkey was updated
+     *         successfully. Otherwise the clientId of the calling (admin) is returned, indicating that the groupkey update was denied.
      * @talk.preconditions client must be logged in, connected client must be admin member of the group
      * @talk.preconditions.server
      * @talk.preconditions.client
