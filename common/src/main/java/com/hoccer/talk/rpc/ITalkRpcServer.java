@@ -480,6 +480,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects Update group key for the member
      * @talk.errors.server
      */
+    @Deprecated
     void updateGroupKey(String groupId, String clientId, String keyId, String key);
 
     /** Update the encrypted shared symmetric group keys for a specified clients;

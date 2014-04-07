@@ -67,6 +67,9 @@ public class TalkGroup {
     @DatabaseField
     Date keyDate;
 
+    @DatabaseField
+    Date groupKeyUpdateInProgress;
+
     public TalkGroup() {
     }
 
@@ -157,5 +160,14 @@ public class TalkGroup {
 
     public void setKeyDate(Date keyDate) {
         this.keyDate = keyDate;
+    }
+
+    public Date getGroupKeyUpdateInProgress() {
+        return groupKeyUpdateInProgress;
+    }
+
+    public Date setGroupKeyUpdateInProgress(Date groupKeyUpdateInProgress) {
+        this.groupKeyUpdateInProgress = groupKeyUpdateInProgress;
+        return groupKeyUpdateInProgress;
     }
 }
