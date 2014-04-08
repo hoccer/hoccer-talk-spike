@@ -1,4 +1,4 @@
-package com.hoccer.talk;
+package com.hoccer.talk.util;
 
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
@@ -16,7 +16,7 @@ import java.net.UnknownHostException;
 
 /* this class just wraps a mongodb, a talkserver and a jetty server in one convenient class for test purposes */
 
-public class TestServer {
+public class TestTalkServer {
 
     private final MongoClient mongo;
     private final TalkServer ts;
@@ -36,9 +36,8 @@ public class TestServer {
 
     private Connector serverConnector;
 
-    TestServer(MongodForTestsFactory factory) throws Exception {
+    TestTalkServer(TalkServerConfiguration configuration, MongodForTestsFactory factory) throws Exception {
         mongo = factory.newMongo();
-        TalkServerConfiguration configuration = new TalkServerConfiguration();
 
         ITalkServerDatabase db = new JongoDatabase(configuration,mongo);
         ts = new TalkServer(configuration, db);
@@ -64,5 +63,6 @@ public class TestServer {
 
     public void shutdown() throws Exception {
         s.stop();
+        s.join();
     }
 }
