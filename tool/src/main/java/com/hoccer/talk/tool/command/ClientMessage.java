@@ -122,6 +122,7 @@ public class ClientMessage extends TalkToolCommand {
         } else {
             Console.info("<ClientMessage::createAttachment> Creating attachment for file: '" + fileToUpload.getAbsolutePath() + "'");
             String url = fileToUpload.getAbsolutePath();
+            String fileName = fileToUpload.getName();
             String contentType = "image/*"; // XXX TODO: calculate filetype
             String mediaType = "image"; // seems to be only needed in android
             double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
@@ -129,7 +130,7 @@ public class ClientMessage extends TalkToolCommand {
             String contentHmac = getContentHmac("file://" + url);
 
             TalkClientUpload attachmentUpload = new TalkClientUpload();
-            attachmentUpload.initializeAsAttachment(url, url, contentType, mediaType, aspectRatio, contentLength, contentHmac);
+            attachmentUpload.initializeAsAttachment(fileName, url, url, contentType, mediaType, aspectRatio, contentLength, contentHmac);
             return attachmentUpload;
         }
     }
