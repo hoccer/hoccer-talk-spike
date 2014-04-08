@@ -22,7 +22,13 @@ import java.security.Security;
 import java.sql.SQLException;
 import java.util.List;
 
-@CLICommand(name = "cmessage", description = "Send a text message from one client to another, use: cmessage <sender_id> <recipient_id> -m <message_string> -f <path_to_file> -n <number_of_messages_to_send>")
+@CLICommand(name = "cmessage", description = "Send a text message from one client to another, " +
+                                             "use: cmessage <sender_id> <recipient_id> " +
+                                                   "-m <message_string> " +
+                                                   "-f <path_to_file> " +
+                                                   // the -n option is currently broken when running in non-ssl mode,
+                                                   // see: https://github.com/hoccer/scrum/issues/139
+                                                   "-n <number_of_messages_to_send>")
 public class ClientMessage extends TalkToolCommand {
 
     private final String DEFAULT_MESSAGE = "Hello World";
@@ -47,14 +53,12 @@ public class ClientMessage extends TalkToolCommand {
 
     @Override
     protected void run(TalkToolContext context) throws Exception {
-        List<TalkToolClient> clients = context.getClientsBySelectors(pClients);
-
         /*Provider[] provs = Security.getProviders();
         for(Provider prov: provs) {
             Console.info(prov.toString());
         }*/
 
-        if (clients.size() != 2) {
+        if (pClients.size() != 2) {
             throw new Exception("Clients must be supplied in a pair (sender, recipient)");
         }
         if (pMessage == null || pMessage.isEmpty()) {
@@ -62,12 +66,22 @@ public class ClientMessage extends TalkToolCommand {
             Console.warn("WARN <ClientMessage::run> No message provided. Using default messageText.");
         }
 
+        TalkToolClient sender = context.getClientBySelector(pClients.get(0));
+        TalkToolClient recipient = context.getClientBySelector(pClients.get(1));
+        String recipientId;
+        if (recipient == null) {
+            // no tool-client found -> assuming that a tool external client-id was given
+            recipientId = pClients.get(1);
+        } else {
+            recipientId = recipient.getClientId();
+        }
+
         TalkClientUpload attachmentUpload = null;
         for (int i = 0; i < pNumMessages; ++i) {
             if (!(pAttachmentPath == null || pAttachmentPath.isEmpty())) {
                 attachmentUpload = createAttachment(retrieveFile(i));
             }
-            sendMessage(clients.get(0), clients.get(1), pMessage, attachmentUpload);
+            sendMessage(sender, recipientId, pMessage, attachmentUpload);
         }
     }
 
@@ -120,15 +134,16 @@ public class ClientMessage extends TalkToolCommand {
         }
     }
 
-    private void sendMessage(TalkToolClient sender, TalkToolClient recipient, String messageText, TalkClientUpload attachment) {
-        Console.info("<ClientMessage::sendMessage> sender-id: '" + sender.getClientId() + "', recipient-id: '" + recipient.getClientId() + "', message: '" + messageText + "'");
+
+    private void sendMessage(TalkToolClient sender, String recipientId, String messageText, TalkClientUpload attachment) {
+        Console.info("<ClientMessage::sendMessage> sender-id: '" + sender.getClientId() + "', recipient-id: '" + recipientId + "', message: '" + messageText + "'");
 
         // check if relationship exists
         // XXX TODO: implement a relationship-check in XOClient,
         //           e.g. sender.isKnownRelationship(TalkToolClient recipient)
         TalkClientContact recipientContact;
         try {
-            recipientContact = sender.getDatabase().findContactByClientId(recipient.getClientId(), false);
+            recipientContact = sender.getDatabase().findContactByClientId(recipientId, false);
         } catch (SQLException e) {
             recipientContact = null;
             e.printStackTrace();
