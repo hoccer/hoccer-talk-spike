@@ -35,7 +35,7 @@ public class ClientGroupCreate extends TalkToolClientCommand /*implements IXoCon
         Console.info("group name is: '" + pGroupName + "'");
         newGroup.getGroupPresence().setGroupName(pGroupName);
 
-        client.getClient().registerContactListener(this);
+        //client.getClient().registerContactListener(this);
 
         client.getClient().createGroup(newGroup);
         // The actual group creation is now async and we have no way to *wait* for it here => rely on Listeners.
