@@ -5,6 +5,8 @@ package com.hoccer.talk;
 import com.google.code.tempusfugit.temporal.Condition;
 import com.google.code.tempusfugit.temporal.Timeout;
 import com.hoccer.talk.client.XoClient;
+import com.hoccer.talk.util.IntegrationTest;
+import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +21,7 @@ import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 @RunWith(JUnit4.class)
 public class ITTwoClientsPairing extends IntegrationTest {
 
-    private TestServer firstServer;
+    private TestTalkServer firstServer;
 
     @Before
     public void setUp() throws Exception {

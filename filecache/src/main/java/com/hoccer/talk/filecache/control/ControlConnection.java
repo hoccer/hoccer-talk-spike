@@ -14,17 +14,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ControlConnection implements ICacheControl {
 
     private static final Logger LOG = Logger.getLogger(ControlConnection.class);
-
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
     int mId = ID_COUNTER.incrementAndGet();
 
     ControlServlet mServlet;
-
     JsonRpcConnection mRpcConnection;
-
     HttpServletRequest mHttpRequest;
-
     CacheBackend mBackend;
 
     public ControlConnection(ControlServlet servlet, JsonRpcConnection rpcConnection, HttpServletRequest httpRequest) {
@@ -49,7 +45,7 @@ public class ControlConnection implements ICacheControl {
 
     @Override
     public FileHandles createFileForStorage(String accountId, String contentType, int contentLength) {
-        logCall("createFileForStorage(" + accountId + "," + contentType + "," + contentLength + ")");
+        logCall("createFileForStorage (account-id: '" + accountId + "', content-type: '" + contentType + "', content-length: '" + contentLength + "')");
 
         CacheFile file = mBackend.getByFileId(UUID.randomUUID().toString(), true);
 
@@ -57,7 +53,7 @@ public class ControlConnection implements ICacheControl {
         file.setAccountId(accountId);
         file.setContentType(contentType);
         file.setContentLength(contentLength);
-        file.setupExpiry(365 * 24 * 3600); // XXX 1 year
+        file.setupExpiry(mBackend.getConfiguration().getStorageFileExpiryTime());
 
         mBackend.checkpoint(file);
 
@@ -71,7 +67,7 @@ public class ControlConnection implements ICacheControl {
 
     @Override
     public FileHandles createFileForTransfer(String accountId, String contentType, int contentLength) {
-        logCall("createFileForTransfer(" + accountId + "," + contentType + "," + contentLength + ")");
+        logCall("createFileForTransfer (account-id: '" + accountId + "', content-type: '" + contentType + "', content-length: '" + contentLength + "')");
 
         CacheFile file = mBackend.getByFileId(UUID.randomUUID().toString(), true);
 
@@ -79,7 +75,7 @@ public class ControlConnection implements ICacheControl {
         file.setAccountId(accountId);
         file.setContentType(contentType);
         file.setContentLength(contentLength);
-        file.setupExpiry(3 * 7 * 24 * 3600); // XXX 3 weeks
+        file.setupExpiry(mBackend.getConfiguration().getTransferFileExpiryTime());
 
         mBackend.checkpoint(file);
 
@@ -93,7 +89,7 @@ public class ControlConnection implements ICacheControl {
 
     @Override
     public void deleteFile(String fileId) {
-        logCall("deleteFile(" + fileId + ")");
+        logCall("deleteFile (file-id: '" + fileId + "')");
         CacheFile file = mBackend.getByFileId(fileId, false);
         if(file != null) {
             file.delete();
@@ -102,7 +98,7 @@ public class ControlConnection implements ICacheControl {
 
     @Override
     public void deleteAccount(String accountId) {
-        logCall("deleteAccount(" + accountId + ")");
+        logCall("deleteAccount (account-id: '" + accountId + "')");
         List<CacheFile> files = mBackend.getFilesByAccount(accountId);
         if(files != null) {
             for(CacheFile file: files) {

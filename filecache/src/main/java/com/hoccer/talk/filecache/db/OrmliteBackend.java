@@ -48,7 +48,7 @@ public class OrmliteBackend extends CacheBackend {
     public void start() {
         try {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("creating connection source for " + mConfiguration.getOrmliteUrl());
+                LOG.debug("creating connection source for: '" + mConfiguration.getOrmliteUrl() + "'");
             }
             mConnectionSource = new JdbcConnectionSource(mConfiguration.getOrmliteUrl(),
                                                          mConfiguration.getOrmliteUser(),
@@ -57,9 +57,8 @@ public class OrmliteBackend extends CacheBackend {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("creating table for files");
                 }
-                TableUtils.createTable(mConnectionSource, CacheFile.class);
-                LOG.info("Tables created - exiting now");
-                System.exit(0);
+                TableUtils.createTableIfNotExists(mConnectionSource, CacheFile.class);
+                LOG.info("Tables created.");
             }
             if(LOG.isDebugEnabled()) {
                 LOG.debug("creating dao for files");
@@ -68,15 +67,24 @@ public class OrmliteBackend extends CacheBackend {
         } catch (SQLException e) {
             LOG.error("Error initializing ormlite", e);
         }
-        mExpiryExecutor.scheduleAtFixedRate(new Runnable() {
+
+        LOG.info("cleaning files scheduling will start in '" + mConfiguration.getCleanupFilesDelay() + "' seconds.");
+        mExpiryExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("deleting expired files");
-                }
-                deleteExpiredFiles();
+                scheduleCleanupFiles();
             }
-        }, 10, 60, TimeUnit.SECONDS);
+        }, mConfiguration.getCleanupFilesDelay(), TimeUnit.SECONDS);
+    }
+
+    private void scheduleCleanupFiles() {
+        LOG.info("scheduling files cleanup in '" + mConfiguration.getCleanupFilesInterval() + "' seconds.");
+        mExpiryExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                doCleanupFiles();
+            }
+        }, mConfiguration.getCleanupFilesInterval(), TimeUnit.SECONDS);
     }
 
     private CacheFile activate(CacheFile file) {
@@ -109,11 +117,13 @@ public class OrmliteBackend extends CacheBackend {
     public void delete(CacheFile file) {
         // delete the file
         File f = file.getFile();
-        if(f.exists()) {
+        if (f.exists()) {
+            LOG.debug("deleting file from disk (file-id: '" + file.getFileId() + "')");
             f.delete();
         }
         // delete the record
         try {
+            LOG.debug("deleting file from db (file-id: '" + file.getFileId() + "')");
             mDao.delete(file);
         } catch (SQLException e) {
             LOG.error("SQL exception", e);
@@ -181,7 +191,7 @@ public class OrmliteBackend extends CacheBackend {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("get by fileId " + id + " found " + (res != null ? "yes" : "no"));
+            LOG.debug((res != null ? "did" : "did NOT") + " find file by file-id '" + id + "'");
         }
 
         // return whatever we got
@@ -205,7 +215,7 @@ public class OrmliteBackend extends CacheBackend {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("get by uploadId " + id + " found " + (res != null ? "yes" : "no"));
+            LOG.debug((res != null ? "did" : "did NOT") + " find file by upload-id '" + id + "'");
         }
 
         return res;
@@ -228,7 +238,7 @@ public class OrmliteBackend extends CacheBackend {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("get by downloadId " + id + " found " + (res != null ? "yes" : "no"));
+            LOG.debug((res != null ? "did" : "did NOT") + " find file by download-id '" + id + "'");
         }
 
         return res;
@@ -240,8 +250,8 @@ public class OrmliteBackend extends CacheBackend {
 
         try {
             res = mDao.queryBuilder().where()
-                            .eq("accountId", accountId)
-                       .query();
+                      .eq("accountId", accountId)
+                      .query();
         } catch (SQLException e) {
             LOG.error("SQL exception", e);
         }
@@ -255,8 +265,10 @@ public class OrmliteBackend extends CacheBackend {
         return res;
     }
 
-    private void deleteExpiredFiles() {
-        LOG.info("querying for expired files");
+    private void doCleanupFiles() {
+        LOG.info("cleanupFiles - querying for expired files...");
+        long startTime = System.currentTimeMillis();
+
         Date now = new Date();
         List<CacheFile> files = null;
         try {
@@ -269,7 +281,7 @@ public class OrmliteBackend extends CacheBackend {
                             .or(3)
                             .prepare();
             files = mDao.query(expiryQuery);
-            LOG.info("found " + files.size() + " files");
+            LOG.info("found " + files.size() + " expired files");
         } catch (SQLException e) {
             LOG.error("SQL exception", e);
         }
@@ -290,6 +302,9 @@ public class OrmliteBackend extends CacheBackend {
                 }
             }
         }
-    }
 
+        long endTime = System.currentTimeMillis();
+        LOG.info("cleanupFiles done (took '" + (endTime - startTime) + "ms'). re-scheduling next run...");
+        scheduleCleanupFiles();
+    }
 }

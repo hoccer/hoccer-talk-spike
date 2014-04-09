@@ -4,6 +4,7 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.tool.TalkToolContext;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.sql.SQLException;
 
@@ -18,6 +19,9 @@ public class TalkToolClient {
     TalkToolClientHost mHost;
 
     TalkToolClientDatabase mDatabaseBackend;
+
+    private Boolean mSupportModeEnabled = false;
+    private String mSupportTag = "log";
 
     public TalkToolClient(TalkToolContext context) {
         mContext = context;
@@ -72,4 +76,23 @@ public class TalkToolClient {
         return null;
     }
 
+    public Boolean getSupportMode() {
+        return mSupportModeEnabled;
+    }
+
+    public String getSupportTag() {
+        return mSupportTag;
+    }
+
+    public void updateSupportMode(Boolean modeEnabled, String tag) {
+        if (modeEnabled != null) {
+            mSupportModeEnabled = modeEnabled;
+        }
+        if (tag != null) {
+            mSupportTag = tag;
+        }
+        if (mClient.isAwake()) {
+            mClient.hello();
+        }
+    }
 }
