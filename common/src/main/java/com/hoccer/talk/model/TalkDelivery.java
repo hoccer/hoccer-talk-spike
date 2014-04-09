@@ -168,6 +168,7 @@ public class TalkDelivery {
     }
 
     public void setState(String state) {
+        // TODO: validate state (e.g. with isValidState)
         this.state = state;
     }
 

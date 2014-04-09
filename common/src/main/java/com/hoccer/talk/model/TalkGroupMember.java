@@ -45,6 +45,15 @@ public class TalkGroupMember {
     String encryptedGroupKey;
 
     @DatabaseField
+    String sharedKeyId;
+
+    @DatabaseField
+    String sharedKeyIdSalt;
+
+    @DatabaseField
+    String keySupplier;
+
+    @DatabaseField
     Date lastChanged;
 
     public TalkGroupMember() {
@@ -111,6 +120,7 @@ public class TalkGroupMember {
     }
 
     public void setState(String state) {
+        // TODO: validate state
         this.state = state;
     }
 
@@ -138,4 +148,27 @@ public class TalkGroupMember {
         this.lastChanged = lastChanged;
     }
 
+    public String getSharedKeyId() {
+        return sharedKeyId;
+    }
+
+    public void setSharedKeyId(String sharedKeyId) {
+        this.sharedKeyId = sharedKeyId;
+    }
+
+    public String getSharedKeyIdSalt() {
+        return sharedKeyIdSalt;
+    }
+
+    public void setSharedKeyIdSalt(String sharedKeyIdSalt) {
+        this.sharedKeyIdSalt = sharedKeyIdSalt;
+    }
+
+    public String getKeySupplier() {
+        return keySupplier;
+    }
+
+    public void setKeySupplier(String keySupplier) {
+        this.keySupplier = keySupplier;
+    }
 }

@@ -145,7 +145,7 @@ public class JsonRpcClient {
     public void sendNotification(JsonRpcConnection connection, ObjectNode notification) throws Exception {
         // log notification
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Notification: " + notification.toString());
+            LOG.debug("Notification (for connectionId '" + connection.getConnectionId() + "'): " + notification.toString());
         }
         // send it
         connection.sendNotification(notification);
@@ -294,7 +294,7 @@ public class JsonRpcClient {
 			String id = idNode.asText();
             // log response
             if (LOG.isDebugEnabled()) {
-                LOG.debug("RPC-Client Response: " + response.toString());
+                LOG.debug("RPC-Client Response (for connectionId '" + connection.getConnectionId() + "'): " + response.toString());
             }
             // retrieve the request from the client table
             JsonRpcClientRequest req = null;

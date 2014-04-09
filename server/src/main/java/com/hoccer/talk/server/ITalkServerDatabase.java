@@ -94,6 +94,8 @@ public interface ITalkServerDatabase {
 
     public List<TalkGroupMember> findGroupMembersById(String groupId);
 
+    public List<TalkGroupMember> findGroupMembersByIdWithStates(String groupId, String[] states);
+
     public List<TalkGroupMember> findGroupMembersForClient(String clientId);
 
     public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown);
@@ -102,7 +104,21 @@ public interface ITalkServerDatabase {
 
     public void saveGroupMember(TalkGroupMember groupMember);
 
+    public void saveEnvironment(TalkEnvironment environment);
+
+    public TalkEnvironment findEnvironmentByClientId(String clientId);
+
+    public List<TalkEnvironment> findEnvironmentsForGroup(String groupId);
+
+    public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment);
+
+    public void deleteEnvironment(TalkEnvironment environment);
+
     public boolean ping();
 
     public void reportPing();
+
+    public boolean acquireGroupKeyUpdateLock(String groupId);
+
+    public void releaseGroupKeyUpdateLock(String groupId);
 }

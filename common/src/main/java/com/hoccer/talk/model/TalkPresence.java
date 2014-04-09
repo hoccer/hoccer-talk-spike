@@ -11,6 +11,7 @@ public class TalkPresence {
     public final static String CONN_STATUS_ONLINE = "online";
     public final static String CONN_STATUS_OFFLINE = "offline";
 
+    // required for OrmLite!
     private String _id;
 
     @DatabaseField(id = true)
@@ -90,6 +91,7 @@ public class TalkPresence {
     }
 
     public void setConnectionStatus(String connectionStatus) {
+        // TODO: validate connection status
         this.connectionStatus = connectionStatus;
     }
 

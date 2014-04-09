@@ -19,11 +19,12 @@ import java.util.*;
  * <p/>
  * This is intended as the production backend.
  * <p/>
- * XXX this should use findOne() instead of find() where appropriate
+ * TODO: this should use findOne() instead of find() where appropriate
  */
 public class JongoDatabase implements ITalkServerDatabase {
 
     private static final Logger LOG = Logger.getLogger(JongoDatabase.class);
+    private static final long GROUPKEY_LOCK_RETENTION_TIMEOUT = 1000 * 30; // in milliseconds
 
     /**
      * Mongo connection pool
@@ -51,6 +52,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     MongoCollection mKeys;
     MongoCollection mGroups;
     MongoCollection mGroupMembers;
+    MongoCollection mEnvironments;
 
     public JongoDatabase(TalkServerConfiguration configuration) {
         mCollections = new ArrayList<MongoCollection>();
@@ -98,6 +100,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mKeys = getCollection("key");
         mGroups = getCollection("group");
         mGroupMembers = getCollection("groupMember");
+        mEnvironments = getCollection("enviroment");
     }
 
     private MongoCollection getCollection(String name) {
@@ -441,10 +444,10 @@ public class JongoDatabase implements ITalkServerDatabase {
         List<TalkGroup> res = new ArrayList<TalkGroup>();
         List<TalkGroupMember> members = findGroupMembersForClient(clientId);
         for (TalkGroupMember member : members) {
-            String memberState = member.getState();
+            // String memberState = member.getState();
             if (member.isMember() || member.isInvited()) {
                 TalkGroup group = findGroupById(member.getGroupId());
-                //if(group.getLastChanged().after(lastKnown)) { // XXX fix this
+                //if(group.getLastChanged().after(lastKnown)) { // TODO: fix this
                 res.add(group);
                 //}
             }
@@ -468,6 +471,18 @@ public class JongoDatabase implements ITalkServerDatabase {
         }
         return res;
     }
+
+    public List<TalkGroupMember> findGroupMembersByIdWithStates(String groupId, String[] states) {
+        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
+        Iterator<TalkGroupMember> it =
+                mGroupMembers.find("{groupId:#, state: { $in: # }}", groupId, states)
+                        .as(TalkGroupMember.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
 
     @Override
     public List<TalkGroupMember> findGroupMembersForClient(String clientId) {
@@ -505,6 +520,116 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public void saveEnvironment(TalkEnvironment environment) {
+        mEnvironments.save(environment);
+    }
+
+    @Override
+    public TalkEnvironment findEnvironmentByClientId(String clientId) {
+        return mEnvironments.findOne("{clientId:#}", clientId)
+                .as(TalkEnvironment.class);
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsForGroup(String groupId) {
+        List<TalkEnvironment> res = new ArrayList<TalkEnvironment>();
+        Iterator<TalkEnvironment> it =
+                mEnvironments.find("{groupId:#}", groupId)
+                        .as(TalkEnvironment.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment) {
+        mEnvironments.ensureIndex("{geoLocation: '2dsphere'}");
+        List<TalkEnvironment> res = new ArrayList<TalkEnvironment>();
+
+        // do geospatial search
+        Double[] searchCenter = environment.getGeoLocation();
+        Float accuracy = environment.getAccuracy();
+        if (searchCenter != null) {
+            Float searchRadius = accuracy;
+            if (searchRadius > 200.f) {
+                searchRadius = 200.f;
+            }
+            if (searchRadius < 100.f) {
+                searchRadius = 100.f;
+            }
+            Double EARTH_RADIUS = 1000.0 * 6371.0;
+            Double searchRadiusRad = searchRadius / EARTH_RADIUS;
+            Iterator<TalkEnvironment> it = mEnvironments.find("{ geoLocation : { $geoWithin : { $centerSphere : [ [# , #] , # ] } } }", searchCenter[0], searchCenter[1], searchRadiusRad)
+                    .as(TalkEnvironment.class).iterator();
+            while (it.hasNext()) {
+                res.add(it.next());
+            }
+            LOG.debug("found " + res.size() + " environments by geolocation");
+        }
+
+        // do bssid search
+        if (environment.getBssids() != null) {
+            List<String> bssids = Arrays.asList(environment.getBssids());
+            Iterator<TalkEnvironment> it =
+                    mEnvironments.find("{ bssids :{ $in: # } }", bssids)
+                            .as(TalkEnvironment.class).iterator();
+            int totalFound = 0;
+            int newFound = 0;
+            while (it.hasNext()) {
+                TalkEnvironment te = it.next();
+                ++totalFound;
+                boolean found = false;
+                for (TalkEnvironment rte : res) {
+                    if (rte.getGroupId().equals(te.getGroupId()) && rte.getClientId().equals(te.getClientId())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    res.add(te);
+                    ++newFound;
+                }
+            }
+            LOG.debug("found " + totalFound + " environments by bssid, " + newFound + " of them are new");
+        }
+
+        // do identifiers search
+        if (environment.getIdentifiers() != null) {
+            List<String> identifiers = Arrays.asList(environment.getIdentifiers());
+            Iterator<TalkEnvironment> it =
+                    mEnvironments.find("{ identifiers :{ $in: # } }", identifiers)
+                            .as(TalkEnvironment.class).iterator();
+            int totalFound = 0;
+            int newFound = 0;
+            while (it.hasNext()) {
+                TalkEnvironment te = it.next();
+                ++totalFound;
+                boolean found = false;
+                for (TalkEnvironment rte : res) {
+                    if (rte.getGroupId().equals(te.getGroupId()) && rte.getClientId().equals(te.getClientId())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    res.add(te);
+                    ++newFound;
+                }
+            }
+
+            LOG.debug("found " + totalFound + " environments by identifiers, " + newFound + " of them are new");
+        }
+
+        return res;
+    }
+
+    @Override
+    public void deleteEnvironment(TalkEnvironment environment) {
+        mEnvironments.remove("{clientId:#}", environment.getClientId());
+    }
+
+    @Override
     public boolean ping() {
         return mDb.command("ping").ok();
     }
@@ -518,4 +643,32 @@ public class JongoDatabase implements ITalkServerDatabase {
             LOG.error("Database is not online:", e);
         }
     }
+
+    @Override
+    public boolean acquireGroupKeyUpdateLock(String groupId) {
+        TalkGroup group = findGroupById(groupId);
+        Date newLockDate = new Date();
+        Date oldLockDate = group.getGroupKeyUpdateInProgress();
+
+        if (oldLockDate != null) { // is already locked
+            if ((newLockDate.getTime() - oldLockDate.getTime()) > GROUPKEY_LOCK_RETENTION_TIMEOUT) {
+                LOG.info("group key update lock is too old (> " + GROUPKEY_LOCK_RETENTION_TIMEOUT + "ms) - reacquiring lock...");
+            } else {
+                // cannot acquire lock
+                return false;
+            }
+        }
+
+        group.setGroupKeyUpdateInProgress(newLockDate);
+        saveGroup(group);
+        return true;
+    }
+
+    @Override
+    public void releaseGroupKeyUpdateLock(String groupId) {
+        TalkGroup group = findGroupById(groupId);
+        group.setGroupKeyUpdateInProgress(null);
+        saveGroup(group);
+    }
+
 }

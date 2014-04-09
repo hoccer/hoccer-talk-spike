@@ -541,6 +541,12 @@ public class OrmliteDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkGroupMember> findGroupMembersByIdWithStates(String groupId, String[] states) {
+        return null;
+    }
+
+
+    @Override
     public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown) {
         try {
             return mGroupMembers.queryBuilder().where()
@@ -578,6 +584,29 @@ public class OrmliteDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public void saveEnvironment(TalkEnvironment environment) {
+    }
+
+    @Override
+    public TalkEnvironment findEnvironmentByClientId(String clientId) {
+        return null;
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsForGroup(String groupId) {
+        return null;
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment) {
+        return null;
+    }
+
+    @Override
+    public void deleteEnvironment(TalkEnvironment environment) {
+    }
+
+    @Override
     public boolean ping() {
         // TODO: implement me properly!
         return false;
@@ -586,5 +615,16 @@ public class OrmliteDatabase implements ITalkServerDatabase {
     @Override
     public void reportPing() {
         LOG.info(ping());
+    }
+
+    @Override
+    public boolean acquireGroupKeyUpdateLock(String groupId) {
+        // TODO: implememnt me...
+        return false;
+    }
+
+    @Override
+    public void releaseGroupKeyUpdateLock(String groupId) {
+        // TODO: implement me...
     }
 }

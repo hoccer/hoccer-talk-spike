@@ -87,25 +87,6 @@
 
     <!-- Hoccer Release Versions -->
     <hoccer-talk-server.version>1.0.5</hoccer-talk-server.version>
+    <hoccer-talk-filecache.version>1.0.1</hoccer-talk-filecache.version>
   </properties>
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-failsafe-plugin</artifactId>
-          <version>${maven-failsafe.version}</version>
-          <executions>
-            <execution>
-              <id>integration-test</id>
-              <goals>
-                <goal>integration-test</goal>
-                <goal>verify</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>
