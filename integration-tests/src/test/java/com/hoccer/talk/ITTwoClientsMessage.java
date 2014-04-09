@@ -5,6 +5,8 @@ import com.google.code.tempusfugit.temporal.Timeout;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.util.IntegrationTest;
+import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +24,7 @@ import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 @RunWith(JUnit4.class)
 public class ITTwoClientsMessage extends IntegrationTest {
 
-    private TestServer firstServer;
+    private TestTalkServer firstServer;
 
     private final static String messageText = "test";
 
