@@ -4,7 +4,6 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.tool.TalkToolContext;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.sql.SQLException;
 
