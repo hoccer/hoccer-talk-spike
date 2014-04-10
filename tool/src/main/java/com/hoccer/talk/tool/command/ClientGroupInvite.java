@@ -15,15 +15,12 @@ public class ClientGroupInvite extends TalkToolClientCommand {
     @Parameter(names = "-g", description = "GroupId of group to invite to", required = true)
     String pGroup;
 
-    @Parameter(names = "-t", description = "Target of invitation - accepts only toolclients currently", required = true)
+    @Parameter(names = "-t", description = "Target of invitation - either by selector or clientId", required = true)
     String pTarget;
 
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) throws Exception {
-        TalkToolClient target = context.getClientBySelector(pTarget);
-        if (target == null) {
-            throw new Exception("Need to provide valid target");
-        }
+        String inviteeClientId = context.getClientIdFromParam(pTarget);
 
         TalkClientContact group = null;
         try {
@@ -35,6 +32,6 @@ public class ClientGroupInvite extends TalkToolClientCommand {
             throw new Exception("Need to provide valid target and group");
         }
 
-        client.getClient().inviteClientToGroup(group.getGroupId(), target.getClientId());
+        client.getClient().inviteClientToGroup(group.getGroupId(), inviteeClientId);
     }
 }

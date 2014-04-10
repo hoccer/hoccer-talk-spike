@@ -61,7 +61,7 @@ public class IntegrationTest {
 
     public TestFileCache createFileCache() throws Exception {
         CacheConfiguration configuration = new CacheConfiguration();
-        configuration.setOrmliteUrl("jdbc:h2:mem");
+        configuration.setOrmliteUrl("jdbc:h2:mem:");
         configuration.setOrmliteInitDb(true);
         configuration.setDataDirectory(tempDir.toString());
         return new TestFileCache(configuration);

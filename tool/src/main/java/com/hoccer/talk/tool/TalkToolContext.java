@@ -12,10 +12,7 @@ import org.eclipse.jetty.websocket.WebSocketClientFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -156,6 +153,27 @@ public class TalkToolContext extends CLIContext {
             client = getClientByClientId(selector);
         }
         return client;
+    }
+
+    /**
+     *
+     * @param selectorOrclientId is either a client in talk tool identified by number (e.g. '2') or
+     *                           a clientId
+     * @return clientId - An existing talk-tool client number is converted to a clientId.
+     *         If it does not exist we assume the given String is a UUID and treat it as clientId
+     */
+    public String getClientIdFromParam(String selectorOrclientId) {
+        String clientId = selectorOrclientId;
+
+        final TalkToolClient client = getClientBySelector(selectorOrclientId);
+        if (client != null) {
+            clientId = client.getClientId();
+        }
+
+        // this validates that the evaluated clientId is always a UUID.
+        clientId = UUID.fromString(clientId).toString();
+
+        return clientId;
     }
 
     public TalkToolClient getClientById(int id) {
