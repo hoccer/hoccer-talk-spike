@@ -43,7 +43,6 @@ public class ITSingleTalkClient extends IntegrationTest {
       assertFalse(c.isAwake());
       c.wake();
       assertTrue(c.isAwake());
-      assertTrue(false); // added to test e-mail notification
 
       waitOrTimeout(new Condition() {
           @Override
