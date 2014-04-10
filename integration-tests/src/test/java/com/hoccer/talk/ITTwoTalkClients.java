@@ -17,6 +17,7 @@ import java.sql.SQLException;
 
 import static com.google.code.tempusfugit.temporal.Duration.seconds;
 import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
+import static junit.framework.TestCase.assertNotNull;
 
 @RunWith(JUnit4.class)
 public class ITTwoTalkClients extends IntegrationTest {
@@ -55,6 +56,7 @@ public class ITTwoTalkClients extends IntegrationTest {
       }, Timeout.timeout(seconds(2)));
 
       String token = c1.generatePairingToken();
+      assertNotNull("Pairing token must not be null", token);
       c2.performTokenPairing(token);
 
       final String c1Id = c1.getSelfContact().getClientId();
