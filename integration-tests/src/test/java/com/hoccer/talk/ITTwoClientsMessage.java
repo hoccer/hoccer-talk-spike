@@ -91,7 +91,8 @@ public class ITTwoClientsMessage extends IntegrationTest {
             @Override
             public boolean isSatisfied() {
                 try {
-                    return c1.getDatabase().findContactByClientId(c2Id, false) != null;
+                    return c1.getDatabase().findContactByClientId(c2Id, false) != null &&
+                           c1.getDatabase().findContactByClientId(c2Id, false).getPublicKey() != null;
                 } catch (SQLException e) {
                     return false;
                 }
@@ -103,7 +104,8 @@ public class ITTwoClientsMessage extends IntegrationTest {
             @Override
             public boolean isSatisfied() {
                 try {
-                    return c2.getDatabase().findContactByClientId(c1Id, false) != null;
+                    return c2.getDatabase().findContactByClientId(c1Id, false) != null &&
+                           c2.getDatabase().findContactByClientId(c1Id, false).getPublicKey() != null;
                 } catch (SQLException e) {
                     return false;
                 }
