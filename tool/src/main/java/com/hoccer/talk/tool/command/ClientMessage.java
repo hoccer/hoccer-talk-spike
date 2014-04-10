@@ -151,7 +151,7 @@ public class ClientMessage extends TalkToolCommand {
         }
 
         if (recipientContact == null) {
-            Console.warn("WARN <ClientMessage::sendMessage> The sender has no relationship to the recipient. Doing nothing.");
+            Console.warn("WARN <ClientMessage::sendMessage> The sender doesn't know the recipient. Doing nothing.");
         } else {
             TalkClientMessage clientMessage = sender.getClient().composeClientMessage(recipientContact, messageText, attachment);
             sender.getClient().requestDelivery(clientMessage);
