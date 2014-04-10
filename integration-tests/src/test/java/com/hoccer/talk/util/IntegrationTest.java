@@ -7,6 +7,7 @@ import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.mongo.tests.MongodForTestsFactory;
 
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,6 +16,7 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.Provider;
 import java.security.Security;
 
 public class IntegrationTest {
@@ -68,7 +70,9 @@ public class IntegrationTest {
     }
 
     public XoClient createTalkClient(TestTalkServer server) throws Exception {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
         return new XoClient(new TestClientHost(server));
     }
 }
