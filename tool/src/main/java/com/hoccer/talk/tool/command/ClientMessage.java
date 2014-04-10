@@ -53,11 +53,6 @@ public class ClientMessage extends TalkToolCommand {
 
     @Override
     protected void run(TalkToolContext context) throws Exception {
-        /*Provider[] provs = Security.getProviders();
-        for(Provider prov: provs) {
-            Console.info(prov.toString());
-        }*/
-
         if (pClients.size() != 2) {
             throw new Exception("Clients must be supplied in a pair (sender, recipient)");
         }
@@ -67,14 +62,7 @@ public class ClientMessage extends TalkToolCommand {
         }
 
         TalkToolClient sender = context.getClientBySelector(pClients.get(0));
-        TalkToolClient recipient = context.getClientBySelector(pClients.get(1));
-        String recipientId;
-        if (recipient == null) {
-            // no tool-client found -> assuming that a tool external client-id was given
-            recipientId = pClients.get(1);
-        } else {
-            recipientId = recipient.getClientId();
-        }
+        String recipientId = context.getClientIdFromParam(pClients.get(1));
 
         TalkClientUpload attachmentUpload = null;
         for (int i = 0; i < pNumMessages; ++i) {
