@@ -130,7 +130,13 @@ public class ITTwoClientsMessage extends IntegrationTest {
 
         final List<TalkClientMessage> unseenMessages = c2.getDatabase().findUnseenMessages();
 
-        assertTrue(unseenMessages.size() == 1);
-        assertTrue(unseenMessages.get(0).getText() == messageText);
+        assertEquals(1, unseenMessages.size());
+        waitOrTimeout(new Condition() {
+            @Override
+            public boolean isSatisfied() {
+                return !unseenMessages.get(0).isInProgress();
+            }
+        }, Timeout.timeout(seconds(2)));
+        assertEquals(unseenMessages.get(0).getText(), messageText);
     }
 }
