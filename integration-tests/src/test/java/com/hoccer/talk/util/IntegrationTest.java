@@ -15,7 +15,7 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
+import java.security.Security;
 
 public class IntegrationTest {
 
@@ -68,6 +68,7 @@ public class IntegrationTest {
     }
 
     public XoClient createTalkClient(TestTalkServer server) throws Exception {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         return new XoClient(new TestClientHost(server));
     }
 }
