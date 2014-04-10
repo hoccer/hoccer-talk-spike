@@ -1,5 +1,6 @@
 package com.hoccer.talk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -71,6 +72,16 @@ public class TalkGroup {
     Date groupKeyUpdateInProgress;
 
     public TalkGroup() {
+    }
+
+    @JsonIgnore
+    public boolean isTypeNearby() {
+        return (this.groupType != null) && this.groupType.equals(GROUP_TYPE_NEARBY);
+    }
+
+    @JsonIgnore
+    public boolean isTypeUser() {
+        return (this.groupType != null) && this.groupType.equals(GROUP_TYPE_USER);
     }
 
     public String getGroupId() {
