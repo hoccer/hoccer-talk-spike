@@ -91,7 +91,8 @@ public class ITTwoClientsMessage extends IntegrationTest {
             @Override
             public boolean isSatisfied() {
                 try {
-                    return c1.getDatabase().findContactByClientId(c2Id, false) != null;
+                    return c1.getDatabase().findContactByClientId(c2Id, false) != null &&
+                           c1.getDatabase().findContactByClientId(c2Id, false).getPublicKey() != null;
                 } catch (SQLException e) {
                     return false;
                 }
@@ -103,7 +104,8 @@ public class ITTwoClientsMessage extends IntegrationTest {
             @Override
             public boolean isSatisfied() {
                 try {
-                    return c2.getDatabase().findContactByClientId(c1Id, false) != null;
+                    return c2.getDatabase().findContactByClientId(c1Id, false) != null &&
+                           c2.getDatabase().findContactByClientId(c1Id, false).getPublicKey() != null;
                 } catch (SQLException e) {
                     return false;
                 }
@@ -128,7 +130,13 @@ public class ITTwoClientsMessage extends IntegrationTest {
 
         final List<TalkClientMessage> unseenMessages = c2.getDatabase().findUnseenMessages();
 
-        assertTrue(unseenMessages.size() == 1);
-        assertTrue(unseenMessages.get(0).getText() == messageText);
+        assertEquals(1, unseenMessages.size());
+        waitOrTimeout(new Condition() {
+            @Override
+            public boolean isSatisfied() {
+                return !unseenMessages.get(0).isInProgress();
+            }
+        }, Timeout.timeout(seconds(2)));
+        assertEquals(unseenMessages.get(0).getText(), messageText);
     }
 }

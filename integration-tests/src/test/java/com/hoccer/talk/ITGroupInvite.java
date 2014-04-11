@@ -9,6 +9,7 @@ import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -36,6 +37,7 @@ public class ITGroupInvite extends IntegrationTest {
         firstServer.shutdown();
     }
 
+    @Ignore("not ready yet")
     @Test
     public void inviteGroupTest() throws Exception {
         // create clients
