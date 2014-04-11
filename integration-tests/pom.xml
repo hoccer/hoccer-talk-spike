@@ -28,6 +28,11 @@
       </dependency>
       <dependency>
           <groupId>hoccer</groupId>
+          <artifactId>hoccer-talk-filecache</artifactId>
+          <version>${hoccer-talk-filecache.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>hoccer</groupId>
           <artifactId>hoccer-talk-client</artifactId>
           <version>0.0.1-SNAPSHOT</version>
       </dependency>
@@ -37,17 +42,43 @@
           <version>${h2-jdbc.version}</version>
       </dependency>
       <dependency>
+          <groupId>com.jayway.awaitility</groupId>
+          <artifactId>awaitility</artifactId>
+          <version>1.5.0</version>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
           <groupId>com.google.code.tempus-fugit</groupId>
           <artifactId>tempus-fugit</artifactId>
           <version>1.1</version>
       </dependency>
   </dependencies>
   <build>
+      <testResources>
+          <testResource>
+              <directory>res</directory>
+              <filtering>true</filtering>
+          </testResource>
+      </testResources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${maven-failsafe.version}</version>
+          <executions>
+              <execution>
+                  <id>integration-test</id>
+                  <goals>
+                      <goal>integration-test</goal>
+                  </goals>
+              </execution>
+              <execution>
+                  <id>verify</id>
+                  <goals>
+                      <goal>verify</goal>
+                  </goals>
+              </execution>
+          </executions>
       </plugin>
         <plugin>
           <groupId>com.github.joelittlejohn.embedmongo</groupId>

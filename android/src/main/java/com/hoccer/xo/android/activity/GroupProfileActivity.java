@@ -1,12 +1,9 @@
 package com.hoccer.xo.android.activity;
 
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.view.*;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.IXoStateListener;
-import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
@@ -18,7 +15,7 @@ import java.sql.SQLException;
 /**
  * Activity wrapping a group profile fragment
  */
-public class GroupProfileActivity extends XoActivity implements IXoContactListener, IXoStateListener {
+public class GroupProfileActivity extends XoActivity {
 
     /* use this extra to open in "group creation" mode */
     public static final String EXTRA_CLIENT_CREATE_GROUP = "clientCreateGroup";
@@ -49,7 +46,7 @@ public class GroupProfileActivity extends XoActivity implements IXoContactListen
         enableUpNavigation();
         getActionBar();
 
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         mGroupProfileFragment = (GroupProfileFragment) fragmentManager.findFragmentById(R.id.activity_group_profile_fragment);
         mStatusFragment = (StatusFragment) fragmentManager.findFragmentById(R.id.activity_profile_status_fragment);
         mStatusFragment.getView().setVisibility(View.VISIBLE);
@@ -71,38 +68,13 @@ public class GroupProfileActivity extends XoActivity implements IXoContactListen
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        LOG.debug("onCreateOptionsMenu()");
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     protected void onResume() {
         LOG.debug("onResume()");
         super.onResume();
 
-        getXoClient().registerContactListener(this);
-        getXoClient().registerStateListener(this);
-
         if (mMode == Mode.CREATE_SELF) {
             mStatusFragment.getView().setVisibility(View.GONE);
-            getActionBar().setDisplayHomeAsUpEnabled(false);
         }
-    }
-
-    @Override
-    protected void onPause() {
-        LOG.debug("onPause()");
-        super.onPause();
-
-        getXoClient().unregisterStateListener(this);
-        getXoClient().unregisterContactListener(this);
     }
 
     private TalkClientContact refreshContact(int contactId) {
@@ -132,41 +104,6 @@ public class GroupProfileActivity extends XoActivity implements IXoContactListen
         LOG.debug("hackReturnedFromDialog()");
         super.hackReturnedFromDialog();
         mGroupProfileFragment.refreshContact(mGroupProfileFragment.getContact());
-    }
-
-    @Override
-    public void onClientStateChange(XoClient client, int state) {
-        LOG.debug("onClientStateChange()");
-    }
-
-    @Override
-    public void onContactAdded(TalkClientContact contact) {
-        LOG.debug("onContactAdded()");
-    }
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {
-
-    }
-
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-
-    }
-
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-
-    }
-
-    @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-
-    }
-
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-
     }
 
     public enum Mode {

@@ -1,8 +1,7 @@
 package com.hoccer.xo.android.activity;
 
+import android.support.v4.app.FragmentManager;
 import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.IXoStateListener;
-import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.base.XoActivity;
@@ -11,7 +10,6 @@ import com.hoccer.xo.android.fragment.StatusFragment;
 import com.hoccer.xo.release.R;
 
 import android.app.ActionBar;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -23,7 +21,7 @@ import java.sql.SQLException;
  * Activity wrapping a single profile fragment
  */
 public class SingleProfileActivity extends XoActivity
-        implements IXoContactListener, IXoStateListener {
+        implements IXoContactListener {
 
     /* use this extra to open in "client registration" mode */
     public static final String EXTRA_CLIENT_CREATE_SELF = "clientCreateSelf";
@@ -58,7 +56,7 @@ public class SingleProfileActivity extends XoActivity
 
         mActionBar = getActionBar();
 
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         mSingleProfileFragment = (SingleProfileFragment) fragmentManager
                 .findFragmentById(R.id.activity_single_profile_fragment);
         mStatusFragment = (StatusFragment) fragmentManager
@@ -118,7 +116,6 @@ public class SingleProfileActivity extends XoActivity
         super.onResume();
 
         getXoClient().registerContactListener(this);
-        getXoClient().registerStateListener(this);
 
         if (mMode == Mode.CREATE_SELF) {
             mStatusFragment.getView().setVisibility(View.GONE);
@@ -131,7 +128,6 @@ public class SingleProfileActivity extends XoActivity
         LOG.debug("onPause()");
         super.onPause();
 
-        getXoClient().unregisterStateListener(this);
         getXoClient().unregisterContactListener(this);
     }
 
@@ -206,11 +202,6 @@ public class SingleProfileActivity extends XoActivity
     private boolean isMyContact(TalkClientContact contact) {
         TalkClientContact myContact = mSingleProfileFragment.getContact();
         return myContact != null && myContact.getClientContactId() == contact.getClientContactId();
-    }
-
-    @Override
-    public void onClientStateChange(XoClient client, int state) {
-        // we don't care
     }
 
     @Override

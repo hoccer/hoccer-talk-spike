@@ -6,9 +6,11 @@ import com.beust.jcommander.Parameter;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
+import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 // import java.security.Provider;
@@ -20,7 +22,13 @@ import java.security.Security;
 import java.sql.SQLException;
 import java.util.List;
 
-@CLICommand(name = "cmessage", description = "Send a text message from one client to another, use: cmessage <sender_id> <recipient_id> -m <message_string> -f <path_to_file> -n <number_of_messages_to_send>")
+@CLICommand(name = "cmessage", description = "Send a text message from one client to another, " +
+                                             "use: cmessage <sender_id> <recipient_id> " +
+                                                   "-m <message_string> " +
+                                                   "-f <path_to_file> " +
+                                                   // the -n option is currently broken when running in non-ssl mode,
+                                                   // see: https://github.com/hoccer/scrum/issues/139
+                                                   "-n <number_of_messages_to_send>")
 public class ClientMessage extends TalkToolCommand {
 
     private final String DEFAULT_MESSAGE = "Hello World";
@@ -45,14 +53,7 @@ public class ClientMessage extends TalkToolCommand {
 
     @Override
     protected void run(TalkToolContext context) throws Exception {
-        List<TalkToolClient> clients = context.getClientsBySelectors(pClients);
-
-        /*Provider[] provs = Security.getProviders();
-        for(Provider prov: provs) {
-            Console.info(prov.toString());
-        }*/
-
-        if (clients.size() != 2) {
+        if (pClients.size() != 2) {
             throw new Exception("Clients must be supplied in a pair (sender, recipient)");
         }
         if (pMessage == null || pMessage.isEmpty()) {
@@ -60,12 +61,15 @@ public class ClientMessage extends TalkToolCommand {
             Console.warn("WARN <ClientMessage::run> No message provided. Using default messageText.");
         }
 
+        TalkToolClient sender = context.getClientBySelector(pClients.get(0));
+        String recipientId = context.getClientIdFromParam(pClients.get(1));
+
         TalkClientUpload attachmentUpload = null;
         for (int i = 0; i < pNumMessages; ++i) {
             if (!(pAttachmentPath == null || pAttachmentPath.isEmpty())) {
                 attachmentUpload = createAttachment(retrieveFile(i));
             }
-            sendMessage(clients.get(0), clients.get(1), pMessage, attachmentUpload);
+            sendMessage(sender, recipientId, pMessage, attachmentUpload);
         }
     }
 
@@ -87,40 +91,55 @@ public class ClientMessage extends TalkToolCommand {
         return null;
     }
 
+    private String getContentHmac(String contentDataUrl) {
+        byte[] hmac = new byte[0];
+        String contentHmac = null;
+        try {
+            hmac = CryptoUtils.computeHmac(contentDataUrl);
+            contentHmac = new String(Base64.encodeBase64(hmac));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return contentHmac;
+    }
+
     private TalkClientUpload createAttachment(File fileToUpload) {
         if (fileToUpload == null) {
             return null;
         } else {
             Console.info("<ClientMessage::createAttachment> Creating attachment for file: '" + fileToUpload.getAbsolutePath() + "'");
             String url = fileToUpload.getAbsolutePath();
-            String contentUrl = url; // in android this makes a difference
+            String fileName = fileToUpload.getName();
             String contentType = "image/*"; // XXX TODO: calculate filetype
             String mediaType = "image"; // seems to be only needed in android
             double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
             int contentLength = (int)fileToUpload.length();
+            String contentHmac = getContentHmac("file://" + url);
 
             TalkClientUpload attachmentUpload = new TalkClientUpload();
-            attachmentUpload.initializeAsAttachment(contentUrl, url, contentType, mediaType, aspectRatio, contentLength);
+            attachmentUpload.initializeAsAttachment(fileName, url, url, contentType, mediaType, aspectRatio, contentLength, contentHmac);
             return attachmentUpload;
         }
     }
 
-    private void sendMessage(TalkToolClient sender, TalkToolClient recipient, String messageText, TalkClientUpload attachment) {
-        Console.info("<ClientMessage::sendMessage> sender-id: '" + sender.getClientId() + "', recipient-id: '" + recipient.getClientId() + "', message: '" + messageText + "'");
+
+    private void sendMessage(TalkToolClient sender, String recipientId, String messageText, TalkClientUpload attachment) {
+        Console.info("<ClientMessage::sendMessage> sender-id: '" + sender.getClientId() + "', recipient-id: '" + recipientId + "', message: '" + messageText + "'");
 
         // check if relationship exists
         // XXX TODO: implement a relationship-check in XOClient,
         //           e.g. sender.isKnownRelationship(TalkToolClient recipient)
         TalkClientContact recipientContact;
         try {
-            recipientContact = sender.getDatabase().findContactByClientId(recipient.getClientId(), false);
+            recipientContact = sender.getDatabase().findContactByClientId(recipientId, false);
         } catch (SQLException e) {
             recipientContact = null;
             e.printStackTrace();
         }
 
         if (recipientContact == null) {
-            Console.warn("WARN <ClientMessage::sendMessage> The sender has no relationship to the recipient. Doing nothing.");
+            Console.warn("WARN <ClientMessage::sendMessage> The sender doesn't know the recipient. Doing nothing.");
         } else {
             TalkClientMessage clientMessage = sender.getClient().composeClientMessage(recipientContact, messageText, attachment);
             sender.getClient().requestDelivery(clientMessage);

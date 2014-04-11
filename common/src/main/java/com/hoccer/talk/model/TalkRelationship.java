@@ -6,21 +6,21 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
 
-@DatabaseTable(tableName="relationship")
+@DatabaseTable(tableName = "relationship")
 public class TalkRelationship {
 
-    public static final String STATE_NONE    = "none";
-    public static final String STATE_FRIEND  = "friend";
+    public static final String STATE_NONE = "none";
+    public static final String STATE_FRIEND = "friend";
     public static final String STATE_BLOCKED = "blocked";
 
     public static boolean isValidState(String state) {
-        if(state.equals(STATE_NONE)) {
+        if (state.equals(STATE_NONE)) {
             return true;
         }
-        if(state.equals(STATE_FRIEND)) {
+        if (state.equals(STATE_FRIEND)) {
             return true;
         }
-        if(state.equals(STATE_BLOCKED)) {
+        if (state.equals(STATE_BLOCKED)) {
             return true;
         }
         return false;

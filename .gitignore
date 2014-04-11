@@ -13,6 +13,7 @@ build-log.xml
 **/run
 **/proguard_logs
 **/git_properties
+**/.DS_Store
 
 /filecache/development.conf
 

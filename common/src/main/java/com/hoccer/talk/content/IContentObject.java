@@ -25,6 +25,8 @@ public interface IContentObject {
     /** The MIME content type, if known */
     public String getContentType();
 
+    public String getFileName();
+
     /** Content URL, if available */
     public String getContentUrl();
 
@@ -34,4 +36,6 @@ public interface IContentObject {
     /** Content length */
     public int getContentLength();
 
+    /** hash over content */
+    public String getContentHmac();
 }

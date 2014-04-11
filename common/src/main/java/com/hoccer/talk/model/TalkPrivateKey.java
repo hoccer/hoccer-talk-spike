@@ -52,7 +52,7 @@ public class TalkPrivateKey {
 //            byte[] decoded = Base64.decodeBase64(this.key);
 //            Base64.decodeBase64(this.key.getBytes(Charset.forName("UTF-8")));
             byte[] decoded =  Base64.decodeBase64(this.key.getBytes(Charset.forName("UTF-8")));
-            key = RSACryptor.makePrivateRSA1024Key(decoded);
+            key = RSACryptor.makePrivateRSAKey(decoded);
         } catch (InvalidKeyException e) {
             e.printStackTrace();
         } catch (InvalidKeySpecException e) {
