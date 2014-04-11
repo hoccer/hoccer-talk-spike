@@ -15,11 +15,12 @@ import java.util.UUID;
 @DatabaseTable(tableName="message")
 public class TalkMessage {
 
-    public static String FIELD_MESSAGE_ID  = "messageId";
-    public static String FIELD_MESSAGE_TAG = "messageTag";
-    public static String FIELD_SENDER_ID   = "senderId";
-    public static String FIELD_BODY        = "body";
-    public static String FIELD_ATTACHMENT  = "attachment";
+    public static final String FIELD_MESSAGE_ID  = "messageId";
+    public static final String FIELD_MESSAGE_TAG = "messageTag";
+    public static final String FIELD_SENDER_ID   = "senderId";
+    public static final String FIELD_BODY        = "body";
+    public static final String FIELD_ATTACHMENT  = "attachment";
+    public static final String FIELD_SHARED_KEY_ID  = "sharedKeyId";
 
     private String _id;
 
@@ -47,7 +48,7 @@ public class TalkMessage {
 	String body;
 
     /** Message attachment */
-    @DatabaseField(width = 1024)
+    @DatabaseField(width = 2048)
     String attachment;
 
     /** Attachment file id (for housekeeping) */
@@ -62,6 +63,21 @@ public class TalkMessage {
     @DatabaseField
     int numDeliveries;
 
+    /** an id for the shared key the body and attachment was encrypted with */
+    @DatabaseField
+    String sharedKeyId;
+
+    /** an salt for the id for the shared key the body and attachment was encrypted with */
+    @DatabaseField
+    String sharedKeyIdSalt;
+
+    /** an optional hmac */
+    @DatabaseField
+    String hmac;
+
+    /** an optional signature for the hmac*/
+    @DatabaseField
+    String signature;
 
     public TalkMessage() {
     }
@@ -142,5 +158,38 @@ public class TalkMessage {
     public void setNumDeliveries(int numDeliveries) {
         this.numDeliveries = numDeliveries;
     }
+
+    public String getSharedKeyId() {
+        return sharedKeyId;
+    }
+
+    public void setSharedKeyId(String sharedKeyId) {
+        this.sharedKeyId = sharedKeyId;
+    }
+
+    public String getSharedKeyIdSalt() {
+        return sharedKeyIdSalt;
+    }
+
+    public void setSharedKeyIdSalt(String sharedKeyIdSalt) {
+        this.sharedKeyIdSalt = sharedKeyIdSalt;
+    }
+
+    public String getHmac() {
+        return hmac;
+    }
+
+    public void setHmac(String hmac) {
+        this.hmac = hmac;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
 
 }

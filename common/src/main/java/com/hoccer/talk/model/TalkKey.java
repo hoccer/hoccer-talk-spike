@@ -41,12 +41,6 @@ public class TalkKey {
     @DatabaseField
     private Date timestamp;
 
-    @DatabaseField
-    private String sharedKeyIdSalt;
-
-    @DatabaseField
-    private String sharedKeyId;
-
     public TalkKey() {
     }
 
@@ -96,21 +90,5 @@ public class TalkKey {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public String getSharedKeyId() {
-        return sharedKeyId;
-    }
-
-    public void setSharedKeyId(String sharedKeyId) {
-        this.sharedKeyId = sharedKeyId;
-    }
-
-    public String getSharedKeyIdSalt() {
-        return sharedKeyIdSalt;
-    }
-
-    public void setSharedKeyIdSalt(String sharedKeyIdSalt) {
-        this.sharedKeyIdSalt = sharedKeyIdSalt;
     }
 }

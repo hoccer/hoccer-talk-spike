@@ -23,8 +23,8 @@ public class TalkGroupMember {
 
     private String _id;
 
-    @DatabaseField(generatedId = true)
-    private long memberId;
+    //@DatabaseField(generatedId = true)
+    //private long memberId;
 
     @DatabaseField
     String groupId;
@@ -49,6 +49,9 @@ public class TalkGroupMember {
 
     @DatabaseField
     String sharedKeyIdSalt;
+
+    @DatabaseField
+    Date sharedKeyDate;
 
     @DatabaseField
     String keySupplier;
@@ -170,5 +173,13 @@ public class TalkGroupMember {
 
     public void setKeySupplier(String keySupplier) {
         this.keySupplier = keySupplier;
+    }
+
+    public Date getSharedKeyDate() {
+        return sharedKeyDate;
+    }
+
+    public void setSharedKeyDate(Date sharedKeyDate) {
+        this.sharedKeyDate = sharedKeyDate;
     }
 }
