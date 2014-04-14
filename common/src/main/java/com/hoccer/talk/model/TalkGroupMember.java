@@ -51,6 +51,9 @@ public class TalkGroupMember {
     String sharedKeyIdSalt;
 
     @DatabaseField
+    Date sharedKeyDate;
+
+    @DatabaseField
     String keySupplier;
 
     @DatabaseField
@@ -170,5 +173,13 @@ public class TalkGroupMember {
 
     public void setKeySupplier(String keySupplier) {
         this.keySupplier = keySupplier;
+    }
+
+    public Date getSharedKeyDate() {
+        return sharedKeyDate;
+    }
+
+    public void setSharedKeyDate(Date sharedKeyDate) {
+        this.sharedKeyDate = sharedKeyDate;
     }
 }
