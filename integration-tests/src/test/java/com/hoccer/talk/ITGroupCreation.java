@@ -1,7 +1,5 @@
 package com.hoccer.talk;
 
-import com.google.code.tempusfugit.temporal.Condition;
-import com.google.code.tempusfugit.temporal.Timeout;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroup;
@@ -15,8 +13,6 @@ import org.junit.runners.JUnit4;
 
 import java.sql.SQLException;
 
-import static com.google.code.tempusfugit.temporal.Duration.seconds;
-import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
 import static org.hamcrest.Matchers.equalTo;
