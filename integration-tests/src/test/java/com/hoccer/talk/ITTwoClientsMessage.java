@@ -80,7 +80,5 @@ public class ITTwoClientsMessage extends IntegrationTest {
         c2.deactivate();
         await("client 1 is inactive").untilCall(to(c1).getState(), equalTo(XoClient.STATE_INACTIVE));
         await("client 2 is inactive").untilCall(to(c2).getState(), equalTo(XoClient.STATE_INACTIVE));
-
-
     }
 }

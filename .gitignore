@@ -3,6 +3,7 @@
 build.log
 build-log.xml
 **/*.iml
+*.iml
 **/.project
 **/.settings
 **/.classpath
