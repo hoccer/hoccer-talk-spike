@@ -1,7 +1,5 @@
 package com.hoccer.talk;
 
-import com.google.code.tempusfugit.temporal.Condition;
-import com.google.code.tempusfugit.temporal.Timeout;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroup;
@@ -16,8 +14,6 @@ import org.junit.runners.JUnit4;
 
 import java.sql.SQLException;
 
-import static com.google.code.tempusfugit.temporal.Duration.seconds;
-import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -46,7 +42,7 @@ public class ITGroupInvite extends IntegrationTest {
         final XoClient invitedClient = createTalkClient(firstServer);
         invitedClient.wake();
 
-
+        /*
         waitOrTimeout(new Condition() {
             @Override
             public boolean isSatisfied() {
@@ -59,7 +55,8 @@ public class ITGroupInvite extends IntegrationTest {
                 }
             }
         }, Timeout.timeout(seconds(2)));
-
+        */
+        /*
         waitOrTimeout(new Condition() {
             @Override
             public boolean isSatisfied() {
@@ -72,7 +69,7 @@ public class ITGroupInvite extends IntegrationTest {
                 }
             }
         }, Timeout.timeout(seconds(2)));
-
+        */
         /* TODO: ideally this new group and presence creation stuff and eventually calling createGroup should be more graceful in the clients and disappear form this test entirely */
         TalkClientContact newGroup = TalkClientContact.createGroupContact();
         final String groupTag = newGroup.getGroupTag();
@@ -82,7 +79,7 @@ public class ITGroupInvite extends IntegrationTest {
         newGroup.updateGroupPresence(groupPresence);
 
         invitingClient.createGroup(newGroup);
-
+        /*
         waitOrTimeout(new Condition() {
             @Override
             public boolean isSatisfied() {
@@ -94,13 +91,13 @@ public class ITGroupInvite extends IntegrationTest {
                 }
             }
         }, Timeout.timeout(seconds(2)));
-
+        */
         final String groupId = invitingClient.getDatabase().findContactByGroupTag(groupTag).getGroupId();
 
         assertNotNull(groupId);
 
         invitingClient.inviteClientToGroup(groupId, invitedClient.getSelfContact().getClientId());
-
+        /*
         waitOrTimeout(new Condition() {
             @Override
             public boolean isSatisfied() {
@@ -112,6 +109,7 @@ public class ITGroupInvite extends IntegrationTest {
                 }
             }
         }, Timeout.timeout(seconds(2)));
+        */
     }
 
 }
