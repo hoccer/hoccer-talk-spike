@@ -3,23 +3,22 @@ package com.hoccer.talk;
 // import junit stuff
 import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestTalkServer;
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.to;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.*;
 
-// Utility classes for async tests
-import com.google.code.tempusfugit.temporal.*;
-
-import static com.google.code.tempusfugit.temporal.Duration.seconds;
-import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
-
 // Import the classes we need for the tests
-// import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.XoClient;
+
 
 @RunWith(JUnit4.class)
 public class ITSingleTalkClient extends IntegrationTest {
@@ -46,21 +45,12 @@ public class ITSingleTalkClient extends IntegrationTest {
         c.wake();
         assertTrue(c.isAwake());
 
-        waitOrTimeout(new Condition() {
-            @Override
-            public boolean isSatisfied() {
-                return XoClient.STATE_ACTIVE == c.getState();
-            }
-        }, Timeout.timeout(seconds(2)));
+        await("client active").untilCall(to(c).getState(), equalTo(XoClient.STATE_ACTIVE));
+        await("client has pubkey").untilCall(to(c.getDatabase().findSelfContact(false)).getPrivateKey(), notNullValue());
 
         // test disconnecting
         c.deactivate();
-        waitOrTimeout(new Condition() {
-            @Override
-            public boolean isSatisfied() {
-                return XoClient.STATE_INACTIVE == c.getState();
-            }
-        }, Timeout.timeout(seconds(2)));
+        await("client is inactive").untilCall(to(c).getState(), equalTo(XoClient.STATE_INACTIVE));
     }
 
 }
