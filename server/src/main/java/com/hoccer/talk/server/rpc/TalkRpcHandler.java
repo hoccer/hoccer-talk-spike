@@ -817,6 +817,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 }
                 if (member.getSharedKeyId() != null && message.getSharedKeyId() != null && !member.getSharedKeyId().equals(message.getSharedKeyId())) {
                     LOG.warn("message key id and member shared key id mismatch, discarding group message "+message.getMessageId()+" for client "+member.getClientId()+" group "+groupId);
+                    LOG.warn("message.sharedKeyId="+message.getSharedKeyId()+" member.sharedKeyId= "+member.getSharedKeyId() +" group.sharedKeyId= "+group.getSharedKeyId());
                     continue;
                 }
                 LOG.info("delivering message " + message.getMessageId() + " for client " + member.getClientId() + " group " + groupId + " sharedKeyId=" + message.getSharedKeyId() + ", member sharedKeyId=" + member.getSharedKeyId());
@@ -1135,6 +1136,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             // notify various things
             touchGroupMemberPresences(groupId);
             mServer.getUpdateAgent().requestGroupUpdate(groupId, clientId);
+            mServer.getUpdateAgent().requestGroupMembershipUpdatesForNewMember(groupId, clientId);
             mServer.getUpdateAgent().requestPresenceUpdateForGroup(clientId, groupId);
             mServer.getUpdateAgent().requestPresenceUpdate(clientId);
         } else {
@@ -1396,7 +1398,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     private void joinGroupWithEnvironment(TalkGroup group, TalkEnvironment environment) {
-        LOG.info("updateEnvironment: creating new group for client with id '" + mConnection.getClientId() + "'");
+        LOG.info("updateEnvironment: joining group with client id '" + mConnection.getClientId() + "'");
 
         TalkGroupMember groupAdmin = mDatabase.findGroupMemberForClient(group.getGroupId(), mConnection.getClientId());
         if (groupAdmin == null) {
@@ -1419,6 +1421,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         touchGroupMemberPresences(group.getGroupId());
         mServer.getUpdateAgent().requestGroupUpdate(group.getGroupId(), mConnection.getClientId());
+        mServer.getUpdateAgent().requestGroupMembershipUpdatesForNewMember(group.getGroupId(), mConnection.getClientId());
         mServer.getUpdateAgent().requestPresenceUpdateForGroup(mConnection.getClientId(), group.getGroupId());
         mServer.getUpdateAgent().requestPresenceUpdate(mConnection.getClientId());
     }
