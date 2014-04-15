@@ -1,7 +1,5 @@
 package com.hoccer.talk;
 
-import com.google.code.tempusfugit.temporal.Condition;
-import com.google.code.tempusfugit.temporal.Timeout;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroup;
@@ -15,8 +13,10 @@ import org.junit.runners.JUnit4;
 
 import java.sql.SQLException;
 
-import static com.google.code.tempusfugit.temporal.Duration.seconds;
-import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
+import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.to;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -45,12 +45,7 @@ public class ITGroupCreation extends IntegrationTest {
         client.wake();
         assertTrue(client.isAwake());
 
-        waitOrTimeout(new Condition() {
-            @Override
-            public boolean isSatisfied() {
-                return XoClient.STATE_ACTIVE == client.getState();
-            }
-        }, Timeout.timeout(seconds(2)));
+        await().untilCall(to(client).getState(), equalTo(XoClient.STATE_ACTIVE));
 
         /* TODO: ideally this new group and presence creation stuff and eventually calling createGroup should be more graceful in the clients and disappear form this test entirely */
         TalkClientContact newGroup = TalkClientContact.createGroupContact();
@@ -61,18 +56,11 @@ public class ITGroupCreation extends IntegrationTest {
         newGroup.updateGroupPresence(groupPresence);
 
         client.createGroup(newGroup);
+        await().untilCall(to(client.getDatabase()).findContactByGroupTag(groupTag), notNullValue());
 
-        waitOrTimeout(new Condition() {
-            @Override
-            public boolean isSatisfied() {
-                try {
-                    return client.getDatabase().findContactByGroupTag(groupTag) != null;
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-        }, Timeout.timeout(seconds(2)));
+        // test disconnecting
+        client.deactivate();
+        await().untilCall(to(client).getState(), equalTo(XoClient.STATE_INACTIVE));
     }
 
 }

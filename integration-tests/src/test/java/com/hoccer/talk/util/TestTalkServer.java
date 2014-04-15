@@ -18,7 +18,6 @@ import java.net.UnknownHostException;
 
 public class TestTalkServer {
 
-    private final MongoClient mongo;
     private final TalkServer ts;
     private final Server s;
 
@@ -30,16 +29,11 @@ public class TestTalkServer {
         return ts;
     }
 
-    public MongoClient getMongo() {
-        return mongo;
-    }
-
     private Connector serverConnector;
 
-    TestTalkServer(TalkServerConfiguration configuration, MongodForTestsFactory factory) throws Exception {
-        mongo = factory.newMongo();
+    TestTalkServer(TalkServerConfiguration configuration, MongoClient mongo) throws Exception {
 
-        ITalkServerDatabase db = new JongoDatabase(configuration,mongo);
+        ITalkServerDatabase db = new JongoDatabase(configuration, mongo);
         ts = new TalkServer(configuration, db);
         // create jetty instance
 

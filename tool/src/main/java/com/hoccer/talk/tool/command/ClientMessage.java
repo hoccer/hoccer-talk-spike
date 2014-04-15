@@ -34,7 +34,7 @@ public class ClientMessage extends TalkToolCommand {
     private final String DEFAULT_MESSAGE = "Hello World";
     private final String ATTACHMENT_CLONES_PATH = "files/clones";
 
-    @Parameter(description = "Clients for message exchange")
+    @Parameter(description = "<sender-id> <recipient-id>")
     List<String> pClients;
 
     @Parameter(description = "Message being sent, defaults to '" + DEFAULT_MESSAGE + "'", names = "-m")
