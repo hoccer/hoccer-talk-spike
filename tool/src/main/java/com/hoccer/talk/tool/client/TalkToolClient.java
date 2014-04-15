@@ -30,8 +30,9 @@ public class TalkToolClient {
     private ScheduledFuture mNearbyUpdater;
 
     // https://www.google.com/maps/place//@52.5017778,13.3427778,14z
-    private final static double GEO_LONGITUDE = 52.501772;
-    private final static double GEO_LATITUDE = 13.342769;
+    private final static double DEFAULT_GEO_LONGITUDE = 52.501772;
+    private final static double DEFAULT_GEO_LATITUDE = 13.342769;
+    private Double[] mGeoLocation;
 
     private final static int NEARBY_UPDATE_RATE = 5; //in seconds
     private final static float NEARBY_ACCURACY = 0.0f;
@@ -71,10 +72,17 @@ public class TalkToolClient {
     }
 
     public Double[] getGeoLocation() {
-        return new Double[] {
-            GEO_LONGITUDE,
-            GEO_LATITUDE
-        };
+        if (mGeoLocation != null) {
+            return mGeoLocation;
+        } else {
+            Console.debug("No explicit location set yet, using default.");
+            return new Double[] { DEFAULT_GEO_LONGITUDE, DEFAULT_GEO_LATITUDE };
+        }
+    }
+
+    public void setGeoLocation(Double longitude, Double latitude) {
+        Console.info("Setting geo-location to (" + longitude.toString() + ", " + latitude.toString() + ")");
+        mGeoLocation = new Double[] { longitude, latitude };
     }
 
     private void enableNearby() {
@@ -82,11 +90,11 @@ public class TalkToolClient {
             Console.warn("Environment updates are already running - IGNORING");
             return;
         }
-
+        Console.info("Starting environment update scheduler...");
         mNearbyUpdater = mLocationUpdater.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                Console.info("running environment update...");
+                Console.debug("running environment update...");
                 TalkEnvironment environment = new TalkEnvironment();
                 environment.setGeoLocation(getGeoLocation());
                 environment.setAccuracy(NEARBY_ACCURACY);
@@ -106,7 +114,7 @@ public class TalkToolClient {
             mClient.sendDestroyEnvironment();
             Console.info("environment updates disabled.");
         } else {
-            Console.info("but it isn't even running yet!");
+            Console.info("Nothing to disable - nearby was running. Doing nothing.");
         }
     }
 
