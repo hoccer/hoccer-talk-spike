@@ -181,6 +181,12 @@ public abstract class JsonRpcConnection {
         mServerHandler = handler;
     }
 
+    public Object getServerHandler() {
+        if (mServerHandler == null) {
+            throw new RuntimeException("Connection has no server handler (not configured for server mode)");
+        }
+        return mServerHandler;
+    }
 
     /**
      * Returns true if the connection is currently connected

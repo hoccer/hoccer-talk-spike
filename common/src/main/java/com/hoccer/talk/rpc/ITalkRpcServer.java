@@ -593,8 +593,6 @@ public interface ITalkRpcServer {
     String updateEnvironment(TalkEnvironment environment);
 
     /** end participation in location based grouping
-     * @param clientId optional own client id
-     * @param groupId the group id returned by updateEnvironment
      * @talk.preconditions client must be logged in
      * @talk.preconditions.server
      * @talk.preconditions.client
@@ -603,7 +601,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects changes environment, creates, destroys or modifies groups and adds or removes group members
      * @talk.errors.server
      */
-    void destroyEnvironment(String clientId, String groupId);
+    void destroyEnvironment();
 
 }
 

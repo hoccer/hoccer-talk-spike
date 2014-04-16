@@ -104,8 +104,8 @@ public class JsonRpcServer {
     public void handleRequest(Object handler, ObjectNode node, JsonRpcConnection connection) throws Throwable {
         ObjectMapper mapper = connection.getMapper();
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("RPC-Server Request (for connectionId '" + connection.getConnectionId() + "'): " + node.toString());
+        if (LOG.isInfoEnabled()) {
+            LOG.info("RPC-Server Request (for connectionId '" + connection.getConnectionId() + "'): " + node.toString());
         }
 
         // validate request
@@ -184,8 +184,8 @@ public class JsonRpcServer {
                         error.getCode(), error.getMessage(), error.getData());
             }
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("RPC-Server Response: " + response.toString());
+            if (LOG.isInfoEnabled()) {
+                LOG.info("RPC-Server Response: " + response.toString());
             }
 
             connection.sendResponse(response);
