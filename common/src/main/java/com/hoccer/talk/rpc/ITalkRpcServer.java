@@ -603,6 +603,8 @@ public interface ITalkRpcServer {
      */
     void destroyEnvironment();
 
+    Boolean[] isMemberInGroups(String[] groupIds);
+
 }
 
 /**
