@@ -13,12 +13,10 @@ import de.flapdoodle.embed.mongo.config.IMongodConfig;
 import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.mongo.runtime.Mongod;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -29,12 +27,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Security;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.to;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertNotNull;
 
 public class IntegrationTest {
 
     private static MongodStarter mongodStarter = null;
     private static IMongodConfig mongodConfig = null;
-    private static Logger mongoLogger = Logger.getLogger(Mongod.class);
 
     private MongodExecutable mongodExecutable = null;
     private MongodProcess mongod = null;
@@ -56,8 +60,8 @@ public class IntegrationTest {
         }
         if (mongodConfig == null) {
             mongodConfig = new MongodConfigBuilder()
-                .version(Version.Main.PRODUCTION)
-                .build();
+                    .version(Version.Main.PRODUCTION)
+                    .build();
         }
     }
 
@@ -93,7 +97,7 @@ public class IntegrationTest {
         // set up connection to fileCache
         if (fc != null) {
             int port = fc.getServerConnector().getPort();
-            configuration.setFilecacheControlUrl("ws://localhost:"+port+"/control");
+            configuration.setFilecacheControlUrl("ws://localhost:" + port + "/control");
             configuration.setFilecacheDownloadBase("http://localhost:" + port + "/download/");
             configuration.setFilecacheUploadBase("http://localhost:" + port + "/upload/");
         }
@@ -115,5 +119,29 @@ public class IntegrationTest {
             Security.addProvider(new BouncyCastleProvider());
         }
         return new XoClient(new TestClientHost(server));
+    }
+
+    public HashMap<String, XoClient> initializeTalkClients(TestTalkServer server,
+                                                           int amount) throws Exception {
+        final HashMap<String, XoClient> clients = new HashMap<String, XoClient>();
+
+        for (int i = 0; i < amount; i++) {
+            XoClient client = createTalkClient(server);
+            client.wake();
+
+            await().untilCall(to(client).getState(), equalTo(XoClient.STATE_ACTIVE));
+            clients.put("client" + (i + 1), client);
+        }
+
+        return clients;
+    }
+
+    public void shutdownClients(HashMap<String, XoClient> clients) {
+        for (Map.Entry<String, XoClient> entry : clients.entrySet()) {
+            XoClient client = entry.getValue();
+            assertNotNull(client);
+            client.deactivate();
+            await(entry.getKey() + " is inactive").untilCall(to(client).getState(), equalTo(XoClient.STATE_INACTIVE));
+        }
     }
 }

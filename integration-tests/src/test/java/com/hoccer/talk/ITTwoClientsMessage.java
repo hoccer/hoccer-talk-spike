@@ -11,12 +11,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import static com.jayway.awaitility.Awaitility.*;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-
 import java.util.List;
 
+import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.to;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(JUnit4.class)
 public class ITTwoClientsMessage extends IntegrationTest {
@@ -44,10 +44,6 @@ public class ITTwoClientsMessage extends IntegrationTest {
 
         await("client 1 is active").untilCall(to(c1).getState(), equalTo(XoClient.STATE_ACTIVE));
         await("client 2 is active").untilCall(to(c2).getState(), equalTo(XoClient.STATE_ACTIVE));
-
-        // STATE_ACTIVE does not necessarily mean we are finished with generating pub/private keys (dumb i know)
-        await("client 1 has private key").untilCall(to(c1.getDatabase().findSelfContact(false)).getPrivateKey(), notNullValue());
-        await("client 2 has private key").untilCall(to(c2.getDatabase().findSelfContact(false)).getPrivateKey(), notNullValue());
 
         String token = c1.generatePairingToken();
         c2.performTokenPairing(token);
