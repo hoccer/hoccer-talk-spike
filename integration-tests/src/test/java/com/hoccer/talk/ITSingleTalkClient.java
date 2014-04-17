@@ -1,9 +1,10 @@
 package com.hoccer.talk;
 
 // import junit stuff
+
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestTalkServer;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,11 +14,8 @@ import org.junit.runners.JUnit4;
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.*;
-
-// Import the classes we need for the tests
-import com.hoccer.talk.client.XoClient;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 @RunWith(JUnit4.class)

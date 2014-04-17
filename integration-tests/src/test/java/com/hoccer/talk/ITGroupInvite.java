@@ -12,64 +12,38 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.sql.SQLException;
+import java.util.HashMap;
 
-import static org.junit.Assert.assertFalse;
+import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.to;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
+@Ignore("Not ready yet")
 public class ITGroupInvite extends IntegrationTest {
 
     private TestTalkServer firstServer;
+    private HashMap<String, XoClient> clients;
 
     @Before
     public void setUp() throws Exception {
         firstServer = createTalkServer();
+        clients = initializeTalkClients(firstServer, 2);
     }
 
     @After
     public void tearDown() throws Exception {
         firstServer.shutdown();
+        shutdownClients(clients);
     }
 
-    @Ignore("not ready yet")
     @Test
     public void inviteGroupTest() throws Exception {
         // create clients
-        final XoClient invitingClient = createTalkClient(firstServer);
-        invitingClient.wake();
-        final XoClient invitedClient = createTalkClient(firstServer);
-        invitedClient.wake();
+        XoClient invitingClient = clients.get("client1");
+        XoClient invitedClient =  clients.get("client2");
 
-        /*
-        waitOrTimeout(new Condition() {
-            @Override
-            public boolean isSatisfied() {
-                try {
-                    return XoClient.STATE_ACTIVE == invitingClient.getState() &&
-                            (invitingClient.getDatabase().findSelfContact(false).getPrivateKey() != null);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-        }, Timeout.timeout(seconds(2)));
-        */
-        /*
-        waitOrTimeout(new Condition() {
-            @Override
-            public boolean isSatisfied() {
-                try {
-                    return XoClient.STATE_ACTIVE == invitedClient.getState() &&
-                            (invitedClient.getDatabase().findSelfContact(false).getPrivateKey() != null);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-        }, Timeout.timeout(seconds(2)));
-        */
         /* TODO: ideally this new group and presence creation stuff and eventually calling createGroup should be more graceful in the clients and disappear form this test entirely */
         TalkClientContact newGroup = TalkClientContact.createGroupContact();
         final String groupTag = newGroup.getGroupTag();
@@ -79,37 +53,17 @@ public class ITGroupInvite extends IntegrationTest {
         newGroup.updateGroupPresence(groupPresence);
 
         invitingClient.createGroup(newGroup);
-        /*
-        waitOrTimeout(new Condition() {
-            @Override
-            public boolean isSatisfied() {
-                try {
-                    return invitingClient.getDatabase().findContactByGroupTag(groupTag) != null;
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-        }, Timeout.timeout(seconds(2)));
-        */
+        await("client knows about created group").untilCall(to(invitingClient.getDatabase()).findContactByGroupTag(groupTag), notNullValue());
         final String groupId = invitingClient.getDatabase().findContactByGroupTag(groupTag).getGroupId();
-
         assertNotNull(groupId);
 
+        //await("groupContact knows group").untilCall(to(invitingClient.getDatabase()).findContactByGroupId(groupId,false), notNullValue());
+        //await("groupContact has groupkey set").untilCall(to(invitingClient.getDatabase().findContactByGroupId(groupId,false)).getGroupKey(), notNullValue());
+
+        assertNotNull(invitedClient.getSelfContact());
+        assertNotNull(invitedClient.getSelfContact().getClientId());
+
         invitingClient.inviteClientToGroup(groupId, invitedClient.getSelfContact().getClientId());
-        /*
-        waitOrTimeout(new Condition() {
-            @Override
-            public boolean isSatisfied() {
-                try {
-                    return invitedClient.getDatabase().findContactByGroupId(groupId, false) != null;
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-        }, Timeout.timeout(seconds(2)));
-        */
     }
 
 }
