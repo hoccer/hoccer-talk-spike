@@ -12,7 +12,6 @@ import java.net.URLConnection;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.logging.ErrorManager;
 
 public class TestClientHost implements IXoClientHost {
 
@@ -20,7 +19,6 @@ public class TestClientHost implements IXoClientHost {
     private final IXoClientDatabaseBackend mDatabaseBackend;
     private final WebSocketClientFactory mWSClientFactory;
     private final TestTalkServer mServer;
-    private ErrorManager LOG;
 
     public TestClientHost(TestTalkServer testServer) throws Exception {
         mExecutor = Executors.newScheduledThreadPool(10);

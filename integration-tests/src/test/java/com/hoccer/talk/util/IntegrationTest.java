@@ -118,8 +118,7 @@ public class IntegrationTest {
         if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
-        XoClient client = new XoClient(new TestClientHost(server));
-        return client;
+        return new XoClient(new TestClientHost(server));
     }
 
     public HashMap<String, XoClient> initializeTalkClients(TestTalkServer server,
