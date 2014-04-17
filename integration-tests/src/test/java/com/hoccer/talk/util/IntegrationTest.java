@@ -33,7 +33,6 @@ import java.util.Map;
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
 
 public class IntegrationTest {
@@ -132,8 +131,6 @@ public class IntegrationTest {
             client.wake();
 
             await().untilCall(to(client).getState(), equalTo(XoClient.STATE_ACTIVE));
-            await().untilCall(to(client.getDatabase().findSelfContact(false)).getPrivateKey(), notNullValue());
-
             clients.put("client" + (i + 1), client);
         }
 
