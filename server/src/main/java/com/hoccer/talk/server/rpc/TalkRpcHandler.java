@@ -1087,6 +1087,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
         for (TalkGroupMember member : members) {
             if (member.isInvited() || member.isJoined()) {
                 member.setState(TalkGroupMember.STATE_GROUP_REMOVED);
+
+                // TODO: check if degrade role of admins is advisable
+                /*if (member.isAdmin()) {
+                    member.setRole(TalkGroupMember.ROLE_MEMBER);
+                }*/
                 changedGroupMember(member);
             }
         }
@@ -1550,5 +1555,23 @@ public class TalkRpcHandler implements ITalkRpcServer {
         while ((myEnvironment = mDatabase.findEnvironmentByClientId(mConnection.getClientId())) != null) {
             destroyEnvironment(myEnvironment);
         }
+    }
+
+    @Override
+    public Boolean[] isMemberInGroups(String[] groupIds) {
+        ArrayList<Boolean> result = new ArrayList<Boolean>();
+
+        String clientId = mConnection.getClientId();
+
+        for (String groupId : groupIds) {
+            TalkGroupMember membership = mDatabase.findGroupMemberForClient(groupId, clientId);
+            if (membership != null && (membership.isInvited() || membership.isMember())) {
+                result.add(true);
+            } else {
+                result.add(false);
+            }
+        }
+
+        return result.toArray(new Boolean[result.size()]);
     }
 }

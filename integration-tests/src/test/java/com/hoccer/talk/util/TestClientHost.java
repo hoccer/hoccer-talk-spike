@@ -2,8 +2,8 @@ package com.hoccer.talk.util;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
-import org.junit.Assert;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
+import org.junit.Assert;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +12,6 @@ import java.net.URLConnection;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.logging.ErrorManager;
 
 public class TestClientHost implements IXoClientHost {
 
@@ -20,7 +19,6 @@ public class TestClientHost implements IXoClientHost {
     private final IXoClientDatabaseBackend mDatabaseBackend;
     private final WebSocketClientFactory mWSClientFactory;
     private final TestTalkServer mServer;
-    private ErrorManager LOG;
 
     public TestClientHost(TestTalkServer testServer) throws Exception {
         mExecutor = Executors.newScheduledThreadPool(10);
@@ -29,6 +27,7 @@ public class TestClientHost implements IXoClientHost {
         mWSClientFactory.start();
         mServer = testServer;
     }
+
     @Override
     public ScheduledExecutorService getBackgroundExecutor() {
         return mExecutor;
@@ -61,7 +60,7 @@ public class TestClientHost implements IXoClientHost {
 
     @Override
     public String getServerUri() {
-        return "ws://127.0.0.1:"+mServer.getServerConnector().getPort();
+        return "ws://127.0.0.1:" + mServer.getServerConnector().getPort();
     }
 
     @Override

@@ -1,7 +1,5 @@
 package com.hoccer.talk;
 
-// import junit stuff
-
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.util.IntegrationTest;
@@ -15,8 +13,10 @@ import org.junit.runners.JUnit4;
 
 import java.net.URL;
 
-import static com.jayway.awaitility.Awaitility.*;
-import static org.hamcrest.Matchers.*;
+import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.to;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 @RunWith(JUnit4.class)
 public class ITSingleFileClient extends IntegrationTest {
@@ -36,27 +36,27 @@ public class ITSingleFileClient extends IntegrationTest {
         fileCache.shutdown();
     }
 
-  @Test
-  public void uploadAvatar() throws Exception {
-      // create client
-      final XoClient c = createTalkClient(talkServer);
-      c.wake();
-      await().untilCall(to(c).getState(), equalTo(XoClient.STATE_ACTIVE));
+    @Test
+    public void uploadAvatar() throws Exception {
+        // create client
+        final XoClient c = createTalkClient(talkServer);
+        c.wake();
+        await().untilCall(to(c).getState(), equalTo(XoClient.STATE_ACTIVE));
 
-      // upload file
-      final TalkClientUpload upload = new TalkClientUpload();
-      URL r1 = getClass().getResource("/test.png");
+        // upload file
+        final TalkClientUpload upload = new TalkClientUpload();
+        URL r1 = getClass().getResource("/test.png");
 
-      upload.initializeAsAvatar(r1.toString(), r1.toString(), "image/png", r1.getFile().length());
-      c.setClientAvatar(upload);
-      // wait for upload to start
-      await().untilCall(to(c.getTransferAgent()).isUploadActive(upload), is(true));
-      // wait for upload to end
-      await().untilCall(to(c.getTransferAgent()).isUploadActive(upload), is(false));
+        upload.initializeAsAvatar(r1.toString(), r1.toString(), "image/png", r1.getFile().length());
+        c.setClientAvatar(upload);
+        // wait for upload to start
+        await().untilCall(to(c.getTransferAgent()).isUploadActive(upload), is(true));
+        // wait for upload to end
+        await().untilCall(to(c.getTransferAgent()).isUploadActive(upload), is(false));
 
-      // test disconnecting
-      c.deactivate();
-      await().untilCall(to(c).getState(), equalTo(XoClient.STATE_INACTIVE));
-  }
+        // test disconnecting
+        c.deactivate();
+        await().untilCall(to(c).getState(), equalTo(XoClient.STATE_INACTIVE));
+    }
 }
 
