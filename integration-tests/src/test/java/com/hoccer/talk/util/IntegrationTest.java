@@ -27,6 +27,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Security;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.to;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNotNull;
 
 public class IntegrationTest {
 
@@ -111,6 +119,33 @@ public class IntegrationTest {
         if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
-        return new XoClient(new TestClientHost(server));
+        XoClient client = new XoClient(new TestClientHost(server));
+        return client;
+    }
+
+    public HashMap<String, XoClient> initializeTalkClients(TestTalkServer server,
+                                                           int amount) throws Exception {
+        final HashMap<String, XoClient> clients = new HashMap<String, XoClient>();
+
+        for (int i = 0; i < amount; i++) {
+            XoClient client = createTalkClient(server);
+            client.wake();
+
+            await().untilCall(to(client).getState(), equalTo(XoClient.STATE_ACTIVE));
+            await().untilCall(to(client.getDatabase().findSelfContact(false)).getPrivateKey(), notNullValue());
+
+            clients.put("client" + (i + 1), client);
+        }
+
+        return clients;
+    }
+
+    public void shutdownClients(HashMap<String, XoClient> clients) {
+        for (Map.Entry<String, XoClient> entry : clients.entrySet()) {
+            XoClient client = entry.getValue();
+            assertNotNull(client);
+            client.deactivate();
+            await(entry.getKey() + " is inactive").untilCall(to(client).getState(), equalTo(XoClient.STATE_INACTIVE));
+        }
     }
 }
