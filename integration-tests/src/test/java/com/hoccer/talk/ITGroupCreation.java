@@ -11,14 +11,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.sql.SQLException;
-
-import static com.jayway.awaitility.Awaitility.await;
-import static com.jayway.awaitility.Awaitility.to;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.jayway.awaitility.Awaitility.*;
+import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
 
 @RunWith(JUnit4.class)
 public class ITGroupCreation extends IntegrationTest {
@@ -39,13 +34,9 @@ public class ITGroupCreation extends IntegrationTest {
     public void createGroupTest() throws Exception {
         // create client
         final XoClient client = createTalkClient(firstServer);
-
-        // test waking and connecting
-        assertFalse(client.isAwake());
         client.wake();
-        assertTrue(client.isAwake());
 
-        await().untilCall(to(client).getState(), equalTo(XoClient.STATE_ACTIVE));
+        await("client is active").untilCall(to(client).getState(), equalTo(XoClient.STATE_ACTIVE));
 
         /* TODO: ideally this new group and presence creation stuff and eventually calling createGroup should be more graceful in the clients and disappear form this test entirely */
         TalkClientContact newGroup = TalkClientContact.createGroupContact();
@@ -56,11 +47,13 @@ public class ITGroupCreation extends IntegrationTest {
         newGroup.updateGroupPresence(groupPresence);
 
         client.createGroup(newGroup);
-        await().untilCall(to(client.getDatabase()).findContactByGroupTag(groupTag), notNullValue());
+        await("client knows about created group").untilCall(to(client.getDatabase()).findContactByGroupTag(groupTag), notNullValue());
+        final String groupId = client.getDatabase().findContactByGroupTag(groupTag).getGroupId();
+        assertNotNull(groupId);
 
         // test disconnecting
         client.deactivate();
-        await().untilCall(to(client).getState(), equalTo(XoClient.STATE_INACTIVE));
+        await("client is inactive").untilCall(to(client).getState(), equalTo(XoClient.STATE_INACTIVE));
     }
 
 }

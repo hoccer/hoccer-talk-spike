@@ -34,6 +34,7 @@ public class TestTalkServer {
     TestTalkServer(TalkServerConfiguration configuration, MongoClient mongo) throws Exception {
 
         ITalkServerDatabase db = new JongoDatabase(configuration, mongo);
+        db.reportPing();
         ts = new TalkServer(configuration, db);
         // create jetty instance
 
