@@ -56,8 +56,8 @@ public class IntegrationTest {
         }
         if (mongodConfig == null) {
             mongodConfig = new MongodConfigBuilder()
-                .version(Version.Main.PRODUCTION)
-                .build();
+                    .version(Version.Main.PRODUCTION)
+                    .build();
         }
     }
 
@@ -93,7 +93,7 @@ public class IntegrationTest {
         // set up connection to fileCache
         if (fc != null) {
             int port = fc.getServerConnector().getPort();
-            configuration.setFilecacheControlUrl("ws://localhost:"+port+"/control");
+            configuration.setFilecacheControlUrl("ws://localhost:" + port + "/control");
             configuration.setFilecacheDownloadBase("http://localhost:" + port + "/download/");
             configuration.setFilecacheUploadBase("http://localhost:" + port + "/upload/");
         }

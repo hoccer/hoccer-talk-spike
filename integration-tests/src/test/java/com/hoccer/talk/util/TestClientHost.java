@@ -2,8 +2,8 @@ package com.hoccer.talk.util;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
-import org.junit.Assert;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
+import org.junit.Assert;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +29,7 @@ public class TestClientHost implements IXoClientHost {
         mWSClientFactory.start();
         mServer = testServer;
     }
+
     @Override
     public ScheduledExecutorService getBackgroundExecutor() {
         return mExecutor;
@@ -61,7 +62,7 @@ public class TestClientHost implements IXoClientHost {
 
     @Override
     public String getServerUri() {
-        return "ws://127.0.0.1:"+mServer.getServerConnector().getPort();
+        return "ws://127.0.0.1:" + mServer.getServerConnector().getPort();
     }
 
     @Override
