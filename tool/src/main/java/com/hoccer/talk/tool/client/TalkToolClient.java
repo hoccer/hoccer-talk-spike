@@ -112,7 +112,7 @@ public class TalkToolClient {
     private void disableNearby() {
         if (mNearbyUpdater != null) {
             resetNearbyUpdater();
-            mClient.sendDestroyEnvironment();
+            mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
             Console.info("environment updates disabled.");
         } else {
             Console.info("Nothing to disable - nearby was not running. Doing nothing.");
