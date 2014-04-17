@@ -1836,7 +1836,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                 @Override
                 public void run() {
                     try {
-                        mServerRpc.destroyEnvironment();
+                        mServerRpc.destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
                     } catch (Throwable t) {
                         LOG.error("sendDestroyEnvironment: other error", t);
                     }
