@@ -43,7 +43,7 @@ public class ITSingleTalkClient extends IntegrationTest {
         // test waking and connecting
         assertFalse(c.isAwake());
         c.wake();
-        //assertTrue(c.isAwake());
+        assertTrue(c.isAwake());
 
         await("client active").untilCall(to(c).getState(), equalTo(XoClient.STATE_ACTIVE));
 
