@@ -169,7 +169,6 @@ public class XoClient implements JsonRpcConnection.Listener {
 
     // temporary group for geolocation grouping
     String mEnvironmentGroupId;
-    TalkEnvironment mEnvironment;
     AtomicBoolean mEnvironmentUpdateCallPending = new AtomicBoolean(false);
 
     int mRSAKeysize = 1024;
@@ -1803,24 +1802,19 @@ public class XoClient implements JsonRpcConnection.Listener {
         }, 0, TimeUnit.SECONDS);
     }
 
-    public void setEnvironment(TalkEnvironment environment) {
-        mEnvironment = environment;
-    }
-
-    // TODO: might be better to have the environment as parameter for sendEnvironment
-    public void sendEnvironmentUpdate() {
+    public void sendEnvironmentUpdate(TalkEnvironment environment) {
         LOG.debug("sendEnvironmentUpdate()");
-        if (this.getState() == STATE_ACTIVE && mEnvironment != null) {
+        if (this.getState() == STATE_ACTIVE && environment != null) {
             if (mEnvironmentUpdateCallPending.compareAndSet(false,true)) {
-                final TalkEnvironment environment = mEnvironment;
-                mEnvironment = null;
+
+                final TalkEnvironment environmentToSend = environment;
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            environment.setClientId(mSelfContact.getClientId());
-                            environment.setGroupId(mEnvironmentGroupId);
-                            mEnvironmentGroupId = mServerRpc.updateEnvironment(environment);
+                            environmentToSend.setClientId(mSelfContact.getClientId());
+                            environmentToSend.setGroupId(mEnvironmentGroupId);
+                            mEnvironmentGroupId = mServerRpc.updateEnvironment(environmentToSend);
                         } catch (Throwable t) {
                             LOG.error("sendEnvironmentUpdate: other error", t);
                         }
@@ -2598,6 +2592,16 @@ public class XoClient implements JsonRpcConnection.Listener {
                         needRenewal = true;
                     }
                 }
+
+                /* Mark as nearby contact and save to database. */
+                if (groupContact.getGroupPresence().isTypeNearby() && member.isJoined()) {
+                    clientContact.setNearby(true);
+                    mDatabase.saveContact(clientContact);
+                } else {
+                    clientContact.setNearby(false);
+                    mDatabase.saveContact(clientContact);
+                }
+
                 membership.updateGroupMember(member);
                 mDatabase.saveGroupMember(membership.getMember());
                 mDatabase.saveClientMembership(membership);
@@ -2609,6 +2613,7 @@ public class XoClient implements JsonRpcConnection.Listener {
         for (int i = 0; i < mContactListeners.size(); i++) {
             IXoContactListener listener = mContactListeners.get(i);
             listener.onGroupMembershipChanged(groupContact);
+            // TODO: ?? send onClientContactUpdated ??
         }
 
         if(needGroupUpdate) {

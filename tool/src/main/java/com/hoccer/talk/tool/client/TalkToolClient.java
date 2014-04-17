@@ -104,8 +104,7 @@ public class TalkToolClient {
                 environment.setLocationType(TalkEnvironment.LOCATION_TYPE_GPS);
                 environment.setTimestamp(new Date());
 
-                mClient.setEnvironment(environment);
-                mClient.sendEnvironmentUpdate();
+                mClient.sendEnvironmentUpdate(environment);
             }
         }, 0, NEARBY_UPDATE_RATE, TimeUnit.SECONDS);
     }
