@@ -13,12 +13,10 @@ import de.flapdoodle.embed.mongo.config.IMongodConfig;
 import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.mongo.runtime.Mongod;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -34,7 +32,6 @@ public class IntegrationTest {
 
     private static MongodStarter mongodStarter = null;
     private static IMongodConfig mongodConfig = null;
-    private static Logger mongoLogger = Logger.getLogger(Mongod.class);
 
     private MongodExecutable mongodExecutable = null;
     private MongodProcess mongod = null;
