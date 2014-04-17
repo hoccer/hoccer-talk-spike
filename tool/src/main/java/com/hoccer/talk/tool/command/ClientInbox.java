@@ -3,6 +3,7 @@ package com.hoccer.talk.tool.command;
 
 import better.cli.annotations.CLICommand;
 import better.cli.console.Console;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.tool.TalkToolContext;
@@ -37,7 +38,17 @@ public class ClientInbox extends TalkToolClientCommand {
                 Console.info("   with attachment (download url: " + attachment.getDownloadUrl() + ")");
             }
 
-            Console.info("   (sent from: " + client.getDatabase().findClientContactById(messages.get(i).getConversationContact().getClientContactId()).getClientId() + ")");
+            // determine recipient of message
+            int conversationContactId = messages.get(i).getConversationContact().getClientContactId();
+            // search own contacts for recipient-contact
+            TalkClientContact senderContact = client.getDatabase().findClientContactById(conversationContactId);
+            String senderId;
+            if (senderContact.isGroup()) {
+                senderId = senderContact.getGroupId();
+            } else {
+                senderId = senderContact.getClientId();
+            }
+            Console.info("   (sent from " + senderContact.getContactType() + ": " + senderId + ")");
         }
         Console.info("In total " + messages.size() + " messages present.");
     }
