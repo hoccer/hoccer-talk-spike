@@ -440,17 +440,20 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public List<TalkGroup> findGroupsByClientIdChangedAfter(String clientId, Date lastKnown) {
-        // XXX dirty hack / indirect query
+        // indirect query
         List<TalkGroup> res = new ArrayList<TalkGroup>();
-        List<TalkGroupMember> members = findGroupMembersForClient(clientId);
+        //List<TalkGroupMember> members = findGroupMembersForClient(clientId);
+        List<TalkGroupMember> members = findGroupMembersByIdWithStates(clientId, new String[]{TalkGroupMember.STATE_JOINED, TalkGroupMember.STATE_INVITED});
         for (TalkGroupMember member : members) {
-            // String memberState = member.getState();
-            if (member.isMember() || member.isInvited()) {
+            // if (member.isMember() || member.isInvited()) {
                 TalkGroup group = findGroupById(member.getGroupId());
-                //if(group.getLastChanged().after(lastKnown)) { // TODO: fix this
-                res.add(group);
-                //}
-            }
+                if (group == null) {
+                    throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
+                }
+                if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {
+                    res.add(group);
+                }
+            // }
         }
         return res;
     }
@@ -472,6 +475,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         return res;
     }
 
+    @Override
     public List<TalkGroupMember> findGroupMembersByIdWithStates(String groupId, String[] states) {
         List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
         Iterator<TalkGroupMember> it =
@@ -483,6 +487,17 @@ public class JongoDatabase implements ITalkServerDatabase {
         return res;
     }
 
+    @Override
+    public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown) {
+        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
+        Iterator<TalkGroupMember> it =
+                mGroupMembers.find("{groupId:#,lastChanged: {$gt:#}}", groupId, lastKnown)
+                        .as(TalkGroupMember.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
 
     @Override
     public List<TalkGroupMember> findGroupMembersForClient(String clientId) {
@@ -497,10 +512,10 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown) {
+    public List<TalkGroupMember> findGroupMembersForClientWithStates(String clientId, String[] states) {
         List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
         Iterator<TalkGroupMember> it =
-                mGroupMembers.find("{groupId:#,lastChanged: {$gt:#}}", groupId, lastKnown)
+                mGroupMembers.find("{clientId:#, state: { $in: # }}", clientId, states)
                         .as(TalkGroupMember.class).iterator();
         while (it.hasNext()) {
             res.add(it.next());
@@ -525,8 +540,8 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public TalkEnvironment findEnvironmentByClientId(String clientId) {
-        return mEnvironments.findOne("{clientId:#}", clientId)
+    public TalkEnvironment findEnvironmentByClientId(String type, String clientId) {
+        return mEnvironments.findOne("{type:#, clientId:#}", type, clientId)
                 .as(TalkEnvironment.class);
     }
 
@@ -560,7 +575,7 @@ public class JongoDatabase implements ITalkServerDatabase {
             }
             Double EARTH_RADIUS = 1000.0 * 6371.0;
             Double searchRadiusRad = searchRadius / EARTH_RADIUS;
-            Iterator<TalkEnvironment> it = mEnvironments.find("{ geoLocation : { $geoWithin : { $centerSphere : [ [# , #] , # ] } } }", searchCenter[0], searchCenter[1], searchRadiusRad)
+            Iterator<TalkEnvironment> it = mEnvironments.find("{type:#, geoLocation : { $geoWithin : { $centerSphere : [ [# , #] , # ] } } }", environment.getType(), searchCenter[0], searchCenter[1], searchRadiusRad)
                     .as(TalkEnvironment.class).iterator();
             while (it.hasNext()) {
                 res.add(it.next());
@@ -572,7 +587,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         if (environment.getBssids() != null) {
             List<String> bssids = Arrays.asList(environment.getBssids());
             Iterator<TalkEnvironment> it =
-                    mEnvironments.find("{ bssids :{ $in: # } }", bssids)
+                    mEnvironments.find("{type:#, bssids :{ $in: # } }", environment.getType(), bssids)
                             .as(TalkEnvironment.class).iterator();
             int totalFound = 0;
             int newFound = 0;
@@ -626,7 +641,7 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public void deleteEnvironment(TalkEnvironment environment) {
-        mEnvironments.remove("{clientId:#}", environment.getClientId());
+        mEnvironments.remove("{type:#, clientId:#}", environment.getType(), environment.getClientId());
     }
 
     @Override

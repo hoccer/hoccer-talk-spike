@@ -56,6 +56,9 @@ public class TalkToolClient {
     }
 
     public void stop() {
+        if (mNearbyUpdater != null) {
+            resetNearbyUpdater();
+        }
         mClient.deactivate();
     }
 
@@ -101,21 +104,24 @@ public class TalkToolClient {
                 environment.setLocationType(TalkEnvironment.LOCATION_TYPE_GPS);
                 environment.setTimestamp(new Date());
 
-                mClient.setEnvironment(environment);
-                mClient.sendEnvironmentUpdate();
+                mClient.sendEnvironmentUpdate(environment);
             }
         }, 0, NEARBY_UPDATE_RATE, TimeUnit.SECONDS);
     }
 
     private void disableNearby() {
         if (mNearbyUpdater != null) {
-            mNearbyUpdater.cancel(true);
-            mNearbyUpdater = null;
-            mClient.sendDestroyEnvironment();
+            resetNearbyUpdater();
+            mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
             Console.info("environment updates disabled.");
         } else {
-            Console.info("Nothing to disable - nearby was running. Doing nothing.");
+            Console.info("Nothing to disable - nearby was not running. Doing nothing.");
         }
+    }
+
+    private void resetNearbyUpdater() {
+        mNearbyUpdater.cancel(true);
+        mNearbyUpdater = null;
     }
 
     public int getId() {

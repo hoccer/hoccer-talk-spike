@@ -8,7 +8,6 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import org.junit.Assert;
 
-
 import java.sql.SQLException;
 
 public class TestClientDatabaseBackend implements IXoClientDatabaseBackend {

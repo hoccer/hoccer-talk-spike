@@ -85,6 +85,9 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkClientUpload avatarUpload;
+
+    @DatabaseField
+    private boolean isNearby;
     
 
     public TalkClientContact() {
@@ -405,6 +408,14 @@ public class TalkClientContact implements Serializable {
     public ForeignCollection<TalkClientMembership> getGroupMemberships() {
         ensureGroup();
         return groupMemberships;
+    }
+
+    public boolean isNearby() {
+        return isNearby;
+    }
+
+    public void setNearby(boolean isNearby) {
+        this.isNearby = isNearby;
     }
 
     public boolean initializeSelf() {

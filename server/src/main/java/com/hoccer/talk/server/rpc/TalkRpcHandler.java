@@ -86,6 +86,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
+    private void requirePastIdentification() {
+        if (!mConnection.wasLoggedIn()) {
+            throw new RuntimeException("Was not logged in");
+        }
+    }
+
     private void logCall(String message) {
         if (TalkServerConfiguration.LOG_ALL_CALLS || mConnection.isSupportMode()) {
             LOG.info("[connectionId: '" + mConnection.getConnectionId() + "'] " + message);
@@ -1087,6 +1093,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
         for (TalkGroupMember member : members) {
             if (member.isInvited() || member.isJoined()) {
                 member.setState(TalkGroupMember.STATE_GROUP_REMOVED);
+
+                // TODO: check if degrade role of admins is advisable
+                /*if (member.isAdmin()) {
+                    member.setRole(TalkGroupMember.ROLE_MEMBER);
+                }*/
                 changedGroupMember(member);
             }
         }
@@ -1347,7 +1358,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (gm != null && (gm.isInvited() || gm.isMember())) {
             return gm;
         }
-        throw new RuntimeException("Client is not an member in group with id: '" + groupId + "'");
+        throw new RuntimeException("Client is not a member in group with id: '" + groupId + "'");
     }
 
     private void requireNotNearbyGroupType(String groupId) {
@@ -1377,13 +1388,18 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     private void createGroupWithEnvironment(TalkEnvironment environment) {
-        LOG.info("updateEnvironment: creating new group for client with id '" + mConnection.getClientId() + "'");
+        LOG.info("createGroupWithEnvironment: creating new group for client with id '" + mConnection.getClientId() + "'");
         TalkGroup group = new TalkGroup();
         group.setGroupTag(UUID.randomUUID().toString());
         group.setGroupId(UUID.randomUUID().toString());
         group.setState(TalkGroup.STATE_EXISTS);
-        group.setGroupName("Nearby" + "-" + group.getGroupId().substring(group.getGroupId().length() - 8));
-        group.setGroupType(TalkGroup.GROUP_TYPE_NEARBY);
+        if (environment.getName() == null) {
+            group.setGroupName(environment.getType() + "-" + group.getGroupId().substring(group.getGroupId().length() - 8));
+        } else {
+            group.setGroupName(environment.getName());
+        }
+        group.setGroupType(environment.getType());
+        LOG.info("updateEnvironment: creating new group for client with id '" + mConnection.getClientId() + "' with type "+environment.getType());
         TalkGroupMember groupAdmin = new TalkGroupMember();
         groupAdmin.setClientId(mConnection.getClientId());
         groupAdmin.setGroupId(group.getGroupId());
@@ -1398,7 +1414,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     private void joinGroupWithEnvironment(TalkGroup group, TalkEnvironment environment) {
-        LOG.info("updateEnvironment: joining group with client id '" + mConnection.getClientId() + "'");
+        LOG.info("joinGroupWithEnvironment: joining group with client id '" + mConnection.getClientId() + "'");
 
         TalkGroupMember groupAdmin = mDatabase.findGroupMemberForClient(group.getGroupId(), mConnection.getClientId());
         if (groupAdmin == null) {
@@ -1450,11 +1466,17 @@ public class TalkRpcHandler implements ITalkRpcServer {
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
         requireIdentification();
+
+        if (environment.getType() == null) {
+            LOG.warn("updateEnvironment: no environment type, defaulting to nearby. Please fix client");
+            environment.setLocationType(TalkEnvironment.TYPE_NEARBY);
+        }
+
         environment.setTimeReceived(new Date());
         environment.setClientId(mConnection.getClientId());
 
         List<TalkEnvironment> matching = mDatabase.findEnvironmentsMatching(environment);
-        TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientId(mConnection.getClientId());
+        TalkEnvironment myEnvironment = mDatabase.findEnvironmentByClientId(environment.getType(),mConnection.getClientId());
         ArrayList<Pair<String, Integer>> environmentsPerGroup = findGroupSortedBySize(matching);
 
         for (TalkEnvironment te : matching) {
@@ -1543,12 +1565,36 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     @Override
-    public void destroyEnvironment() {
+    public void destroyEnvironment(String type) {
         logCall("destroyEnvironment(clientId: '" + mConnection.getClientId() + "')");
-        requireIdentification();
+        requirePastIdentification();
+
+        if (type == null) {
+            LOG.warn("destroyEnvironment: no environment type, defaulting to nearby. Please fix client");
+            type = TalkEnvironment.TYPE_NEARBY;
+        }
+
         TalkEnvironment myEnvironment;
-        while ((myEnvironment = mDatabase.findEnvironmentByClientId(mConnection.getClientId())) != null) {
+        while ((myEnvironment = mDatabase.findEnvironmentByClientId(type, mConnection.getClientId())) != null) {
             destroyEnvironment(myEnvironment);
         }
+    }
+
+    @Override
+    public Boolean[] isMemberInGroups(String[] groupIds) {
+        ArrayList<Boolean> result = new ArrayList<Boolean>();
+
+        String clientId = mConnection.getClientId();
+
+        for (String groupId : groupIds) {
+            TalkGroupMember membership = mDatabase.findGroupMemberForClient(groupId, clientId);
+            if (membership != null && (membership.isInvited() || membership.isMember())) {
+                result.add(true);
+            } else {
+                result.add(false);
+            }
+        }
+
+        return result.toArray(new Boolean[result.size()]);
     }
 }

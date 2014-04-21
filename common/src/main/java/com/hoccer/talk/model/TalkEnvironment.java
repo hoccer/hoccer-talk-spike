@@ -22,6 +22,8 @@ public class TalkEnvironment {
     public final static String LOCATION_TYPE_OTHER = "other";
     public final static String LOCATION_TYPE_NONE = "none";       // indicates that location is invalid
 
+    public final static String TYPE_NEARBY = "nearby";            // a nearby grouping environment
+
     private String _id;
 
     // id of the sending client
@@ -31,6 +33,14 @@ public class TalkEnvironment {
     // optional group the location is associated with
     @DatabaseField
     String groupId;
+
+    // type of the environment; only one environment of each type can exist on the server per client
+    @DatabaseField
+    String type;
+
+    // some name that can be set by the client and may or maybe not used by the server
+    @DatabaseField
+    String name;
 
     // client provided timestamp
     @DatabaseField
@@ -63,6 +73,21 @@ public class TalkEnvironment {
     public TalkEnvironment() {
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getClientId() {
         return clientId;
@@ -138,6 +163,8 @@ public class TalkEnvironment {
     }
 
     public void updateWith(TalkEnvironment environment) {
+        this.type = environment.type;
+        this.name = environment.name;
         this.clientId = environment.clientId;
         this.groupId = environment.groupId;
         this.timestamp = environment.timestamp;
