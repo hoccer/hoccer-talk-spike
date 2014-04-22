@@ -7,7 +7,6 @@ import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -17,10 +16,9 @@ import java.util.HashMap;
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
-@Ignore("Not ready yet")
 public class ITGroupInvite extends IntegrationTest {
 
     private TestTalkServer firstServer;
@@ -42,7 +40,7 @@ public class ITGroupInvite extends IntegrationTest {
     public void inviteGroupTest() throws Exception {
         // create clients
         XoClient invitingClient = clients.get("client1");
-        XoClient invitedClient =  clients.get("client2");
+        XoClient invitedClient = clients.get("client2");
 
         /* TODO: ideally this new group and presence creation stuff and eventually calling createGroup should be more graceful in the clients and disappear form this test entirely */
         TalkClientContact newGroup = TalkClientContact.createGroupContact();
@@ -57,13 +55,15 @@ public class ITGroupInvite extends IntegrationTest {
         final String groupId = invitingClient.getDatabase().findContactByGroupTag(groupTag).getGroupId();
         assertNotNull(groupId);
 
-        //await("groupContact knows group").untilCall(to(invitingClient.getDatabase()).findContactByGroupId(groupId,false), notNullValue());
-        //await("groupContact has groupkey set").untilCall(to(invitingClient.getDatabase().findContactByGroupId(groupId,false)).getGroupKey(), notNullValue());
-
-        assertNotNull(invitedClient.getSelfContact());
-        assertNotNull(invitedClient.getSelfContact().getClientId());
+        await("invitingClient knows group via groupId").untilCall(to(invitingClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
 
         invitingClient.inviteClientToGroup(groupId, invitedClient.getSelfContact().getClientId());
+
+        await("invitedClient knows group via groupId").untilCall(to(invitedClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
+
+        TalkClientContact groupContact = invitedClient.getDatabase().findContactByGroupId(groupId, false);
+        assertTrue("invitedClient is invited to group", groupContact.getGroupMember().isInvited());
+        assertEquals("invited client membership is actually the invitedClient", groupContact.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
     }
 
 }
