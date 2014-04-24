@@ -3,6 +3,7 @@ package com.hoccer.talk;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
@@ -11,8 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
@@ -71,16 +72,21 @@ public class ITGroupJoin extends IntegrationTest {
         assertEquals("invited client membership is actually the invitedClient", groupContact.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
 
         // join group
-        // TODO: NOT working yet - implement await on correct value, currently only sleep lets the test pass
-
-        //invitedClient.joinGroup(groupId);
-
-        //int groupContactId = groupContact.getClientContactId();
-        //int invitedClientContactId = invitedClient.getDatabase().findSelfContact(false).getClientContactId();
-        //await("invitedClient got updated after joining").untilCall(to(invitedClient.getDatabase().findMembershipByContacts(groupContactId, invitedClientContactId, false)), notNullValue());
-        ////Thread.sleep(2000);
-
-        //TalkClientContact updatedGroupContact = invitedClient.getDatabase().findContactByGroupId(groupId, false);
-        //assertTrue("invitedClient has joined the group", updatedGroupContact.getGroupMember().isJoined());
+        invitedClient.joinGroup(groupId);
+        await("invited client is joined").until(joinComplete(invitedClient, groupId));
     }
+
+    private Callable<Boolean> joinComplete(final XoClient invitedClient, final String groupId) {
+        return new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                TalkGroupMember groupMember = invitedClient.getDatabase().findContactByGroupId(groupId, false).getGroupMember();
+                return TalkGroupMember.STATE_JOINED.equals(groupMember.getState()) &&
+                       groupMember.isJoined() &&
+                       groupMember.getEncryptedGroupKey() != null &&
+                       groupMember.getMemberKeyId() != null;
+            }
+        };
+    }
+
 }
