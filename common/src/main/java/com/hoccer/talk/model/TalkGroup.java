@@ -63,7 +63,7 @@ public class TalkGroup {
     String sharedKeyIdSalt;
 
     @DatabaseField
-    String keySupplier;
+    String keySupplier;  // ClientId of the Admin having set the current groupkey
 
     @DatabaseField
     Date keyDate;

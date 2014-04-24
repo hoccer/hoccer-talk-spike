@@ -94,6 +94,8 @@ public class IntegrationTest {
 
     public TestTalkServer createTalkServer(TestFileCache fc) throws Exception {
         TalkServerConfiguration configuration = new TalkServerConfiguration();
+        configuration.setLogAllCalls(true);
+
         // set up connection to fileCache
         if (fc != null) {
             int port = fc.getServerConnector().getPort();
@@ -103,6 +105,9 @@ public class IntegrationTest {
         }
         // set up mongo client
         MongoClient mongo = new MongoClient(new ServerAddress(mongodConfig.net().getServerAddress(), mongodConfig.net().getPort()));
+
+        configuration.report();
+
         return new TestTalkServer(configuration, mongo);
     }
 

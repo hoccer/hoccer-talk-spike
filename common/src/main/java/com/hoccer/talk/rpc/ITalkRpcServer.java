@@ -483,7 +483,24 @@ public interface ITalkRpcServer {
     @Deprecated
     void updateGroupKey(String groupId, String clientId, String keyId, String key);
 
-    /** Update the encrypted shared symmetric group keys for a specified clients;
+    /** Update the encrypted shared symmetric group keys for a myself;
+     * can be called by a non-admin client member when the clients public key has changed
+     * @param groupId denotes the group the key belongs to
+     * @param sharedKeyId denotes is a truncated secure hash of the shared key
+     * @param sharedKeyIdSalt is some random data used in the computation of the secure hash of the shared key
+     * @param publicKeyId is the key ids of the cryptedSharedKey
+     * @param cryptedSharedKey are the b64 encoded cyphertext of the shared group key, encrypted with my public key
+     * @talk.preconditions client must be logged in, connected client must be member of the group, and a group key must have been previously set by a group admin via updateGroupKeys(), sharedKeyId and Salt must match the group shared key id and salt
+     * @talk.preconditions.server
+     * @talk.preconditions.client
+     * @talk.behavior.server Update my group key and notify the members of the change
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects Update the encrypted group key for the calling client's group membership
+     * @talk.errors.server
+     */
+    public void updateMyGroupKey(String groupId,String sharedKeyId, String sharedKeyIdSalt, String publicKeyId, String cryptedSharedKey);
+
+    /** Update the encrypted shared symmetric group keys for the specified clients;
      it is a group admins responsibility to distribute the shared group key to all members
      * @param groupId denotes the group the key belongs to
      * @param sharedKeyId denotes is a truncated secure hash of the shared key
