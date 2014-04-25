@@ -8,6 +8,8 @@ import com.hoccer.talk.filecache.CacheConfiguration;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.hoccer.talk.server.database.JongoDatabase;
 import com.hoccer.talk.server.rpc.TalkRpcHandler;
+import com.j256.ormlite.logger.LoggerFactory;
+import com.j256.ormlite.table.TableUtils;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import de.flapdoodle.embed.mongo.Command;
@@ -22,6 +24,7 @@ import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -43,7 +46,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
 
 public class IntegrationTest {
-
     private static MongodStarter mongodStarter = null;
     private static IMongodConfig mongodConfig = null;
 
@@ -51,6 +53,10 @@ public class IntegrationTest {
     private MongodProcess mongod = null;
     private Path tempDir;
 
+
+    static {
+        configureLogging();
+    }
 
     @BeforeClass
     public static void setUpClass() throws IOException {
@@ -100,18 +106,6 @@ public class IntegrationTest {
     }
 
     public TestTalkServer createTalkServer(TestFileCache fc) throws Exception {
-        // This sets everything to DEBUG - use only when necessary
-        //RootLogger.getRootLogger().setLevel(Level.DEBUG);
-
-        // Setting the Loglevel of specific logger explicitely
-        //org.apache.log4j.Logger.getLogger(UpdateAgent.class).setLevel(Level.DEBUG);
-        org.apache.log4j.Logger.getLogger(JongoDatabase.class).setLevel(Level.DEBUG);
-        org.apache.log4j.Logger.getLogger(TalkRpcHandler.class).setLevel(Level.DEBUG);
-
-        org.apache.log4j.Logger.getLogger(JsonRpcServer.class).setLevel(Level.DEBUG);
-        org.apache.log4j.Logger.getLogger(JsonRpcClient.class).setLevel(Level.DEBUG);
-        org.apache.log4j.Logger.getLogger(JsonRpcConnection.class).setLevel(Level.DEBUG);
-
         TalkServerConfiguration configuration = new TalkServerConfiguration();
         configuration.setLogAllCalls(true);
 
@@ -183,5 +177,26 @@ public class IntegrationTest {
 
         await("client 2 is paired with client 1").untilCall(to(client2.getDatabase()).findContactByClientId(client2Id, false), notNullValue());
         await("client 2 has client 1's pubkey").untilCall(to(client2.getDatabase().findContactByClientId(client2Id, false)).getPublicKey(), notNullValue());
+    }
+
+    private static void configureLogging() {
+        // This sets everything to DEBUG - use only when necessary
+        //RootLogger.getRootLogger().setLevel(Level.DEBUG);
+
+        // For TalkClient
+        Logger.getLogger(XoClient.class).setLevel(Level.DEBUG);
+        System.setProperty(LoggerFactory.LOG_TYPE_SYSTEM_PROPERTY, LoggerFactory.LogType.LOG4J.name());
+        Logger.getLogger(TableUtils.class).setLevel(Level.DEBUG);
+
+        // For Server
+        // Setting the Loglevel of specific logger explicitely
+        //org.apache.log4j.Logger.getLogger(UpdateAgent.class).setLevel(Level.DEBUG);
+        org.apache.log4j.Logger.getLogger(JongoDatabase.class).setLevel(Level.DEBUG);
+        org.apache.log4j.Logger.getLogger(TalkRpcHandler.class).setLevel(Level.DEBUG);
+
+        // For both
+        org.apache.log4j.Logger.getLogger(JsonRpcServer.class).setLevel(Level.DEBUG);
+        org.apache.log4j.Logger.getLogger(JsonRpcClient.class).setLevel(Level.DEBUG);
+        org.apache.log4j.Logger.getLogger(JsonRpcConnection.class).setLevel(Level.DEBUG);
     }
 }
