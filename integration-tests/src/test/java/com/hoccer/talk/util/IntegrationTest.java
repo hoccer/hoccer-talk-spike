@@ -1,8 +1,13 @@
 package com.hoccer.talk.util;
 
+import better.jsonrpc.client.JsonRpcClient;
+import better.jsonrpc.core.JsonRpcConnection;
+import better.jsonrpc.server.JsonRpcServer;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.filecache.CacheConfiguration;
 import com.hoccer.talk.server.TalkServerConfiguration;
+import com.hoccer.talk.server.database.JongoDatabase;
+import com.hoccer.talk.server.rpc.TalkRpcHandler;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import de.flapdoodle.embed.mongo.Command;
@@ -93,6 +98,18 @@ public class IntegrationTest {
     }
 
     public TestTalkServer createTalkServer(TestFileCache fc) throws Exception {
+        // This sets everything to DEBUG - use only when necessary
+        //RootLogger.getRootLogger().setLevel(Level.DEBUG);
+
+        // Setting the Loglevel of specific logger explicitely
+        //org.apache.log4j.Logger.getLogger(UpdateAgent.class).setLevel(Level.DEBUG);
+        org.apache.log4j.Logger.getLogger(JongoDatabase.class).setLevel(Level.DEBUG);
+        org.apache.log4j.Logger.getLogger(TalkRpcHandler.class).setLevel(Level.DEBUG);
+
+        org.apache.log4j.Logger.getLogger(JsonRpcServer.class).setLevel(Level.DEBUG);
+        org.apache.log4j.Logger.getLogger(JsonRpcClient.class).setLevel(Level.DEBUG);
+        org.apache.log4j.Logger.getLogger(JsonRpcConnection.class).setLevel(Level.DEBUG);
+
         TalkServerConfiguration configuration = new TalkServerConfiguration();
         configuration.setLogAllCalls(true);
 
@@ -132,10 +149,12 @@ public class IntegrationTest {
 
         for (int i = 0; i < amount; i++) {
             XoClient client = createTalkClient(server);
+            String clientName = "client" + (i + 1);
+
             client.wake();
 
-            await().untilCall(to(client).getState(), equalTo(XoClient.STATE_ACTIVE));
-            clients.put("client" + (i + 1), client);
+            await(clientName + " reaches active state").untilCall(to(client).getState(), equalTo(XoClient.STATE_ACTIVE));
+            clients.put(clientName, client);
         }
 
         return clients;

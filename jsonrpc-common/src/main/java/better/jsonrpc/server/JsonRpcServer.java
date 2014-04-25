@@ -105,7 +105,7 @@ public class JsonRpcServer {
         ObjectMapper mapper = connection.getMapper();
 
         if (LOG.isInfoEnabled()) {
-            LOG.info("RPC-Server Request (for connectionId '" + connection.getConnectionId() + "'): " + node.toString());
+            LOG.info("RPC-Server Request [connectionId: '" + connection.getConnectionId() + "']: " + node.toString());
         }
 
         // validate request
@@ -185,7 +185,7 @@ public class JsonRpcServer {
             }
 
             if (LOG.isInfoEnabled()) {
-                LOG.info("RPC-Server Response: " + response.toString());
+                LOG.info("RPC-Server Response [connectionId: '" + connection.getConnectionId() + "']: " + response.toString());
             }
 
             connection.sendResponse(response);
