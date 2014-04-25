@@ -3,7 +3,7 @@ package com.hoccer.talk.tool;
 import better.cli.CLIContext;
 import better.cli.console.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hoccer.talk.client.HttpClientWithKeystore;
+import com.hoccer.talk.client.HttpClientWithKeyStore;
 import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -50,7 +50,7 @@ public class TalkToolContext extends CLIContext {
                 input.close();
             }
             // configure HttpClient
-            HttpClientWithKeystore.initializeSsl(ks);
+            HttpClientWithKeyStore.initializeSsl(ks);
 
             KEYSTORE = ks;
         } catch (Exception e) {
