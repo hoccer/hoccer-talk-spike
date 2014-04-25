@@ -161,6 +161,12 @@ public class AESCryptor {
         return new CipherOutputStream(os, c);
     }
 
+    public static byte[] calcSymmetricKeyId(byte[] key, byte[] salt) throws NoSuchAlgorithmException {
+        Mac hmacAlgo = Mac.getInstance("HmacSHA256");
+        byte[] keyHash = derivePBKDF2Key(hmacAlgo, key, salt, 10000, 256);
+        return CryptoUtils.shorten(keyHash,8);
+    }
+
     public static byte[] make256BitKeyFromPassword_PBKDF2WithHmacSHA1(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException, UnsupportedEncodingException {
         //SecretKeyFactory kf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         SecretKeyFactory kf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
