@@ -38,7 +38,7 @@ public class ITGroupInvite extends IntegrationTest {
 
     @Test
     public void inviteGroupTest() throws Exception {
-        // create clients
+        // assigning clients
         XoClient invitingClient = clients.get("client1");
         XoClient invitedClient = clients.get("client2");
 
