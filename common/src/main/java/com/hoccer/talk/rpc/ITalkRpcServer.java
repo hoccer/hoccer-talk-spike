@@ -361,6 +361,9 @@ public interface ITalkRpcServer {
      */
     TalkGroup[] getGroups(Date lastKnown);
 
+    TalkGroup getGroup(String groupId);
+
+    TalkGroupMember getGroupMember(String groupId, String clientId);
 
     /** Update group name and group avatar; this function is deprecated, use updateGroupAvatar and updateGroupName instead
      * @param group is the group to update
@@ -480,8 +483,8 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects Update group key for the member
      * @talk.errors.server
      */
-    @Deprecated
-    void updateGroupKey(String groupId, String clientId, String keyId, String key);
+    //@Deprecated
+    //void updateGroupKey(String groupId, String clientId, String keyId, String key);
 
     /** Update the encrypted shared symmetric group keys for a myself;
      * can be called by a non-admin client member when the clients public key has changed
@@ -546,7 +549,7 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      * @talk.todo remove from API
      */
-    void updateGroupMember(TalkGroupMember member);
+    //void updateGroupMember(TalkGroupMember member);
 
     /** remove (kick) a member from a group
      * @param groupId denotes the group from which the member is to be removed
