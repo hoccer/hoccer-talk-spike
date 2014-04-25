@@ -45,21 +45,11 @@ public class ITTwoClientsMessage extends IntegrationTest {
         final XoClient sendingClient = clients.get("client1");
         final XoClient receivingClient = clients.get("client2");
 
-        String token = sendingClient.generatePairingToken();
-        receivingClient.performTokenPairing(token);
-
-        final String c1Id = sendingClient.getSelfContact().getClientId();
-        final String c2Id = receivingClient.getSelfContact().getClientId();
-
-        await("client 1 is paired with client 2").untilCall(to(sendingClient.getDatabase()).findContactByClientId(c2Id, false), notNullValue());
-        await("client 1 has client 2's pubkey").untilCall(to(sendingClient.getDatabase().findContactByClientId(c2Id, false)).getPublicKey(), notNullValue());
-
-        await("client 2 is paired with client 1").untilCall(to(receivingClient.getDatabase()).findContactByClientId(c1Id, false), notNullValue());
-        await("client 2 has client 1's pubkey").untilCall(to(receivingClient.getDatabase().findContactByClientId(c1Id, false)).getPublicKey(), notNullValue());
+        pairClients(sendingClient, receivingClient);
 
         // sendingClient sends a messages to receivingClient
-        TalkClientContact recipient = sendingClient.getDatabase().findContactByClientId(receivingClient.getSelfContact().getClientId(), false);
-        TalkClientMessage message = sendingClient.composeClientMessage(recipient, messageText);
+        TalkClientContact recipientContact = sendingClient.getDatabase().findContactByClientId(receivingClient.getSelfContact().getClientId(), false);
+        TalkClientMessage message = sendingClient.composeClientMessage(recipientContact, messageText);
         sendingClient.requestDelivery(message);
 
         await("receivingClient has unseen messages").untilCall(to(receivingClient.getDatabase()).findUnseenMessages(), is(not(empty())));
@@ -71,4 +61,9 @@ public class ITTwoClientsMessage extends IntegrationTest {
         await("unseen message is done downloading").untilCall(to(unseenMessages.get(0)).isInProgress(), is(false));
         assertEquals("unseen message text matches", unseenMessages.get(0).getText(), messageText);
     }
+
+    /*@Test
+    public void clientMessageTestOfflineRecipient() throws Exception {
+
+    }*/
 }
