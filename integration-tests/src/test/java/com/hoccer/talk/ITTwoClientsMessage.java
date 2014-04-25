@@ -59,7 +59,7 @@ public class ITTwoClientsMessage extends IntegrationTest {
 
         // wait until message is done downloading
         await("unseen message is done downloading").untilCall(to(unseenMessages.get(0)).isInProgress(), is(false));
-        assertEquals("unseen message text matches", unseenMessages.get(0).getText(), messageText);
+        assertEquals("unseen message text matches", messageText, unseenMessages.get(0).getText());
     }
 
     @Test
@@ -86,6 +86,6 @@ public class ITTwoClientsMessage extends IntegrationTest {
 
         // wait until message is done downloading
         await("unseen message is done downloading").untilCall(to(unseenMessages.get(0)).isInProgress(), is(false));
-        assertEquals("unseen message text matches", unseenMessages.get(0).getText(), messageText);
+        assertEquals("unseen message text matches", messageText, unseenMessages.get(0).getText() );
     }
 }
