@@ -62,8 +62,30 @@ public class ITTwoClientsMessage extends IntegrationTest {
         assertEquals("unseen message text matches", unseenMessages.get(0).getText(), messageText);
     }
 
-    /*@Test
+    @Test
     public void clientMessageTestOfflineRecipient() throws Exception {
+        final XoClient sendingClient = clients.get("client1");
+        final XoClient receivingClient = clients.get("client2");
+        pairClients(sendingClient, receivingClient);
 
-    }*/
+        // Taking recipient offline
+        receivingClient.deactivate();
+        await("receivingClient is inactive").untilCall(to(receivingClient).getState(), equalTo(XoClient.STATE_INACTIVE));
+
+        TalkClientContact recipientContact = sendingClient.getDatabase().findContactByClientId(receivingClient.getSelfContact().getClientId(), false);
+        TalkClientMessage message = sendingClient.composeClientMessage(recipientContact, messageText);
+        sendingClient.requestDelivery(message);
+
+        // Taking recipient online again
+        receivingClient.wake();
+
+        await("receivingClient has unseen messages").untilCall(to(receivingClient.getDatabase()).findUnseenMessages(), is(not(empty())));
+
+        final List<TalkClientMessage> unseenMessages = receivingClient.getDatabase().findUnseenMessages();
+        assertEquals(1, unseenMessages.size());
+
+        // wait until message is done downloading
+        await("unseen message is done downloading").untilCall(to(unseenMessages.get(0)).isInProgress(), is(false));
+        assertEquals("unseen message text matches", unseenMessages.get(0).getText(), messageText);
+    }
 }
