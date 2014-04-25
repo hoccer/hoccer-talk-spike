@@ -53,14 +53,16 @@ public class ITTwoClientsMessage extends IntegrationTest {
         TalkClientMessage message = sendingClient.composeClientMessage(recipientContact, messageText);
         sendingClient.requestDelivery(message);
 
-        await("receivingClient has unseen messages").untilCall(to(receivingClient.getDatabase()).findUnseenMessages(), is(not(empty())));
-
-        final List<TalkClientMessage> unseenMessages = receivingClient.getDatabase().findUnseenMessages();
-        assertEquals(1, unseenMessages.size());
-
-        // wait until message is done downloading
-        await("unseen message is done downloading").untilCall(to(unseenMessages.get(0)).isInProgress(), is(false));
-        assertEquals("unseen message text matches", messageText, unseenMessages.get(0).getText());
+        await().until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                List<TalkClientMessage> unseenMessages = receivingClient.getDatabase().findUnseenMessages();
+                return unseenMessages != null &&
+                        unseenMessages.size() == 1 &&
+                        !unseenMessages.get(0).isInProgress() &&
+                        messageText.equals(unseenMessages.get(0).getText());
+            }
+        });
     }
 
     @Test
@@ -80,15 +82,6 @@ public class ITTwoClientsMessage extends IntegrationTest {
         // Taking recipient online again
         receivingClient.wake();
         await("receivingClient reaches active state").untilCall(to(receivingClient).getState(), equalTo(XoClient.STATE_ACTIVE));
-
-        /*await("receivingClient has unseen messages").untilCall(to(receivingClient.getDatabase()).findUnseenMessages(), is(not(empty())));
-
-        final List<TalkClientMessage> unseenMessages = receivingClient.getDatabase().findUnseenMessages();
-        assertEquals(1, unseenMessages.size());
-
-        // wait until message is done downloading
-        await("unseen message is done downloading").untilCall(to(unseenMessages.get(0)).isInProgress(), is(false));
-        assertEquals("unseen message text matches", messageText, unseenMessages.get(0).getText() );*/
 
         await().until(new Callable<Boolean>() {
             @Override
