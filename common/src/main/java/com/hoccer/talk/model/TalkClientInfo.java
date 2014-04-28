@@ -13,8 +13,11 @@ public class TalkClientInfo {
     /** The name of the client program; on iOS it is the name of the app 'Hoccer XO'*/
     String clientName;
 
-    /** A version string for the client program; on iOS it is the build number */
+    /** A version string for the client program */
     String clientVersion;
+
+    /** A build number of the client program; on iOS it is the build number */
+    int clientBuildNumber;
 
     /** A canonicalized IETF BCP 47 language identifier for the current client UI language, e.g. 'de' for german */
     String clientLanguage;
@@ -68,6 +71,14 @@ public class TalkClientInfo {
 
     public void setClientVersion(String clientVersion) {
         this.clientVersion = clientVersion;
+    }
+
+    public int getClientBuildNumber() {
+        return clientBuildNumber;
+    }
+
+    public void setClientBuildNumber(int clientBuildNumber) {
+        this.clientBuildNumber = clientBuildNumber;
     }
 
     public String getClientLanguage() {
