@@ -5,6 +5,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.talk.util.IntegrationTest;
+import com.hoccer.talk.util.TestHelper;
 import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
@@ -31,13 +32,13 @@ public class ITGroupJoin extends IntegrationTest {
     @Before
     public void setUp() throws Exception {
         firstServer = createTalkServer();
-        clients = initializeTalkClients(firstServer, 2);
+        clients = TestHelper.initializeTalkClients(firstServer, 2);
     }
 
     @After
     public void tearDown() throws Exception {
         firstServer.shutdown();
-        shutdownClients(clients);
+        TestHelper.shutdownClients(clients);
     }
 
     @Test

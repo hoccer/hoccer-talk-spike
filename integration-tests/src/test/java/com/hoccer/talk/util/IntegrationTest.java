@@ -139,46 +139,6 @@ public class IntegrationTest {
         return new XoClient(new TestClientHost(server));
     }
 
-    public HashMap<String, XoClient> initializeTalkClients(TestTalkServer server,
-                                                           int amount) throws Exception {
-        final HashMap<String, XoClient> clients = new HashMap<String, XoClient>();
-
-        for (int i = 0; i < amount; i++) {
-            XoClient client = createTalkClient(server);
-            String clientName = "client" + (i + 1);
-
-            client.wake();
-
-            await(clientName + " reaches active state").untilCall(to(client).getState(), equalTo(XoClient.STATE_ACTIVE));
-            clients.put(clientName, client);
-        }
-
-        return clients;
-    }
-
-    public void shutdownClients(HashMap<String, XoClient> clients) {
-        for (Map.Entry<String, XoClient> entry : clients.entrySet()) {
-            XoClient client = entry.getValue();
-            assertNotNull(client);
-            client.deactivate();
-            await(entry.getKey() + " is inactive").untilCall(to(client).getState(), equalTo(XoClient.STATE_INACTIVE));
-        }
-    }
-
-    public void pairClients(XoClient client1, XoClient client2) throws SQLException {
-        final String token = client1.generatePairingToken();
-        client2.performTokenPairing(token);
-
-        final String client1Id = client1.getSelfContact().getClientId();
-        final String client2Id = client2.getSelfContact().getClientId();
-
-        await("client 1 is paired with client 2").untilCall(to(client1.getDatabase()).findContactByClientId(client1Id, false), notNullValue());
-        await("client 1 has client 2's pubkey").untilCall(to(client1.getDatabase().findContactByClientId(client1Id, false)).getPublicKey(), notNullValue());
-
-        await("client 2 is paired with client 1").untilCall(to(client2.getDatabase()).findContactByClientId(client2Id, false), notNullValue());
-        await("client 2 has client 1's pubkey").untilCall(to(client2.getDatabase().findContactByClientId(client2Id, false)).getPublicKey(), notNullValue());
-    }
-
     private static void configureLogging() {
         // This sets everything to DEBUG - use only when necessary
         //RootLogger.getRootLogger().setLevel(Level.DEBUG);
