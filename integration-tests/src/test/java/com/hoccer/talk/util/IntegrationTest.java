@@ -25,7 +25,6 @@ import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -34,7 +33,6 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.Security;
 
 public class IntegrationTest {
     private static MongodStarter mongodStarter = null;
@@ -92,11 +90,11 @@ public class IntegrationTest {
         FileUtils.deleteDirectory(tempDir.toFile());
     }
 
-    public TestTalkServer createTalkServer() throws Exception {
+    protected TestTalkServer createTalkServer() throws Exception {
         return createTalkServer(null);
     }
 
-    public TestTalkServer createTalkServer(TestFileCache fc) throws Exception {
+    protected TestTalkServer createTalkServer(TestFileCache fc) throws Exception {
         TalkServerConfiguration configuration = new TalkServerConfiguration();
         configuration.setLogAllCalls(true);
 
@@ -115,19 +113,12 @@ public class IntegrationTest {
         return new TestTalkServer(configuration, mongo);
     }
 
-    public TestFileCache createFileCache() throws Exception {
+    protected TestFileCache createFileCache() throws Exception {
         CacheConfiguration configuration = new CacheConfiguration();
         configuration.setOrmliteUrl("jdbc:h2:mem:");
         configuration.setOrmliteInitDb(true);
         configuration.setDataDirectory(tempDir.toString());
         return new TestFileCache(configuration);
-    }
-
-    public XoClient createTalkClient(TestTalkServer server) throws Exception {
-        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
-            Security.addProvider(new BouncyCastleProvider());
-        }
-        return new XoClient(new TestClientHost(server));
     }
 
     private static void configureLogging() {
