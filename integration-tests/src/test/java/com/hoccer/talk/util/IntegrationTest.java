@@ -35,15 +35,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Security;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.jayway.awaitility.Awaitility.await;
-import static com.jayway.awaitility.Awaitility.to;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
 
 public class IntegrationTest {
     private static MongodStarter mongodStarter = null;
