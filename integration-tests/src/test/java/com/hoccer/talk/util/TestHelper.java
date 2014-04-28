@@ -2,18 +2,24 @@ package com.hoccer.talk.util;
 
 
 import com.hoccer.talk.client.XoClient;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupMember;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Security;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class TestHelper {
@@ -25,8 +31,7 @@ public class TestHelper {
         return new XoClient(new TestClientHost(server));
     }
 
-    public static HashMap<String, XoClient> initializeTalkClients(TestTalkServer server,
-                                                           int amount) throws Exception {
+    public static HashMap<String, XoClient> initializeTalkClients(TestTalkServer server, int amount) throws Exception {
         final HashMap<String, XoClient> clients = new HashMap<String, XoClient>();
 
         for (int i = 0; i < amount; i++) {
@@ -63,5 +68,51 @@ public class TestHelper {
 
         await("client 2 is paired with client 1").untilCall(to(client2.getDatabase()).findContactByClientId(client2Id, false), notNullValue());
         await("client 2 has client 1's pubkey").untilCall(to(client2.getDatabase().findContactByClientId(client2Id, false)).getPublicKey(), notNullValue());
+    }
+
+    public static String createGroup(XoClient client) throws SQLException {
+        /* TODO: ideally this new group and presence creation stuff and eventually calling createGroup should be more graceful in the clients and disappear form this test entirely */
+        TalkClientContact newGroup = TalkClientContact.createGroupContact();
+        final String groupTag = newGroup.getGroupTag();
+
+        TalkGroup groupPresence = new TalkGroup();
+        groupPresence.setGroupTag(newGroup.getGroupTag());
+        newGroup.updateGroupPresence(groupPresence);
+
+        client.createGroup(newGroup);
+        await("client knows about created group").untilCall(to(client.getDatabase()).findContactByGroupTag(groupTag), notNullValue());
+        final String groupId = client.getDatabase().findContactByGroupTag(groupTag).getGroupId();
+        assertNotNull(groupId);
+
+        return groupId;
+    }
+
+    public static void inviteToGroup(XoClient invitingClient, XoClient invitedClient, String groupId) throws SQLException {
+        await("invitingClient knows group via groupId").untilCall(to(invitingClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
+
+        invitingClient.inviteClientToGroup(groupId, invitedClient.getSelfContact().getClientId());
+
+        await("invitedClient knows group via groupId").untilCall(to(invitedClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
+
+        TalkClientContact groupContact = invitedClient.getDatabase().findContactByGroupId(groupId, false);
+        assertTrue("invitedClient is invited to group", groupContact.getGroupMember().isInvited());
+        assertEquals("invited client membership is actually the invitedClient", groupContact.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
+    }
+
+    public static void joinGroup(final XoClient joiningClient, final String groupId) {
+        joiningClient.joinGroup(groupId);
+
+        await("client is joined").until(
+            new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    TalkGroupMember groupMember = joiningClient.getDatabase().findContactByGroupId(groupId, false).getGroupMember();
+                    return TalkGroupMember.STATE_JOINED.equals(groupMember.getState()) &&
+                            groupMember.isJoined() &&
+                            groupMember.getEncryptedGroupKey() != null &&
+                            groupMember.getMemberKeyId() != null;
+                }
+            }
+        );
     }
 }
