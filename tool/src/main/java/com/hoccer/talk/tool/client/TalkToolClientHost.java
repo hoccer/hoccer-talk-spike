@@ -85,8 +85,13 @@ public class TalkToolClientHost implements IXoClientHost {
     }
 
     @Override
-    public String getClientVersion() {
+    public String getClientVersionName() {
         return null;
+    }
+
+    @Override
+    public int getClientVersionCode() {
+        return 0;
     }
 
     @Override
