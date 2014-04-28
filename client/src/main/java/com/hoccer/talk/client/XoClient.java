@@ -542,7 +542,8 @@ public class XoClient implements JsonRpcConnection.Listener {
             clientInfo.setClientName(mClientHost.getClientName());
             clientInfo.setClientTime(mClientHost.getClientTime());
             clientInfo.setClientLanguage(mClientHost.getClientLanguage());
-            clientInfo.setClientVersion(mClientHost.getClientVersionName() + "-" + mClientHost.getClientVersionCode());
+            clientInfo.setClientVersion(mClientHost.getClientVersionName());
+            clientInfo.setClientBuildNumber(mClientHost.getClientVersionCode());
             clientInfo.setDeviceModel(mClientHost.getDeviceModel());
             clientInfo.setSystemName(mClientHost.getSystemName());
             clientInfo.setSystemLanguage(mClientHost.getSystemLanguage());
@@ -2203,7 +2204,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                 LOG.error("error encrypting", e);
                 return;
             }
-        } else {
+        } else { //TODO: should elseif for isGroup() and MUST add a check for isSelf() (i.e. for sending messages to yourself)
             LOG.trace("using group key for encryption");
             // get and decode the group key
             String groupKey = receiver.getGroupKey();
