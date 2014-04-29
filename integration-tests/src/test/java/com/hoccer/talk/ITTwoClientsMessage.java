@@ -4,6 +4,7 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.util.IntegrationTest;
+import com.hoccer.talk.util.TestHelper;
 import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
@@ -18,7 +19,6 @@ import java.util.concurrent.Callable;
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(JUnit4.class)
 public class ITTwoClientsMessage extends IntegrationTest {
@@ -31,13 +31,13 @@ public class ITTwoClientsMessage extends IntegrationTest {
     @Before
     public void setUp() throws Exception {
         firstServer = createTalkServer();
-        clients = initializeTalkClients(firstServer, 2);
+        clients = TestHelper.initializeTalkClients(firstServer, 2);
     }
 
     @After
     public void tearDown() throws Exception {
         firstServer.shutdown();
-        shutdownClients(clients);
+        TestHelper.shutdownClients(clients);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class ITTwoClientsMessage extends IntegrationTest {
         final XoClient sendingClient = clients.get("client1");
         final XoClient receivingClient = clients.get("client2");
 
-        pairClients(sendingClient, receivingClient);
+        TestHelper.pairClients(sendingClient, receivingClient);
 
         // sendingClient sends a messages to receivingClient
         TalkClientContact recipientContact = sendingClient.getDatabase().findContactByClientId(receivingClient.getSelfContact().getClientId(), false);
@@ -69,7 +69,7 @@ public class ITTwoClientsMessage extends IntegrationTest {
     public void clientMessageTestOfflineRecipient() throws Exception {
         final XoClient sendingClient = clients.get("client1");
         final XoClient receivingClient = clients.get("client2");
-        pairClients(sendingClient, receivingClient);
+        TestHelper.pairClients(sendingClient, receivingClient);
 
         // Taking recipient offline
         receivingClient.deactivate();

@@ -4,6 +4,7 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestFileCache;
+import com.hoccer.talk.util.TestHelper;
 import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +40,7 @@ public class ITSingleFileClient extends IntegrationTest {
     @Test
     public void uploadAvatar() throws Exception {
         // create client
-        final XoClient c = createTalkClient(talkServer);
+        final XoClient c = TestHelper.createTalkClient(talkServer);
         c.wake();
         await().untilCall(to(c).getState(), equalTo(XoClient.STATE_ACTIVE));
 
