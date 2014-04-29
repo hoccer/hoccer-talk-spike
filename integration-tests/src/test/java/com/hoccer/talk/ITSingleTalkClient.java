@@ -4,6 +4,7 @@ package com.hoccer.talk;
 
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.util.IntegrationTest;
+import com.hoccer.talk.util.TestHelper;
 import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
@@ -36,7 +37,7 @@ public class ITSingleTalkClient extends IntegrationTest {
     @Test
     public void clientConnectAndDisconnectTest() throws Exception {
         // create client
-        final XoClient c = createTalkClient(firstServer);
+        final XoClient c = TestHelper.createTalkClient(firstServer);
 
         // test waking and connecting
         assertFalse(c.isAwake());
