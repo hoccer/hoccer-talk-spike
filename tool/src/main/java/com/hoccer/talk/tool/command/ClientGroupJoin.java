@@ -12,7 +12,7 @@ import java.sql.SQLException;
 @CLICommand(name = "cgjoin", description = "Join a group that you have been invited to")
 public class ClientGroupJoin extends TalkToolClientCommand {
 
-    @Parameter(names = "-g", description = "Group to invite to", required = true)
+    @Parameter(names = "-g", description = "groupId to join", required = true)
     String pGroup;
 
     @Override

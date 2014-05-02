@@ -91,5 +91,4 @@ public class TalkKey {
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
-
 }

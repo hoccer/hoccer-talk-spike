@@ -1,13 +1,10 @@
 package com.hoccer.talk;
 
-// import junit stuff
-
-import com.google.code.tempusfugit.temporal.Condition;
-import com.google.code.tempusfugit.temporal.Timeout;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestFileCache;
+import com.hoccer.talk.util.TestHelper;
 import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
@@ -17,9 +14,10 @@ import org.junit.runners.JUnit4;
 
 import java.net.URL;
 
-import static com.google.code.tempusfugit.temporal.Duration.seconds;
-import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
-
+import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.to;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 @RunWith(JUnit4.class)
 public class ITSingleFileClient extends IntegrationTest {
@@ -39,46 +37,27 @@ public class ITSingleFileClient extends IntegrationTest {
         fileCache.shutdown();
     }
 
-  @Test
-  public void clientConnectAndDisconnectTest() throws Exception {
-      // create client
-      final XoClient c = createTalkClient(talkServer);
-      c.wake();
-      waitOrTimeout(new Condition() {
-          @Override
-          public boolean isSatisfied() {
-              return XoClient.STATE_ACTIVE == c.getState();
-          }
-      }, Timeout.timeout(seconds(2)));
+    @Test
+    public void uploadAvatar() throws Exception {
+        // create client
+        final XoClient c = TestHelper.createTalkClient(talkServer);
+        c.wake();
+        await().untilCall(to(c).getState(), equalTo(XoClient.STATE_ACTIVE));
 
-      // upload file
-      final TalkClientUpload upload = new TalkClientUpload();
-      URL r1 = getClass().getResource("/test.png");
+        // upload file
+        final TalkClientUpload upload = new TalkClientUpload();
+        URL r1 = getClass().getResource("/test.png");
 
-      upload.initializeAsAvatar(r1.toString(), r1.toString(), "image/png", r1.getFile().length());
-      c.setClientAvatar(upload);
-      // wait for upload to start
-      waitOrTimeout(new Condition() {
-          @Override
-          public boolean isSatisfied() {
-              return c.getTransferAgent().isUploadActive(upload) == true;
-          }
-      }, Timeout.timeout(seconds(2)));
-      // wait for upload to end
-      waitOrTimeout(new Condition() {
-          @Override
-          public boolean isSatisfied() {
-              return c.getTransferAgent().isUploadActive(upload) == false;
-          }
-      }, Timeout.timeout(seconds(2)));
-      // test disconnecting
-      c.deactivate();
-      waitOrTimeout(new Condition() {
-          @Override
-          public boolean isSatisfied() {
-              return XoClient.STATE_INACTIVE == c.getState();
-          }
-      }, Timeout.timeout(seconds(2)));
-  }
+        upload.initializeAsAvatar(r1.toString(), r1.toString(), "image/png", r1.getFile().length());
+        c.setClientAvatar(upload);
+        // wait for upload to start
+        await().untilCall(to(c.getTransferAgent()).isUploadActive(upload), is(true));
+        // wait for upload to end
+        await().untilCall(to(c.getTransferAgent()).isUploadActive(upload), is(false));
+
+        // test disconnecting
+        c.deactivate();
+        await().untilCall(to(c).getState(), equalTo(XoClient.STATE_INACTIVE));
+    }
 }
 

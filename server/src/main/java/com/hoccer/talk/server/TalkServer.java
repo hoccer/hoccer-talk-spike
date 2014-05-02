@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.model.TalkClient;
+import com.hoccer.talk.model.TalkEnvironment;
 import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.server.cleaning.CleaningAgent;
 import com.hoccer.talk.server.database.DatabaseHealthCheck;
@@ -269,6 +270,7 @@ public class TalkServer {
         String clientId = client.getClientId();
         TalkRpcConnection oldConnection = mConnectionsByClientId.get(clientId);
         if (oldConnection != null) {
+            // TODO: LOG this - maybe even on warn level!
             oldConnection.disconnect();
         }
         mConnectionsByClientId.put(clientId, connection);
@@ -297,6 +299,8 @@ public class TalkServer {
         mConnections.remove(connection);
         // remove connection from table
         if (connection.getClientId() != null) {
+            connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
+
             String clientId = connection.getClientId();
             // remove connection from table
             mConnectionsByClientId.remove(clientId);

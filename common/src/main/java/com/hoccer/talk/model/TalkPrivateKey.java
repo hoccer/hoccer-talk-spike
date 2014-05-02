@@ -36,6 +36,12 @@ public class TalkPrivateKey {
     @DatabaseField(columnName = FIELD_TIMESTAMP)
     private Date timestamp;
 
+    @DatabaseField
+    private String groupKeyId;
+
+    @DatabaseField
+    private String groupKeyIdSalt;
+
     public TalkPrivateKey() {
     }
 
@@ -89,4 +95,19 @@ public class TalkPrivateKey {
         this.timestamp = timestamp;
     }
 
+    public String getGroupKeyId() {
+        return groupKeyId;
+    }
+
+    public void setGroupKeyId(String groupKeyId) {
+        this.groupKeyId = groupKeyId;
+    }
+
+    public String getGroupKeyIdSalt() {
+        return groupKeyIdSalt;
+    }
+
+    public void setGroupKeyIdSalt(String groupKeyIdSalt) {
+        this.groupKeyIdSalt = groupKeyIdSalt;
+    }
 }

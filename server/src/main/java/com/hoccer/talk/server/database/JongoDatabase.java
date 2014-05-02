@@ -19,11 +19,12 @@ import java.util.*;
  * <p/>
  * This is intended as the production backend.
  * <p/>
- * XXX this should use findOne() instead of find() where appropriate
+ * TODO: this should use findOne() instead of find() where appropriate
  */
 public class JongoDatabase implements ITalkServerDatabase {
 
     private static final Logger LOG = Logger.getLogger(JongoDatabase.class);
+    private static final long GROUPKEY_LOCK_RETENTION_TIMEOUT = 1000 * 30; // in milliseconds
 
     /**
      * Mongo connection pool
@@ -51,6 +52,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     MongoCollection mKeys;
     MongoCollection mGroups;
     MongoCollection mGroupMembers;
+    MongoCollection mEnvironments;
 
     public JongoDatabase(TalkServerConfiguration configuration) {
         mCollections = new ArrayList<MongoCollection>();
@@ -98,6 +100,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mKeys = getCollection("key");
         mGroups = getCollection("group");
         mGroupMembers = getCollection("groupMember");
+        mEnvironments = getCollection("enviroment");
     }
 
     private MongoCollection getCollection(String name) {
@@ -435,19 +438,43 @@ public class JongoDatabase implements ITalkServerDatabase {
         return mGroups.findOne("{groupId:#}", groupId).as(TalkGroup.class);
     }
 
+
     @Override
     public List<TalkGroup> findGroupsByClientIdChangedAfter(String clientId, Date lastKnown) {
-        // XXX dirty hack / indirect query
+        return findGroupsByClientIdChangedAfterV1(clientId,lastKnown);
+    }
+
+
+    private List<TalkGroup> findGroupsByClientIdChangedAfterV1(String clientId, Date lastKnown) {
+        // indirect query
         List<TalkGroup> res = new ArrayList<TalkGroup>();
         List<TalkGroupMember> members = findGroupMembersForClient(clientId);
         for (TalkGroupMember member : members) {
-            String memberState = member.getState();
             if (member.isMember() || member.isInvited()) {
                 TalkGroup group = findGroupById(member.getGroupId());
-                //if(group.getLastChanged().after(lastKnown)) { // XXX fix this
-                res.add(group);
-                //}
-            }
+                if (group == null) {
+                    throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
+                }
+                if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {
+                    res.add(group);
+                }
+             }
+        }
+        return res;
+    }
+
+    private List<TalkGroup> findGroupsByClientIdChangedAfterV2(String clientId, Date lastKnown) {
+        // indirect query
+        List<TalkGroup> res = new ArrayList<TalkGroup>();
+        List<TalkGroupMember> members = findGroupMembersByIdWithStates(clientId, new String[]{TalkGroupMember.STATE_JOINED, TalkGroupMember.STATE_INVITED});
+        for (TalkGroupMember member : members) {
+                TalkGroup group = findGroupById(member.getGroupId());
+                if (group == null) {
+                    throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
+                }
+                if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {
+                    res.add(group);
+                }
         }
         return res;
     }
@@ -470,10 +497,11 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public List<TalkGroupMember> findGroupMembersForClient(String clientId) {
+    public List<TalkGroupMember> findGroupMembersByIdWithStates(String groupId, String[] states) {
+
         List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
         Iterator<TalkGroupMember> it =
-                mGroupMembers.find("{clientId:#}", clientId)
+                mGroupMembers.find("{groupId:#, state: { $in: # }}", groupId, Arrays.asList(states))
                         .as(TalkGroupMember.class).iterator();
         while (it.hasNext()) {
             res.add(it.next());
@@ -494,6 +522,42 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkGroupMember> findGroupMembersByIdWithStatesChangedAfter(String groupId, String[] states, Date lastKnown) {
+        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
+        Iterator<TalkGroupMember> it =
+                mGroupMembers.find("{groupId:#, state: { $in: # }, lastChanged: { $gt:# } }", groupId, Arrays.asList(states), lastKnown)
+                        .as(TalkGroupMember.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
+    public List<TalkGroupMember> findGroupMembersForClient(String clientId) {
+        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
+        Iterator<TalkGroupMember> it =
+                mGroupMembers.find("{clientId:#}", clientId)
+                        .as(TalkGroupMember.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
+    public List<TalkGroupMember> findGroupMembersForClientWithStates(String clientId, String[] states) {
+        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
+        Iterator<TalkGroupMember> it =
+                mGroupMembers.find("{clientId:#, state: { $in: # }}", clientId, Arrays.asList(states))
+                        .as(TalkGroupMember.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
     public TalkGroupMember findGroupMemberForClient(String groupId, String clientId) {
         return mGroupMembers.findOne("{groupId:#,clientId:#}", groupId, clientId)
                 .as(TalkGroupMember.class);
@@ -502,6 +566,116 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     public void saveGroupMember(TalkGroupMember groupMember) {
         mGroupMembers.save(groupMember);
+    }
+
+    @Override
+    public void saveEnvironment(TalkEnvironment environment) {
+        mEnvironments.save(environment);
+    }
+
+    @Override
+    public TalkEnvironment findEnvironmentByClientId(String type, String clientId) {
+        return mEnvironments.findOne("{type:#, clientId:#}", type, clientId)
+                .as(TalkEnvironment.class);
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsForGroup(String groupId) {
+        List<TalkEnvironment> res = new ArrayList<TalkEnvironment>();
+        Iterator<TalkEnvironment> it =
+                mEnvironments.find("{groupId:#}", groupId)
+                        .as(TalkEnvironment.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment) {
+        mEnvironments.ensureIndex("{geoLocation: '2dsphere'}");
+        List<TalkEnvironment> res = new ArrayList<TalkEnvironment>();
+
+        // do geospatial search
+        Double[] searchCenter = environment.getGeoLocation();
+        Float accuracy = environment.getAccuracy();
+        if (searchCenter != null) {
+            Float searchRadius = accuracy;
+            if (searchRadius > 200.f) {
+                searchRadius = 200.f;
+            }
+            if (searchRadius < 100.f) {
+                searchRadius = 100.f;
+            }
+            Double EARTH_RADIUS = 1000.0 * 6371.0;
+            Double searchRadiusRad = searchRadius / EARTH_RADIUS;
+            Iterator<TalkEnvironment> it = mEnvironments.find("{type:#, geoLocation : { $geoWithin : { $centerSphere : [ [# , #] , # ] } } }", environment.getType(), searchCenter[0], searchCenter[1], searchRadiusRad)
+                    .as(TalkEnvironment.class).iterator();
+            while (it.hasNext()) {
+                res.add(it.next());
+            }
+            LOG.debug("found " + res.size() + " environments by geolocation");
+        }
+
+        // do bssid search
+        if (environment.getBssids() != null) {
+            List<String> bssids = Arrays.asList(environment.getBssids());
+            Iterator<TalkEnvironment> it =
+                    mEnvironments.find("{type:#, bssids :{ $in: # } }", environment.getType(), bssids)
+                            .as(TalkEnvironment.class).iterator();
+            int totalFound = 0;
+            int newFound = 0;
+            while (it.hasNext()) {
+                TalkEnvironment te = it.next();
+                ++totalFound;
+                boolean found = false;
+                for (TalkEnvironment rte : res) {
+                    if (rte.getGroupId().equals(te.getGroupId()) && rte.getClientId().equals(te.getClientId())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    res.add(te);
+                    ++newFound;
+                }
+            }
+            LOG.debug("found " + totalFound + " environments by bssid, " + newFound + " of them are new");
+        }
+
+        // do identifiers search
+        if (environment.getIdentifiers() != null) {
+            List<String> identifiers = Arrays.asList(environment.getIdentifiers());
+            Iterator<TalkEnvironment> it =
+                    mEnvironments.find("{ identifiers :{ $in: # } }", identifiers)
+                            .as(TalkEnvironment.class).iterator();
+            int totalFound = 0;
+            int newFound = 0;
+            while (it.hasNext()) {
+                TalkEnvironment te = it.next();
+                ++totalFound;
+                boolean found = false;
+                for (TalkEnvironment rte : res) {
+                    if (rte.getGroupId().equals(te.getGroupId()) && rte.getClientId().equals(te.getClientId())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    res.add(te);
+                    ++newFound;
+                }
+            }
+
+            LOG.debug("found " + totalFound + " environments by identifiers, " + newFound + " of them are new");
+        }
+
+        return res;
+    }
+
+    @Override
+    public void deleteEnvironment(TalkEnvironment environment) {
+        mEnvironments.remove("{type:#, clientId:#}", environment.getType(), environment.getClientId());
     }
 
     @Override
@@ -518,4 +692,59 @@ public class JongoDatabase implements ITalkServerDatabase {
             LOG.error("Database is not online:", e);
         }
     }
+
+    private boolean canAcquireGroupKeyUpdateLock(TalkGroup group, Date newLockDate, String lockingClientId) {
+        Date oldLockDate = group.getGroupKeyUpdateInProgress();
+        if (oldLockDate == null) { // is not locked
+            return true;
+        }
+        if ((newLockDate.getTime() - oldLockDate.getTime()) > GROUPKEY_LOCK_RETENTION_TIMEOUT) {
+            LOG.info("group key update lock is too old (> " + GROUPKEY_LOCK_RETENTION_TIMEOUT + "ms) - reacquiring lock...");
+            return true;
+        }
+        if (group.getKeySupplier() != null) {
+            if (group.getKeySupplier().equals(lockingClientId)) {
+                LOG.info("group key update lock is active and set by the same client (keymaster) :'" + lockingClientId + "' - reacquiring lock...");
+                return true;
+            }
+            TalkPresence keySupplierPresence = findPresenceForClient(group.getKeySupplier());
+            if (keySupplierPresence != null &&
+                    keySupplierPresence.getConnectionStatus().equals(TalkPresence.CONN_STATUS_OFFLINE)) {
+                LOG.info("group key update lock is active for keymaster '" + group.getKeySupplier() + "' but he is offline - acquiring lock");
+                return true;
+            }
+            TalkGroupMember supplier = findGroupMemberForClient(group.getGroupId(),group.getKeySupplier());
+            if (supplier == null || !supplier.isMember()) {
+                LOG.info("old keymaster not found as group member :'" + group.getKeySupplier() + "' - reacquiring lock...");
+                return true;
+            }
+            if (!supplier.isAdmin()) {
+                LOG.info("old keymaster no admin :'" + group.getKeySupplier() + "' - reacquiring lock...");
+                return true;
+            }
+        }
+        LOG.info("group key update lock is locked for group '" + group.getGroupId() + "' - not acquirung...");
+        return false;
+    }
+
+    @Override
+    public boolean acquireGroupKeyUpdateLock(String groupId, String lockingClientId) {
+        TalkGroup group = findGroupById(groupId);
+        Date newLockDate = new Date();
+
+        if (canAcquireGroupKeyUpdateLock(group,newLockDate,lockingClientId)) {
+            group.setGroupKeyUpdateInProgress(newLockDate);
+            saveGroup(group);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void releaseGroupKeyUpdateLock(String groupId) {
+        TalkGroup group = findGroupById(groupId);
+        group.setGroupKeyUpdateInProgress(null);
+        saveGroup(group);
+    }
+
 }
