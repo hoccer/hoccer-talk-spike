@@ -7,6 +7,7 @@ public class TalkServerInfo {
     Date serverTime;
 
     boolean supportMode;
+    private String version;
 
     public TalkServerInfo() {
     }
@@ -27,4 +28,11 @@ public class TalkServerInfo {
         this.supportMode = supportMode;
     }
 
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getVersion() {
+        return version;
+    }
 }
