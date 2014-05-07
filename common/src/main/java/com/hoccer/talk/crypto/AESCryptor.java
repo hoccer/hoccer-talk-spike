@@ -163,7 +163,7 @@ public class AESCryptor {
 
     public static byte[] calcSymmetricKeyId(byte[] key, byte[] salt) throws NoSuchAlgorithmException {
         Mac hmacAlgo = Mac.getInstance("HmacSHA256");
-        byte[] keyHash = derivePBKDF2Key(hmacAlgo, key, salt, 10000, 256);
+        byte[] keyHash = derivePBKDF2Key(hmacAlgo, key, salt, 100, 256);
         return CryptoUtils.shorten(keyHash,8);
     }
 
