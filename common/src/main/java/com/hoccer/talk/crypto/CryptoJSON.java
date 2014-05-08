@@ -23,7 +23,6 @@ public class CryptoJSON {
         rootNode.put("ciphered", cipherTextString);
         String jsonString = jsonMapper.writeValueAsString(rootNode);
         return jsonString.getBytes("UTF-8");
-        //return jsonMapper.writeValueAsBytes(rootNode);
     }
 
     public static byte[] decryptedContainer(byte[] jsonContainer, String password, String contentType) throws Exception {
