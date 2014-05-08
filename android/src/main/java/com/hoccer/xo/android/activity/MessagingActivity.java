@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.activity;
 
-import android.view.View;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.widget.PopupMenu;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -10,6 +12,8 @@ import com.hoccer.xo.android.content.ContentView;
 import com.hoccer.xo.android.content.clipboard.Clipboard;
 import com.hoccer.xo.android.fragment.CompositionFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
+import com.hoccer.xo.android.gesture.Gestures;
+import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.release.R;
 
 import android.app.ActionBar;
@@ -32,6 +36,9 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
 
     TalkClientContact mContact;
     private IContentObject mClipboardAttachment;
+    private  getContactIdInConversation m_checkIdReceiver;
+
+    private MotionInterpreter mMotionInterpreter;
 
     @Override
     protected int getLayoutResource() {
@@ -60,6 +67,14 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         mMessagingFragment.setRetainInstance(true);
         mCompositionFragment = (CompositionFragment) fragmentManager.findFragmentById(R.id.activity_messaging_composer);
         mCompositionFragment.setRetainInstance(true);
+
+        // register receiver for notification check
+        IntentFilter filter = new IntentFilter("com.hoccer.xo.android.activity.MessagingActivity$getContactIdInConversation");
+        filter.addAction("CHECK_ID_IN_CONVERSATION");
+        m_checkIdReceiver = new getContactIdInConversation();
+        registerReceiver(m_checkIdReceiver, filter);
+
+        mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, this, mCompositionFragment);
     }
 
     @Override
@@ -72,6 +87,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         // handle converse intent
         if(intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
             int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
+            m_checkIdReceiver.setId(contactId);
             if(contactId == -1) {
                 LOG.error("invalid contact id");
             } else {
@@ -86,6 +102,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
             }
         }
 
+        mMotionInterpreter.activate();
         getXoClient().registerContactListener(this);
     }
 
@@ -94,6 +111,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         LOG.debug("onPause()");
         super.onPause();
 
+        mMotionInterpreter.deactivate();
         getXoClient().unregisterContactListener(this);
     }
 
@@ -112,6 +130,12 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         }
 
         return result;
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(m_checkIdReceiver);
+        super.onDestroy();
     }
 
     @Override
@@ -208,6 +232,23 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
         // we don't care
+    }
+
+    private class getContactIdInConversation extends BroadcastReceiver {
+        private int m_contactId;
+
+        public void setId(int id) {
+            m_contactId = id;
+        }
+
+        @Override
+        public void onReceive(Context arg0, Intent arg1) {
+            Intent intent = new Intent();
+            intent.setAction("CONTACT_ID_IN_CONVERSATION");
+            intent.putExtra("id", m_contactId);
+            sendBroadcast(intent);
+        }
+
     }
 
 }

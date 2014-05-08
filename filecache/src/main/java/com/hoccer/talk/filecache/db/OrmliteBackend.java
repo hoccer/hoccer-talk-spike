@@ -57,9 +57,8 @@ public class OrmliteBackend extends CacheBackend {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("creating table for files");
                 }
-                TableUtils.createTable(mConnectionSource, CacheFile.class);
-                LOG.info("Tables created - exiting now");
-                System.exit(0);
+                TableUtils.createTableIfNotExists(mConnectionSource, CacheFile.class);
+                LOG.info("Tables created.");
             }
             if(LOG.isDebugEnabled()) {
                 LOG.debug("creating dao for files");
@@ -119,10 +118,12 @@ public class OrmliteBackend extends CacheBackend {
         // delete the file
         File f = file.getFile();
         if (f.exists()) {
+            LOG.debug("deleting file from disk (file-id: '" + file.getFileId() + "')");
             f.delete();
         }
         // delete the record
         try {
+            LOG.debug("deleting file from db (file-id: '" + file.getFileId() + "')");
             mDao.delete(file);
         } catch (SQLException e) {
             LOG.error("SQL exception", e);
@@ -190,7 +191,7 @@ public class OrmliteBackend extends CacheBackend {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("found file by file-id '" + id + "'? -> " + (res != null ? "yes" : "no"));
+            LOG.debug((res != null ? "did" : "did NOT") + " find file by file-id '" + id + "'");
         }
 
         // return whatever we got
@@ -214,7 +215,7 @@ public class OrmliteBackend extends CacheBackend {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("found file by upload-id '" + id + "'? -> " + (res != null ? "yes" : "no"));
+            LOG.debug((res != null ? "did" : "did NOT") + " find file by upload-id '" + id + "'");
         }
 
         return res;
@@ -237,7 +238,7 @@ public class OrmliteBackend extends CacheBackend {
         }
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("found file by download-id '" + id + "'? -> " + (res != null ? "yes" : "no"));
+            LOG.debug((res != null ? "did" : "did NOT") + " find file by download-id '" + id + "'");
         }
 
         return res;
@@ -265,7 +266,7 @@ public class OrmliteBackend extends CacheBackend {
     }
 
     private void doCleanupFiles() {
-        LOG.info("doCleanupFiles - querying for expired files...");
+        LOG.info("cleanupFiles - querying for expired files...");
         long startTime = System.currentTimeMillis();
 
         Date now = new Date();
@@ -303,7 +304,7 @@ public class OrmliteBackend extends CacheBackend {
         }
 
         long endTime = System.currentTimeMillis();
-        LOG.info("deleting expired files done (took '" + (endTime - startTime) + "ms'). re-scheduling next run...");
+        LOG.info("cleanupFiles done (took '" + (endTime - startTime) + "ms'). re-scheduling next run...");
         scheduleCleanupFiles();
     }
 }

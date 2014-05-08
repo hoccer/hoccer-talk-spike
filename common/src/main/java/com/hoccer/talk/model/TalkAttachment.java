@@ -1,5 +1,6 @@
 package com.hoccer.talk.model;
 
+
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -12,7 +13,7 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName = "attachment")
 public class TalkAttachment {
 
-    /** internal id, not transfered */
+    /** internal id, not transferred */
     @DatabaseField(generatedId = true)
     private int attachmentId;
 
@@ -27,7 +28,7 @@ public class TalkAttachment {
      */
     @DatabaseField
     private
-    String filename;
+    String fileName;
 
     /** MIME type of attached file */
     @DatabaseField
@@ -65,12 +66,17 @@ public class TalkAttachment {
         this.url = url;
     }
 
-    public String getFilename() {
-        return filename;
+    public String getFileName() {
+        return fileName;
     }
 
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    /** XXX Reserved for legacy json-mapping. !!Do not use!! */
     public void setFilename(String filename) {
-        this.filename = filename;
+        this.fileName = filename;
     }
 
     public String getMimeType() {

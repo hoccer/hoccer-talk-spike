@@ -2,7 +2,6 @@ package com.hoccer.talk.tool.client;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
-import com.hoccer.talk.client.XoClientConfiguration;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
@@ -67,12 +66,12 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public boolean isSupportModeEnabled() {
-        return false;
+        return mClient.getSupportMode();
     }
 
     @Override
     public String getSupportTag() {
-        return null;
+        return mClient.getSupportTag();
     }
 
     @Override

@@ -81,31 +81,11 @@
     <android.supportv4.version>19.0.1</android.supportv4.version>
     <android.gms.version>14.0.0</android.gms.version>
     <android.gmaps.version>17_r3</android.gmaps.version>
-    <actionbarsherlock.version>4.4.0</actionbarsherlock.version>
     <log4j-android.version>1.2.17-1</log4j-android.version>
     <universal.image.loader.version>1.9.0</universal.image.loader.version>
 
     <!-- Hoccer Release Versions -->
     <hoccer-talk-server.version>1.0.5</hoccer-talk-server.version>
+    <hoccer-talk-filecache.version>1.0.1</hoccer-talk-filecache.version>
   </properties>
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-failsafe-plugin</artifactId>
-          <version>${maven-failsafe.version}</version>
-          <executions>
-            <execution>
-              <id>integration-test</id>
-              <goals>
-                <goal>integration-test</goal>
-                <goal>verify</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>
