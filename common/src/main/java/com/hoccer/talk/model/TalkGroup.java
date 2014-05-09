@@ -181,4 +181,19 @@ public class TalkGroup {
         this.groupKeyUpdateInProgress = groupKeyUpdateInProgress;
         return groupKeyUpdateInProgress;
     }
+
+    @JsonIgnore
+    public void updateWith(TalkGroup g) {
+        this.setGroupId(g.getGroupId());
+        this.setGroupName(g.getGroupName());
+        this.setGroupAvatarUrl(g.getGroupAvatarUrl());
+        this.setState(g.getState());
+        this.setLastChanged(g.getLastChanged());
+        this.setGroupType(g.getGroupType());
+        this.setSharedKeyId(g.getSharedKeyId());
+        this.setSharedKeyIdSalt(g.getSharedKeyIdSalt());
+        this.setKeySupplier(g.getKeySupplier());
+        this.setKeyDate(g.getKeyDate());
+        this.setGroupKeyUpdateInProgress(this.getGroupKeyUpdateInProgress());
+    }
 }

@@ -8,10 +8,12 @@ import com.hoccer.talk.util.TestHelper;
 import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -19,6 +21,7 @@ import java.util.concurrent.Callable;
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class ITTwoClientsMessage extends IntegrationTest {
@@ -93,6 +96,26 @@ public class ITTwoClientsMessage extends IntegrationTest {
                        messageText.equals(unseenMessages.get(0).getText());
             }
         });
+    }
+
+    @Test
+    public void clientMessageTestRecipientBlockedSender() throws SQLException, InterruptedException {
+        final XoClient sendingClient = clients.get("client1");
+        final XoClient receivingClient = clients.get("client2");
+        TestHelper.pairClients(sendingClient, receivingClient);
+
+        // Recipient blocks sender
+        TestHelper.blockClient(receivingClient, sendingClient);
+
+        TalkClientContact recipientContact = sendingClient.getDatabase().findContactByClientId(receivingClient.getSelfContact().getClientId(), false);
+        TalkClientMessage message = sendingClient.composeClientMessage(recipientContact, messageText);
+        sendingClient.requestDelivery(message);
+
+        // TODO: Now check that the recipient does not receive the message.
+
+        // Rejected messages are not persisted on the server. Due to the nature of the blocking mechanism,
+        // that the sender doesn't know whether a message was blocked, we can not test for rejected messages.
+        // TODO: We need a callback from the TalkRpcHandler when a message was rejected
 
     }
 }

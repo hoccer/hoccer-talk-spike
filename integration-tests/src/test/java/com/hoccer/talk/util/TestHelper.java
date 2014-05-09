@@ -115,4 +115,17 @@ public class TestHelper {
             }
         );
     }
+
+    public static void blockClient(final XoClient blockingClient, final XoClient blockedClient) throws SQLException {
+
+        final String blockedClientId = blockedClient.getSelfContact().getClientId();
+        blockingClient.blockContact(blockingClient.getDatabase().findContactByClientId(blockedClientId, false));
+
+        await("client is blocked").until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return blockingClient.getDatabase().findContactByClientId(blockedClientId, false).getClientRelationship().isBlocked();
+            }
+        });
+    }
 }

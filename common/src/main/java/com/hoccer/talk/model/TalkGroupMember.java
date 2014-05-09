@@ -85,6 +85,11 @@ public class TalkGroupMember {
     }
 
     @JsonIgnore
+    public boolean isJoinedOrInvited() {
+        return isJoined() || isInvited();
+    }
+
+    @JsonIgnore
     public boolean isGroupRemoved() {
         return this.state.equals(STATE_GROUP_REMOVED);
     }
@@ -181,5 +186,20 @@ public class TalkGroupMember {
 
     public void setSharedKeyDate(Date sharedKeyDate) {
         this.sharedKeyDate = sharedKeyDate;
+    }
+
+    @JsonIgnore
+    public void updateWith(TalkGroupMember m) {
+        this.setClientId(m.getClientId());
+        this.setGroupId(m.getGroupId());
+        this.setRole(m.getRole());
+        this.setState(m.getState());
+        this.setMemberKeyId(m.getMemberKeyId());
+        this.setEncryptedGroupKey(m.getEncryptedGroupKey());
+        this.setLastChanged(m.getLastChanged());
+        this.setSharedKeyId(m.getSharedKeyId());
+        this.setSharedKeyIdSalt(m.getSharedKeyIdSalt());
+        this.setKeySupplier(m.getKeySupplier());
+        this.setSharedKeyDate(m.getSharedKeyDate());
     }
 }
