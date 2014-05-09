@@ -98,7 +98,6 @@ public class ITTwoClientsMessage extends IntegrationTest {
         });
     }
 
-    @Ignore
     @Test
     public void clientMessageTestRecipientBlockedSender() throws SQLException, InterruptedException {
         final XoClient sendingClient = clients.get("client1");
@@ -106,21 +105,17 @@ public class ITTwoClientsMessage extends IntegrationTest {
         TestHelper.pairClients(sendingClient, receivingClient);
 
         // Recipient blocks sender
-        final String sendingClientId = sendingClient.getSelfContact().getClientId();
-        receivingClient.blockContact(receivingClient.getDatabase().findContactByClientId(sendingClientId, false));
-
-        await().until(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                return receivingClient.getDatabase().findContactByClientId(sendingClientId, false).getClientRelationship().isBlocked();
-            }
-        });
+        TestHelper.blockClient(receivingClient, sendingClient);
 
         TalkClientContact recipientContact = sendingClient.getDatabase().findContactByClientId(receivingClient.getSelfContact().getClientId(), false);
         TalkClientMessage message = sendingClient.composeClientMessage(recipientContact, messageText);
         sendingClient.requestDelivery(message);
 
         // TODO: Now check that the recipient does not receive the message.
-        // maybe ask the server? Does the server persist this?
+
+        // Rejected messages are not persisted on the server. Due to the nature of the blocking mechanism,
+        // that the sender doesn't know whether a message was blocked, we can not test for rejected messages.
+        // TODO: We need a callback from the TalkRpcHandler when a message was rejected
+
     }
 }
