@@ -94,4 +94,12 @@ public class TalkRelationship {
         this.lastChanged = lastChanged;
     }
 
+    @JsonIgnore
+    public void updateWith(TalkRelationship r) {
+        this.setClientId(r.getClientId());
+        this.setOtherClientId(r.getOtherClientId());
+        this.setState(r.getState());
+        this.setLastChanged(r.getLastChanged());
+    }
+
 }

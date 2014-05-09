@@ -1,5 +1,6 @@
 package com.hoccer.talk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -93,6 +94,17 @@ public class TalkPresence {
     public void setConnectionStatus(String connectionStatus) {
         // TODO: validate connection status
         this.connectionStatus = connectionStatus;
+    }
+
+    @JsonIgnore
+    public void updateWith(TalkPresence p) {
+        this.setClientId(p.getClientId());
+        this.setClientName(p.getClientName());
+        this.setClientStatus(p.getClientStatus());
+        this.setTimestamp(p.getTimestamp());
+        this.setAvatarUrl(p.getAvatarUrl());
+        this.setKeyId(p.getKeyId());
+        this.setConnectionStatus(p.getConnectionStatus());
     }
 
 }

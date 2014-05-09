@@ -100,7 +100,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mKeys = getCollection("key");
         mGroups = getCollection("group");
         mGroupMembers = getCollection("groupMember");
-        mEnvironments = getCollection("enviroment");
+        mEnvironments = getCollection("environment");
     }
 
     private MongoCollection getCollection(String name) {
@@ -436,6 +436,11 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     public TalkGroup findGroupById(String groupId) {
         return mGroups.findOne("{groupId:#}", groupId).as(TalkGroup.class);
+    }
+
+    @Override
+    public void deleteGroup(TalkGroup group) {
+        mGroups.remove("{groupId:#", group.getGroupId());
     }
 
 

@@ -6,19 +6,25 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
+import com.hoccer.scm.GitInfo;
 import com.hoccer.talk.server.database.JongoDatabase;
 import com.hoccer.talk.server.database.OrmliteDatabase;
 import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
+import com.hoccer.talk.server.cryptoutils.*;
+import com.hoccer.talk.servlets.CertificateInfoServlet;
+import com.hoccer.talk.servlets.ServerInfoServlet;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.Properties;
 
@@ -39,6 +45,17 @@ public class TalkServerMain {
 
         config.report();
 
+        // report APNS expiry
+        if (config.isApnsEnabled()) {
+            final P12CertificateChecker p12Verifier = new P12CertificateChecker(config.getApnsCertPath(), config.getApnsCertPassword());
+            try {
+                LOG.info("APNS expiryDate is: " + p12Verifier.getCertificateExpiryDate());
+                LOG.info("APNS expiration status: " + p12Verifier.isExpired());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         // select and instantiate database backend
         ITalkServerDatabase db = initializeDatabase(config);
         db.reportPing();
@@ -55,6 +72,7 @@ public class TalkServerMain {
         // create jetty instance
         Server s = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
 
+        // all metrics servlets are handled here
         ServletContextHandler metricsContextHandler = new ServletContextHandler();
         metricsContextHandler.setContextPath("/metrics");
         metricsContextHandler.setInitParameter("show-jvm-metrics", "true");
@@ -65,11 +83,22 @@ public class TalkServerMain {
         metricsContextHandler.addEventListener(new MyHealtchecksServletContextListener(talkServer.getHealthCheckRegistry()));
         metricsContextHandler.addServlet(HealthCheckServlet.class, "/health");
 
+        // handler for additional status information about the server
+        ServletContextHandler serverInfoContextHandler = new ServletContextHandler();
+        serverInfoContextHandler.setContextPath("/server");
+        serverInfoContextHandler.setAttribute("server", talkServer);
+        serverInfoContextHandler.addServlet(ServerInfoServlet.class, "/info");
+        serverInfoContextHandler.addServlet(CertificateInfoServlet.class, "/certificates");
+
         // handler for talk websocket connections
         WebSocketHandler clientHandler = new TalkRpcConnectionHandler(talkServer);
-        clientHandler.setHandler(metricsContextHandler);
-        // set root handler of the server
-        s.setHandler(clientHandler);
+
+        // set server handlers
+        HandlerCollection handlerCollection = new HandlerCollection();
+        handlerCollection.addHandler(clientHandler);
+        handlerCollection.addHandler(serverInfoContextHandler);
+        handlerCollection.addHandler(metricsContextHandler);
+        s.setHandler(handlerCollection);
 
         // run and stop when interrupted
         try {
@@ -104,6 +133,30 @@ public class TalkServerMain {
                 configuration.configureFromProperties(properties);
             }
         }
+
+        // also read additional bundled property files
+        LOG.info("Loading bundled properties...");
+        Properties bundled_properties = new Properties();
+        try {
+            InputStream bundledConfigIs = TalkServerConfiguration.class.getResourceAsStream("/server.properties");
+            bundled_properties.load(bundledConfigIs);
+            configuration.setVersion(bundled_properties.getProperty("version"));
+        } catch (IOException e) {
+            LOG.error("Unable to load bundled configuration", e);
+        }
+
+        LOG.info("Loading GIT properties...");
+        Properties git_properties = new Properties();
+        try {
+            InputStream gitConfigIs = TalkServerConfiguration.class.getResourceAsStream("/git.properties");
+            if (gitConfigIs != null) {
+                git_properties.load(gitConfigIs);
+                configuration.setGitInfo(GitInfo.initializeFromProperties(git_properties));
+            }
+        } catch (IOException e) {
+            LOG.error("Unable to load bundled configuration", e);
+        }
+
         return configuration;
     }
 
@@ -152,5 +205,4 @@ public class TalkServerMain {
             return _healthCheckRegistry;
         }
     }
-
 }

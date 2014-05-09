@@ -86,7 +86,14 @@ public class TalkRpcHandler implements ITalkRpcServer {
         mStatistics = mServer.getStatistics();
     }
 
+    private void requireIsNotOutdated() {
+        if(mConnection.isLegacyMode()) {
+            throw new RuntimeException("Client too old");
+        }
+    }
+
     private void requireIdentification() {
+        requireIsNotOutdated();
         if (!mConnection.isLoggedIn()) {
             throw new RuntimeException("Not logged in");
         }
@@ -120,10 +127,16 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 mConnection.deactivateSupportMode();
             }
         }
+        
+        // TODO: Persist the TalkClientInfo and associate it to the connected clientId
 
         TalkServerInfo serverInfo = new TalkServerInfo();
         serverInfo.setServerTime(new Date());
         serverInfo.setSupportMode(mConnection.isSupportMode());
+        serverInfo.setVersion(mServer.getConfiguration().getVersion());
+        serverInfo.setCommitId(mServer.getConfiguration().getGitInfo().commitId);
+        serverInfo.addProtocolVersion(TalkRpcConnectionHandler.TALK_TEXT_PROTOCOL_NAME_V2);
+        serverInfo.addProtocolVersion(TalkRpcConnectionHandler.TALK_BINARY_PROTOCOL_NAME_V2);
 
         return serverInfo;
     }
@@ -654,10 +667,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireIdentification();
 
         logCall("blockClient(id '" + clientId + "')");
-
-        TalkRelationship rel = mDatabase.findRelationshipBetween(mConnection.getClientId(), clientId);
+        TalkRelationship rel;
+        rel = mDatabase.findRelationshipBetween(mConnection.getClientId(), clientId);
         if (rel == null) {
-            throw new RuntimeException("You are not paired with client with id '" + clientId + "'");
+            rel = new TalkRelationship();
+            rel.setClientId(mConnection.getClientId());
+            rel.setOtherClientId(clientId);
+            mDatabase.saveRelationship(rel);
         }
 
         String oldState = rel.getState();
@@ -856,8 +872,16 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 }
             }
         } else {
+            // TODO: actually the check is wrong!
+            /*
+            1) if a client is blocked we are done - message delivery is disallowed.
+            2) Otherwise check if the sender has a valid relationship to the recipient that allows message delivery
+
+            (!isBlocked(recipientId, senderId) && // recipient blocks the sender !
+             (areFriends(...) || areRelatedViaGroupMembership(senderId, recipientId)))
+             */
             // Check if client is friend via relationship OR they know each other through a shared group in which both are "joined" members.
-            if (areBefriended(senderId, recipientId) ||
+            if (areBefriended(recipientId, senderId) ||
                 areRelatedViaGroupMembership(senderId, recipientId)) {
                 if (performOneDelivery(message, delivery)) {
                     result.add(delivery);
@@ -1336,7 +1360,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         outOfDateMembers.add(members.get(i).getClientId());
                     }
                 }
-                logCall("updateGroupKeys - found " + members.size() + " out of date group members");
+                logCall("updateGroupKeys - found " + outOfDateMembers.size() + " out of date group members");
 
                 for (int i = 0; i < outOfDateMembers.size(); ++i) {
                     result.add(outOfDateMembers.get(i));
@@ -1463,6 +1487,17 @@ public class TalkRpcHandler implements ITalkRpcServer {
         environment.setGroupId(group.getGroupId());
         environment.setClientId(mConnection.getClientId());
         mDatabase.saveEnvironment(environment);
+
+        String currentGroupId = environment.getGroupId();
+        String potentiallyOtherGroupId = updateEnvironment(environment);
+        if (!currentGroupId.equals(potentiallyOtherGroupId)) {
+            LOG.info("createGroupWithEnvironment Collision detected: determined there is actually another group we were merged with...");
+            LOG.info("  * original groupId: '" + currentGroupId + "' - new groupId: '" + potentiallyOtherGroupId + "'");
+            environment.setGroupId(potentiallyOtherGroupId);
+
+            // Now perform a hard-delete of old group - notifications have not yet been sent out, so this is ok
+            mDatabase.deleteGroup(group);
+        }
     }
 
     private void joinGroupWithEnvironment(TalkGroup group, TalkEnvironment environment) {
@@ -1589,22 +1624,45 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return environment.getGroupId();
     }
 
+    private void removeGroupMember(TalkGroupMember member, Date now) {
+        // remove my membership
+        // set membership state to NONE
+        member.setState(TalkGroupMember.STATE_NONE);
+        // degrade removed users to member
+        member.setRole(TalkGroupMember.ROLE_MEMBER);
+        changedGroupMember(member, now);
+    }
+
     private void destroyEnvironment(TalkEnvironment environment) {
         logCall("destroyEnvironment(" + environment + ")");
         TalkGroup group = mDatabase.findGroupById(environment.getGroupId());
         TalkGroupMember member = mDatabase.findGroupMemberForClient(environment.getGroupId(), environment.getClientId());
         if (member != null && member.getState().equals(TalkGroupMember.STATE_JOINED)) {
-            // remove my membership
-            // set membership state to NONE
-            member.setState(TalkGroupMember.STATE_NONE);
-            // degrade removed users to member
-            member.setRole(TalkGroupMember.ROLE_MEMBER);
             Date now = new Date();
-            changedGroupMember(member, now);
+            removeGroupMember(member,now);
             String[] states = {TalkGroupMember.STATE_JOINED};
             List<TalkGroupMember> membersLeft = mDatabase.findGroupMembersByIdWithStates(environment.getGroupId(), states);
             logCall("destroyEnvironment: membersLeft: " + membersLeft.size());
-            if (membersLeft.isEmpty()) {
+
+            // clean up other offline members that somehow might be stuck in the group
+            // although this should never happen except on crash or server restart
+            // The canonical place would be to check this on group join, but here
+            // we already have a list of all remaining members, so it will be faster
+            // and should cause less trouble than doing it on joining
+            int removedCount = 0;
+            for (int i = 0; i < membersLeft.size();++i) {
+                // cleanup other offline members
+                TalkGroupMember otherMember = membersLeft.get(i);
+                boolean isConnected = mServer.isClientConnected(otherMember.getClientId());
+                if (!isConnected) {
+                    // remove offline member from group
+                    removeGroupMember(otherMember, now);
+                    ++removedCount;
+                }
+            }
+            logCall("destroyEnvironment: offline members removed: " + removedCount);
+
+            if (membersLeft.size() - removedCount <= 0) {
                 logCall("destroyEnvironment: last member left, removing group "+group.getGroupId());
                 // last member removed, remove group
                 group.setState(TalkGroup.STATE_NONE);
