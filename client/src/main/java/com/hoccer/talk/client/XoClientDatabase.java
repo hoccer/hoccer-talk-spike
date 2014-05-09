@@ -440,20 +440,13 @@ public class XoClientDatabase {
         return res;
     }
 
-    public List<TalkAttachment> findAttachmentsByTypeAudio() throws SQLException {
-        List<TalkAttachment> audioAttachments = new ArrayList<TalkAttachment>();
-        CloseableIterator<TalkAttachment> iterator = mAttachments.closeableIterator();
-        try {
-            while (iterator.hasNext()){
-                TalkAttachment attachment = iterator.next();
-                if (attachment.getMediaType().equalsIgnoreCase("audio")) {
-                    audioAttachments.add(attachment);
-                }
-            }
-        } finally {
-            iterator.close();
-        }
-        return audioAttachments;
+
+    public List<TalkAttachment> findAllAttachments() throws SQLException {
+        return mAttachments.queryForAll();
+    }
+
+    public List<TalkAttachment> findAttachmentsByMediaType(String mediaType) throws SQLException {
+        return mAttachments.queryForEq("mediaType", mediaType);
     }
 
     public void saveClientMembership(TalkClientMembership membership) throws SQLException {
