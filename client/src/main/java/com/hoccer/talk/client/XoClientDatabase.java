@@ -413,6 +413,14 @@ public class XoClientDatabase {
         return mClientDownloads.queryForId(clientDownloadId);
     }
 
+    public List<TalkClientDownload> findClientDownloadByMediaType(String mediaType) throws SQLException {
+        return mClientDownloads.queryForEq("mediaType", mediaType);
+    }
+
+    public List<TalkClientDownload> findAllClientDownloads() throws SQLException {
+        return mClientDownloads.queryForAll();
+    }
+
     public TalkClientMessage findClientMessageById(int clientMessageId) throws SQLException {
         return mClientMessages.queryForId(clientMessageId);
     }
@@ -460,20 +468,14 @@ public class XoClientDatabase {
         return res;
     }
 
-    public List<TalkAttachment> findAttachmentsByTypeAudio() throws SQLException {
-        List<TalkAttachment> audioAttachments = new ArrayList<TalkAttachment>();
-        CloseableIterator<TalkAttachment> iterator = mAttachments.closeableIterator();
-        try {
-            while (iterator.hasNext()){
-                TalkAttachment attachment = iterator.next();
-                if (attachment.getMediaType().equalsIgnoreCase("audio")) {
-                    audioAttachments.add(attachment);
-                }
-            }
-        } finally {
-            iterator.close();
-        }
-        return audioAttachments;
+
+    public List<TalkAttachment> findAllAttachments() throws SQLException {
+        return mAttachments.queryForAll();
+    }
+
+    public List<TalkAttachment> findAttachmentsByMediaType(String mediaType) throws SQLException {
+        LOG.error("BAZINGA: request for attachment of type " + mediaType);
+        return mAttachments.queryForEq("mediaType", mediaType);
     }
 
     public void saveClientMembership(TalkClientMembership membership) throws SQLException {
