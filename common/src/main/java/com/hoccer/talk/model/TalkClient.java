@@ -27,6 +27,7 @@ public class TalkClient {
     public static final String FIELD_TIME_REGISTERED      = "timeRegistered";
     public static final String FIELD_TIME_LAST_LOGIN      = "timeLastLogin";
     public static final String FIELD_TIME_LAST_PUSH       = "timeLastPush";
+    public static final String FIELD_TIME_READY           = "timeReady";
 
     /** Object ID for jongo */
     private String _id;
@@ -75,6 +76,10 @@ public class TalkClient {
     @DatabaseField(columnName = FIELD_TIME_LAST_PUSH, canBeNull = true)
     Date timeLastPush;
 
+    /** Time of last ready call received */
+    @DatabaseField(columnName = FIELD_TIME_READY, canBeNull = true)
+    Date timeReady;
+
     public TalkClient() {
     }
 
@@ -98,8 +103,12 @@ public class TalkClient {
         return apnsToken != null;
     }
 
+    @JsonIgnore
+    public boolean isReady() {
+        return timeReady != null && timeLastLogin != null && timeReady.getTime() > timeLastLogin.getTime();
+    }
 
-	public String getClientId() {
+    public String getClientId() {
 		return clientId;
 	}
 
@@ -185,5 +194,13 @@ public class TalkClient {
 
     public void setTimeLastPush(Date timeLastPush) {
         this.timeLastPush = timeLastPush;
+    }
+
+    public Date getTimeReady() {
+        return timeReady;
+    }
+
+    public void setTimeReady(Date timeReady) {
+        this.timeReady = timeReady;
     }
 }

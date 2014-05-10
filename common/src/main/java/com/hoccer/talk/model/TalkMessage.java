@@ -58,10 +58,6 @@ public class TalkMessage {
     @DatabaseField
 	String body;
 
-    /** Message body */
-    @DatabaseField
-    String system;
-
     /** Message attachment */
     @DatabaseField(width = 2048)
     String attachment;
@@ -93,6 +89,10 @@ public class TalkMessage {
     /** an optional signature for the hmac*/
     @DatabaseField
     String signature;
+
+    /** Message body */
+    @DatabaseField
+    String system;
 
     public TalkMessage() {
     }

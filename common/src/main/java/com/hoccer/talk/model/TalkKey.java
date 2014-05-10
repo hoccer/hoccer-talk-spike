@@ -6,6 +6,8 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.bouncycastle.util.encoders.Base64;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -50,15 +52,28 @@ public class TalkKey {
         try {
             byte[] decoded = Base64.decode(this.key);
             key = RSACryptor.makePublicRSAKey(decoded);
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (GeneralSecurityException e) {
             e.printStackTrace();
         }
         return key;
     }
+
+    @JsonIgnore
+    public String calcKeyId() {
+        PublicKey key = null;
+        try {
+            byte[] decoded = Base64.decode(this.key);
+            String kid = RSACryptor.calcKeyId(decoded);
+            return kid;
+
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public String getClientId() {
         return clientId;

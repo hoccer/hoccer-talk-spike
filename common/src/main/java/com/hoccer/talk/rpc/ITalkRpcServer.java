@@ -19,7 +19,7 @@ public interface ITalkRpcServer {
     /**
      * The obligatory equivalent of ping, only called bing to differentiate it from the server ping to the client
      *
-     * The server may use this to measure RTT on the connection
+     * The client may use this to measure RTT on the connection
      * @talk.preconditions Client is logged in
      * @talk.behavior Server responds with null result or error
      * @talk.statechanges.clientobjects none
@@ -28,6 +28,18 @@ public interface ITalkRpcServer {
      * @talk.errors.client Error response when not connected or logged in
      */
     void bing();
+
+    /**
+     * The client can signal by calling ready() that is has completed initial synchronisation and is ready to handle heavy stuff
+     *
+     * @talk.preconditions Client is logged in
+     * @talk.behavior Server responds with null result or error
+     * @talk.statechanges.clientobjects none
+     * @talk.statechanges.serverobjects something is set to ready state
+     * @talk.ui.client none
+     * @talk.errors.client Error response when not connected or logged in
+     */
+    void ready();
 
     /**
      * Generate a new client ID for registration
@@ -91,6 +103,17 @@ public interface ITalkRpcServer {
     */
     TalkServerInfo hello(TalkClientInfo clientInfo);
 
+    /** get the server time
+     * @return server time
+     * @talk.preconditions none
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server
+     * @talk.statechanges.serverobjects none
+     * @talk.errors.server
+     */
+    Date getTime();
+
     /** Retrieve established relationships changed after given date
      * @param lastKnown is the date in milliseconds since start of year 1970
      * @return array of relationship objects that have a change date greater than the given date
@@ -101,6 +124,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects none
      * @talk.errors.server
      */
+
     TalkRelationship[] getRelationships(Date lastKnown);
 
     /** Register client for GCM push notifications with the given parameters
@@ -168,6 +192,19 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      */
     void updateKey(TalkKey key);
+
+    /** Verify if my latest public encryption key is on the server for this client
+     * @param keyId the public key id
+     * @return true the key with keyId is my public key on the server, false otherwise
+     * @talk.preconditions client must be logged in
+     * @talk.preconditions.server
+     * @talk.preconditions.client
+     * @talk.behavior.server
+     * @talk.behavior.client client must call updateKey if this function returns false
+     * @talk.statechanges.serverobjects update the key on the server
+     * @talk.errors.server
+     */
+    boolean verifyKey(String keyId);
 
     /** Get key for given client with given keyid
      * @param clientId is a UUID denoting the client
