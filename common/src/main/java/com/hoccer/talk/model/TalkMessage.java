@@ -58,6 +58,10 @@ public class TalkMessage {
     @DatabaseField
 	String body;
 
+    /** Message body */
+    @DatabaseField
+    String system;
+
     /** Message attachment */
     @DatabaseField(width = 2048)
     String attachment;
@@ -240,5 +244,11 @@ public class TalkMessage {
         this.signature = signature;
     }
 
+    public String getSystem() {
+        return system;
+    }
 
+    public void setSystem(String system) {
+        this.system = system;
+    }
 }

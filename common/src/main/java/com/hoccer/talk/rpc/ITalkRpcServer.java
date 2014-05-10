@@ -17,6 +17,19 @@ import java.util.Date;
 public interface ITalkRpcServer {
 
     /**
+     * The obligatory equivalent of ping, only called bing to differentiate it from the server ping to the client
+     *
+     * The server may use this to measure RTT on the connection
+     * @talk.preconditions Client is logged in
+     * @talk.behavior Server responds with null result or error
+     * @talk.statechanges.clientobjects none
+     * @talk.statechanges.serverobjects none
+     * @talk.ui.client none
+     * @talk.errors.client Error response when not connected or logged in
+     */
+    void bing();
+
+    /**
      * Generate a new client ID for registration
      *
      * The ID will be remembered as part of connection state,
