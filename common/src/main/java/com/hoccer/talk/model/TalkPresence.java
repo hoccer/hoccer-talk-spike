@@ -9,8 +9,10 @@ import java.util.Date;
 @DatabaseTable(tableName="presence")
 public class TalkPresence {
 
-    public final static String CONN_STATUS_ONLINE = "online";
     public final static String CONN_STATUS_OFFLINE = "offline";
+    public final static String CONN_STATUS_BACKGROUND = "background";
+    public final static String CONN_STATUS_ONLINE = "online";
+    public final static String CONN_STATUS_TYPING = "typing";
 
     // required for OrmLite!
     private String _id;
@@ -37,6 +39,36 @@ public class TalkPresence {
     String connectionStatus;
 
     public TalkPresence() {
+    }
+
+    @JsonIgnore
+    public boolean isOffline() {
+        return connectionStatus == null || connectionStatus.equals(CONN_STATUS_OFFLINE);
+    }
+
+    @JsonIgnore
+    public boolean isBackground() {
+        return connectionStatus != null || connectionStatus.equals(CONN_STATUS_BACKGROUND);
+    }
+
+    @JsonIgnore
+    public boolean isOnline() {
+        return (connectionStatus != null) || connectionStatus.equals(CONN_STATUS_ONLINE);
+    }
+
+    @JsonIgnore
+    public boolean isTyping() {
+        return (connectionStatus != null) || connectionStatus.equals(CONN_STATUS_TYPING);
+    }
+
+    @JsonIgnore
+    public boolean isPresent() {
+        return (connectionStatus != null) || connectionStatus.equals(CONN_STATUS_ONLINE) || connectionStatus.equals(CONN_STATUS_TYPING);
+    }
+
+    @JsonIgnore
+    public boolean isConnected() {
+        return isPresent() || isBackground();
     }
 
     public String getClientId() {

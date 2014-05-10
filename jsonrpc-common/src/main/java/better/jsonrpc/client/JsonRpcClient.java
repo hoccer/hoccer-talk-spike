@@ -293,8 +293,8 @@ public class JsonRpcClient {
 		if(idNode != null && idNode.isTextual()) {
 			String id = idNode.asText();
             // log response
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("RPC-Client Response [connectionId: '" + connection.getConnectionId() + "']: " + response.toString());
+            if (LOG.isInfoEnabled()) {
+                LOG.info("RPC-Client Response [connectionId: '" + connection.getConnectionId() + "']: " + response.toString());
             }
             // retrieve the request from the client table
             JsonRpcClientRequest req = null;
