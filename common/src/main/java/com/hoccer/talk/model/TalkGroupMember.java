@@ -21,6 +21,11 @@ public class TalkGroupMember {
         return role.equals(ROLE_ADMIN) || role.equals(ROLE_MEMBER);
     }
 
+    public static final String[] ACTIVE_STATES = {
+            TalkGroupMember.STATE_INVITED,
+            TalkGroupMember.STATE_JOINED
+    };
+
     private String _id;
 
     @DatabaseField(generatedId = true)

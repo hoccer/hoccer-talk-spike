@@ -34,6 +34,18 @@ public interface ITalkRpcClient {
     void ping();
 
     /**
+     * Get group Keys for a particular group member
+     *
+     * @talk.preconditions Client is logged in
+     * @talk.behavior Client responds with an array of encrypted group keys
+     * @talk.statechanges.clientobjects none
+     * @talk.statechanges.serverobjects none
+     * @talk.ui.client none
+     * @talk.errors.client Error response when not connected
+     */
+    String[] getEncryptedGroupKeys(String groupId, String sharedKeyId, String sharedKeyIdSalt, String[] clientIds, String[] publicKeyIds);
+
+    /**
      * Alert the user immediately showing the given message
      * @param message the string to be shown to the user
      * @talk.preconditions Client is logged in
@@ -170,5 +182,6 @@ public interface ITalkRpcClient {
      */
     @JsonRpcNotification
     void groupMemberUpdated(TalkGroupMember groupMember);
+
 
 }
