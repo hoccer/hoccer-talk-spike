@@ -52,6 +52,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     private CharSequence mFileName;
     private RemoteViews mNotificationViews;
 
+    private BroadcastReceiver mReceiver;
+
     public class MediaPlayerBinder extends Binder {
         public MediaPlayerService getService() {
             return MediaPlayerService.this;
@@ -129,8 +131,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
         mBuilder.setContent(mNotificationViews);
         startForeground(MUSIC_PLAYER_NOTIFICATION_ID, mBuilder.build());
     }
-
-    private BroadcastReceiver mReceiver;
 
     private void createNotification() {
         //TODO going back crashes the app
