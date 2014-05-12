@@ -109,6 +109,22 @@ public interface ITalkRpcClient {
     void presenceUpdated(TalkPresence presence);
 
     /**
+     * Sent to notify a client about a presence update on the server
+     *
+     * @param presence that has changed
+     * @talk.preconditions Client is logged in
+     * @talk.preconditions.server presence has changed, connected client is friend or group friend with present client
+     * @talk.preconditions.client
+     * @talk.behavior.client  update local contact profile, eventually retrieve new key or avatar
+     * @talk.statechanges.clientobjects create or delete or update local presence information for contact
+     * @talk.ui.client reflect changes in profile in UI
+     * @talk.errors.client
+     * */
+    @JsonRpcNotification
+    void presenceModified(TalkPresence presence);
+
+
+    /**
      * Sent to notify a client about a relationship update on the server
      *
      * @param relationship that has changed

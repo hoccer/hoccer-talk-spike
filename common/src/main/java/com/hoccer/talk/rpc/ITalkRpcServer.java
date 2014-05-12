@@ -233,6 +233,18 @@ public interface ITalkRpcServer {
      */
     void updatePresence(TalkPresence presence);
 
+    /** modify client presence
+     * @param presence is a structure containing information about a contact
+     * @talk.preconditions client must be logged in
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server store only non-null fields of presence and notify other clients about presence changes via modifyPresense
+     * @talk.behavior.client none
+     * @talk.statechanges.serverobjects update and timestamp the client's presence record on the server
+     * @talk.errors.server
+     */
+    void modifyPresence(TalkPresence presence);
+
     /** Retrieve presences changed after given date
      * @param lastKnown is the date in milliseconds since start of year 1970
      * @talk.preconditions client must be logged in
