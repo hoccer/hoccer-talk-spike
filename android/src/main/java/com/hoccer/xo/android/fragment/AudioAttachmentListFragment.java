@@ -48,11 +48,10 @@ public class AudioAttachmentListFragment extends XoListFragment {
         ListAdapter adapter;
 
         try {
-            //mAudioAttachmentList = getXoDatabase().findAttachmentsByMediaType("audio");
             mAudioAttachmentList = getXoDatabase().findClientDownloadByMediaType("audio");
             AudioListManager.get(getActivity().getApplicationContext()).setAudioAttachmentList(mAudioAttachmentList);
             adapter = new AttachmentListAdapter(getXoActivity(),
-                    mAudioAttachmentList,R.layout.music_viewer_item, R.id.songTitle);
+                    mAudioAttachmentList,R.layout.attachmentlist_general_item, R.id.songTitle);
         } catch (SQLException e) {
             // TODO handle exception!
             LOG.warn(e);
