@@ -50,7 +50,6 @@ public class AudioAttachmentListFragment extends XoListFragment {
         try {
             //mAudioAttachmentList = getXoDatabase().findAttachmentsByMediaType("audio");
             mAudioAttachmentList = getXoDatabase().findClientDownloadByMediaType("audio");
-            AudioListManager.get(getActivity().getApplicationContext()).setAudioAttachmentList(mAudioAttachmentList);
             adapter = new AttachmentListAdapter(getXoActivity(),
                     mAudioAttachmentList,R.layout.music_viewer_item, R.id.songTitle);
         } catch (SQLException e) {
