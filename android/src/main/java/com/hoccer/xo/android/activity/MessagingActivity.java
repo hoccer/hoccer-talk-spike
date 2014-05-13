@@ -7,6 +7,7 @@ import android.widget.PopupMenu;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentView;
 import com.hoccer.xo.android.content.clipboard.Clipboard;
@@ -24,7 +25,7 @@ import android.view.MenuItem;
 
 import java.sql.SQLException;
 
-public class MessagingActivity extends XoActivity implements IXoContactListener {
+public class MessagingActivity extends XoActionbarActivity implements IXoContactListener {
 
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
 
@@ -38,10 +39,10 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
     private  getContactIdInConversation m_checkIdReceiver;
 
     private MotionInterpreter mMotionInterpreter;
-    private MediaPlayerService mMediaPlayerService;
+    /*private MediaPlayerService mMediaPlayerService;
     private ServiceConnection mServiceConnection;
     private Menu mMenu;
-    private BroadcastReceiver mBroadcastReceiver;
+    private BroadcastReceiver mBroadcastReceiver;*/
 
     @Override
     protected int getLayoutResource() {
@@ -79,13 +80,13 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
 
         mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, this, mCompositionFragment);
 
-        Intent intent = new Intent(this, MediaPlayerService.class);
+        /*Intent intent = new Intent(this, MediaPlayerService.class);
         startService(intent);
         bindService(intent);
-        createBroadcastReceiver();
+        createBroadcastReceiver();*/
     }
 
-    private void bindService(Intent intent) {
+    /*private void bindService(Intent intent) {
 
         mServiceConnection = new ServiceConnection() {
             @Override
@@ -102,7 +103,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         };
 
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-    }
+    }*/
 
     @Override
     protected void onResume() {
@@ -156,13 +157,13 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
 //            getActionBar().setIcon(android.R.color.transparent);
         }
 
-        mMenu = menu;
-        updateActionBarIcons(menu);
+        //mMenu = menu;
+        //updateActionBarIcons(menu);
 
         return result;
     }
 
-    private void updateActionBarIcons( Menu menu){
+    /*private void updateActionBarIcons( Menu menu){
         if ( mMediaPlayerService != null && menu != null) {
             MenuItem mediaPlayerItem = menu.findItem(R.id.menu_media_player);
 
@@ -178,17 +179,17 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
                 //}
             }
         }
-    }
+    }*/
 
     @Override
     protected void onDestroy() {
         unregisterReceiver(m_checkIdReceiver);
         super.onDestroy();
 
-        unbindService(mServiceConnection);
+        /*unbindService(mServiceConnection);
 
         unregisterReceiver(mBroadcastReceiver);
-        mBroadcastReceiver = null;
+        mBroadcastReceiver = null;*/
     }
 
     @Override
@@ -201,17 +202,17 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
                     showContactProfile(mContact);
                 }
                 break;
-            case R.id.menu_media_player:
+            /*case R.id.menu_media_player:
                 updatePlayState();
                 updateActionBarIcons(mMenu);
-                break;
+                break;*/
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
     }
 
-    private void updatePlayState(){
+    /*private void updatePlayState(){
         if ( mMediaPlayerService != null){
             if (mMediaPlayerService.isPaused() || mMediaPlayerService.isStopped()) {
                 mMediaPlayerService.play(true);
@@ -232,7 +233,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         };
         IntentFilter filter = new IntentFilter(MediaPlayerService.PLAYSTATE_CHANGED_ACTION);
         registerReceiver(mBroadcastReceiver, filter);
-    }
+    }*/
 
     @Override
     public void showPopupForContentView(ContentView contentView) {
