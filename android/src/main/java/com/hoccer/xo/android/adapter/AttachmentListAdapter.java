@@ -23,9 +23,8 @@ public class AttachmentListAdapter extends XoAdapter {
 
     public AttachmentListAdapter(XoActivity pXoContext, List<TalkClientDownload> pAttachments, int pViewResourceId, int pTextViewId){
         super(pXoContext);
-        LOG.error("AttachmentListAdapter contructor");
+
         mAttachments = pAttachments;
-        LOG.error("Attachments: " + mAttachments.size());
         mViewResourceId = pViewResourceId;
         mTextViewId = pTextViewId;
     }
@@ -58,10 +57,13 @@ public class AttachmentListAdapter extends XoAdapter {
     }
 
     private String getDisplayName(int pPosition) {
+        String displayName;
         TalkClientDownload attachment = mAttachments.get(pPosition);
+        displayName = attachment.getFileName();
         if (attachment.getMediaType().equalsIgnoreCase("audio")) {
+            //  TODO get ID3 tags vom audio file
             attachment.getFileName();
         }
-        return mAttachments.get(pPosition).getFileName();
+        return displayName;
     }
 }

@@ -5,12 +5,24 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @DatabaseTable(tableName="presence")
 public class TalkPresence {
 
-    public final static String CONN_STATUS_ONLINE = "online";
     public final static String CONN_STATUS_OFFLINE = "offline";
+    public final static String CONN_STATUS_BACKGROUND = "background";
+    public final static String CONN_STATUS_ONLINE = "online";
+    public final static String CONN_STATUS_TYPING = "typing";
+
+    public final static String FIELD_CLIENT_ID = "clientId";
+    public final static String FIELD_CLIENT_NAME = "clientName";
+    public final static String FIELD_CLIENT_STATUS = "clientStatus";
+    public final static String FIELD_TIMESTAMP = "timestamp";
+    public final static String FIELD_AVATAR_URL = "avatarUrl";
+    public final static String FIELD_KEY_ID = "keyId";
+    public final static String FIELD_CONNECTION_STATUS = "connectionStatus";
 
     // required for OrmLite!
     private String _id;
@@ -37,6 +49,36 @@ public class TalkPresence {
     String connectionStatus;
 
     public TalkPresence() {
+    }
+
+    @JsonIgnore
+    public boolean isOffline() {
+        return connectionStatus == null || connectionStatus.equals(CONN_STATUS_OFFLINE);
+    }
+
+    @JsonIgnore
+    public boolean isBackground() {
+        return connectionStatus != null || connectionStatus.equals(CONN_STATUS_BACKGROUND);
+    }
+
+    @JsonIgnore
+    public boolean isOnline() {
+        return (connectionStatus != null) || connectionStatus.equals(CONN_STATUS_ONLINE);
+    }
+
+    @JsonIgnore
+    public boolean isTyping() {
+        return (connectionStatus != null) || connectionStatus.equals(CONN_STATUS_TYPING);
+    }
+
+    @JsonIgnore
+    public boolean isPresent() {
+        return (connectionStatus != null) || connectionStatus.equals(CONN_STATUS_ONLINE) || connectionStatus.equals(CONN_STATUS_TYPING);
+    }
+
+    @JsonIgnore
+    public boolean isConnected() {
+        return isPresent() || isBackground();
     }
 
     public String getClientId() {
@@ -105,6 +147,57 @@ public class TalkPresence {
         this.setAvatarUrl(p.getAvatarUrl());
         this.setKeyId(p.getKeyId());
         this.setConnectionStatus(p.getConnectionStatus());
+    }
+
+    @JsonIgnore
+    public void updateWith(TalkPresence p, Set<String> fields) {
+        if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_ID)) {
+            this.setClientId(p.getClientId());
+        }
+        if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_NAME)) {
+            this.setClientName(p.getClientName());
+        }
+        if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_STATUS)) {
+            this.setClientStatus(p.getClientStatus());
+        }
+        if (fields == null || fields.contains(TalkPresence.FIELD_TIMESTAMP)) {
+            this.setTimestamp(p.getTimestamp());
+        }
+        if (fields == null || fields.contains(TalkPresence.FIELD_AVATAR_URL)) {
+            this.setAvatarUrl(p.getAvatarUrl());
+        }
+        if (fields == null || fields.contains(TalkPresence.FIELD_KEY_ID)) {
+            this.setKeyId(p.getKeyId());
+        }
+        if (fields == null || fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
+            this.setConnectionStatus(p.getConnectionStatus());
+        }
+    }
+    @JsonIgnore
+    public Set<String> nonNullFields() {
+        Set<String> result = new HashSet<String>();
+        if (clientId != null) {
+            result.add(TalkPresence.FIELD_CLIENT_ID);
+        }
+        if (clientName != null) {
+            result.add(TalkPresence.FIELD_CLIENT_NAME);
+        }
+        if (clientStatus != null) {
+            result.add(TalkPresence.FIELD_CLIENT_STATUS);
+        }
+        if (timestamp != null) {
+            result.add(TalkPresence.FIELD_TIMESTAMP);
+        }
+        if (avatarUrl != null) {
+            result.add(TalkPresence.FIELD_AVATAR_URL);
+        }
+        if (keyId != null) {
+            result.add(TalkPresence.FIELD_KEY_ID);
+        }
+        if (connectionStatus != null) {
+            result.add(TalkPresence.FIELD_CONNECTION_STATUS);
+        }
+        return result;
     }
 
 }

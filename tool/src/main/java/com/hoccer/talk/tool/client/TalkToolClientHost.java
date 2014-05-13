@@ -11,20 +11,23 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class TalkToolClientHost implements IXoClientHost {
 
     private static final Logger LOG = Logger.getLogger(TalkToolClientHost.class);
+    private final ScheduledExecutorService mExecutor;
     TalkToolClient mClient;
 
     public TalkToolClientHost(TalkToolClient client) {
         mClient = client;
+        mExecutor = Executors.newScheduledThreadPool(4);
     }
 
     @Override
     public ScheduledExecutorService getBackgroundExecutor() {
-        return mClient.getContext().getExecutor();
+        return mExecutor; // mClient.getContext().getExecutor();
     }
 
     @Override

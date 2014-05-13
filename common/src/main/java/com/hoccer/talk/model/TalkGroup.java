@@ -84,6 +84,11 @@ public class TalkGroup {
         return (this.groupType != null) && this.groupType.equals(GROUP_TYPE_USER);
     }
 
+    @JsonIgnore
+    public boolean exists() {
+        return (this.state != null) && this.state.equals(STATE_EXISTS);
+    }
+
     public String getGroupId() {
         return groupId;
     }
