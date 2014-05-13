@@ -13,11 +13,15 @@ import java.util.List;
                                                "use: csetnearby -c <client-id> <true|false>")
 public class ClientSetNearby extends TalkToolClientCommand {
 
-    @Parameter(description = "<nearby-mode enabled flag (true|false)>")
+    @Parameter(description = "<nearby-mode enabled flag (true|false)> - default: 'true'", names = "-f")
     List<Boolean> pNearbyEnabled;
 
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) {
-        client.setNearby(pNearbyEnabled.get(0));
+        Boolean nearbyEnabled = true;
+        if (!pNearbyEnabled.isEmpty()) {
+            nearbyEnabled = pNearbyEnabled.get(0);
+        }
+        client.setNearby(nearbyEnabled);
     }
 }
