@@ -7,20 +7,16 @@ import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
 
 /**
- * Base class for our activities
- * <p/>
- * All our activities inherit from SherlockFragmentActivity
- * to maintain a common look and feel in the whole application.
- * <p/>
- * These activites continually keep the background service which
- * we use for connection retention alive by calling it via RPC.
+ * Activity keeps track of synchronizing the mediaplay icon
+ * according to the mediaplayer state.
+ * It can also be used to pause the current media.
  */
 public abstract class XoActionbarActivity extends XoActivity {
 
-    protected MediaPlayerService mMediaPlayerService;
-    protected ServiceConnection mMediaPlayerServiceConnection;
-    protected Menu mMenu;
-    protected BroadcastReceiver mBroadcastReceiver;
+    private MediaPlayerService mMediaPlayerService;
+    private ServiceConnection mMediaPlayerServiceConnection;
+    private Menu mMenu;
+    private BroadcastReceiver mBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +24,8 @@ public abstract class XoActionbarActivity extends XoActivity {
 
         Intent intent = new Intent(this, MediaPlayerService.class);
         startService(intent);
-        bindService(intent);
-        createBroadcastReceiver();
+        bindMediaPlayerService(intent);
+        createMediaPlayerBroadcastReceiver();
     }
 
     @Override
@@ -65,7 +61,7 @@ public abstract class XoActionbarActivity extends XoActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    protected void updatePlayState(){
+    private void updatePlayState(){
         if ( mMediaPlayerService != null){
             if (mMediaPlayerService.isPaused() || mMediaPlayerService.isStopped()) {
                 mMediaPlayerService.play(true);
@@ -75,7 +71,7 @@ public abstract class XoActionbarActivity extends XoActivity {
         }
     }
 
-    protected void createBroadcastReceiver() {
+    private void createMediaPlayerBroadcastReceiver() {
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -88,7 +84,7 @@ public abstract class XoActionbarActivity extends XoActivity {
         registerReceiver(mBroadcastReceiver, filter);
     }
 
-    protected void updateActionBarIcons( Menu menu){
+    private void updateActionBarIcons( Menu menu){
         if ( mMediaPlayerService != null && menu != null) {
             MenuItem mediaPlayerItem = menu.findItem(R.id.menu_media_player);
 
@@ -106,7 +102,7 @@ public abstract class XoActionbarActivity extends XoActivity {
         }
     }
 
-    protected void bindService(Intent intent) {
+    private void bindMediaPlayerService(Intent intent) {
 
         mMediaPlayerServiceConnection = new ServiceConnection() {
             @Override
