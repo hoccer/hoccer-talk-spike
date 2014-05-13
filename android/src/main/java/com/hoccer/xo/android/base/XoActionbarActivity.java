@@ -1,8 +1,13 @@
 package com.hoccer.xo.android.base;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.*;
 import android.os.*;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.view.*;
+import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
 
@@ -53,7 +58,7 @@ public abstract class XoActionbarActivity extends XoActivity {
 
         switch (item.getItemId()) {
             case R.id.menu_media_player:
-                updatePlayState();
+                openFullScreenPlayer();
                 updateActionBarIcons(mMenu);
                 break;
         }
@@ -61,14 +66,14 @@ public abstract class XoActionbarActivity extends XoActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void updatePlayState(){
-        if ( mMediaPlayerService != null){
-            if (mMediaPlayerService.isPaused() || mMediaPlayerService.isStopped()) {
-                mMediaPlayerService.play(true);
-            } else {
-                mMediaPlayerService.pause();
-            }
-        }
+    private void openFullScreenPlayer(){
+        Intent resultIntent = new Intent(this, FullscreenPlayerActivity.class);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this)
+                .addParentStack(FullscreenPlayerActivity.class)
+                .addNextIntent(resultIntent);
+
+        stackBuilder.startActivities();
     }
 
     private void createMediaPlayerBroadcastReceiver() {
@@ -92,12 +97,6 @@ public abstract class XoActionbarActivity extends XoActivity {
                 mediaPlayerItem.setVisible(false);
             }else {
                 mediaPlayerItem.setVisible(true);
-
-                //if ( mMediaPlayerService.isPaused()){
-                //    mediaPlayerItem.setIcon(R.drawable.ic_dark_play);
-                //}else{
-                //    mediaPlayerItem.setIcon(R.drawable.ic_dark_pause);
-                //}
             }
         }
     }
