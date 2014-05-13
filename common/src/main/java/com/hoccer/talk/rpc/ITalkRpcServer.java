@@ -563,7 +563,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects Update the encrypted group key for the calling client's group membership
      * @talk.errors.server
      */
-    public void updateMyGroupKey(String groupId,String sharedKeyId, String sharedKeyIdSalt, String publicKeyId, String cryptedSharedKey);
+    //public void updateMyGroupKey(String groupId,String sharedKeyId, String sharedKeyIdSalt, String publicKeyId, String cryptedSharedKey);
 
     /** Update the encrypted shared symmetric group keys for the specified clients;
      it is a group admins responsibility to distribute the shared group key to all members
@@ -583,7 +583,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects Update group keys for the specified members, update group key information
      * @talk.errors.server
      */
-    String[] updateGroupKeys(String groupId, String sharedKeyId, String sharedKeyIdSalt, String[] clientIds, String[] publicKeyIds, String[] cryptedSharedKeys);
+    //String[] updateGroupKeys(String groupId, String sharedKeyId, String sharedKeyIdSalt, String[] clientIds, String[] publicKeyIds, String[] cryptedSharedKeys);
 
     /** Retrieve members of a group changed after given date
      * @param groupId denotes the group to retrieve the members of
