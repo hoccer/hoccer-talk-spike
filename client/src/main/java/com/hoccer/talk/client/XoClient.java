@@ -616,7 +616,13 @@ public class XoClient implements JsonRpcConnection.Listener {
                     IXoContactListener listener = mContactListeners.get(i);
                     listener.onClientPresenceChanged(mSelfContact);
                 }
-                sendPresence();
+
+                mExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        sendPresence();
+                    }
+                });
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
@@ -635,7 +641,13 @@ public class XoClient implements JsonRpcConnection.Listener {
                         IXoContactListener listener = mContactListeners.get(i);
                         listener.onClientPresenceChanged(mSelfContact);
                     }
-                    sendPresence();
+
+                    mExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendPresence();
+                        }
+                    });
                 }
             }
         } catch (SQLException e) {
@@ -1307,28 +1319,38 @@ public class XoClient implements JsonRpcConnection.Listener {
                             updateGroupPresence(group);
                         }
                     }
-                    LOG.debug("sync: syncing group memberships");
-                    List<TalkClientContact> contacts = mDatabase.findAllGroupContacts();
-                    for (TalkClientContact group : contacts) {
-                        if (group.isGroup()) {
-                            try {
-                                TalkGroupMember[] members = mServerRpc.getGroupMembers(group.getGroupId(), never);
-                                for (TalkGroupMember member : members) {
-                                    updateGroupMember(member);
+
+                    try {
+                        LOG.debug("sync: syncing group memberships");
+                        List<TalkClientContact> contacts = mDatabase.findAllGroupContacts();
+                        for (TalkClientContact group : contacts) {
+                            if (group.isGroup()) {
+                                try {
+                                    TalkGroupMember[] members = mServerRpc.getGroupMembers(group.getGroupId(), never);
+                                    for (TalkGroupMember member : members) {
+                                        updateGroupMember(member);
+                                    }
+                                } catch (JsonRpcClientException e) {
+                                    LOG.error("Error while updating group member: ", e);
+                                } catch (RuntimeException e) {
+                                    LOG.error("Error while updating group members: ", e);
                                 }
-                            } catch (JsonRpcClientException e) {
-                                LOG.error("Error while updating group member: " , e);
-                            } catch (RuntimeException e) {
-                                LOG.error("Error while updating group members: ", e);
                             }
                         }
+                    } catch (SQLException e) {
+                        LOG.error("SQL Error while syncing: ", e);
+
+                        // TODO: consider resync ??
                     }
-                } catch (SQLException e) {
-                    LOG.error("SQL Error while syncing: ", e);
+                    
+                    switchState(STATE_ACTIVE, "sync successful");
+
                 } catch (JsonRpcClientException e) {
                     LOG.error("Error while syncing: ", e);
+
+                    LOG.debug("Rescheduling synchronization.");
+                    scheduleSync();
                 }
-                switchState(STATE_ACTIVE, "sync successful");
             }
         });
     }
@@ -1535,9 +1557,6 @@ public class XoClient implements JsonRpcConnection.Listener {
             String clientId = selfContact.getClientId();
             TalkClientSelf self = selfContact.getSelf();
 
-            //String saltString = new String(Base64.encodeBase64(Hex.decodeHex(self.getSrpSalt().toCharArray())));
-            //byte[] secretString = new String(Base64.encodeBase64(Hex.decodeHex(self.getSrpSecret().toCharArray())));
-
             ObjectMapper jsonMapper = new ObjectMapper();
             ObjectNode rootNode = jsonMapper.createObjectNode();
             rootNode.put("password", self.getSrpSecret());
@@ -1551,58 +1570,65 @@ public class XoClient implements JsonRpcConnection.Listener {
         }
     }
 
-    private byte[] makeCryptedCredentialsContainer(TalkClientContact selfContact, String containerPassword) throws Exception {
-        byte[] credentials = extractCredentialsAsJson(selfContact);
+    public byte[] makeEncryptedCredentialsContainer(String containerPassword) throws Exception {
+        byte[] credentials = extractCredentialsAsJson(getSelfContact());
         byte[] container = CryptoJSON.encryptedContainer(credentials, containerPassword, "credentials");
         return container;
     }
 
-    private boolean setCryptedCredentialsFromContainer(TalkClientContact selfContact, byte[] jsonContainer, String containerPassword) {
+    public boolean setEncryptedCredentialsFromContainer(byte[] jsonContainer, String containerPassword) {
         try {
-            byte[] credentials = CryptoJSON.decryptedContainer(jsonContainer,containerPassword,"credentials");
+            byte[] credentials = CryptoJSON.decryptedContainer(jsonContainer, containerPassword, "credentials");
             ObjectMapper jsonMapper = new ObjectMapper();
             JsonNode json = jsonMapper.readTree(credentials);
-            if (json == null ||  !json.isObject()) {
-                throw new Exception("setCryptedCredentialsFromContainer: not a json object");
+            if (json == null || !json.isObject()) {
+                throw new Exception("setEncryptedCredentialsFromContainer: not a json object");
             }
             JsonNode password = json.get("password");
             if (password == null) {
-                throw new Exception("setCryptedCredentialsFromContainer: missing password");
+                throw new Exception("setEncryptedCredentialsFromContainer: missing password");
             }
             JsonNode saltNode = json.get("salt");
-            if (saltNode == null ) {
-                throw new Exception("setCryptedCredentialsFromContainer: missing salt");
+            if (saltNode == null) {
+                throw new Exception("setEncryptedCredentialsFromContainer: missing salt");
             }
             JsonNode clientIdNode = json.get("clientId");
             if (clientIdNode == null) {
                 throw new Exception("parseEncryptedContainer: wrong or missing ciphered content");
             }
-            TalkClientSelf self = selfContact.getSelf();
+
+            // Update credentials
+            TalkClientSelf self = getSelfContact().getSelf();
             self.provideCredentials(saltNode.asText(), password.asText());
+
+            // Update client id
+            TalkClientContact selfContact = getSelfContact();
             selfContact.updateSelfRegistered(clientIdNode.asText());
+
+            mSelfContact = selfContact;
+
+            // save credentials and contact
+            mDatabase.saveCredentials(self);
+            mDatabase.saveContact(selfContact);
+
+            // remove contacts + groups from DB
+            //mDatabase.deleteAllClientContacts();
+            //mDatabase.deleteAllGroupContacts();
+
+            mDatabase.eraseAllRelationships();
+            mDatabase.eraseAllClientContacts();
+            mDatabase.eraseAllGroupMemberships();
+            mDatabase.eraseAllGroupContacts();
+
+            reconnect("Credentials imported.");
+
             return true;
+        } catch (SQLException sqlException) {
+            LOG.error("setEncryptedCredentialsFromContainer", sqlException);
         } catch (Exception e) {
-            LOG.error("setCryptedCredentialsFromContainer", e);
+            LOG.error("setEncryptedCredentialsFromContainer", e);
         }
         return false;
-    }
-
-    public void testCredentialsContainer(TalkClientContact selfContact) {
-        try {
-            byte[] container = makeCryptedCredentialsContainer(selfContact,"12345678");
-            String containerString = new String(container,"UTF-8");
-            LOG.info(containerString);
-            if (setCryptedCredentialsFromContainer(selfContact,container,"12345678")) {
-                LOG.info("reading credentials from container succeeded");
-            } else {
-                LOG.info("reading credentials from container failed");
-
-            }
-        } catch (UnsupportedEncodingException e) {
-            LOG.error("testCredentialsContainer", e);
-        } catch (Exception e) {
-            LOG.error("testCredentialsContainer", e);
-        }
     }
 
     private void performLogin(TalkClientContact selfContact) {
@@ -1764,9 +1790,12 @@ public class XoClient implements JsonRpcConnection.Listener {
 
     private void sendPresence() {
         LOG.debug("sendPresence()");
+
+        /*
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
+        */
                 try {
                     TalkClientContact contact = mSelfContact;
                     ensureSelfPresence(contact);
@@ -1782,8 +1811,11 @@ public class XoClient implements JsonRpcConnection.Listener {
                 } catch (JsonRpcClientException e) {
                     LOG.error("Error while sending presence: ", e);
                 }
+
+        /*
             }
         });
+        */
     }
 
     private void updateOutgoingDelivery(final TalkDelivery delivery) {
