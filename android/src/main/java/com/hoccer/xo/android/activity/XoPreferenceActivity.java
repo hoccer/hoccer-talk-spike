@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.*;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
@@ -167,7 +168,7 @@ public class XoPreferenceActivity extends PreferenceActivity implements SharedPr
         super.onDestroy();
 
         unbindService(mMediaPlayerServiceConnection);
-        unregisterReceiver(mBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
         mBroadcastReceiver = null;
     }
 
@@ -191,7 +192,7 @@ public class XoPreferenceActivity extends PreferenceActivity implements SharedPr
             }
         };
         IntentFilter filter = new IntentFilter(MediaPlayerService.PLAYSTATE_CHANGED_ACTION);
-        registerReceiver(mBroadcastReceiver, filter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, filter);
     }
 
     private void updateActionBarIcons( Menu menu){
@@ -202,12 +203,6 @@ public class XoPreferenceActivity extends PreferenceActivity implements SharedPr
                 mediaPlayerItem.setVisible(false);
             }else {
                 mediaPlayerItem.setVisible(true);
-
-                //if ( mMediaPlayerService.isPaused()){
-                //    mediaPlayerItem.setIcon(R.drawable.ic_dark_play);
-                //}else{
-                //    mediaPlayerItem.setIcon(R.drawable.ic_dark_pause);
-                //}
             }
         }
     }

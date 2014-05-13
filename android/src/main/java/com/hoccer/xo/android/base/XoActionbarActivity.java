@@ -6,6 +6,7 @@ import android.content.*;
 import android.os.*;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.*;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.service.MediaPlayerService;
@@ -38,7 +39,7 @@ public abstract class XoActionbarActivity extends XoActivity {
         super.onDestroy();
 
         unbindService(mMediaPlayerServiceConnection);
-        unregisterReceiver(mBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
         mBroadcastReceiver = null;
     }
 
@@ -86,7 +87,7 @@ public abstract class XoActionbarActivity extends XoActivity {
             }
         };
         IntentFilter filter = new IntentFilter(MediaPlayerService.PLAYSTATE_CHANGED_ACTION);
-        registerReceiver(mBroadcastReceiver, filter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, filter);
     }
 
     private void updateActionBarIcons( Menu menu){
