@@ -80,6 +80,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     private final HashMap<Object, Timer.Context> requestTimers= new HashMap<Object, Timer.Context>();
     private boolean mLegacyMode;
 
+    private Long mLastPingLatency;
+    private Date mLastPingOccured;
+
     /**
      * Construct a connection for the given server using the given connection
      *
@@ -125,6 +128,13 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
     public boolean isLoggedIn() {
         return isConnected() && mTalkClient != null;
+    }
+
+    /**
+     * Indicate if the connection has called ready
+     */
+    public boolean isReady() {
+        return isConnected() && mTalkClient != null && mTalkClient.isReady();
     }
 
     /**
@@ -227,12 +237,26 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         mLastActivity = -1;
         // tell the server about the disconnect
         mServer.connectionClosed(this);
+
     }
 
     /**
      * Disconnect the underlying connection and finish up
      */
     public void disconnect() {
+
+        if (mTalkClient != null) {
+            if (mTalkClient.isReady()) {
+                // set client to not ready
+                ITalkServerDatabase database = mServer.getDatabase();
+                TalkClient client = database.findClientById(mTalkClient.getClientId());
+                if (client != null) {
+                    client.setTimeReady(null);
+                    database.saveClient(client);
+                }
+            }
+        }
+
         mTalkClient = null;
         mConnection.disconnect();
     }
@@ -270,11 +294,35 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         }
 
         // attempt to deliver anything we might have
-        mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId());
+        // mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId());
 
         // request a ping in a few seconds
-        mServer.getPingAgent().requestPing(mTalkClient.getClientId());
+        //mServer.getPingAgent().requestPing(mTalkClient.getClientId());
     }
+
+    /**
+     * Called by handler when the client has called ready()
+     */
+    public void readyClient() {
+        if (isLoggedIn() && mTalkClient != null) {
+            LOG.info("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
+
+            // mark connection as logged in
+            ITalkServerDatabase database = mServer.getDatabase();
+            mTalkClient.setTimeReady(new Date());
+            database.saveClient(mTalkClient);
+
+            // notify server abount ready state
+            mServer.readyClient(mTalkClient, this);
+
+            // attempt to deliver anything we might have
+            mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId());
+
+            // request a ping in a few seconds
+            mServer.getPingAgent().requestPing(mTalkClient.getClientId());
+        }
+    }
+
 
     /**
      * Begins the registration process under the given client id
@@ -357,5 +405,22 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     public boolean isLegacyMode() {
         return mLegacyMode;
+    }
+
+
+    public Long getLastPingLatency() {
+        return mLastPingLatency;
+    }
+
+    public void setLastPingLatency(long mLastPingLatency) {
+        this.mLastPingLatency = mLastPingLatency;
+    }
+
+    public void setLastPingOccured(Date lastPingOccured) {
+        this.mLastPingOccured = lastPingOccured;
+    }
+
+    public Date getLastPingOccured() {
+        return mLastPingOccured;
     }
 }
