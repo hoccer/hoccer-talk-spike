@@ -38,7 +38,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState){
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         Intent intent = new Intent(getActivity(), MediaPlayerService.class);
@@ -47,15 +47,9 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
         ListAdapter adapter;
 
-        try {
-            mAudioAttachmentList = getXoDatabase().findClientDownloadByMediaType("audio");
-            adapter = new AttachmentListAdapter(getXoActivity(),
-                    mAudioAttachmentList,R.layout.attachmentlist_general_item, R.id.songTitle);
-        } catch (SQLException e) {
-            // TODO handle exception!
-            LOG.warn(e);
-            adapter = null;
-        }
+        mAudioAttachmentList = AudioListManager.get(getActivity().getApplicationContext()).getAudioList();
+        adapter = new AttachmentListAdapter(getXoActivity(),
+                mAudioAttachmentList, R.layout.attachmentlist_general_item, R.id.songTitle);
 
         setListAdapter(adapter);
 
@@ -77,7 +71,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
         getActivity().unbindService(mConnection);
     }
 
-    private void bindService(Intent intent){
+    private void bindService(Intent intent) {
 
         mConnection = new ServiceConnection() {
             @Override

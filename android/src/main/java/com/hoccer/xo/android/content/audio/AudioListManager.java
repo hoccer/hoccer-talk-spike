@@ -69,4 +69,8 @@ public class AudioListManager implements Iterator<TalkClientDownload> {
     @Override
     public void remove() {
     }
+
+    public List<TalkClientDownload> getAudioList() {
+        return mAudioAttachmentList;
+    }
 }
