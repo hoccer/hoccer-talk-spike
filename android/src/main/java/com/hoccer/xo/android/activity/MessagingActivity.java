@@ -1,9 +1,8 @@
 package com.hoccer.xo.android.activity;
 
+import android.content.*;
+import android.os.IBinder;
 import android.support.v4.app.FragmentManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.IntentFilter;
 import android.widget.PopupMenu;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -15,10 +14,10 @@ import com.hoccer.xo.android.fragment.CompositionFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
+import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
 
 import android.app.ActionBar;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,6 +38,10 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
     private  getContactIdInConversation m_checkIdReceiver;
 
     private MotionInterpreter mMotionInterpreter;
+    private MediaPlayerService mMediaPlayerService;
+    private ServiceConnection mServiceConnection;
+    private Menu mMenu;
+    private BroadcastReceiver mBroadcastReceiver;
 
     @Override
     protected int getLayoutResource() {
@@ -75,6 +78,30 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         registerReceiver(m_checkIdReceiver, filter);
 
         mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, this, mCompositionFragment);
+
+        Intent intent = new Intent(this, MediaPlayerService.class);
+        startService(intent);
+        bindService(intent);
+        createBroadcastReceiver();
+    }
+
+    private void bindService(Intent intent) {
+
+        mServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                MediaPlayerService.MediaPlayerBinder binder = (MediaPlayerService.MediaPlayerBinder) service;
+                mMediaPlayerService = binder.getService();
+                updateActionBarIcons( mMenu);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                mMediaPlayerService = null;
+            }
+        };
+
+        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -129,13 +156,39 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
 //            getActionBar().setIcon(android.R.color.transparent);
         }
 
+        mMenu = menu;
+        updateActionBarIcons(menu);
+
         return result;
+    }
+
+    private void updateActionBarIcons( Menu menu){
+        if ( mMediaPlayerService != null && menu != null) {
+            MenuItem mediaPlayerItem = menu.findItem(R.id.menu_media_player);
+
+            if ( mMediaPlayerService.isStopped() || mMediaPlayerService.isPaused()) {
+                mediaPlayerItem.setVisible(false);
+            }else {
+                mediaPlayerItem.setVisible(true);
+
+                //if ( mMediaPlayerService.isPaused()){
+                //    mediaPlayerItem.setIcon(R.drawable.ic_dark_play);
+                //}else{
+                //    mediaPlayerItem.setIcon(R.drawable.ic_dark_pause);
+                //}
+            }
+        }
     }
 
     @Override
     protected void onDestroy() {
         unregisterReceiver(m_checkIdReceiver);
         super.onDestroy();
+
+        unbindService(mServiceConnection);
+
+        unregisterReceiver(mBroadcastReceiver);
+        mBroadcastReceiver = null;
     }
 
     @Override
@@ -148,10 +201,37 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
                     showContactProfile(mContact);
                 }
                 break;
+            case R.id.menu_media_player:
+                updatePlayState();
+                updateActionBarIcons(mMenu);
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private void updatePlayState(){
+        if ( mMediaPlayerService != null){
+            if (mMediaPlayerService.isPaused() || mMediaPlayerService.isStopped()) {
+                mMediaPlayerService.play(true);
+            } else {
+                mMediaPlayerService.pause();
+            }
+        }
+    }
+
+    private void createBroadcastReceiver() {
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(MediaPlayerService.PLAYSTATE_CHANGED_ACTION)) {
+                    updateActionBarIcons(mMenu);
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter(MediaPlayerService.PLAYSTATE_CHANGED_ACTION);
+        registerReceiver(mBroadcastReceiver, filter);
     }
 
     @Override
