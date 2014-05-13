@@ -5,7 +5,7 @@
     <item
             android:id="@+id/menu_media_player"
             android:title="@string/menu_profile"
-            android:icon="@drawable/ic_notification"
+            android:icon="@drawable/ic_notification_music"
             android:visible="false"
             android:showAsAction="always"
             android:orderInCategory="90"/>
