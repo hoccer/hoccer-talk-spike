@@ -9,7 +9,10 @@ import com.hoccer.talk.tool.TalkToolContext;
 
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class TalkToolClient {
 
@@ -79,13 +82,13 @@ public class TalkToolClient {
             return mGeoLocation;
         } else {
             Console.debug("No explicit location set yet, using default.");
-            return new Double[] { DEFAULT_GEO_LONGITUDE, DEFAULT_GEO_LATITUDE };
+            return new Double[]{DEFAULT_GEO_LONGITUDE, DEFAULT_GEO_LATITUDE};
         }
     }
 
     public void setGeoLocation(Double longitude, Double latitude) {
-        Console.info("Setting geo-location to (" + longitude.toString() + ", " + latitude.toString() + ")");
-        mGeoLocation = new Double[] { longitude, latitude };
+        Console.info("Setting geo-location to (" + longitude + ", " + latitude + ")");
+        mGeoLocation = new Double[]{longitude, latitude};
     }
 
     private void enableNearby() {
