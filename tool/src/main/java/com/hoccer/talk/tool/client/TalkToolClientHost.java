@@ -2,7 +2,6 @@ package com.hoccer.talk.tool.client;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
-
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 

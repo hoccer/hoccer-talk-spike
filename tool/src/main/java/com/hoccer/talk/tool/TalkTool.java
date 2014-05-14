@@ -4,7 +4,6 @@ import better.cli.CLIContext;
 import better.cli.CommandLineApplication;
 import better.cli.EntryPoint;
 import better.cli.annotations.CLIEntry;
-import better.cli.console.Console;
 import better.cli.exceptions.CLIInitException;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -21,25 +20,24 @@ public class TalkTool extends CommandLineApplication<TalkToolContext> {
 
     TalkToolContext mContext;
 
-    @Parameter(names={"-s", "-server"},
+    @Parameter(names = {"-s", "-server"},
             description = "Talkserver to use (complete uri)")
     private String server = XoClientConfiguration.SERVER_URI;
 
-    @Parameter(names="-dbfile",
+    @Parameter(names = "-dbfile",
             description = "If true database is stored in a file. By default memory mode is used.",
             arity = 1)
     private boolean dbfile = false;
 
-    @Parameter(names="-filesdir",
+    @Parameter(names = "-filesdir",
             description = "Directory path where encrypted files for upload and download will be stored. Default is '/files'",
             arity = 1)
     private String filesdir = DEFAULT_FILES_DIR;
 
-    @Parameter(names="-sslenabled",
+    @Parameter(names = "-sslenabled",
             description = "Enables ssl. By default is false.",
             arity = 1)
     private boolean sslenabled = false;
-
 
     public TalkTool() throws CLIInitException {
         super();
@@ -65,7 +63,6 @@ public class TalkTool extends CommandLineApplication<TalkToolContext> {
     protected void shutdown() {
     }
 
-
     public Boolean isSslEnabled() {
         return sslenabled;
     }
@@ -85,5 +82,4 @@ public class TalkTool extends CommandLineApplication<TalkToolContext> {
     public String getServer() {
         return server;
     }
-
 }
