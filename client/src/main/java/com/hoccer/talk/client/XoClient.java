@@ -2678,6 +2678,11 @@ public class XoClient implements JsonRpcConnection.Listener {
             LOG.error("SQL error", e);
         }
 
+        // quietly destroy nearby group
+        if (group.isTypeNearby() && !group.exists()) {
+            destroyNearbyGroup(groupContact);
+        }
+
         LOG.info("updateGroupPresence(" + group.getGroupId() + ") - saved");
 
         for (int i = 0; i < mContactListeners.size(); i++) {
@@ -2689,26 +2694,17 @@ public class XoClient implements JsonRpcConnection.Listener {
     private void destroyNearbyGroup(TalkClientContact groupContact) {
         LOG.debug("destroying nearby group with id " + groupContact.getGroupId());
 
-        // delete group
-        groupContact.markAsDeleted();
-        groupContact.setNearby(false);
-
         // reset group state
         TalkGroup groupPresence = groupContact.getGroupPresence();
         groupPresence.setState(TalkGroup.STATE_NONE);
 
         try {
-            // delete all group members
+            // remove all group members
             for (TalkClientMembership membership : groupContact.getGroupMemberships()) {
 
                 // reset nearby status of group member contact
                 TalkClientContact groupMemberContact = membership.getClientContact();
                 groupMemberContact.setNearby(false);
-
-                // delete when not related
-                if (groupMemberContact.isEverRelated() == false) {
-                    groupMemberContact.markAsDeleted();
-                }
                 mDatabase.saveContact(groupMemberContact);
 
                 // reset group membership state
@@ -2745,11 +2741,11 @@ public class XoClient implements JsonRpcConnection.Listener {
 
     public void updateGroupMemberHere(TalkGroupMember member) {
         LOG.info("updateGroupMember(groupId: '" + member.getGroupId() + "', clientId: '" + member.getClientId() + "', state: '" + member.getState() + "')");
-        TalkClientContact groupContact = null;
-        TalkClientContact clientContact = null;
+        TalkClientContact groupContact;
+        TalkClientContact clientContact;
         boolean needGroupUpdate = false;
-        boolean newGroup = false;
-        boolean newContact = false;
+        boolean newGroup = false; // TODO: should we read this flags somewhere ??
+        boolean newContact = false; // TODO: should we read this flags somewhere ??
 
         try {
             groupContact = mDatabase.findContactByGroupId(member.getGroupId(), false);
@@ -2770,7 +2766,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                 boolean createContact = member.isInvolved() && !member.isGroupRemoved();
                 if (createContact) {
                     LOG.info("creating contact for member in state '" + member.getState() + "' clientId '" + member.getClientId() + "'");
-                    groupContact = mDatabase.findContactByGroupId(member.getGroupId(), true);
+                    clientContact = mDatabase.findContactByClientId(member.getClientId(), true);
                     newContact = true;
                 } else {
                     LOG.warn("ignoring incoming member for unknown contact for member in state '" + member.getState() + "' clientId '" + member.getGroupId() + "'");
@@ -2809,7 +2805,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                 // quietly destroy nearby group
                 if (!member.isInvolved()) {
                     if (groupContact.getGroupPresence().isTypeNearby()) {
-                       destroyNearbyGroup(groupContact);
+                        destroyNearbyGroup(groupContact);
                     }
                 }
 
@@ -2848,7 +2844,6 @@ public class XoClient implements JsonRpcConnection.Listener {
         for (int i = 0; i < mContactListeners.size(); i++) {
             IXoContactListener listener = mContactListeners.get(i);
             listener.onGroupMembershipChanged(groupContact);
-            // TODO: ?? send onClientContactUpdated ??
         }
 
         // TODO: needGroupUpdate is never changed, do we mean newGroup or newClient instead ??
