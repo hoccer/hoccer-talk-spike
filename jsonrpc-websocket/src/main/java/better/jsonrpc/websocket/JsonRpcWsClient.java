@@ -13,8 +13,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import better.jsonrpc.client.JsonRpcClient;
-
 public class JsonRpcWsClient extends JsonRpcWsConnection
         implements WebSocket, WebSocket.OnTextMessage, WebSocket.OnBinaryMessage {
 
@@ -90,11 +88,11 @@ public class JsonRpcWsClient extends JsonRpcWsConnection
 	}
 
     public void connect(long maxWait, TimeUnit maxWaitUnit)
-            throws TimeoutException, IOException, InterruptedException
-    {
+            throws TimeoutException, IOException, InterruptedException {
         if(LOG.isDebugEnabled()) {
             LOG.debug("[" + mConnectionId + "] connecting with timeout of " + maxWait + " " + maxWaitUnit);
         }
+        LOG.info("[connection #" + mConnectionId + "] connecting to '" + mServiceUri + "'");
         mClient.setProtocol(mServiceProtocol);
         mClient.open(mServiceUri, this, maxWait, maxWaitUnit);
     }
