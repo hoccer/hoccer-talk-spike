@@ -554,6 +554,10 @@ public class OrmliteDatabase implements ITalkServerDatabase {
         return null;
     }
 
+    @Override
+    public List<TalkGroupMember> findGroupMembersByIdWithStatesAndRoles(String groupId, String[] states, String [] roles) {
+        return null;
+    }
 
     @Override
     public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown) {
@@ -634,16 +638,5 @@ public class OrmliteDatabase implements ITalkServerDatabase {
     @Override
     public void reportPing() {
         LOG.info(ping());
-    }
-
-    @Override
-    public boolean acquireGroupKeyUpdateLock(String groupId, String locker) {
-        // TODO: implememnt me...
-        return false;
-    }
-
-    @Override
-    public void releaseGroupKeyUpdateLock(String groupId) {
-        // TODO: implement me...
     }
 }

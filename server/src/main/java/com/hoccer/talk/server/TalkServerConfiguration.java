@@ -26,6 +26,9 @@ public class TalkServerConfiguration {
     public static final int THREADS_PING = 2; // XXX HIGHER COUNT?
     public static final int THREADS_CLEANING = 4;
 
+    public static final int PING_INTERVAL = 300; // in seconds
+    public static final boolean PERFORM_PING_AT_INTERVALS = false;
+
     private static final String PROPERTY_PREFIX = "talk";
 
     private String mListenAddress = "localhost";
@@ -101,7 +104,7 @@ public class TalkServerConfiguration {
                         MessageFormat.format("\n   * deliveries cleanup interval (in s): ''{0}''", Long.toString(mCleanupAllDeliveriesInterval)) +
                         "\n - Filecache Configuration:" +
                         MessageFormat.format("\n   * filecache control url:              ''{0}''", mFilecacheControlUrl) +
-                        MessageFormat.format("\n   * filecache upload base url:          ''{0}''", mFilecacheDownloadBase) +
+                        MessageFormat.format("\n   * filecache upload base url:          ''{0}''", mFilecacheUploadBase) +
                         MessageFormat.format("\n   * filecache download base url:        ''{0}''", mFilecacheDownloadBase) +
                         "\n - Other:" +
                         MessageFormat.format("\n   * support tag: ''{0}''", mSupportTag) +
@@ -111,6 +114,8 @@ public class TalkServerConfiguration {
                         MessageFormat.format("\n   * PushAgent     Threads Poolsize:     ''{0}''", THREADS_PUSH) +
                         MessageFormat.format("\n   * PingAgent     Threads Poolsize:     ''{0}''", THREADS_PING) +
                         MessageFormat.format("\n   * UpdateAgent   Threads Poolsize:     ''{0}''", THREADS_UPDATE) +
+                        MessageFormat.format("\n   * Ping interval (in s):               ''{0}''", PING_INTERVAL) +
+                        MessageFormat.format("\n   * perform ping at intervals:          ''{0}''", PERFORM_PING_AT_INTERVALS) +
                         "\n - Debugging:" +
                         MessageFormat.format("\n   * LogAllCalls:     ''{0}''", mLogAllCalls)
         );

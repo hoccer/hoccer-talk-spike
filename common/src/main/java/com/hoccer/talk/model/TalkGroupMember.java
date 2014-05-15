@@ -17,9 +17,14 @@ public class TalkGroupMember {
     public static final String ROLE_ADMIN = "admin";
     public static final String ROLE_MEMBER = "member";
 
-    public static final boolean isValidRole(String role) {
+    public static boolean isValidRole(String role) {
         return role.equals(ROLE_ADMIN) || role.equals(ROLE_MEMBER);
     }
+
+    public static final String[] ACTIVE_STATES = {
+            TalkGroupMember.STATE_INVITED,
+            TalkGroupMember.STATE_JOINED
+    };
 
     private String _id;
 
@@ -202,4 +207,31 @@ public class TalkGroupMember {
         this.setKeySupplier(m.getKeySupplier());
         this.setSharedKeyDate(m.getSharedKeyDate());
     }
-}
+
+    // only copies the field where a foreign member is interested in
+    @JsonIgnore
+    public void foreignUpdateWith(TalkGroupMember m) {
+        this.setClientId(m.getClientId());
+        this.setGroupId(m.getGroupId());
+        this.setRole(m.getRole());
+        this.setState(m.getState());
+        //this.setMemberKeyId(m.getMemberKeyId());
+        //this.setEncryptedGroupKey(m.getEncryptedGroupKey());
+        this.setLastChanged(m.getLastChanged());
+        //this.setSharedKeyId(m.getSharedKeyId());
+        //this.setSharedKeyIdSalt(m.getSharedKeyIdSalt());
+        //this.setKeySupplier(m.getKeySupplier());
+        //this.setSharedKeyDate(m.getSharedKeyDate());
+    }
+
+    @JsonIgnore
+    public void trashPrivate() {
+        this.setSharedKeyDate(null);
+        this.setSharedKeyIdSalt(null);
+        this.setMemberKeyId(null);
+        this.setSharedKeyId(null);
+        this.setEncryptedGroupKey(null);
+        this.setKeySupplier(null);
+    }
+
+    }

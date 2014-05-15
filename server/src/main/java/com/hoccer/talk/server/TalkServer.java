@@ -26,6 +26,7 @@ import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import com.hoccer.talk.server.update.UpdateAgent;
 import de.undercouch.bson4jackson.BsonFactory;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -251,11 +252,26 @@ public class TalkServer {
     }
 
     /**
+     * Check if the given client is connected
+     *
+     * @param clientId of the client to check for
+     * @return true if the client is connected
+     */
+    public boolean isClientReady(String clientId) {
+        TalkRpcConnection c = getClientConnection(clientId);
+        if (c != null) {
+            return c.isReady();
+        }
+        return false;
+    }
+
+    /**
      * Retrieve the connection of the given client
      *
      * @param clientId of the client to check for
      * @return connection of the client or null
      */
+    @Nullable
     public TalkRpcConnection getClientConnection(String clientId) {
         return mConnectionsByClientId.get(clientId);
     }
@@ -369,5 +385,17 @@ public class TalkServer {
 
     public HealthCheckRegistry getHealthCheckRegistry() {
         return mHealthRegistry;
+    }
+
+    public Vector<TalkRpcConnection> getReadyConnections() {
+        Vector<TalkRpcConnection> readyClientConnections = new Vector<TalkRpcConnection>();
+        Iterator<TalkRpcConnection> iterator = mConnections.iterator();
+        while (iterator.hasNext()) {
+            TalkRpcConnection connection = iterator.next();
+            if (connection.getClient() != null && connection.getClient().isReady()) {
+                readyClientConnections.add(connection);
+            }
+        }
+        return readyClientConnections;
     }
 }

@@ -100,6 +100,8 @@ public interface ITalkServerDatabase {
 
     public List<TalkGroupMember> findGroupMembersByIdWithStates(String groupId, String[] states);
 
+    public List<TalkGroupMember> findGroupMembersByIdWithStatesAndRoles(String groupId, String[] states, String [] roles);
+
     public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown);
 
     public List<TalkGroupMember> findGroupMembersForClient(String clientId);
@@ -123,8 +125,4 @@ public interface ITalkServerDatabase {
     public boolean ping();
 
     public void reportPing();
-
-    public boolean acquireGroupKeyUpdateLock(String groupId, String lockingClientId);
-
-    public void releaseGroupKeyUpdateLock(String groupId);
 }

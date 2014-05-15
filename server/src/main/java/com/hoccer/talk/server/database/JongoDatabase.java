@@ -515,6 +515,20 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkGroupMember> findGroupMembersByIdWithStatesAndRoles(String groupId, String[] states, String [] roles) {
+
+        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
+        Iterator<TalkGroupMember> it =
+                mGroupMembers.find("{groupId:#, state: { $in: # }, role: {$in: #}", groupId, Arrays.asList(states), Arrays.asList(roles))
+                        .as(TalkGroupMember.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+
+    @Override
     public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown) {
         List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
         Iterator<TalkGroupMember> it =
@@ -696,59 +710,6 @@ public class JongoDatabase implements ITalkServerDatabase {
         } catch (Exception e) {
             LOG.error("Database is not online:", e);
         }
-    }
-
-    private boolean canAcquireGroupKeyUpdateLock(TalkGroup group, Date newLockDate, String lockingClientId) {
-        Date oldLockDate = group.getGroupKeyUpdateInProgress();
-        if (oldLockDate == null) { // is not locked
-            return true;
-        }
-        if ((newLockDate.getTime() - oldLockDate.getTime()) > GROUPKEY_LOCK_RETENTION_TIMEOUT) {
-            LOG.info("group key update lock is too old (> " + GROUPKEY_LOCK_RETENTION_TIMEOUT + "ms) - reacquiring lock...");
-            return true;
-        }
-        if (group.getKeySupplier() != null) {
-            if (group.getKeySupplier().equals(lockingClientId)) {
-                LOG.info("group key update lock is active and set by the same client (keymaster) :'" + lockingClientId + "' - reacquiring lock...");
-                return true;
-            }
-            TalkPresence keySupplierPresence = findPresenceForClient(group.getKeySupplier());
-            if (keySupplierPresence != null && keySupplierPresence.isOffline()) {
-                LOG.info("group key update lock is active for keymaster '" + group.getKeySupplier() + "' but he is offline - acquiring lock");
-                return true;
-            }
-            TalkGroupMember supplier = findGroupMemberForClient(group.getGroupId(),group.getKeySupplier());
-            if (supplier == null || !supplier.isMember()) {
-                LOG.info("old keymaster not found as group member :'" + group.getKeySupplier() + "' - reacquiring lock...");
-                return true;
-            }
-            if (!supplier.isAdmin()) {
-                LOG.info("old keymaster no admin :'" + group.getKeySupplier() + "' - reacquiring lock...");
-                return true;
-            }
-        }
-        LOG.info("group key update lock is locked for group '" + group.getGroupId() + "' - not acquirung...");
-        return false;
-    }
-
-    @Override
-    public boolean acquireGroupKeyUpdateLock(String groupId, String lockingClientId) {
-        TalkGroup group = findGroupById(groupId);
-        Date newLockDate = new Date();
-
-        if (canAcquireGroupKeyUpdateLock(group,newLockDate,lockingClientId)) {
-            group.setGroupKeyUpdateInProgress(newLockDate);
-            saveGroup(group);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void releaseGroupKeyUpdateLock(String groupId) {
-        TalkGroup group = findGroupById(groupId);
-        group.setGroupKeyUpdateInProgress(null);
-        saveGroup(group);
     }
 
 }
