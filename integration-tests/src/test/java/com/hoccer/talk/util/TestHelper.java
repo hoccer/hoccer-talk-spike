@@ -3,6 +3,7 @@ package com.hoccer.talk.util;
 
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.talk.model.TalkGroupMember;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -10,6 +11,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -17,9 +19,7 @@ import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class TestHelper {
@@ -125,6 +125,44 @@ public class TestHelper {
             @Override
             public Boolean call() throws Exception {
                 return blockingClient.getDatabase().findContactByClientId(blockedClientId, false).getClientRelationship().isBlocked();
+            }
+        });
+    }
+
+    public static void unblockClient(final XoClient client, final XoClient clientToUnblock) throws SQLException {
+
+        final String clientId = clientToUnblock.getSelfContact().getClientId();
+        client.unblockContact(client.getDatabase().findContactByClientId(clientId, false));
+
+        await("client is unblocked").until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return !client.getDatabase().findContactByClientId(clientId, false).getClientRelationship().isBlocked();
+            }
+        });
+    }
+
+    public static void sendMessage(final XoClient sendingClient, final XoClient receivingClient, final String messageText) throws SQLException {
+        assertNotNull(sendingClient);
+        assertNotNull(receivingClient);
+        assertNotNull(messageText);
+
+        final int previousMsgCount = receivingClient.getDatabase().findUnseenMessages().size();
+
+        // sendingClient sends a messages to receivingClient
+        TalkClientContact recipientContact = sendingClient.getDatabase().findContactByClientId(receivingClient.getSelfContact().getClientId(), false);
+        assertNotNull(recipientContact);
+        TalkClientMessage message = sendingClient.composeClientMessage(recipientContact, messageText);
+        sendingClient.requestDelivery(message);
+
+        await().until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                List<TalkClientMessage> unseenMessages = receivingClient.getDatabase().findUnseenMessages();
+                return unseenMessages != null &&
+                        unseenMessages.size() == (previousMsgCount+1) &&
+                        !unseenMessages.get(0).isInProgress() &&
+                        messageText.equals(unseenMessages.get(0).getText());
             }
         });
     }
