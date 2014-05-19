@@ -120,6 +120,7 @@ public class TalkToolClient {
         environment.setAccuracy(NEARBY_ACCURACY);
         environment.setLocationType(TalkEnvironment.LOCATION_TYPE_GPS);
         environment.setTimestamp(new Date());
+        environment.setType(TalkEnvironment.TYPE_NEARBY);
 
         mClient.sendEnvironmentUpdate(environment);
     }
