@@ -9,10 +9,7 @@ import com.hoccer.talk.tool.TalkToolContext;
 
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class TalkToolClient {
 
@@ -30,7 +27,7 @@ public class TalkToolClient {
     private String mSupportTag = "log";
 
     private ScheduledExecutorService mLocationUpdater;
-    private ScheduledFuture mNearbyUpdater;
+    private Future mNearbyUpdater;
 
     // https://www.google.com/maps/place//@52.5017778,13.3427778,14z
     private final static double DEFAULT_GEO_LONGITUDE = 52.501772;
@@ -69,9 +66,9 @@ public class TalkToolClient {
         mClient.wake();
     }
 
-    public void setNearby(Boolean enabled) {
+    public void setNearby(boolean enabled, boolean schedule) {
         if (enabled) {
-            enableNearby();
+            enableNearby(schedule);
         } else {
             disableNearby();
         }
@@ -91,25 +88,40 @@ public class TalkToolClient {
         mGeoLocation = new Double[]{longitude, latitude};
     }
 
-    private void enableNearby() {
+    private void enableNearby(boolean schedule) {
         if (mNearbyUpdater != null) {
             Console.warn("Environment updates are already running - IGNORING");
             return;
         }
-        Console.info("Starting environment update scheduler...");
-        mNearbyUpdater = mLocationUpdater.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                Console.debug("running environment update...");
-                TalkEnvironment environment = new TalkEnvironment();
-                environment.setGeoLocation(getGeoLocation());
-                environment.setAccuracy(NEARBY_ACCURACY);
-                environment.setLocationType(TalkEnvironment.LOCATION_TYPE_GPS);
-                environment.setTimestamp(new Date());
+        if (schedule) {
+            Console.info("Starting environment update scheduler...");
+            mNearbyUpdater = mLocationUpdater.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    updateEnvironment();
+                }
+            }, 0, NEARBY_UPDATE_RATE, TimeUnit.SECONDS);
+        } else {
+            Console.info("Sending environment update just once");
+            mNearbyUpdater = mLocationUpdater.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    updateEnvironment();
+                }
+            }, 0, TimeUnit.SECONDS);
+        }
 
-                mClient.sendEnvironmentUpdate(environment);
-            }
-        }, 0, NEARBY_UPDATE_RATE, TimeUnit.SECONDS);
+    }
+
+    private void updateEnvironment() {
+        Console.debug("updating environment...");
+        TalkEnvironment environment = new TalkEnvironment();
+        environment.setGeoLocation(getGeoLocation());
+        environment.setAccuracy(NEARBY_ACCURACY);
+        environment.setLocationType(TalkEnvironment.LOCATION_TYPE_GPS);
+        environment.setTimestamp(new Date());
+
+        mClient.sendEnvironmentUpdate(environment);
     }
 
     private void disableNearby() {
