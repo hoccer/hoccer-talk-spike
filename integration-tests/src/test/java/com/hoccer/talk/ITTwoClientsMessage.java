@@ -1,14 +1,12 @@
 package com.hoccer.talk;
 
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestHelper;
 import com.hoccer.talk.util.TestTalkServer;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -20,8 +18,7 @@ import java.util.concurrent.Callable;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(JUnit4.class)
 public class ITTwoClientsMessage extends IntegrationTest {
@@ -85,9 +82,9 @@ public class ITTwoClientsMessage extends IntegrationTest {
             public Boolean call() throws Exception {
                 List<TalkClientMessage> unseenMessages = receivingClient.getDatabase().findUnseenMessages();
                 return unseenMessages != null &&
-                       unseenMessages.size() == 1 &&
-                       !unseenMessages.get(0).isInProgress() &&
-                       messageText.equals(unseenMessages.get(0).getText());
+                        unseenMessages.size() == 1 &&
+                        !unseenMessages.get(0).isInProgress() &&
+                        messageText.equals(unseenMessages.get(0).getText());
             }
         });
     }
