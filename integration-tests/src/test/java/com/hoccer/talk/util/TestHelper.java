@@ -1,6 +1,5 @@
 package com.hoccer.talk.util;
 
-
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -103,21 +102,20 @@ public class TestHelper {
         joiningClient.joinGroup(groupId);
 
         await("client is joined").until(
-            new Callable<Boolean>() {
-                @Override
-                public Boolean call() throws Exception {
-                    TalkGroupMember groupMember = joiningClient.getDatabase().findContactByGroupId(groupId, false).getGroupMember();
-                    return TalkGroupMember.STATE_JOINED.equals(groupMember.getState()) &&
-                            groupMember.isJoined() &&
-                            groupMember.getEncryptedGroupKey() != null &&
-                            groupMember.getMemberKeyId() != null;
+                new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
+                        TalkGroupMember groupMember = joiningClient.getDatabase().findContactByGroupId(groupId, false).getGroupMember();
+                        return TalkGroupMember.STATE_JOINED.equals(groupMember.getState()) &&
+                                groupMember.isJoined() &&
+                                groupMember.getEncryptedGroupKey() != null &&
+                                groupMember.getMemberKeyId() != null;
+                    }
                 }
-            }
         );
     }
 
     public static void blockClient(final XoClient blockingClient, final XoClient blockedClient) throws SQLException {
-
         final String blockedClientId = blockedClient.getSelfContact().getClientId();
         blockingClient.blockContact(blockingClient.getDatabase().findContactByClientId(blockedClientId, false));
 
@@ -130,7 +128,6 @@ public class TestHelper {
     }
 
     public static void unblockClient(final XoClient client, final XoClient clientToUnblock) throws SQLException {
-
         final String clientId = clientToUnblock.getSelfContact().getClientId();
         client.unblockContact(client.getDatabase().findContactByClientId(clientId, false));
 
@@ -160,7 +157,7 @@ public class TestHelper {
             public Boolean call() throws Exception {
                 List<TalkClientMessage> unseenMessages = receivingClient.getDatabase().findUnseenMessages();
                 return unseenMessages != null &&
-                        unseenMessages.size() == (previousMsgCount+1) &&
+                        unseenMessages.size() == (previousMsgCount + 1) &&
                         !unseenMessages.get(0).isInProgress() &&
                         messageText.equals(unseenMessages.get(0).getText());
             }
