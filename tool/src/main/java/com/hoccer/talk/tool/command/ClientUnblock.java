@@ -30,6 +30,6 @@ public class ClientUnblock extends TalkToolClientCommand {
             throw new Exception("Target not known to client.");
         }
 
-        client.getClient().blockContact(contactToBeUnblocked);
+        client.getClient().unblockContact(contactToBeUnblocked);
     }
 }
