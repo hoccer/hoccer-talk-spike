@@ -1,6 +1,7 @@
 package com.hoccer.talk.server;
 
 import com.hoccer.talk.model.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 import java.util.List;
@@ -80,6 +81,7 @@ public interface ITalkServerDatabase {
 
     public List<TalkRelationship> findRelationshipsChangedAfter(String client, Date lastKnown);
 
+    @Nullable
     public TalkRelationship findRelationshipBetween(String client, String otherClient);
 
     public void deleteRelationship(TalkRelationship relationship);
@@ -125,8 +127,4 @@ public interface ITalkServerDatabase {
     public boolean ping();
 
     public void reportPing();
-
-    public boolean acquireGroupKeyUpdateLock(String groupId, String lockingClientId);
-
-    public void releaseGroupKeyUpdateLock(String groupId);
 }

@@ -32,7 +32,7 @@ public class TalkToolContext extends CLIContext {
 
 
     private static KeyStore getKeyStore() {
-        if(KEYSTORE == null) {
+        if (KEYSTORE == null) {
             throw new RuntimeException("SSL security not initialized");
         }
         return KEYSTORE;
@@ -156,11 +156,10 @@ public class TalkToolContext extends CLIContext {
     }
 
     /**
-     *
      * @param selectorOrclientId is either a client in talk tool identified by number (e.g. '2') or
      *                           a clientId
      * @return clientId - An existing talk-tool client number is converted to a clientId.
-     *         If it does not exist we assume the given String is a UUID and treat it as clientId
+     * If it does not exist we assume the given String is a UUID and treat it as clientId
      */
     public String getClientIdFromParam(String selectorOrclientId) {
         String clientId = selectorOrclientId;

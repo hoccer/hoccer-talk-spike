@@ -12,8 +12,8 @@ import java.util.Date;
  * 
  * @author ingo
  */
-
-
+// Suppress unused warnings since they are external API entry points and are called from the outside via JsonRpc (via Websockets)
+@SuppressWarnings("UnusedDeclaration")
 public interface ITalkRpcServer {
 
     /**
@@ -516,7 +516,6 @@ public interface ITalkRpcServer {
      */
     void updateGroupAvatar(String groupId, String avatarUrl);
 
-
     /** Update role of client in group; currently only 'member' and 'admin' are define as role
      * @param groupId denotes the group to rename
      * @param clientId denotes the member to assign the role to
@@ -531,60 +530,6 @@ public interface ITalkRpcServer {
      */
     void updateGroupRole(String groupId, String clientId, String role);
 
-    /** Update the encrypted shared symmetric group key for a specified client;
-     it is a group admins responsibility to distribute the shared group key to all members
-     * @param groupId denotes the group the key belongs to
-     * @param clientId denotes the client the key is encrypted for
-     * @param keyId is a name for the key unique within the realm of the client, typically a fingerprint of the key
-     * @param key b64 encoded cyphertext of the shared group key, encrypted with the client's public key
-     * @talk.preconditions client must be logged in, connected client must be admin member of the group
-     * @talk.preconditions.server
-     * @talk.preconditions.client
-     * @talk.behavior.server Update group key and notify the member of the change
-     * @talk.behavior.client
-     * @talk.statechanges.serverobjects Update group key for the member
-     * @talk.errors.server
-     */
-    //@Deprecated
-    //void updateGroupKey(String groupId, String clientId, String keyId, String key);
-
-    /** Update the encrypted shared symmetric group keys for a myself;
-     * can be called by a non-admin client member when the clients public key has changed
-     * @param groupId denotes the group the key belongs to
-     * @param sharedKeyId denotes is a truncated secure hash of the shared key
-     * @param sharedKeyIdSalt is some random data used in the computation of the secure hash of the shared key
-     * @param publicKeyId is the key ids of the cryptedSharedKey
-     * @param cryptedSharedKey are the b64 encoded cyphertext of the shared group key, encrypted with my public key
-     * @talk.preconditions client must be logged in, connected client must be member of the group, and a group key must have been previously set by a group admin via updateGroupKeys(), sharedKeyId and Salt must match the group shared key id and salt
-     * @talk.preconditions.server
-     * @talk.preconditions.client
-     * @talk.behavior.server Update my group key and notify the members of the change
-     * @talk.behavior.client
-     * @talk.statechanges.serverobjects Update the encrypted group key for the calling client's group membership
-     * @talk.errors.server
-     */
-    public void updateMyGroupKey(String groupId,String sharedKeyId, String sharedKeyIdSalt, String publicKeyId, String cryptedSharedKey);
-
-    /** Update the encrypted shared symmetric group keys for the specified clients;
-     it is a group admins responsibility to distribute the shared group key to all members
-     * @param groupId denotes the group the key belongs to
-     * @param sharedKeyId denotes is a truncated secure hash of the shared key
-     * @param sharedKeyIdSalt is some random data used in the computation of the secure hash of the shared key
-     * @param clientIds is an array of client ids the keys are encrypted for
-     * @param publicKeyIds is an array matching the clientIds array with key ids of the cryptedSharedKeys
-     * @param cryptedSharedKeys are the b64 encoded cyphertexts of the shared group key, encrypted with the client's public key
-     * @return a list of group member client ids where sharedKeyId does not match after updating if the groupkey was updated
-     *         successfully. Otherwise the clientId of the calling (admin) is returned, indicating that the groupkey update was denied.
-     * @talk.preconditions client must be logged in, connected client must be admin member of the group
-     * @talk.preconditions.server
-     * @talk.preconditions.client
-     * @talk.behavior.server Update group keys and notify the members of the change
-     * @talk.behavior.client
-     * @talk.statechanges.serverobjects Update group keys for the specified members, update group key information
-     * @talk.errors.server
-     */
-    String[] updateGroupKeys(String groupId, String sharedKeyId, String sharedKeyIdSalt, String[] clientIds, String[] publicKeyIds, String[] cryptedSharedKeys);
-
     /** Retrieve members of a group changed after given date
      * @param groupId denotes the group to retrieve the members of
      * @param lastKnown is the date in milliseconds since start of year 1970
@@ -597,21 +542,6 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      */
     TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown);
-
-    /** This function is deprecated and must not be used - use updateGroupRole and updateGroupKey instead!
-     (Was supposed to update information for a group member, but it is broken because it only updates role and key and not the keyId;
-     however, it does not seem to be used anyway)
-
-     * @param member denotes the group member to update as well as the new information, currently role and key
-     * @talk.preconditions client must be logged in, connected client must be admin member of the group
-     * @talk.preconditions.server
-     * @talk.preconditions.client
-     * @talk.behavior.server
-     * @talk.statechanges.serverobjects Update group key and role for a member
-     * @talk.errors.server
-     * @talk.todo remove from API
-     */
-    //void updateGroupMember(TalkGroupMember member);
 
     /** remove (kick) a member from a group
      * @param groupId denotes the group from which the member is to be removed

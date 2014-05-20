@@ -6,12 +6,10 @@ import com.beust.jcommander.Parameter;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
-
 import java.util.ArrayList;
 
 @CLICommand(name = "ccreate", description = "Create clients")
 public class ClientCreate extends TalkToolCommand {
-
     @Parameter(description = "Number of clients to create", names = "-n")
     int pNumClients = 1;
     @Parameter(description = "Select clients after creation", names = "-s")

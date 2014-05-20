@@ -26,6 +26,7 @@ import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import com.hoccer.talk.server.update.UpdateAgent;
 import de.undercouch.bson4jackson.BsonFactory;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -257,11 +258,8 @@ public class TalkServer {
      * @return true if the client is connected
      */
     public boolean isClientReady(String clientId) {
-        TalkRpcConnection c = getClientConnection(clientId);
-        if (c != null) {
-            return c.isReady();
-        }
-        return false;
+        TalkRpcConnection client = getClientConnection(clientId);
+        return client != null && client.isReady();
     }
 
     /**
@@ -270,6 +268,7 @@ public class TalkServer {
      * @param clientId of the client to check for
      * @return connection of the client or null
      */
+    @Nullable
     public TalkRpcConnection getClientConnection(String clientId) {
         return mConnectionsByClientId.get(clientId);
     }
@@ -326,13 +325,12 @@ public class TalkServer {
         mConnections.remove(connection);
         // remove connection from table
         if (connection.getClientId() != null) {
-            connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
-
             String clientId = connection.getClientId();
             // remove connection from table
             mConnectionsByClientId.remove(clientId);
             // update presence for connection status change
             mUpdateAgent.requestPresenceUpdate(clientId, CONNECTION_STATUS_UPDATE_FIELDS);
+            connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
         }
         // disconnect if we still are
         if (connection.isConnected()) {

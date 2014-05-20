@@ -28,24 +28,21 @@ public class CleaningAgent {
 
     private final static Logger LOG = Logger.getLogger(CleaningAgent.class);
 
-    TalkServer mServer;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final TalkServer mServer;
+    private final TalkServerConfiguration mConfig;
+    private final ITalkServerDatabase mDatabase;
+    private final FilecacheClient mFilecache;
+    private final ScheduledExecutorService mExecutor;
 
-    TalkServerConfiguration mConfig;
-
-    ITalkServerDatabase mDatabase;
-
-    FilecacheClient mFilecache;
-
-    ScheduledExecutorService mExecutor;
-
-    static final int KEY_LIFE_TIME = 3; // in months
-    static final int RELATIONSHIP_LIFE_TIME = 3; // in months
+    private static final int KEY_LIFE_TIME = 3; // in months
+    private static final int RELATIONSHIP_LIFE_TIME = 3; // in months
 
     public CleaningAgent(TalkServer server) {
         mServer = server;
-        mConfig = server.getConfiguration();
-        mDatabase = server.getDatabase();
-        mFilecache = server.getFilecacheClient();
+        mConfig = mServer.getConfiguration();
+        mDatabase = mServer.getDatabase();
+        mFilecache = mServer.getFilecacheClient();
         mExecutor = Executors.newScheduledThreadPool(
             TalkServerConfiguration.THREADS_CLEANING,
             new NamedThreadFactory("cleaning-agent")
@@ -68,7 +65,6 @@ public class CleaningAgent {
     }
 
     // TODO: Also clean groups (normal and nearby)
-
 
     public void cleanClientData(final String clientId) {
         LOG.debug("cleaning client " + clientId);
@@ -211,7 +207,6 @@ public class CleaningAgent {
         LOG.debug("cleaning tokens for client " + clientId);
 
         Date now = new Date();
-        int numKept = 0;
         int numSpent = 0;
         int numExpired = 0;
         List<TalkToken> tokens = mDatabase.findTokensByClient(clientId);
@@ -224,7 +219,6 @@ public class CleaningAgent {
             if (token.getExpiryTime().before(now)) {
                 numExpired++;
                 mDatabase.deleteToken(token);
-                continue;
             }
         }
         if (numSpent > 0) {
@@ -232,9 +226,6 @@ public class CleaningAgent {
         }
         if (numExpired > 0) {
             LOG.debug("deleted " + numExpired + " expired tokens");
-        }
-        if (numKept > 0) {
-            LOG.debug("kept " + numKept + " tokens");
         }
     }
 

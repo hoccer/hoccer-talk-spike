@@ -10,18 +10,27 @@ import com.hoccer.talk.tool.client.TalkToolClientCommand;
 import java.util.List;
 
 @CLICommand(name = "csetnearby", description = "Activate/deactivate nearby mode of a client, " +
-                                               "use: csetnearby -c <client-id> <true|false>")
+        "use: csetnearby -c <client-id> <true|false>")
 public class ClientSetNearby extends TalkToolClientCommand {
 
     @Parameter(description = "<nearby-mode enabled flag (true|false)> - default: 'true'", names = "-f")
     List<Boolean> pNearbyEnabled;
 
+    @Parameter(description = "<nearby-mode regularly update flag (true|false) - default: 'false'", names = "-r")
+    List<Boolean> pScheduleNearby;
+
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) {
         Boolean nearbyEnabled = true;
-        if (!pNearbyEnabled.isEmpty()) {
+        if (pNearbyEnabled != null && !pNearbyEnabled.isEmpty()) {
             nearbyEnabled = pNearbyEnabled.get(0);
         }
-        client.setNearby(nearbyEnabled);
+
+        Boolean scheduleEnabled = false;
+        if (pScheduleNearby != null && !pScheduleNearby.isEmpty()) {
+            scheduleEnabled = pScheduleNearby.get(0);
+        }
+
+        client.setNearby(nearbyEnabled, scheduleEnabled);
     }
 }

@@ -9,10 +9,9 @@ import java.util.concurrent.Executors;
 
 public class NotificationDeferrer {
 
-    private Executor mExecutor;
+    private final Executor mExecutor;
 
     public NotificationDeferrer(int poolSize, String poolName) {
-
         mExecutor = Executors.newScheduledThreadPool(
                 poolSize,
                 new NamedThreadFactory(poolName)
@@ -39,7 +38,7 @@ public class NotificationDeferrer {
         if (context.get() != null) {
             ArrayList<Runnable> queue = context.get();
 
-            if (queue.size() > 0) {
+            if (!queue.isEmpty()) {
                 LOG.trace("  * " + queue.size() + " notification generators were queued. flushing them...");
                 for (Runnable notificationGenerator : queue) {
                     mExecutor.execute(notificationGenerator);
