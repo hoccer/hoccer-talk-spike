@@ -89,7 +89,7 @@ public class TalkDelivery {
     /**
      * an optional UUID identifying the communication group
      */
-    @DatabaseField(columnName = FIELD_GROUP_ID, canBeNull = true)
+    @DatabaseField(columnName = FIELD_GROUP_ID)
     String groupId;
 
     /**
@@ -142,6 +142,21 @@ public class TalkDelivery {
     @JsonIgnore
     public boolean isFinished() {
         return state.equals(STATE_ABORTED) || state.equals(STATE_FAILED) || state.equals(STATE_CONFIRMED);
+    }
+
+    @JsonIgnore
+    public boolean isClientDelivery() {
+        return receiverId != null && groupId == null;
+    }
+
+    @JsonIgnore
+    public boolean isGroupDelivery() {
+        return groupId != null && receiverId == null;
+    }
+
+    @JsonIgnore
+    public boolean hasValidRecipient() {
+        return isClientDelivery() || isGroupDelivery();
     }
 
     public String getMessageId() {
