@@ -18,7 +18,7 @@ public class TalkGroupMember {
     public static final String ROLE_MEMBER = "member";
 
     public static boolean isValidRole(String role) {
-        return role.equals(ROLE_ADMIN) || role.equals(ROLE_MEMBER);
+        return ROLE_ADMIN.equals(role) || ROLE_MEMBER.equals(role);
     }
 
     public static final String[] ACTIVE_STATES = {
