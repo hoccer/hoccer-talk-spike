@@ -12,6 +12,8 @@ import java.util.Date;
  * 
  * @author ingo
  */
+// Suppress unused warnings since they are external API entry points and are called from the outside via JsonRpc (via Websockets)
+@SuppressWarnings("UnusedDeclaration")
 public interface ITalkRpcServer {
 
     /**
