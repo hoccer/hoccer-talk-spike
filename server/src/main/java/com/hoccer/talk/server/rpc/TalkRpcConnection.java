@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Connection object representing one JSON-RPC connection each
  * <p/>
@@ -31,7 +33,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     private static final Logger LOG = Logger.getLogger(TalkRpcConnection.class);
 
     // TODO find a better place for this message...
-    private static final String UPDATE_NAGGING_MESSAGE = "Please update your Hoccer XO client!";
+    private static final String UPDATE_NAGGING_MESSAGE = "Bitte update XO und installiere die neueste Version. Tolle neue Funktionen warten auf dich! Please update XO and install the new version. Great new features are waiting for you!";
 
     /**
      * Server this connection belongs to
@@ -52,12 +54,6 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * RPC interface to client
      */
     private final ITalkRpcClient mClientRpc;
-
-    /**
-     * Last time we have seen client activity (connection or message)
-     * *Note:* This does not seem to do anything!
-     */
-    private long mLastActivity;
 
     /**
      * Client object (if logged in)
@@ -83,6 +79,10 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     private Long mLastPingLatency;
     private Date mLastPingOccured;
 
+    // Penalty is measured in milliseconds for the purpose of selecting suitable connections for a task.
+    // If a client fails at this task the connection is penalized so it less likely to be considered for this task.
+    private long mCurrentPriorityPenalty = 0L;
+
     /**
      * Construct a connection for the given server using the given connection
      *
@@ -90,11 +90,10 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * @param connection that we should handle
      */
     public TalkRpcConnection(TalkServer server, JsonRpcWsConnection connection, HttpServletRequest request) {
-        // remember stuff
         mServer = server;
         mConnection = connection;
         mInitialRequest = request;
-        // create a json-rpc proxy for client notifications
+        // create a json-rpc proxy for client notifications and rpc calls
         mClientRpc = connection.makeProxy(ITalkRpcClient.class);
         // register ourselves for connection events
         mConnection.addListener(this);
@@ -154,10 +153,11 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     }
 
     /**
-     * Returns the logged-in clients id or null
+     * Returns the logged-in client's id or null
      *
-     * @return TalkClient client
+     * @return TalkClient client (or null)
      */
+    @Nullable
     public String getClientId() {
         if (mTalkClient != null) {
             return mTalkClient.getClientId();
@@ -215,9 +215,6 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onOpen(JsonRpcConnection connection) {
         LOG.info("[connectionId: '" + getConnectionId() + "'] connection opened by " + getRemoteAddress());
-        // reset the time of last activity
-        mLastActivity = System.currentTimeMillis();
-        // tell the server about the connection
         mServer.connectionOpened(this);
     }
 
@@ -233,27 +230,20 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.info("[connectionId: '" + getConnectionId() + "'] connection closed");
-        // invalidate the time of last activity
-        mLastActivity = -1;
-        // tell the server about the disconnect
         mServer.connectionClosed(this);
-
     }
 
     /**
      * Disconnect the underlying connection and finish up
      */
     public void disconnect() {
-
-        if (mTalkClient != null) {
-            if (mTalkClient.isReady()) {
-                // set client to not ready
-                ITalkServerDatabase database = mServer.getDatabase();
-                TalkClient client = database.findClientById(mTalkClient.getClientId());
-                if (client != null) {
-                    client.setTimeReady(null);
-                    database.saveClient(client);
-                }
+        if (mTalkClient != null && mTalkClient.isReady()) {
+            // set client to not ready
+            ITalkServerDatabase database = mServer.getDatabase();
+            TalkClient client = database.findClientById(mTalkClient.getClientId());
+            if (client != null) {
+                client.setTimeReady(null);
+                database.saveClient(client);
             }
         }
 
@@ -266,8 +256,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
     public void identifyClient(String clientId) {
         LOG.info("[connectionId: '" + getConnectionId() + "'] logged in as " + clientId);
-
-        ITalkServerDatabase database = mServer.getDatabase();
+        final ITalkServerDatabase database = mServer.getDatabase();
 
         // mark connection as logged in
         mTalkClient = database.findClientById(clientId);
@@ -290,14 +279,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         if (isLegacyMode()) {
             LOG.info("Legacy mode active -> Issuing upgrade nagging to client");
             nagUserUpdate();
-            return;
         }
-
-        // attempt to deliver anything we might have
-        // mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId());
-
-        // request a ping in a few seconds
-        //mServer.getPingAgent().requestPing(mTalkClient.getClientId());
     }
 
     /**
@@ -422,5 +404,17 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     public Date getLastPingOccured() {
         return mLastPingOccured;
+    }
+
+    public long getCurrentPriorityPenalty() {
+        return mCurrentPriorityPenalty;
+    }
+
+    public void penalizePriorization(long penalty) {
+        mCurrentPriorityPenalty += penalty;
+    }
+
+    public void resetPriorityPenalty() {
+        mCurrentPriorityPenalty = 0L;
     }
 }

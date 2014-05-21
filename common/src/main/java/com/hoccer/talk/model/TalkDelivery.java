@@ -10,100 +10,121 @@ import java.util.Date;
  * Delivery objects represent the receiver-dependent
  * envelope of a given message and contain
  * receiver-dependent delivery state
- * 
+ * <p/>
  * - saved in the database
  * - manipulated by delivery logic
  * - used in RPC for requesting delivery
  * - used in RPC for reflecting delivery state
- * 
+ *
  * @author ingo
  */
-@DatabaseTable(tableName="delivery")
+@DatabaseTable(tableName = "delivery")
 public class TalkDelivery {
 
-    public static final String FIELD_DELIVERY_ID      = "deliveryId";
-    public static final String FIELD_MESSAGE_ID       = "messageId";
-    public static final String FIELD_MESSAGE_TAG      = "messageTag";
-    public static final String FIELD_SENDER_ID        = "senderId";
-    public static final String FIELD_RECEIVER_ID      = "receiverId";
-    public static final String FIELD_GROUP_ID         = "groupId";
-    public static final String FIELD_STATE            = "state";
-    public static final String FIELD_KEY_ID           = "keyId";
-    public static final String FIELD_KEY_CIPHERTEXT   = "keyCiphertext";
-    public static final String FIELD_TIME_ACCEPTED    = "timeAccepted";
-    public static final String FIELD_TIME_CHANGED     = "timeChanged";
+    public static final String FIELD_DELIVERY_ID = "deliveryId";
+    public static final String FIELD_MESSAGE_ID = "messageId";
+    public static final String FIELD_MESSAGE_TAG = "messageTag";
+    public static final String FIELD_SENDER_ID = "senderId";
+    public static final String FIELD_RECEIVER_ID = "receiverId";
+    public static final String FIELD_GROUP_ID = "groupId";
+    public static final String FIELD_STATE = "state";
+    public static final String FIELD_KEY_ID = "keyId";
+    public static final String FIELD_KEY_CIPHERTEXT = "keyCiphertext";
+    public static final String FIELD_TIME_ACCEPTED = "timeAccepted";
+    public static final String FIELD_TIME_CHANGED = "timeChanged";
     public static final String FIELD_TIME_UPDATED_OUT = "timeUpdatedOut";
-    public static final String FIELD_TIME_UPDATED_IN  = "timeUpdatedIn";
+    public static final String FIELD_TIME_UPDATED_IN = "timeUpdatedIn";
 
-    public static final String STATE_NEW        = "new";
+    public static final String STATE_NEW = "new";
     public static final String STATE_DELIVERING = "delivering";
-    public static final String STATE_DELIVERED  = "delivered";
-    public static final String STATE_CONFIRMED  = "confirmed";
-    public static final String STATE_FAILED     = "failed";
-    public static final String STATE_ABORTED    = "aborted";
+    public static final String STATE_DELIVERED = "delivered";
+    public static final String STATE_CONFIRMED = "confirmed";
+    public static final String STATE_FAILED = "failed";
+    public static final String STATE_ABORTED = "aborted";
 
     public static boolean isValidState(String state) {
-        if(state != null) {
-            if(state.equals(STATE_NEW)
-                    || state.equals(STATE_DELIVERING)
-                    || state.equals(STATE_DELIVERED)
-                    || state.equals(STATE_CONFIRMED)
-                    || state.equals(STATE_FAILED)
-                    || state.equals(STATE_ABORTED)) {
-                return true;
-            }
-        }
-        return false;
+        return STATE_NEW.equals(state)  ||
+                STATE_DELIVERING.equals(state) ||
+                STATE_DELIVERED.equals(state) ||
+                STATE_CONFIRMED.equals(state) ||
+                STATE_FAILED.equals(state) ||
+                STATE_ABORTED.equals(state);
     }
 
-    /** unique object ID for the database, never transfered */
+    /**
+     * unique object ID for the database, never transfered
+     */
     private String _id;
 
-    /** another unique object ID for the database, never transfered */
+    /**
+     * another unique object ID for the database, never transfered
+     */
     @DatabaseField(columnName = FIELD_DELIVERY_ID, generatedId = true)
     private int deliveryId;
 
-    /** a server generated UUID identifying the message globally within the system */
+    /**
+     * a server generated UUID identifying the message globally within the system
+     */
     @DatabaseField(columnName = FIELD_MESSAGE_ID)
-	String messageId;
+    String messageId;
 
-    /** a sender generated UUID identifying the message to the sending client */
+    /**
+     * a sender generated UUID identifying the message to the sending client
+     */
     @DatabaseField(columnName = FIELD_MESSAGE_TAG)
     String messageTag;
 
-    /** a UUID identifying the sending client */
+    /**
+     * a UUID identifying the sending client
+     */
     @DatabaseField(columnName = FIELD_SENDER_ID)
     String senderId;
 
-    /** a UUID identifying the receiving client */
+    /**
+     * a UUID identifying the receiving client
+     */
     @DatabaseField(columnName = FIELD_RECEIVER_ID)
-	String receiverId;
+    String receiverId;
 
-    /** an optional UUID identifying the communication group */
-    @DatabaseField(columnName = FIELD_GROUP_ID, canBeNull = true)
+    /**
+     * an optional UUID identifying the communication group
+     */
+    @DatabaseField(columnName = FIELD_GROUP_ID)
     String groupId;
 
-    /** the delivery state, can be "new","delivering","delivered","confirmed","failed","aborted";     */
+    /**
+     * the delivery state, can be "new","delivering","delivered","confirmed","failed","aborted";
+     */
     @DatabaseField(columnName = FIELD_STATE)
     String state;
 
-    /** an id for the public key the keyCiphertext was encrypted with, typically a lower cased hex string the first 8 bytes of an SHA256-hash of the PKCS1 encoded public key, e.g. "83edb9ee04d8e372" */
+    /**
+     * an id for the public key the keyCiphertext was encrypted with, typically a lower cased hex string the first 8 bytes of an SHA256-hash of the PKCS1 encoded public key, e.g. "83edb9ee04d8e372"
+     */
     @DatabaseField(columnName = FIELD_KEY_ID)
     String keyId;
 
-    /** the public key encrypted cipherText of the shared symmetric (e.g. AES) key the message body and attachment is encrypted with, b64-encoded */
+    /**
+     * the public key encrypted cipherText of the shared symmetric (e.g. AES) key the message body and attachment is encrypted with, b64-encoded
+     */
     @DatabaseField(columnName = FIELD_KEY_CIPHERTEXT, width = 1024)
     String keyCiphertext;
 
-    /** the server generated time stamp of the point in the message has been accepted by the server; this field denotes the official time ordering of all messages in a chat */
+    /**
+     * the server generated time stamp of the point in the message has been accepted by the server; this field denotes the official time ordering of all messages in a chat
+     */
     @DatabaseField(columnName = FIELD_TIME_ACCEPTED)
     Date timeAccepted;
 
-    /** the server generated time stamp with the last time the delivery state has changed */
+    /**
+     * the server generated time stamp with the last time the delivery state has changed
+     */
     @DatabaseField(columnName = FIELD_TIME_CHANGED, canBeNull = true)
     Date timeChanged;
 
-    /** the server generated time stamp with the last time an outgoingDelivery-Notification has been sent from the server to the  */
+    /**
+     * the server generated time stamp with the last time an outgoingDelivery-Notification has been sent from the server to the
+     */
     @DatabaseField(columnName = FIELD_TIME_UPDATED_OUT, canBeNull = true)
     Date timeUpdatedOut;
 
@@ -123,13 +144,28 @@ public class TalkDelivery {
         return state.equals(STATE_ABORTED) || state.equals(STATE_FAILED) || state.equals(STATE_CONFIRMED);
     }
 
-	public String getMessageId() {
-		return messageId;
-	}
+    @JsonIgnore
+    public boolean isClientDelivery() {
+        return receiverId != null && groupId == null;
+    }
 
-	public void setMessageId(String messageId) {
-		this.messageId = messageId;
-	}
+    @JsonIgnore
+    public boolean isGroupDelivery() {
+        return groupId != null && receiverId == null;
+    }
+
+    @JsonIgnore
+    public boolean hasValidRecipient() {
+        return isClientDelivery() || isGroupDelivery();
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
 
     public String getMessageTag() {
         return messageTag;
@@ -148,12 +184,12 @@ public class TalkDelivery {
     }
 
     public String getReceiverId() {
-		return receiverId;
-	}
+        return receiverId;
+    }
 
-	public void setReceiverId(String receiverId) {
-		this.receiverId = receiverId;
-	}
+    public void setReceiverId(String receiverId) {
+        this.receiverId = receiverId;
+    }
 
     public String getGroupId() {
         return groupId;
