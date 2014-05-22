@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.activity;
 
+import android.graphics.Color;
 import android.view.*;
 import android.widget.LinearLayout;
 import com.hoccer.xo.android.XoApplication;
@@ -54,6 +55,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else {
             addPreferencesFromResource(R.xml.preferences);
         }
+        getListView().setBackgroundColor(Color.WHITE);
     }
 
     @Override

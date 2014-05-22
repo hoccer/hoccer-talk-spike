@@ -4,6 +4,7 @@ import android.app.*;
 import android.content.*;
 import android.graphics.drawable.ColorDrawable;
 import android.os.*;
+import android.support.v4.app.FragmentActivity;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -13,12 +14,13 @@ import com.google.zxing.integration.android.IntentResult;
 
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
+import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
+import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.RichContactsAdapter;
@@ -51,7 +53,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -62,7 +63,7 @@ import java.util.concurrent.TimeUnit;
  * These activites continually keep the background service which
  * we use for connection retention alive by calling it via RPC.
  */
-public abstract class XoActivity extends Activity {
+public abstract class XoActivity extends FragmentActivity {
 
     public final static int REQUEST_SELECT_AVATAR = 23;
 
@@ -131,6 +132,8 @@ public abstract class XoActivity extends Activity {
     private ScreenReceiver mScreenListener;
     private XoAlertListener mAlertListener;
 
+
+
     public XoActivity() {
         LOG = Logger.getLogger(getClass());
     }
@@ -141,6 +144,10 @@ public abstract class XoActivity extends Activity {
 
     public XoClient getXoClient() {
         return XoApplication.getXoClient();
+    }
+
+    public XoSoundPool getXoSoundPool() {
+        return XoApplication.getXoSoundPool();
     }
 
     public ScheduledExecutorService getBackgroundExecutor() {
@@ -158,6 +165,99 @@ public abstract class XoActivity extends Activity {
     public void unregisterXoFragment(IXoFragment fragment) {
         mTalkFragments.remove(fragment);
     }
+
+
+    // Application background/foreground observation
+    public static boolean isAppInBackground = false;
+    public static boolean isWindowFocused = false;
+    public static boolean isMenuOpened = false;
+    public static boolean isBackPressed = false;
+    public static boolean isBackgroundActive = false;
+
+    protected void applicationWillEnterForeground() {
+        LOG.debug("Application will enter foreground.");
+        isAppInBackground = false;
+        isBackgroundActive = false;
+        XoApplication.enterForegroundMode();
+    }
+
+    protected void applicationWillEnterBackground() {
+        LOG.debug("Application will enter background.");
+        isAppInBackground = true;
+        XoApplication.enterBackgroundMode();
+    }
+
+    protected void applicationWillEnterBackgroundActive() {
+        LOG.debug("Application will enter background active.");
+        isAppInBackground = false;
+        XoApplication.enterBackgroundActiveMode();
+    }
+
+    protected void setBackgroundActive() {
+        isBackgroundActive = true;
+    }
+
+    public void startExternalActivity(Intent intent) {
+        LOG.debug(getClass() + " starting external activity " + intent.toString());
+        setBackgroundActive();
+        startActivity(intent);
+    }
+
+    public void startExternalActivityForResult(Intent intent, int requestCode) {
+        LOG.debug(getClass() + " starting external activity " +  intent.toString() + " for request code: " + requestCode);
+        setBackgroundActive();
+        startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    protected void onStart() {
+        if (isAppInBackground || isBackgroundActive) {
+            applicationWillEnterForeground();
+        }
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (!isWindowFocused) {
+            if (isBackgroundActive) {
+                applicationWillEnterBackgroundActive();
+            } else {
+                applicationWillEnterBackground();
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!(this instanceof ContactsActivity)) {
+            isBackPressed = true;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        isWindowFocused = hasFocus;
+        if (isBackPressed && !hasFocus) {
+            isBackPressed = false;
+            isWindowFocused = true;
+        }
+        super.onWindowFocusChanged(hasFocus);
+    }
+
+    /*@Override
+    public boolean onMenuItemSelected(int featureId, android.view.MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
+        }
+        return true;
+    }*/
+
+    //--------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -207,7 +307,6 @@ public abstract class XoActivity extends Activity {
         mServiceConnection = new MainServiceConnection();
         bindService(serviceIntent, mServiceConnection, BIND_IMPORTANT);
         checkKeys();
-        getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
 
         getXoClient().registerAlertListener(mAlertListener);
     }
@@ -301,26 +400,8 @@ public abstract class XoActivity extends Activity {
             unbindService(mServiceConnection);
             mServiceConnection = null;
         }
-        checkIfAppInForeground();
 
         getXoClient().unregisterAlertListener(mAlertListener);
-    }
-
-    public void checkIfAppInForeground() {
-        Handler checkState = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                ActivityManager activityManager = (ActivityManager) getApplicationContext().
-                        getSystemService(Context.ACTIVITY_SERVICE);
-                List<ActivityManager.RunningTaskInfo> services = activityManager.getRunningTasks(Integer.MAX_VALUE);
-                String ourName = getApplicationContext().getPackageName().toString();
-                if (!services.get(0).topActivity.getPackageName().toString().equalsIgnoreCase(ourName)
-                        || !mScreenListener.isScreenOn()) {
-                    getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_OFFLINE);
-                }
-            }
-        };
-        checkState.sendEmptyMessageDelayed(0, 1000);
     }
 
     @Override
@@ -467,7 +548,7 @@ public abstract class XoActivity extends Activity {
         if (requestCode == REQUEST_SELECT_AVATAR) {
             if (mAvatarSelection != null) {
                 ImageSelector selector = (ImageSelector) mAvatarSelection.getSelector();
-                startActivityForResult(selector.createCropIntent(this, data.getData()),
+                startExternalActivityForResult(selector.createCropIntent(this, data.getData()),
                         REQUEST_CROP_AVATAR);
             }
             return;
@@ -508,8 +589,8 @@ public abstract class XoActivity extends Activity {
             if (barcode != null) {
                 LOG.debug("scanned barcode: " + barcode.getContents());
                 String code = barcode.getContents();
-                if (code.startsWith("hxo://")) {
-                    mBarcodeToken = code.replace("hxo://", "");
+                if (code.startsWith(XoClientConfiguration.HXO_URL_SCHEME)) {
+                    mBarcodeToken = code.replace(XoClientConfiguration.HXO_URL_SCHEME, "");
                 }
             }
             return;
@@ -666,6 +747,9 @@ public abstract class XoActivity extends Activity {
 
     public void selectAttachment() {
         LOG.debug("selectAttachment()");
+
+        setBackgroundActive();
+
         mAttachmentSelection = ContentRegistry.get(this)
                 .selectAttachment(this, REQUEST_SELECT_ATTACHMENT);
     }
@@ -685,7 +769,7 @@ public abstract class XoActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mBarcodeService.shareText("hxo://" + token);
+                        mBarcodeService.shareText(XoClientConfiguration.HXO_URL_SCHEME + token);
                     }
                 });
             }
@@ -699,7 +783,7 @@ public abstract class XoActivity extends Activity {
             TalkClientContact self = mDatabase.findSelfContact(false);
 
             String message = String
-                    .format(getString(R.string.sms_invitation_text), token, self.getName());
+                    .format(getString(R.string.sms_invitation_text), XoClientConfiguration.HXO_URL_SCHEME, token, self.getName());
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //At least KitKat
                 String defaultSmsPackageName = Telephony.Sms

@@ -9,10 +9,9 @@ import java.util.concurrent.Executors;
 
 public class NotificationDeferrer {
 
-    private Executor mExecutor;
+    private final Executor mExecutor;
 
     public NotificationDeferrer(int poolSize, String poolName) {
-
         mExecutor = Executors.newScheduledThreadPool(
                 poolSize,
                 new NamedThreadFactory(poolName)
@@ -26,33 +25,34 @@ public class NotificationDeferrer {
 
         if (context.get() != null) {
             ArrayList<Runnable> queue = context.get();
-            LOG.debug("context is currently set (" + queue.size() + " items). Queueing notification generator.");
+            LOG.trace("context is currently set (" + queue.size() + " items). Queueing notification generator.");
             queue.add(notificationGenerator);
         } else {
-            LOG.debug("context is currently NOT set. Immediately executing notification generators");
+            LOG.trace("context is currently NOT set. Immediately executing notification generators");
             mExecutor.execute(notificationGenerator);
         }
     }
 
     private void flushContext(ThreadLocal<ArrayList<Runnable>> context) {
-        LOG.debug("Flushing context.");
+        LOG.trace("Flushing context.");
         if (context.get() != null) {
             ArrayList<Runnable> queue = context.get();
 
-            if (queue.size() > 0) {
-                LOG.debug("  * " + queue.size() + " notification generators were queued. flushing them...");
-                for (Runnable notification : queue) {
-                    mExecutor.execute(notification);
+            if (!queue.isEmpty()) {
+                LOG.trace("  * " + queue.size() + " notification generators were queued. flushing them...");
+                for (Runnable notificationGenerator : queue) {
+                    mExecutor.execute(notificationGenerator);
                 }
             } else {
-                LOG.debug("  * No notification generators were queued - nothing to do.");
+                LOG.trace("  * No notification generators were queued - nothing to do.");
             }
         }
         context.remove();
     }
 
     protected void setRequestContext(ThreadLocal<ArrayList<Runnable>> context) {
-        LOG.debug("Setting context.");
+        LOG.trace("Setting context.");
+
         if (context.get() != null) {
             LOG.warn("context still contains notification generators! Flushing(executing) them now.");
             flushContext(context);
@@ -61,7 +61,7 @@ public class NotificationDeferrer {
     }
 
     protected void clearRequestContext(ThreadLocal<ArrayList<Runnable>> context) {
-        LOG.debug("Clearing context.");
+        LOG.trace("Clearing context.");
         flushContext(context);
     }
 

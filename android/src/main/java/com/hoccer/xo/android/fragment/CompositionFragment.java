@@ -1,11 +1,14 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Dialog;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.gesture.Gestures;
+import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.release.R;
 
 import android.app.AlertDialog;
@@ -25,7 +28,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class CompositionFragment extends XoFragment implements View.OnClickListener,
-        View.OnLongClickListener {
+        View.OnLongClickListener, MotionGestureListener {
 
     private EditText mTextEdit;
 
@@ -105,6 +108,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             }
         };
         mTextEdit.addTextChangedListener(mTextWatcher);
+
     }
 
     @Override
@@ -175,8 +179,17 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         mAttachment = null;
     }
 
+    private boolean isSendMessagePossible() {
+        return !(mContact.isGroup() && mContact.getGroupMemberships().size() == 1);
+    }
+
     private void sendComposedMessage() {
         if (mContact == null) {
+            return;
+        }
+
+        if (!isSendMessagePossible()) {
+            showAlertSendMessageNotPossible();
             return;
         }
 
@@ -195,6 +208,21 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         clearComposedMessage();
     }
 
+    private void showAlertSendMessageNotPossible() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getXoActivity());
+        builder.setTitle(R.string.composition_alert_empty_group_title);
+        builder.setMessage(R.string.composition_alert_empty_group_text);
+        builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int index) {
+                dialog.dismiss();
+            }
+        });
+
+        Dialog dialog = builder.create();
+        dialog.show();
+    }
+
     @Override
     public boolean onLongClick(View v) {
         boolean longpressHandled = false;
@@ -207,6 +235,17 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             clearComposedMessage();
         }
         return longpressHandled;
+    }
+
+    @Override
+    public void onMotionGesture(int pType) {
+        String gestureName = Gestures.GESTURE_NAMES.get(pType);
+        LOG.debug("Received gesture of type: " + gestureName);
+
+        if (isComposed()) {
+            getXoSoundPool().playThrowSound();
+            sendComposedMessage();
+        }
     }
 
     private class AddAttachmentOnClickListener implements View.OnClickListener {

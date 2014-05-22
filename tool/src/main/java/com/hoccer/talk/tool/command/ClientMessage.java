@@ -34,7 +34,7 @@ public class ClientMessage extends TalkToolCommand {
     private final String DEFAULT_MESSAGE = "Hello World";
     private final String ATTACHMENT_CLONES_PATH = "files/clones";
 
-    @Parameter(description = "Clients for message exchange")
+    @Parameter(description = "<sender-id> <recipient-id>")
     List<String> pClients;
 
     @Parameter(description = "Message being sent, defaults to '" + DEFAULT_MESSAGE + "'", names = "-m")
@@ -53,11 +53,6 @@ public class ClientMessage extends TalkToolCommand {
 
     @Override
     protected void run(TalkToolContext context) throws Exception {
-        /*Provider[] provs = Security.getProviders();
-        for(Provider prov: provs) {
-            Console.info(prov.toString());
-        }*/
-
         if (pClients.size() != 2) {
             throw new Exception("Clients must be supplied in a pair (sender, recipient)");
         }
@@ -67,14 +62,7 @@ public class ClientMessage extends TalkToolCommand {
         }
 
         TalkToolClient sender = context.getClientBySelector(pClients.get(0));
-        TalkToolClient recipient = context.getClientBySelector(pClients.get(1));
-        String recipientId;
-        if (recipient == null) {
-            // no tool-client found -> assuming that a tool external client-id was given
-            recipientId = pClients.get(1);
-        } else {
-            recipientId = recipient.getClientId();
-        }
+        String recipientId = context.getClientIdFromParam(pClients.get(1));
 
         TalkClientUpload attachmentUpload = null;
         for (int i = 0; i < pNumMessages; ++i) {
@@ -135,23 +123,31 @@ public class ClientMessage extends TalkToolCommand {
         }
     }
 
+    // TODO: put this into XOClient?!
+    private TalkClientContact getContactForClient(TalkToolClient client, String clientOrGroupId) {
+        TalkClientContact contact = null;
+        try {
+            contact = client.getDatabase().findContactByClientId(clientOrGroupId, false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        // if nothing found as client it might be a group
+        if (contact == null) {
+            try {
+                contact = client.getDatabase().findContactByGroupId(clientOrGroupId, false);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return contact;
+    }
 
     private void sendMessage(TalkToolClient sender, String recipientId, String messageText, TalkClientUpload attachment) {
         Console.info("<ClientMessage::sendMessage> sender-id: '" + sender.getClientId() + "', recipient-id: '" + recipientId + "', message: '" + messageText + "'");
 
-        // check if relationship exists
-        // XXX TODO: implement a relationship-check in XOClient,
-        //           e.g. sender.isKnownRelationship(TalkToolClient recipient)
-        TalkClientContact recipientContact;
-        try {
-            recipientContact = sender.getDatabase().findContactByClientId(recipientId, false);
-        } catch (SQLException e) {
-            recipientContact = null;
-            e.printStackTrace();
-        }
-
+        TalkClientContact recipientContact = getContactForClient(sender, recipientId);
         if (recipientContact == null) {
-            Console.warn("WARN <ClientMessage::sendMessage> The sender has no relationship to the recipient. Doing nothing.");
+            Console.warn("WARN <ClientMessage::sendMessage> The sender doesn't know the recipient. Doing nothing.");
         } else {
             TalkClientMessage clientMessage = sender.getClient().composeClientMessage(recipientContact, messageText, attachment);
             sender.getClient().requestDelivery(clientMessage);

@@ -14,6 +14,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.model.TalkClient;
+import com.hoccer.talk.model.TalkEnvironment;
+import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.server.cleaning.CleaningAgent;
 import com.hoccer.talk.server.database.DatabaseHealthCheck;
@@ -24,9 +26,9 @@ import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import com.hoccer.talk.server.update.UpdateAgent;
 import de.undercouch.bson4jackson.BsonFactory;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -250,11 +252,23 @@ public class TalkServer {
     }
 
     /**
+     * Check if the given client is connected
+     *
+     * @param clientId of the client to check for
+     * @return true if the client is connected
+     */
+    public boolean isClientReady(String clientId) {
+        TalkRpcConnection client = getClientConnection(clientId);
+        return client != null && client.isReady();
+    }
+
+    /**
      * Retrieve the connection of the given client
      *
      * @param clientId of the client to check for
      * @return connection of the client or null
      */
+    @Nullable
     public TalkRpcConnection getClientConnection(String clientId) {
         return mConnectionsByClientId.get(clientId);
     }
@@ -269,10 +283,21 @@ public class TalkServer {
         String clientId = client.getClientId();
         TalkRpcConnection oldConnection = mConnectionsByClientId.get(clientId);
         if (oldConnection != null) {
+            // TODO: LOG this - maybe even on warn level!
             oldConnection.disconnect();
         }
+        connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);  // after logon, destroy possibly left over environments
         mConnectionsByClientId.put(clientId, connection);
-        mUpdateAgent.requestPresenceUpdate(clientId);
+    }
+
+    /**
+     * Notify the server of a ready call
+     *
+     * @param client     that called ready
+     * @param connection the client is on
+     */
+    public void readyClient(TalkClient client, TalkRpcConnection connection) {
+        mUpdateAgent.requestPresenceUpdate(client.getClientId(), null);
     }
 
     /**
@@ -285,6 +310,9 @@ public class TalkServer {
         mConnectionsOpen.incrementAndGet();
         mConnections.add(connection);
     }
+
+    public static final String[] CONNECTION_STATUS_UPDATE_FIELDS_ARRAY = new String[] { TalkPresence.FIELD_CLIENT_ID, TalkPresence.FIELD_CONNECTION_STATUS };
+    public static final Set<String> CONNECTION_STATUS_UPDATE_FIELDS = new HashSet<String>(Arrays.asList(CONNECTION_STATUS_UPDATE_FIELDS_ARRAY));
 
     /**
      * Unregister a connection from the server
@@ -301,7 +329,8 @@ public class TalkServer {
             // remove connection from table
             mConnectionsByClientId.remove(clientId);
             // update presence for connection status change
-            mUpdateAgent.requestPresenceUpdate(clientId);
+            mUpdateAgent.requestPresenceUpdate(clientId, CONNECTION_STATUS_UPDATE_FIELDS);
+            connection.getServerHandler().destroyEnvironment(TalkEnvironment.TYPE_NEARBY);
         }
         // disconnect if we still are
         if (connection.isConnected()) {
@@ -352,5 +381,17 @@ public class TalkServer {
 
     public HealthCheckRegistry getHealthCheckRegistry() {
         return mHealthRegistry;
+    }
+
+    public Vector<TalkRpcConnection> getReadyConnections() {
+        Vector<TalkRpcConnection> readyClientConnections = new Vector<TalkRpcConnection>();
+        Iterator<TalkRpcConnection> iterator = mConnections.iterator();
+        while (iterator.hasNext()) {
+            TalkRpcConnection connection = iterator.next();
+            if (connection.getClient() != null && connection.getClient().isReady()) {
+                readyClientConnections.add(connection);
+            }
+        }
+        return readyClientConnections;
     }
 }

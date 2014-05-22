@@ -17,9 +17,9 @@
           <scope>test</scope>
       </dependency>
       <dependency>
-          <groupId>com.github.joelittlejohn.embedmongo</groupId>
-          <artifactId>embedmongo-maven-plugin</artifactId>
-          <version>${embedmongo-maven-plugin.version}</version>
+          <groupId>de.flapdoodle.embed</groupId>
+          <artifactId>de.flapdoodle.embed.mongo</artifactId>
+          <version>${flapdoodle-embed-mongo.version}</version>
       </dependency>
       <dependency>
           <groupId>hoccer</groupId>
@@ -40,6 +40,12 @@
           <groupId>com.h2database</groupId>
           <artifactId>h2</artifactId>
           <version>${h2-jdbc.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>com.jayway.awaitility</groupId>
+          <artifactId>awaitility</artifactId>
+          <version>1.5.0</version>
+          <scope>test</scope>
       </dependency>
       <dependency>
           <groupId>com.google.code.tempus-fugit</groupId>
@@ -74,25 +80,6 @@
               </execution>
           </executions>
       </plugin>
-        <plugin>
-          <groupId>com.github.joelittlejohn.embedmongo</groupId>
-          <artifactId>embedmongo-maven-plugin</artifactId>
-          <version>${embedmongo-maven-plugin.version}</version>
-          <executions>
-            <execution>
-                <id>start</id>
-                <goals>
-                    <goal>start</goal>
-                </goals>
-            </execution>
-            <execution>
-                <id>stop</id>
-                <goals>
-                    <goal>stop</goal>
-                </goals>
-            </execution>
-          </executions>
-        </plugin>
     </plugins>
   </build>
 </project>

@@ -3,27 +3,19 @@ package com.hoccer.talk.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 
-@DatabaseTable(tableName="relationship")
+@DatabaseTable(tableName = "relationship")
 public class TalkRelationship {
 
-    public static final String STATE_NONE    = "none";
-    public static final String STATE_FRIEND  = "friend";
+    public static final String STATE_NONE = "none";
+    public static final String STATE_FRIEND = "friend";
     public static final String STATE_BLOCKED = "blocked";
 
     public static boolean isValidState(String state) {
-        if(state.equals(STATE_NONE)) {
-            return true;
-        }
-        if(state.equals(STATE_FRIEND)) {
-            return true;
-        }
-        if(state.equals(STATE_BLOCKED)) {
-            return true;
-        }
-        return false;
+        return STATE_NONE.equals(state) || STATE_FRIEND.equals(state) || STATE_BLOCKED.equals(state);
     }
 
     private String _id;
@@ -77,11 +69,13 @@ public class TalkRelationship {
         this.otherClientId = otherClientId;
     }
 
+    @Nullable
     public String getState() {
         return state;
     }
 
     public void setState(String state) {
+        // TODO: validate state here (isValidState)
         this.state = state;
     }
 
@@ -91,6 +85,14 @@ public class TalkRelationship {
 
     public void setLastChanged(Date lastChanged) {
         this.lastChanged = lastChanged;
+    }
+
+    @JsonIgnore
+    public void updateWith(TalkRelationship r) {
+        this.setClientId(r.getClientId());
+        this.setOtherClientId(r.getOtherClientId());
+        this.setState(r.getState());
+        this.setLastChanged(r.getLastChanged());
     }
 
 }

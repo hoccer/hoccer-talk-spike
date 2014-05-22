@@ -3,6 +3,7 @@
 build.log
 build-log.xml
 **/*.iml
+*.iml
 **/.project
 **/.settings
 **/.classpath
@@ -19,4 +20,4 @@ build-log.xml
 
 /server/standalone.conf
 
-server/src/main/resources/git.properties
+/server/src/main/resources/git.properties

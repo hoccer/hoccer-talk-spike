@@ -7,6 +7,7 @@ import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.rpc.ITalkRpcClient;
+import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import org.apache.log4j.Logger;
@@ -14,6 +15,8 @@ import org.apache.log4j.Logger;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Connection object representing one JSON-RPC connection each
@@ -28,6 +31,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Logger for connection-related things
      */
     private static final Logger LOG = Logger.getLogger(TalkRpcConnection.class);
+
+    // TODO find a better place for this message...
+    private static final String UPDATE_NAGGING_MESSAGE = "Bitte update XO und installiere die neueste Version. Tolle neue Funktionen warten auf dich! Please update XO and install the new version. Great new features are waiting for you!";
 
     /**
      * Server this connection belongs to
@@ -50,12 +56,6 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     private final ITalkRpcClient mClientRpc;
 
     /**
-     * Last time we have seen client activity (connection or message)
-     * *Note:* This does not seem to do anything!
-     */
-    private long mLastActivity;
-
-    /**
      * Client object (if logged in)
      */
     private TalkClient mTalkClient;
@@ -74,6 +74,14 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * User data associated to requests
      */
     private final HashMap<Object, Timer.Context> requestTimers= new HashMap<Object, Timer.Context>();
+    private boolean mLegacyMode;
+
+    private Long mLastPingLatency;
+    private Date mLastPingOccured;
+
+    // Penalty is measured in milliseconds for the purpose of selecting suitable connections for a task.
+    // If a client fails at this task the connection is penalized so it less likely to be considered for this task.
+    private long mCurrentPriorityPenalty = 0L;
 
     /**
      * Construct a connection for the given server using the given connection
@@ -82,11 +90,10 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * @param connection that we should handle
      */
     public TalkRpcConnection(TalkServer server, JsonRpcWsConnection connection, HttpServletRequest request) {
-        // remember stuff
         mServer = server;
         mConnection = connection;
         mInitialRequest = request;
-        // create a json-rpc proxy for client notifications
+        // create a json-rpc proxy for client notifications and rpc calls
         mClientRpc = connection.makeProxy(ITalkRpcClient.class);
         // register ourselves for connection events
         mConnection.addListener(this);
@@ -123,6 +130,20 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     }
 
     /**
+     * Indicate if the connection has called ready
+     */
+    public boolean isReady() {
+        return isConnected() && mTalkClient != null && mTalkClient.isReady();
+    }
+
+    /**
+     * Indicate if the client was logged in before the connection was closed
+     */
+    public boolean wasLoggedIn() {
+        return mTalkClient != null;
+    }
+
+    /**
      * Returns the logged-in client or null
      *
      * @return TalkClient client
@@ -132,10 +153,11 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     }
 
     /**
-     * Returns the logged-in clients id or null
+     * Returns the logged-in client's id or null
      *
-     * @return TalkClient client
+     * @return TalkClient client (or null)
      */
+    @Nullable
     public String getClientId() {
         if (mTalkClient != null) {
             return mTalkClient.getClientId();
@@ -150,6 +172,13 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         return mClientRpc;
     }
 
+    /**
+     *  returns the connections server call handler
+     */
+    public ITalkRpcServer getServerHandler() {
+        return (ITalkRpcServer)mConnection.getServerHandler();
+
+    }
     /**
      * Returns the remote network address of the client
      */
@@ -186,10 +215,11 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onOpen(JsonRpcConnection connection) {
         LOG.info("[connectionId: '" + getConnectionId() + "'] connection opened by " + getRemoteAddress());
-        // reset the time of last activity
-        mLastActivity = System.currentTimeMillis();
-        // tell the server about the connection
         mServer.connectionOpened(this);
+    }
+
+    private void nagUserUpdate() {
+        mClientRpc.alertUser(UPDATE_NAGGING_MESSAGE);
     }
 
     /**
@@ -200,9 +230,6 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.info("[connectionId: '" + getConnectionId() + "'] connection closed");
-        // invalidate the time of last activity
-        mLastActivity = -1;
-        // tell the server about the disconnect
         mServer.connectionClosed(this);
     }
 
@@ -210,6 +237,16 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Disconnect the underlying connection and finish up
      */
     public void disconnect() {
+        if (mTalkClient != null && mTalkClient.isReady()) {
+            // set client to not ready
+            ITalkServerDatabase database = mServer.getDatabase();
+            TalkClient client = database.findClientById(mTalkClient.getClientId());
+            if (client != null) {
+                client.setTimeReady(null);
+                database.saveClient(client);
+            }
+        }
+
         mTalkClient = null;
         mConnection.disconnect();
     }
@@ -219,8 +256,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
     public void identifyClient(String clientId) {
         LOG.info("[connectionId: '" + getConnectionId() + "'] logged in as " + clientId);
-
-        ITalkServerDatabase database = mServer.getDatabase();
+        final ITalkServerDatabase database = mServer.getDatabase();
 
         // mark connection as logged in
         mTalkClient = database.findClientById(clientId);
@@ -239,12 +275,36 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
             mClientRpc.pushNotRegistered();
         }
 
-        // attempt to deliver anything we might have
-        mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId());
-
-        // request a ping in a few seconds
-        mServer.getPingAgent().requestPing(mTalkClient.getClientId());
+        // Tell the client that he is outdated and should upgrade
+        if (isLegacyMode()) {
+            LOG.info("Legacy mode active -> Issuing upgrade nagging to client");
+            nagUserUpdate();
+        }
     }
+
+    /**
+     * Called by handler when the client has called ready()
+     */
+    public void readyClient() {
+        if (isLoggedIn() && mTalkClient != null) {
+            LOG.info("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
+
+            // mark connection as logged in
+            ITalkServerDatabase database = mServer.getDatabase();
+            mTalkClient.setTimeReady(new Date());
+            database.saveClient(mTalkClient);
+
+            // notify server abount ready state
+            mServer.readyClient(mTalkClient, this);
+
+            // attempt to deliver anything we might have
+            mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId());
+
+            // request a ping in a few seconds
+            mServer.getPingAgent().requestPing(mTalkClient.getClientId());
+        }
+    }
+
 
     /**
      * Begins the registration process under the given client id
@@ -272,8 +332,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     @Override
     public void onPreHandleRequest(JsonRpcConnection connection, ObjectNode request) {
-        LOG.debug("onPreHandleRequest -- connectionId: '" + connection.getConnectionId() +
-                  "', clientId: '" + ((mTalkClient == null) ? "null" : mTalkClient.getClientId()) + "'");
+        LOG.trace("onPreHandleRequest -- connectionId: '" +
+                connection.getConnectionId() + "', clientId: '" +
+                ((mTalkClient == null) ? "null" : mTalkClient.getClientId()) + "'");
 
         Timer.Context timerContext = mServer.getStatistics().signalRequestStart(connection, request);
         requestTimers.put(getIdFromRequest(request), timerContext);
@@ -284,8 +345,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     @Override
     public void onPostHandleRequest(JsonRpcConnection connection, ObjectNode request) {
-        LOG.debug("onPostHandleRequest -- connectionId: '" + connection.getConnectionId() +
-                  "', clientId: '" + ((mTalkClient == null) ? "null" : mTalkClient.getClientId()) + "'");
+        LOG.trace("onPostHandleRequest -- connectionId: '" +
+                connection.getConnectionId() + "', clientId: '" +
+                ((mTalkClient == null) ? "null" : mTalkClient.getClientId()) + "'");
 
         Object jsonRpcId = getIdFromRequest(request);
         mServer.getStatistics().signalRequestStop(connection, request, requestTimers.get(jsonRpcId));
@@ -317,5 +379,42 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     private static Object getIdFromRequest(ObjectNode request) {
         return ProtocolUtils.parseId(request.get("id"));
+    }
+
+    public void setLegacyMode(boolean mLegacyMode) {
+        this.mLegacyMode = mLegacyMode;
+    }
+
+    public boolean isLegacyMode() {
+        return mLegacyMode;
+    }
+
+
+    public Long getLastPingLatency() {
+        return mLastPingLatency;
+    }
+
+    public void setLastPingLatency(long mLastPingLatency) {
+        this.mLastPingLatency = mLastPingLatency;
+    }
+
+    public void setLastPingOccured(Date lastPingOccured) {
+        this.mLastPingOccured = lastPingOccured;
+    }
+
+    public Date getLastPingOccured() {
+        return mLastPingOccured;
+    }
+
+    public long getCurrentPriorityPenalty() {
+        return mCurrentPriorityPenalty;
+    }
+
+    public void penalizePriorization(long penalty) {
+        mCurrentPriorityPenalty += penalty;
+    }
+
+    public void resetPriorityPenalty() {
+        mCurrentPriorityPenalty = 0L;
     }
 }

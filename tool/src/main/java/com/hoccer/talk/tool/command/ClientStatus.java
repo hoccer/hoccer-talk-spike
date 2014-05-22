@@ -27,7 +27,7 @@ public class ClientStatus extends TalkToolClientCommand {
         if (clientId != null) {
             printInd("client id: '" + clientId + "'", 1);
         } else {
-            printInd("cliend id: not yet generated - register first!", 1);
+            printInd("client id: not yet generated - register first!", 1);
         }
 
         printInd("state: '" + client.getClient().getStateString() + "'", 1);
@@ -48,18 +48,20 @@ public class ClientStatus extends TalkToolClientCommand {
                     printInd("contact " + contact.getClientContactId() + ": (self) " + contact.getClientId(), 1);
                     TalkPresence presence = contact.getClientPresence();
                     if (presence != null) {
-                        printInd("name '" + presence.getClientName() + "'"
-                                + " status '" + presence.getClientStatus() + "'", 2);
+                        printInd("name: " + presence.getClientName() + ", " +
+                                 "status: " + presence.getClientStatus() , 2);
                     } else {
                         printInd("no presence", 2);
                     }
                     TalkPrivateKey privKey = contact.getPrivateKey();
                     if (privKey != null) {
-                        printInd("private key with id " + privKey.getKeyId(), 2);
+                        printInd("private key-id: " + privKey.getKeyId(), 2);
+                    } else {
+                        printInd("no private key", 2);
                     }
                     TalkKey pubKey = contact.getPublicKey();
                     if (pubKey != null) {
-                        printInd("public key with id " + pubKey.getKeyId(), 2);
+                        printInd("public key-id: " + pubKey.getKeyId(), 2);
                     } else {
                         printInd("no public key", 2);
                     }
@@ -68,38 +70,39 @@ public class ClientStatus extends TalkToolClientCommand {
                     printInd("contact " + contact.getClientContactId() + ": (client) " + contact.getClientId(), 1);
                     TalkRelationship relationship = contact.getClientRelationship();
                     if (relationship != null) {
-                        printInd("relationship " + relationship.getState(), 2);
+                        printInd("relationship: " + relationship.getState(), 2);
                     } else {
                         printInd("no relationship", 2);
                     }
                     TalkPresence presence = contact.getClientPresence();
                     if (presence != null) {
-                        printInd("name '" + presence.getClientName() + "'"
-                                + " status '" + presence.getClientStatus() + "'"
-                                + " connState " + presence.getConnectionStatus(), 2);
+                        printInd("name: " + presence.getClientName() + ", " +
+                                 "status: " + presence.getClientStatus() + ", " +
+                                 "connState: " + presence.getConnectionStatus(), 2);
                     } else {
                         printInd("no presence", 2);
                     }
                     TalkKey pubKey = contact.getPublicKey();
                     if (pubKey != null) {
-                        printInd("public key with id '" + pubKey.getKeyId() + "'", 2);
+                        printInd("public key-id " + pubKey.getKeyId(), 2);
                     } else {
                         printInd("no public key", 2);
                     }
                 }
                 if (contact.isGroup()) {
-                    printInd("contact " + contact.getClientContactId() + ": group " + contact.getGroupId(), 1);
+                    printInd("contact " + contact.getClientContactId() + ": (group) " + contact.getGroupId(), 1);
                     TalkGroup group = contact.getGroupPresence();
                     if (group != null) {
-                        printInd("name '" + group.getGroupName() + "'"
-                                + " state " + group.getState(), 2);
+                        printInd("name: " + group.getGroupName() + ", " +
+                                 "state: " + group.getState() + ", " +
+                                 "type: " + group.getGroupType(), 2);
                     } else {
                         printInd("no presence", 2);
                     }
                     TalkGroupMember member = contact.getGroupMember();
                     if (member != null) {
-                        printInd("state " + member.getState()
-                                + " role " + member.getRole(), 2);
+                        printInd("state: " + member.getState() + ", " +
+                                 "role: " + member.getRole(), 2);
                     } else {
                         printInd("no membership", 2);
                     }

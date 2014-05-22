@@ -1,5 +1,6 @@
 package com.hoccer.talk.server;
 
+import com.hoccer.scm.GitInfo;
 import org.apache.log4j.Logger;
 
 import java.net.URI;
@@ -19,13 +20,14 @@ public class TalkServerConfiguration {
 
     private static final Logger LOG = Logger.getLogger(TalkServerConfiguration.class);
 
-    public static final boolean LOG_ALL_CALLS = false;
-
     public static final int THREADS_DELIVERY = 1;
     public static final int THREADS_UPDATE = 1;
     public static final int THREADS_PUSH = 1;
     public static final int THREADS_PING = 2; // XXX HIGHER COUNT?
     public static final int THREADS_CLEANING = 4;
+
+    public static final int PING_INTERVAL = 300; // in seconds
+    public static final boolean PERFORM_PING_AT_INTERVALS = false;
 
     private static final String PROPERTY_PREFIX = "talk";
 
@@ -59,11 +61,24 @@ public class TalkServerConfiguration {
 
     private String mSupportTag = "Oos8guceich2yoox";
 
+    private boolean mLogAllCalls = false;
+
+    private String mVersion = "<unknown>";
+    private String mBuildNumber;
+    private GitInfo gitInfo = new GitInfo();
+
     public TalkServerConfiguration() {
     }
 
     public void report() {
         LOG.info("Current configuration:" +
+                        "\n - General:" +
+                        MessageFormat.format("\n   * version:                            ''{0}''", mVersion) +
+                        MessageFormat.format("\n   * git.commit.id:                      ''{0}''", gitInfo.commitId) +
+                        MessageFormat.format("\n   * git.commit.id.abbrev:               ''{0}''", gitInfo.commitIdAbbrev) +
+                        MessageFormat.format("\n   * git.branch:                         ''{0}''", gitInfo.branch) +
+                        MessageFormat.format("\n   * git.commit.time:                    ''{0}''", gitInfo.commitTime) +
+                        MessageFormat.format("\n   * git.build.time:                     ''{0}''", gitInfo.buildTime) +
                         "\n - WebServer Configuration:" +
                         MessageFormat.format("\n   * listen address:                     ''{0}''", mListenAddress) +
                         MessageFormat.format("\n   * listen port:                        ''{0}''", Long.toString(mListenPort)) +
@@ -98,7 +113,11 @@ public class TalkServerConfiguration {
                         MessageFormat.format("\n   * CleanupAgent  Threads Poolsize:     ''{0}''", THREADS_CLEANING) +
                         MessageFormat.format("\n   * PushAgent     Threads Poolsize:     ''{0}''", THREADS_PUSH) +
                         MessageFormat.format("\n   * PingAgent     Threads Poolsize:     ''{0}''", THREADS_PING) +
-                        MessageFormat.format("\n   * UpdateAgebt   Threads Poolsize:     ''{0}''", THREADS_UPDATE)
+                        MessageFormat.format("\n   * UpdateAgent   Threads Poolsize:     ''{0}''", THREADS_UPDATE) +
+                        MessageFormat.format("\n   * Ping interval (in s):               ''{0}''", PING_INTERVAL) +
+                        MessageFormat.format("\n   * perform ping at intervals:          ''{0}''", PERFORM_PING_AT_INTERVALS) +
+                        "\n - Debugging:" +
+                        MessageFormat.format("\n   * LogAllCalls:     ''{0}''", mLogAllCalls)
         );
     }
 
@@ -141,6 +160,9 @@ public class TalkServerConfiguration {
 
         // Support
         mSupportTag = properties.getProperty(PROPERTY_PREFIX + ".support.tag", mSupportTag);
+
+        // Debugging
+        mLogAllCalls = Boolean.valueOf(properties.getProperty(PROPERTY_PREFIX + ".debug.logallcalls", Boolean.toString(mLogAllCalls)));
     }
 
     public String getListenAddress() {
@@ -249,4 +271,35 @@ public class TalkServerConfiguration {
         return mSupportTag;
     }
 
+    public void setLogAllCalls(boolean flag) {
+        mLogAllCalls = flag;
+    }
+
+    public boolean getLogAllCalls() {
+        return mLogAllCalls;
+    }
+
+    public String getVersion() {
+        return mVersion;
+    }
+
+    public void setVersion(String version) {
+        this.mVersion = version;
+    }
+
+    public void setBuildNumber(String buildNumber) {
+        this.mBuildNumber = buildNumber;
+    }
+
+    public String getBuildNumber() {
+        return mBuildNumber;
+    }
+
+    public void setGitInfo(GitInfo gitInfo) {
+        this.gitInfo = gitInfo;
+    }
+
+    public GitInfo getGitInfo() {
+        return gitInfo;
+    }
 }

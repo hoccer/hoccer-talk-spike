@@ -1,14 +1,6 @@
 package com.hoccer.talk.rpc;
 
-import com.hoccer.talk.model.TalkClientInfo;
-import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
-import com.hoccer.talk.model.TalkKey;
-import com.hoccer.talk.model.TalkMessage;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.talk.model.TalkRelationship;
-import com.hoccer.talk.model.TalkServerInfo;
+import com.hoccer.talk.model.*;
 
 import java.util.Date;
 
@@ -20,9 +12,34 @@ import java.util.Date;
  * 
  * @author ingo
  */
-
-
+// Suppress unused warnings since they are external API entry points and are called from the outside via JsonRpc (via Websockets)
+@SuppressWarnings("UnusedDeclaration")
 public interface ITalkRpcServer {
+
+    /**
+     * The obligatory equivalent of ping, only called bing to differentiate it from the server ping to the client
+     *
+     * The client may use this to measure RTT on the connection
+     * @talk.preconditions Client is logged in
+     * @talk.behavior Server responds with null result or error
+     * @talk.statechanges.clientobjects none
+     * @talk.statechanges.serverobjects none
+     * @talk.ui.client none
+     * @talk.errors.client Error response when not connected or logged in
+     */
+    void bing();
+
+    /**
+     * The client can signal by calling ready() that is has completed initial synchronisation and is ready to handle heavy stuff
+     *
+     * @talk.preconditions Client is logged in
+     * @talk.behavior Server responds with null result or error
+     * @talk.statechanges.clientobjects none
+     * @talk.statechanges.serverobjects something is set to ready state
+     * @talk.ui.client none
+     * @talk.errors.client Error response when not connected or logged in
+     */
+    void ready();
 
     /**
      * Generate a new client ID for registration
@@ -86,6 +103,17 @@ public interface ITalkRpcServer {
     */
     TalkServerInfo hello(TalkClientInfo clientInfo);
 
+    /** get the server time
+     * @return server time
+     * @talk.preconditions none
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server
+     * @talk.statechanges.serverobjects none
+     * @talk.errors.server
+     */
+    Date getTime();
+
     /** Retrieve established relationships changed after given date
      * @param lastKnown is the date in milliseconds since start of year 1970
      * @return array of relationship objects that have a change date greater than the given date
@@ -96,6 +124,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects none
      * @talk.errors.server
      */
+
     TalkRelationship[] getRelationships(Date lastKnown);
 
     /** Register client for GCM push notifications with the given parameters
@@ -164,6 +193,19 @@ public interface ITalkRpcServer {
      */
     void updateKey(TalkKey key);
 
+    /** Verify if my latest public encryption key is on the server for this client
+     * @param keyId the public key id
+     * @return true the key with keyId is my public key on the server, false otherwise
+     * @talk.preconditions client must be logged in
+     * @talk.preconditions.server
+     * @talk.preconditions.client
+     * @talk.behavior.server
+     * @talk.behavior.client client must call updateKey if this function returns false
+     * @talk.statechanges.serverobjects update the key on the server
+     * @talk.errors.server
+     */
+    boolean verifyKey(String keyId);
+
     /** Get key for given client with given keyid
      * @param clientId is a UUID denoting the client
      * @param keyId is a name for the key unique within the realm of the client, typically a fingerprint of the key
@@ -190,6 +232,18 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      */
     void updatePresence(TalkPresence presence);
+
+    /** modify client presence
+     * @param presence is a structure containing information about a contact
+     * @talk.preconditions client must be logged in
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server store only non-null fields of presence and notify other clients about presence changes via modifyPresense
+     * @talk.behavior.client none
+     * @talk.statechanges.serverobjects update and timestamp the client's presence record on the server
+     * @talk.errors.server
+     */
+    void modifyPresence(TalkPresence presence);
 
     /** Retrieve presences changed after given date
      * @param lastKnown is the date in milliseconds since start of year 1970
@@ -369,6 +423,9 @@ public interface ITalkRpcServer {
      */
     TalkGroup[] getGroups(Date lastKnown);
 
+    TalkGroup getGroup(String groupId);
+
+    TalkGroupMember getGroupMember(String groupId, String clientId);
 
     /** Update group name and group avatar; this function is deprecated, use updateGroupAvatar and updateGroupName instead
      * @param group is the group to update
@@ -459,7 +516,6 @@ public interface ITalkRpcServer {
      */
     void updateGroupAvatar(String groupId, String avatarUrl);
 
-
     /** Update role of client in group; currently only 'member' and 'admin' are define as role
      * @param groupId denotes the group to rename
      * @param clientId denotes the member to assign the role to
@@ -474,26 +530,6 @@ public interface ITalkRpcServer {
      */
     void updateGroupRole(String groupId, String clientId, String role);
 
-    /** Update the encrypted shared symmetric group key for a specified client;
-     it is a group admins responsibility to distribute the shared group key to all members
-     * @param groupId denotes the group the key belongs to
-     * @param clientId denotes the client the key is encrypted for
-     * @param keyId is a name for the key unique within the realm of the client, typically a fingerprint of the key
-     * @param key b64 encoded cyphertext of the shared group key, encrypted with the client's public key
-     * @talk.preconditions client must be logged in, connected client must be admin member of the group
-     * @talk.preconditions.server
-     * @talk.preconditions.client
-     * @talk.behavior.server Update group key and notify the member of the change
-     * @talk.behavior.client
-     * @talk.statechanges.serverobjects Update group key for the member
-     * @talk.errors.server
-     */
-    void updateGroupKey(String groupId, String clientId, String keyId, String key);
-
-    // TODO: void updateGroupKey2(String groupId, String clientId, String sharedKeyId, String publicKeyId, String cryptedSharedKey);
-    // TODO: void updateGroupKeys(String groupId, String sharedKeyId, String[] clientIds, String[] publicKeyIds, String[] cryptedSharedKeys);
-    // TODO: void updateGroupKeys(String groupId, String sharedKeyId, GroupKey[] groupKeys);
-
     /** Retrieve members of a group changed after given date
      * @param groupId denotes the group to retrieve the members of
      * @param lastKnown is the date in milliseconds since start of year 1970
@@ -506,21 +542,6 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      */
     TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown);
-
-    /** This function is deprecated and must not be used - use updateGroupRole and updateGroupKey instead!
-     (Was supposed to update information for a group member, but it is broken because it only updates role and key and not the keyId;
-     however, it does not seem to be used anyway)
-
-     * @param member denotes the group member to update as well as the new information, currently role and key
-     * @talk.preconditions client must be logged in, connected client must be admin member of the group
-     * @talk.preconditions.server
-     * @talk.preconditions.client
-     * @talk.behavior.server
-     * @talk.statechanges.serverobjects Update group key and role for a member
-     * @talk.errors.server
-     * @talk.todo remove from API
-     */
-    void updateGroupMember(TalkGroupMember member);
 
     /** remove (kick) a member from a group
      * @param groupId denotes the group from which the member is to be removed
@@ -569,6 +590,33 @@ public interface ITalkRpcServer {
         public String uploadUrl;
         public String downloadUrl;
     }
+
+    /** provide environment record for location based grouping
+     * @param environment denotes the geoposition and other environment data for grouping
+     * @return a group id for a transient group id the client is in
+     * @talk.preconditions client must be logged in
+     * @talk.preconditions.server
+     * @talk.preconditions.client
+     * @talk.behavior.server store environment and group
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects changes environment, creates, destroys or modifies groups and adds or removes group members
+     * @talk.errors.server
+     */
+    String updateEnvironment(TalkEnvironment environment);
+
+    /** end participation in location based grouping
+     * @param type denotes the type of the environment; only one environment of each type can exist on the server
+     * @talk.preconditions client must be logged in
+     * @talk.preconditions.server
+     * @talk.preconditions.client
+     * @talk.behavior.server remove client from group and destroy group if client is last member
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects changes environment, creates, destroys or modifies groups and adds or removes group members
+     * @talk.errors.server
+     */
+    void destroyEnvironment(String type);
+
+    Boolean[] isMemberInGroups(String[] groupIds);
 
 }
 

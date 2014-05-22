@@ -13,6 +13,7 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.image.ClickableImageView;
 import com.hoccer.xo.android.content.image.IClickableImageViewListener;
 import com.hoccer.xo.android.view.AttachmentTransferControlView;
@@ -93,8 +94,10 @@ public class ContentView extends LinearLayout implements View.OnClickListener, V
             } else {
                 updateFooter(ContentState.SELECTED);
                 mContentWrapper.setVisibility(View.VISIBLE);
-                mContentChild.setEnabled(true);
-                mContentChild.invalidate();
+                if (mContentChild != null) {
+                    mContentChild.setEnabled(true);
+                    mContentChild.invalidate();
+                }
                 mWaitUntilOperationIsFinished = false;
             }
         }
@@ -164,8 +167,8 @@ public class ContentView extends LinearLayout implements View.OnClickListener, V
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.parse(mContent.getContentDataUrl()), "image/*");
         try {
-            Activity activity = (Activity) view.getContext();
-            activity.startActivity(intent);
+            XoActivity activity = (XoActivity)view.getContext();
+            activity.startExternalActivity(intent);
         } catch (ClassCastException e) {
             e.printStackTrace();
         }
@@ -325,12 +328,15 @@ public class ContentView extends LinearLayout implements View.OnClickListener, V
         if(dataUrl == null || dataUrl.length() == 0) {
             return;
         }
+
+        // Only check for the existence of attachments that can actually be stored on the file system ( no content:// etc.)
         if(dataUrl.startsWith("file://")) {
             dataUrl = dataUrl.replaceFirst("file://", "");
-        }
-        File file = new File(dataUrl);
-        if(!file.exists()) {
-            throw new FileNotFoundException("attachment file not found: " + dataUrl);
+
+            File file = new File(dataUrl);
+            if (!file.exists()) {
+                throw new FileNotFoundException("attachment file not found: " + dataUrl);
+            }
         }
     }
 

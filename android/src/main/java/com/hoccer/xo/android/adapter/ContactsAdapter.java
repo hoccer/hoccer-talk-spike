@@ -42,6 +42,8 @@ public abstract class ContactsAdapter extends XoAdapter
 
     protected final static int VIEW_TYPE_COUNT = 4;
 
+    private OnItemCountChangedListener mOnItemCountChangedListener;
+
     public ContactsAdapter(XoActivity activity) {
         super(activity);
     }
@@ -95,6 +97,7 @@ public abstract class ContactsAdapter extends XoAdapter
         super.onReloadRequest();
         synchronized (this) {
             try {
+                int oldItemCount = getCount();
                 List<TalkClientSmsToken> newTokens = null;
                 if(mShowTokens) {
                     newTokens = mDatabase.findAllSmsTokens();
@@ -119,6 +122,9 @@ public abstract class ContactsAdapter extends XoAdapter
 
                 mClientContacts = newClients;
                 mSmsTokens = newTokens;
+                if(mOnItemCountChangedListener != null && oldItemCount != getCount()) {
+                    mOnItemCountChangedListener.onItemCountChanged(getCount());
+                }
             } catch (SQLException e) {
                 LOG.error("SQL error", e);
             }
@@ -233,10 +239,8 @@ public abstract class ContactsAdapter extends XoAdapter
     @Override
     public int getCount() {
         int count = 0;
-
         count += mSmsTokens.size();
         count += mClientContacts.size();
-
         return count;
     }
 
@@ -289,7 +293,6 @@ public abstract class ContactsAdapter extends XoAdapter
         if(item instanceof TalkClientSmsToken) {
             return ITEM_ID_TOKENS_BASE + ((TalkClientSmsToken)item).getSmsTokenId();
         }
-
         int offset = 0;
         if(!mSmsTokens.isEmpty()) {
             offset += mSmsTokens.size();
@@ -352,6 +355,10 @@ public abstract class ContactsAdapter extends XoAdapter
         LOG.debug("updateSeparator()");
         TextView separator = (TextView)view;
         separator.setText((String)getItem(position));
+    }
+
+    public void setOnItemCountChangedListener(OnItemCountChangedListener onItemCountChangedListener) {
+        mOnItemCountChangedListener = onItemCountChangedListener;
     }
 
     public interface Filter {

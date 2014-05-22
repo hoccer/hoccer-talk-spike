@@ -498,6 +498,15 @@ public class OrmliteDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public void deleteGroup(TalkGroup group) {
+        try {
+            mGroups.delete(group);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public List<TalkGroup> findGroupsByClientIdChangedAfter(String clientId, Date lastKnown) {
         List<TalkGroup> result = new ArrayList<TalkGroup>();
         List<TalkGroupMember> memberships = findGroupMembersForClient(clientId);
@@ -541,6 +550,16 @@ public class OrmliteDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkGroupMember> findGroupMembersByIdWithStates(String groupId, String[] states) {
+        return null;
+    }
+
+    @Override
+    public List<TalkGroupMember> findGroupMembersByIdWithStatesAndRoles(String groupId, String[] states, String [] roles) {
+        return null;
+    }
+
+    @Override
     public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown) {
         try {
             return mGroupMembers.queryBuilder().where()
@@ -552,6 +571,11 @@ public class OrmliteDatabase implements ITalkServerDatabase {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public List<TalkGroupMember> findGroupMembersByIdWithStatesChangedAfter(String groupId, String[] states, Date lastKnown) {
+        return null;
     }
 
     @Override
@@ -575,6 +599,34 @@ public class OrmliteDatabase implements ITalkServerDatabase {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void saveEnvironment(TalkEnvironment environment) {
+    }
+
+    @Override
+    public TalkEnvironment findEnvironmentByClientId(String type, String clientId) {
+        return null;
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsForGroup(String groupId) {
+        return null;
+    }
+
+    @Override
+    public List<TalkEnvironment> findEnvironmentsMatching(TalkEnvironment environment) {
+        return null;
+    }
+
+    @Override
+    public void deleteEnvironment(TalkEnvironment environment) {
+    }
+
+    @Override
+    public List<TalkGroupMember> findGroupMembersForClientWithStates(String clientId, String[] states) {
+        return null;
     }
 
     @Override
