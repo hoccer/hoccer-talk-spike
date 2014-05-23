@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -20,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.widget.*;
+import com.hoccer.xo.android.content.MediaItem;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
@@ -105,6 +105,8 @@ public class FullscreenPlayerFragment extends Fragment {
                     setupViewListeners();
                     enableViewComponents(true);
                     updateTrackData();
+                    refreshRepeatButton();
+                    refreshShuffleButton();
                 }
 
                 @Override
@@ -157,14 +159,15 @@ public class FullscreenPlayerFragment extends Fragment {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                String trackArtist = mMediaPlayerService.getMediaMetaData().getArtist();
-                String trackTitle = mMediaPlayerService.getMediaMetaData().getTitle();
+                MediaItem currentItem = mMediaPlayerService.getCurrentMediaItem();
+                String trackArtist = currentItem.getMetaData().getArtist();
+                String trackTitle = currentItem.getMetaData().getTitle();
                 int totalDuration = mMediaPlayerService.getTotalDuration();
-                byte[] cover = MediaMetaData.getArtwork(mMediaPlayerService.getCurrentMediaFilePath());
+                byte[] cover = MediaMetaData.getArtwork(currentItem.getFilePath());
 
 
                 if (trackTitle == null || trackTitle.isEmpty()) {
-                    File file = new File(mMediaPlayerService.getCurrentMediaFilePath());
+                    File file = new File(currentItem.getFilePath());
                     trackTitle = file.getName();
                 }
 
@@ -177,8 +180,8 @@ public class FullscreenPlayerFragment extends Fragment {
                 mTrackProgressBar.setProgress(mMediaPlayerService.getCurrentPosition());
 
                 mTotalDurationLabel.setText(stringFromTimeStamp(totalDuration));
-                mPlaylistIndexLabel.setText(Integer.toString(mMediaPlayerService.getCurrentPlaylist().getCurrentIndex() + 1));
-                mPlaylistSizeLabel.setText(Integer.toString(mMediaPlayerService.getCurrentPlaylist().size()));
+                mPlaylistIndexLabel.setText(Integer.toString(mMediaPlayerService.getCurrentPosition() + 1));
+                mPlaylistSizeLabel.setText(Integer.toString(mMediaPlayerService.getMediaListSize()));
 
                 if (cover != null) {
                     Bitmap coverBitmap = BitmapFactory.decodeByteArray(cover, 0, cover.length);
@@ -233,7 +236,7 @@ public class FullscreenPlayerFragment extends Fragment {
         mBlinkAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                mCurrentTimeLabel.setTextColor((Integer) animation.getAnimatedValue() );
+                mCurrentTimeLabel.setTextColor((Integer) animation.getAnimatedValue());
             }
         });
     }
@@ -296,34 +299,20 @@ public class FullscreenPlayerFragment extends Fragment {
                     if (!mMediaPlayerService.isPaused() && !mMediaPlayerService.isStopped()) {
                         mMediaPlayerService.pause();
                     } else {
-                        mMediaPlayerService.start();
+                        mMediaPlayerService.play(true);
                     }
                     break;
                 case R.id.bt_player_skip_back:
-					mMediaPlayerService.skipBackwards();
+                    mMediaPlayerService.skipBackwards();
                     break;
                 case R.id.bt_player_skip_forward:
                     mMediaPlayerService.skipForward();
                     break;
                 case R.id.bt_player_repeat:
-                    MediaPlaylist.RepeatMode repeatMode = mMediaPlayerService.getCurrentPlaylist().getRepeatMode();
-                	MediaPlaylist playlist = mMediaPlayerService.getCurrentPlaylist();
-
-                	switch (repeatMode) {
-                    	case NO_REPEAT:
-                     	    playlist.setRepeatMode(MediaPlaylist.RepeatMode.REPEAT_TRACK);
-                        	mRepeatButton.setBackgroundColor(Color.GREEN);
-                    	case REPEAT_TRACK:
-                        	playlist.setRepeatMode(MediaPlaylist.RepeatMode.REPEAT_ALL);
-                        	mRepeatButton.setBackgroundColor(Color.BLUE);
-                    	case REPEAT_ALL:
-                        	playlist.setRepeatMode(MediaPlaylist.RepeatMode.NO_REPEAT);
-                        	mRepeatButton.setBackgroundColor(Color.TRANSPARENT);
-                	}
-
+                    updateRepeatMode();
                     break;
                 case R.id.bt_player_shuffle:
-                    // TODO set playlist to shuffle
+                    updateShuffleState();
                     break;
             }
         }
@@ -344,5 +333,55 @@ public class FullscreenPlayerFragment extends Fragment {
             mTimeProgressHandler.postDelayed(mUpdateTimeTask, 100);
         }
 
+    }
+
+    private void refreshRepeatButton() {
+        MediaPlaylist.RepeatMode repeatMode = mMediaPlayerService.getRepeatMode();
+        switch (repeatMode) {
+            case NO_REPEAT:
+                mRepeatButton.setImageResource(R.drawable.btn_player_repeat);
+                break;
+            case REPEAT_ALL:
+                mRepeatButton.setImageResource(R.drawable.btn_player_repeat_all);
+                break;
+            case REPEAT_TITLE:
+                mRepeatButton.setImageResource(R.drawable.btn_player_repeat_title);
+                break;
+        }
+    }
+
+    private void refreshShuffleButton() {
+        if (mMediaPlayerService.isShuffleActive()) {
+            mShuffleButton.setActivated(true);
+        } else {
+            mShuffleButton.setActivated(false);
+        }
+    }
+
+    private void updateRepeatMode() {
+        switch (mMediaPlayerService.getRepeatMode()) {
+            case NO_REPEAT:
+                mMediaPlayerService.setRepeatMode(MediaPlaylist.RepeatMode.REPEAT_ALL);
+                mRepeatButton.setImageResource(R.drawable.btn_player_repeat_all);
+                break;
+            case REPEAT_ALL:
+                mMediaPlayerService.setRepeatMode(MediaPlaylist.RepeatMode.REPEAT_TITLE);
+                mRepeatButton.setImageResource(R.drawable.btn_player_repeat_title);
+                break;
+            case REPEAT_TITLE:
+                mMediaPlayerService.setRepeatMode(MediaPlaylist.RepeatMode.NO_REPEAT);
+                mRepeatButton.setImageResource(R.drawable.btn_player_repeat);
+                break;
+        }
+    }
+
+    private void updateShuffleState() {
+        if (mMediaPlayerService.isShuffleActive()) {
+            mShuffleButton.setActivated(false);
+            mMediaPlayerService.setShuffleActive(false);
+        } else {
+            mShuffleButton.setActivated(true);
+            mMediaPlayerService.setShuffleActive(true);
+        }
     }
 }
