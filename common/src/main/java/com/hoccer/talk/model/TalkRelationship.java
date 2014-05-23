@@ -3,7 +3,7 @@ package com.hoccer.talk.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import org.jetbrains.annotations.Nullable;
+//import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 
@@ -15,16 +15,7 @@ public class TalkRelationship {
     public static final String STATE_BLOCKED = "blocked";
 
     public static boolean isValidState(String state) {
-        if (state.equals(STATE_NONE)) {
-            return true;
-        }
-        if (state.equals(STATE_FRIEND)) {
-            return true;
-        }
-        if (state.equals(STATE_BLOCKED)) {
-            return true;
-        }
-        return false;
+        return STATE_NONE.equals(state) || STATE_FRIEND.equals(state) || STATE_BLOCKED.equals(state);
     }
 
     private String _id;
@@ -78,7 +69,7 @@ public class TalkRelationship {
         this.otherClientId = otherClientId;
     }
 
-    @Nullable
+//    @Nullable
     public String getState() {
         return state;
     }
