@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -20,6 +21,7 @@ import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.widget.*;
 import com.hoccer.xo.android.content.MediaMetaData;
+import com.hoccer.xo.android.content.audio.MediaPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -298,13 +300,27 @@ public class FullscreenPlayerFragment extends Fragment {
                     }
                     break;
                 case R.id.bt_player_skip_back:
-                    mMediaPlayerService.playPrevious(true);
+					mMediaPlayerService.skipBackwards();
                     break;
                 case R.id.bt_player_skip_forward:
-                    mMediaPlayerService.playNext(true);
+                    mMediaPlayerService.skipForward();
                     break;
                 case R.id.bt_player_repeat:
-                    // TODO set playlist to repeat (all & single)
+                    MediaPlaylist.RepeatMode repeatMode = mMediaPlayerService.getCurrentPlaylist().getRepeatMode();
+                	MediaPlaylist playlist = mMediaPlayerService.getCurrentPlaylist();
+
+                	switch (repeatMode) {
+                    	case NO_REPEAT:
+                     	    playlist.setRepeatMode(MediaPlaylist.RepeatMode.REPEAT_TRACK);
+                        	mRepeatButton.setBackgroundColor(Color.GREEN);
+                    	case REPEAT_TRACK:
+                        	playlist.setRepeatMode(MediaPlaylist.RepeatMode.REPEAT_ALL);
+                        	mRepeatButton.setBackgroundColor(Color.BLUE);
+                    	case REPEAT_ALL:
+                        	playlist.setRepeatMode(MediaPlaylist.RepeatMode.NO_REPEAT);
+                        	mRepeatButton.setBackgroundColor(Color.TRANSPARENT);
+                	}
+
                     break;
                 case R.id.bt_player_shuffle:
                     // TODO set playlist to shuffle
