@@ -429,7 +429,9 @@ public class XoClientDatabase {
 
         QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
         downloadQb.where()
-                .eq("mediaType", mediaType);
+                .eq("mediaType", mediaType)
+                .and()
+                .eq("state", TalkClientDownload.State.COMPLETE);
 
         List<TalkClientDownload> downloads = downloadQb.join(messageQb).query();
 
@@ -576,6 +578,9 @@ public class XoClientDatabase {
     }
 
     private String migrateFilecacheUrl(String url) {
+        if(url == null) {
+            return null;
+        }
         String migratedUrl = url.substring(url.indexOf("/", 8));
         migratedUrl = "https://filecache.talk.hoccer.de:8444" + migratedUrl;
         LOG.debug("migrated url: " + url + " to: " + migratedUrl);
