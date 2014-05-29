@@ -11,11 +11,15 @@ import java.util.Date;
 public class TalkRelationship {
 
     public static final String STATE_NONE = "none";
+    public static final String STATE_INVITED = "invited";
+    public static final String STATE_INVITED_ME = "invitedMe";
     public static final String STATE_FRIEND = "friend";
     public static final String STATE_BLOCKED = "blocked";
 
+    public static final String[] STATES_RELATED = {TalkRelationship.STATE_FRIEND, TalkRelationship.STATE_BLOCKED, TalkRelationship.STATE_INVITED, TalkRelationship.STATE_INVITED_ME};
+
     public static boolean isValidState(String state) {
-        return STATE_NONE.equals(state) || STATE_FRIEND.equals(state) || STATE_BLOCKED.equals(state);
+        return STATE_NONE.equals(state) || STATE_FRIEND.equals(state) || STATE_BLOCKED.equals(state) || STATE_INVITED.equals(state) || STATE_INVITED_ME.equals(state);
     }
 
     private String _id;
@@ -51,6 +55,16 @@ public class TalkRelationship {
     @JsonIgnore
     public boolean isBlocked() {
         return state.equals(STATE_BLOCKED);
+    }
+
+    @JsonIgnore
+    public boolean isInvited() {
+        return state.equals(STATE_INVITED);
+    }
+
+    @JsonIgnore
+    public boolean invitedMe() {
+        return state.equals(STATE_INVITED_ME);
     }
 
     public String getClientId() {

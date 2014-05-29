@@ -326,6 +326,55 @@ public interface ITalkRpcServer {
      **/
     void unblockClient(String clientId);
 
+    /** Invite the given client to become a friend
+     * @param clientId is a UUID denoting the client to block
+     * @talk.preconditions client must be logged in, other client must not be be friend
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server set relationShip with the client to invited, reverse relationship to invitedMe and notify partners via relationshipUpdated
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects set relationShips, update time stamp
+     * @talk.errors.server
+     **/
+    void inviteFriend(String clientId);
+
+    /** retract friend invitation with the given client
+     * @param clientId is a UUID denoting the client to unblock
+     * @talk.preconditions client must be logged in, other client must be invited
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server set relationShip with the client to 'none' and notify partner via relationshipUpdated
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects set relationShip with the client to none again, update time stamp
+     * @talk.errors.server  returns exception object when clientId unknown or no relationship exists
+     **/
+    void disinviteFriend(String clientId);
+
+
+    /** accept the given client as friend
+     * @param clientId is a UUID denoting the client to block
+     * @talk.preconditions client must be logged in, other client must have invited me as friend
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server set relationShip with the client to friend and notify partner via relationshipUpdated
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects set relationShip with the client to friend, update time stamp
+     * @talk.errors.server
+     **/
+    void acceptFriend(String clientId);
+
+    /** refuse to become friend with the given client
+     * @param clientId is a UUID denoting the client to refuse friendship
+     * @talk.preconditions client must be logged in, other client must have invited me as friend
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server set relationShip with the client to 'none' and notify partner via relationshipUpdated
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects set relationShip with the client to none again, update time stamp
+     * @talk.errors.server  returns exception object when clientId unknown or no relationship exists
+     **/
+    void refuseFriend(String clientId);
+
     /** Depair the given client, removing the relationship between clients
      * @param clientId is a UUID denoting the client to unblock
      * @talk.preconditions client must be logged in, other client must be blocked or friend
@@ -617,7 +666,7 @@ public interface ITalkRpcServer {
     void destroyEnvironment(String type);
 
     Boolean[] isMemberInGroups(String[] groupIds);
-
+    Boolean[] isContactOf(String[] clientIds);
 }
 
 /**
