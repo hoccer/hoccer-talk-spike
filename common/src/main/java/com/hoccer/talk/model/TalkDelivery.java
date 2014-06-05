@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Delivery objects represent the receiver-dependent
@@ -41,6 +44,9 @@ public class TalkDelivery {
     public static final String STATE_CONFIRMED = "confirmed";
     public static final String STATE_FAILED = "failed";
     public static final String STATE_ABORTED = "aborted";
+
+    public static final String[] REQUIRED_UPDATE_FIELDS = {FIELD_DELIVERY_ID, FIELD_MESSAGE_ID, FIELD_MESSAGE_TAG, FIELD_SENDER_ID, FIELD_RECEIVER_ID, FIELD_GROUP_ID, FIELD_STATE, FIELD_TIME_ACCEPTED, FIELD_TIME_CHANGED};
+    public static final Set<String> REQUIRED_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_UPDATE_FIELDS));
 
     public static boolean isValidState(String state) {
         return STATE_NEW.equals(state)  ||
@@ -132,14 +138,28 @@ public class TalkDelivery {
     Date timeUpdatedIn;
 
     public TalkDelivery() {
-        this.state = STATE_NEW;
-        this.timeAccepted = new Date(0);
-        this.timeChanged = new Date(0);
-        this.timeUpdatedIn = new Date(0);
-        this.timeUpdatedOut = new Date(0);
+    }
+
+    public TalkDelivery(boolean init) {
+        if (init) this.initialize();
     }
 
     @JsonIgnore
+    public void initialize() {
+        this.state = STATE_NEW;
+        this.ensureDates();
+    }
+
+    @JsonIgnore
+    public void ensureDates() {
+        if (this.timeAccepted == null) this.timeAccepted = new Date(0);
+        if (this.timeChanged == null) this.timeChanged = new Date(0);
+        if (this.timeUpdatedIn == null) this.timeUpdatedIn = new Date(0);
+        if (this.timeUpdatedOut == null) this.timeUpdatedOut = new Date(0);
+    }
+
+
+        @JsonIgnore
     public boolean isFinished() {
         return state.equals(STATE_ABORTED) || state.equals(STATE_FAILED) || state.equals(STATE_CONFIRMED);
     }
@@ -254,5 +274,60 @@ public class TalkDelivery {
 
     public void setTimeUpdatedIn(Date timeUpdatedIn) {
         this.timeUpdatedIn = timeUpdatedIn;
+    }
+
+    @JsonIgnore
+    public void updateWith(TalkDelivery delivery) {
+        this.messageId = delivery.getMessageId();
+        this.messageTag = delivery.getMessageTag();
+        this.senderId = delivery.getSenderId();
+        this.receiverId = delivery.getReceiverId();
+        this.groupId = delivery.getGroupId();
+        this.state = delivery.getState();
+        this.keyId = delivery.getKeyId();
+        this.keyCiphertext = delivery.getKeyCiphertext();
+        this.timeAccepted = delivery.getTimeAccepted();
+        this.timeChanged = delivery.getTimeChanged();
+        this.timeUpdatedOut = delivery.getTimeUpdatedOut();
+        this.timeUpdatedIn = delivery.getTimeUpdatedIn();
+    }
+    @JsonIgnore
+    public void updateWith(TalkDelivery delivery, Set<String> fields) {
+        if (fields == null || fields.contains(TalkDelivery.FIELD_MESSAGE_ID)) {
+            this.messageId = delivery.getMessageId();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_MESSAGE_TAG)) {
+            this.messageTag = delivery.getMessageTag();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_SENDER_ID)) {
+            this.senderId = delivery.getSenderId();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_RECEIVER_ID)) {
+            this.receiverId = delivery.getReceiverId();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_GROUP_ID)) {
+            this.groupId = delivery.getGroupId();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_STATE)) {
+            this.state = delivery.getState();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_KEY_ID)) {
+            this.keyId = delivery.getKeyId();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_KEY_CIPHERTEXT)) {
+            this.keyCiphertext = delivery.getKeyCiphertext();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_TIME_ACCEPTED)) {
+            this.timeAccepted = delivery.getTimeAccepted();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_TIME_CHANGED)) {
+            this.timeChanged = delivery.getTimeChanged();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_TIME_UPDATED_OUT)) {
+            this.timeUpdatedOut = delivery.getTimeUpdatedOut();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_TIME_UPDATED_IN)) {
+            this.timeUpdatedIn = delivery.getTimeUpdatedIn();
+        }
     }
 }
