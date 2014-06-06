@@ -291,6 +291,49 @@ public class TalkDelivery {
         this.timeUpdatedOut = delivery.getTimeUpdatedOut();
         this.timeUpdatedIn = delivery.getTimeUpdatedIn();
     }
+
+    @JsonIgnore
+    public Set<String> nonNullFields() {
+        Set<String> result = new HashSet<String>();
+        if (this.messageId != null) {
+            result.add(TalkDelivery.FIELD_MESSAGE_ID);
+        }
+        if (this.messageTag != null) {
+            result.add(TalkDelivery.FIELD_MESSAGE_TAG);
+        }
+        if (this.senderId != null) {
+            result.add(TalkDelivery.FIELD_SENDER_ID);
+        }
+        if (this.receiverId != null) {
+            result.add(TalkDelivery.FIELD_RECEIVER_ID);
+        }
+        if (this.groupId != null) {
+            result.add(TalkDelivery.FIELD_GROUP_ID);
+        }
+        if (this.state != null) {
+            result.add(TalkDelivery.FIELD_STATE);
+        }
+        if (this.keyId != null) {
+            result.add(TalkDelivery.FIELD_KEY_ID);
+        }
+        if (this.keyCiphertext != null) {
+            result.add(TalkDelivery.FIELD_KEY_CIPHERTEXT);
+        }
+        if (this.timeAccepted != null) {
+            result.add(TalkDelivery.FIELD_TIME_ACCEPTED);
+        }
+        if (this.timeChanged != null) {
+            result.add(TalkDelivery.FIELD_TIME_CHANGED);
+        }
+        if (this.timeUpdatedOut != null) {
+            result.add(TalkDelivery.FIELD_TIME_UPDATED_OUT);
+        }
+        if (this.timeUpdatedIn != null) {
+            result.add(TalkDelivery.FIELD_TIME_UPDATED_IN);
+        }
+        return result;
+    }
+
     @JsonIgnore
     public void updateWith(TalkDelivery delivery, Set<String> fields) {
         if (fields == null || fields.contains(TalkDelivery.FIELD_MESSAGE_ID)) {
