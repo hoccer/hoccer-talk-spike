@@ -429,6 +429,12 @@ public interface ITalkRpcServer {
      **/
     TalkDelivery   deliveryAcknowledge(String messageId, String recipientId);
 
+    // As sender, acknowledge a "failed" delivery
+    TalkDelivery   deliveryFailedAcknowledge(String messageId, String recipientId);
+
+    // As sender, acknowledge a "rejected" delivery
+    TalkDelivery   deliveryRejectedAcknowledge(String messageId, String recipientId);
+
     /**
      * Reject/abort a delivery
      * @param messageId is the server-provided message id
@@ -444,7 +450,12 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects update state in delivery object to 'aborted', update timeChanged
      * @talk.errors.server
      **/
+
+    // abort a delivery as sender
     TalkDelivery deliveryAbort(String messageId, String recipientId);
+
+    // reject a delivery as receiver
+    TalkDelivery deliveryReject(String messageId);
 
     /**
      * Create a new group on the server
@@ -639,6 +650,43 @@ public interface ITalkRpcServer {
         public String uploadUrl;
         public String downloadUrl;
     }
+
+    // can be called by the creator/uploader to remove it in case the transfer was cancelled
+    //void deleteFile(String fileId);
+
+    // should be called by the receiver of an transfer file after download; the server can the delete the file in case
+    String receivedFile(String fileId);
+
+    // should be called by the receiver of an transfer file if the user has aborted the download
+    String abortedFileDownload(String fileId);
+
+    // should be called by the receiver of an transfer file if the client has exceeded the download retry count
+    String failedFileDownload(String fileId);
+
+    // should be called by the receiver of an transfer file when a final attachment sender set state has been seen
+    String acknowledgeAbortedFileUpload(String fileId);
+    String acknowledgeFailedFileUpload(String fileId);
+
+    //------ sender attachment state indication methods
+    // should be called by the sender of an transfer file after upload has been started
+    String startedFileUpload(String fileId);
+
+    // should be called by the sender of an transfer file when the upload has been paused
+    String pausedFileUpload(String fileId);
+
+    // should be called by the sender of an transfer file after upload has been finished
+    String finishedFileUpload(String fileId);
+
+    // should be called by the sender of an transfer file when the upload is aborted by the user
+    String abortedFileUpload(String fileId);
+
+    // should be called by the sender of an transfer file when upload retry count has been exceeded
+    String failedFileUpload(String fileId);
+
+    // should be called by the sender of an transfer file when a final attachment receiver set state has been seen
+    String acknowledgeReceivedFile(String fileId);
+    String acknowledgeAbortedFileDownload(String fileId);
+    String acknowledgeFailedFileDownload(String fileId);
 
     /** provide environment record for location based grouping
      * @param environment denotes the geoposition and other environment data for grouping
