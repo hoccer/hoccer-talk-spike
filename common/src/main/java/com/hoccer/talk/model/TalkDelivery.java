@@ -42,11 +42,22 @@ public class TalkDelivery {
     public static final String FIELD_TIME_ATTACHMENT_RECEIVED = "timeAttachmentReceived";
     public static final String FIELD_REASON = "reason";
 
-    public static final String[] REQUIRED_UPDATE_FIELDS = {FIELD_DELIVERY_ID, FIELD_MESSAGE_ID, FIELD_MESSAGE_TAG,
+    public static final String[] REQUIRED_OUT_RESULT_FIELDS = {FIELD_DELIVERY_ID, FIELD_MESSAGE_ID, FIELD_MESSAGE_TAG,
             FIELD_SENDER_ID, FIELD_RECEIVER_ID, FIELD_GROUP_ID, FIELD_STATE, FIELD_TIME_ACCEPTED, FIELD_TIME_CHANGED,
             FIELD_ATTACHMENT_STATE, FIELD_TIME_ATTACHMENT_RECEIVED, FIELD_REASON
     };
-    public static final Set<String> REQUIRED_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_UPDATE_FIELDS));
+    public static final Set<String> REQUIRED_OUT_RESULT_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_OUT_RESULT_FIELDS));
+
+    public static final String[] REQUIRED_OUT_UPDATE_FIELDS = {FIELD_MESSAGE_ID, FIELD_MESSAGE_TAG,
+            FIELD_SENDER_ID, FIELD_RECEIVER_ID, FIELD_GROUP_ID, FIELD_STATE, FIELD_TIME_ACCEPTED, FIELD_TIME_CHANGED,
+            FIELD_ATTACHMENT_STATE, FIELD_TIME_ATTACHMENT_RECEIVED, FIELD_REASON
+    };
+    public static final Set<String> REQUIRED_OUT_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_OUT_UPDATE_FIELDS));
+
+    public static final String[] REQUIRED_IN_UPDATE_FIELDS = {FIELD_MESSAGE_ID, FIELD_RECEIVER_ID, FIELD_STATE, FIELD_TIME_CHANGED,
+            FIELD_ATTACHMENT_STATE, FIELD_TIME_ATTACHMENT_RECEIVED, FIELD_REASON
+    };
+    public static final Set<String> REQUIRED_IN_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_IN_UPDATE_FIELDS));
 
     /* For migration:
     On Client and Server, change old state -> new state:
