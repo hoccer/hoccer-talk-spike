@@ -3,7 +3,6 @@ package com.hoccer.talk.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import com.sun.tools.classfile.StackMap_attribute;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -41,34 +40,47 @@ public class TalkDelivery {
     public static final String FIELD_TIME_UPDATED_IN = "timeUpdatedIn";
     public static final String FIELD_ATTACHMENT_STATE = "attachmentState";
     public static final String FIELD_TIME_ATTACHMENT_RECEIVED = "timeAttachmentReceived";
+    public static final String FIELD_REASON = "reason";
 
     public static final String[] REQUIRED_UPDATE_FIELDS = {FIELD_DELIVERY_ID, FIELD_MESSAGE_ID, FIELD_MESSAGE_TAG,
             FIELD_SENDER_ID, FIELD_RECEIVER_ID, FIELD_GROUP_ID, FIELD_STATE, FIELD_TIME_ACCEPTED, FIELD_TIME_CHANGED,
-            FIELD_ATTACHMENT_STATE, FIELD_TIME_ATTACHMENT_RECEIVED
+            FIELD_ATTACHMENT_STATE, FIELD_TIME_ATTACHMENT_RECEIVED, FIELD_REASON
     };
     public static final Set<String> REQUIRED_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_UPDATE_FIELDS));
+
+    /* For migration:
+    On Client and Server, change old state -> new state:
+    confirmed -> deliveredAcknowledged
+    aborted -> abortedAcknowledged
+    failed -> failedAcknowledged
+
+    Attachment states:
+     On Server:
+    - normal states -> ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED
+    - retries exhausted ->  ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED or ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED
+     */
 
     // the delivery states
     public static final String STATE_NEW = "new";
     public static final String STATE_DELIVERING = "delivering";
     public static final String STATE_DELIVERED = "delivered";
-    public static final String STATE_CONFIRMED = "confirmed";
+    public static final String STATE_DELIVERED_ACKNOWLEDGED = "deliveredAcknowledged";
     public static final String STATE_FAILED = "failed";
     public static final String STATE_ABORTED = "aborted";
     public static final String STATE_REJECTED = "rejected";
-    public static final String STATE_FAILED_CONFIRMED = "failedConfirmed";
-    public static final String STATE_ABORTED_CONFIRMED = "abortedConfirmed";
-    public static final String STATE_REJECTED_CONFIRMED = "rejectedConfirmed";
+    public static final String STATE_FAILED_ACKNOWLEDGED = "failedAcknowledged";
+    public static final String STATE_ABORTED_ACKNOWLEDGED = "abortedAcknowledged";
+    public static final String STATE_REJECTED_ACKNOWLEDGED = "rejectedAcknowledged";
 
     public static final String[] ALL_STATES = {STATE_NEW, STATE_DELIVERING, STATE_DELIVERED,
-            STATE_CONFIRMED, STATE_FAILED, STATE_ABORTED, STATE_REJECTED, STATE_FAILED_CONFIRMED, STATE_ABORTED_CONFIRMED,
-            STATE_REJECTED_CONFIRMED};
+            STATE_DELIVERED_ACKNOWLEDGED, STATE_FAILED, STATE_ABORTED, STATE_REJECTED, STATE_FAILED_ACKNOWLEDGED, STATE_ABORTED_ACKNOWLEDGED,
+            STATE_REJECTED_ACKNOWLEDGED};
     public static final Set<String> ALL_STATES_SET = new HashSet<String>(Arrays.asList(ALL_STATES));
 
     public static final String[] PRE_FINAL_STATES = {STATE_DELIVERED, STATE_FAILED, STATE_ABORTED, STATE_REJECTED};
     public static final Set<String> PRE_FINAL_STATES_SET = new HashSet<String>(Arrays.asList(PRE_FINAL_STATES));
 
-    public static final String[] FINAL_STATES = {STATE_CONFIRMED, STATE_FAILED_CONFIRMED, STATE_ABORTED_CONFIRMED, STATE_REJECTED_CONFIRMED};
+    public static final String[] FINAL_STATES = {STATE_DELIVERED_ACKNOWLEDGED, STATE_FAILED_ACKNOWLEDGED, STATE_ABORTED_ACKNOWLEDGED, STATE_REJECTED_ACKNOWLEDGED};
     public static final Set<String> FINAL_STATES_SET = new HashSet<String>(Arrays.asList(FINAL_STATES));
 
     // the attachment delivery states
@@ -78,21 +90,21 @@ public class TalkDelivery {
     public static final String ATTACHMENT_STATE_UPLOAD_PAUSED = "paused";
     public static final String ATTACHMENT_STATE_UPLOADED = "uploaded";
     public static final String ATTACHMENT_STATE_RECEIVED = "received";
-    public static final String ATTACHMENT_STATE_RECEIVED_CONFIRMED = "receivedConfirmed";
+    public static final String ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED = "receivedAcknowledged";
     public static final String ATTACHMENT_STATE_UPLOAD_FAILED = "uploadFailed";
-    public static final String ATTACHMENT_STATE_UPLOAD_FAILED_CONFIRMED = "uploadFailedConfirmed";
+    public static final String ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED = "uploadFailedAcknowledged";
     public static final String ATTACHMENT_STATE_UPLOAD_ABORTED = "uploadAborted";
-    public static final String ATTACHMENT_STATE_UPLOAD_ABORTED_CONFIRMED = "uploadAbortedConfirmed";
+    public static final String ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED = "uploadAbortedAcknowledged";
     public static final String ATTACHMENT_STATE_DOWNLOAD_FAILED = "downloadFailed";
-    public static final String ATTACHMENT_STATE_DOWNLOAD_FAILED_CONFIRMED = "downloadFailedConfirmed";
+    public static final String ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED = "downloadFailedAcknowledged";
     public static final String ATTACHMENT_STATE_DOWNLOAD_ABORTED = "downloadAborted";
-    public static final String ATTACHMENT_STATE_DOWNLOAD_ABORTED_CONFIRMED = "downloadAbortedConfirmed";
+    public static final String ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED = "downloadAbortedAcknowledged";
 
     public static final String[] ALL_ATTACHMENT_STATES = {ATTACHMENT_STATE_NONE,ATTACHMENT_STATE_NEW,ATTACHMENT_STATE_UPLOADING,
-            ATTACHMENT_STATE_UPLOAD_PAUSED,ATTACHMENT_STATE_UPLOADED,ATTACHMENT_STATE_RECEIVED,ATTACHMENT_STATE_RECEIVED_CONFIRMED,
-            ATTACHMENT_STATE_UPLOAD_FAILED,ATTACHMENT_STATE_UPLOAD_FAILED_CONFIRMED,ATTACHMENT_STATE_UPLOAD_ABORTED,
-            ATTACHMENT_STATE_UPLOAD_ABORTED_CONFIRMED,ATTACHMENT_STATE_DOWNLOAD_FAILED,ATTACHMENT_STATE_DOWNLOAD_FAILED_CONFIRMED,
-            ATTACHMENT_STATE_DOWNLOAD_ABORTED,ATTACHMENT_STATE_DOWNLOAD_ABORTED_CONFIRMED
+            ATTACHMENT_STATE_UPLOAD_PAUSED,ATTACHMENT_STATE_UPLOADED,ATTACHMENT_STATE_RECEIVED, ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_UPLOAD_FAILED, ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED,ATTACHMENT_STATE_UPLOAD_ABORTED,
+            ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED,ATTACHMENT_STATE_DOWNLOAD_FAILED, ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_DOWNLOAD_ABORTED, ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
     };
     public static final Set<String> ALL_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(ALL_ATTACHMENT_STATES));
 
@@ -101,8 +113,8 @@ public class TalkDelivery {
     };
     public static final Set<String> PRE_FINAL_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(PRE_FINAL_ATTACHMENT_STATES));
 
-    public static final String[] FINAL_ATTACHMENT_STATES = {ATTACHMENT_STATE_RECEIVED_CONFIRMED, ATTACHMENT_STATE_UPLOAD_FAILED_CONFIRMED,
-            ATTACHMENT_STATE_UPLOAD_ABORTED_CONFIRMED,ATTACHMENT_STATE_DOWNLOAD_FAILED_CONFIRMED, ATTACHMENT_STATE_DOWNLOAD_ABORTED_CONFIRMED
+    public static final String[] FINAL_ATTACHMENT_STATES = {ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED, ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED, ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED, ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
     };
     public static final Set<String> FINAL_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(FINAL_ATTACHMENT_STATES));
 
@@ -139,13 +151,13 @@ public class TalkDelivery {
             return !nextState.equals(STATE_NEW) && !nextState.equals(STATE_DELIVERING);
         }
         if (state.equals(STATE_FAILED)) {
-            return nextState.equals(STATE_FAILED_CONFIRMED);
+            return nextState.equals(STATE_FAILED_ACKNOWLEDGED);
         }
         if (state.equals(STATE_ABORTED)) {
-            return nextState.equals(STATE_ABORTED_CONFIRMED);
+            return nextState.equals(STATE_ABORTED_ACKNOWLEDGED);
         }
         if (state.equals(STATE_REJECTED)) {
-            return nextState.equals(STATE_REJECTED_CONFIRMED);
+            return nextState.equals(STATE_REJECTED_ACKNOWLEDGED);
         }
         throw new RuntimeException("Internal Logic failure (nextStateAllowed)");
     }
@@ -177,26 +189,26 @@ public class TalkDelivery {
             return !nextState.equals(ATTACHMENT_STATE_NEW) && !nextState.equals(ATTACHMENT_STATE_UPLOADING);
         }
         if (attachmentState.equals(ATTACHMENT_STATE_RECEIVED)) {
-            return nextState.equals(ATTACHMENT_STATE_RECEIVED_CONFIRMED);
+            return nextState.equals(ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
         }
         if (attachmentState.equals(ATTACHMENT_STATE_UPLOAD_FAILED)) {
-            return nextState.equals(ATTACHMENT_STATE_UPLOAD_FAILED_CONFIRMED);
+            return nextState.equals(ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED);
         }
         if (attachmentState.equals(ATTACHMENT_STATE_DOWNLOAD_FAILED)) {
-            return nextState.equals(ATTACHMENT_STATE_DOWNLOAD_FAILED_CONFIRMED);
+            return nextState.equals(ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED);
         }
         if (attachmentState.equals(ATTACHMENT_STATE_UPLOAD_ABORTED)) {
-            return nextState.equals(ATTACHMENT_STATE_UPLOAD_ABORTED_CONFIRMED);
+            return nextState.equals(ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED);
         }
         if (attachmentState.equals(ATTACHMENT_STATE_DOWNLOAD_ABORTED)) {
-            return nextState.equals(ATTACHMENT_STATE_DOWNLOAD_ABORTED_CONFIRMED);
+            return nextState.equals(ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED);
         }
         throw new RuntimeException("Internal Logic failure (nextAttachmentStateAllowed)");
     }
 
     @JsonIgnore
-    public boolean hasAttachment {
-        return attachmentState =! null && !ATTACHMENT_STATE_NONE.equals(attachmentState);
+    public boolean hasAttachment() {
+        return attachmentState != null && !ATTACHMENT_STATE_NONE.equals(attachmentState);
     }
 
 
@@ -291,6 +303,10 @@ public class TalkDelivery {
     @DatabaseField(columnName = FIELD_ATTACHMENT_STATE, canBeNull = true)
     String attachmentState;
 
+    // may contain a reason for rejection, failure or abortion
+    @DatabaseField(columnName = FIELD_REASON, canBeNull = true)
+    String reason;
+
     public TalkDelivery() {
     }
 
@@ -315,7 +331,7 @@ public class TalkDelivery {
 
     @JsonIgnore
     public boolean isFinished() {
-        return state.equals(STATE_ABORTED) || state.equals(STATE_FAILED) || state.equals(STATE_CONFIRMED);
+        return state.equals(STATE_ABORTED) || state.equals(STATE_FAILED) || state.equals(STATE_DELIVERED_ACKNOWLEDGED);
     }
 
     @JsonIgnore
@@ -444,6 +460,14 @@ public class TalkDelivery {
 
     public void setAttachmentState(String attachmentState) {
         this.attachmentState = attachmentState;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     @JsonIgnore

@@ -87,7 +87,8 @@ public interface ITalkRpcClient {
      * @talk.errors.client call deliveryAbort when preconditions not met
      */
 	@JsonRpcNotification
-	void incomingDelivery(TalkDelivery d, TalkMessage m);
+    void incomingDelivery(TalkDelivery d, TalkMessage m);
+    void incomingDeliveryUpdate(TalkDelivery d);
 
     /**
      * Notifies a client about a state change on the server about an outgoing delivery sent by this client
@@ -103,7 +104,7 @@ public interface ITalkRpcClient {
      * @talk.errors.client
      */
 	@JsonRpcNotification
-	void outgoingDelivery(TalkDelivery d);
+    void outgoingDeliveryUpdate(TalkDelivery d);
 
     /**
      * Sent to notify a client about a presence update on the server

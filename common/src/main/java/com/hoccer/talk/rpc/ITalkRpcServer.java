@@ -400,7 +400,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects store message and delivery objects, stamp with timeAccepted and create a message id
      * @talk.errors.server
      **/
-	TalkDelivery[] deliveryRequest(TalkMessage m, TalkDelivery[] d);
+	TalkDelivery[] outDeliveryRequest(TalkMessage m, TalkDelivery[] d);
 
     /** Confirm reception of the message with the given message id
      * @param messageId is the server-provided message id
@@ -413,7 +413,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects update state in delivery object to 'delivered', update timeChanged
      * @talk.errors.server
      **/
-	TalkDelivery   deliveryConfirm(String messageId);
+	TalkDelivery   inDeliveryConfirm(String messageId);
 
     /** Acknowledge reception of outgoing message delivery confirmation
      * @param messageId is the server-provided message id
@@ -427,13 +427,13 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects update state in delivery object to 'confirmed', update timeChanged
      * @talk.errors.server
      **/
-    TalkDelivery   deliveryAcknowledge(String messageId, String recipientId);
+    TalkDelivery   outDeliveryAcknowledge(String messageId, String recipientId);
 
     // As sender, acknowledge a "failed" delivery
-    TalkDelivery   deliveryFailedAcknowledge(String messageId, String recipientId);
+    TalkDelivery   outDeliveryAcknowledgeFailed(String messageId, String recipientId);
 
     // As sender, acknowledge a "rejected" delivery
-    TalkDelivery   deliveryRejectedAcknowledge(String messageId, String recipientId);
+    TalkDelivery   outDeliveryAcknowledgeRejected(String messageId, String recipientId);
 
     /**
      * Reject/abort a delivery
@@ -452,10 +452,10 @@ public interface ITalkRpcServer {
      **/
 
     // abort a delivery as sender
-    TalkDelivery deliveryAbort(String messageId, String recipientId);
+    TalkDelivery outDeliveryAbort(String messageId, String recipientId);
 
     // reject a delivery as receiver
-    TalkDelivery deliveryReject(String messageId);
+    TalkDelivery inDeliveryReject(String messageId, String reason);
 
     /**
      * Create a new group on the server
