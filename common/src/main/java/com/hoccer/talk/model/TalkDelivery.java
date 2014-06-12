@@ -54,7 +54,7 @@ public class TalkDelivery {
     };
     public static final Set<String> REQUIRED_OUT_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_OUT_UPDATE_FIELDS));
 
-    public static final String[] REQUIRED_IN_UPDATE_FIELDS = {FIELD_MESSAGE_ID, FIELD_RECEIVER_ID, FIELD_STATE, FIELD_TIME_CHANGED,
+    public static final String[] REQUIRED_IN_UPDATE_FIELDS = {FIELD_MESSAGE_ID, FIELD_RECEIVER_ID, FIELD_MESSAGE_TAG, FIELD_STATE, FIELD_TIME_CHANGED,
             FIELD_ATTACHMENT_STATE, FIELD_TIME_ATTACHMENT_RECEIVED, FIELD_REASON
     };
     public static final Set<String> REQUIRED_IN_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_IN_UPDATE_FIELDS));
@@ -140,6 +140,10 @@ public class TalkDelivery {
     the counterparty is responsible to acknowledge the pre-final state, which will advance the delivery into a confirmed end-state
      */
 
+    @JsonIgnore
+    public boolean isFinished() {
+        return isFinalState(state) && isFinalAttachmentState(attachmentState);
+    }
 
     public static boolean isValidState(String state) {
         return ALL_STATES_SET.contains(state);
@@ -337,12 +341,6 @@ public class TalkDelivery {
         if (this.timeChanged == null) this.timeChanged = new Date(0);
         if (this.timeUpdatedIn == null) this.timeUpdatedIn = new Date(0);
         if (this.timeUpdatedOut == null) this.timeUpdatedOut = new Date(0);
-    }
-
-
-    @JsonIgnore
-    public boolean isFinished() {
-        return state.equals(STATE_ABORTED) || state.equals(STATE_FAILED) || state.equals(STATE_DELIVERED_ACKNOWLEDGED);
     }
 
     @JsonIgnore

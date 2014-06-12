@@ -88,6 +88,8 @@ public interface ITalkRpcClient {
      */
 	@JsonRpcNotification
     void incomingDelivery(TalkDelivery d, TalkMessage m);
+
+    @JsonRpcNotification
     void incomingDeliveryUpdated(TalkDelivery d);
 
     /**
