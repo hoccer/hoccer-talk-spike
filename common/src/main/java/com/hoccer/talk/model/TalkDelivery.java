@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Delivery objects represent the receiver-dependent
@@ -72,10 +69,21 @@ public class TalkDelivery {
      */
 
     // the delivery states
+    public static final String STATE_DRAFT = "draft";
     public static final String STATE_NEW = "new";
     public static final String STATE_DELIVERING = "delivering";
     public static final String STATE_DELIVERED = "delivered";
     public static final String STATE_DELIVERED_ACKNOWLEDGED = "deliveredAcknowledged";
+    public static final String STATE_DELIVERED_SEEN = "deliveredSeen";
+    public static final String STATE_DELIVERED_SEEN_ACKNOWLEDGED = "deliveredSeenAcknowledged";
+    public static final String STATE_DELIVERED_SEEN_RESPONDING = "deliveredSeenResponding";
+    public static final String STATE_DELIVERED_SEEN_RESPONDING_ACKNOWLEDGED = "deliveredSeenRespondingAcknowledged";
+    public static final String STATE_DELIVERED_SEEN_RESPONDED = "deliveredSeenResponding";
+    public static final String STATE_DELIVERED_SEEN_RESPONDED_ACKNOWLEDGED = "deliveredSeenRespondedAcknowledged";
+    public static final String STATE_DELIVERED_SEEN_NOT_RESPONDED = "deliveredSeenNotResponded";
+    public static final String STATE_DELIVERED_SEEN_NOT_RESPONDED_ACKNOWLEDGED = "deliveredSeenNotRespondedAcknowledged";
+    public static final String STATE_DELIVERED_NOT_SEEN = "deliveredNotSeen";
+    public static final String STATE_DELIVERED_NOT_SEEN_ACKNOWLEDGED = "deliveredNotSeenAcknowledged";
     public static final String STATE_FAILED = "failed";
     public static final String STATE_ABORTED = "aborted";
     public static final String STATE_REJECTED = "rejected";
@@ -83,15 +91,142 @@ public class TalkDelivery {
     public static final String STATE_ABORTED_ACKNOWLEDGED = "abortedAcknowledged";
     public static final String STATE_REJECTED_ACKNOWLEDGED = "rejectedAcknowledged";
 
-    public static final String[] ALL_STATES = {STATE_NEW, STATE_DELIVERING, STATE_DELIVERED,
-            STATE_DELIVERED_ACKNOWLEDGED, STATE_FAILED, STATE_ABORTED, STATE_REJECTED, STATE_FAILED_ACKNOWLEDGED, STATE_ABORTED_ACKNOWLEDGED,
-            STATE_REJECTED_ACKNOWLEDGED};
+    public static final String[] ALL_STATES = {
+            STATE_DRAFT,
+            STATE_NEW,
+            STATE_DELIVERING,
+            STATE_DELIVERED,
+            STATE_DELIVERED_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN,
+            STATE_DELIVERED_SEEN_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN_RESPONDING,
+            STATE_DELIVERED_SEEN_RESPONDING_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN_RESPONDED,
+            STATE_DELIVERED_SEEN_RESPONDED_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN_NOT_RESPONDED,
+            STATE_DELIVERED_SEEN_NOT_RESPONDED_ACKNOWLEDGED,
+            STATE_DELIVERED_NOT_SEEN,
+            STATE_DELIVERED_NOT_SEEN_ACKNOWLEDGED,
+            STATE_FAILED,
+            STATE_FAILED_ACKNOWLEDGED,
+            STATE_ABORTED,
+            STATE_ABORTED_ACKNOWLEDGED,
+            STATE_REJECTED,
+            STATE_REJECTED_ACKNOWLEDGED
+    };
     public static final Set<String> ALL_STATES_SET = new HashSet<String>(Arrays.asList(ALL_STATES));
 
-    public static final String[] PRE_FINAL_STATES = {STATE_DELIVERED, STATE_FAILED, STATE_ABORTED, STATE_REJECTED};
-    public static final Set<String> PRE_FINAL_STATES_SET = new HashSet<String>(Arrays.asList(PRE_FINAL_STATES));
+    public static class StateInfo {
+        boolean senderCaused;
+        boolean receiverCaused;
+        boolean notifySender;
+        boolean notifyReceiver;
+    }
 
-    public static final String[] FINAL_STATES = {STATE_DELIVERED_ACKNOWLEDGED, STATE_FAILED_ACKNOWLEDGED, STATE_ABORTED_ACKNOWLEDGED, STATE_REJECTED_ACKNOWLEDGED};
+    static final Map<String, StateInfo> stateInfo = new HashMap<String, StateInfo>();
+
+    static final Map<String, Set<String>> nextState = new HashMap<String, Set<String>>();
+
+    static {
+        // nextstate init
+        nextState.put(STATE_DRAFT, new HashSet<String>(Arrays.asList(new String[]{STATE_NEW})));
+        nextState.put(STATE_NEW, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERING, STATE_FAILED})));
+        nextState.put(STATE_DELIVERING, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED, STATE_REJECTED, STATE_ABORTED, STATE_DELIVERED_SEEN, STATE_DELIVERED_NOT_SEEN})));
+        nextState.put(STATE_DELIVERED, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_ACKNOWLEDGED})));
+        nextState.put(STATE_DELIVERED_ACKNOWLEDGED, new HashSet<String>());
+        nextState.put(STATE_DELIVERED_SEEN, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_SEEN_ACKNOWLEDGED})));
+        nextState.put(STATE_DELIVERED_SEEN_ACKNOWLEDGED, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_SEEN_RESPONDING, STATE_DELIVERED_SEEN_NOT_RESPONDED})));
+        nextState.put(STATE_DELIVERED_SEEN_RESPONDING, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_SEEN_RESPONDING_ACKNOWLEDGED})));
+        nextState.put(STATE_DELIVERED_SEEN_RESPONDING_ACKNOWLEDGED, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_SEEN_RESPONDED, STATE_DELIVERED_SEEN_NOT_RESPONDED})));
+        nextState.put(STATE_DELIVERED_SEEN_RESPONDED, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_SEEN_RESPONDED_ACKNOWLEDGED})));
+        nextState.put(STATE_DELIVERED_SEEN_RESPONDED_ACKNOWLEDGED, new HashSet<String>());
+        nextState.put(STATE_DELIVERED_SEEN_NOT_RESPONDED, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_SEEN_NOT_RESPONDED_ACKNOWLEDGED})));
+        nextState.put(STATE_DELIVERED_SEEN_NOT_RESPONDED_ACKNOWLEDGED, new HashSet<String>());
+        nextState.put(STATE_DELIVERED_NOT_SEEN, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_NOT_SEEN_ACKNOWLEDGED})));
+        nextState.put(STATE_DELIVERED_NOT_SEEN_ACKNOWLEDGED, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_SEEN})));
+        nextState.put(STATE_FAILED, new HashSet<String>(Arrays.asList(new String[]{STATE_FAILED_ACKNOWLEDGED})));
+        nextState.put(STATE_FAILED_ACKNOWLEDGED, new HashSet<String>());
+        nextState.put(STATE_ABORTED, new HashSet<String>(Arrays.asList(new String[]{STATE_ABORTED_ACKNOWLEDGED})));
+        nextState.put(STATE_ABORTED_ACKNOWLEDGED, new HashSet<String>());
+        nextState.put(STATE_REJECTED, new HashSet<String>(Arrays.asList(new String[]{STATE_REJECTED_ACKNOWLEDGED})));
+        nextState.put(STATE_REJECTED_ACKNOWLEDGED, new HashSet<String>());
+
+        /*
+        // stateInfo init
+        stateInfo.put(STATE_DRAFT,                      new StateInfo()             {{senderCaused=false; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_NEW,                        new StateInfo()             {{senderCaused=true;  receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERING,                 new StateInfo()             {{senderCaused=true;  receiverCaused=false; notifySender =true;  notifyReceiver =true;}});
+        stateInfo.put(STATE_DELIVERED,                  new StateInfo()             {{senderCaused=false; receiverCaused=true;  notifySender =true;  notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_ACKNOWLEDGED,     new StateInfo()             {{senderCaused=true;  receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_SEEN,              new StateInfo()            {{senderCaused=false; receiverCaused=true; notifySender =true; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_SEEN_ACKNOWLEDGED,            new StateInfo() {{senderCaused=true; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_SEEN_RESPONDING,              new StateInfo() {{senderCaused=false; receiverCaused=true; notifySender =true; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_SEEN_RESPONDING_ACKNOWLEDGED, new StateInfo() {{senderCaused=true; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_SEEN_RESPONDED,               new StateInfo() {{senderCaused=false; receiverCaused=true; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_SEEN_RESPONDED_ACKNOWLEDGED,  new StateInfo() {{senderCaused=true; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_SEEN_NOT_RESPONDED, new StateInfo()           {{senderCaused=false; receiverCaused=true; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_SEEN_NOT_RESPONDED_ACKNOWLEDGED, new StateInfo(){{senderCaused=true; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_NOT_SEEN,             new StateInfo()         {{senderCaused=false; receiverCaused=true; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_DELIVERED_NOT_SEEN_ACKNOWLEDGED,new StateInfo()         {{senderCaused=true; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_FAILED,                     new StateInfo()             {{senderCaused=true; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_FAILED_ACKNOWLEDGED,        new StateInfo()             {{senderCaused=true; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_ABORTED,                    new StateInfo()             {{senderCaused=true; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_ABORTED_ACKNOWLEDGED,       new StateInfo()             {{senderCaused=true; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_REJECTED, new StateInfo()                               {{senderCaused=false; receiverCaused=true; notifySender =false; notifyReceiver =false;}});
+        stateInfo.put(STATE_REJECTED_ACKNOWLEDGED,      new StateInfo()             {{senderCaused=true; receiverCaused=false; notifySender =false; notifyReceiver =false;}});
+        */
+    }
+
+    final static boolean statePathExists(String stateA, String stateB) {
+        return statePathExists(stateA, stateB, 0);
+    }
+
+    final static boolean statePathExists(String stateA, String stateB, int depth) {
+        if (depth > nextState.size()) {
+            throw new RuntimeException("circular path detected");
+        }
+        Set<String> aFollows = nextState.get(stateA);
+        if (aFollows == null) {
+            throw new RuntimeException("state A ='"+stateA+"' does not exist");
+        }
+        Set<String> bFollows = nextState.get(stateB);
+        if (bFollows == null) {
+            throw new RuntimeException("state B ='"+stateB+"' does not exist");
+        }
+        if (aFollows.contains(stateB)) {
+            return true;
+        }
+        for (String next : aFollows) {
+            if (statePathExists(next, stateB, depth + 1)) return true;
+        }
+        return false;
+    }
+
+    public static final String[] DELIVERED_STATES = {
+            STATE_DELIVERED_SEEN,
+            STATE_DELIVERED_SEEN_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN_RESPONDING,
+            STATE_DELIVERED_SEEN_RESPONDING_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN_RESPONDED,
+            STATE_DELIVERED_SEEN_RESPONDED_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN_NOT_RESPONDED,
+            STATE_DELIVERED_SEEN_NOT_RESPONDED_ACKNOWLEDGED,
+            STATE_DELIVERED_NOT_SEEN,
+            STATE_DELIVERED_NOT_SEEN_ACKNOWLEDGED
+    };
+    public static final Set<String> DELIVERED_STATES_SET = new HashSet<String>(Arrays.asList(DELIVERED_STATES));
+
+    //public static final String[] PRE_FINAL_STATES = {STATE_DELIVERED, STATE_FAILED, STATE_ABORTED, STATE_REJECTED};
+    //public static final Set<String> PRE_FINAL_STATES_SET = new HashSet<String>(Arrays.asList(PRE_FINAL_STATES));
+
+    public static final String[] FINAL_STATES = {
+            STATE_DELIVERED_ACKNOWLEDGED,
+            STATE_FAILED_ACKNOWLEDGED,
+            STATE_ABORTED_ACKNOWLEDGED,
+            STATE_REJECTED_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN_RESPONDED_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN_NOT_RESPONDED_ACKNOWLEDGED
+    };
     public static final Set<String> FINAL_STATES_SET = new HashSet<String>(Arrays.asList(FINAL_STATES));
 
     // the attachment delivery states
