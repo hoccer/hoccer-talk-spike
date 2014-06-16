@@ -353,7 +353,7 @@ public class TalkDelivery {
         if (attachmentState.equals(ATTACHMENT_STATE_DOWNLOAD_ABORTED)) {
             return nextState.equals(ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED);
         }
-        throw new RuntimeException("Internal Logic failure (nextAttachmentStateAllowed)");
+        throw new RuntimeException("Internal Logic failure (nextAttachmentStateAllowed), state="+attachmentState+", nextState="+nextState);
     }
 
     @JsonIgnore
@@ -572,6 +572,7 @@ public class TalkDelivery {
 
     public void setTimeChanged(Date timeChanged) {
         this.timeChanged = timeChanged;
+        System.out.println("@@@@"+this+ " setTimeChanged("+(timeChanged != null ? timeChanged.getTime() : "null")+")");
     }
 
     public Date getTimeUpdatedOut() {
@@ -580,6 +581,7 @@ public class TalkDelivery {
 
     public void setTimeUpdatedOut(Date timeUpdatedOut) {
         this.timeUpdatedOut = timeUpdatedOut;
+        System.out.println("@@@@"+this+ " setTimeUpdatedOut("+(timeUpdatedOut != null ? timeUpdatedOut.getTime() : "null")+")");
     }
 
     public Date getTimeUpdatedIn() {
@@ -588,6 +590,7 @@ public class TalkDelivery {
 
     public void setTimeUpdatedIn(Date timeUpdatedIn) {
         this.timeUpdatedIn = timeUpdatedIn;
+        System.out.println("@@@@"+this+ " setTimeUpdatedIn("+(timeUpdatedIn != null ? timeUpdatedIn.getTime() : "null")+")");
     }
 
     public Date getTimeAttachmentReceived() {
