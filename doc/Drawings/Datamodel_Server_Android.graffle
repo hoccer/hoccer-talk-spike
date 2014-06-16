@@ -57,14 +57,170 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>66</integer>
+				<integer>43</integer>
+			</dict>
+			<key>ID</key>
+			<integer>232</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
+			<key>Points</key>
+			<array>
+				<string>{747.74999630131902, 775.89285383951358}</string>
+				<string>{811.82142459144995, 775.89285383951301}</string>
+				<string>{938.71635705008111, 764.5679911047024}</string>
+			</array>
+			<key>Style</key>
+			<dict>
+				<key>stroke</key>
+				<dict>
+					<key>HeadArrow</key>
+					<string>0</string>
+					<key>Legacy</key>
+					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
+					<key>TailArrow</key>
+					<string>FilledArrow</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>Class</key>
+			<string>LineGraphic</string>
+			<key>Head</key>
+			<dict>
+				<key>ID</key>
+				<integer>67</integer>
+			</dict>
+			<key>ID</key>
+			<integer>231</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
+			<key>Points</key>
+			<array>
+				<string>{369.91072909792507, 762.4999967536761}</string>
+				<string>{340.04367468201804, 633.59423690628194}</string>
+			</array>
+			<key>Style</key>
+			<dict>
+				<key>stroke</key>
+				<dict>
+					<key>HeadArrow</key>
+					<string>0</string>
+					<key>Legacy</key>
+					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
+					<key>TailArrow</key>
+					<string>FilledArrow</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>Class</key>
+			<string>LineGraphic</string>
+			<key>Head</key>
+			<dict>
+				<key>ID</key>
+				<integer>92</integer>
+			</dict>
+			<key>ID</key>
+			<integer>230</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
+			<key>Points</key>
+			<array>
+				<string>{615.39285399916889, 729.46428260860932}</string>
+				<string>{543.857140013758, 729.46428260861001}</string>
+				<string>{543.857140013758, 831.24999646097422}</string>
+				<string>{504.85714068251519, 831.13229068587918}</string>
+			</array>
+			<key>Style</key>
+			<dict>
+				<key>stroke</key>
+				<dict>
+					<key>HeadArrow</key>
+					<string>0</string>
+					<key>Legacy</key>
+					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
+					<key>TailArrow</key>
+					<string>FilledArrow</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>Class</key>
+			<string>LineGraphic</string>
+			<key>ID</key>
+			<integer>229</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
+			<key>Points</key>
+			<array>
+				<string>{562.93211581432104, 454.03498440993303}</string>
+				<string>{558.14285423865124, 541.0714262678307}</string>
+				<string>{22.428570805155505, 541.96428340688658}</string>
+				<string>{25.999999361378809, 927.87885691277108}</string>
+				<string>{372.74092979470618, 929.78571156501414}</string>
+			</array>
+			<key>Style</key>
+			<dict>
+				<key>stroke</key>
+				<dict>
+					<key>HeadArrow</key>
+					<string>FilledArrow</string>
+					<key>Legacy</key>
+					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
+					<key>TailArrow</key>
+					<string>0</string>
+				</dict>
+			</dict>
+			<key>Tail</key>
+			<dict>
+				<key>ID</key>
+				<integer>107</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>Class</key>
+			<string>LineGraphic</string>
+			<key>Head</key>
+			<dict>
+				<key>ID</key>
+				<integer>67</integer>
 			</dict>
 			<key>ID</key>
 			<integer>228</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{504.80776390095645, 863.35876626174218}</string>
-				<string>{651.1331413567151, 933.71187443184783}</string>
+				<string>{370.9107290979249, 874.10713913565394}</string>
+				<string>{336.84851830502373, 633.60220010007481}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -74,14 +230,11 @@
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>92</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -90,14 +243,21 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>79</integer>
+				<integer>80</integer>
 			</dict>
 			<key>ID</key>
 			<integer>227</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{504.69905853491014, 902.78164604441122}</string>
-				<string>{637.31185856307047, 1044.2780325493738}</string>
+				<string>{369.96428415194458, 775.8928538395129}</string>
+				<string>{337.32142751846385, 775.89285383951301}</string>
+				<string>{315.56744297355152, 755.90965726364504}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -107,14 +267,11 @@
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>92</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -123,14 +280,22 @@
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>100</integer>
+				<integer>101</integer>
 			</dict>
 			<key>ID</key>
 			<integer>226</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{488.29549196703823, 964.39570379744828}</string>
-				<string>{576.86441707922143, 1196.4613454804025}</string>
+				<string>{368.96428361976024, 791.07142520346213}</string>
+				<string>{194.17857136394909, 790.17856806440625}</string>
+				<string>{186.71428439142753, 683.92856915538312}</string>
+				<string>{164.82439628981999, 675.59081375696519}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -140,14 +305,11 @@
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>92</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -160,10 +322,18 @@
 			</dict>
 			<key>ID</key>
 			<integer>225</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{369.86599552478361, 818.05678738750521}</string>
-				<string>{189.99113843819086, 783.751400761372}</string>
+				<string>{370.53571217598358, 816.96428223608098}</string>
+				<string>{254.57142695967033, 816.46428271504681}</string>
+				<string>{254.57142695967033, 773.21428242234549}</string>
+				<string>{153.85714077099595, 772.97111815115613}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -173,14 +343,11 @@
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>92</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -193,10 +360,18 @@
 			</dict>
 			<key>ID</key>
 			<integer>224</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{369.86552153999526, 843.44202348352042}</string>
-				<string>{189.99162113468455, 876.79199775928851}</string>
+				<string>{371.53571217598358, 831.24999646097456}</string>
+				<string>{254.57142695967033, 831.24999646097422}</string>
+				<string>{254.57142695967033, 891.07142477771458}</string>
+				<string>{153.85713833205693, 890.64802973460939}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -206,14 +381,11 @@
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>92</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -226,10 +398,17 @@
 			</dict>
 			<key>ID</key>
 			<integer>223</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{369.94741932201941, 878.07766643022796}</string>
-				<string>{207.9811520685391, 991.36344895572495}</string>
+				<string>{371.53571217598358, 890.46428292792064}</string>
+				<string>{307.24999816396405, 910.71428183694275}</string>
+				<string>{194.55991245312379, 1006.2782747265574}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -239,14 +418,11 @@
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>92</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -259,10 +435,16 @@
 			</dict>
 			<key>ID</key>
 			<integer>222</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{370.0807793150089, 932.3630102988858}</string>
-				<string>{227.38339664919997, 1147.5118156633296}</string>
+				<string>{371.64285503692781, 903.46428186355195}</string>
+				<string>{318.14873858901046, 1089.6979992218849}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -272,14 +454,11 @@
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>92</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -432,7 +611,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{423.42423071396149, 970.58207395775048}, {17, 14}}</string>
+			<string>{{526.40475880430665, 911.3873678173876}, {17, 14}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -448,7 +627,7 @@
 				<key>Offset</key>
 				<real>5.3333330154418945</real>
 				<key>Position</key>
-				<real>0.10000000149011612</real>
+				<real>0.14054933190345764</real>
 				<key>RotationType</key>
 				<integer>0</integer>
 			</dict>
@@ -491,7 +670,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{426.51942644266643, 1075.8408897438064}, {16, 14}}</string>
+			<string>{{461.39507958214756, 978.58332883779497}, {16, 14}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -556,10 +735,17 @@
 			</dict>
 			<key>ID</key>
 			<integer>16</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{437.26649621130287, 964.42856904707037}</string>
-				<string>{437.17715909915557, 1095.9998296078365}</string>
+				<string>{508.7142857751071, 915.1785675322219}</string>
+				<string>{529.57142578886476, 981.24999582235307}</string>
+				<string>{465.79735928509143, 1001.7750502650451}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -570,15 +756,10 @@
 					<key>Legacy</key>
 					<true/>
 					<key>LineType</key>
-					<integer>1</integer>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>0</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>92</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -674,17 +855,21 @@ type}</string>
 		<dict>
 			<key>Class</key>
 			<string>LineGraphic</string>
-			<key>Head</key>
-			<dict>
-				<key>ID</key>
-				<integer>91</integer>
-			</dict>
 			<key>ID</key>
 			<integer>125</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{407.34633094084904, 454.03174896033437}</string>
-				<string>{436.4075222908902, 683.43253364827444}</string>
+				<string>{391.88615870301862, 454.03570848804583}</string>
+				<string>{392.07142637426756, 495.53571217598358}</string>
+				<string>{15.178571363949077, 529.46428346010498}</string>
+				<string>{271.53571260173101, 943.64285312106415}</string>
+				<string>{372.32142645409522, 943.64285312106415}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -694,6 +879,8 @@ type}</string>
 					<string>FilledArrow</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>0</string>
 				</dict>
@@ -702,39 +889,6 @@ type}</string>
 			<dict>
 				<key>ID</key>
 				<integer>95</integer>
-			</dict>
-		</dict>
-		<dict>
-			<key>Class</key>
-			<string>LineGraphic</string>
-			<key>Head</key>
-			<dict>
-				<key>ID</key>
-				<integer>91</integer>
-			</dict>
-			<key>ID</key>
-			<integer>123</integer>
-			<key>Points</key>
-			<array>
-				<string>{523.76713427990967, 454.00547302777528}</string>
-				<string>{440.08148517569236, 683.4588357691681}</string>
-			</array>
-			<key>Style</key>
-			<dict>
-				<key>stroke</key>
-				<dict>
-					<key>HeadArrow</key>
-					<string>FilledArrow</string>
-					<key>Legacy</key>
-					<true/>
-					<key>TailArrow</key>
-					<string>0</string>
-				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>107</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -747,10 +901,17 @@ type}</string>
 			</dict>
 			<key>ID</key>
 			<integer>115</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{677.24452618281157, 652.45382774718075}</string>
-				<string>{611.67962270490125, 454.01049796759992}</string>
+				<string>{611.82142544294493, 785.71428236912698}</string>
+				<string>{572.42856846354448, 785.71428236912709}</string>
+				<string>{570.5929483200764, 454.03573199286899}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -760,14 +921,11 @@ type}</string>
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>88</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -780,10 +938,19 @@ type}</string>
 			</dict>
 			<key>ID</key>
 			<integer>114</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{612.44789937572853, 679.01058864440529}</string>
-				<string>{458.58768505260036, 434.45371088204075}</string>
+				<string>{611.71428258200081, 801.78571087213197}</string>
+				<string>{555.46428282148372, 801.78571087213197}</string>
+				<string>{555.46428282148372, 558.03571190989135}</string>
+				<string>{407.24999773821662, 529.46428346010498}</string>
+				<string>{401.29990379259499, 454.03416505121038}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -793,14 +960,11 @@ type}</string>
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>89</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -813,10 +977,16 @@ type}</string>
 			</dict>
 			<key>ID</key>
 			<integer>113</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{747.21298448253231, 781.29735414838512}</string>
-				<string>{938.71551936455751, 768.15797544624036}</string>
+				<string>{747.64285344037467, 757.14285391934072}</string>
+				<string>{938.71437768914109, 757.21782347721125}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -826,14 +996,11 @@ type}</string>
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>89</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -846,10 +1013,18 @@ type}</string>
 			</dict>
 			<key>ID</key>
 			<integer>109</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{612.22255951644911, 798.46018440214948}</string>
-				<string>{504.84874065349851, 818.39697082645398}</string>
+				<string>{615.28571113822409, 715.17856838371677}</string>
+				<string>{529.57142578886476, 715.17856838371677}</string>
+				<string>{529.57142578886476, 831.24999646097422}</string>
+				<string>{504.85713991216386, 831.16385095212672}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -859,14 +1034,11 @@ type}</string>
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>89</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -875,14 +1047,20 @@ type}</string>
 			<key>Head</key>
 			<dict>
 				<key>ID</key>
-				<integer>34</integer>
+				<integer>35</integer>
 			</dict>
 			<key>ID</key>
 			<integer>108</integer>
+			<key>OrthogonalBarAutomatic</key>
+			<true/>
+			<key>OrthogonalBarPoint</key>
+			<string>{0, 0}</string>
+			<key>OrthogonalBarPosition</key>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{747.14733388259197, 824.80217686938181}</string>
-				<string>{861.66823977603849, 890.82070149248386}</string>
+				<string>{748.32142485754218, 742.85713969444737}</string>
+				<string>{797.63038023088563, 620.82072916937852}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -892,14 +1070,11 @@ type}</string>
 					<string>0</string>
 					<key>Legacy</key>
 					<true/>
+					<key>LineType</key>
+					<integer>2</integer>
 					<key>TailArrow</key>
 					<string>FilledArrow</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>89</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -1107,7 +1282,7 @@ body}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{512.71428353993258, 1196.9284801224678}, {134, 14}}</string>
+					<string>{{30.357143552936009, 600.89285458457107}, {134, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1143,7 +1318,7 @@ body}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{512.71428353993258, 1210.9284801224678}, {134, 70}}</string>
+					<string>{{30.357143552936009, 614.89285458457107}, {134, 70}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1200,7 +1375,7 @@ srpSecret}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{353.69644273741534, 1096.4998279478502}, {167, 14}}</string>
+					<string>{{360.07145838211432, 1001.9282323952299}, {167.00003051757812, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1236,7 +1411,7 @@ srpSecret}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{353.69644273741534, 1110.4998279478502}, {167, 56}}</string>
+					<string>{{360.07145838211432, 1015.9282323952298}, {167.00003051757812, 56}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1479,8 +1654,8 @@ groupKey\
 groupPresence\
 groupMember\
 groupMemberships\
-avatarDownload\
 avatarUpload\
+avatarDownload\
 isNearby}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
@@ -1703,7 +1878,7 @@ protocolVerions}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{587.71429222502888, 1044.6428526953171}, {113, 14}}</string>
+					<string>{{205.35714198284001, 643.5714084186792}, {113, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1739,7 +1914,7 @@ protocolVerions}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{587.71429222502888, 1058.6428526953171}, {113, 98}}</string>
+					<string>{{205.35714198284001, 657.5714084186792}, {113, 98}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1993,7 +2168,7 @@ maxuseCount}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{621.14285812420519, 933.92853257896354}, {90, 14}}</string>
+					<string>{{286.82142735880848, 549.10714051933314}, {90, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2029,7 +2204,7 @@ maxuseCount}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{621.14285812420519, 947.92853257896354}, {90, 70}}</string>
+					<string>{{286.82142735880848, 563.10714051933314}, {90, 70}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2086,7 +2261,7 @@ timestamp}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{66.499991022202352, 708.92856841032619}, {123, 14}}</string>
+					<string>{{30.357149842746338, 709.82142554938184}, {122.99999237060547, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2122,7 +2297,7 @@ timestamp}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{66.499991022202352, 722.92856841032619}, {123, 98}}</string>
+					<string>{{30.357149842746338, 723.82142554938184}, {122.99999237060547, 98}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2181,7 +2356,7 @@ connectionStatus}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{66.499999733907742, 839.285710712477}, {123, 14}}</string>
+					<string>{{30.357142754507223, 841.38738657108433}, {123, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2217,7 +2392,7 @@ connectionStatus}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{66.499999733907742, 853.285710712477}, {123, 70}}</string>
+					<string>{{30.357142754507223, 855.38738657108433}, {123, 70}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2274,7 +2449,7 @@ lastChanged}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{156.46428505665787, 1147.9284967742117}, {132, 14}}</string>
+					<string>{{249.99999893563131, 1090.1785667871638}, {132.00001525878906, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2310,7 +2485,7 @@ lastChanged}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{156.46428505665787, 1161.9284967742117}, {132, 168}}</string>
+					<string>{{249.99999893563131, 1104.1785667871638}, {132.00001525878906, 168}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2374,7 +2549,7 @@ lastChanged}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{28.571428449786438, 956.2499596441578}, {179, 14}}</string>
+					<string>{{15.178571363949075, 984.49985489081996}, {179, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2410,7 +2585,7 @@ lastChanged}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{28.571428449786438, 970.2499596441578}, {179, 168}}</string>
+					<string>{{15.178571363949075, 998.49985489081996}, {179, 168.00006103515625}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2672,7 +2847,7 @@ timeReady}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{939.21437766570898, 636.60714014680411}, {163, 14}}</string>
+					<string>{{939.21437766570898, 631.24999731246885}, {163, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2708,7 +2883,7 @@ timeReady}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{939.21437766570898, 650.60714014680411}, {163, 224}}</string>
+					<string>{{939.21437766570898, 645.24999731246885}, {163, 224}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2872,7 +3047,7 @@ hmac}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{784.67853241915657, 891.07142477771458}, {179, 14}}</string>
+					<string>{{753.57142536311733, 382.35714123778172}, {179, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2908,7 +3083,7 @@ hmac}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{784.67853241915657, 905.07142477771458}, {179, 224}}</string>
+					<string>{{753.57142536311733, 396.35714123778172}, {179, 224}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3065,7 +3240,7 @@ attachmentUploadFinished}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-06-16 12:10:28 +0000</string>
+	<string>2014-06-16 13:45:18 +0000</string>
 	<key>Modifier</key>
 	<string>Julian Krumow</string>
 	<key>NotesVisible</key>
@@ -3141,7 +3316,7 @@ attachmentUploadFinished}</string>
 		<key>ExpandedCanvases</key>
 		<array/>
 		<key>Frame</key>
-		<string>{{121, -984}, {1680, 962}}</string>
+		<string>{{0, 66}, {1680, 962}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
@@ -3155,7 +3330,7 @@ attachmentUploadFinished}</string>
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{-124, 830.35713932191845}, {1366.9642798944699, 734.82142544294504}}</string>
+		<string>{{-124, 0}, {1366.9642798944699, 734.82142544294504}}</string>
 		<key>Zoom</key>
 		<real>1.1200000047683716</real>
 		<key>ZoomValues</key>
