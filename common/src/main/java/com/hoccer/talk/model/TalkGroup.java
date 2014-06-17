@@ -9,6 +9,7 @@ import java.util.Date;
 @DatabaseTable(tableName = "group")
 public class TalkGroup {
 
+    // TODO: define all field strings
     public static final String FIELD_GROUP_ID         = "groupId";
     public static final String FIELD_GROUP_NAME       = "groupName";
     public static final String FIELD_GROUP_TAG        = "groupTag";

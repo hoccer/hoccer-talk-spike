@@ -714,6 +714,8 @@ public interface ITalkRpcServer {
     void destroyEnvironment(String type);
 
     Boolean[] isMemberInGroups(String[] groupIds);
+
+    // return true if for each client the caller is related to by a relationsShip or by an active group membership
     Boolean[] isContactOf(String[] clientIds);
 }
 
