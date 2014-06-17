@@ -26,7 +26,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-06-16 12:46:59 +0000</string>
+	<string>2014-06-17 08:51:28 +0000</string>
 	<key>Modifier</key>
 	<string>andreas</string>
 	<key>NotesVisible</key>
@@ -138,7 +138,7 @@
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{289.5, 546.99996948242188}, {61, 56}}</string>
+					<string>{{298.5, 555.99996948242188}, {61, 56}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -147,6 +147,8 @@
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>97</integer>
+					<key>Layer</key>
+					<integer>0</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -189,20 +191,13 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{286, 540.50000302170429}, {136, 147}}</string>
+					<string>{{295, 549.50000302170429}, {136, 147}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>96</integer>
-					<key>Line</key>
-					<dict>
-						<key>ID</key>
-						<integer>33</integer>
-						<key>Position</key>
-						<real>0.98021316528320312</real>
-						<key>RotationType</key>
-						<integer>0</integer>
-					</dict>
+					<key>Layer</key>
+					<integer>0</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -226,7 +221,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{289.5, 444}, {61, 56}}</string>
+					<string>{{298.5, 453}, {61, 56}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -235,6 +230,8 @@ States}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>95</integer>
+					<key>Layer</key>
+					<integer>0</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -277,11 +274,13 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{278, 248.99996948242188}, {151, 446.00003051757812}}</string>
+					<string>{{287, 257.99996948242188}, {151, 446.00003051757812}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>94</integer>
+					<key>Layer</key>
+					<integer>0</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -305,7 +304,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{124, 324}, {57, 14}}</string>
+					<string>{{133, 333}, {57, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -314,6 +313,8 @@ States}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>93</integer>
+					<key>Layer</key>
+					<integer>0</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -353,11 +354,13 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{12, 239.99996948242188}, {424, 102.00003051757812}}</string>
+					<string>{{21, 248.99996948242188}, {424, 102.00003051757812}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>92</integer>
+					<key>Layer</key>
+					<integer>0</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -381,7 +384,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{261.5, 750}, {64, 14}}</string>
+					<string>{{270.5, 759}, {64, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -390,6 +393,8 @@ States}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>90</integer>
+					<key>Layer</key>
+					<integer>0</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -429,7 +434,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{619.5, 192}, {89, 14}}</string>
+					<string>{{628.5, 201}, {89, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -438,6 +443,8 @@ States}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>88</integer>
+					<key>Layer</key>
+					<integer>0</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -477,6 +484,66 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
+					<string>{{507, 194.99998474121094}, {442, 558}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>ID</key>
+					<integer>87</integer>
+					<key>Layer</key>
+					<integer>0</integer>
+					<key>Shape</key>
+					<string>Rectangle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Pattern</key>
+							<integer>1</integer>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{21, 630}, {1110, 147}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>ID</key>
+					<integer>89</integer>
+					<key>Layer</key>
+					<integer>0</integer>
+					<key>Shape</key>
+					<string>Rectangle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Pattern</key>
+							<integer>1</integer>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
 					<string>{{453, 20}, {249, 17}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
@@ -493,6 +560,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>86</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -540,6 +609,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>85</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -623,6 +694,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>82</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -634,6 +707,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>81</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -715,6 +790,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>78</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -726,6 +803,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>77</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -764,6 +843,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>76</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -804,6 +885,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>75</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -887,6 +970,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>72</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -898,6 +983,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>71</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -936,6 +1023,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>70</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -976,6 +1065,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>69</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1017,6 +1108,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>68</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1057,6 +1150,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>67</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -1097,6 +1192,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>66</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1178,6 +1275,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>63</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -1189,6 +1288,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>62</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1229,6 +1330,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>61</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -1271,6 +1374,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>60</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1314,6 +1419,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>59</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1397,6 +1504,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>56</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Bounds</key>
@@ -1405,6 +1514,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>55</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -1447,6 +1558,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>54</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1490,6 +1603,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>53</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1530,6 +1645,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>52</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -1572,6 +1689,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>51</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1612,6 +1731,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>50</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -1654,6 +1775,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>49</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1699,6 +1822,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>48</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1739,6 +1864,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>47</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -1781,6 +1908,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>46</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1821,6 +1950,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>45</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -1863,6 +1994,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>44</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1903,6 +2036,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>43</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -1943,6 +2078,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>42</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -1983,6 +2120,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>41</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2023,6 +2162,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>39</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -2104,6 +2245,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>1</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -2117,6 +2260,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>37</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -2157,6 +2302,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>35</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2194,6 +2341,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>34</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2236,6 +2385,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>33</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -2274,6 +2425,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>32</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2316,6 +2469,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>31</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -2361,6 +2516,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>30</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -2402,6 +2559,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>29</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -2442,6 +2601,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>28</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2479,6 +2640,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>27</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2519,6 +2682,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>26</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -2560,6 +2725,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>25</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -2601,6 +2768,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>24</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -2639,6 +2808,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>20</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2676,6 +2847,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>19</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2713,6 +2886,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>11</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2750,6 +2925,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>10</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2787,6 +2964,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>8</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -2829,6 +3008,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>9</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Points</key>
 					<array>
 						<string>{79.042299789244566, 35}</string>
@@ -2856,6 +3037,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>4</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Shape</key>
 					<string>Circle</string>
 					<key>Style</key>
@@ -2879,62 +3062,6 @@ States}</string>
 						</dict>
 					</dict>
 				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{498, 185.99998474121094}, {442, 558}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>ID</key>
-					<integer>87</integer>
-					<key>Shape</key>
-					<string>Rectangle</string>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Pattern</key>
-							<integer>1</integer>
-						</dict>
-					</dict>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{12, 621}, {1110, 147}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>ID</key>
-					<integer>89</integer>
-					<key>Shape</key>
-					<string>Rectangle</string>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Pattern</key>
-							<integer>1</integer>
-						</dict>
-					</dict>
-				</dict>
 			</array>
 			<key>GridInfo</key>
 			<dict/>
@@ -2944,6 +3071,16 @@ States}</string>
 			<false/>
 			<key>Layers</key>
 			<array>
+				<dict>
+					<key>Lock</key>
+					<string>NO</string>
+					<key>Name</key>
+					<string>State Groups</string>
+					<key>Print</key>
+					<string>YES</string>
+					<key>View</key>
+					<string>YES</string>
+				</dict>
 				<dict>
 					<key>Lock</key>
 					<string>NO</string>
@@ -3026,7 +3163,7 @@ States}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{761, 435.5}, {121, 14}}</string>
+					<string>{{770, 444.5}, {121, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3035,6 +3172,8 @@ States}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>133</integer>
+					<key>Layer</key>
+					<integer>0</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -3074,7 +3213,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{267, 257}, {111, 14}}</string>
+					<string>{{276, 266}, {111, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3083,6 +3222,8 @@ States}</string>
 					<string>Resize</string>
 					<key>ID</key>
 					<integer>131</integer>
+					<key>Layer</key>
+					<integer>0</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -3121,6 +3262,154 @@ States}</string>
 					<string>NO</string>
 				</dict>
 				<dict>
+					<key>Bounds</key>
+					<string>{{554.5, 680}, {64, 14}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FitText</key>
+					<string>YES</string>
+					<key>Flow</key>
+					<string>Resize</string>
+					<key>ID</key>
+					<integer>113</integer>
+					<key>Layer</key>
+					<integer>0</integer>
+					<key>Shape</key>
+					<string>Rectangle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+					<key>Text</key>
+					<dict>
+						<key>Pad</key>
+						<integer>0</integer>
+						<key>Text</key>
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf400
+\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
+
+\f0\fs24 \cf0 Final States}</string>
+						<key>VerticalPad</key>
+						<integer>0</integer>
+					</dict>
+					<key>Wrap</key>
+					<string>NO</string>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{174, 559}, {930, 139}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>ID</key>
+					<integer>112</integer>
+					<key>Layer</key>
+					<integer>0</integer>
+					<key>Shape</key>
+					<string>Rectangle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Pattern</key>
+							<integer>1</integer>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{565, 440}, {539, 112}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>HFlip</key>
+					<string>YES</string>
+					<key>ID</key>
+					<integer>132</integer>
+					<key>Layer</key>
+					<integer>0</integer>
+					<key>Shape</key>
+					<string>Rectangle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Pattern</key>
+							<integer>1</integer>
+						</dict>
+					</dict>
+					<key>VFlip</key>
+					<string>YES</string>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{102, 258}, {448, 294}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>HFlip</key>
+					<string>YES</string>
+					<key>ID</key>
+					<integer>130</integer>
+					<key>Layer</key>
+					<integer>0</integer>
+					<key>Shape</key>
+					<string>Rectangle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Pattern</key>
+							<integer>1</integer>
+						</dict>
+					</dict>
+					<key>VFlip</key>
+					<string>YES</string>
+				</dict>
+				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
 					<key>Head</key>
@@ -3130,6 +3419,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>129</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3211,6 +3502,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>126</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -3222,6 +3515,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>125</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3303,6 +3598,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>122</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -3314,6 +3611,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>121</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3395,6 +3694,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>118</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -3406,6 +3707,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>117</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3487,6 +3790,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>114</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -3498,6 +3803,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>75</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3579,54 +3886,8 @@ States}</string>
 					</array>
 					<key>ID</key>
 					<integer>72</integer>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{545.5, 671}, {64, 14}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>FitText</key>
-					<string>YES</string>
-					<key>Flow</key>
-					<string>Resize</string>
-					<key>ID</key>
-					<integer>113</integer>
-					<key>Shape</key>
-					<string>Rectangle</string>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-					</dict>
-					<key>Text</key>
-					<dict>
-						<key>Pad</key>
-						<integer>0</integer>
-						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf400
-\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
-
-\f0\fs24 \cf0 Final States}</string>
-						<key>VerticalPad</key>
-						<integer>0</integer>
-					</dict>
-					<key>Wrap</key>
-					<string>NO</string>
+					<key>Layer</key>
+					<integer>1</integer>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -3638,6 +3899,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>111</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3679,6 +3942,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>110</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3720,6 +3985,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>109</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3763,6 +4030,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>108</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3806,6 +4075,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>107</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3847,6 +4118,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>106</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3890,6 +4163,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>105</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3933,6 +4208,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>104</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -3976,6 +4253,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>103</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -4019,6 +4298,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>102</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>OrthogonalBarAutomatic</key>
 					<true/>
 					<key>OrthogonalBarPoint</key>
@@ -4057,6 +4338,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>101</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4094,6 +4377,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>100</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4131,6 +4416,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>99</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4168,6 +4455,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>98</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4205,6 +4494,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>97</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4242,6 +4533,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>96</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4279,6 +4572,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>95</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4316,6 +4611,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>94</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4353,6 +4650,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>93</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4390,6 +4689,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>92</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4427,6 +4728,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>91</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4464,6 +4767,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>90</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4501,6 +4806,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>89</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4538,6 +4845,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>87</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4575,6 +4884,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>8</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Magnets</key>
 					<array>
 						<string>{0, 1}</string>
@@ -4617,6 +4928,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>9</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Points</key>
 					<array>
 						<string>{64.042299789244566, 112}</string>
@@ -4644,6 +4957,8 @@ States}</string>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
 					<integer>4</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Shape</key>
 					<string>Circle</string>
 					<key>Style</key>
@@ -4685,6 +5000,8 @@ States}</string>
 					</dict>
 					<key>ID</key>
 					<integer>86</integer>
+					<key>Layer</key>
+					<integer>1</integer>
 					<key>Shape</key>
 					<string>Rectangle</string>
 					<key>Style</key>
@@ -4722,98 +5039,6 @@ States}</string>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{165, 550}, {930, 139}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>ID</key>
-					<integer>112</integer>
-					<key>Shape</key>
-					<string>Rectangle</string>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Pattern</key>
-							<integer>1</integer>
-						</dict>
-					</dict>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{570, 431}, {525, 107.5}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>HFlip</key>
-					<string>YES</string>
-					<key>ID</key>
-					<integer>132</integer>
-					<key>Shape</key>
-					<string>Rectangle</string>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Pattern</key>
-							<integer>1</integer>
-						</dict>
-					</dict>
-					<key>VFlip</key>
-					<string>YES</string>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{99, 249}, {461, 294}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>HFlip</key>
-					<string>YES</string>
-					<key>ID</key>
-					<integer>130</integer>
-					<key>Shape</key>
-					<string>Rectangle</string>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Pattern</key>
-							<integer>1</integer>
-						</dict>
-					</dict>
-					<key>VFlip</key>
-					<string>YES</string>
-				</dict>
 			</array>
 			<key>GridInfo</key>
 			<dict/>
@@ -4823,6 +5048,16 @@ States}</string>
 			<false/>
 			<key>Layers</key>
 			<array>
+				<dict>
+					<key>Lock</key>
+					<string>NO</string>
+					<key>Name</key>
+					<string>State Groups</string>
+					<key>Print</key>
+					<string>YES</string>
+					<key>View</key>
+					<string>YES</string>
+				</dict>
 				<dict>
 					<key>Lock</key>
 					<string>NO</string>
@@ -4880,6 +5115,10 @@ States}</string>
 			<dict>
 				<key>name</key>
 				<string>Canvas 1</string>
+			</dict>
+			<dict>
+				<key>name</key>
+				<string>Canvas 2</string>
 			</dict>
 		</array>
 		<key>Frame</key>
