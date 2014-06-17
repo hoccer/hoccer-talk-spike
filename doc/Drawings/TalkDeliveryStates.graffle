@@ -26,7 +26,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-06-16 12:43:30 +0000</string>
+	<string>2014-06-16 12:46:59 +0000</string>
 	<key>Modifier</key>
 	<string>andreas</string>
 	<key>NotesVisible</key>
@@ -429,7 +429,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{655.5, 192}, {89, 14}}</string>
+					<string>{{619.5, 192}, {89, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -981,11 +981,11 @@ States}</string>
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>66.849998474121094</real>
+					<real>17.350000381469727</real>
 					<key>Points</key>
 					<array>
-						<string>{602, 351.99997329711914}</string>
-						<string>{759.5, 284.49998664855957}</string>
+						<string>{665, 351.99997329711914}</string>
+						<string>{723.5, 284.49998664855957}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1025,8 +1025,8 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{526.5, 306.99997329711914}</string>
-						<string>{526.5, 329.49997329711914}</string>
+						<string>{589.5, 306.99997329711914}</string>
+						<string>{589.5, 329.49997329711914}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1052,7 +1052,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{451, 329.49997329711914}, {151, 45}}</string>
+					<string>{{514, 329.49997329711914}, {151, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1105,8 +1105,8 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{914, 687.9999866598597}</string>
-						<string>{914, 707.49998137851787}</string>
+						<string>{860, 687.9999866598597}</string>
+						<string>{860, 707.49998137851787}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1135,7 +1135,7 @@ States}</string>
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{903.5, 707.99998663981796}, {21, 21}}</string>
+							<string>{{849.5, 707.99998663981796}, {21, 21}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>ID</key>
@@ -1165,7 +1165,7 @@ States}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{899, 703.49998663981796}, {30, 30}}</string>
+							<string>{{845, 703.49998663981796}, {30, 30}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>ID</key>
@@ -1197,8 +1197,8 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{914, 460.99998664855957}</string>
-						<string>{914, 642.49998664855957}</string>
+						<string>{860, 460.99998664855957}</string>
+						<string>{860, 642.49998664855957}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1224,7 +1224,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{848, 642.49998664855957}, {132, 45}}</string>
+					<string>{{794, 642.49998664855957}, {132, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1279,8 +1279,8 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{710, 611.99998664855957}</string>
-						<string>{710, 642.49998664855957}</string>
+						<string>{692, 611.99998664855957}</string>
+						<string>{692, 642.49998664855957}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1322,8 +1322,8 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{710, 687.49998664855957}</string>
-						<string>{710.32260349622709, 707.50140340899986}</string>
+						<string>{692, 687.49998664855957}</string>
+						<string>{692.32260349622709, 707.50140340899986}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1354,7 +1354,7 @@ States}</string>
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{700, 707.99998663981796}, {21, 21}}</string>
+							<string>{{682, 707.99998663981796}, {21, 21}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>ID</key>
@@ -1384,7 +1384,7 @@ States}</string>
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{695.5, 703.49998663981796}, {30, 30}}</string>
+							<string>{{677.5, 703.49998663981796}, {30, 30}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>ID</key>
@@ -1400,7 +1400,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{644, 642.49998664855957}, {132, 45}}</string>
+					<string>{{626, 642.49998664855957}, {132, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1452,11 +1452,11 @@ States}</string>
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>24.100000381469727</real>
+					<real>6.1000003814697266</real>
 					<key>Points</key>
 					<array>
-						<string>{776, 589.49998664855957}</string>
-						<string>{848, 438.49998664855957}</string>
+						<string>{758, 589.49998664855957}</string>
+						<string>{794, 438.49998664855957}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1498,8 +1498,8 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{710, 536.49998664855957}</string>
-						<string>{710, 566.99998664855957}</string>
+						<string>{692, 536.49998664855957}</string>
+						<string>{692, 566.99998664855957}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1525,7 +1525,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{644, 566.99998664855957}, {132, 45}}</string>
+					<string>{{626, 566.99998664855957}, {132, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1580,8 +1580,8 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{710, 460.99998664855957}</string>
-						<string>{710, 491.49998664855957}</string>
+						<string>{692, 460.99998664855957}</string>
+						<string>{692, 491.49998664855957}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1607,7 +1607,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{644, 491.49998664855957}, {132, 45}}</string>
+					<string>{{626, 491.49998664855957}, {132, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1663,7 +1663,7 @@ States}</string>
 					<key>Points</key>
 					<array>
 						<string>{277.5, 187.00000190734863}</string>
-						<string>{526.5, 261.99997329711914}</string>
+						<string>{589.5, 261.99997329711914}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1789,8 +1789,8 @@ States}</string>
 					<real>8.8500003814697266</real>
 					<key>Points</key>
 					<array>
-						<string>{819, 374.49998664855957}</string>
-						<string>{914, 415.99998664855957}</string>
+						<string>{783, 374.49998664855957}</string>
+						<string>{860, 415.99998664855957}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1816,7 +1816,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{848, 415.99998664855957}, {132, 45}}</string>
+					<string>{{794, 415.99998664855957}, {132, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1871,8 +1871,8 @@ States}</string>
 					<real>8.8500003814697266</real>
 					<key>Points</key>
 					<array>
-						<string>{819, 374.49998664855957}</string>
-						<string>{710, 415.99998664855957}</string>
+						<string>{783, 374.49998664855957}</string>
+						<string>{692, 415.99998664855957}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1898,7 +1898,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{644, 415.99998664855957}, {132, 45}}</string>
+					<string>{{626, 415.99998664855957}, {132, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1951,8 +1951,8 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{819, 306.99998664855957}</string>
-						<string>{819, 329.49998664855957}</string>
+						<string>{783, 306.99998664855957}</string>
+						<string>{783, 329.49998664855957}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1978,7 +1978,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{753, 329.49998664855957}, {132, 45}}</string>
+					<string>{{717, 329.49998664855957}, {132, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2126,7 +2126,7 @@ States}</string>
 					<key>Points</key>
 					<array>
 						<string>{277.5, 187.00000190734863}</string>
-						<string>{819, 261.99998664855957}</string>
+						<string>{783, 261.99998664855957}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2152,7 +2152,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{451, 261.99997329711914}, {151, 45}}</string>
+					<string>{{514, 261.99997329711914}, {151, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2189,7 +2189,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{759.5, 261.99998664855957}, {119, 45}}</string>
+					<string>{{723.5, 261.99998664855957}, {119, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2881,7 +2881,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{444, 185.99998474121094}, {544, 558}}</string>
+					<string>{{498, 185.99998474121094}, {442, 558}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -3074,38 +3074,6 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{577.5, 431}, {517.5, 107.5}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>HFlip</key>
-					<string>YES</string>
-					<key>ID</key>
-					<integer>132</integer>
-					<key>Shape</key>
-					<string>Rectangle</string>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Pattern</key>
-							<integer>1</integer>
-						</dict>
-					</dict>
-					<key>VFlip</key>
-					<string>YES</string>
-				</dict>
-				<dict>
-					<key>Bounds</key>
 					<string>{{267, 257}, {111, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
@@ -3151,38 +3119,6 @@ States}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{106, 249}, {454, 294}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>HFlip</key>
-					<string>YES</string>
-					<key>ID</key>
-					<integer>130</integer>
-					<key>Shape</key>
-					<string>Rectangle</string>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Pattern</key>
-							<integer>1</integer>
-						</dict>
-					</dict>
-					<key>VFlip</key>
-					<string>YES</string>
 				</dict>
 				<dict>
 					<key>Class</key>
@@ -3710,7 +3646,7 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{999, 532}</string>
+						<string>{999, 523}</string>
 						<string>{999, 569.5}</string>
 					</array>
 					<key>Style</key>
@@ -3751,7 +3687,7 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{277, 532}</string>
+						<string>{277, 523}</string>
 						<string>{277, 565}</string>
 					</array>
 					<key>Style</key>
@@ -3792,7 +3728,7 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{455, 532}</string>
+						<string>{455, 523}</string>
 						<string>{455, 565}</string>
 					</array>
 					<key>Style</key>
@@ -3835,7 +3771,7 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{826, 532}</string>
+						<string>{826, 523}</string>
 						<string>{826, 569.5}</string>
 					</array>
 					<key>Style</key>
@@ -3878,7 +3814,7 @@ States}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{656.5, 532}</string>
+						<string>{656.5, 523}</string>
 						<string>{656.5, 567.5}</string>
 					</array>
 					<key>Style</key>
@@ -3959,11 +3895,11 @@ States}</string>
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>48.099998474121094</real>
+					<real>43.599998474121094</real>
 					<key>Points</key>
 					<array>
 						<string>{191.5, 367}</string>
-						<string>{277, 487}</string>
+						<string>{277, 478}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4153,7 +4089,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{753, 487}, {146, 45}}</string>
+					<string>{{753, 478}, {146, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -4227,7 +4163,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{926, 487}, {146, 45}}</string>
+					<string>{{926, 478}, {146, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -4301,7 +4237,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{204, 487}, {146, 45}}</string>
+					<string>{{204, 478}, {146, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -4375,7 +4311,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{382, 487}, {146, 45}}</string>
+					<string>{{382, 478}, {146, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -4449,7 +4385,7 @@ States}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{583.5, 487}, {146, 45}}</string>
+					<string>{{583.5, 478}, {146, 45}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -4814,6 +4750,70 @@ States}</string>
 						</dict>
 					</dict>
 				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{570, 431}, {525, 107.5}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>HFlip</key>
+					<string>YES</string>
+					<key>ID</key>
+					<integer>132</integer>
+					<key>Shape</key>
+					<string>Rectangle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Pattern</key>
+							<integer>1</integer>
+						</dict>
+					</dict>
+					<key>VFlip</key>
+					<string>YES</string>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{99, 249}, {461, 294}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>HFlip</key>
+					<string>YES</string>
+					<key>ID</key>
+					<integer>130</integer>
+					<key>Shape</key>
+					<string>Rectangle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Pattern</key>
+							<integer>1</integer>
+						</dict>
+					</dict>
+					<key>VFlip</key>
+					<string>YES</string>
+				</dict>
 			</array>
 			<key>GridInfo</key>
 			<dict/>
@@ -4874,7 +4874,7 @@ States}</string>
 	<key>WindowInfo</key>
 	<dict>
 		<key>CurrentSheet</key>
-		<integer>0</integer>
+		<integer>1</integer>
 		<key>ExpandedCanvases</key>
 		<array>
 			<dict>
