@@ -178,7 +178,7 @@
 			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{543.77260846180491, 358.73768813703992}</string>
+				<string>{541.14920650260274, 372.73685786425506}</string>
 				<string>{524.96449867740978, 441.96428383263401}</string>
 				<string>{494.07142562920956, 623.21428306096675}</string>
 				<string>{339.6071405725516, 642.92856904894722}</string>
@@ -525,8 +525,8 @@
 			<integer>9</integer>
 			<key>Points</key>
 			<array>
-				<string>{230.64103583923543, 298.9872055763044}</string>
-				<string>{325.43051888609932, 260.02951151212261}</string>
+				<string>{230.64515188252884, 300.77694332108859}</string>
+				<string>{325.42404782439388, 264.26779304494568}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -560,8 +560,8 @@
 			<integer>132</integer>
 			<key>Points</key>
 			<array>
-				<string>{561.87151819202188, 91.964693525940987}</string>
-				<string>{498.59308527600774, 47.999611492030162}</string>
+				<string>{561.87186589415887, 91.964686974988922}</string>
+				<string>{498.59556374651987, 47.999587964814367}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -595,8 +595,8 @@
 			<integer>27</integer>
 			<key>Points</key>
 			<array>
-				<string>{402.38298774449106, 91.945016124914559}</string>
-				<string>{459.44833978367075, 48.01923604761636}</string>
+				<string>{402.38334043933929, 91.94502342886058}</string>
+				<string>{459.4508458179485, 48.019262223673444}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -874,7 +874,7 @@ type}</string>
 			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{394.27825893203777, 358.74996957630754}</string>
+				<string>{394.4143009310165, 372.74996705638648}</string>
 				<string>{394.85714043950549, 411.60714110473589}</string>
 				<string>{425.21428316740355, 411.60714110473589}</string>
 				<string>{331.46428356654184, 633.92856872963659}</string>
@@ -921,7 +921,7 @@ type}</string>
 				<string>{612.71428258200069, 716.85713980088417}</string>
 				<string>{604.57142546955413, 716.96428266182852}</string>
 				<string>{573.32142560260024, 716.85713980088428}</string>
-				<string>{572.60886522512703, 358.74998556308822}</string>
+				<string>{572.62668709441118, 372.74998552367236}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -960,7 +960,7 @@ type}</string>
 				<string>{565.39285399916832, 729.46428260861001}</string>
 				<string>{562.71428258200081, 652.74999757856324}</string>
 				<string>{394.74999779143502, 411.60714110473589}</string>
-				<string>{394.20269162680381, 358.74997275741418}</string>
+				<string>{394.33131316835323, 372.74997054526318}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1133,7 +1133,7 @@ type}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{505.35714070559766, 106.24998653330343}, {134.00003051757812, 252}}</string>
+					<string>{{505.35714070559766, 106.24998653330343}, {134.00003051757812, 266}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1166,7 +1166,11 @@ type}</string>
 type\
 state\
 contentUrl\
+contentType\
+contentHmac\
+mediaType\
 filename\
+fileId\
 dataFile\
 dataLength\
 encryptedFile\
@@ -1175,9 +1179,6 @@ encryptionKey\
 uploadLength\
 uploadUrl\
 downloadUrl\
-contentType\
-mediaType\
-contentHmac\
 aspectRatio\
 progress}</string>
 						<key>VerticalPad</key>
@@ -1516,7 +1517,7 @@ member}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{325.89285575537656, 106.24999954764309}, {134, 252}}</string>
+					<string>{{325.89285575537656, 106.24999954764309}, {134, 266}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1551,18 +1552,19 @@ state\
 contentUrl\
 contentLength\
 contentType\
-filename\
+contentHmac\
 mediaType\
+filename\
+fileId\
 dataFile\
+decryptedFile\
+decryptionkey\
 downloadUrl\
 downloadFile\
-downloadProgress\
-decryptionkey\
-decryptedFile\
 aspectRatio\
 transferFailures\
-contentHmac\
-progressRateLimit}</string>
+progressRateLimit\
+downloadProgress}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -3253,7 +3255,7 @@ attachmentUploadFinished}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-06-16 15:54:29 +0000</string>
+	<string>2014-06-18 08:54:58 +0000</string>
 	<key>Modifier</key>
 	<string>Julian Krumow</string>
 	<key>NotesVisible</key>
@@ -3343,7 +3345,7 @@ attachmentUploadFinished}</string>
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{-173, 453.57142664035973}, {1464.285708051555, 927.6785674790035}}</string>
+		<string>{{-173, 0}, {1464.285708051555, 927.6785674790035}}</string>
 		<key>Zoom</key>
 		<real>1.1200000047683716</real>
 		<key>ZoomValues</key>
