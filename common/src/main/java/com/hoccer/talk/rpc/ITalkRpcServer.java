@@ -413,7 +413,9 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects update state in delivery object to 'delivered', update timeChanged
      * @talk.errors.server
      **/
-	TalkDelivery   inDeliveryConfirm(String messageId);
+    TalkDelivery   inDeliveryConfirmUnseen(String messageId);
+    TalkDelivery   inDeliveryConfirmSeen(String messageId);
+    TalkDelivery   inDeliveryConfirmPrivate(String messageId);
 
     /** Acknowledge reception of outgoing message delivery confirmation
      * @param messageId is the server-provided message id
@@ -427,7 +429,9 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects update state in delivery object to 'confirmed', update timeChanged
      * @talk.errors.server
      **/
-    TalkDelivery   outDeliveryAcknowledge(String messageId, String recipientId);
+    TalkDelivery   outDeliveryAcknowledgeSeen(String messageId, String recipientId);
+    TalkDelivery   outDeliveryAcknowledgeUnseen(String messageId, String recipientId);
+    TalkDelivery   outDeliveryAcknowledgePrivate(String messageId, String recipientId);
 
     // As sender, acknowledge a "failed" delivery
     TalkDelivery   outDeliveryAcknowledgeFailed(String messageId, String recipientId);
