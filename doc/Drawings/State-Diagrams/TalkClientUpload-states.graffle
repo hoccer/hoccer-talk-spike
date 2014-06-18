@@ -14,7 +14,7 @@
 	<key>BackgroundGraphic</key>
 	<dict>
 		<key>Bounds</key>
-		<string>{{0, 0}, {1183, 1026}}</string>
+		<string>{{0, 0}, {1183, 823}}</string>
 		<key>Class</key>
 		<string>SolidGraphic</string>
 		<key>ID</key>
@@ -38,7 +38,7 @@
 	<key>CanvasOrigin</key>
 	<string>{0, 0}</string>
 	<key>CanvasSize</key>
-	<string>{1183, 1026}</string>
+	<string>{1183, 823}</string>
 	<key>ColumnAlign</key>
 	<integer>1</integer>
 	<key>ColumnSpacing</key>
@@ -73,7 +73,7 @@
 			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{286, 523}</string>
+				<string>{267, 525}</string>
 				<string>{187, 649.5}</string>
 			</array>
 			<key>Style</key>
@@ -91,13 +91,6 @@
 					<key>TailArrow</key>
 					<string>0</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>29</integer>
-				<key>Info</key>
-				<integer>1</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -211,7 +204,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{163, 366}, {24, 14}}</string>
+			<string>{{151, 352}, {24, 14}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -258,13 +251,6 @@
 		<dict>
 			<key>Class</key>
 			<string>LineGraphic</string>
-			<key>Head</key>
-			<dict>
-				<key>ID</key>
-				<integer>29</integer>
-				<key>Info</key>
-				<integer>4</integer>
-			</dict>
 			<key>ID</key>
 			<integer>49</integer>
 			<key>OrthogonalBarAutomatic</key>
@@ -272,13 +258,12 @@
 			<key>OrthogonalBarPoint</key>
 			<string>{0, 0}</string>
 			<key>OrthogonalBarPosition</key>
-			<real>6.0500001907348633</real>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{286, 250}</string>
-				<string>{254.5, 274}</string>
-				<string>{194, 323}</string>
-				<string>{237.75, 500.5}</string>
+				<string>{254.5, 231}</string>
+				<string>{139, 338}</string>
+				<string>{237.75, 487}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -295,11 +280,6 @@
 					<key>TailArrow</key>
 					<string>0</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>27</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -1300,7 +1280,7 @@ HTTP response code 400 - 499 during upload}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-06-18 11:08:23 +0000</string>
+	<string>2014-06-18 18:11:20 +0000</string>
 	<key>Modifier</key>
 	<string>Julian Krumow</string>
 	<key>NotesVisible</key>
@@ -1376,7 +1356,7 @@ HTTP response code 400 - 499 during upload}</string>
 		<key>ExpandedCanvases</key>
 		<array/>
 		<key>Frame</key>
-		<string>{{312, -0}, {1317, 1165}}</string>
+		<string>{{363, 66}, {1317, 962}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
@@ -1390,7 +1370,7 @@ HTTP response code 400 - 499 during upload}</string>
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{0, 0}, {1182, 1026}}</string>
+		<string>{{0, 0}, {1182, 823}}</string>
 		<key>Zoom</key>
 		<real>1</real>
 		<key>ZoomValues</key>

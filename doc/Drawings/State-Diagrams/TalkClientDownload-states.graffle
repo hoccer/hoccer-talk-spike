@@ -14,7 +14,7 @@
 	<key>BackgroundGraphic</key>
 	<dict>
 		<key>Bounds</key>
-		<string>{{0, 0}, {1349, 1026}}</string>
+		<string>{{0, 0}, {1349, 823}}</string>
 		<key>Class</key>
 		<string>SolidGraphic</string>
 		<key>ID</key>
@@ -38,7 +38,7 @@
 	<key>CanvasOrigin</key>
 	<string>{0, 0}</string>
 	<key>CanvasSize</key>
-	<string>{1349, 1026}</string>
+	<string>{1349, 823}</string>
 	<key>ColumnAlign</key>
 	<integer>1</integer>
 	<key>ColumnSpacing</key>
@@ -156,7 +156,7 @@
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{487.28155517578125, 697}, {254, 98}}</string>
+			<string>{{417, 676}, {254, 98}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -208,7 +208,7 @@ wrong offset}</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{709, 501}, {119, 70}}</string>
+			<string>{{650.5, 557}, {119, 70}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -258,7 +258,7 @@ MimeTypeException}</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{576.5, 595.5}, {98, 42}}</string>
+			<string>{{495, 594}, {98, 42}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -307,25 +307,19 @@ decryption failed}</string>
 		<dict>
 			<key>Class</key>
 			<string>LineGraphic</string>
-			<key>Head</key>
-			<dict>
-				<key>ID</key>
-				<integer>30</integer>
-				<key>Info</key>
-				<integer>1</integer>
-			</dict>
 			<key>ID</key>
 			<integer>69</integer>
 			<key>OrthogonalBarAutomatic</key>
-			<false/>
+			<true/>
 			<key>OrthogonalBarPoint</key>
 			<string>{0, 0}</string>
 			<key>OrthogonalBarPosition</key>
-			<real>4</real>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{233.25, 491.5}</string>
-				<string>{858.5, 669}</string>
+				<string>{233.25, 509}</string>
+				<string>{285, 549.99999291326685}</string>
+				<string>{827, 659}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -341,34 +335,22 @@ decryption failed}</string>
 					<string>0</string>
 				</dict>
 			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>29</integer>
-			</dict>
 		</dict>
 		<dict>
 			<key>Class</key>
 			<string>LineGraphic</string>
-			<key>Head</key>
-			<dict>
-				<key>ID</key>
-				<integer>30</integer>
-				<key>Info</key>
-				<integer>2</integer>
-			</dict>
 			<key>ID</key>
 			<integer>68</integer>
 			<key>OrthogonalBarAutomatic</key>
-			<false/>
+			<true/>
 			<key>OrthogonalBarPoint</key>
 			<string>{0, 0}</string>
 			<key>OrthogonalBarPosition</key>
-			<real>26</real>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
 				<string>{649.28155517578125, 457.49998775257154}</string>
-				<string>{858.5, 624}</string>
+				<string>{827, 634}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -486,13 +468,6 @@ decryption failed}</string>
 		<dict>
 			<key>Class</key>
 			<string>LineGraphic</string>
-			<key>Head</key>
-			<dict>
-				<key>ID</key>
-				<integer>58</integer>
-				<key>Info</key>
-				<integer>4</integer>
-			</dict>
 			<key>ID</key>
 			<integer>66</integer>
 			<key>OrthogonalBarAutomatic</key>
@@ -500,11 +475,12 @@ decryption failed}</string>
 			<key>OrthogonalBarPoint</key>
 			<string>{0, 0}</string>
 			<key>OrthogonalBarPosition</key>
-			<real>23.990777969360352</real>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
 				<string>{493.5, 491.5}</string>
-				<string>{565.28155517578125, 434.99998775257154}</string>
+				<string>{523, 469}</string>
+				<string>{565.28155517578125, 445}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -574,25 +550,20 @@ decryption failed}</string>
 		<dict>
 			<key>Class</key>
 			<string>LineGraphic</string>
-			<key>Head</key>
-			<dict>
-				<key>ID</key>
-				<integer>58</integer>
-				<key>Info</key>
-				<integer>2</integer>
-			</dict>
 			<key>ID</key>
 			<integer>64</integer>
 			<key>OrthogonalBarAutomatic</key>
-			<false/>
+			<true/>
 			<key>OrthogonalBarPoint</key>
 			<string>{0, 0}</string>
 			<key>OrthogonalBarPosition</key>
-			<real>17</real>
+			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{233.25, 491.5}</string>
-				<string>{649.28155517578125, 412.49998775257154}</string>
+				<string>{233.25, 476}</string>
+				<string>{272, 476}</string>
+				<string>{284, 430}</string>
+				<string>{565.28155517578125, 425}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -607,11 +578,6 @@ decryption failed}</string>
 					<key>TailArrow</key>
 					<string>0</string>
 				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>29</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -1636,7 +1602,7 @@ Unclear why}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-06-18 11:59:45 +0000</string>
+	<string>2014-06-18 18:15:09 +0000</string>
 	<key>Modifier</key>
 	<string>Julian Krumow</string>
 	<key>NotesVisible</key>
@@ -1712,7 +1678,7 @@ Unclear why}</string>
 		<key>ExpandedCanvases</key>
 		<array/>
 		<key>Frame</key>
-		<string>{{166, -0}, {1483, 1165}}</string>
+		<string>{{197, 66}, {1483, 962}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
@@ -1726,7 +1692,7 @@ Unclear why}</string>
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{0, 0}, {1348, 1026}}</string>
+		<string>{{0, 0}, {1348, 823}}</string>
 		<key>Zoom</key>
 		<real>1</real>
 		<key>ZoomValues</key>
