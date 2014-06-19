@@ -86,8 +86,6 @@
 					<true/>
 					<key>LineType</key>
 					<integer>2</integer>
-					<key>Pattern</key>
-					<integer>4</integer>
 					<key>TailArrow</key>
 					<string>0</string>
 				</dict>
@@ -131,8 +129,6 @@
 					<true/>
 					<key>LineType</key>
 					<integer>2</integer>
-					<key>Pattern</key>
-					<integer>4</integer>
 					<key>TailArrow</key>
 					<string>0</string>
 				</dict>
@@ -165,8 +161,6 @@
 				<dict>
 					<key>CornerRadius</key>
 					<real>5</real>
-					<key>Pattern</key>
-					<integer>1</integer>
 				</dict>
 			</dict>
 			<key>Text</key>
@@ -1300,7 +1294,7 @@ HTTP response code 400 - 499 during upload}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-06-18 11:08:23 +0000</string>
+	<string>2014-06-19 12:58:07 +0000</string>
 	<key>Modifier</key>
 	<string>Julian Krumow</string>
 	<key>NotesVisible</key>
