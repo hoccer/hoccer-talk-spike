@@ -73,13 +73,13 @@
 				<key>stroke</key>
 				<dict>
 					<key>HeadArrow</key>
-					<string>0</string>
+					<string>FilledArrow</string>
 					<key>Legacy</key>
 					<true/>
 					<key>LineType</key>
 					<integer>2</integer>
 					<key>TailArrow</key>
-					<string>FilledArrow</string>
+					<string>0</string>
 				</dict>
 			</dict>
 			<key>Tail</key>
@@ -110,13 +110,13 @@
 				<key>stroke</key>
 				<dict>
 					<key>HeadArrow</key>
-					<string>0</string>
+					<string>FilledArrow</string>
 					<key>Legacy</key>
 					<true/>
 					<key>LineType</key>
 					<integer>2</integer>
 					<key>TailArrow</key>
-					<string>FilledArrow</string>
+					<string>0</string>
 				</dict>
 			</dict>
 			<key>Tail</key>
@@ -147,13 +147,13 @@
 				<key>stroke</key>
 				<dict>
 					<key>HeadArrow</key>
-					<string>0</string>
+					<string>FilledArrow</string>
 					<key>Legacy</key>
 					<true/>
 					<key>LineType</key>
 					<integer>2</integer>
 					<key>TailArrow</key>
-					<string>FilledArrow</string>
+					<string>0</string>
 				</dict>
 			</dict>
 			<key>Tail</key>
@@ -636,8 +636,8 @@
 			<integer>9</integer>
 			<key>Points</key>
 			<array>
-				<string>{230.64100515707497, 298.97411164778276}</string>
-				<string>{325.43044413263704, 259.99855032497231}</string>
+				<string>{230.64099978358811, 298.97180923285526}</string>
+				<string>{325.43043100126204, 259.99310617627032}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -671,8 +671,8 @@
 			<integer>132</integer>
 			<key>Points</key>
 			<array>
-				<string>{561.87186589415887, 91.964686974988922}</string>
-				<string>{498.59556374651987, 47.999587964814367}</string>
+				<string>{561.87187801325501, 91.96468674510875}</string>
+				<string>{498.59565013714956, 47.99958713668164}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -706,8 +706,8 @@
 			<integer>27</integer>
 			<key>Points</key>
 			<array>
-				<string>{402.38334043933929, 91.94502342886058}</string>
-				<string>{459.4508458179485, 48.019262223673444}</string>
+				<string>{402.38335278444117, 91.945023691876216}</string>
+				<string>{459.45093360119478, 48.01926314037658}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1184,7 +1184,7 @@ type}</string>
 			<key>Points</key>
 			<array>
 				<string>{749.21428199659795, 773.99999670045713}</string>
-				<string>{853.09319766304077, 617.88055609484547}</string>
+				<string>{822.02203576741329, 608.99316071925375}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -3171,7 +3171,7 @@ hmac}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{838.39285357342089, 379.46428409872613}, {179, 14}}</string>
+					<string>{{782.14285381290381, 370.53571270816786}, {179, 14}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3207,7 +3207,7 @@ hmac}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{838.39285357342089, 393.46428409872613}, {179, 224}}</string>
+					<string>{{782.14285381290381, 384.53571270816786}, {179, 224}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3364,7 +3364,7 @@ attachmentUploadFinished}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-06-20 09:04:36 +0000</string>
+	<string>2014-06-20 09:19:57 +0000</string>
 	<key>Modifier</key>
 	<string>Julian Krumow</string>
 	<key>NotesVisible</key>
@@ -3454,7 +3454,7 @@ attachmentUploadFinished}</string>
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{-173, 612.49999739229679}, {1464.285708051555, 927.6785674790035}}</string>
+		<string>{{-173, 570.53571185667295}, {1464.285708051555, 927.67856747900339}}</string>
 		<key>Zoom</key>
 		<real>1.1200000047683716</real>
 		<key>ZoomValues</key>
