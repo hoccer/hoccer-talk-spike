@@ -7,6 +7,14 @@ import java.util.Date;
  */
 public class TalkClientHostInfo {
 
+    /**
+     * unique object ID for the database, never transfered
+     */
+    private String _id;
+
+    /** the time on the server whenever this information was received */
+    Date serverTime;
+
     /** the time on the client when the hello call was made */
     Date clientTime;
 
@@ -34,9 +42,6 @@ public class TalkClientHostInfo {
     /** A hardware device name identifier, e.g. 'iPhone6,1' */
     String deviceModel;
 
-    /** A string to control the support mode for this device; 'log' will activate additional logging on the server fpr this connection */
-    String supportTag;
-
     /** clientCrashed is set to 1 if the client has crashed since the last connection */
     // boolean clientCrashed;
 
@@ -52,7 +57,14 @@ public class TalkClientHostInfo {
     }
 
     public TalkClientHostInfo(TalkClientInfo clientInfo) {
-
+        this.clientBuildNumber = clientInfo.clientBuildNumber;
+        this.clientLanguage    = clientInfo.clientLanguage;
+        this.clientName        = clientInfo.clientName;
+        this.clientTime        = clientInfo.clientTime;
+        this.clientVersion     = clientInfo.clientVersion;
+        this.systemVersion     = clientInfo.systemVersion;
+        this.systemLanguage    = clientInfo.systemLanguage;
+        this.systemName        = clientInfo.systemName;
     }
 
     public String getClientId() {
@@ -135,11 +147,11 @@ public class TalkClientHostInfo {
         this.deviceModel = deviceModel;
     }
 
-    public String getSupportTag() {
-        return supportTag;
+    public Date getServerTime() {
+        return serverTime;
     }
 
-    public void setSupportTag(String supportTag) {
-        this.supportTag = supportTag;
+    public void setServerTime(Date serverTime) {
+        this.serverTime = serverTime;
     }
 }

@@ -10,11 +10,11 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.FriendRequestAdapter;
 import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
 import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.android.dialog.TokenDialog;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -39,6 +39,8 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     private TextView mPlaceholderText;
 
     private ImageView mPlaceholderImage;
+
+    private ListView mFriendRequestListView;
 
     private FriendRequestAdapter mFriendRequestAdapter = null;
 
@@ -116,23 +118,21 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     }
 
     private void initFriendRequestAdapter() {
-        ListView friendRequestListView = (ListView) getView().findViewById(R.id.lv_contacts_friendrequests);
+        mFriendRequestListView = (ListView) getView().findViewById(R.id.lv_contacts_friendrequests);
         if (getXoDatabase().hasPendingFriendRequests()) {
             mFriendRequestAdapter = new FriendRequestAdapter(getXoActivity());
             mFriendRequestAdapter.setOnItemCountChangedListener(this);
-            friendRequestListView.setAdapter(mFriendRequestAdapter);
-            friendRequestListView.setVisibility(View.VISIBLE);
-            hidePlaceholder();
-        } else {
-            friendRequestListView.setVisibility(View.GONE);
+            mFriendRequestListView.setAdapter(mFriendRequestAdapter);
         }
-        friendRequestListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+        mFriendRequestListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                getXoActivity().showContactProfile(
-                        (TalkClientContact) adapterView.getItemAtPosition(i));
+                getXoActivity().showContactProfile((TalkClientContact) adapterView.getItemAtPosition(i));
             }
         });
+
+        updateDisplay();
     }
 
     private void initContactListAdapter() {
@@ -165,7 +165,22 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         }
         mAdapter.requestReload(); // XXX fix contact adapter and only do this on new adapter
         mAdapter.onResume();
-        onItemCountChanged(mAdapter.getCount());
+        updateDisplay();
+    }
+
+    private void updateDisplay() {
+        showPlaceholder();
+        if (mFriendRequestAdapter != null) {
+            if (getXoDatabase().hasPendingFriendRequests()) {
+                mFriendRequestListView.setVisibility(View.VISIBLE);
+                hidePlaceholder();
+            } else {
+                mFriendRequestListView.setVisibility(View.GONE);
+            }
+        }
+        if (mAdapter != null && mAdapter.getCount() > 0) {
+            hidePlaceholder();
+        }
     }
 
     // XXX @Override
@@ -197,7 +212,8 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
             }
             if (item instanceof TalkClientSmsToken) {
                 TalkClientSmsToken token = (TalkClientSmsToken) item;
-                XoDialogs.showTokenDialog(getXoActivity(), token);
+                new TokenDialog(getXoActivity(), token)
+                        .show(getXoActivity().getFragmentManager(), "TokenDialog");
             }
         }
     }
@@ -236,13 +252,14 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        if(mFriendRequestAdapter == null) {
+        if (mFriendRequestAdapter == null) {
             return;
         }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mFriendRequestAdapter.notifyDataSetChanged();
+                updateDisplay();
             }
         });
     }

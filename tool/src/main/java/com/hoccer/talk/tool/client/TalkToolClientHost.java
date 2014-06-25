@@ -78,7 +78,7 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public String getClientName() {
-        return null;
+        return "Talk";
     }
 
     @Override
@@ -108,7 +108,7 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public String getSystemName() {
-        return null;
+        return "TalkTool";
     }
 
     @Override

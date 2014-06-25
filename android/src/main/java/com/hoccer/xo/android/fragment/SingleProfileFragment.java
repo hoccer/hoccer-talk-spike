@@ -18,7 +18,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.apache.log4j.Logger;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -79,7 +78,7 @@ public class SingleProfileFragment extends XoFragment
         return v;
     }
 
-    private void initInviteButton(final TalkClientContact contact) {
+    private void updateInviteButton(final TalkClientContact contact) {
         Button inviteButton = (Button) getView().findViewById(R.id.btn_profile_invite);
         if(contact == null || contact.isSelf() || contact.isGroup()) {
             inviteButton.setVisibility(View.GONE);
@@ -91,7 +90,7 @@ public class SingleProfileFragment extends XoFragment
         try {
             getXoDatabase().refreshClientContact(contact);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
         }
 
         if(contact.getClientRelationship() == null || (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_NONE))) {
@@ -123,6 +122,35 @@ public class SingleProfileFragment extends XoFragment
         }
     }
 
+    private void updateDeclineButton(final TalkClientContact contact) {
+
+        Button declineButton = (Button) getView().findViewById(R.id.btn_profile_decline);
+        if(contact == null || contact.isSelf() || contact.isGroup()) {
+            declineButton.setVisibility(View.GONE);
+            return;
+        } else {
+            declineButton.setVisibility(View.VISIBLE);
+        }
+
+        try {
+            getXoDatabase().refreshClientContact(contact);
+        } catch (SQLException e) {
+            LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
+        }
+
+        if(contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED_ME)) {
+            declineButton.setText(R.string.friend_request_decline_invitation);
+            declineButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getXoActivity().getXoClient().declineFriend(contact);
+                }
+            });
+        } else {
+            declineButton.setVisibility(View.GONE);
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -134,7 +162,23 @@ public class SingleProfileFragment extends XoFragment
                 break;
             case R.id.menu_profile_delete:
                 if (mContact != null) {
-                    XoDialogs.confirmDeleteContact(getXoActivity(), mContact);
+                    XoDialogs.showYesNoDialog("ContactDeleteDialog",
+                            R.string.dialog_delete_contact_title,
+                            R.string.dialog_delete_contact_message,
+                            getXoActivity(),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    getXoActivity().getXoClient().deleteContact(mContact);
+                                    getXoActivity().hackReturnedFromDialog();
+                                }
+                            },
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+
+                                }
+                            });
                 }
                 break;
             case R.id.menu_profile_edit:
@@ -310,7 +354,8 @@ public class SingleProfileFragment extends XoFragment
 
         mKeyText.setText(getFingerprint());
 
-        initInviteButton(contact);
+        updateInviteButton(contact);
+        updateDeclineButton(contact);
     }
 
     public String getFingerprint() {
@@ -338,25 +383,24 @@ public class SingleProfileFragment extends XoFragment
 
     private void blockContact() {
         LOG.debug("blockContact()");
-        AlertDialog.Builder builder = new AlertDialog.Builder(getXoActivity());
-        builder.setNegativeButton(R.string.common_no, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-        builder.setPositiveButton(R.string.common_yes, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (mContact != null) {
-                    getXoClient().blockContact(mContact);
-                    getXoActivity().finish();
-                }
-            }
-        });
-        builder.setTitle(R.string.dialog_block_user_title);
-        builder.setMessage(R.string.dialog_block_user_message);
-        builder.create().show();
+        XoDialogs.showYesNoDialog("BlockContactDialog",
+                R.string.dialog_block_user_title,
+                R.string.dialog_block_user_message,
+                getXoActivity(),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        if (mContact != null) {
+                            getXoClient().blockContact(mContact);
+                            getXoActivity().finish();
+                        }
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
     }
 
     private void unblockContact() {
