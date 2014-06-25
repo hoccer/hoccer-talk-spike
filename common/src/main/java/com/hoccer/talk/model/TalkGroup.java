@@ -54,7 +54,7 @@ public class TalkGroup {
     @DatabaseField(columnName = FIELD_LAST_CHANGED)
     Date lastChanged;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_GROUP_TYPE)
     String groupType;
 
     @DatabaseField
