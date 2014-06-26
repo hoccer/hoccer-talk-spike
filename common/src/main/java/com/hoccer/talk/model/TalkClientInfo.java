@@ -19,6 +19,10 @@ public class TalkClientInfo {
     /** A build number of the client program; on iOS it is the build number */
     int clientBuildNumber;
 
+    /** The build variant. Currently valid values: [debug|release] */
+    // TODO: flesh this out - use this in PushRequest (APNS) to determine which apns service to actually use...
+    //String clientBuildVariant;
+
     /** A canonicalized IETF BCP 47 language identifier for the current client UI language, e.g. 'de' for german */
     String clientLanguage;
 
