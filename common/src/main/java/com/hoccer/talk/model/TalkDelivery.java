@@ -664,6 +664,9 @@ public class TalkDelivery {
     }
 
     @JsonIgnore
+    public String getId() {return _id;}
+
+    @JsonIgnore
     public void updateWith(TalkDelivery delivery) {
         this.messageId = delivery.getMessageId();
         this.messageTag = delivery.getMessageTag();

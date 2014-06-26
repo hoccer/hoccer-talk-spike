@@ -688,9 +688,9 @@ public interface ITalkRpcServer {
     String failedFileUpload(String fileId);
 
     // should be called by the sender of an transfer file when a final attachment receiver set state has been seen
-    String acknowledgeReceivedFile(String fileId);
-    String acknowledgeAbortedFileDownload(String fileId);
-    String acknowledgeFailedFileDownload(String fileId);
+    String acknowledgeReceivedFile(String fileId, String receiverId);
+    String acknowledgeAbortedFileDownload(String fileId, String receiverId);
+    String acknowledgeFailedFileDownload(String fileId, String receiverId);
 
     /** provide environment record for location based grouping
      * @param environment denotes the geoposition and other environment data for grouping
