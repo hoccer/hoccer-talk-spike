@@ -97,6 +97,11 @@ public class TalkToolClientHost implements IXoClientHost {
     }
 
     @Override
+    public String getClientBuildVariant() {
+        return "release";
+    }
+
+    @Override
     public Date getClientTime() {
         return null;
     }
