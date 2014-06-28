@@ -166,4 +166,17 @@ public class TalkClientHostInfo {
     public void setServerTime(Date serverTime) {
         this.serverTime = serverTime;
     }
+
+    public void updateWith(TalkClientInfo clientInfo) {
+        this.clientBuildNumber = clientInfo.getClientBuildNumber();
+        this.clientBuildVariant = clientInfo.getClientBuildVariant();
+        this.clientLanguage = clientInfo.getClientLanguage();
+        this.clientName = clientInfo.getClientName();
+        this.clientTime = clientInfo.getClientTime();
+        this.clientVersion = clientInfo.getClientVersion();
+        this.deviceModel = clientInfo.getDeviceModel();
+        this.systemLanguage = clientInfo.getSystemLanguage();
+        this.systemName = clientInfo.getSystemName();
+        this.systemVersion = clientInfo.getSystemVersion();
+    }
 }
