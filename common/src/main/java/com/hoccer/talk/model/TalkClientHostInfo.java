@@ -27,6 +27,9 @@ public class TalkClientHostInfo {
     /** A build number of the client program; on iOS it is the build number */
     int clientBuildNumber;
 
+    /** The build variant. Currently valid values: [debug|release] */
+    String clientBuildVariant;
+
     /** A canonicalized IETF BCP 47 language identifier for the current client UI language, e.g. 'de' for german */
     String clientLanguage;
 
@@ -57,14 +60,15 @@ public class TalkClientHostInfo {
     }
 
     public TalkClientHostInfo(TalkClientInfo clientInfo) {
-        this.clientBuildNumber = clientInfo.clientBuildNumber;
-        this.clientLanguage    = clientInfo.clientLanguage;
-        this.clientName        = clientInfo.clientName;
-        this.clientTime        = clientInfo.clientTime;
-        this.clientVersion     = clientInfo.clientVersion;
-        this.systemVersion     = clientInfo.systemVersion;
-        this.systemLanguage    = clientInfo.systemLanguage;
-        this.systemName        = clientInfo.systemName;
+        this.clientBuildNumber = clientInfo.getClientBuildNumber();
+        this.clientBuildVariant = clientInfo.getClientBuildVariant();
+        this.clientLanguage    = clientInfo.getClientLanguage();
+        this.clientName        = clientInfo.getClientName();
+        this.clientTime        = clientInfo.getClientTime();
+        this.clientVersion     = clientInfo.getClientVersion();
+        this.systemVersion     = clientInfo.getSystemVersion();
+        this.systemLanguage    = clientInfo.getSystemLanguage();
+        this.systemName        = clientInfo.getSystemName();
     }
 
     public String getClientId() {
@@ -105,6 +109,14 @@ public class TalkClientHostInfo {
 
     public void setClientBuildNumber(int clientBuildNumber) {
         this.clientBuildNumber = clientBuildNumber;
+    }
+
+    public String getClientBuildVariant() {
+        return clientBuildVariant;
+    }
+
+    public void setClientBuildVariant(String clientBuildVariant) {
+        this.clientBuildVariant = clientBuildVariant;
     }
 
     public String getClientLanguage() {
