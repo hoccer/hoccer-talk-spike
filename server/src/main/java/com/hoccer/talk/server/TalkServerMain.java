@@ -47,10 +47,17 @@ public class TalkServerMain {
 
         // report APNS expiry
         if (config.isApnsEnabled()) {
-            final P12CertificateChecker p12Verifier = new P12CertificateChecker(config.getApnsCertPath(), config.getApnsCertPassword());
+            final P12CertificateChecker p12ProductionVerifier = new P12CertificateChecker(
+                    config.getApnsCertProductionPath(),
+                    config.getApnsCertProductionPassword());
+            final P12CertificateChecker p12SandboxVerifier = new P12CertificateChecker(
+                    config.getApnsCertProductionPath(),
+                    config.getApnsCertProductionPassword());
             try {
-                LOG.info("APNS expiryDate is: " + p12Verifier.getCertificateExpiryDate());
-                LOG.info("APNS expiration status: " + p12Verifier.isExpired());
+                LOG.info("APNS production cert expiryDate is: " + p12ProductionVerifier.getCertificateExpiryDate());
+                LOG.info("APNS production cert expiration status: " + p12ProductionVerifier.isExpired());
+                LOG.info("APNS sandbox cert expiryDate is: " + p12SandboxVerifier.getCertificateExpiryDate());
+                LOG.info("APNS sandbox cert expiration status: " + p12SandboxVerifier.isExpired());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -128,14 +135,13 @@ public class TalkServerMain {
             } catch (IOException e) {
                 LOG.error("Could not load configuration", e);
             }
-            // if we could load it then configure using it
             if (properties != null) {
                 configuration.configureFromProperties(properties);
             }
         }
 
         // also read additional bundled property files
-        LOG.info("Loading bundled properties...");
+        LOG.info("Loading bundled properties (server.properties)...");
         Properties bundled_properties = new Properties();
         try {
             InputStream bundledConfigIs = TalkServerConfiguration.class.getResourceAsStream("/server.properties");
@@ -145,7 +151,7 @@ public class TalkServerMain {
             LOG.error("Unable to load bundled configuration", e);
         }
 
-        LOG.info("Loading GIT properties...");
+        LOG.info("Loading GIT properties (git.properties)...");
         Properties git_properties = new Properties();
         try {
             InputStream gitConfigIs = TalkServerConfiguration.class.getResourceAsStream("/git.properties");

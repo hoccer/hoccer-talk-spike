@@ -20,8 +20,7 @@ public class TalkClientInfo {
     int clientBuildNumber;
 
     /** The build variant. Currently valid values: [debug|release] */
-    // TODO: flesh this out - use this in PushRequest (APNS) to determine which apns service to actually use...
-    //String clientBuildVariant;
+    String clientBuildVariant;
 
     /** A canonicalized IETF BCP 47 language identifier for the current client UI language, e.g. 'de' for german */
     String clientLanguage;
@@ -83,6 +82,14 @@ public class TalkClientInfo {
 
     public void setClientBuildNumber(int clientBuildNumber) {
         this.clientBuildNumber = clientBuildNumber;
+    }
+
+    public String getClientBuildVariant() {
+        return clientBuildVariant;
+    }
+
+    public void setClientBuildVariant(String clientBuildVariant) {
+        this.clientBuildVariant = clientBuildVariant;
     }
 
     public String getClientLanguage() {
