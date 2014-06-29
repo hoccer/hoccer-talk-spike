@@ -56,18 +56,6 @@ public class TalkDelivery {
     };
     public static final Set<String> REQUIRED_IN_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_IN_UPDATE_FIELDS));
 
-    /* For migration:
-    On Client and Server, change old state -> new state:
-    confirmed -> deliveredAcknowledged
-    aborted -> abortedAcknowledged
-    failed -> failedAcknowledged
-
-    Attachment states:
-     On Server:
-    - normal states -> ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED
-    - retries exhausted ->  ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED or ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED
-     */
-
     // the delivery states
     public static final String STATE_DRAFT = "draft";
     public static final String STATE_NEW = "new";

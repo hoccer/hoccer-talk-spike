@@ -5,7 +5,10 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @DatabaseTable(tableName = "relationship")
 public class TalkRelationship {
@@ -16,10 +19,16 @@ public class TalkRelationship {
     public static final String STATE_FRIEND = "friend";
     public static final String STATE_BLOCKED = "blocked";
 
-    public static final String[] STATES_RELATED = {TalkRelationship.STATE_FRIEND, TalkRelationship.STATE_BLOCKED, TalkRelationship.STATE_INVITED, TalkRelationship.STATE_INVITED_ME};
+    public static final String LOCK_PREFIX = "rel-";
+
+    public static final String[] STATES_VALID = {STATE_NONE, STATE_FRIEND, STATE_BLOCKED, STATE_INVITED, STATE_INVITED_ME};
+    public static final Set<String> STATES_VALID_SET = new HashSet<String>(Arrays.asList(STATES_VALID));
+
+    public static final String[] STATES_RELATED = {STATE_FRIEND, STATE_BLOCKED, STATE_INVITED, STATE_INVITED_ME};
+    public static final Set<String> STATES_RELATED_SET = new HashSet<String>(Arrays.asList(STATES_RELATED));
 
     public static boolean isValidState(String state) {
-        return STATE_NONE.equals(state) || STATE_FRIEND.equals(state) || STATE_BLOCKED.equals(state) || STATE_INVITED.equals(state) || STATE_INVITED_ME.equals(state);
+        return STATES_VALID_SET.contains(state);
     }
 
     private String _id;
@@ -37,6 +46,9 @@ public class TalkRelationship {
     String state;
 
     @DatabaseField
+    String unblockState;
+
+    @DatabaseField
     Date lastChanged;
 
     public TalkRelationship() {
@@ -44,27 +56,32 @@ public class TalkRelationship {
 
     @JsonIgnore
     public boolean isRelated() {
-        return !state.equals(STATE_NONE);
+        return STATES_RELATED_SET.contains(state);
+    }
+
+    @JsonIgnore
+    public boolean isNone() {
+        return STATE_NONE.equals(state);
     }
 
     @JsonIgnore
     public boolean isFriend() {
-        return state.equals(STATE_FRIEND);
+        return STATE_FRIEND.equals(state);
     }
 
     @JsonIgnore
     public boolean isBlocked() {
-        return state.equals(STATE_BLOCKED);
+        return STATE_BLOCKED.equals(state);
     }
 
     @JsonIgnore
     public boolean isInvited() {
-        return state.equals(STATE_INVITED);
+        return STATE_INVITED.equals(state);
     }
 
     @JsonIgnore
     public boolean invitedMe() {
-        return state.equals(STATE_INVITED_ME);
+        return STATE_INVITED_ME.equals(state);
     }
 
     public String getClientId() {
@@ -89,8 +106,18 @@ public class TalkRelationship {
     }
 
     public void setState(String state) {
-        // TODO: validate state here (isValidState)
+        if (!isValidState(state)) {
+            throw new RuntimeException("Invalid relationship state: "+state);
+        }
         this.state = state;
+    }
+
+    public String getUnblockState() {
+        return unblockState;
+    }
+
+    public void setUnblockState(String unblockState) {
+        this.unblockState = unblockState;
     }
 
     public Date getLastChanged() {
