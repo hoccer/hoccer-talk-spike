@@ -242,6 +242,20 @@ public class XoClientDatabase {
         return allNearbyGroupContacts;
     }
 
+    public List<TalkClientContact> findAllNearbyGroups() throws SQLException {
+        List<TalkClientContact> allGroupContacts = this.findAllGroupContacts();
+        List<TalkClientContact> allNearbyGroupContacts = new ArrayList<TalkClientContact>();
+
+        // add all nearby groups
+        for (TalkClientContact groupContact : allGroupContacts) {
+            if (groupContact.isGroupInvolved() && groupContact.isGroupExisting() && groupContact.getGroupPresence().isTypeNearby()) {
+                allNearbyGroupContacts.add(groupContact);
+            }
+        }
+
+        return allNearbyGroupContacts;
+    }
+
     public List<TalkClientSmsToken> findAllSmsTokens() throws SQLException {
         return mSmsTokens.queryForAll();
     }
@@ -367,6 +381,37 @@ public class XoClientDatabase {
         return mClientMessages.queryForEq("conversationContact_id", contactId);
     }
 
+    public List<TalkClientMessage> findNearbyMessages(long count, long offset) throws SQLException {
+        List<TalkClientMessage> list =  getAllNearbyGroupMessages();
+        if (offset + count > list.size()) {
+            count = list.size() - offset;
+        }
+        ArrayList<TalkClientMessage> res = new ArrayList<TalkClientMessage>();
+        for (int i = (int)offset; i<offset+count; i++) {
+            res.add(list.get(i));
+        }
+        return res;
+    }
+
+    public long getMessageCountNearby() throws SQLException {
+        return getAllNearbyGroupMessages().size();
+    }
+
+    private List<TalkClientMessage> getAllNearbyGroupMessages() throws SQLException {
+        QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
+        builder.orderBy("timestamp", true);
+        List<TalkClientMessage> list =  builder.query();
+        ArrayList<TalkClientMessage> res = new ArrayList<TalkClientMessage>();
+        for (TalkClientMessage t: list) {
+            if (t.getConversationContact().getContactType().equals("group")) {
+                if (t.getConversationContact().getGroupPresence().isTypeNearby()) {
+                    res.add(t);
+                }
+            }
+        }
+        return res;
+    }
+
     public List<TalkClientMessage> findMessagesByContactId(int contactId, long count, long offset) throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
         builder.limit(count);
@@ -484,13 +529,7 @@ public class XoClientDatabase {
     }
 
     public TalkClientMessage findMessageByDownloadId(int downloadId) throws SQLException {
-        LOG.error("#foo downloadId: " + downloadId);
         List<TalkClientMessage> messages = mClientMessages.queryForAll();
-        for (TalkClientMessage message : messages) {
-            if (message.getAttachmentDownload() != null) {
-                LOG.error("#foo " + message.getAttachmentDownload().getClientDownloadId());
-            }
-        }
         return mClientMessages.queryBuilder()
                 .where()
                 .eq("attachmentDownload_id", downloadId)
