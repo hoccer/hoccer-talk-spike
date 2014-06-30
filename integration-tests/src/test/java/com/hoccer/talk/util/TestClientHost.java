@@ -134,4 +134,9 @@ public class TestClientHost implements IXoClientHost {
     public int getRSAKeysize() {
         return 1024;
     }
+
+    @Override
+    public boolean isSilentDeliveryEnabled() {
+        return false;
+    }
 }

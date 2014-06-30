@@ -131,4 +131,9 @@ public class TalkToolClientHost implements IXoClientHost {
         return 1024;
     }
 
+    @Override
+    public boolean isSilentDeliveryEnabled() {
+        return false;
+    }
+
 }
