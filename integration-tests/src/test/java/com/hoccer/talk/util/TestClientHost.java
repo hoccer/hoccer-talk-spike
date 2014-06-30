@@ -136,7 +136,7 @@ public class TestClientHost implements IXoClientHost {
     }
 
     @Override
-    public boolean isSilentDeliveryEnabled() {
+    public boolean isSendDeliveryConfirmationEnabled() {
         return false;
     }
 }

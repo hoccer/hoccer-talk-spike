@@ -132,7 +132,7 @@ public class TalkToolClientHost implements IXoClientHost {
     }
 
     @Override
-    public boolean isSilentDeliveryEnabled() {
+    public boolean isSendDeliveryConfirmationEnabled() {
         return false;
     }
 
