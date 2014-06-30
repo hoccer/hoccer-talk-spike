@@ -73,6 +73,19 @@ public class TalkDelivery {
     public static final String STATE_ABORTED_ACKNOWLEDGED = "abortedAcknowledged";
     public static final String STATE_REJECTED_ACKNOWLEDGED = "rejectedAcknowledged";
 
+    @Deprecated
+    public static final String STATE_NEW_OLD = "new";
+    @Deprecated
+    public static final String STATE_DELIVERING_OLD = "delivering";
+    @Deprecated
+    public static final String STATE_DELIVERED_OLD = "delivered";
+    @Deprecated
+    public static final String STATE_CONFIRMED_OLD = "confirmed";
+    @Deprecated
+    public static final String STATE_FAILED_OLD = "failed";
+    @Deprecated
+    public static final String STATE_ABORTED_OLD = "aborted";
+
     public static final String[] ALL_STATES = {
             STATE_DRAFT,
             STATE_NEW,
