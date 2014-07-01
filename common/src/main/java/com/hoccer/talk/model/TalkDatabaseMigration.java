@@ -3,6 +3,8 @@ package com.hoccer.talk.model;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.Date;
+
 /**
  * These objects represent migrations applied to the database.
  *
@@ -11,9 +13,6 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName="migrations")
 public class TalkDatabaseMigration {
 
-    // TODO: maybe also record in the database when the migration was applied?
-    // something like 'executionTime'
-
     /** Object ID for jongo */
     private String _id;
 
@@ -21,8 +20,14 @@ public class TalkDatabaseMigration {
     @DatabaseField(id = true)
     String name;
 
+    /** Used for ordering the migrations, which is an important property. The 'unique' property however does not seems to
+      * be very strongly enforced -> investigate */
     @DatabaseField(unique = true, canBeNull = false)
     int position;
+
+    /** Marks the (server) time when the execution of the migration happened */
+    @DatabaseField(canBeNull = false)
+    Date timeExecuted;
 
     public String getName() {
         return name;
@@ -38,5 +43,13 @@ public class TalkDatabaseMigration {
 
     public int getPosition() {
         return position;
+    }
+
+    public Date getTimeExecuted() {
+        return timeExecuted;
+    }
+
+    public void setTimeExecuted(Date executionTime) {
+        this.timeExecuted = executionTime;
     }
 }
