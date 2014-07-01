@@ -19,7 +19,7 @@ import java.util.*;
  * @author ingo
  */
 @DatabaseTable(tableName = "delivery")
-public class TalkDelivery {
+    public class TalkDelivery {
 
     // the fields
     public static final String FIELD_DELIVERY_ID = "deliveryId";
