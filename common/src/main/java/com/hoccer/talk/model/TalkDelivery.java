@@ -15,11 +15,9 @@ import java.util.*;
  * - manipulated by delivery logic
  * - used in RPC for requesting delivery
  * - used in RPC for reflecting delivery state
- *
- * @author ingo
  */
 @DatabaseTable(tableName = "delivery")
-    public class TalkDelivery {
+public class TalkDelivery {
 
     // the fields
     public static final String FIELD_DELIVERY_ID = "deliveryId";
