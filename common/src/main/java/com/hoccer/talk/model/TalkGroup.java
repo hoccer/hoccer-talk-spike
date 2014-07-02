@@ -20,6 +20,7 @@ public class TalkGroup {
 
     public static final String STATE_NONE   = "none";
     public static final String STATE_EXISTS = "exists";
+    public static final String STATE_KEPT = "kept";
 
     public static final String GROUP_TYPE_USER   = "user";
     public static final String GROUP_TYPE_NEARBY = "nearby";
