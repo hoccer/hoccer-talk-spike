@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.activity.NearbyContactsActivity;
 import com.hoccer.xo.android.adapter.NearbyChatAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.view.OverscrollListView;
@@ -134,7 +136,8 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
                         mUserCountText.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                mActivity.showContactProfile(nearbyGroup);
+                                Intent intent = new Intent(mActivity, NearbyContactsActivity.class);
+                                mActivity.startActivity(intent);
                             }
                         });
                     }
