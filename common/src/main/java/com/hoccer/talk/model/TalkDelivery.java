@@ -19,7 +19,7 @@ import java.util.*;
 @DatabaseTable(tableName = "delivery")
 public class TalkDelivery {
 
-    // the fields
+    // The database field names
     public static final String FIELD_DELIVERY_ID = "deliveryId";
     public static final String FIELD_MESSAGE_ID = "messageId";
     public static final String FIELD_MESSAGE_TAG = "messageTag";
@@ -71,6 +71,7 @@ public class TalkDelivery {
     public static final String STATE_ABORTED_ACKNOWLEDGED = "abortedAcknowledged";
     public static final String STATE_REJECTED_ACKNOWLEDGED = "rejectedAcknowledged";
 
+    // Old states are only needed for Database migrations. Maybe we should collect them somewhere else?
     @Deprecated
     public static final String STATE_NEW_OLD = "new";
     @Deprecated
@@ -125,7 +126,6 @@ public class TalkDelivery {
     };
     public static final Set<String> RECIPIENT_CALL_STATES_SET = new HashSet<String>(Arrays.asList(RECIPIENT_CALL_STATES));
 
-
     // The delivery states the sender is interested in for outgoingDeliverUpdated regardless of attachmentState
     public static final String[] OUT_STATES = {STATE_DELIVERED_UNSEEN, STATE_DELIVERED_SEEN,
             STATE_DELIVERED_PRIVATE, STATE_FAILED, STATE_REJECTED};
@@ -142,12 +142,10 @@ public class TalkDelivery {
 
     // attachment state and delivery state combinations the receiver is interested in addition to IN_STATES
     public final static String[] IN_ATTACHMENT_DELIVERY_STATES = {STATE_DELIVERED_UNSEEN, STATE_DELIVERED_UNSEEN_ACKNOWLEDGED, STATE_DELIVERED_SEEN,
-            STATE_DELIVERED_SEEN_ACKNOWLEDGED,STATE_DELIVERED_PRIVATE, STATE_DELIVERED_PRIVATE_ACKNOWLEDGED};
+            STATE_DELIVERED_SEEN_ACKNOWLEDGED, STATE_DELIVERED_PRIVATE, STATE_DELIVERED_PRIVATE_ACKNOWLEDGED};
 
     public final static String[] IN_ATTACHMENT_STATES = {TalkDelivery.ATTACHMENT_STATE_UPLOADING, TalkDelivery.ATTACHMENT_STATE_UPLOADED,
             TalkDelivery.ATTACHMENT_STATE_UPLOAD_PAUSED, TalkDelivery.ATTACHMENT_STATE_UPLOAD_ABORTED, TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED};
-
-
 
     public static final String[] DELIVERED_STATES = {
             STATE_DELIVERED_PRIVATE,
@@ -177,7 +175,6 @@ public class TalkDelivery {
             STATE_REJECTED_ACKNOWLEDGED
     };
     public static final Set<String> FAILED_STATES_SET = new HashSet<String>(Arrays.asList(FAILED_STATES));
-
 
     // the attachment delivery states
     public static final String ATTACHMENT_STATE_NONE = "none";
@@ -214,7 +211,6 @@ public class TalkDelivery {
             ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
     };
     public static final Set<String> ALL_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(ALL_ATTACHMENT_STATES));
-
 
     public static final String[] FINAL_ATTACHMENT_STATES = {ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED, ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED,
             ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED, ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED, ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
@@ -271,16 +267,15 @@ public class TalkDelivery {
         nextAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED, new HashSet<String>());
     }
 
-    final static boolean statePathExists(final String stateA, final String stateB) {
+    static boolean statePathExists(final String stateA, final String stateB) {
         return statePathExists(nextState, stateA, stateB, new HashSet<String>());
     }
 
-    final static boolean attachentStatePathExists(final String stateA, final String stateB) {
+    static boolean attachentStatePathExists(final String stateA, final String stateB) {
         return statePathExists(nextAttachmentState, stateA, stateB, new HashSet<String>());
     }
 
-
-    final static boolean statePathExists(final Map<String, Set<String>> graph, final String stateA, final String stateB, final Set<String> track) {
+    static boolean statePathExists(final Map<String, Set<String>> graph, final String stateA, final String stateB, final Set<String> track) {
         if (track.size() > graph.size()) {
             throw new RuntimeException("impossible path length");
         }
@@ -290,11 +285,11 @@ public class TalkDelivery {
         }
         final Set<String> aFollows = graph.get(stateA);
         if (aFollows == null) {
-            throw new RuntimeException("state A ='"+stateA+"' does not exist");
+            throw new RuntimeException("state A ='" + stateA + "' does not exist");
         }
         final Set<String> bFollows = graph.get(stateB);
         if (bFollows == null) {
-            throw new RuntimeException("state B ='"+stateB+"' does not exist");
+            throw new RuntimeException("state B ='" + stateB + "' does not exist");
         }
         if (aFollows.contains(stateB)) {
             return true;
@@ -302,7 +297,7 @@ public class TalkDelivery {
         HashSet downTrack = new HashSet(track);
         downTrack.add(stateA);
         for (String next : aFollows) {
-             if (statePathExists(graph, next, stateB, downTrack)) return true;
+            if (statePathExists(graph, next, stateB, downTrack)) return true;
         }
         return false;
     }
@@ -312,6 +307,7 @@ public class TalkDelivery {
     public boolean isFinished() {
         return isFinalState(state) && isFinalAttachmentState(attachmentState);
     }
+
     @JsonIgnore
     public boolean isFailure() {
         return isFailedState(state);
@@ -320,9 +316,11 @@ public class TalkDelivery {
     public static boolean isValidState(String state) {
         return ALL_STATES_SET.contains(state);
     }
+
     public static boolean isFinalState(String state) {
         return FINAL_STATES_SET.contains(state);
     }
+
     public static boolean isFailedState(String state) {
         return FAILED_STATES_SET.contains(state);
     }
@@ -330,16 +328,25 @@ public class TalkDelivery {
 
     @JsonIgnore
     public boolean nextStateAllowed(String nextState) {
-        if (!isValidState(state)) return true;
-        if (!isValidState(nextState)) return false;
-        if (state.equals(nextState)) return true;
-        if (isFinalState(state)) return false;
+        if (!isValidState(state)) {
+            return true;
+        }
+        if (!isValidState(nextState)) {
+            return false;
+        }
+        if (state.equals(nextState)) {
+            return true;
+        }
+        if (isFinalState(state)) {
+            return false;
+        }
         return statePathExists(state, nextState);
-     }
+    }
 
     public static boolean isValidAttachmentState(String state) {
         return ALL_ATTACHMENT_STATES_SET.contains(state);
     }
+
     public static boolean isFinalAttachmentState(String state) {
         return FINAL_ATTACHMENT_STATES_SET.contains(state);
     }
@@ -348,49 +355,20 @@ public class TalkDelivery {
     // returns true if nextState is a valid state and there are one or more state transition that lead form the current state to nextSate
     @JsonIgnore
     public boolean nextAttachmentStateAllowed(String nextState) {
-        if (!isValidAttachmentState(attachmentState)) return true;
-        if (!isValidAttachmentState(nextState)) return false;
-        if (attachmentState.equals(nextState)) return true;
-        if (isFinalAttachmentState(attachmentState)) return false;
+        if (!isValidAttachmentState(attachmentState)) {
+            return true;
+        }
+        if (!isValidAttachmentState(nextState)) {
+            return false;
+        }
+        if (attachmentState.equals(nextState)) {
+            return true;
+        }
+        if (isFinalAttachmentState(attachmentState)) {
+            return false;
+        }
         return attachentStatePathExists(attachmentState, nextState);
     }
-    /*
-    @JsonIgnore
-    public boolean nextAttachmentStateAllowed(String nextState) {
-        if (!isValidAttachmentState(attachmentState)) return true;
-        if (!isValidAttachmentState(nextState)) return false;
-        if (attachmentState.equals(nextState)) return true;
-        if (attachmentState.equals(ATTACHMENT_STATE_NONE)) return false;
-        if (nextState.equals(ATTACHMENT_STATE_NONE)) return false;
-        if (attachmentState.equals(ATTACHMENT_STATE_NEW)) return true;
-
-        if (attachmentState.equals(ATTACHMENT_STATE_UPLOADING)) {
-            return !nextState.equals(ATTACHMENT_STATE_NEW);
-        }
-        if (attachmentState.equals(ATTACHMENT_STATE_UPLOAD_PAUSED)) {
-            return !nextState.equals(ATTACHMENT_STATE_NEW);
-        }
-        if (attachmentState.equals(ATTACHMENT_STATE_UPLOADED)) {
-            return !nextState.equals(ATTACHMENT_STATE_NEW) && !nextState.equals(ATTACHMENT_STATE_UPLOADING);
-        }
-        if (attachmentState.equals(ATTACHMENT_STATE_RECEIVED)) {
-            return nextState.equals(ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
-        }
-        if (attachmentState.equals(ATTACHMENT_STATE_UPLOAD_FAILED)) {
-            return nextState.equals(ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED);
-        }
-        if (attachmentState.equals(ATTACHMENT_STATE_DOWNLOAD_FAILED)) {
-            return nextState.equals(ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED);
-        }
-        if (attachmentState.equals(ATTACHMENT_STATE_UPLOAD_ABORTED)) {
-            return nextState.equals(ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED);
-        }
-        if (attachmentState.equals(ATTACHMENT_STATE_DOWNLOAD_ABORTED)) {
-            return nextState.equals(ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED);
-        }
-        throw new RuntimeException("Internal Logic failure (nextAttachmentStateAllowed), state="+attachmentState+", nextState="+nextState);
-    }
-    */
 
     @JsonIgnore
     public boolean hasAttachment() {
@@ -496,7 +474,9 @@ public class TalkDelivery {
     }
 
     public TalkDelivery(boolean init) {
-        if (init) this.initialize();
+        if (init) {
+            this.initialize();
+        }
     }
 
     @JsonIgnore
@@ -507,10 +487,18 @@ public class TalkDelivery {
 
     @JsonIgnore
     public void ensureDates() {
-        if (this.timeAccepted == null) this.timeAccepted = new Date(0);
-        if (this.timeChanged == null) this.timeChanged = new Date(0);
-        if (this.timeUpdatedIn == null) this.timeUpdatedIn = new Date(0);
-        if (this.timeUpdatedOut == null) this.timeUpdatedOut = new Date(0);
+        if (this.timeAccepted == null) {
+            this.timeAccepted = new Date(0);
+        }
+        if (this.timeChanged == null) {
+            this.timeChanged = new Date(0);
+        }
+        if (this.timeUpdatedIn == null) {
+            this.timeUpdatedIn = new Date(0);
+        }
+        if (this.timeUpdatedOut == null) {
+            this.timeUpdatedOut = new Date(0);
+        }
     }
 
     @JsonIgnore
@@ -578,8 +566,8 @@ public class TalkDelivery {
     }
 
     public void setState(String state) {
-        if (!nextStateAllowed(state))   {
-            throw new RuntimeException("Delivery: state change from ‘"+this.state+"‘ -> '"+state+"' not allowed");
+        if (!nextStateAllowed(state)) {
+            throw new RuntimeException("Delivery: state change from ‘" + this.state + "‘ -> '" + state + "' not allowed");
         }
         this.state = state;
     }
@@ -614,7 +602,7 @@ public class TalkDelivery {
 
     public void setTimeChanged(Date timeChanged) {
         this.timeChanged = timeChanged;
-        System.out.println("@@@@"+this+ " setTimeChanged("+(timeChanged != null ? timeChanged.getTime() : "null")+")");
+        System.out.println("@@@@" + this + " setTimeChanged(" + (timeChanged != null ? timeChanged.getTime() : "null") + ")");
     }
 
     public Date getTimeUpdatedOut() {
@@ -623,7 +611,7 @@ public class TalkDelivery {
 
     public void setTimeUpdatedOut(Date timeUpdatedOut) {
         this.timeUpdatedOut = timeUpdatedOut;
-        System.out.println("@@@@"+this+ " setTimeUpdatedOut("+(timeUpdatedOut != null ? timeUpdatedOut.getTime() : "null")+")");
+        System.out.println("@@@@" + this + " setTimeUpdatedOut(" + (timeUpdatedOut != null ? timeUpdatedOut.getTime() : "null") + ")");
     }
 
     public Date getTimeUpdatedIn() {
@@ -632,7 +620,7 @@ public class TalkDelivery {
 
     public void setTimeUpdatedIn(Date timeUpdatedIn) {
         this.timeUpdatedIn = timeUpdatedIn;
-        System.out.println("@@@@"+this+ " setTimeUpdatedIn("+(timeUpdatedIn != null ? timeUpdatedIn.getTime() : "null")+")");
+        System.out.println("@@@@" + this + " setTimeUpdatedIn(" + (timeUpdatedIn != null ? timeUpdatedIn.getTime() : "null") + ")");
     }
 
     public Date getTimeAttachmentReceived() {
@@ -648,8 +636,8 @@ public class TalkDelivery {
     }
 
     public void setAttachmentState(String attachmentState) {
-        if (!nextAttachmentStateAllowed(attachmentState))   {
-            throw new RuntimeException("Delivery: state change from ‘"+this.attachmentState+"‘ -> '"+attachmentState+"' not allowed");
+        if (!nextAttachmentStateAllowed(attachmentState)) {
+            throw new RuntimeException("Delivery: state change from ‘" + this.attachmentState + "‘ -> '" + attachmentState + "' not allowed");
         }
         this.attachmentState = attachmentState;
     }
@@ -663,7 +651,9 @@ public class TalkDelivery {
     }
 
     @JsonIgnore
-    public String getId() {return _id;}
+    public String getId() {
+        return _id;
+    }
 
     @JsonIgnore
     public void updateWith(TalkDelivery delivery) {
@@ -775,6 +765,5 @@ public class TalkDelivery {
         if (fields == null || fields.contains(TalkDelivery.FIELD_ATTACHMENT_STATE)) {
             this.attachmentState = delivery.getAttachmentState();
         }
-
     }
 }
