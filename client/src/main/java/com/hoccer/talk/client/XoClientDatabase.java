@@ -2,7 +2,6 @@ package com.hoccer.talk.client;
 
 import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.model.*;
-import com.hoccer.talk.util.WeakListenerArray;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.field.DataType;
@@ -14,10 +13,9 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import org.apache.log4j.Logger;
 
+import java.lang.ref.WeakReference;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
@@ -47,6 +45,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     Dao<TalkClientSmsToken, Integer> mSmsTokens;
 
     Dao<TalkClientMediaCollection, Integer> mMediaCollections;
+    Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
 
 
     public static void createTables(ConnectionSource cs) throws SQLException {
@@ -72,6 +71,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         TableUtils.createTable(cs, TalkClientSmsToken.class);
 
         TableUtils.createTable(cs, TalkClientMediaCollection.class);
+        TableUtils.createTable(cs, TalkClientMediaCollectionRelation.class);
     }
 
     public XoClientDatabase(IXoClientDatabaseBackend backend) {
@@ -101,6 +101,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mSmsTokens = mBackend.getDao(TalkClientSmsToken.class);
 
         mMediaCollections = mBackend.getDao(TalkClientMediaCollection.class);
+        mMediaCollectionRelations = mBackend.getDao(TalkClientMediaCollectionRelation.class);
     }
 
     public void saveContact(TalkClientContact contact) throws SQLException {
@@ -672,57 +673,85 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     //////// MediaCollection Management ////////
 
-    WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListener = new WeakListenerArray<IXoMediaCollectionListener>();
+    private Map<Integer, WeakReference<TalkClientMediaCollection>> mMediaCollectionCache =
+            new HashMap<Integer, WeakReference<TalkClientMediaCollection>>();
 
     @Override
     public TalkClientMediaCollection findMediaCollectionById(Integer id) throws SQLException {
-        return mMediaCollections.queryForId(id);
+        TalkClientMediaCollection collection = mMediaCollections.queryForId(id);
+        return prepareMediaCollection(collection);
     }
 
     @Override
     public List<TalkClientMediaCollection> findMediaCollectionsByName(String name) throws SQLException {
-        return mMediaCollections.queryBuilder().where()
+        List<TalkClientMediaCollection> collections = mMediaCollections.queryBuilder().where()
                 .eq("name", name)
                 .query();
+
+        for(int i = 0; i < collections.size(); i++) {
+            TalkClientMediaCollection preparedCollection = prepareMediaCollection(collections.get(i));
+            collections.set(i, preparedCollection);
+        }
+        return collections;
     }
 
     @Override
-    public TalkClientDownload findMediaCollectionItemById(Integer itemId) throws SQLException {
-        return findClientDownloadById(itemId);
+    public List<TalkClientMediaCollection> findAllMediaCollections() throws SQLException {
+        List<TalkClientMediaCollection> collections = mMediaCollections.queryForAll();
+
+        for(int i = 0; i < collections.size(); i++) {
+            TalkClientMediaCollection preparedCollection = prepareMediaCollection(collections.get(i));
+            collections.set(i, preparedCollection);
+        }
+        return collections;
     }
 
     @Override
-    public void createMediaCollection(TalkClientMediaCollection collection) throws SQLException {
+    public TalkClientMediaCollection createMediaCollection(String collectionName) throws SQLException {
+        TalkClientMediaCollection collection = new TalkClientMediaCollection(collectionName);
         mMediaCollections.createIfNotExists(collection);
+        return prepareMediaCollection(collection);
     }
 
     @Override
     public void deleteMediaCollection(TalkClientMediaCollection collection) throws SQLException {
+        mMediaCollectionCache.remove(collection.getId());
         mMediaCollections.delete(collection);
     }
 
     @Override
     public void deleteMediaCollectionById(int collectionId) throws SQLException {
+        mMediaCollectionCache.remove(collectionId);
         mMediaCollections.deleteById(collectionId);
     }
 
+    // The returned Dao should not be used directly to alter the database, use TalkClientMediaCollection instead
     @Override
-    public void refreshMediaCollection(TalkClientMediaCollection collection) throws SQLException {
-        mMediaCollections.refresh(collection);
+    public Dao<TalkClientMediaCollection, Integer> getMediaCollectionDao() {
+        return mMediaCollections;
     }
 
+    // The returned Dao should not be used directly to alter the database, use TalkClientMediaCollection instead
     @Override
-    public void updateMediaCollection(TalkClientMediaCollection collection) throws SQLException {
-        mMediaCollections.update(collection);
+    public Dao<TalkClientMediaCollectionRelation, Integer> getMediaCollectionRelationDao() {
+        return mMediaCollectionRelations;
     }
 
-    @Override
-    public void registerMediaCollectionListener(IXoMediaCollectionListener listener) {
-        mMediaCollectionListener.addListener(listener);
-    }
+    // Returns an already cached collection with the same id or the prepared collection
+    private TalkClientMediaCollection prepareMediaCollection(TalkClientMediaCollection collection) {
+        WeakReference<TalkClientMediaCollection> cachedWeakCollection = mMediaCollectionCache.get(collection.getId());
+        if(cachedWeakCollection != null) {
+            TalkClientMediaCollection cachedCollection = cachedWeakCollection.get();
+            if(cachedCollection != null) {
+                return cachedCollection;
+            } else {
+                // cleanup weak null reference
+                mMediaCollectionCache.remove(collection.getId());
+            }
+        }
 
-    @Override
-    public void unregisterMediaCollectionListener(IXoMediaCollectionListener listener) {
-        mMediaCollectionListener.removeListener(listener);
+        collection.setDatabase(this);
+        mMediaCollectionCache.put(collection.getId(), new WeakReference<TalkClientMediaCollection>(collection));
+        return collection;
     }
 }

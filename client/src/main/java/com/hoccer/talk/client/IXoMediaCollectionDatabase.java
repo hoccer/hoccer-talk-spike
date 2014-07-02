@@ -2,6 +2,8 @@ package com.hoccer.talk.client;
 
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.talk.client.model.TalkClientMediaCollectionRelation;
+import com.j256.ormlite.dao.Dao;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -15,19 +17,15 @@ public interface IXoMediaCollectionDatabase {
 
     List<TalkClientMediaCollection> findMediaCollectionsByName(String name) throws SQLException;
 
-    TalkClientDownload findMediaCollectionItemById(Integer itemId) throws SQLException;
+    List<TalkClientMediaCollection> findAllMediaCollections() throws SQLException;
 
-    void createMediaCollection(TalkClientMediaCollection collection) throws SQLException;
+    TalkClientMediaCollection createMediaCollection(String collectionName) throws SQLException;
 
     void deleteMediaCollection(TalkClientMediaCollection collection) throws SQLException;
 
     void deleteMediaCollectionById(int collectionId) throws SQLException;
 
-    void updateMediaCollection(TalkClientMediaCollection collection) throws SQLException;
+    Dao<TalkClientMediaCollection, Integer> getMediaCollectionDao();
 
-    void refreshMediaCollection(TalkClientMediaCollection collection) throws SQLException;
-
-    void registerMediaCollectionListener(IXoMediaCollectionListener listener);
-
-    void unregisterMediaCollectionListener(IXoMediaCollectionListener listener);
+    Dao<TalkClientMediaCollectionRelation, Integer> getMediaCollectionRelationDao();
 }
