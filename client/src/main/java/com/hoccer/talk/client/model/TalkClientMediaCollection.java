@@ -91,7 +91,7 @@ public class TalkClientMediaCollection {
 
     // Moves the item at index 'from' to index 'to'.
     // Throws an IndexOutOfBoundsException if 'from' or 'to' is out of bounds.
-    public void moveItemFromToIndex(int from, int to) {
+    public void reorderItemIndex(int from, int to) {
         if(from < 0 || from >= mItemList.size()) {
             throw new IndexOutOfBoundsException("'from' parameter is out of bounds [0," + mItemList.size() + "] with value: " + from);
         }
@@ -168,9 +168,16 @@ public class TalkClientMediaCollection {
                     .eq("collection_id", mCollectionId)
                     .query();
 
+            // decrease/increase index of all affected items except the reordered one
+            int step = from < to ? -1 : 1;
             for(int i = 0; i < relations.size(); i++) {
                 TalkClientMediaCollectionRelation relation = relations.get(i);
-                LOG.debug(relation.getIndex());
+                if(relation.getIndex() == from) {
+                    relation.setIndex(to);
+                } else {
+                    relation.setIndex(relation.getIndex() + step);
+                }
+                relationDao.update(relation);
             }
         } catch(SQLException e) {
             e.printStackTrace();
