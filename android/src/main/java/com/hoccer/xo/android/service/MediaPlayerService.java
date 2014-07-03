@@ -497,9 +497,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mPlaylist.setTrackList(itemList);
     }
 
-    public void removeMedia(int pos) {
+    public void removeMedia(AudioAttachmentItem item) {
         if (mPlaylist.size() > 0) {
-            mPlaylist.remove(pos);
+            mPlaylist.remove(item);
         }
     }
 

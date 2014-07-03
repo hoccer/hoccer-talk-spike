@@ -18,6 +18,7 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.AttachmentListAdapter;
 import com.hoccer.xo.android.adapter.AttachmentListFilterAdapter;
+import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.SearchResultsAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
@@ -44,10 +45,10 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
     private final static Logger LOG = Logger.getLogger(AudioAttachmentListFragment.class);
     private ServiceConnection mConnection;
-    private AttachmentListAdapter mAttachmentCacheAdapter;
     private AttachmentListAdapter mAttachmentListAdapter;
     private AttachmentListFilterAdapter mFilterAdapter;
     private SearchResultsAdapter mResultsAdapter;
+    private ContactsAdapter mContactsAdapter;
     private int mFilteredContactId;
     private int mMediaCollectionId;
     private ActionMode mActionMode;
@@ -67,8 +68,8 @@ public class AudioAttachmentListFragment extends XoListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-
         View view = inflater.inflate(R.layout.fragment_audio_attachment_list, container, false);
+
         return view;
     }
 
@@ -105,30 +106,29 @@ public class AudioAttachmentListFragment extends XoListFragment {
     public void onStart() {
         super.onStart();
 
+        mAttachmentListAdapter = new AttachmentListAdapter(getActivity());
         if (getArguments() != null) {
             int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-
-            if (clientContactId == -1) {
-                LOG.error("invalid contact id");
-            } else {
-                mFilteredContactId = clientContactId;
-            }
-
             int mediaCollectionId = getArguments().getInt(ARG_MEDIA_COLLECTION_ID);
-            if (mediaCollectionId == -1) {
-                LOG.error("invalid collection id");
-            } else {
+
+            if (mediaCollectionId > 0) {
                 mMediaCollectionId = mediaCollectionId;
+                mAttachmentListAdapter.loadAttachmentsFromCollection(mMediaCollectionId);
+            } else if (clientContactId > 0) {
+                    mFilteredContactId = clientContactId;
+                    mAttachmentListAdapter.loadAttachmentsFromContact(clientContactId, null);
             }
+        } else {
+            mAttachmentListAdapter.loadAttachmentList();
         }
 
-        loadAttachments();
+        XoApplication.getXoClient().registerTransferListener(mAttachmentListAdapter);
+        setListAdapter(mAttachmentListAdapter);
 
-        ListView listView = getListView();
-        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         ListInteractionHandler listHandler = new ListInteractionHandler();
-        listView.setOnItemClickListener(listHandler);
-        listView.setMultiChoiceModeListener(listHandler);
+        getListView().setOnItemClickListener(listHandler);
+        getListView().setMultiChoiceModeListener(listHandler);
 
         Intent intent = new Intent(getActivity(), MediaPlayerService.class);
         getActivity().startService(intent);
@@ -166,15 +166,6 @@ public class AudioAttachmentListFragment extends XoListFragment {
             XoApplication.getXoClient().unregisterTransferListener(mAttachmentListAdapter);
         }
 
-        mAttachmentCacheAdapter = new AttachmentListAdapter(getXoActivity(), ContentMediaType.AUDIO, mFilteredContactId);
-        mAttachmentCacheAdapter.loadAttachmentList();
-
-        mAttachmentListAdapter = new AttachmentListAdapter(getActivity(), ContentMediaType.AUDIO, mFilteredContactId);
-        mAttachmentListAdapter.setAudioAttachmentItems(mAttachmentCacheAdapter.getAudioAttachmentItems());
-
-        XoApplication.getXoClient().registerTransferListener(mAttachmentListAdapter);
-        XoApplication.getXoClient().registerTransferListener(mAttachmentCacheAdapter);
-        setListAdapter(mAttachmentListAdapter);
     }
 
     private void deleteSelectedAttachments(SparseBooleanArray selectedItems) {
@@ -225,10 +216,9 @@ public class AudioAttachmentListFragment extends XoListFragment {
                 int messageId = XoApplication.getXoClient().getDatabase().findMessageByDownloadId(downloadId).getClientMessageId();
                 XoApplication.getXoClient().getDatabase().deleteMessageById(messageId);
 
-                mAttachmentCacheAdapter.removeItem(mAttachmentListAdapter.getItem(pos));
                 mAttachmentListAdapter.removeItem(pos);
 
-                mMediaPlayerService.removeMedia(pos);
+                mMediaPlayerService.removeMedia(item);
 
                 Intent intent = new Intent(AUDIO_ATTACHMENT_REMOVED_ACTION);
                 intent.putExtra(TALK_CLIENT_MESSAGE_ID_EXTRA, messageId);
@@ -306,8 +296,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
             }
             mResultsAdapter.clear();
             AttachmentListAdapter audioAttachments = new AttachmentListAdapter(getXoActivity());
-
-            List<AudioAttachmentItem> items = mAttachmentListAdapter.getAudioAttachmentItems();
+            List<AudioAttachmentItem> items = mAttachmentListAdapter.getAttachmentItems();
 
             for (int i = 0; i < items.size(); ++i) {
                 AudioAttachmentItem item = items.get(i);
@@ -319,6 +308,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
                     audioAttachments.addItem(item);
                 }
             }
+
 
             mResultsAdapter.addSection("Audio Attachments", audioAttachments);
             setListAdapter(mResultsAdapter);
@@ -403,7 +393,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
         private void setMediaList() {
             List<AudioAttachmentItem> itemList = new ArrayList<AudioAttachmentItem>();
-            for (AudioAttachmentItem audioAttachmentItem : mAttachmentListAdapter.getAudioAttachmentItems()) {
+            for (AudioAttachmentItem audioAttachmentItem : mAttachmentListAdapter.getAttachmentItems()) {
                 itemList.add(audioAttachmentItem);
             }
             mMediaPlayerService.setMediaList(itemList);
@@ -452,7 +442,6 @@ public class AudioAttachmentListFragment extends XoListFragment {
                 mInSearchMode = false;
                 mResultsAdapter.clear();
                 setListAdapter(mAttachmentListAdapter);
-                Toast.makeText(getActivity(),"HOLLERRR!!!", Toast.LENGTH_LONG).show();
             }
             return true;
         }

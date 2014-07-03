@@ -135,22 +135,8 @@ public class MediaPlaylist implements ListIterator<AudioAttachmentItem> {
         LOG.error("Adding items at current position is not supported.");
     }
 
-    public void remove(int attachmentIndex) {
-
-        if (attachmentIndex < 0) {
-            throw new IllegalArgumentException("Removing entry with index < 0 is not possible.");
-        }
-
-        if (attachmentIndex == getCurrentPlaylistPosition()) {
-            throw new IllegalStateException("Removing the current entry (" + getCurrentPlaylistPosition() + ") from playlist not possible.");
-        }
-
-        if (attachmentIndex < mAudioAttachmentItems.size()) {
-            int indexOfPlaylistPosition = getIndexOfPlaylistPosition(attachmentIndex);
-            mAudioAttachmentItems.remove(attachmentIndex);
-            mPlaylistOrder.remove(indexOfPlaylistPosition);
-            correctPlaylistIndexes(indexOfPlaylistPosition);
-        }
+    public void remove(AudioAttachmentItem item) {
+        remove(mAudioAttachmentItems.indexOf(item));
     }
 
     private int getIndexOfPlaylistPosition(int attachmentIndex) {
@@ -255,4 +241,23 @@ public class MediaPlaylist implements ListIterator<AudioAttachmentItem> {
             mPlaylistOrder.add(i);
         }
     }
+
+    private void remove(int attachmentIndex) {
+
+        if (attachmentIndex < 0) {
+            throw new IllegalArgumentException("Removing entry with index < 0 is not possible.");
+        }
+
+        if (attachmentIndex == getCurrentPlaylistPosition()) {
+            throw new IllegalStateException("Removing the current entry (" + getCurrentPlaylistPosition() + ") from playlist not possible.");
+        }
+
+        if (attachmentIndex < mAudioAttachmentItems.size()) {
+            int indexOfPlaylistPosition = getIndexOfPlaylistPosition(attachmentIndex);
+            mAudioAttachmentItems.remove(attachmentIndex);
+            mPlaylistOrder.remove(indexOfPlaylistPosition);
+            correctPlaylistIndexes(indexOfPlaylistPosition);
+        }
+    }
+
 }
