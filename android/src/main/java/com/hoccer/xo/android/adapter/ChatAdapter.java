@@ -240,6 +240,12 @@ public class
     }
 
     @Override
+    public void onReloadRequest() {
+        super.onReloadRequest();
+        notifyDataSetChanged();
+    }
+
+    @Override
     public void onMessageAdded(final TalkClientMessage message) {
         LOG.debug("onMessageAdded()");
         if (message.getConversationContact() == mContact) {
