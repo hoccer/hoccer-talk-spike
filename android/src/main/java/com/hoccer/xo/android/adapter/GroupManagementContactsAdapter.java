@@ -53,6 +53,16 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
     }
 
     @Override
+    protected int getNearbyHistoryLayout() {
+        return -1;
+    }
+
+    @Override
+    protected void updateNearbyHistoryLayout(View v) {
+
+    }
+
+    @Override
     protected void updateToken(View view, TalkClientSmsToken token) {
         LOG.debug("updateToken(" + token.getSmsTokenId() + ")");
     }
@@ -61,7 +71,7 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
     protected void updateContact(final View view, final TalkClientContact contact) {
         LOG.debug("updateContact(" + contact.getClientContactId() + ")");
         CheckedTextView checkedTextView = (CheckedTextView) view.findViewById(R.id.contact_name_checked);
-        checkedTextView.setText(contact.getName());
+        checkedTextView.setText(contact.getNickname());
 
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         avatarView.setContact(contact);

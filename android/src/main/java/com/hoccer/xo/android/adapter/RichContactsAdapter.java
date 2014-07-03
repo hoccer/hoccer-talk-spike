@@ -1,13 +1,5 @@
 package com.hoccer.xo.android.adapter;
 
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -15,10 +7,19 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.TextView;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientSmsToken;
+import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Contacts adapter for the main contact list
@@ -31,6 +32,10 @@ public class RichContactsAdapter extends ContactsAdapter {
     public RichContactsAdapter(XoActivity activity) {
         super(activity);
         setShowTokens(true);
+    }
+
+    public RichContactsAdapter(XoActivity activity, boolean showNearbyHistory) {
+        super(activity, showNearbyHistory);
     }
 
     @Override
@@ -51,6 +56,32 @@ public class RichContactsAdapter extends ContactsAdapter {
     @Override
     protected int getTokenLayout() {
         return R.layout.item_contact_sms_invite;
+    }
+
+    @Override
+    protected int getNearbyHistoryLayout() {
+        return R.layout.item_contact_client;
+    }
+
+    @Override
+    protected void updateNearbyHistoryLayout(View v) {
+        TextView titleText = (TextView) v.findViewById(R.id.contact_name);
+        TextView timestampText = (TextView) v.findViewById(R.id.contact_time);
+        TextView lastMessageText = (TextView) v.findViewById(R.id.contact_last_message);
+        AvatarView avatarView = (AvatarView) v.findViewById(R.id.contact_icon);
+
+        try {
+            long offset = mDatabase.getNearbyMessageCount() - 1;
+            TalkClientMessage lastNearbyMessage = mDatabase.findNearbyMessages(1, offset).get(0);
+            timestampText.setText(getTimeString(lastNearbyMessage.getTimestamp()));
+            lastMessageText.setText(lastNearbyMessage.getText());
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+
+        titleText.setText(R.string.nearby_saved);
+        avatarView.setAvatarImage(R.drawable.avatar_default_location);
+        avatarView.setClickable(false);
     }
 
     @Override
@@ -91,7 +122,7 @@ public class RichContactsAdapter extends ContactsAdapter {
         LOG.debug("updateContact(" + contact.getClientContactId() + ")");
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
-        nameView.setText(contact.getName());
+        nameView.setText(contact.getNickname());
         TextView typeView = (TextView) view.findViewById(R.id.contact_type);
 
         avatarView.setContact(contact);
@@ -107,9 +138,7 @@ public class RichContactsAdapter extends ContactsAdapter {
             TalkClientMessage message = mDatabase
                     .findLatestMessageByContactId(contact.getClientContactId());
             if (message != null) {
-                Date messageTime = message.getTimestamp();
-                SimpleDateFormat sdf = new SimpleDateFormat("EEE HH:mm");
-                lastMessageTime = sdf.format(messageTime);
+                lastMessageTime = getTimeString(message.getTimestamp());
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
@@ -120,8 +149,7 @@ public class RichContactsAdapter extends ContactsAdapter {
 
         long unseenMessages = 0;
         try {
-            unseenMessages = mDatabase
-                    .findUnseenMessageCountByContactId(contact.getClientContactId());
+            unseenMessages = mDatabase.findUnseenMessageCountByContactId(contact.getClientContactId());
         } catch (SQLException e) {
             LOG.error("sql error", e);
         }
@@ -160,6 +188,11 @@ public class RichContactsAdapter extends ContactsAdapter {
                 mActivity.showContactProfile(contact);
             }
         });
+    }
+
+    private String getTimeString(Date messageTime) {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE HH:mm");
+        return sdf.format(messageTime);
     }
 
     private String chooseAttachmentType(Context context, String attachmentType) {

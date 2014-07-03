@@ -580,7 +580,7 @@ public class XoClientService extends Service {
             // add the intent to the notification
             builder.setContentIntent(pendingIntent);
             // title is always the contact name
-            builder.setContentTitle(singleContact.getName());
+            builder.setContentTitle(singleContact.getNickname());
             // text depends on number of messages
             if (unseenMessages.size() == 1) {
                 TalkClientMessage singleMessage = unseenMessages.get(0);
@@ -607,7 +607,7 @@ public class XoClientService extends Service {
             int last = contacts.size() - 1;
             for (int i = 0; i < contacts.size(); i++) {
                 TalkClientContact contact = contacts.get(i);
-                sb.append(contact.getName());
+                sb.append(contact.getNickname());
                 if (i < last) {
                     sb.append(", ");
                 }
@@ -774,6 +774,11 @@ public class XoClientService extends Service {
         }
 
         @Override
+        public void onDownloadFailed(TalkClientDownload downlad) {
+
+        }
+
+        @Override
         public void onUploadStarted(TalkClientUpload upload) {
         }
 
@@ -783,6 +788,10 @@ public class XoClientService extends Service {
 
         @Override
         public void onUploadFinished(TalkClientUpload upload) {
+        }
+
+        @Override
+        public void onUploadFailed(TalkClientUpload upload) {
         }
 
         @Override

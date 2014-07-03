@@ -28,7 +28,8 @@ import java.util.List;
  * <p/>
  * To configure list items it uses instances of ChatMessageItem and its subtypes.
  */
-public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListener {
+public class
+        ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListener {
 
     /**
      * Number of TalkClientMessage objects in a batch
@@ -280,8 +281,11 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
                         int position = mChatMessageItems.indexOf(item);
                         ChatMessageItem originalItem = mChatMessageItems.get(position);
                         originalItem.setMessage(message);
-                        notifyDataSetChanged();
+                    } else {
+                        ChatMessageItem chatMessageItem = new ChatMessageItem(mActivity, message);
+                        mChatMessageItems.add(chatMessageItem);
                     }
+                    notifyDataSetChanged();
                 }
             });
         }
@@ -304,6 +308,11 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
 
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
+
+    }
+
+    @Override
+    public void onDownloadFailed(TalkClientDownload download) {
 
     }
 
@@ -333,6 +342,11 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
 
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
+
+    }
+
+    @Override
+    public void onUploadFailed(TalkClientUpload upload) {
 
     }
 

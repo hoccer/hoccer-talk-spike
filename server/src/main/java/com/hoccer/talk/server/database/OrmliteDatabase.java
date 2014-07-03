@@ -20,20 +20,20 @@ public class OrmliteDatabase implements ITalkServerDatabase {
 
     private static final Logger LOG = Logger.getLogger(OrmliteDatabase.class);
 
-    JdbcConnectionSource mConnectionSource;
+    private JdbcConnectionSource mConnectionSource;
 
     /* OWN SIMPLE IDENTITY */
-    Dao<TalkClient, String> mClients;
-    Dao<TalkMessage, String> mMessages;
-    Dao<TalkPresence, String> mPresence;
-    Dao<TalkGroup, String> mGroups;
+    private Dao<TalkClient, String> mClients;
+    private Dao<TalkMessage, String> mMessages;
+    private Dao<TalkPresence, String> mPresence;
+    private Dao<TalkGroup, String> mGroups;
 
     /* COMPOSITE IDENTITY */
-    Dao<TalkDelivery, Long> mDeliveries;
-    Dao<TalkToken, Long> mTokens;
-    Dao<TalkRelationship, Long> mRelationships;
-    Dao<TalkKey, Long> mKeys;
-    Dao<TalkGroupMember, Long> mGroupMembers;
+    private Dao<TalkDelivery, Long> mDeliveries;
+    private Dao<TalkToken, Long> mTokens;
+    private Dao<TalkRelationship, Long> mRelationships;
+    private Dao<TalkKey, Long> mKeys;
+    private Dao<TalkGroupMember, Long> mGroupMembers;
 
     public OrmliteDatabase() {
         try {
@@ -124,6 +124,10 @@ public class OrmliteDatabase implements ITalkServerDatabase {
             return null;
         }
     }
+    @Override
+    public List<TalkMessage> findMessagesWithAttachmentFileId(String fileId) {
+        return null;
+    }
 
     @Override
     public void deleteMessage(TalkMessage message) {
@@ -168,8 +172,17 @@ public class OrmliteDatabase implements ITalkServerDatabase {
             return null;
         }
     }
+    @Override
+    public List<TalkDelivery> findDeliveriesInStates(String[] states) {
+        return null;
+    }
 
     @Override
+    public List<TalkDelivery> findDeliveriesInStatesAndAttachmentStates(String[] deliveryStates, String[] attachmentStates) {
+        return null;
+    }
+
+        @Override
     public List<TalkDelivery> findDeliveriesForMessage(String messageId) {
         try {
             return mDeliveries.queryBuilder().where()
@@ -217,6 +230,20 @@ public class OrmliteDatabase implements ITalkServerDatabase {
             e.printStackTrace();
             return null;
         }
+    }
+    @Override
+    public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
+        return null;
+    }
+
+    @Override
+    public List<TalkDelivery> findDeliveriesFromClientInStates(String clientId, String[] deliveryStates) {
+        return null;
+    }
+
+    @Override
+    public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
+        return null;
     }
 
     @Override
@@ -430,6 +457,11 @@ public class OrmliteDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkRelationship> findRelationshipsForClientInStates(String clientId, String[] states) {
+        return null;
+    }
+
+    @Override
     public List<TalkRelationship> findRelationshipsByOtherClient(String other) {
         try {
             return mRelationships.queryBuilder().where()
@@ -638,5 +670,38 @@ public class OrmliteDatabase implements ITalkServerDatabase {
     @Override
     public void reportPing() {
         LOG.info(ping());
+    }
+
+    @Override
+    public TalkClientHostInfo findClientHostInfoForClient(String clientId) {
+        // TODO: implement me properly!
+        return null;
+    }
+
+    @Override
+    public void saveClientHostInfo(TalkClientHostInfo clientHostInfo) {
+        // TODO: implement me properly!
+    }
+
+    @Override
+    public void deleteClientHostInfo(TalkClientHostInfo clientHostInfo) {
+        // TODO: implement me properly!
+    }
+
+    @Override
+    public List<TalkDatabaseMigration> findDatabaseMigrations() {
+        // TODO: implement me properly!
+        return null;
+    }
+
+    @Override
+    public void saveDatabaseMigration(TalkDatabaseMigration migration) {
+        // TODO: implement me properly!
+    }
+
+    @Override
+    public List<TalkDelivery> findAllDeliveries() {
+        // TODO: implement me properly!
+        return null;
     }
 }

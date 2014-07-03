@@ -24,35 +24,36 @@ import java.util.*;
 public class JongoDatabase implements ITalkServerDatabase {
 
     private static final Logger LOG = Logger.getLogger(JongoDatabase.class);
-    private static final long GROUPKEY_LOCK_RETENTION_TIMEOUT = 1000 * 30; // in milliseconds
 
     /**
      * Mongo connection pool
      */
-    Mongo mMongo;
+    private final Mongo mMongo;
 
     /**
      * Mongo database accessor
      */
-    DB mDb;
+    private DB mDb;
 
     /**
      * Jongo object mapper
      */
-    Jongo mJongo;
+    private Jongo mJongo;
 
-    List<MongoCollection> mCollections;
+    private final List<MongoCollection> mCollections;
 
-    MongoCollection mClients;
-    MongoCollection mMessages;
-    MongoCollection mDeliveries;
-    MongoCollection mTokens;
-    MongoCollection mRelationships;
-    MongoCollection mPresences;
-    MongoCollection mKeys;
-    MongoCollection mGroups;
-    MongoCollection mGroupMembers;
-    MongoCollection mEnvironments;
+    private MongoCollection mClients;
+    private MongoCollection mMessages;
+    private MongoCollection mDeliveries;
+    private MongoCollection mTokens;
+    private MongoCollection mRelationships;
+    private MongoCollection mPresences;
+    private MongoCollection mKeys;
+    private MongoCollection mGroups;
+    private MongoCollection mGroupMembers;
+    private MongoCollection mEnvironments;
+    private MongoCollection mClientHostInfos;
+    private MongoCollection mMigrations;
 
     public JongoDatabase(TalkServerConfiguration configuration) {
         mCollections = new ArrayList<MongoCollection>();
@@ -67,16 +68,13 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     private Mongo createMongoClient(TalkServerConfiguration configuration) {
-
-        // write concern for all collections
-        // WriteConcern wc = WriteConcern.JOURNALED; //??? not used?
         // create connection pool
         try {
             MongoOptions options = new MongoOptions();
             options.threadsAllowedToBlockForConnectionMultiplier = 1500;
-            options.maxWaitTime = 5 * 1000;
-            // options.connectionsPerHost
-            return new Mongo("localhost", options);
+            options.maxWaitTime = configuration.getJongoMaxWaitTime();
+            options.connectionsPerHost = configuration.getJongoConnectionsPerHost();
+            return new Mongo(configuration.getJongoHost(), options);
         } catch (UnknownHostException e) {
             e.printStackTrace();
             return null;
@@ -101,6 +99,8 @@ public class JongoDatabase implements ITalkServerDatabase {
         mGroups = getCollection("group");
         mGroupMembers = getCollection("groupMember");
         mEnvironments = getCollection("environment");
+        mClientHostInfos = getCollection("clientHostInfo");
+        mMigrations = getCollection("migrations");
     }
 
     private MongoCollection getCollection(String name) {
@@ -153,6 +153,18 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkMessage> findMessagesWithAttachmentFileId(String fileId) {
+        List<TalkMessage> res = new ArrayList<TalkMessage>();
+        Iterator<TalkMessage> it =
+                mMessages.find("{attachmentFileId:#}", fileId)
+                        .as(TalkMessage.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
     public void deleteMessage(TalkMessage message) {
         mMessages.remove("{messageId:#}", message.getMessageId());
     }
@@ -179,6 +191,44 @@ public class JongoDatabase implements ITalkServerDatabase {
         }
         return res;
     }
+
+    @Override
+    public List<TalkDelivery> findAllDeliveries() {
+        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
+        Iterator<TalkDelivery> it =
+                mDeliveries.find()
+                        .as(TalkDelivery.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
+    public List<TalkDelivery> findDeliveriesInStates(String[] states) {
+
+        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
+        Iterator<TalkDelivery> it =
+                mDeliveries.find("{state: { $in: # } }", Arrays.asList(states))
+                        .as(TalkDelivery.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
+    public List<TalkDelivery> findDeliveriesInStatesAndAttachmentStates(String[] deliveryStates, String[] attachmentStates) {
+        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
+        Iterator<TalkDelivery> it =
+                mDeliveries.find("{state: { $in: # }, attachmentState: {$in: # } }", Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
+                        .as(TalkDelivery.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
 
     @Override
     public List<TalkDelivery> findDeliveriesForClient(String clientId) {
@@ -217,10 +267,49 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
+
+        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
+        Iterator<TalkDelivery> it =
+                mDeliveries.find("{receiverId:#, state: { $in: # }, attachmentState: {$in: # } }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
+                        .as(TalkDelivery.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
     public List<TalkDelivery> findDeliveriesFromClientInState(String clientId, String state) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
                 mDeliveries.find("{senderId:#,state:#}", clientId, state)
+                        .as(TalkDelivery.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
+    public List<TalkDelivery> findDeliveriesFromClientInStates(String clientId, String[] deliveryStates) {
+
+        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
+        Iterator<TalkDelivery> it =
+                mDeliveries.find("{senderId:#, state: { $in: # } }", clientId, Arrays.asList(deliveryStates))
+                        .as(TalkDelivery.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
+    public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
+
+        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
+        Iterator<TalkDelivery> it =
+                mDeliveries.find("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
                         .as(TalkDelivery.class).iterator();
         while (it.hasNext()) {
             res.add(it.next());
@@ -385,6 +474,18 @@ public class JongoDatabase implements ITalkServerDatabase {
         List<TalkRelationship> res = new ArrayList<TalkRelationship>();
         Iterator<TalkRelationship> it =
                 mRelationships.find("{clientId:#,state:#}", clientId, state)
+                        .as(TalkRelationship.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+        return res;
+    }
+
+    @Override
+    public List<TalkRelationship> findRelationshipsForClientInStates(String clientId, String[] states) {
+        List<TalkRelationship> res = new ArrayList<TalkRelationship>();
+        Iterator<TalkRelationship> it =
+                mRelationships.find("{clientId:#,state:{ $in: # }}", clientId, Arrays.asList(states))
                         .as(TalkRelationship.class).iterator();
         while (it.hasNext()) {
             res.add(it.next());
@@ -712,4 +813,38 @@ public class JongoDatabase implements ITalkServerDatabase {
         }
     }
 
+    @Override
+    public TalkClientHostInfo findClientHostInfoForClient(String clientId) {
+        return mClientHostInfos.findOne("{clientId: #}", clientId)
+                .as(TalkClientHostInfo.class);
+    }
+
+    @Override
+    public void saveClientHostInfo(TalkClientHostInfo clientHostInfo) {
+        mClientHostInfos.save(clientHostInfo);
+    }
+
+    @Override
+    public void deleteClientHostInfo(TalkClientHostInfo clientHostInfo) {
+        mClientHostInfos.remove("{clientId: #}", clientHostInfo);
+    }
+
+    @Override
+    public List<TalkDatabaseMigration> findDatabaseMigrations() {
+        List<TalkDatabaseMigration> res = new ArrayList<TalkDatabaseMigration>();
+        Iterator<TalkDatabaseMigration> it =
+                mMigrations.find()
+                        .sort("{position: 1}") // retrieve migration sorted
+                        .as(TalkDatabaseMigration.class).iterator();
+        while (it.hasNext()) {
+            res.add(it.next());
+        }
+
+        return res;
+    }
+
+    @Override
+    public void saveDatabaseMigration(TalkDatabaseMigration migration) {
+        mMigrations.save(migration);
+    }
 }
