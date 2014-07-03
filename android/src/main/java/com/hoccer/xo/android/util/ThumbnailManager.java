@@ -18,7 +18,6 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -35,6 +34,7 @@ import java.io.IOException;
  */
 public class ThumbnailManager {
     private static Logger LOG = Logger.getLogger(ThumbnailManager.class);
+    private static int DEFAULT_HEIGHT_DP = 200;
     private static ThumbnailManager mInstance;
     private LruCache mMemoryLruCache;
     private Context mContext;
@@ -150,7 +150,7 @@ public class ThumbnailManager {
     private Bitmap scaleBitmap(Bitmap bitmap, Context context) {
         //200dp in item_chat_message.xml -> rl_message_attachment -> height
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        float scaledHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, metrics);
+        float scaledHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DEFAULT_HEIGHT_DP, metrics);
         float scaledWidth = bitmap.getWidth() * (scaledHeight / bitmap.getHeight());
         return Bitmap.createScaledBitmap(bitmap, Math.round(scaledWidth), Math.round(scaledHeight), false);
     }
@@ -182,14 +182,14 @@ public class ThumbnailManager {
     }
 
     private void queueThumbnailCreation(String uri, ImageView imageView, int maskResource, String tag) {
-        new LoadBitmapTask().execute(uri, imageView, maskResource, tag);
+        new ImageThumbnailLoader().execute(uri, imageView, maskResource, tag);
     }
 
-    private Bitmap createThumbnail(String uri, int maskResource, String tag) {
+    private Bitmap createImageThumbnail(String uri, int maskResource, String tag) {
         Bitmap thumbnail = null;
         File imageFile = new File(getRealPathFromURI(Uri.parse(uri), mContext));
         if (imageFile.exists()) {
-            thumbnail = renderThumbnail(imageFile, maskResource);
+            thumbnail = renderImageThumbnail(imageFile, maskResource);
             if (thumbnail != null) {
                 saveToThumbnailDirectory(thumbnail, uri, tag);
                 return thumbnail;
@@ -198,10 +198,18 @@ public class ThumbnailManager {
         return thumbnail;
     }
 
-    private Bitmap renderThumbnail(File file, int maskResource) {
-        BitmapFactory.Options opt = new BitmapFactory.Options();
-        opt.inSampleSize = 4;
-        Bitmap original = BitmapFactory.decodeFile(file.getAbsolutePath(), opt);
+    private Bitmap renderImageThumbnail(File file, int maskResource) {
+        // Dry-loading of bitmap to calculate sample size
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        int fileHeight = options.outHeight;
+        int sampleSize = fileHeight / DEFAULT_HEIGHT_DP;
+
+        // Load bitmap in appropriate size
+        options = new BitmapFactory.Options();
+        options.inSampleSize = sampleSize;
+        Bitmap original = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
         original = rotateBitmap(original, file.getAbsolutePath());
         original = scaleBitmap(original, mContext);
         //Load mask
@@ -228,7 +236,7 @@ public class ThumbnailManager {
         }
     }
 
-    private class LoadBitmapTask extends AsyncTask<Object, Object, Bitmap> {
+    private class ImageThumbnailLoader extends AsyncTask<Object, Object, Bitmap> {
         private ImageToLoad mImageToLoad;
         private int mMaskResource;
         private String mTag;
@@ -244,7 +252,7 @@ public class ThumbnailManager {
             mImageToLoad = new ImageToLoad(uri, (ImageView) params[1]);
             mMaskResource = (Integer) params[2];
             mTag = (String) params[3];
-            Bitmap thumbnail = createThumbnail(mImageToLoad.mUrl, mMaskResource, mTag);
+            Bitmap thumbnail = createImageThumbnail(mImageToLoad.mUrl, mMaskResource, mTag);
             if (thumbnail == null) {
                 return null;
             }
@@ -282,7 +290,7 @@ public class ThumbnailManager {
             Bitmap bm = loadThumbnailForVideo(uri, maskResource, tag);
 
             if ( bm == null){
-                makeThumbnail(uri, tag);
+                makeVideoThumbnail(uri, tag);
                 bm = loadThumbnailForVideo(uri, maskResource, tag);
             }
 
@@ -320,7 +328,7 @@ public class ThumbnailManager {
         }
     }
 
-    private void makeThumbnail(String uri, String tag) {
+    private void makeVideoThumbnail(String uri, String tag) {
         String filePath = getRealPathFromURI(Uri.parse(uri), mContext) + ".png";
         File f = new File(filePath);
 

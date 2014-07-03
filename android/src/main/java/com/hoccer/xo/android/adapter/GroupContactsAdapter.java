@@ -47,6 +47,16 @@ public class GroupContactsAdapter extends ContactsAdapter {
     }
 
     @Override
+    protected int getNearbyHistoryLayout() {
+        return -1;
+    }
+
+    @Override
+    protected void updateNearbyHistoryLayout(View v) {
+
+    }
+
+    @Override
     protected void updateToken(View view, TalkClientSmsToken token) {
         LOG.debug("updateToken(" + token.getSmsTokenId() + ")");
     }
@@ -55,10 +65,16 @@ public class GroupContactsAdapter extends ContactsAdapter {
     protected void updateContact(final View view, final TalkClientContact contact) {
         LOG.debug("updateContact(" + contact.getClientContactId() + ")");
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
-        nameView.setText(contact.getName());
+        nameView.setText(contact.getNickname());
 
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         avatarView.setContact(contact);
+        avatarView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mActivity.showContactProfile(contact);
+            }
+        });
 
         TextView roleView = (TextView) view.findViewById(R.id.contact_role);
         roleView.setVisibility(View.GONE);
@@ -68,7 +84,6 @@ public class GroupContactsAdapter extends ContactsAdapter {
                 roleView.setVisibility(View.VISIBLE);
             }
         } else if (contact.isSelf()) {
-
             TalkGroupMember member = mGroup.getGroupMember();
             if (member != null && member.getRole().equals(TalkGroupMember.ROLE_ADMIN)) {
                 roleView.setVisibility(View.VISIBLE);

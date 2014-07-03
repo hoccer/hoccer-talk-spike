@@ -669,10 +669,6 @@ public abstract class XoActivity extends FragmentActivity {
         return mDatabase;
     }
 
-    public ContactsAdapter makeContactListAdapter() {
-        return new RichContactsAdapter(this);
-    }
-
 //    public ConversationAdapter makeConversationAdapter() {
 //        return new ConversationAdapter(this);
 //    }

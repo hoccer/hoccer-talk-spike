@@ -143,7 +143,7 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public String getClientName() {
-        return null;
+        return "Talk";
     }
 
     @Override
@@ -162,6 +162,11 @@ public class TalkToolClientHost implements IXoClientHost {
     }
 
     @Override
+    public String getClientBuildVariant() {
+        return "release";
+    }
+
+    @Override
     public Date getClientTime() {
         return null;
     }
@@ -173,7 +178,7 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public String getSystemName() {
-        return null;
+        return "TalkTool";
     }
 
     @Override
@@ -189,6 +194,11 @@ public class TalkToolClientHost implements IXoClientHost {
     @Override
     public int getRSAKeysize() {
         return 1024;
+    }
+
+    @Override
+    public boolean isSendDeliveryConfirmationEnabled() {
+        return false;
     }
 
 }

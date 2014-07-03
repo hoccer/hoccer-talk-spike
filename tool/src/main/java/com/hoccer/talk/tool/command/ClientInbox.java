@@ -28,7 +28,7 @@ public class ClientInbox extends TalkToolClientCommand {
     }
 
     private void printMessages(List<TalkClientMessage> messages, TalkToolClient client) throws SQLException {
-        Console.info("Listing messages for client with name: '" + client.getClient().getSelfContact().getName() +
+        Console.info("Listing messages for client with name: '" + client.getClient().getSelfContact().getNickname() +
                      "' (id: '" + client.getClientId() + "')...");
 
         for (int i = 0; i < messages.size(); ++i) {

@@ -1,5 +1,6 @@
 package com.hoccer.xo.android;
 
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -34,6 +35,8 @@ public class XoAndroidClientHost implements IXoClientHost {
 
     Context mContext = null;
     PackageInfo mPackageInfo = null;
+    boolean mSendDeliveryConfirmationEnabled = true;
+    SharedPreferences mPreferences;
 
     public XoAndroidClientHost(Context context) {
         mContext = context;
@@ -45,6 +48,8 @@ public class XoAndroidClientHost implements IXoClientHost {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
     }
 
     @Override
@@ -196,6 +201,11 @@ public class XoAndroidClientHost implements IXoClientHost {
     }
 
     @Override
+    public String getClientBuildVariant() {
+        return "release";
+    }
+
+    @Override
     public Date getClientTime() {
         return new Date();
     }
@@ -248,5 +258,9 @@ public class XoAndroidClientHost implements IXoClientHost {
         return keySize.intValue();
     }
 
-
+    @Override
+    public boolean isSendDeliveryConfirmationEnabled() {
+        mSendDeliveryConfirmationEnabled = mPreferences.getBoolean("preference_confirm_messages_seen", true);
+        return mSendDeliveryConfirmationEnabled;
+    }
 }

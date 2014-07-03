@@ -12,15 +12,15 @@ import java.util.List;
 
 public class NearbyChatAdapter extends ChatAdapter {
 
-    public NearbyChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
-        super(listView, activity, contact);
+    public NearbyChatAdapter(ListView listView, XoActivity activity) {
+        super(listView, activity, null);
     }
 
     @Override
     protected void initialize() {
         int totalMessageCount = 0;
         try {
-            totalMessageCount = (int) mDatabase.getMessageCountNearby();
+            totalMessageCount = (int) mDatabase.getNearbyMessageCount();
         } catch (SQLException e) {
             LOG.error("SQLException while loading message count in nearby ");
         }
@@ -51,5 +51,9 @@ public class NearbyChatAdapter extends ChatAdapter {
         } catch (SQLException e) {
             LOG.error("SQLException while batch retrieving messages for nearby", e);
         }
+    }
+    public void setConverseContact(TalkClientContact talkClientContact) {
+        mContact = talkClientContact;
+        initialize();
     }
 }

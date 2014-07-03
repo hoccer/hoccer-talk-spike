@@ -1,10 +1,13 @@
 package com.hoccer.talk.server.delivery;
 
+import com.hoccer.talk.rpc.ITalkRpcClient;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.hoccer.talk.server.agents.NotificationDeferrer;
+import com.hoccer.talk.server.rpc.TalkRpcConnection;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class DeliveryAgent extends NotificationDeferrer {
 
@@ -24,8 +27,11 @@ public class DeliveryAgent extends NotificationDeferrer {
         return mServer;
     }
 
-    public void requestDelivery(String clientId) {
-        final DeliveryRequest deliveryRequest = new DeliveryRequest(this, clientId);
+    public void requestDelivery(String clientId, boolean forceAll) {
+        if (clientId == null) {
+            throw new NullPointerException("no clientId");
+        }
+        final DeliveryRequest deliveryRequest = new DeliveryRequest(this, clientId, forceAll);
 
         Runnable notificationGenerator = new Runnable() {
             @Override
