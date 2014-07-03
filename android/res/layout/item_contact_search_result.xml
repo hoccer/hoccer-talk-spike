@@ -1,7 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp">
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+    <com.hoccer.xo.android.view.AvatarView
+            android:id="@+id/contact_icon"
+            android:clickable="true"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            custom:cornerRadius="65"
+            custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
+            style="@style/AppBaseTheme.Contact.Avatar"/>
+
+    <TextView
+            android:id="@+id/contact_name"
+            android:text="@string/contact_name_new_client"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/contact_icon"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:layout_marginRight="85dp"
+            style="@style/AppBaseTheme.Contact.Name"/>
+
+    <TextView
+            android:id="@+id/contact_type"
+            android:text="@string/common_friend"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@id/contact_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            style="@style/AppBaseTheme.Contact.CommonGroup"/>
 
 </RelativeLayout>

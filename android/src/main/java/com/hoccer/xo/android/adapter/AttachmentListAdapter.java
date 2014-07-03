@@ -251,16 +251,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
                 downloads = XoApplication.getXoClient().getDatabase().findAllClientDownloads();
             }
 
-            if (downloads != null) {
-                for (TalkClientDownload download : downloads) {
-                    if (!isRecordedAudio(download.getFileName())) {
-                        AudioAttachmentItem newItem = AudioAttachmentItem.create(download.getContentDataUrl(), download, true);
-                        if (newItem != null) {
-                            mAttachmentItems.add(newItem);
-                        }
-                    }
-                }
-            }
+            createAttachmentItemsFromTalkClientDownloads(downloads);
         } catch (SQLException e) {
             LOG.error(e);
         }
@@ -280,6 +271,8 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     public void loadAttachmentsFromContact(int contactId, String contentMediaType) {
+        mConversationContactId = contactId;
+        mContentMediaType = contentMediaType;
         try {
             List<TalkClientDownload> downloads;
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
