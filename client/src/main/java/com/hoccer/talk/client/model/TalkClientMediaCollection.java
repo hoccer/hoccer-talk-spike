@@ -106,6 +106,7 @@ public class TalkClientMediaCollection {
 
         if(reorderRelation(from, to)) {
             TalkClientDownload item = mItemList.get(from);
+            mItemList.remove(from);
             mItemList.add(to, item);
         }
     }
