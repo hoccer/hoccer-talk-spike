@@ -3,7 +3,6 @@ package com.hoccer.xo.android;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.XoClientConfiguration;
 
 import org.eclipse.jetty.websocket.WebSocketClient;
 
