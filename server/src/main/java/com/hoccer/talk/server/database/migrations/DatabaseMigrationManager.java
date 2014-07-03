@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DatabaseMigrationManager {
@@ -20,8 +21,8 @@ public class DatabaseMigrationManager {
     // List of known migrations in applicable order. This list should only ever be extended but not modified!
     // The ordering here is very important. Do not change the ordering on a whim!
     static {
-        /*migrationClasses.add(DatabaseMigrationDeliveryStates.class);
-        migrationClasses.add(DatabaseMigrationAttachmentStates.class);*/
+        migrationClasses.add(DatabaseMigrationDeliveryStates.class);
+        migrationClasses.add(DatabaseMigrationAttachmentStates.class);
     }
 
     private final List<IDatabaseMigration> mMigrations = new ArrayList<IDatabaseMigration>();
@@ -42,7 +43,9 @@ public class DatabaseMigrationManager {
         mAppliedMigrations = mDatabase.findDatabaseMigrations();
         LOG.info("migrations recorded in the database:");
         for (TalkDatabaseMigration appliedMigration : mAppliedMigrations) {
-            LOG.info(" * " + appliedMigration.getPosition() + ": '" + appliedMigration.getName() + "' executed at " + dateFormatter.format(appliedMigration.getTimeExecuted()));
+            LOG.info(" * " + appliedMigration.getPosition() + ": '" + appliedMigration.getName() +
+                    "' executed at " + dateFormatter.format(appliedMigration.getTimeExecutionFinished()) +
+                    " (took " + appliedMigration.getDuration(TimeUnit.SECONDS) +  "s)");
         }
 
         // check uniqueness of migration names in the loaded classes
@@ -83,28 +86,34 @@ public class DatabaseMigrationManager {
                 LOG.info("  * migration '" + migration.getName() + "' is already (marked as) executed - DOING NOTHING");
                 migrationsAlreadyExecuted.incrementAndGet();
             } else {
-                executeMigrationUp(migration, position);
+                try {
+                    executeMigrationUp(migration, position);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
                 migrationsExecuted.incrementAndGet();
             }
         }
         LOG.info("executeAllMigration - " + migrationsExecuted + " migrations executed - " + migrationsAlreadyExecuted + " were already executed - DONE");
     }
 
-    private void executeMigrationUp(IDatabaseMigration migration, int position) {
+    private void executeMigrationUp(IDatabaseMigration migration, int position) throws Exception {
         LOG.info("  * executing 'up' for migration '" + migration.getName() + "'...");
 
-        final Date now = new Date();
-        long startTime = System.currentTimeMillis();
+        final Date startDate = new Date();
         migration.up();
-        long endTime = System.currentTimeMillis();
-        long duration = endTime - startTime;
+        final Date finishedDate = new Date();
+
         final TalkDatabaseMigration dbMigration = new TalkDatabaseMigration();
         dbMigration.setName(migration.getName());
         dbMigration.setPosition(position);
-        dbMigration.setTimeExecuted(now);
+        dbMigration.setTimeExecutionStarted(startDate);
+        dbMigration.setTimeExecutionFinished(finishedDate);
         mDatabase.saveDatabaseMigration(dbMigration);
+
         migration.markAsExecuted();
-        LOG.info("  * ... done executing migration '" + migration.getName() + "' (at '" + dateFormatter.format(now) + "' - took '" + duration + "ms')");
+        LOG.info("  * ... done executing migration '" + migration.getName() + "' (at '" + dateFormatter.format(finishedDate) + "' - took " + dbMigration.getDuration(TimeUnit.SECONDS) + "s)");
     }
 
     private void validateMigrations() {

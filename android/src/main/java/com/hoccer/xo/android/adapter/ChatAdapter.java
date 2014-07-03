@@ -57,8 +57,8 @@ public class
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
-        mContact = contact;
         mListView = listView;
+        mContact = contact;
 
         initialize();
     }
@@ -237,6 +237,12 @@ public class
                 mListView.smoothScrollToPosition(getCount() - 1);
             }
         }
+    }
+
+    @Override
+    public void onReloadRequest() {
+        super.onReloadRequest();
+        notifyDataSetChanged();
     }
 
     @Override

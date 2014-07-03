@@ -2,6 +2,7 @@ package com.hoccer.xo.android.fragment;
 
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.activity.NearbyHistoryMessagingActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
@@ -27,6 +28,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Fragment that shows a list of contacts
@@ -92,6 +94,9 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         if (object instanceof TalkClientContact) {
             MenuInflater inflater = getActivity().getMenuInflater();
             inflater.inflate(R.menu.context_menu_contacts, menu);
+        } else if(object instanceof String) {
+            MenuInflater inflater = getActivity().getMenuInflater();
+            inflater.inflate(R.menu.context_menu_contacts, menu);
         }
     }
 
@@ -100,11 +105,19 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case R.id.menu_clear_conversation:
-                TalkClientContact contact = (TalkClientContact) mAdapter.getItem(info.position);
-                clearConversationForContact(contact);
+                deleteChatHistoryAt(info.position);
                 return true;
             default:
                 return super.onContextItemSelected(item);
+        }
+    }
+
+    private void deleteChatHistoryAt(int position) {
+        Object item = mAdapter.getItem(position);
+        if(item instanceof TalkClientContact) {
+            clearConversationForContact((TalkClientContact) item);
+        } else if(item instanceof String) {
+            clearNearbyHistory();
         }
     }
 
@@ -114,6 +127,19 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
             mAdapter.notifyDataSetChanged();
         } catch (SQLException e) {
             LOG.error("SQLException while clearing conversation with contact " + contact.getClientContactId(), e);
+        }
+    }
+
+    private void clearNearbyHistory() {
+        try {
+            List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
+            for(TalkClientMessage message : messages) {
+                message.markAsDeleted();
+                mDatabase.saveClientMessage(message);
+            }
+            mAdapter.notifyDataSetChanged();
+        } catch (SQLException e) {
+            LOG.error("SQLException while clearing nearby history", e);
         }
     }
 

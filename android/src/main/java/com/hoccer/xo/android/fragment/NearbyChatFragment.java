@@ -63,6 +63,7 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
     public void onResume() {
         super.onResume();
         showPlaceholder();
+        updateViews();
     }
 
     @Override
@@ -107,26 +108,28 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
             if (mActivity == null) {
                 return;
             }
-            final List<TalkClientContact> nearbyGroups = getXoDatabase().findAllNearbyGroups();
+
+            final TalkClientContact nearbyGroup = getXoActivity().getXoClient().getCurrentNearbyGroup();
             final List<TalkClientContact> allNearbyContacts = getXoDatabase().findAllNearbyContacts();
-            if (nearbyGroups.size() > 0) {
+            if (nearbyGroup != null) {
                 if (mNearbyAdapter == null) {
-                    mNearbyAdapter = new ChatAdapter(mList, getXoActivity(), nearbyGroups.get(0));
+                    mNearbyAdapter = new ChatAdapter(mList, getXoActivity(),
+                            nearbyGroup);
                     mNearbyAdapter.onCreate();
-                    mActivity.runOnUiThread(new Runnable() {
+                    mList.post(new Runnable() {
                         @Override
                         public void run() {
-                            mList.setAdapter(mNearbyAdapter);                     }
+                            mList.setAdapter(mNearbyAdapter);
+                        }
                     });
                 }
                 mNearbyAdapter.onResume();
-                mActivity.runOnUiThread(new Runnable() {
+                mNearbyAdapter.requestReload();
+                mCompositionFragment.setContact(nearbyGroup);
+                runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         hidePlaceholder();
-                        mNearbyAdapter.requestReload();
-                        mNearbyAdapter.notifyDataSetChanged();
-                        mCompositionFragment.converseWithContact(nearbyGroups.get(0));
                         mUserCountText.setText(mActivity.getResources().getString(
                                 R.string.nearby_info_usercount, allNearbyContacts.size() - 1));
                         mNearbyInfoContainer.setOnClickListener(new View.OnClickListener() {

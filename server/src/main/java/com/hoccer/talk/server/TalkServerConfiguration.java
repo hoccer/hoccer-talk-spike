@@ -47,9 +47,18 @@ public class TalkServerConfiguration {
         DATABASE_BACKEND(PROPERTY_PREFIX + ".db.backend",
                 PropertyTypes.STRING,
                 "jongo"),
+        JONGO_HOST(PROPERTY_PREFIX + ".jongo.host",
+                PropertyTypes.STRING,
+                "localhost"),
         JONGO_DATABASE(PROPERTY_PREFIX + ".jongo.db",
                 PropertyTypes.STRING,
                 "talk"),
+        JONGO_CONNECTIONS_PER_HOST(PROPERTY_PREFIX + ".jongo.connectionsPerHost",
+                PropertyTypes.INTEGER,
+                10),
+        JONGO_MAX_WAIT_TIME(PROPERTY_PREFIX + ".jongo.maxWaitTime",
+                PropertyTypes.INTEGER,
+                5 * 1000), // in milliseconds (5 seconds)
         // PUSH GENERIC
         PUSH_RATE_LIMIT(PROPERTY_PREFIX + ".push.rateLimit",
                 PropertyTypes.INTEGER,
@@ -168,7 +177,10 @@ public class TalkServerConfiguration {
                         MessageFormat.format("\n   * listen port:                        {0}", Long.toString(getListenPort())) +
                         "\n - Database Configuration:" +
                         MessageFormat.format("\n   * database backend:                   ''{0}''", this.getDatabaseBackend()) +
+                        MessageFormat.format("\n   * jongo host:                         ''{0}''", this.getJongoHost()) +
                         MessageFormat.format("\n   * jongo database:                     ''{0}''", this.getJongoDb()) +
+                        MessageFormat.format("\n   * jongo connections/host:             {0}", this.getJongoConnectionsPerHost()) +
+                        MessageFormat.format("\n   * jongo max wait time (in ms):        {0}", this.getJongoMaxWaitTime()) +
                         "\n - Push Configuration:" +
                         MessageFormat.format("\n   * push rate limit (in milli-seconds): {0}", Long.toString(this.getPushRateLimit())) +
                         "\n   - APNS:" +
@@ -227,6 +239,18 @@ public class TalkServerConfiguration {
 
     public String getJongoDb() {
         return (String) ConfigurableProperties.JONGO_DATABASE.value;
+    }
+
+    public int getJongoConnectionsPerHost() {
+        return (Integer) ConfigurableProperties.JONGO_CONNECTIONS_PER_HOST.value;
+    }
+
+    public int getJongoMaxWaitTime() {
+        return (Integer) ConfigurableProperties.JONGO_MAX_WAIT_TIME.value;
+    }
+
+    public String getJongoHost() {
+        return (String) ConfigurableProperties.JONGO_HOST.value;
     }
 
     public int getPushRateLimit() {
