@@ -1,14 +1,12 @@
 package com.hoccer.xo.android.adapter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import com.hoccer.talk.client.IXoTransferListener;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -18,7 +16,6 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.view.AudioAttachmentView;
-import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -30,7 +27,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
     private final Activity mActivity;
-    private List<AudioAttachmentItem> mAudioAttachmentItems = new ArrayList<AudioAttachmentItem>();
+    private List<AudioAttachmentItem> mAttachmentItems = new ArrayList<AudioAttachmentItem>();
 
     private String mContentMediaType;
     private int mConversationContactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
@@ -55,12 +52,12 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         setConversationContactId(pConversationContactId);
     }
 
-    public List<AudioAttachmentItem> getAudioAttachmentItems() {
-        return mAudioAttachmentItems;
+    public List<AudioAttachmentItem> getAttachmentItems() {
+        return mAttachmentItems;
     }
 
-    public void setAudioAttachmentItems(List<AudioAttachmentItem> items) {
-        mAudioAttachmentItems.addAll(items);
+    public void setAttachmentItems(List<AudioAttachmentItem> items) {
+        mAttachmentItems.addAll(items);
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -75,12 +72,12 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     @Override
     public int getCount() {
-        return mAudioAttachmentItems.size();
+        return mAttachmentItems.size();
     }
 
     @Override
     public AudioAttachmentItem getItem(int position) {
-        return mAudioAttachmentItems.get(position);
+        return mAttachmentItems.get(position);
     }
 
     @Override
@@ -90,9 +87,9 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (mAudioAttachmentItems.get(position) == null) {
-            mAudioAttachmentItems.remove(position);
-            if (mAudioAttachmentItems.size() <= position) {
+        if (mAttachmentItems.get(position) == null) {
+            mAttachmentItems.remove(position);
+            if (mAttachmentItems.size() <= position) {
                 return null;
             }
             return getView(position, convertView, parent);
@@ -103,7 +100,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
             audioRowView = new AudioAttachmentView(mActivity);
         }
 
-        audioRowView.setMediaItem(mAudioAttachmentItems.get(position));
+        audioRowView.setMediaItem(mAttachmentItems.get(position));
         audioRowView.updatePlayPauseView();
 
         if (mSelections != null) {
@@ -152,7 +149,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
         if (download.getContentMediaType().equals(this.mContentMediaType)) {
             if ((mConversationContactId == MediaPlayerService.UNDEFINED_CONTACT_ID) || (mConversationContactId == contactId)) {
-                mAudioAttachmentItems.add(0, AudioAttachmentItem.create(download.getContentDataUrl(), download, true));
+                mAttachmentItems.add(0, AudioAttachmentItem.create(download.getContentDataUrl(), download, true));
 
                 mActivity.runOnUiThread(new Runnable() {
                     @Override
@@ -194,7 +191,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     public void removeItem(int pos) {
-        mAudioAttachmentItems.remove(pos);
+        mAttachmentItems.remove(pos);
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -204,9 +201,9 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     public boolean removeItem(AudioAttachmentItem item) {
-        boolean isRemovable = mAudioAttachmentItems.contains(item);
+        boolean isRemovable = mAttachmentItems.contains(item);
         if (isRemovable) {
-            mAudioAttachmentItems.remove(mAudioAttachmentItems.indexOf(item));
+            mAttachmentItems.remove(mAttachmentItems.indexOf(item));
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -218,7 +215,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     public void addItem(AudioAttachmentItem item) {
-        mAudioAttachmentItems.add(item);
+        mAttachmentItems.add(item);
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -228,7 +225,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     public void clear() {
-        mAudioAttachmentItems.clear();
+        mAttachmentItems.clear();
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -259,7 +256,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
                     if (!isRecordedAudio(download.getFileName())) {
                         AudioAttachmentItem newItem = AudioAttachmentItem.create(download.getContentDataUrl(), download, true);
                         if (newItem != null) {
-                            mAudioAttachmentItems.add(newItem);
+                            mAttachmentItems.add(newItem);
                         }
                     }
                 }
@@ -269,6 +266,54 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         }
     }
 
+    public void loadAttachmentsFromCollection(int collectionId) {
+        try {
+            List<TalkClientDownload> downloads;
+            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+
+            downloads = database.findClientDownloadByCollectionId(collectionId);
+            createAttachmentItemsFromTalkClientDownloads(downloads);
+
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+    }
+
+    public void loadAttachmentsFromContact(int contactId, String contentMediaType) {
+        try {
+            List<TalkClientDownload> downloads;
+            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+
+            if (contentMediaType != null) {
+                if (contactId != MediaPlayerService.UNDEFINED_CONTACT_ID) {
+                    downloads = database.findClientDownloadByMediaTypeAndConversationContactId(ContentMediaType.AUDIO, contactId);
+                } else {
+                    downloads = database.findClientDownloadByMediaType(contentMediaType);
+                }
+            } else {
+                downloads = database.findAllClientDownloads();
+            }
+
+            createAttachmentItemsFromTalkClientDownloads(downloads);
+
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+    }
+
+    private void createAttachmentItemsFromTalkClientDownloads(List<TalkClientDownload> downloads) {
+        if (downloads != null) {
+            for (TalkClientDownload download : downloads) {
+                if (!isRecordedAudio(download.getFileName())) {
+                    // TODO: differentiate between generic and special attachment types
+                    AudioAttachmentItem newItem = AudioAttachmentItem.create(download.getContentDataUrl(), download, true);
+                    if (newItem != null) {
+                        mAttachmentItems.add(newItem);
+                    }
+                }
+            }
+        }
+    }
     private void updateCheckedItems() {
         SparseBooleanArray updatedSelection = new SparseBooleanArray(mSelections.size());
 

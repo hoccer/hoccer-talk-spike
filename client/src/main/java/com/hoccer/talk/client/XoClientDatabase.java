@@ -490,6 +490,20 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return downloads;
     }
 
+    public List<TalkClientDownload> findClientDownloadByCollectionId(int collectionId) throws SQLException {
+        List<TalkClientDownload> downloads = new ArrayList<TalkClientDownload>();
+        List<TalkClientMediaCollectionRelation> relations = new ArrayList<TalkClientMediaCollectionRelation>();
+
+        relations = mMediaCollectionRelations.queryBuilder()
+                .where().eq("collection_id", collectionId)
+                .query();
+        for (TalkClientMediaCollectionRelation relation : relations) {
+            downloads.add(relation.getItem());
+        }
+
+        return downloads;
+    }
+
     public TalkClientMessage findClientMessageByTalkClientDownloadId(int attachmentDownloadId) throws SQLException {
         List<TalkClientMessage> messages = mClientMessages.queryForEq("attachmentDownload_id", attachmentDownloadId);
         int numberOfMessages = messages.size();
