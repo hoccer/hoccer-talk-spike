@@ -169,8 +169,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         mAddAttachmentButton.setImageResource(imageResource);
     }
 
-    public void converseWithContact(TalkClientContact contact) {
-        LOG.debug("converseWithContact(" + contact.getClientContactId() + ")");
+    public void setContact(TalkClientContact contact) {
+        LOG.debug("setContact(" + contact.getClientContactId() + ")");
         mContact = contact;
         configureMotionInterpreterForContact(mContact);
         runOnUiThread(new Runnable() {

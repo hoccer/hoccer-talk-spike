@@ -57,8 +57,8 @@ public class
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
-        mContact = contact;
         mListView = listView;
+        mContact = contact;
 
         initialize();
     }
