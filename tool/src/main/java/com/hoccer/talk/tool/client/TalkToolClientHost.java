@@ -77,6 +77,71 @@ public class TalkToolClientHost implements IXoClientHost {
     }
 
     @Override
+    public boolean getUseBsonProtocol() {
+        return false;
+    }
+
+    @Override
+    public String getBsonProtocolString() {
+        return null;
+    }
+
+    @Override
+    public String getJsonProtocolString() {
+        return null;
+    }
+
+    @Override
+    public int getTransferThreads() {
+        return 0;
+    }
+
+    @Override
+    public int getConnectTimeout() {
+        return 0;
+    }
+
+    @Override
+    public int getIdleTimeout() {
+        return 0;
+    }
+
+    @Override
+    public boolean getKeepAliveEnabled() {
+        return false;
+    }
+
+    @Override
+    public int getKeepAliveInterval() {
+        return 0;
+    }
+
+    @Override
+    public int getConnectionIdleTimeout() {
+        return 0;
+    }
+
+    @Override
+    public float getReconnectBackoffFixedDelay() {
+        return 0;
+    }
+
+    @Override
+    public float getReconnectBackoffVariableFactor() {
+        return 0;
+    }
+
+    @Override
+    public float getReconnectBackoffVariableMaximum() {
+        return 0;
+    }
+
+    @Override
+    public String getUrlScheme() {
+        return null;
+    }
+
+    @Override
     public String getClientName() {
         return null;
     }
