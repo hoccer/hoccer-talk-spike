@@ -108,6 +108,12 @@ public class
         }
     }
 
+    public void setContact(TalkClientContact contact) {
+        mContact = contact;
+        initialize();
+        requestReload();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -219,7 +225,7 @@ public class
         }
     }
 
-    private void markMessageAsSeen(final TalkClientMessage message) {
+    protected void markMessageAsSeen(final TalkClientMessage message) {
         mActivity.getBackgroundExecutor().execute(new Runnable() {
             @Override
             public void run() {
