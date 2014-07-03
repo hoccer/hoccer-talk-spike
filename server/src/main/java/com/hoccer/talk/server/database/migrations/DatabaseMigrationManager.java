@@ -21,8 +21,8 @@ public class DatabaseMigrationManager {
     // List of known migrations in applicable order. This list should only ever be extended but not modified!
     // The ordering here is very important. Do not change the ordering on a whim!
     static {
-        /*migrationClasses.add(DatabaseMigrationDeliveryStates.class);
-        migrationClasses.add(DatabaseMigrationAttachmentStates.class);*/
+        migrationClasses.add(DatabaseMigrationDeliveryStates.class);
+        migrationClasses.add(DatabaseMigrationAttachmentStates.class);
     }
 
     private final List<IDatabaseMigration> mMigrations = new ArrayList<IDatabaseMigration>();
