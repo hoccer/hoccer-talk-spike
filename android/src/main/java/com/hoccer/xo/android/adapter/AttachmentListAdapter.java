@@ -34,15 +34,15 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     private SparseBooleanArray mSelections;
 
-    public AttachmentListAdapter(XoActivity pXoContext) {
+    public AttachmentListAdapter(Activity pXoContext) {
         this(pXoContext, null, MediaPlayerService.UNDEFINED_CONTACT_ID);
     }
 
-    public AttachmentListAdapter(XoActivity pXoContext, String pContentMediaType) {
+    public AttachmentListAdapter(Activity pXoContext, String pContentMediaType) {
         this(pXoContext, pContentMediaType, MediaPlayerService.UNDEFINED_CONTACT_ID);
     }
 
-    public AttachmentListAdapter(XoActivity pXoContext, int pConversationContactId) {
+    public AttachmentListAdapter(Activity pXoContext, int pConversationContactId) {
         this(pXoContext, null, pConversationContactId);
     }
 
@@ -97,7 +97,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
         AudioAttachmentView audioRowView = (AudioAttachmentView) convertView;
         if (audioRowView == null) {
-            audioRowView = new AudioAttachmentView(mActivity);
+            audioRowView = new AudioAttachmentView(parent.getContext());
         }
 
         audioRowView.setMediaItem(mAttachmentItems.get(position));
