@@ -179,8 +179,8 @@ public class TalkServerConfiguration {
                         MessageFormat.format("\n   * database backend:                   ''{0}''", this.getDatabaseBackend()) +
                         MessageFormat.format("\n   * jongo host:                         ''{0}''", this.getJongoHost()) +
                         MessageFormat.format("\n   * jongo database:                     ''{0}''", this.getJongoDb()) +
-                        MessageFormat.format("\n   * jongo connections/host:             ''{0}''", this.getJongoConnectionsPerHost()) +
-                        MessageFormat.format("\n   * jongo max wait time:                ''{0}''", this.getJongoMaxWaitTime()) +
+                        MessageFormat.format("\n   * jongo connections/host:             {0}", this.getJongoConnectionsPerHost()) +
+                        MessageFormat.format("\n   * jongo max wait time (in ms):        {0}", this.getJongoMaxWaitTime()) +
                         "\n - Push Configuration:" +
                         MessageFormat.format("\n   * push rate limit (in milli-seconds): {0}", Long.toString(this.getPushRateLimit())) +
                         "\n   - APNS:" +
