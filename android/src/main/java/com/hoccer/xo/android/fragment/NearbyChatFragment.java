@@ -112,30 +112,22 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
             final TalkClientContact nearbyGroup = getXoActivity().getXoClient().getCurrentNearbyGroup();
             final List<TalkClientContact> allNearbyContacts = getXoDatabase().findAllNearbyContacts();
             if (nearbyGroup != null) {
-                if (mNearbyAdapter == null) {
-                    mNearbyAdapter = new ChatAdapter(mList, getXoActivity(),
-                            nearbyGroup);
-                    mNearbyAdapter.onCreate();
-                    mList.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mList.setAdapter(mNearbyAdapter);
-                        }
-                    });
-                }
-                mNearbyAdapter.onResume();
-                mNearbyAdapter.requestReload();
+                mNearbyAdapter = new ChatAdapter(mList, getXoActivity(),
+                        nearbyGroup);
+                mNearbyAdapter.onCreate();
                 mCompositionFragment.setContact(nearbyGroup);
-                runOnUiThread(new Runnable() {
+                mList.post(new Runnable() {
                     @Override
                     public void run() {
+                        mList.setAdapter(mNearbyAdapter);
                         hidePlaceholder();
                         mUserCountText.setText(mActivity.getResources().getString(
                                 R.string.nearby_info_usercount, allNearbyContacts.size() - 1));
                         mNearbyInfoContainer.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                Intent intent = new Intent(mActivity, NearbyContactsActivity.class);
+                                Intent intent = new Intent(mActivity,
+                                        NearbyContactsActivity.class);
                                 mActivity.startActivity(intent);
                             }
                         });
