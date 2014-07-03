@@ -108,6 +108,12 @@ public class
         }
     }
 
+    public void setContact(TalkClientContact contact) {
+        mContact = contact;
+        initialize();
+        requestReload();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
