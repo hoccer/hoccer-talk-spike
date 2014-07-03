@@ -8,6 +8,7 @@ import com.hoccer.talk.filecache.CacheConfiguration;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.hoccer.talk.server.database.JongoDatabase;
 import com.hoccer.talk.server.rpc.TalkRpcHandler;
+import com.hoccer.talk.server.update.UpdateAgent;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.table.TableUtils;
 import com.mongodb.MongoClient;
@@ -141,7 +142,7 @@ public class IntegrationTest {
 
         // For Server
         // Setting the Loglevel of specific logger explicitely
-        //org.apache.log4j.Logger.getLogger(UpdateAgent.class).setLevel(Level.DEBUG);
+        org.apache.log4j.Logger.getLogger(UpdateAgent.class).setLevel(Level.DEBUG);
         org.apache.log4j.Logger.getLogger(JongoDatabase.class).setLevel(Level.DEBUG);
         org.apache.log4j.Logger.getLogger(TalkRpcHandler.class).setLevel(Level.DEBUG);
 

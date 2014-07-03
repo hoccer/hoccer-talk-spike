@@ -27,6 +27,7 @@
     <string name="menu_about">About Hoccer XO</string>
     <string name="menu_reconnect">Reconnect</string>
     <string name="menu_quit">Quit</string>
+    <string name="menu_clear_conversation">Clear conversation</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_category_friends">Friends</string>
@@ -92,6 +93,14 @@
     <string name="profile_user_unblock_button">Unblock this user</string>
     <string name="profile_user_depair_button">Depair this user</string>
     <string name="profile_user_delete_button">Delete this user</string>
+
+    <string name="friend_request_add_as_friend">Add as a friend</string>
+    <string name="friend_request_cancel_invitation">Cancel invitation</string>
+    <string name="friend_request_accept_invitation">Accept invitation</string>
+    <string name="friend_request_decline_invitation">Decline invitation</string>
+    <string name="friend_request_invited_me_description">wants to be your friend.</string>
+    <string name="friend_request_invited_by_you_description">has received an invitation from you.</string>
+
     <string name="group_name_hint">Group name</string>
     <string name="profile_group_members_title">Members</string>
     <string name="profile_group_create_button">Create group</string>
@@ -214,6 +223,7 @@
     <string name="pref_auto_downloads_mobile">On mobile networks</string>
     <string name="pref_auto_download_wifi">On wireless networks</string>
     <string name="pref_auto_download">Automatic downloads</string>
+    <string name="pref_confirm_messages_seen">Confirm seen messages</string>
     <string name="pref_credentials">Credentials</string>
     <string name="pref_export_credentials">Export credentials</string>
     <string name="pref_import_credentials">Import credentials</string>
@@ -260,6 +270,7 @@
 
     <string-array name="tab_names">
         <item>CHATS</item>
+        <item>INVITATIONS</item>
         <item>NEARBY</item>
     </string-array>
 
@@ -268,6 +279,15 @@
     <string name="placeholder_nearby_text">Waiting for others nearby...</string>
     <string name="actionbar_default_title">Hoccer</string>
     <string name="content_audio_caption">Music</string>
+    <string name="nearby_info_usercount">%1$d Users are Nearby</string>
+    <string name="profile_nickname_text">Nickname</string>
+    <string name="seen_text">seen</string>
+    <string name="nearby_text">all nearby</string>
+    <string name="error_send_message">Could not send message.</string>
+    <string name="pref_privacy_title">Privacy</string>
+    <string name="nearby_saved">Nearby saved</string>
+    <string name="error_send_message_empty_group">There is nobody in this group.</string>
+    <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
 
     <string name="about_advert_text">Hoccer XO \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. Hoccer sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. Hoccer XO provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s</string>
