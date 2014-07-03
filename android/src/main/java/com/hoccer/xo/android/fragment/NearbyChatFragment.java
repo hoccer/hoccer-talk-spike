@@ -123,7 +123,7 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
                         mNearbyAdapter.onResume();
                         mNearbyAdapter.requestReload();
                         mNearbyAdapter.notifyDataSetChanged();
-                        mCompositionFragment.converseWithContact(nearbyGroups.get(0));
+                        mCompositionFragment.setContact(nearbyGroups.get(0));
                         mUserCountText.setText(mActivity.getResources().getString(
                                 R.string.nearby_info_usercount, allNearbyContacts.size() - 1));
                         mNearbyInfoContainer.setOnClickListener(new View.OnClickListener() {
