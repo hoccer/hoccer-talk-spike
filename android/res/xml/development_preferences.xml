@@ -88,14 +88,15 @@
 
         <ListPreference
                 android:key="preference_server_uri"
-                android:entries="@array/servers"
-                android:entryValues="@array/servers"
-                android:title="Select Server URI"/>
+                android:entries="@array/servers_development"
+                android:entryValues="@array/servers_development"
+                android:title="Select Server URI"
+                android:defaultValue="wss://talkserver.talk.hoccer.de:8443/"/>
 
         <ListPreference
                 android:key="preference_database"
-                android:entries="@array/databases"
-                android:entryValues="@array/database_values"
+                android:entries="@array/databases_development"
+                android:entryValues="@array/database_values_development"
                 android:title="@string/preference_database_title"
                 android:defaultValue="hoccer-talk.db"/>
 

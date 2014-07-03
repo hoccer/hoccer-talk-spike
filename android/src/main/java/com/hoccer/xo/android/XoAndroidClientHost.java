@@ -2,12 +2,14 @@ package com.hoccer.xo.android;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
 import android.os.Build;
+import android.util.TypedValue;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
+import com.hoccer.xo.release.R;
+import com.sun.tools.javac.util.Log;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import android.content.Context;
@@ -19,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -35,11 +36,9 @@ public class XoAndroidClientHost implements IXoClientHost {
 
     Context mContext = null;
     PackageInfo mPackageInfo = null;
-    Properties mClientConfigProperties = null;
 
     public XoAndroidClientHost(Context context) {
         mContext = context;
-        loadClientConfigProperties();
         try {
             PackageManager packageManager = mContext.getPackageManager();
             if (packageManager != null) {
@@ -91,16 +90,74 @@ public class XoAndroidClientHost implements IXoClientHost {
     }
 
     @Override
-    public void loadClientConfigProperties() {
+    public boolean getUseBsonProtocol() {
+        return mContext.getResources().getBoolean(R.bool.use_bson_protocol);
+    }
 
-        mClientConfigProperties = new Properties();
-        try {
-            InputStream inputStream = mContext.getAssets().open("clientConfig.properties");
-            mClientConfigProperties.load(inputStream);
+    @Override
+    public String getBsonProtocolString() {
+        return mContext.getResources().getString(R.string.protocol_bson);
+    }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public String getJsonProtocolString() {
+        return  mContext.getResources().getString(R.string.protocol_json);
+    }
+
+    @Override
+    public int getTransferThreads() {
+        return  mContext.getResources().getInteger(R.integer.transfer_threads);
+    }
+
+    @Override
+    public int getConnectTimeout() {
+        return mContext.getResources().getInteger(R.integer.connect_timeout);
+    }
+
+    @Override
+    public int getIdleTimeout() {
+        return mContext.getResources().getInteger(R.integer.idle_timeout);
+    }
+
+    @Override
+    public boolean getKeepAliveEnabled() {
+        return mContext.getResources().getBoolean(R.bool.keep_alive_enabled);
+    }
+
+    @Override
+    public int getKeepAliveInterval() {
+        return mContext.getResources().getInteger(R.integer.keep_alive_interval);
+    }
+
+    @Override
+    public int getConnectionIdleTimeout() {
+        return mContext.getResources().getInteger(R.integer.connection_idle_timeout);
+    }
+
+    @Override
+    public float getReconnectBackoffFixedDelay() {
+        TypedValue outValue = new TypedValue();
+        mContext.getResources().getValue(R.dimen.reconnect_backoff_fixed_delay, outValue, true);
+        return outValue.getFloat();
+    }
+
+    @Override
+    public float getReconnectBackoffVariableFactor() {
+        TypedValue outValue = new TypedValue();
+        mContext.getResources().getValue(R.dimen.reconnect_backoff_variable_factor, outValue, true);
+        return outValue.getFloat();
+    }
+
+    @Override
+    public float getReconnectBackoffVariableMaximum() {
+        TypedValue outValue = new TypedValue();
+        mContext.getResources().getValue(R.dimen.reconnect_backoff_variable_maximum, outValue, true);
+        return outValue.getFloat();
+    }
+
+    @Override
+    public String getUrlScheme() {
+        return mContext.getResources().getString(R.string.url_scheme);
     }
 
     @Override
@@ -172,7 +229,18 @@ public class XoAndroidClientHost implements IXoClientHost {
 
     @Override
     public String getServerUri() {
-        return (XoConfiguration.DEVELOPMENT_MODE_ENABLED) ?  mClientConfigProperties.getProperty("serverDebugUri") : mClientConfigProperties.getProperty("serverUri");
+        String serverUri;
+        try {
+            if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
+                serverUri = PreferenceManager.getDefaultSharedPreferences(mContext).getString("preference_server_uri", "");
+            } else {
+                serverUri = mContext.getResources().getStringArray(R.array.servers_production)[0];
+            }
+        }
+        catch(Exception e){
+            serverUri = "server url missing";
+        }
+        return serverUri;
     }
 
     @Override

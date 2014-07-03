@@ -236,14 +236,10 @@ public class XoClientService extends Service {
         String uriString = mPreferences.getString("preference_service_uri", "");
         if (uriString.isEmpty()) {
 
-            Properties clientConfigProperties = new Properties();
             try {
-                AssetManager assetManager = getAssets();
-                InputStream inputStream = assetManager.open("clientConfig.properties");
-                clientConfigProperties.load(inputStream);
-                uriString = clientConfigProperties.getProperty("serverUri");
+                uriString = getResources().getStringArray(R.array.servers_production)[0];
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
