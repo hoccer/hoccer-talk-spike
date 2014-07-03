@@ -183,6 +183,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     private void updateSeenStatus(View view) {
         TextView messageInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
+        if(mMessage.getConversationContact().isGroup()) {
+            messageInfo.setVisibility(View.GONE);
+            return;
+        }
 
         String currentState = mMessage.getOutgoingDelivery().getState();
         if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
