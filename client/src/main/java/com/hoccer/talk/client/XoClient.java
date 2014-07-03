@@ -2107,9 +2107,19 @@ public class XoClient implements JsonRpcConnection.Listener {
         }
     }
 
+    public TalkClientContact getCurrentNearbyGroup() {
+        try {
+            return mDatabase.findContactByGroupId(mEnvironmentGroupId, false);
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+        return null;
+    }
+
 
     public void sendDestroyEnvironment(final String type) {
         if (this.getState() == STATE_ACTIVE) {
+            mEnvironmentGroupId = null;
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
