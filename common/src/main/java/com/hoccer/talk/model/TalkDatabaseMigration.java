@@ -1,9 +1,11 @@
 package com.hoccer.talk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * These objects represent migrations applied to the database.
@@ -25,9 +27,13 @@ public class TalkDatabaseMigration {
     @DatabaseField(unique = true, canBeNull = false)
     int position;
 
-    /** Marks the (server) time when the execution of the migration happened */
+    /** Marks the (server) time when the execution of the migration started */
     @DatabaseField(canBeNull = false)
-    Date timeExecuted;
+    Date timeExecutionStarted;
+
+    /** Marks the (server) time when the execution of the mihration finished */
+    @DatabaseField(canBeNull = false)
+    Date timeExecutionFinished;
 
     public String getName() {
         return name;
@@ -45,11 +51,26 @@ public class TalkDatabaseMigration {
         return position;
     }
 
-    public Date getTimeExecuted() {
-        return timeExecuted;
+    public Date getTimeExecutionStarted() {
+        return timeExecutionStarted;
     }
 
-    public void setTimeExecuted(Date executionTime) {
-        this.timeExecuted = executionTime;
+    public void setTimeExecutionStarted(Date pExecutionTimeStarted) {
+        this.timeExecutionStarted = pExecutionTimeStarted;
+    }
+
+    public Date getTimeExecutionFinished() {
+        return timeExecutionFinished;
+    }
+
+    public void setTimeExecutionFinished(Date pExecutionTimeFinished) {
+        this.timeExecutionFinished = pExecutionTimeFinished;
+    }
+
+    @JsonIgnore
+    public long getDuration(TimeUnit pTimeUnit) {
+        return pTimeUnit.convert(
+                (this.timeExecutionFinished.getTime() - this.timeExecutionStarted.getTime()),
+                TimeUnit.MILLISECONDS); // getTime() returns milliseconds
     }
 }
