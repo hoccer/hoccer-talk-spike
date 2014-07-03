@@ -2,6 +2,7 @@ package com.hoccer.talk.client.model;
 
 import com.hoccer.talk.client.IXoDatabaseRefreshListener;
 import com.hoccer.talk.client.IXoMediaCollectionDatabase;
+import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.log4j.Logger;
@@ -136,7 +137,8 @@ public class TalkClientMediaCollection {
     private boolean createRelation(TalkClientDownload item, int index) {
         try {
             // increment index of all items with same or higher index
-            List<TalkClientMediaCollectionRelation> relations = mDatabase.getMediaCollectionRelationDao().queryBuilder()
+            Dao<TalkClientMediaCollectionRelation, Integer> relationDao = mDatabase.getMediaCollectionRelationDao();
+            List<TalkClientMediaCollectionRelation> relations = relationDao.queryBuilder()
                     .where()
                     .not()
                     .lt("index", index)
@@ -147,11 +149,11 @@ public class TalkClientMediaCollection {
             for(int i = 0; i < relations.size(); i++) {
                 TalkClientMediaCollectionRelation relation = relations.get(i);
                 relation.setIndex(relation.getIndex() + 1);
-                mDatabase.getMediaCollectionRelationDao().update(relation);
+                relationDao.update(relation);
             }
 
             TalkClientMediaCollectionRelation newRelation = new TalkClientMediaCollectionRelation(mCollectionId, item, index);
-            mDatabase.getMediaCollectionRelationDao().create(newRelation);
+            relationDao.create(newRelation);
         } catch(SQLException e) {
             e.printStackTrace();
             return false;
@@ -161,7 +163,8 @@ public class TalkClientMediaCollection {
 
     private boolean removeRelation(int index) {
         try {
-            TalkClientMediaCollectionRelation relationToDelete = mDatabase.getMediaCollectionRelationDao().queryBuilder()
+            Dao<TalkClientMediaCollectionRelation, Integer> relationDao = mDatabase.getMediaCollectionRelationDao();
+            TalkClientMediaCollectionRelation relationToDelete = relationDao.queryBuilder()
                     .where()
                     .eq("collection_id", mCollectionId)
                     .and()
@@ -169,10 +172,10 @@ public class TalkClientMediaCollection {
                     .queryForFirst();
 
             if(relationToDelete != null) {
-                mDatabase.getMediaCollectionRelationDao().delete(relationToDelete);
+                relationDao.delete(relationToDelete);
 
                 // decrement index of all items with higher index
-                List<TalkClientMediaCollectionRelation> relations = mDatabase.getMediaCollectionRelationDao().queryBuilder()
+                List<TalkClientMediaCollectionRelation> relations = relationDao.queryBuilder()
                         .where()
                         .not()
                         .le("index", index)
@@ -183,7 +186,7 @@ public class TalkClientMediaCollection {
                 for (int i = 0; i < relations.size(); i++) {
                     TalkClientMediaCollectionRelation relation = relations.get(i);
                     relation.setIndex(relation.getIndex() - 1);
-                    mDatabase.getMediaCollectionRelationDao().update(relation);
+                    relationDao.update(relation);
                 }
             }
         } catch(SQLException e) {
