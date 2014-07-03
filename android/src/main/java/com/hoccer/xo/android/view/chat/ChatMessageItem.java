@@ -415,4 +415,15 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return mMessage != null ? mMessage.hashCode() : 0;
     }
 
+    public boolean isSeparator() {
+        return mMessage.getMessageId() != null &&  mMessage.getMessageId().equals("SEPARATOR");
+    }
+
+    public String getText() {
+        return mMessage.getText();
+    }
+
+    public int getConversationContactId() {
+        return mMessage.getConversationContact().getClientContactId();
+    }
 }

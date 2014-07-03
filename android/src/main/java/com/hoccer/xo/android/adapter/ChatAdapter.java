@@ -219,7 +219,7 @@ public class
         }
     }
 
-    private void markMessageAsSeen(final TalkClientMessage message) {
+    protected void markMessageAsSeen(final TalkClientMessage message) {
         mActivity.getBackgroundExecutor().execute(new Runnable() {
             @Override
             public void run() {

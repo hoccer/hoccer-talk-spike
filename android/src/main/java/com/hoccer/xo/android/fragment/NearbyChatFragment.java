@@ -113,7 +113,11 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
                 if (mNearbyAdapter == null) {
                     mNearbyAdapter = new ChatAdapter(mList, getXoActivity(), nearbyGroups.get(0));
                     mNearbyAdapter.onCreate();
-                    mList.setAdapter(mNearbyAdapter);
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mList.setAdapter(mNearbyAdapter);                     }
+                    });
                 }
                 mNearbyAdapter.onResume();
                 mActivity.runOnUiThread(new Runnable() {
