@@ -1,16 +1,9 @@
 package com.hoccer.xo.android;
 
-import com.hoccer.talk.client.XoClient;
-
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import org.apache.log4j.Layout;
 import org.apache.log4j.PatternLayout;
-
-import java.sql.SQLException;
-import java.util.Locale;
 
 /**
  * Static client configuration
@@ -30,9 +23,13 @@ public class XoConfiguration {
     public static final String INTERNAL_DOWNLOADS = "downloads";
     public static final String INTERNAL_UPLOADS = "uploads";
     public static final String INTERNAL_GENERATED = "generated";
+    public static final String INTERNAL_THUMBNAILS = "thumbnails";
 
     /* Enable or disable development settings in preferences */
     public static final boolean DEVELOPMENT_MODE_ENABLED = true;
+
+    /* true: log level = debug, log to sdcard activated*/
+    public static final boolean TESTING_MODE_ENABLED = false;
 
     /**
      * Background executor thread count
@@ -104,6 +101,18 @@ public class XoConfiguration {
         if (!sPreferences.contains("preference_keysize")) {
             SharedPreferences.Editor editor = sPreferences.edit();
             editor.putString("preference_keysize", "2048");
+            editor.commit();
+        }
+
+        if(TESTING_MODE_ENABLED) {
+            SharedPreferences.Editor editor = sPreferences.edit();
+            editor.putString("preference_log_level", "DEBUG");
+            editor.putBoolean("preference_log_sd", true);
+            editor.commit();
+        }
+        if(DEVELOPMENT_MODE_ENABLED) {
+            SharedPreferences.Editor editor = sPreferences.edit();
+            editor.putString("preference_log_level", "DEBUG");
             editor.commit();
         }
     }

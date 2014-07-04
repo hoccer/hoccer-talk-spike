@@ -1,17 +1,10 @@
 package com.hoccer.talk.model;
 
-import com.hoccer.talk.crypto.AESCryptor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import org.apache.commons.codec.binary.Base64;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -31,6 +24,7 @@ public class TalkMessage {
     public static final String FIELD_SENDER_ID   = "senderId";
     public static final String FIELD_BODY        = "body";
     public static final String FIELD_ATTACHMENT  = "attachment";
+    public static final String FIELD_ATTACHMENT_FILE_ID  = "attachmentFileId";
     public static final String FIELD_SHARED_KEY_ID  = "sharedKeyId";
 
     private String _id;
@@ -90,9 +84,17 @@ public class TalkMessage {
     @DatabaseField
     String signature;
 
-    /** Message body */
+    /** system message string, unused */
     @DatabaseField
     String system;
+
+    /** date of attachment upload starte */
+    @JsonIgnore @DatabaseField
+    Date attachmentUploadStarted;
+
+    /** date of attachment upload starte */
+    @JsonIgnore @DatabaseField
+    Date attachmentUploadFinished;
 
     public TalkMessage() {
     }
@@ -250,5 +252,25 @@ public class TalkMessage {
 
     public void setSystem(String system) {
         this.system = system;
+    }
+
+    @JsonIgnore
+    public Date getAttachmentUploadStarted() {
+        return attachmentUploadStarted;
+    }
+
+    @JsonIgnore
+    public void setAttachmentUploadStarted(Date attachmentUploadStarted) {
+        this.attachmentUploadStarted = attachmentUploadStarted;
+    }
+
+    @JsonIgnore
+    public Date getAttachmentUploadFinished() {
+        return attachmentUploadFinished;
+    }
+
+    @JsonIgnore
+    public void setAttachmentUploadFinished(Date attachmentUploadFinished) {
+        this.attachmentUploadFinished = attachmentUploadFinished;
     }
 }

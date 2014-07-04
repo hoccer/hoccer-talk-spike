@@ -58,22 +58,22 @@ public class TalkPresence {
 
     @JsonIgnore
     public boolean isBackground() {
-        return connectionStatus != null || connectionStatus.equals(CONN_STATUS_BACKGROUND);
+        return connectionStatus != null && connectionStatus.equals(CONN_STATUS_BACKGROUND);
     }
 
     @JsonIgnore
     public boolean isOnline() {
-        return (connectionStatus != null) || connectionStatus.equals(CONN_STATUS_ONLINE);
+        return (connectionStatus != null) && connectionStatus.equals(CONN_STATUS_ONLINE);
     }
 
     @JsonIgnore
     public boolean isTyping() {
-        return (connectionStatus != null) || connectionStatus.equals(CONN_STATUS_TYPING);
+        return (connectionStatus != null) && connectionStatus.equals(CONN_STATUS_TYPING);
     }
 
     @JsonIgnore
     public boolean isPresent() {
-        return (connectionStatus != null) || connectionStatus.equals(CONN_STATUS_ONLINE) || connectionStatus.equals(CONN_STATUS_TYPING);
+        return (connectionStatus != null) && (connectionStatus.equals(CONN_STATUS_ONLINE) || connectionStatus.equals(CONN_STATUS_TYPING));
     }
 
     @JsonIgnore

@@ -1,6 +1,7 @@
 package com.hoccer.talk.server;
 
 import com.hoccer.talk.model.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 import java.util.List;
@@ -28,6 +29,8 @@ public interface ITalkServerDatabase {
 
     public TalkMessage findMessageById(String messageId);
 
+    public List<TalkMessage> findMessagesWithAttachmentFileId(String fileId);
+
     public void deleteMessage(TalkMessage message);
 
     public void saveMessage(TalkMessage message);
@@ -36,13 +39,25 @@ public interface ITalkServerDatabase {
 
     public List<TalkDelivery> findDeliveriesInState(String state);
 
+    List<TalkDelivery> findAllDeliveries();
+
+    public List<TalkDelivery> findDeliveriesInStates(String[] states);
+
+    public List<TalkDelivery> findDeliveriesInStatesAndAttachmentStates(String[] states, String[] attachmentStates);
+
     public List<TalkDelivery> findDeliveriesForClient(String clientId);
 
     public List<TalkDelivery> findDeliveriesForClientInState(String clientId, String state);
 
+    public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates);
+
     public List<TalkDelivery> findDeliveriesFromClient(String clientId);
 
     public List<TalkDelivery> findDeliveriesFromClientInState(String clientId, String state);
+
+    public List<TalkDelivery> findDeliveriesFromClientInStates(String clientId, String[] states);
+
+    public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates);
 
     public List<TalkDelivery> findDeliveriesForMessage(String messageId);
 
@@ -76,10 +91,13 @@ public interface ITalkServerDatabase {
 
     public List<TalkRelationship> findRelationshipsForClientInState(String clientId, String state);
 
+    public List<TalkRelationship> findRelationshipsForClientInStates(String clientId, String[] states);
+
     public List<TalkRelationship> findRelationshipsByOtherClient(String other);
 
     public List<TalkRelationship> findRelationshipsChangedAfter(String client, Date lastKnown);
 
+    @Nullable
     public TalkRelationship findRelationshipBetween(String client, String otherClient);
 
     public void deleteRelationship(TalkRelationship relationship);
@@ -125,4 +143,16 @@ public interface ITalkServerDatabase {
     public boolean ping();
 
     public void reportPing();
+
+    TalkClientHostInfo findClientHostInfoForClient(String clientId);
+
+    public void saveClientHostInfo(TalkClientHostInfo clientHostInfo);
+
+    public void deleteClientHostInfo(TalkClientHostInfo clientHostInfo);
+
+    public List<TalkDatabaseMigration> findDatabaseMigrations();
+
+    public void saveDatabaseMigration(TalkDatabaseMigration migration);
+
+    public void changeDeliveryFieldValue(String fieldName, String oldFieldValue, String newFieldValue);
 }

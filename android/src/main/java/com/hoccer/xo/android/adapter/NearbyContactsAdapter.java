@@ -24,6 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NearbyContactsAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListener {
     private XoClientDatabase mDatabase;
@@ -31,8 +33,6 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     private Logger LOG = Logger.getLogger(NearbyContactsAdapter.class);
 
     private List<TalkClientContact> mNearbyContacts = new ArrayList<TalkClientContact>();
-
-    private OnItemCountChangedListener mOnItemCountChangedListener;
 
     public NearbyContactsAdapter(XoClientDatabase db, XoActivity xoActivity) {
         super();
@@ -64,10 +64,6 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         return convertView;
     }
 
-    public void setOnItemCountChangedListener(OnItemCountChangedListener listener) {
-        mOnItemCountChangedListener = listener;
-    }
-
     public void registerListeners() {
         mXoActivity.getXoClient().registerContactListener(this);
         mXoActivity.getXoClient().registerTransferListener(this);
@@ -82,7 +78,17 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
 
     public void retrieveDataFromDb() {
         try {
-            int currentItemCount = mNearbyContacts.size();
+            if(mDatabase == null) {
+                Timer timer = new Timer();
+                TimerTask task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        updateAdapter();
+                    }
+                };
+                timer.schedule(task, 1000);
+                return;
+            }
             mNearbyContacts = mDatabase.findAllNearbyContacts();
             for (TalkClientContact contact : mNearbyContacts) {
                 TalkClientDownload avatarDownload = contact.getAvatarDownload();
@@ -90,8 +96,8 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
                     mDatabase.refreshClientDownload(avatarDownload);
                 }
             }
-            if(mOnItemCountChangedListener != null && currentItemCount != mNearbyContacts.size()) {
-                mOnItemCountChangedListener.onItemCountChanged(mNearbyContacts.size());
+            if(!mNearbyContacts.isEmpty()) {
+                mNearbyContacts.get(0).setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -107,11 +113,8 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         TextView lastMessageText = (TextView) view.findViewById(R.id.contact_last_message);
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
-        nameView.setText(contact.getName());
+        nameView.setText(contact.getNickname());
         avatarView.setContact(contact);
-        if(contact.getAvatar() == null) {
-            avatarView.setAvatarImage("drawable://" + R.drawable.avatar_default_location);
-        }
 
         typeView.setText("");
         lastMessageText.setText("");
@@ -260,6 +263,11 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     }
 
     @Override
+    public void onDownloadFailed(TalkClientDownload downlad) {
+
+    }
+
+    @Override
     public void onDownloadStateChanged(TalkClientDownload download) {
 
     }
@@ -278,6 +286,11 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
 
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
+
+    }
+
+    @Override
+    public void onUploadFailed(TalkClientUpload upload) {
 
     }
 

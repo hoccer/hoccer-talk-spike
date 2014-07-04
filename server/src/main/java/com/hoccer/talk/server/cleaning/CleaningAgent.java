@@ -28,24 +28,20 @@ public class CleaningAgent {
 
     private final static Logger LOG = Logger.getLogger(CleaningAgent.class);
 
-    TalkServer mServer;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final TalkServer mServer;
+    private final TalkServerConfiguration mConfig;
+    private final ITalkServerDatabase mDatabase;
+    private final ScheduledExecutorService mExecutor;
 
-    TalkServerConfiguration mConfig;
-
-    ITalkServerDatabase mDatabase;
-
-    FilecacheClient mFilecache;
-
-    ScheduledExecutorService mExecutor;
-
-    static final int KEY_LIFE_TIME = 3; // in months
-    static final int RELATIONSHIP_LIFE_TIME = 3; // in months
+    // TODO: expose this to config?
+    private static final int KEY_LIFE_TIME = 3; // in months
+    private static final int RELATIONSHIP_LIFE_TIME = 3; // in months
 
     public CleaningAgent(TalkServer server) {
         mServer = server;
-        mConfig = server.getConfiguration();
-        mDatabase = server.getDatabase();
-        mFilecache = server.getFilecacheClient();
+        mConfig = mServer.getConfiguration();
+        mDatabase = mServer.getDatabase();
         mExecutor = Executors.newScheduledThreadPool(
             TalkServerConfiguration.THREADS_CLEANING,
             new NamedThreadFactory("cleaning-agent")
@@ -69,12 +65,12 @@ public class CleaningAgent {
 
     // TODO: Also clean groups (normal and nearby)
 
-
     public void cleanClientData(final String clientId) {
         LOG.debug("cleaning client " + clientId);
         doCleanKeysForClient(clientId);
         doCleanTokensForClient(clientId);
         doCleanRelationshipsForClient(clientId);
+        doCleanClientHostInfoForClient(clientId);
     }
 
     private void scheduleCleanAllDeliveries() {
@@ -123,6 +119,16 @@ public class CleaningAgent {
         long startTime = System.currentTimeMillis();
         LOG.info("Cleaning all finished deliveries...");
 
+        List<TalkDelivery> finishedDeliveries = mDatabase.findDeliveriesInStatesAndAttachmentStates(TalkDelivery.FINAL_STATES, TalkDelivery.FINAL_ATTACHMENT_STATES);
+        if (!finishedDeliveries.isEmpty()) {
+            LOG.info("cleanup found " + finishedDeliveries.size() + " finished deliveries");
+            for (TalkDelivery delivery : finishedDeliveries) {
+                doCleanFinishedDelivery(delivery);
+            }
+        }
+        int totalDeliveriesCleaned = finishedDeliveries.size();
+
+        /*
         List<TalkDelivery> abortedDeliveries = mDatabase.findDeliveriesInState(TalkDelivery.STATE_ABORTED);
         if (!abortedDeliveries.isEmpty()) {
             LOG.info("cleanup found " + abortedDeliveries.size() + " aborted deliveries");
@@ -137,7 +143,7 @@ public class CleaningAgent {
                 doCleanFinishedDelivery(delivery);
             }
         }
-        List<TalkDelivery> confirmedDeliveries = mDatabase.findDeliveriesInState(TalkDelivery.STATE_CONFIRMED);
+        List<TalkDelivery> confirmedDeliveries = mDatabase.findDeliveriesInState(TalkDelivery.STATE_DELIVERED_ACKNOWLEDGED);
         if (!confirmedDeliveries.isEmpty()) {
             LOG.info("cleanup found " + confirmedDeliveries.size() + " confirmed deliveries");
             for (TalkDelivery delivery : confirmedDeliveries) {
@@ -145,6 +151,7 @@ public class CleaningAgent {
             }
         }
         int totalDeliveriesCleaned = abortedDeliveries.size() + failedDeliveries.size() + confirmedDeliveries.size();
+        */
         long endTime = System.currentTimeMillis();
         LOG.info("Cleaning of '" + totalDeliveriesCleaned + "' deliveries done (took '" + (endTime - startTime) + "ms'). rescheduling next run...");
     }
@@ -170,12 +177,15 @@ public class CleaningAgent {
     private void doCleanDeliveriesForMessage(String messageId, TalkMessage message) {
         boolean keepMessage = false;
         List<TalkDelivery> deliveries = mDatabase.findDeliveriesForMessage(messageId);
+        LOG.debug("Found "+deliveries.size()+" deliveries for messageId: "+messageId);
         for (TalkDelivery delivery : deliveries) {
             // confirmed and failed deliveries can always be deleted
             if (delivery.isFinished()) {
+                LOG.debug("Deleting delivery with state '" + delivery.getState() + "' and attachmentState '"+ delivery.getAttachmentState()+"', messageId: "+messageId+", receiverId:"+delivery.getReceiverId());
                 mDatabase.deleteDelivery(delivery);
                 continue;
             }
+            LOG.debug("Keeping delivery with state '" + delivery.getState() + "' and attachmentState '"+ delivery.getAttachmentState()+"', messageId: "+messageId+", receiverId:"+delivery.getReceiverId());
             keepMessage = true;
         }
         if (message != null && !keepMessage) {
@@ -251,13 +261,28 @@ public class CleaningAgent {
         }
     }
 
+    private void doCleanClientHostInfoForClient(String clientId) {
+        LOG.debug("cleaning client host infos for clientId: '" + clientId + "'");
+        final TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(clientId);
+        if (clientHostInfo != null) {
+            mDatabase.deleteClientHostInfo(clientHostInfo);
+            LOG.debug("deleted client host info for clientId: '" + clientId + "'");
+        } else {
+            LOG.debug("unable to find client host info for clientId: '" + clientId + "' - IGNORING");
+        }
+    }
+
     private void doDeleteMessage(TalkMessage message) {
         LOG.debug("deleting message " + message);
 
         // delete attached file if there is one
         String fileId = message.getAttachmentFileId();
         if (fileId != null) {
-            mFilecache.deleteFile(fileId);
+            FilecacheClient filecache = mServer.getFilecacheClient();
+            if (filecache == null) {
+                throw new RuntimeException("cant get filecache");
+            }
+            filecache.deleteFile(fileId);
         }
 
         // delete the message itself

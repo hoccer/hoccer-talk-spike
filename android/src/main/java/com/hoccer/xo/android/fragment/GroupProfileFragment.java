@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,6 +19,7 @@ import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.release.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import org.apache.log4j.Logger;
@@ -29,7 +31,8 @@ import java.sql.SQLException;
  * Fragment for display and editing of group profiles.
  */
 public class GroupProfileFragment extends XoFragment
-        implements View.OnClickListener, IXoContactListener, ActionMode.Callback {
+        implements View.OnClickListener, IXoContactListener, ActionMode.Callback,
+        AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
 
@@ -118,15 +121,30 @@ public class GroupProfileFragment extends XoFragment
             mGroupMemberAdapter.onCreate();
             mGroupMemberAdapter.onResume();
 
-            mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                @Override
-                public boolean shouldShow(TalkClientContact contact) {
-                    return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup) || contact.isSelf();
-                }
-            });
+            if(mGroup.getGroupPresence().isTypeNearby()) {
+                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
+                    @Override
+                    public boolean shouldShow(TalkClientContact contact) {
+                        return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup) && !contact.isSelf();
+                    }
+                });
+            } else {
+                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
+                    @Override
+                    public boolean shouldShow(TalkClientContact contact) {
+                        return contact.isClientGroupInvited(mGroup) || contact
+                                .isClientGroupJoined(mGroup) || contact.isSelf();
+                    }
+                });
+            }
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
         mGroupMemberAdapter.requestReload();
+        if(mGroup != null && mGroup.getGroupPresence().isTypeNearby()) {
+            mGroupMembersList.setOnItemClickListener(this);
+        } else {
+            mGroupMembersList.setOnItemClickListener(null);
+        }
         setHasOptionsMenu(true);
     }
 
@@ -198,13 +216,43 @@ public class GroupProfileFragment extends XoFragment
                 getActivity().startActionMode(this);
                 break;
             case R.id.menu_group_profile_reject_invitation:
-                XoDialogs.confirmRejectInvitationGroup(getXoActivity(), mGroup);
+                XoDialogs.showYesNoDialog("RejectGroupInvitationDialog",
+                        R.string.dialog_reject_group_invitation_title,
+                        R.string.dialog_reject_group_invitation_message,
+                        getXoActivity(),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                getXoActivity().getXoClient().leaveGroup(mGroup.getGroupId());
+                                getXoActivity().finish();
+                            }
+                        },
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        });
                 break;
             case R.id.menu_group_profile_join:
                 joinGroup();
                 break;
             case R.id.menu_group_profile_leave:
-                XoDialogs.confirmLeaveGroup(getXoActivity(), mGroup);
+                XoDialogs.showYesNoDialog("LeaveGroupDialog",
+                        R.string.dialog_leave_group_title,
+                        R.string.dialog_leave_group_message,
+                        getXoActivity(),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                getXoActivity().getXoClient().leaveGroup(mGroup.getGroupId());
+                                getXoActivity().finish();
+                            }
+                        },
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        });
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -288,7 +336,12 @@ public class GroupProfileFragment extends XoFragment
             name = mGroupNameEdit.getText().toString();
         }
 
-        mGroupNameText.setText(name);
+
+        if(mGroup.getGroupPresence().isTypeNearby()) {
+            mGroupNameText.setText(R.string.nearby_text);
+        } else {
+            mGroupNameText.setText(name);
+        }
         mGroupNameEdit.setText(name);
 
         switch (mMode) {
@@ -319,7 +372,7 @@ public class GroupProfileFragment extends XoFragment
         LOG.debug("refreshContact()");
 
         mGroup = newContact;
-        
+
         try {
             getXoDatabase().refreshClientContact(mGroup);
             if (mMode == Mode.PROFILE) {
@@ -367,7 +420,8 @@ public class GroupProfileFragment extends XoFragment
 
     private void manageGroupMembers() {
         LOG.debug("manageGroupMembers()");
-        XoDialogs.selectGroupManage(getXoActivity(), mGroup);
+        new GroupManageDialog(mGroup)
+                .show(getXoActivity().getFragmentManager(), "GroupManageDialog");
     }
 
     private void joinGroup() {
@@ -515,7 +569,21 @@ public class GroupProfileFragment extends XoFragment
         LOG.debug("onOptionsItemSelected(" + menuItem.toString() + ")");
         switch (menuItem.getItemId()) {
             case R.id.menu_group_profile_delete:
-                XoDialogs.confirmDeleteGroup(getXoActivity(), mGroup);
+                XoDialogs.showYesNoDialog("GroupDeleteDialog",
+                        R.string.dialog_delete_group_title,
+                        R.string.dialog_delete_group_message,
+                        getXoActivity(),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                getXoActivity().getXoClient().deleteContact(mGroup);
+                            }
+                        },
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                            }
+                        });
                 break;
             case R.id.menu_group_profile_add_person:
                 manageGroupMembers();
@@ -535,6 +603,12 @@ public class GroupProfileFragment extends XoFragment
         update(mGroup);
 
         configureOptionsMenuItems(mOptionsMenu);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        TalkClientContact contact = (TalkClientContact) adapterView.getItemAtPosition(i);
+        getXoActivity().showContactConversation(contact);
     }
 
 }

@@ -33,7 +33,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     private static final Logger LOG = Logger.getLogger(TalkRpcConnection.class);
 
     // TODO find a better place for this message...
-    private static final String UPDATE_NAGGING_MESSAGE = "Please update your Hoccer XO client!";
+    private static final String UPDATE_NAGGING_MESSAGE = "Bitte update XO und installiere die neueste Version. Tolle neue Funktionen warten auf dich! Please update XO and install the new version. Great new features are waiting for you!";
 
     /**
      * Server this connection belongs to
@@ -82,6 +82,9 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     // Penalty is measured in milliseconds for the purpose of selecting suitable connections for a task.
     // If a client fails at this task the connection is penalized so it less likely to be considered for this task.
     private long mCurrentPriorityPenalty = 0L;
+    //private boolean mNagWhenOffline = false;
+
+    public Object deliveryLock = new Object();
 
     /**
      * Construct a connection for the given server using the given connection
@@ -220,6 +223,13 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
 
     private void nagUserUpdate() {
         mClientRpc.alertUser(UPDATE_NAGGING_MESSAGE);
+        // Additional Nagging for APNS enabled devices since some don't support alertUser properly
+        /*if (mTalkClient.isPushCapable() &&
+            mTalkClient.isApnsCapable()) {
+            this.mNagWhenOffline = true;
+            LOG.info("Nagging clientId '" + mTalkClient.getClientId() + "' about update - ONLINE-HOOK");
+            mServer.getPushAgent().submitSystemMessage(mTalkClient, UPDATE_NAGGING_MESSAGE);
+        }*/
     }
 
     /**
@@ -230,6 +240,14 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.info("[connectionId: '" + getConnectionId() + "'] connection closed");
+        /*try {
+            if (this.mNagWhenOffline) {
+                LOG.info("Nagging clientId '" + mTalkClient.getClientId() + "' about update - OFFLINE-HOOK");
+                mServer.getPushAgent().submitSystemMessage(mTalkClient, UPDATE_NAGGING_MESSAGE);
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }*/
         mServer.connectionClosed(this);
     }
 
@@ -286,7 +304,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Called by handler when the client has called ready()
      */
     public void readyClient() {
-        if (isLoggedIn() && mTalkClient != null) {
+        if (isLoggedIn() && mTalkClient != null) { // TODO: why do we have these checks here anyway? They seems quite redundant
             LOG.info("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
 
             // mark connection as logged in
@@ -298,10 +316,12 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
             mServer.readyClient(mTalkClient, this);
 
             // attempt to deliver anything we might have
-            mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId());
+            mServer.getDeliveryAgent().requestDelivery(mTalkClient.getClientId(), true);
 
             // request a ping in a few seconds
             mServer.getPingAgent().requestPing(mTalkClient.getClientId());
+        } else {
+            LOG.warn("[connectionId: '" + getConnectionId() + "'] client signalled ready but is actually NOT ready!");
         }
     }
 

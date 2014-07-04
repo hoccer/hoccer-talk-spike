@@ -101,6 +101,11 @@ public class TestClientHost implements IXoClientHost {
     }
 
     @Override
+    public String getClientBuildVariant() {
+        return "release";
+    }
+
+    @Override
     public Date getClientTime() {
         return null;
     }
@@ -128,5 +133,10 @@ public class TestClientHost implements IXoClientHost {
     @Override
     public int getRSAKeysize() {
         return 1024;
+    }
+
+    @Override
+    public boolean isSendDeliveryConfirmationEnabled() {
+        return false;
     }
 }

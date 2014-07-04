@@ -2,7 +2,6 @@ package com.hoccer.xo.android.fragment;
 
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.NearbyContactsAdapter;
-import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.release.R;
 
@@ -19,12 +18,9 @@ import android.widget.TextView;
 
 public class NearbyContactsFragment extends XoListFragment {
     private static final Logger LOG = Logger.getLogger(NearbyContactsFragment.class);
-
     private NearbyContactsAdapter mNearbyAdapter;
     private ListView mContactList;
-
     private ImageView mPlaceholderImage;
-
     private TextView mPlaceholderText;
 
     @Override
@@ -32,9 +28,8 @@ public class NearbyContactsFragment extends XoListFragment {
         View view = inflater.inflate(R.layout.fragment_contacts, container, false);
         mContactList = (ListView) view.findViewById(android.R.id.list);
         mPlaceholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
-        mPlaceholderImage.setImageResource(R.drawable.placeholder_nearby);
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
-        mPlaceholderText.setText(R.string.placeholder_nearby_text);
+        hidePlaceholder();
         return view;
     }
 
@@ -44,16 +39,6 @@ public class NearbyContactsFragment extends XoListFragment {
         mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity());
         mNearbyAdapter.retrieveDataFromDb();
         mNearbyAdapter.registerListeners();
-        mNearbyAdapter.setOnItemCountChangedListener(new OnItemCountChangedListener() {
-            @Override
-            public void onItemCountChanged(int count) {
-                if (count > 0) {
-                    hidePlaceholder();
-                } else if (count < 1) {
-                    showPlaceholder();
-                }
-            }
-        });
     }
 
     @Override
@@ -71,11 +56,6 @@ public class NearbyContactsFragment extends XoListFragment {
     public void onDestroy() {
         mNearbyAdapter.unregisterListeners();
         super.onDestroy();
-    }
-
-    private void showPlaceholder() {
-        mPlaceholderImage.setVisibility(View.VISIBLE);
-        mPlaceholderText.setVisibility(View.VISIBLE);
     }
 
     private void hidePlaceholder() {

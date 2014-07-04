@@ -1,27 +1,25 @@
 package com.hoccer.xo.android.activity;
 
-import android.support.v4.app.FragmentManager;
+import android.app.ActionBar;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.PopupMenu;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.content.ContentView;
-import com.hoccer.xo.android.content.clipboard.Clipboard;
+import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.fragment.CompositionFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
-import com.hoccer.xo.android.gesture.Gestures;
-import com.hoccer.xo.android.gesture.MotionInterpreter;
+import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
-
-import android.app.ActionBar;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import java.sql.SQLException;
 
@@ -36,9 +34,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
 
     TalkClientContact mContact;
     private IContentObject mClipboardAttachment;
-    private  getContactIdInConversation m_checkIdReceiver;
-
-    private MotionInterpreter mMotionInterpreter;
+    private getContactIdInConversation m_checkIdReceiver;
 
     @Override
     protected int getLayoutResource() {
@@ -73,8 +69,6 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         filter.addAction("CHECK_ID_IN_CONVERSATION");
         m_checkIdReceiver = new getContactIdInConversation();
         registerReceiver(m_checkIdReceiver, filter);
-
-        mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, this, mCompositionFragment);
     }
 
     @Override
@@ -85,24 +79,22 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         Intent intent = getIntent();
 
         // handle converse intent
-        if(intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
+        if (intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
             int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
             m_checkIdReceiver.setId(contactId);
-            if(contactId == -1) {
+            if (contactId == -1) {
                 LOG.error("invalid contact id");
             } else {
                 try {
                     TalkClientContact contact = getXoDatabase().findClientContactById(contactId);
-                    if(contact != null) {
-                        converseWithContact(contact);
+                    if (contact != null) {
+                        setContact(contact);
                     }
                 } catch (SQLException e) {
                     LOG.error("sql error", e);
                 }
             }
         }
-
-        mMotionInterpreter.activate();
         getXoClient().registerContactListener(this);
     }
 
@@ -111,7 +103,6 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         LOG.debug("onPause()");
         super.onPause();
 
-        mMotionInterpreter.deactivate();
         getXoClient().unregisterContactListener(this);
     }
 
@@ -121,12 +112,11 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         boolean result = super.onCreateOptionsMenu(menu);
 
         // select client/group profile entry for appropriate icon
-        if(mContact != null) {
+        if (mContact != null) {
             MenuItem clientItem = menu.findItem(R.id.menu_profile_client);
             clientItem.setVisible(mContact.isClient());
             MenuItem groupItem = menu.findItem(R.id.menu_single_profile);
             groupItem.setVisible(mContact.isGroup());
-//            getActionBar().setIcon(android.R.color.transparent);
         }
 
         return result;
@@ -144,7 +134,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         switch (item.getItemId()) {
             case R.id.menu_profile_client:
             case R.id.menu_single_profile:
-                if(mContact != null) {
+                if (mContact != null) {
                     showContactProfile(mContact);
                 }
                 break;
@@ -155,13 +145,13 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
     }
 
     @Override
-    public void showPopupForContentView(ContentView contentView) {
-        IContentObject contentObject = contentView.getContent();
+    public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
+        IContentObject contentObject = messageItem.getContent();
 
         if (contentObject.isContentAvailable()) {
             mClipboardAttachment = contentObject;
 
-            PopupMenu popup = new PopupMenu(this, contentView);
+            PopupMenu popup = new PopupMenu(this, messageItemView);
             popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 
@@ -189,17 +179,27 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         mCompositionFragment.onAttachmentSelected(contentObject);
     }
 
-    public void converseWithContact(TalkClientContact contact) {
-        LOG.debug("converseWithContact(" + contact.getClientContactId() + ")");
+    private void setContact(TalkClientContact contact) {
+        LOG.debug("setContact(" + contact.getClientContactId() + ")");
         mContact = contact;
         mActionBar.setTitle(contact.getName());
-        mMessagingFragment.converseWithContact(contact);
-        mCompositionFragment.converseWithContact(contact);
-        if(mContact.isDeleted()) {
+        mMessagingFragment.setContact(contact);
+        mCompositionFragment.setContact(contact);
+        if (mContact.isDeleted()) {
             finish();
         }
         // invalidate menu so that profile buttons get disabled/enabled
         invalidateOptionsMenu();
+    }
+
+    @Override
+    protected void applicationWillEnterBackground() {
+        super.applicationWillEnterBackground();
+        if (mContact.isGroup() && mContact.getGroupPresence().isTypeNearby()) {
+            finish();
+        } else if (mContact.isClient() && mContact.isNearby()) {
+            finish();
+        }
     }
 
     @Override
@@ -209,7 +209,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-        if(mContact != null && mContact.getClientContactId() == contact.getClientContactId()) {
+        if (mContact != null && mContact.getClientContactId() == contact.getClientContactId()) {
             finish();
         }
     }

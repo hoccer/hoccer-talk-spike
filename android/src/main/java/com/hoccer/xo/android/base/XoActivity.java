@@ -16,7 +16,6 @@ import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoSoundPool;
@@ -24,11 +23,12 @@ import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.RichContactsAdapter;
 import com.hoccer.xo.android.content.*;
-import com.hoccer.xo.android.content.image.ImageSelector;
+import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
-import com.hoccer.xo.android.view.AttachmentTransferControlView;
+import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
+import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
 import net.hockeyapp.android.CrashManager;
@@ -36,7 +36,6 @@ import net.hockeyapp.android.CrashManager;
 import org.apache.log4j.Logger;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -52,7 +51,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -125,6 +123,8 @@ public abstract class XoActivity extends FragmentActivity {
     private ScreenReceiver mScreenListener;
     private XoAlertListener mAlertListener;
 
+
+
     public XoActivity() {
         LOG = Logger.getLogger(getClass());
     }
@@ -156,6 +156,99 @@ public abstract class XoActivity extends FragmentActivity {
     public void unregisterXoFragment(IXoFragment fragment) {
         mTalkFragments.remove(fragment);
     }
+
+
+    // Application background/foreground observation
+    public static boolean isAppInBackground = false;
+    public static boolean isWindowFocused = false;
+    public static boolean isMenuOpened = false;
+    public static boolean isBackPressed = false;
+    public static boolean isBackgroundActive = false;
+
+    protected void applicationWillEnterForeground() {
+        LOG.debug("Application will enter foreground.");
+        isAppInBackground = false;
+        isBackgroundActive = false;
+        XoApplication.enterForegroundMode();
+    }
+
+    protected void applicationWillEnterBackground() {
+        LOG.debug("Application will enter background.");
+        isAppInBackground = true;
+        XoApplication.enterBackgroundMode();
+    }
+
+    protected void applicationWillEnterBackgroundActive() {
+        LOG.debug("Application will enter background active.");
+        isAppInBackground = false;
+        XoApplication.enterBackgroundActiveMode();
+    }
+
+    protected void setBackgroundActive() {
+        isBackgroundActive = true;
+    }
+
+    public void startExternalActivity(Intent intent) {
+        LOG.debug(getClass() + " starting external activity " + intent.toString());
+        setBackgroundActive();
+        startActivity(intent);
+    }
+
+    public void startExternalActivityForResult(Intent intent, int requestCode) {
+        LOG.debug(getClass() + " starting external activity " +  intent.toString() + " for request code: " + requestCode);
+        setBackgroundActive();
+        startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    protected void onStart() {
+        if (isAppInBackground || isBackgroundActive) {
+            applicationWillEnterForeground();
+        }
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (!isWindowFocused) {
+            if (isBackgroundActive) {
+                applicationWillEnterBackgroundActive();
+            } else {
+                applicationWillEnterBackground();
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!(this instanceof ContactsActivity)) {
+            isBackPressed = true;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        isWindowFocused = hasFocus;
+        if (isBackPressed && !hasFocus) {
+            isBackPressed = false;
+            isWindowFocused = true;
+        }
+        super.onWindowFocusChanged(hasFocus);
+    }
+
+    /*@Override
+    public boolean onMenuItemSelected(int featureId, android.view.MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
+        }
+        return true;
+    }*/
+
+    //--------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -202,7 +295,6 @@ public abstract class XoActivity extends FragmentActivity {
         mServiceConnection = new MainServiceConnection();
         bindService(serviceIntent, mServiceConnection, BIND_IMPORTANT);
         checkKeys();
-        getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
 
         getXoClient().registerAlertListener(mAlertListener);
     }
@@ -296,26 +388,8 @@ public abstract class XoActivity extends FragmentActivity {
             unbindService(mServiceConnection);
             mServiceConnection = null;
         }
-        checkIfAppInForeground();
 
         getXoClient().unregisterAlertListener(mAlertListener);
-    }
-
-    public void checkIfAppInForeground() {
-        Handler checkState = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                ActivityManager activityManager = (ActivityManager) getApplicationContext().
-                        getSystemService(Context.ACTIVITY_SERVICE);
-                List<ActivityManager.RunningTaskInfo> services = activityManager.getRunningTasks(Integer.MAX_VALUE);
-                String ourName = getApplicationContext().getPackageName().toString();
-                if (!services.get(0).topActivity.getPackageName().toString().equalsIgnoreCase(ourName)
-                        || !mScreenListener.isScreenOn()) {
-                    getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
-                }
-            }
-        };
-        checkState.sendEmptyMessageDelayed(0, 1000);
     }
 
     @Override
@@ -462,7 +536,7 @@ public abstract class XoActivity extends FragmentActivity {
         if (requestCode == REQUEST_SELECT_AVATAR) {
             if (mAvatarSelection != null) {
                 ImageSelector selector = (ImageSelector) mAvatarSelection.getSelector();
-                startActivityForResult(selector.createCropIntent(this, data.getData()),
+                startExternalActivityForResult(selector.createCropIntent(this, data.getData()),
                         REQUEST_CROP_AVATAR);
             }
             return;
@@ -572,10 +646,6 @@ public abstract class XoActivity extends FragmentActivity {
         return mDatabase;
     }
 
-    public ContactsAdapter makeContactListAdapter() {
-        return new RichContactsAdapter(this);
-    }
-
 //    public ConversationAdapter makeConversationAdapter() {
 //        return new ConversationAdapter(this);
 //    }
@@ -647,6 +717,9 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void selectAttachment() {
         LOG.debug("selectAttachment()");
+
+        setBackgroundActive();
+
         mAttachmentSelection = ContentRegistry.get(this)
                 .selectAttachment(this, REQUEST_SELECT_ATTACHMENT);
     }
@@ -690,7 +763,6 @@ public abstract class XoActivity extends FragmentActivity {
                     sendIntent.setPackage(defaultSmsPackageName);
                 }
                 startActivity(sendIntent);
-                return;
             } else {
                 Intent intent = new Intent(Intent.ACTION_SENDTO);
                 intent.setData(Uri.parse("smsto:"));
@@ -706,7 +778,7 @@ public abstract class XoActivity extends FragmentActivity {
     public void hackReturnedFromDialog() {
     }
 
-    public void showPopupForContentView(ContentView contentView) {
+    public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
     }
 
     public void clipBoardItemSelected(IContentObject contentObject) {
