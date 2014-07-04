@@ -83,7 +83,7 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public String getClientLanguage() {
-        return null;
+        return "en";
     }
 
     @Override
