@@ -1,7 +1,7 @@
 package com.hoccer.talk.client.model;
 
-import com.hoccer.talk.client.IXoDatabaseRefreshListener;
 import com.hoccer.talk.client.IXoMediaCollectionDatabase;
+import com.hoccer.talk.util.WeakListenerArray;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -16,6 +16,14 @@ import java.util.*;
 @DatabaseTable(tableName = "mediaCollection")
 public class TalkClientMediaCollection {
 
+    // collection update/change listener
+    public interface Listener {
+        void onCollectionNameChanged(TalkClientMediaCollection collection);
+        void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex);
+        void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved);
+        void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded);
+    }
+
     private static final Logger LOG = Logger.getLogger(TalkClientMediaCollection.class);
 
     @DatabaseField(generatedId = true, columnName = "collectionId")
@@ -27,6 +35,8 @@ public class TalkClientMediaCollection {
     private IXoMediaCollectionDatabase mDatabase;
 
     private List<TalkClientDownload> mItemList = new ArrayList<TalkClientDownload>();
+
+    WeakListenerArray<Listener> mListenerArray = new WeakListenerArray<Listener>();
 
     // do not call constructor directly but create instances via IXoMediaCollectionDatabase.createMediaCollection()
     public TalkClientMediaCollection() {
@@ -50,6 +60,9 @@ public class TalkClientMediaCollection {
     public void setName(String name) {
         mName = name;
         updateMediaCollection();
+        for(Listener listener : mListenerArray) {
+            listener.onCollectionNameChanged(this);
+        }
     }
 
     public String getName() {
@@ -60,6 +73,9 @@ public class TalkClientMediaCollection {
     public void add(TalkClientDownload item) {
         if(createRelation(item, mItemList.size())) {
             mItemList.add(item);
+            for(Listener listener : mListenerArray) {
+                listener.onItemAdded(this, mItemList.size() - 1, item);
+            }
         }
     }
 
@@ -70,6 +86,9 @@ public class TalkClientMediaCollection {
         } else {
             if(createRelation(item, index)) {
                 mItemList.add(index, item);
+                for(Listener listener : mListenerArray) {
+                    listener.onItemAdded(this, index, item);
+                }
             }
         }
     }
@@ -85,7 +104,11 @@ public class TalkClientMediaCollection {
     // Removes the item at the given index from the collection
     public void remove(int index) {
         if(removeRelation(index)) {
+            TalkClientDownload item = mItemList.get(index);
             mItemList.remove(index);
+            for(Listener listener : mListenerArray) {
+                listener.onItemRemoved(this, index, item);
+            }
         }
     }
 
@@ -108,6 +131,9 @@ public class TalkClientMediaCollection {
             TalkClientDownload item = mItemList.get(from);
             mItemList.remove(from);
             mItemList.add(to, item);
+            for(Listener listener : mListenerArray) {
+                listener.onItemOrderChanged(this, from, to);
+            }
         }
     }
 
@@ -118,6 +144,14 @@ public class TalkClientMediaCollection {
 
     public TalkClientDownload getItem(int index) {
         return mItemList.get(index);
+    }
+
+    public void registerListener(Listener listener) {
+        mListenerArray.addListener(listener);
+    }
+
+    public void unregisterListener(Listener listener) {
+        mListenerArray.removeListener(listener);
     }
 
     @Override

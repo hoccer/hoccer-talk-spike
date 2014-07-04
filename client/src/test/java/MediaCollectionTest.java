@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import static junit.framework. TestCase.assertTrue;
+import static junit.framework. TestCase.assertFalse;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.fail;
@@ -654,8 +655,117 @@ public class MediaCollectionTest {
             assertEquals(item4.getClientDownloadId(), relations.get(4).getItem().getClientDownloadId());
         }
     }
+
+    @Test
+    public void testListener() {
+        LOG.info("testListener");
+
+        final String collectionName = "testListener_collection";
+        TalkClientMediaCollection collection = null;
+        TalkClientDownload item0 = new TalkClientDownload();
+        TalkClientDownload item1 = new TalkClientDownload();
+        TalkClientDownload item2 = new TalkClientDownload();
+        TalkClientDownload item3 = new TalkClientDownload();
+        TalkClientDownload item4 = new TalkClientDownload();
+        TalkClientDownload item5 = new TalkClientDownload();
+        try {
+            collection = mDatabase.createMediaCollection(collectionName);
+
+            assertNotNull(collection);
+            assertEquals(collection.getName(), collectionName);
+
+            // create some items and add to collection
+            mDatabase.saveClientDownload(item0);
+            mDatabase.saveClientDownload(item1);
+            mDatabase.saveClientDownload(item2);
+            mDatabase.saveClientDownload(item3);
+            mDatabase.saveClientDownload(item4);
+            mDatabase.saveClientDownload(item5);
+
+            collection.add(item0);
+            collection.add(item1);
+            collection.add(item2);
+            collection.add(item3);
+            collection.add(item4);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+            e.printStackTrace();
+            fail();
+        }
+
+        final String expectedCollectionName = "newCollectionName";
+
+        final TalkClientDownload expectedItemAdded = item5;
+        final int expectedItemAddedIndex = 3;
+        final TalkClientDownload expectedItemRemoved = item5;
+        final int expectedItemRemovedIndex = 3;
+        final int expectedItemOrderFrom = 2;
+        final int expectedItemOrderTo = 4;
+
+        final ValueContainer<Boolean> onNameChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
+
+        TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
+            public void onCollectionNameChanged(TalkClientMediaCollection collection) {
+                assertEquals(expectedCollectionName, collection.getName());
+                onNameChangedCalled.value = true;
+            }
+            public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
+                assertEquals(expectedItemOrderFrom, fromIndex);
+                assertEquals(expectedItemOrderTo, toIndex);
+                onItemOrderChangedCalled.value = true;
+            }
+            public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
+                assertEquals(expectedItemRemovedIndex, indexRemoved);
+                assertEquals(expectedItemRemoved, itemRemoved);
+                onItemRemovedCalled.value = true;
+            }
+            public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
+                assertEquals(expectedItemAddedIndex, indexAdded);
+                assertEquals(expectedItemAdded, itemAdded);
+                onItemAddedCalled.value = true;
+            }
+        };
+        collection.registerListener(listener);
+
+        collection.setName(expectedCollectionName);
+        collection.add(3, expectedItemAdded);
+        collection.remove(expectedItemRemoved);
+        collection.reorderItemIndex(2, 4);
+
+        assertTrue(onNameChangedCalled.value);
+        assertTrue(onItemOrderChangedCalled.value);
+        assertTrue(onItemRemovedCalled.value);
+        assertTrue(onItemAddedCalled.value);
+
+        // test unregister listener
+        collection.unregisterListener(listener);
+
+        // reset states
+        onNameChangedCalled.value = false;
+        onItemOrderChangedCalled.value = false;
+        onItemRemovedCalled.value = false;
+        onItemAddedCalled.value = false;
+
+        collection.setName(expectedCollectionName);
+        collection.add(3, expectedItemAdded);
+        collection.remove(expectedItemRemoved);
+        collection.reorderItemIndex(2, 4);
+
+        assertFalse(onNameChangedCalled.value);
+        assertFalse(onItemOrderChangedCalled.value);
+        assertFalse(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
     }
 
+    private class ValueContainer<T> {
+        public T value;
+        public ValueContainer(T initValue) {
+            value = initValue;
+        }
+    }
     private List<TalkClientMediaCollectionRelation> findMediaCollectionRelationsOrderedByIndex(int collectionId) {
 
         List<TalkClientMediaCollectionRelation> relations = null;
