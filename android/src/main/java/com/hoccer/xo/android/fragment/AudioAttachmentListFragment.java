@@ -255,6 +255,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -264,18 +265,18 @@ public class AudioAttachmentListFragment extends XoListFragment {
                 return true;
             }
         }
+
         return false;
     }
 
     private boolean deleteFile(String filePath) {
         String path = Uri.parse(filePath).getPath();
         File file = new File(path);
-        boolean deleted = file.delete();
-        return deleted;
+
+        return file.delete();
     }
 
     private void bindToMediaPlayerService(Intent intent) {
-
         mConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -317,8 +318,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
             AttachmentListAdapter audioAttachments = new AttachmentListAdapter(getXoActivity());
             List<AudioAttachmentItem> items = mAttachmentListAdapter.getAttachmentItems();
 
-            for (int i = 0; i < items.size(); ++i) {
-                AudioAttachmentItem item = items.get(i);
+            for (AudioAttachmentItem item : items) {
                 String title = item.getMetaData().getTitle();
                 String artist = item.getMetaData().getArtist();
 
@@ -328,9 +328,14 @@ public class AudioAttachmentListFragment extends XoListFragment {
                 }
             }
 
+            if (mDisplayMode != DisplayMode.COLLECTION_ATTACHMENTS) {
+                // TODO load contacts into a contacts adapter
+            }
+
             if (audioAttachments.getCount() > 0) {
                 mResultsAdapter.addSection("Audio Attachments", audioAttachments);
             }
+
             setListAdapter(mResultsAdapter);
         }
     }
@@ -477,8 +482,9 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
         @Override
         public boolean onQueryTextChange(final String query) {
-            mInSearchMode = true;
-            searchAttachmentList(query);
+            if(mInSearchMode) {
+                searchAttachmentList(query);
+            }
 
             return false;
         }
@@ -486,12 +492,11 @@ public class AudioAttachmentListFragment extends XoListFragment {
         @Override
         public boolean onMenuItemActionExpand(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
+                mInSearchMode = true;
+                
                 SearchView searchView = (SearchView) item.getActionView();
                 if (searchView.getQuery().length() > 0) {
-                    mInSearchMode = true;
                     searchAttachmentList(searchView.getQuery().toString());
-                } else {
-                    mInSearchMode = false;
                 }
             }
 
@@ -503,6 +508,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
             if (item.getItemId() == R.id.menu_search) {
                 mInSearchMode = false;
                 mResultsAdapter.clear();
+                Toast.makeText(getActivity(),"onMenuItemActionCollapse", Toast.LENGTH_LONG).show();
                 setListAdapter(mAttachmentListAdapter);
             }
 
