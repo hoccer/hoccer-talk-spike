@@ -404,7 +404,17 @@ public class UpdateAgent extends NotificationDeferrer {
         Runnable checker = new Runnable() {
             @Override
             public void run() {
-                performCheckAndRequestGroupMemberKeys(groupId);
+                TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("groupKeyCheck-"+groupId);
+                try {
+                    lock.lock();
+                    LOG.debug("checkAndRequestGroupMemberKeys acquired lock for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode());
+                    performCheckAndRequestGroupMemberKeys(groupId);
+                } catch (InterruptedException e) {
+                    LOG.debug("checkAndRequestGroupMemberKeys: interrupted" + e);
+                } finally {
+                    LOG.debug("performCheckAndRequestGroupMemberKeys releasing lock for groupId: '" + groupId + "' with id "+lock+", hash="+lock.hashCode());
+                    lock.unlock();
+                }
             }
         };
         queueOrExecute(context, checker);
@@ -444,15 +454,19 @@ public class UpdateAgent extends NotificationDeferrer {
                     for (TalkGroupMember m : members) {
                         TalkPresence presence = mDatabase.findPresenceForClient(m.getClientId());
                         if (presence != null && presence.getKeyId() != null) {
-                            if (!sharedKeyId.equals(m.getSharedKeyId()) || !sharedKeyId.equals(presence.getKeyId())) {
+                            if (!sharedKeyId.equals(m.getSharedKeyId()) || !m.getMemberKeyId().equals(presence.getKeyId())) {
                                 // member has not the current key
+                                LOG.debug("  * Member "+m.getClientId()+" has not the current group key");
                                 outOfDateMembers.add(m);
                                 if (m.isMember() && mServer.isClientReady(m.getClientId())) {
+                                    LOG.debug("  * Member "+m.getClientId()+" is ready and active and added to keyMasterCandidatesWithoutCurrentKey");
                                     keyMasterCandidatesWithoutCurrentKey.add(m);
                                 }
                             } else {
                                 // member has the current key
+                                LOG.debug("  * Member "+m.getClientId()+" has the current group key");
                                 if (m.isMember() && mServer.isClientReady(m.getClientId())) {
+                                    LOG.debug("  * Member "+m.getClientId()+" is ready and active and added to keyMasterCandidatesWithCurrentKey");
                                     keyMasterCandidatesWithCurrentKey.add(m);
                                 }
                             }
@@ -538,12 +552,14 @@ public class UpdateAgent extends NotificationDeferrer {
                     group.setSharedKeyId(forSharedKeyId);
                     group.setSharedKeyIdSalt(withSharedKeyIdSalt);
                     group.setLastChanged(now);
+                    LOG.info("requestGroupKeys, for group '" + forGroupId + "' did set sharedKeyId " + group.getSharedKeyId() + ", salt="+group.getSharedKeyIdSalt());
                     mDatabase.saveGroup(group);
 
                     for (int i = 0; i < forClientIds.length; ++i) {
                         TalkGroupMember member = mDatabase.findGroupMemberForClient(forGroupId, forClientIds[i]);
                         member.setSharedKeyId(forSharedKeyId);
                         member.setSharedKeyIdSalt(withSharedKeyIdSalt);
+                        LOG.info("requestGroupKeys, for member '" + member.getClientId() + "' did set sharedKeyId " + member.getSharedKeyId() + ", salt="+member.getSharedKeyIdSalt());
                         member.setMemberKeyId(withPublicKeyIds[i]);
                         member.setEncryptedGroupKey(newKeyBoxes[i]);
                         member.setKeySupplier(fromClientId);
