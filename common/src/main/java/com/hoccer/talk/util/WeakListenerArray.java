@@ -30,6 +30,14 @@ public class WeakListenerArray<Listener> implements Iterable<Listener>{
         }
     }
 
+    public void unregisterAll() {
+        mItemList.clear();
+    }
+
+    public int size() {
+        return mItemList.size();
+    }
+
     @Override
     public Iterator<Listener> iterator() {
         return new Iterator<Listener>() {
