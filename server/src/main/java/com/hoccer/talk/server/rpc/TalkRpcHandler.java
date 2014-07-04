@@ -5,6 +5,7 @@ import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.ITalkServerStatistics;
 import com.hoccer.talk.server.TalkServer;
+import com.hoccer.talk.server.message.StaticSystemMessage;
 import com.hoccer.talk.srp.SRP6Parameters;
 import com.hoccer.talk.srp.SRP6VerifyingServer;
 import com.hoccer.talk.util.MapUtil;
@@ -92,8 +93,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
     }
 
-    private void requireIdentification() {
-        requireIsNotOutdated();
+    private void requireIdentification(boolean flagCheckOutdated) {
+        LOG.info("requireIdentification : flag is " + flagCheckOutdated);
+        if (flagCheckOutdated) {
+            requireIsNotOutdated();
+        }
         if (!mConnection.isLoggedIn()) {
             throw new RuntimeException("Not logged in");
         }
@@ -114,13 +118,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public void bing() {
         logCall("bing()");
-        requireIdentification();
+        requireIdentification(true);
     }
 
     @Override
     public void ready() {
         logCall("ready()");
-        requireIdentification();
+        requireIdentification(true);
         mConnection.readyClient();
     }
 
@@ -133,7 +137,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public TalkServerInfo hello(TalkClientInfo clientInfo) {
         logCall("hello()");
-        requireIdentification();
+        requireIdentification(false);
 
         String tag = clientInfo.getSupportTag();
         if (tag != null && !tag.isEmpty()) {
@@ -160,6 +164,16 @@ public class TalkRpcHandler implements ITalkRpcServer {
         for (String protcolVersion : protcolVersions) {
             serverInfo.addProtocolVersion(protcolVersion);
         }
+
+        // This is the moment now where have sufficient information about the client to
+        // send customized and potentially even personalized system messages.
+        // *Note* Currently the only mechanism to send system messages is with alertUser()
+        if (mConnection.isLegacyMode()) {
+            mServer.getUpdateAgent().requestUserAlert(
+                    mConnection.getClientId(),
+                    StaticSystemMessage.MESSAGES.UPDATE_NAGGING);
+        }
+        requireIsNotOutdated();
 
         return serverInfo;
     }
@@ -346,7 +360,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void registerGcm(String registeredPackage, String registrationId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("registerGcm(registeredPackage: '" + registeredPackage + "', registrationId: '" + registrationId + "')");
         TalkClient client = mConnection.getClient();
         client.setGcmPackage(registeredPackage);
@@ -356,7 +370,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void unregisterGcm() {
-        requireIdentification();
+        requireIdentification(true);
         logCall("unregisterGcm()");
         TalkClient client = mConnection.getClient();
         client.setGcmPackage(null);
@@ -366,7 +380,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void registerApns(String registrationToken) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("registerApns(registrationToken: '" + registrationToken + "')");
         // APNS occasionally returns these for no good reason
         if (registrationToken.isEmpty()) {
@@ -379,7 +393,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void unregisterApns() {
-        requireIdentification();
+        requireIdentification(true);
         logCall("unregisterApns()");
         TalkClient client = mConnection.getClient();
         client.setApnsToken(null);
@@ -388,7 +402,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void hintApnsUnreadMessage(int numUnreadMessages) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("hintApnsUnreadMessages('" + numUnreadMessages + "' unread messages)");
         TalkClient client = mConnection.getClient();
         client.setApnsUnreadMessages(numUnreadMessages);
@@ -397,7 +411,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public TalkRelationship[] getRelationships(Date lastKnown) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("getRelationships(lastKnown: '" + lastKnown + "')");
 
         List<TalkRelationship> relationships =
@@ -414,14 +428,14 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void updatePresence(TalkPresence presence) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("updatePresence()");
         updatePresence(presence, null);
     }
 
     @Override
     public void modifyPresence(TalkPresence presence) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("modifyPresence(presence: '" + presence + "')");
         Set<String> fields = presence.nonNullFields();
         updatePresence(presence, fields);
@@ -460,7 +474,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public TalkPresence[] getPresences(Date lastKnown) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("getPresences(lastKnown: '" + lastKnown + "')");
 
         List<TalkPresence> pres = mDatabase.findPresencesChangedAfter(mConnection.getClientId(), lastKnown);
@@ -480,7 +494,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void updateKey(TalkKey key) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("updateKey()");
         if (mDatabase.findKey(mConnection.getClientId(), key.getKeyId()) != null) {
             return;
@@ -494,7 +508,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public boolean verifyKey(String keyId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("verifyKey( keyId: '" + keyId + "')");
 
         TalkKey key = mDatabase.findKey(mConnection.getClientId(), keyId);
@@ -513,7 +527,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public TalkKey getKey(String clientId, String keyId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("getKey(clientId: '" + clientId + "', keyId: '" + keyId + "')");
 
         TalkKey key = null;
@@ -543,7 +557,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public String generateToken(String tokenPurpose, int secondsValid) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("generateToken(tokenPurpose: '" + tokenPurpose + "', secondsValid: '" + secondsValid + "')");
 
         // verify request
@@ -595,7 +609,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public String generatePairingToken(int maxUseCount, int secondsValid) {
-        requireIdentification();
+        requireIdentification(true);
 
         logCall("generatePairingToken(maxUseCount: '" + maxUseCount + "', secondsValid: '" + secondsValid + "')");
 
@@ -667,7 +681,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public boolean pairByToken(String secret) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("pairByToken(secret: '" + secret + "')");
 
         TalkToken token = mDatabase.findTokenByPurposeAndSecret(
@@ -727,7 +741,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void blockClient(String clientId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("blockClient(id '" + clientId + "')");
 
         String myId = mConnection.getClientId();
@@ -754,7 +768,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void unblockClient(String clientId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("unblockClient(id '" + clientId + "')");
 
         String myId = mConnection.getClientId();
@@ -777,7 +791,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void inviteFriend(String clientId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("inviteFriend(id '" + clientId + "')");
 
         String myId = mConnection.getClientId();
@@ -828,7 +842,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void disinviteFriend(String clientId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("disinviteFriend(id '" + clientId + "')");
 
         String myId = mConnection.getClientId();
@@ -857,7 +871,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void acceptFriend(String clientId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("acceptFriend(id '" + clientId + "')");
 
         String myId = mConnection.getClientId();
@@ -890,7 +904,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void refuseFriend(String clientId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("acceptFriend(id '" + clientId + "')");
 
         String myId = mConnection.getClientId();
@@ -919,7 +933,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void depairClient(String clientId) {
-        requireIdentification();
+        requireIdentification(true);
 
         logCall("depairClient(id '" + clientId + "')");
 
@@ -966,7 +980,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public TalkDelivery[] outDeliveryRequest(TalkMessage message, TalkDelivery[] deliveries) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("outDeliveryRequest(" + deliveries.length + " deliveries)");
 
         String clientId = mConnection.getClientId();
@@ -1230,7 +1244,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     private TalkDelivery inDeliveryConfirm(String messageId, String confirmationState) {
-        requireIdentification();
+        requireIdentification(true);
         synchronized (mServer.idLock(messageId)) {
             String clientId = mConnection.getClientId();
             TalkDelivery delivery = mDatabase.findDelivery(messageId, clientId);
@@ -1270,7 +1284,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     private TalkDelivery outDeliveryAcknowledge(String messageId, String recipientId, String acknowledgeState, String acknowledgedState) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("deliveryAcknowledge '"+acknowledgeState+"' (messageId: '" + messageId + "', recipientId: '" + recipientId + "')");
         synchronized (mServer.idLock(messageId)) {
             TalkDelivery delivery = mDatabase.findDelivery(messageId, recipientId);
@@ -1328,27 +1342,27 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public TalkDelivery outDeliveryAbort(String messageId, String recipientId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("deliveryAbort(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
         return deliverySenderChangeState(messageId, recipientId, TalkDelivery.STATE_ABORTED_ACKNOWLEDGED);
     }
 
     @Override
     public TalkDelivery outDeliveryAcknowledgeRejected(String messageId, String recipientId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("deliveryAbort(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
         return deliverySenderChangeState(messageId, recipientId, TalkDelivery.STATE_REJECTED_ACKNOWLEDGED);
     }
     @Override
     public TalkDelivery outDeliveryAcknowledgeFailed(String messageId, String recipientId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("deliveryAbort(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
         return deliverySenderChangeState(messageId, recipientId, TalkDelivery.STATE_FAILED_ACKNOWLEDGED);
     }
 
     @Override
     public TalkDelivery inDeliveryReject(String messageId, String reason) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("deliveryReject(messageId: '" + messageId+", reason:"+reason);
         synchronized (mServer.idLock(messageId)) {
             String clientId = mConnection.getClientId();
@@ -1391,7 +1405,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public String createGroup(TalkGroup group) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("createGroup(groupTag: '" + group.getGroupTag() + "')");
         group.setGroupId(UUID.randomUUID().toString());
         group.setState(TalkGroup.STATE_EXISTS);
@@ -1407,7 +1421,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public TalkGroup[] getGroups(Date lastKnown) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("getGroups(lastKnown: '" + lastKnown + "')");
         List<TalkGroup> groups = mDatabase.findGroupsByClientIdChangedAfter(mConnection.getClientId(), lastKnown);
         TalkGroup[] res = new TalkGroup[groups.size()];
@@ -1419,21 +1433,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public TalkGroup getGroup(String groupId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("getGroup(id: '" + groupId + "')");
         return mDatabase.findGroupById(groupId);
     }
 
     @Override
     public TalkGroupMember getGroupMember(String groupId, String clientId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("getGroupMember(groupId: '" + groupId + ", clientId:" + clientId + "')");
         return mDatabase.findGroupMemberForClient(groupId, clientId);
     }
 
     @Override
     public void updateGroupName(String groupId, String name) {
-        requireIdentification();
+        requireIdentification(true);
         requireGroupAdmin(groupId);
         //requireNotNearbyGroupType(groupId);
         logCall("updateGroupName(groupId: '" + groupId + "', name: '" + name + "')");
@@ -1444,7 +1458,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void updateGroupAvatar(String groupId, String avatarUrl) {
-        requireIdentification();
+        requireIdentification(true);
         requireGroupAdmin(groupId);
         //requireNotNearbyGroupType(groupId);
         logCall("updateGroupAvatar(groupId: '" + groupId + "', avatarUrl: '" + avatarUrl + "')");
@@ -1455,7 +1469,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void updateGroup(TalkGroup group) {
-        requireIdentification();
+        requireIdentification(true);
         requireGroupAdmin(group.getGroupId());
         logCall("updateGroup(groupId: '" + group.getGroupId() + "')");
         TalkGroup targetGroup = mDatabase.findGroupById(group.getGroupId());
@@ -1466,7 +1480,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void deleteGroup(String groupId) {
-        requireIdentification();
+        requireIdentification(true);
         requireGroupAdmin(groupId);
         logCall("deleteGroup(groupId: '" + groupId + "')");
 
@@ -1510,7 +1524,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void inviteGroupMember(String groupId, String clientId) {
-        requireIdentification();
+        requireIdentification(true);
         requireGroupAdmin(groupId);
         //requireNotNearbyGroupType(groupId);
         logCall("inviteGroupMember(groupId: '" + groupId + "' / clientId: '" + clientId + "')");
@@ -1553,7 +1567,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void joinGroup(String groupId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("joinGroup(groupId: '" + groupId + "')");
 
         String clientId = mConnection.getClientId();
@@ -1578,7 +1592,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void leaveGroup(String groupId) {
-        requireIdentification();
+        requireIdentification(true);
         TalkGroupMember member = requiredGroupInvitedOrMember(groupId);
         logCall("leaveGroup(groupId: '" + groupId + "')");
         // set membership state to NONE
@@ -1593,7 +1607,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void removeGroupMember(String groupId, String clientId) {
-        requireIdentification();
+        requireIdentification(true);
         requireGroupAdmin(groupId);
         //requireNotNearbyGroupType(groupId);
         logCall("removeGroupMember(groupId: '" + groupId + "' / clientId: '" + clientId + "')");
@@ -1612,7 +1626,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public void updateGroupRole(String groupId, String clientId, String role) {
-        requireIdentification();
+        requireIdentification(true);
         requireGroupAdmin(groupId);
         logCall("updateGroupRole(groupId: '" + groupId + "' / clientId: '" + clientId + "', role: '" + role + "')");
         TalkGroupMember targetMember = mDatabase.findGroupMemberForClient(groupId, clientId);
@@ -1628,7 +1642,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown) {
-        requireIdentification();
+        requireIdentification(true);
         requiredGroupInvitedOrMember(groupId);
         logCall("getGroupMembers(groupId: '" + groupId + "' / lastKnown: '" + lastKnown + "')");
 
@@ -1684,7 +1698,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 */
     @Override
     public FileHandles createFileForStorage(int contentLength) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("createFileForStorage(contentLength: '" + contentLength + "')");
         return mServer.getFilecacheClient()
                 .createFileForStorage(mConnection.getClientId(), "application/octet-stream", contentLength);
@@ -1692,7 +1706,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public FileHandles createFileForTransfer(int contentLength) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("createFileForTransfer(contentLength: '" + contentLength + "')");
         return mServer.getFilecacheClient()
                 .createFileForTransfer(mConnection.getClientId(), "application/octet-stream", contentLength);
@@ -1701,35 +1715,35 @@ public class TalkRpcHandler implements ITalkRpcServer {
     // should be called by the receiver of an transfer file if the user has aborted the download
     @Override
     public String receivedFile(String fileId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("receivedFile(fileId: '" + fileId + "')");
         return processFileDownloadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_RECEIVED);
     }
     // should be called by the receiver of an transfer file after download; the server can the delete the file in case
     @Override
     public String abortedFileDownload(String fileId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("abortedFileDownload(fileId: '" + fileId + "')");
         return processFileDownloadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_ABORTED);
     }
     // should be called by the receiver of an transfer file if the client has exceeded the download retry count
     @Override
     public String failedFileDownload(String fileId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("failedFileDownload(fileId: '" + fileId + "')");
         return processFileDownloadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED);
     }
     // should be called by the receiver of an transfer file when a final attachment sender set state has been seen
     @Override
     public String acknowledgeAbortedFileUpload(String fileId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("failedFileDownload(fileId: '" + fileId + "')");
         return processFileDownloadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED);
     }
     // should be called by the receiver of an transfer file when a final attachment sender set state has been seen
     @Override
     public String acknowledgeFailedFileUpload(String fileId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("acknowledgeFailedFileUpload(fileId: '" + fileId + "')");
         return processFileDownloadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED);
     }
@@ -1772,56 +1786,56 @@ public class TalkRpcHandler implements ITalkRpcServer {
     // should be called by the sender of an transfer file after upload has been started
     @Override
     public String startedFileUpload(String fileId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("startedFileUpload(fileId: '" + fileId + "')");
         return processFileUploadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_UPLOADING, null);
     }
     // should be called by the sender of an transfer file when the upload has been paused
     @Override
     public String pausedFileUpload(String fileId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("pausedFileUpload(fileId: '" + fileId + "')");
         return processFileUploadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_UPLOAD_PAUSED, null);
     }
     // should be called by the sender of an transfer file after upload has been finished
     @Override
     public String finishedFileUpload(String fileId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("finishedFileUpload(fileId: '" + fileId + "')");
         return processFileUploadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_UPLOADED, null);
     }
     // should be called by the sender of an transfer file when the upload is aborted by the user
     @Override
     public String abortedFileUpload(String fileId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("abortedFileUpload(fileId: '" + fileId + "')");
         return processFileUploadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_UPLOAD_ABORTED, null);
     }
     // should be called by the sender of an transfer file when upload retry count has been exceeded
     @Override
     public String failedFileUpload(String fileId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("failedFileUpload(fileId: '" + fileId + "')");
         return processFileUploadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED, null);
     }
     // should be called by the sender of an transfer file when a final attachment receiver set state has been seen
     @Override
     public String acknowledgeReceivedFile(String fileId, String receiverId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("acknowledgeReceivedFile(fileId: '" + fileId + "')");
         return processFileUploadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED, receiverId);
     }
     // should be called by the sender of an transfer file when a final attachment receiver set state has been seen
     @Override
     public String acknowledgeAbortedFileDownload(String fileId, String receiverId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("acknowledgeReceivedFile(fileId: '" + fileId + "')");
         return processFileUploadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED, receiverId);
     }
     // should be called by the sender of an transfer file when a final attachment receiver set state has been seen
     @Override
     public String acknowledgeFailedFileDownload(String fileId, String receiverId) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("acknowledgeReceivedFile(fileId: '" + fileId + "')");
         return processFileUploadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED, receiverId);
     }
@@ -1965,7 +1979,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
-        requireIdentification();
+        requireIdentification(true);
 
         if (environment.getType() == null) {
             LOG.warn("updateEnvironment: no environment type, defaulting to nearby. Please fix client");
@@ -2107,7 +2121,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     @Override
     public Boolean[] isMemberInGroups(String[] groupIds) {
-        requireIdentification();
+        requireIdentification(true);
         ArrayList<Boolean> result = new ArrayList<Boolean>();
         logCall("isMemberInGroups(groupIds: '" + Arrays.toString(groupIds) + "'");
         String clientId = mConnection.getClientId();
@@ -2127,7 +2141,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
     // return true if for each client the caller is related to by a relationsShip or by an active group membership
     @Override
     public Boolean[] isContactOf(String[] clientIds) {
-        requireIdentification();
+        requireIdentification(true);
         logCall("isContactOf(clientIds: '" + Arrays.toString(clientIds) + "'");
         final String clientId = mConnection.getClientId();
 
