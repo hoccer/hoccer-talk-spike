@@ -301,4 +301,10 @@
     <string name="actionbar_default_title">Hoccer</string>
     <string name="content_audio_caption">Music</string>
 
+    <string name="search_section_caption_contacts">Contacts</string>
+    <string name="search_section_caption_files">Files</string>
+    <string name="search_section_caption_images">Images</string>
+    <string name="search_section_caption_audio_files">Audio Files</string>
+    <string name="search_section_caption_video_files">Video Files</string>
+
 </resources>
