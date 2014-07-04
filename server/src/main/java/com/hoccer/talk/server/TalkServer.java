@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 
 /**
  * Main object of the Talk server
@@ -121,13 +122,34 @@ public class TalkServer {
     AtomicInteger mConnectionsTotal = new AtomicInteger();
     AtomicInteger mConnectionsOpen = new AtomicInteger();
 
-    Map<String,Object> mIdLocks;
+    Map<String,String> mIdLocks;
+
+    public class NonReentrantLock{
+
+        private boolean isLocked = false;
+
+        public synchronized void lock()
+                throws InterruptedException{
+            while(isLocked){
+                wait();
+            }
+            isLocked = true;
+        }
+
+        public synchronized void unlock(){
+            isLocked = false;
+            notify();
+        }
+    }
+
+    Map<String,NonReentrantLock> mNonReentrantIdLocks;
 
     /**
      * Create and initialize a Hoccer Talk server
      */
     public TalkServer(TalkServerConfiguration configuration, ITalkServerDatabase database) {
-        mIdLocks = new HashMap<String, Object>();
+        mIdLocks = new HashMap<String, String>();
+        mNonReentrantIdLocks = new HashMap<String, NonReentrantLock>();
 
         mConfiguration = configuration;
         mDatabase = database;
@@ -154,13 +176,26 @@ public class TalkServer {
         mJmxReporter.start();
     }
 
-    public Object idLock(String id) {
-        Object lock = mIdLocks.get(id);
-        if (lock == null) {
-            lock = new Object();
-            mIdLocks.put(id, lock);
+    public NonReentrantLock idLockNonReentrant(String id) {
+        synchronized (mNonReentrantIdLocks) {
+            NonReentrantLock lock = mNonReentrantIdLocks.get(id);
+            if (lock == null) {
+                lock = new NonReentrantLock();
+                mNonReentrantIdLocks.put(id, lock);
+            }
+            return lock;
         }
-        return lock;
+    }
+
+    public String idLock(String id) {
+        synchronized (mIdLocks) {
+            String lock = mIdLocks.get(id);
+            if (lock == null) {
+                lock = new String(id);
+                mIdLocks.put(id, lock);
+            }
+            return lock;
+        }
     }
 
     // lock for two Ids at the same time; note that the individual id will not be locked that way
