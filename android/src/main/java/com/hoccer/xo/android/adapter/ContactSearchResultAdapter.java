@@ -1,5 +1,9 @@
 package com.hoccer.xo.android.adapter;
 
+import android.graphics.Color;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -21,24 +25,28 @@ import java.util.List;
  */
 public class ContactSearchResultAdapter extends ContactsAdapter {
 
-    private List<TalkClientContact> mFoundContacts;
+    private List<TalkClientContact> mFoundContacts = new ArrayList<TalkClientContact>();
+    private String mLastQuery = "";
 
     public ContactSearchResultAdapter(XoActivity activity) {
         super(activity);
         setShowTokens(false);
-        mFoundContacts = new ArrayList<TalkClientContact>();
     }
 
-    public void searchForContactsByName(CharSequence query) {
+    public void searchForContactsByName(String query) {
         mFoundContacts.clear();
+        mLastQuery = query.toLowerCase();
 
         if (query.length() > 0) {
+
             for (TalkClientContact contact : mClientContacts) {
                 String name = contact.getName().toLowerCase();
-                if (name.startsWith(query.toString().toLowerCase())) {
+                if (name.startsWith(mLastQuery)) {
                     mFoundContacts.add(contact);
                 }
             }
+        } else {
+            mFoundContacts.clear();
         }
     }
 
@@ -79,9 +87,14 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
 
     @Override
     protected void updateContact(View view, TalkClientContact contact) {
-        TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
-        nameView.setText(contact.getName());
+
+        TextView nameView = (TextView) view.findViewById(R.id.contact_name);
+//        Spannable contactName = new SpannableString(contact.getName());
+//        int highlightStart = contact.getName().toLowerCase().indexOf(mLastQuery);
+//        contactName.setSpan(new ForegroundColorSpan(Color.BLACK), highlightStart, highlightStart + mLastQuery.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        nameView.setText(getHighlightedSearchResult(contact.getName(), mLastQuery));
         TextView typeView = (TextView) view.findViewById(R.id.contact_type);
 
         avatarView.setContact(contact);
@@ -98,5 +111,15 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
     @Override
     protected void updateToken(View view, TalkClientSmsToken token) {
 
+    }
+
+    private Spannable getHighlightedSearchResult(String text, String query) {
+        Spannable result = new SpannableString(text);
+        int highlightStart = text.toLowerCase().indexOf(query);
+        if (highlightStart >= 0) {
+            result.setSpan(new ForegroundColorSpan(Color.BLACK), highlightStart, highlightStart + mLastQuery.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        return result;
     }
 }
