@@ -109,25 +109,6 @@ public class MediaCollectionTest {
             fail();
         }
 
-        assertNotNull(collection);
-        assertEquals(collectionName, collection.getName());
-        assertEquals(0, collection.size());
-
-        // check database directly
-        {
-            List<TalkClientMediaCollection> collections = null;
-            try {
-                collections = mDatabase.findAllMediaCollections();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                fail();
-            }
-
-            assertNotNull(collections);
-            assertEquals(1, collections.size());
-            assertEquals(collection.getId(), collections.get(0).getId());
-        }
-
         try {
             mDatabase.deleteMediaCollection(collection);
         } catch (SQLException e) {
@@ -161,25 +142,6 @@ public class MediaCollectionTest {
         } catch(SQLException e) {
             e.printStackTrace();
             fail();
-        }
-
-        assertNotNull(collection);
-        assertEquals(collectionName, collection.getName());
-        assertEquals(0, collection.size());
-
-        // check database directly
-        {
-            List<TalkClientMediaCollection> collections = null;
-            try {
-                collections = mDatabase.findAllMediaCollections();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                fail();
-            }
-
-            assertNotNull(collections);
-            assertEquals(1, collections.size());
-            assertEquals(collection.getId(), collections.get(0).getId());
         }
 
         try {
@@ -216,9 +178,6 @@ public class MediaCollectionTest {
         TalkClientDownload item2 = new TalkClientDownload();
         try {
             collection = mDatabase.createMediaCollection(collectionName);
-
-            assertNotNull(collection);
-            assertEquals(collectionName, collection.getName());
 
             // create some items and add to collection
             mDatabase.saveClientDownload(item0);
@@ -263,9 +222,6 @@ public class MediaCollectionTest {
         TalkClientDownload item3 = new TalkClientDownload();
         try {
             collection = mDatabase.createMediaCollection(collectionName);
-
-            assertNotNull(collection);
-            assertEquals(collection.getName(), collectionName);
 
             // create some items and add to collection
             mDatabase.saveClientDownload(item0);
@@ -317,9 +273,6 @@ public class MediaCollectionTest {
         TalkClientDownload item3 = new TalkClientDownload();
         try {
             collection = mDatabase.createMediaCollection(collectionName);
-
-            assertNotNull(collection);
-            assertEquals(collection.getName(), collectionName);
 
             // create some items and add to collection
             mDatabase.saveClientDownload(item0);
@@ -428,9 +381,6 @@ public class MediaCollectionTest {
         TalkClientDownload item4 = new TalkClientDownload();
         try {
             collection = mDatabase.createMediaCollection(collectionName);
-
-            assertNotNull(collection);
-            assertEquals(collection.getName(), collectionName);
 
             // create some items and add to collection
             mDatabase.saveClientDownload(item0);
