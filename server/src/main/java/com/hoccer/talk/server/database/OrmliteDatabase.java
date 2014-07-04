@@ -704,4 +704,9 @@ public class OrmliteDatabase implements ITalkServerDatabase {
         // TODO: implement me properly!
         return null;
     }
+
+    @Override
+    public void changeDeliveryFieldValue(String fieldName, String oldFieldValue, String newFieldValue) {
+        // TODO: implement me properly!
+    }
 }

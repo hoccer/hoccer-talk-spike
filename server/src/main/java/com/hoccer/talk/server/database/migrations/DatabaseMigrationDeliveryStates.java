@@ -36,6 +36,16 @@ public class DatabaseMigrationDeliveryStates extends BaseDatabaseMigration imple
     }
 
     private void migrateDeliveriesFromStateToState(final String startState, final String targetState) {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                mDatabase.changeDeliveryFieldValue("state", startState, targetState);
+            }
+        });
+        LOG.info("scheduled migrating state for deliveries from: '" + startState + "' to '" + targetState + "'");
+    }
+
+    /*private void migrateDeliveriesFromStateToState(final String startState, final String targetState) {
         final List<TalkDelivery> deliveries = mDatabase.findDeliveriesInState(startState);
         //LOG.info("    * migrating " + deliveries.size() + " deliveries from state '" + startState + " -> '" + targetState);
         for (final TalkDelivery delivery : deliveries) {
@@ -48,5 +58,5 @@ public class DatabaseMigrationDeliveryStates extends BaseDatabaseMigration imple
             });
         }
         LOG.info("scheduled migrating state for " + deliveries.size() + " deliveries from: '" + startState + "' to '" + targetState + "'");
-    }
+    }*/
 }

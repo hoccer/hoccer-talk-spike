@@ -3,10 +3,7 @@ package com.hoccer.talk.server.database;
 import com.hoccer.talk.model.*;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServerConfiguration;
-import com.mongodb.DB;
-import com.mongodb.Mongo;
-import com.mongodb.MongoOptions;
-import com.mongodb.WriteConcern;
+import com.mongodb.*;
 import org.apache.log4j.Logger;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
@@ -841,6 +838,15 @@ public class JongoDatabase implements ITalkServerDatabase {
         }
 
         return res;
+    }
+
+    // Used for migrations - it bulk updates all specific field values encountered of the field specified with the given new value
+    // *Note:* This is brutally fast
+    public void changeDeliveryFieldValue(String fieldName, String oldFieldValue, String newFieldValue) {
+        mDeliveries.update("{" + fieldName + ": '" + oldFieldValue + "'}")
+                .multi()
+                .with("{$set: {" + fieldName + ": '" + newFieldValue + "'}}");
+        mDeliveries.findAndModify();
     }
 
     @Override
