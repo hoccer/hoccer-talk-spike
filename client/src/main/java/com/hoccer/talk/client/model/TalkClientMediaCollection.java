@@ -4,6 +4,7 @@ import com.hoccer.talk.client.IXoMediaCollectionDatabase;
 import com.hoccer.talk.util.WeakListenerArray;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.log4j.Logger;
 
@@ -22,6 +23,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
         void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex);
         void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved);
         void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded);
+        void onCollectionCleared(TalkClientMediaCollection collection);
     }
 
     private static final Logger LOG = Logger.getLogger(TalkClientMediaCollection.class);
@@ -144,6 +146,28 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
     public TalkClientDownload getItem(int index) {
         return mItemList.get(index);
+    }
+
+    // Remove all items from collection
+    public void clear() {
+        if(mItemList.size() == 0) {
+            return;
+        }
+
+        // delete all relationships from  database
+        try {
+            DeleteBuilder<TalkClientMediaCollectionRelation, Integer> deleteBuilder = mDatabase.getMediaCollectionRelationDao().deleteBuilder();
+            deleteBuilder.where()
+                    .eq("collection_id", mCollectionId);
+            deleteBuilder.delete();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+        mItemList.clear();
+        for(Listener listener : mListenerArray) {
+            listener.onCollectionCleared(this);
+        }
     }
 
     public void registerListener(Listener listener) {

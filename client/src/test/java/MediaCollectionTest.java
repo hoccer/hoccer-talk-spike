@@ -7,6 +7,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
+import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -131,6 +132,9 @@ public class MediaCollectionTest {
 
             assertNotNull(collections);
             assertEquals(0, collections.size());
+
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            assertEquals(0, relations.size());
         }
     }
 
@@ -166,6 +170,9 @@ public class MediaCollectionTest {
 
             assertNotNull(collections);
             assertEquals(0, collections.size());
+
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            assertEquals(0, relations.size());
         }
     }
 
@@ -368,6 +375,36 @@ public class MediaCollectionTest {
             assertEquals(1, relations.get(1).getIndex());
             assertEquals(item2.getClientDownloadId(), relations.get(1).getItem().getClientDownloadId());
         }
+    }
+
+    @Test
+    public void testClearCollection() {
+        LOG.info("testClearCollection");
+
+        String collectionName = "testClearCollection_collection";
+
+        TalkClientMediaCollection collection = null;
+        TalkClientDownload item0 = new TalkClientDownload();
+        TalkClientDownload item1 = new TalkClientDownload();
+        TalkClientDownload item2 = new TalkClientDownload();
+        try {
+            collection = mDatabase.createMediaCollection(collectionName);
+
+            // create some items and addItem to collection
+            mDatabase.saveClientDownload(item0);
+            mDatabase.saveClientDownload(item1);
+            mDatabase.saveClientDownload(item2);
+            collection.addItem(item0);
+            collection.addItem(item1);
+            collection.addItem(item2);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+            e.printStackTrace();
+            fail();
+        }
+        collection.clear();
+
+        assertEquals(0, collection.size());
     }
 
     @Test
@@ -659,10 +696,10 @@ public class MediaCollectionTest {
     }
 
     @Test
-    public void testListener() {
-        LOG.info("testListener");
+    public void testRegisterListener() {
+        LOG.info("testRegisterListener");
 
-        final String collectionName = "testListener_collection";
+        final String collectionName = "testRegisterListener_collection";
         TalkClientMediaCollection collection = null;
         TalkClientDownload item0 = new TalkClientDownload();
         TalkClientDownload item1 = new TalkClientDownload();
@@ -704,6 +741,7 @@ public class MediaCollectionTest {
         final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
 
         TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
             public void onCollectionNameChanged(TalkClientMediaCollection collection) {
@@ -725,6 +763,10 @@ public class MediaCollectionTest {
                 assertEquals(expectedItemAdded, itemAdded);
                 onItemAddedCalled.value = true;
             }
+            @Override
+            public void onCollectionCleared(TalkClientMediaCollection collection) {
+                onCollectionClearedCalled.value = true;
+            }
         };
         collection.registerListener(listener);
 
@@ -732,30 +774,86 @@ public class MediaCollectionTest {
         collection.addItem(3, expectedItemAdded);
         collection.removeItem(expectedItemRemoved);
         collection.reorderItemIndex(2, 4);
+        collection.clear();
 
         assertTrue(onNameChangedCalled.value);
         assertTrue(onItemOrderChangedCalled.value);
         assertTrue(onItemRemovedCalled.value);
         assertTrue(onItemAddedCalled.value);
+        assertTrue(onCollectionClearedCalled.value);
+    }
 
-        // test unregister listener
+    @Test
+    public void testUnregisterListener() {
+        LOG.info("testUnregisterListener");
+
+        final String collectionName = "testUnregisterListener_collection";
+        TalkClientMediaCollection collection = null;
+        TalkClientDownload item0 = new TalkClientDownload();
+        TalkClientDownload item1 = new TalkClientDownload();
+        TalkClientDownload item2 = new TalkClientDownload();
+        TalkClientDownload item3 = new TalkClientDownload();
+        TalkClientDownload item4 = new TalkClientDownload();
+        TalkClientDownload item5 = new TalkClientDownload();
+        try {
+            collection = mDatabase.createMediaCollection(collectionName);
+
+            mDatabase.saveClientDownload(item0);
+            mDatabase.saveClientDownload(item1);
+            mDatabase.saveClientDownload(item2);
+            mDatabase.saveClientDownload(item3);
+            mDatabase.saveClientDownload(item4);
+            mDatabase.saveClientDownload(item5);
+
+            collection.addItem(item0);
+            collection.addItem(item1);
+            collection.addItem(item2);
+            collection.addItem(item3);
+            collection.addItem(item4);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+            e.printStackTrace();
+            fail();
+        }
+
+        final ValueContainer<Boolean> onNameChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
+
+        TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
+            public void onCollectionNameChanged(TalkClientMediaCollection collection) {
+                onNameChangedCalled.value = true;
+            }
+            public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
+                onItemOrderChangedCalled.value = true;
+            }
+            public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
+                onItemRemovedCalled.value = true;
+            }
+            public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
+                onItemAddedCalled.value = true;
+            }
+            @Override
+            public void onCollectionCleared(TalkClientMediaCollection collection) {
+                onCollectionClearedCalled.value = true;
+            }
+        };
+        collection.registerListener(listener);
         collection.unregisterListener(listener);
 
-        // reset states
-        onNameChangedCalled.value = false;
-        onItemOrderChangedCalled.value = false;
-        onItemRemovedCalled.value = false;
-        onItemAddedCalled.value = false;
-
-        collection.setName(expectedCollectionName);
-        collection.addItem(3, expectedItemAdded);
-        collection.removeItem(expectedItemRemoved);
+        collection.setName("newName");
+        collection.addItem(3, item5);
+        collection.removeItem(item5);
         collection.reorderItemIndex(2, 4);
+        collection.clear();
 
         assertFalse(onNameChangedCalled.value);
         assertFalse(onItemOrderChangedCalled.value);
         assertFalse(onItemRemovedCalled.value);
         assertFalse(onItemAddedCalled.value);
+        assertFalse(onCollectionClearedCalled.value);
     }
 
     @Test
