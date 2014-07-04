@@ -12,8 +12,8 @@ public class StaticSystemMessage {
     public static enum MESSAGES {
 
         UPDATE_NAGGING(
-                "Bitte update XO und installiere die neueste Version. Tolle neue Funktionen warten auf dich! Please update XO and install the new version. Great new features are waiting for you!",
-                "foo");
+                "Bitte XO updaten und die aktuellste Version aus deinem App Store installieren! Ältere Versionen werden nicht mehr unterstützt!",
+                "Please update XO and install the latest version from your App store! Outdated versions are no longer supported!");
 
         public String deu;
         public String eng;
