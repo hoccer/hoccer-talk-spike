@@ -32,7 +32,7 @@ public class StaticSystemMessage {
         }
     }
 
-    public static Language DEFAULT_LANGUAGE = Language.GERMAN;
+    public final static Language DEFAULT_LANGUAGE = Language.GERMAN;
 
     public static enum MESSAGES {
         UPDATE_NAGGING(
