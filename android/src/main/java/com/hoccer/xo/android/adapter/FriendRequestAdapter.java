@@ -26,10 +26,10 @@ public class FriendRequestAdapter extends XoAdapter {
     public FriendRequestAdapter(XoActivity activity) {
         super(activity);
         mItems = new ArrayList<TalkClientContact>();
-        loadPendingFreidnRequests();
+        loadPendingFriendRequests();
     }
 
-    private void loadPendingFreidnRequests() {
+    private void loadPendingFriendRequests() {
         int countBefore = getCount();
         mItems = mActivity.getXoDatabase().findAllPendingFriendRequests();
         if(mListener != null && countBefore != getCount()) {
@@ -83,7 +83,7 @@ public class FriendRequestAdapter extends XoAdapter {
 
     @Override
     public void notifyDataSetChanged() {
-        loadPendingFreidnRequests();
+        loadPendingFriendRequests();
         super.notifyDataSetChanged();
     }
 

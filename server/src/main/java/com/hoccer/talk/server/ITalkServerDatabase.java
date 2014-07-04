@@ -153,4 +153,6 @@ public interface ITalkServerDatabase {
     public List<TalkDatabaseMigration> findDatabaseMigrations();
 
     public void saveDatabaseMigration(TalkDatabaseMigration migration);
+
+    public void changeDeliveryFieldValue(String fieldName, String oldFieldValue, String newFieldValue);
 }

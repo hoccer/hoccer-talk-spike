@@ -1041,11 +1041,9 @@ public class XoClient implements JsonRpcConnection.Listener {
                             LOG.error("createGroup: defective membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
                         }
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        LOG.error("SQL error: ", e);
                     }
                     // end of error checking section
-
-
 
                 } catch (JsonRpcClientException e) {
                     LOG.error("Error while creating group: ", e);
@@ -2107,9 +2105,19 @@ public class XoClient implements JsonRpcConnection.Listener {
         }
     }
 
+    public TalkClientContact getCurrentNearbyGroup() {
+        try {
+            return mDatabase.findContactByGroupId(mEnvironmentGroupId, false);
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+        return null;
+    }
+
 
     public void sendDestroyEnvironment(final String type) {
         if (this.getState() == STATE_ACTIVE) {
+            mEnvironmentGroupId = null;
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -2175,15 +2183,19 @@ public class XoClient implements JsonRpcConnection.Listener {
             LOG.error("SQL error", e);
         }
 
-        final XoClient that = this;
+        sendDeliveryConfirmation(delivery);
+
+        for(IXoMessageListener listener: mMessageListeners) {
+            listener.onMessageStateChanged(clientMessage);
+        }
+    }
+
+    private void sendDeliveryConfirmation(final TalkDelivery delivery) {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-
                 try {
-
                     TalkDelivery result = null;
-
                     if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_SEEN)) {
                         result = mServerRpc.outDeliveryAcknowledgeSeen(delivery.getMessageId(), delivery.getReceiverId());
                     } else if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_UNSEEN)) {
@@ -2195,20 +2207,14 @@ public class XoClient implements JsonRpcConnection.Listener {
                     } else if (delivery.getState().equals(TalkDelivery.STATE_REJECTED)) {
                         result = mServerRpc.outDeliveryAcknowledgeRejected(delivery.getMessageId(), delivery.getReceiverId());
                     }
-
                     if (result != null) {
-                        that.updateOutgoingDelivery(result);
+                        updateOutgoingDelivery(result);
                     }
-
                 } catch (Exception e) {
                     LOG.error("Error while sending delivery confirmation: ", e);
                 }
             }
         });
-
-        for(IXoMessageListener listener: mMessageListeners) {
-            listener.onMessageStateChanged(clientMessage);
-        }
     }
 
     private void updateIncomingDelivery(final TalkDelivery delivery) {

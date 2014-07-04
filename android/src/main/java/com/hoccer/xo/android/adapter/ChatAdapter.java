@@ -57,8 +57,8 @@ public class
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
-        mContact = contact;
         mListView = listView;
+        mContact = contact;
 
         initialize();
     }
@@ -106,6 +106,12 @@ public class
         } catch (SQLException e) {
             LOG.error("SQLException while batch retrieving messages for contact: " + mContact.getClientId(), e);
         }
+    }
+
+    public void setContact(TalkClientContact contact) {
+        mContact = contact;
+        initialize();
+        requestReload();
     }
 
     @Override
@@ -219,7 +225,7 @@ public class
         }
     }
 
-    private void markMessageAsSeen(final TalkClientMessage message) {
+    protected void markMessageAsSeen(final TalkClientMessage message) {
         mActivity.getBackgroundExecutor().execute(new Runnable() {
             @Override
             public void run() {
@@ -237,6 +243,12 @@ public class
                 mListView.smoothScrollToPosition(getCount() - 1);
             }
         }
+    }
+
+    @Override
+    public void onReloadRequest() {
+        super.onReloadRequest();
+        notifyDataSetChanged();
     }
 
     @Override

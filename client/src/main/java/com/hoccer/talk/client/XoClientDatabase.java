@@ -427,15 +427,33 @@ public class XoClientDatabase {
         builder.where().eq("deleted", false);
         builder.orderBy("timestamp", true);
         List<TalkClientMessage> messages = builder.query();
-        ArrayList<TalkClientMessage> res = new ArrayList<TalkClientMessage>();
+
+        ArrayList<TalkClientMessage> nearbyMessages = new ArrayList<TalkClientMessage>();
         for (TalkClientMessage message : messages) {
-            if (message.getConversationContact().getContactType().equals("group")) {
-                if (message.getConversationContact().getGroupPresence().isTypeNearby()) {
-                    res.add(message);
+            if (message.getConversationContact() != null && message.getConversationContact().getContactType() != null) {
+                if (message.getConversationContact().getContactType().equals("group")) {
+                    if (message.getConversationContact().getGroupPresence().isTypeNearby()) {
+                        nearbyMessages.add(message);
+                    }
                 }
             }
         }
-        return res;
+        ArrayList<TalkClientContact> allNearbyGroupsOrdered = new ArrayList<TalkClientContact>();
+        for (TalkClientMessage m: nearbyMessages) {
+            if (!allNearbyGroupsOrdered.contains(m.getConversationContact())) {
+                allNearbyGroupsOrdered.add(m.getConversationContact());
+            }
+        }
+        ArrayList<TalkClientMessage> orderedMessages = new ArrayList<TalkClientMessage>();
+        for (TalkClientContact c: allNearbyGroupsOrdered) {
+            TalkClientMessage separator = new TalkClientMessage();
+            separator.setConversationContact(c);
+            separator.setText("Nearby: " + c.getNickname());
+            separator.setMessageId("SEPARATOR");
+            orderedMessages.add(separator);
+            orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(),nearbyMessages.size(), 0));
+        }
+        return orderedMessages;
     }
 
     public List<TalkClientMessage> findMessagesByContactId(int contactId, long count, long offset) throws SQLException {

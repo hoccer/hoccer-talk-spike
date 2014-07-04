@@ -63,6 +63,7 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
     public void onResume() {
         super.onResume();
         showPlaceholder();
+        updateViews();
     }
 
     @Override
@@ -107,29 +108,26 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
             if (mActivity == null) {
                 return;
             }
-            final List<TalkClientContact> nearbyGroups = getXoDatabase().findAllNearbyGroups();
+
+            final TalkClientContact nearbyGroup = getXoActivity().getXoClient().getCurrentNearbyGroup();
             final List<TalkClientContact> allNearbyContacts = getXoDatabase().findAllNearbyContacts();
-            if (nearbyGroups.size() > 0) {
-                mActivity.runOnUiThread(new Runnable() {
+            if (nearbyGroup != null) {
+                mNearbyAdapter = new ChatAdapter(mList, getXoActivity(),
+                        nearbyGroup);
+                mNearbyAdapter.onCreate();
+                mCompositionFragment.setContact(nearbyGroup);
+                mList.post(new Runnable() {
                     @Override
                     public void run() {
+                        mList.setAdapter(mNearbyAdapter);
                         hidePlaceholder();
-                        if (mNearbyAdapter == null) {
-                            mNearbyAdapter = new ChatAdapter(mList, getXoActivity(),
-                                    nearbyGroups.get(0));
-                            mNearbyAdapter.onCreate();
-                            mList.setAdapter(mNearbyAdapter);
-                        }
-                        mNearbyAdapter.onResume();
-                        mNearbyAdapter.requestReload();
-                        mNearbyAdapter.notifyDataSetChanged();
-                        mCompositionFragment.converseWithContact(nearbyGroups.get(0));
                         mUserCountText.setText(mActivity.getResources().getString(
                                 R.string.nearby_info_usercount, allNearbyContacts.size() - 1));
                         mNearbyInfoContainer.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                Intent intent = new Intent(mActivity, NearbyContactsActivity.class);
+                                Intent intent = new Intent(mActivity,
+                                        NearbyContactsActivity.class);
                                 mActivity.startActivity(intent);
                             }
                         });
@@ -137,7 +135,7 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
                 });
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("SQL Exception while retrieving current nearby group: ", e);
         }
     }
 
