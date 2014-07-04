@@ -38,8 +38,8 @@ public class AttachmentListFilterAdapter extends XoAdapter {
     }
 
     @Override
-    public Integer getItem(int position) {
-        return new Integer(mFilterItems.get(position).getContactId());
+    public Object getItem(int position) {
+        return mFilterItems.get(position);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class AttachmentListFilterAdapter extends XoAdapter {
         return mFilterItems.get(position).getContactId();
     }
 
-    public int getPosition(int contactId){
+    public int getPositionForContactId(int contactId){
         for (FilterItem item : mFilterItems) {
             if (item.getContactId() == contactId) {
                 return mFilterItems.indexOf(item);
@@ -111,7 +111,7 @@ public class AttachmentListFilterAdapter extends XoAdapter {
         return false;
     }
 
-    private class FilterItem {
+    public class FilterItem {
 
         private String mDefaultFilterLabel;
         private TalkClientContact mContact;

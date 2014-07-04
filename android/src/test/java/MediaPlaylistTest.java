@@ -57,7 +57,7 @@ public class MediaPlaylistTest {
     public void testRemoveAfterCurrent() {
 
         mp.setCurrentIndex(1);
-        mp.remove(2);
+        mp.remove(items.get(2));
 
         List<Integer> expectedOrder = new ArrayList<Integer>() {
             {
@@ -78,7 +78,7 @@ public class MediaPlaylistTest {
     public void testRemoveBeforeCurrent() {
 
         mp.setCurrentIndex(2);
-        mp.remove(1);
+        mp.remove(items.get(1));
 
         List<Integer> expectedOrder = new ArrayList<Integer>() {
             {
@@ -99,7 +99,7 @@ public class MediaPlaylistTest {
     public void testRemoveCurrent() {
 
         mp.setCurrentIndex(0);
-        mp.remove(0);
+        mp.remove(items.get(0));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class MediaPlaylistTest {
             }
         });
         mp.setCurrentIndex(2);
-        mp.remove(2);
+        mp.remove(items.get(2));
 
         List<Integer> expectedOrder = new ArrayList<Integer>() {
             {
@@ -145,7 +145,7 @@ public class MediaPlaylistTest {
             }
         });
         mp.setCurrentIndex(0);
-        mp.remove(0);
+        mp.remove(items.get(0));
 
         List<Integer> expectedOrder = new ArrayList<Integer>() {
             {
@@ -175,6 +175,6 @@ public class MediaPlaylistTest {
             }
         });
         mp.setCurrentIndex(2);
-        mp.remove(0);
+        mp.remove(items.get(0));
     }
 }
