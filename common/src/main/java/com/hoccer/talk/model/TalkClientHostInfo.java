@@ -30,7 +30,7 @@ public class TalkClientHostInfo {
     /** The build variant. Currently valid values: [debug|release] */
     String clientBuildVariant;
 
-    /** A canonicalized IETF BCP 47 language identifier for the current client UI language, e.g. 'de' for german */
+    /** A ISO 639-1 language identifier for the current client UI language, e.g. 'de' for german */
     String clientLanguage;
 
     /** Name of the operating system, e.g. 'iPhone OS' */
@@ -39,7 +39,7 @@ public class TalkClientHostInfo {
     /** Version of the operating system, e.g. '7.0.4' */
     String systemVersion;
 
-    /** A canonicalized IETF BCP 47 language identifier for the current system language , e.g. 'de' for german */
+    /** A ISO 639-1 language identifier for the current system language , e.g. 'de' for german */
     String systemLanguage;
 
     /** A hardware device name identifier, e.g. 'iPhone6,1' */
