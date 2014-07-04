@@ -5,28 +5,33 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.model.TalkClientHostInfo;
 import org.apache.log4j.Logger;
 
+import java.util.Locale;
+
 public class StaticSystemMessage {
 
     private static final Logger LOG = Logger.getLogger(StaticSystemMessage.class);
 
+    // TODO: maybe use something like "new Locale(code)" directly
     public static enum Language {
-        GERMAN("de"),
-        ENGLISH("en");
+        GERMAN(Locale.GERMAN),
+        ENGLISH(Locale.ENGLISH);
 
-        public String iso639_1;
-        Language(String pIso639value) {
-            this.iso639_1 = pIso639value;
+        public Locale locale;
+
+        Language(Locale pLocale) {
+            this.locale = pLocale;
         }
 
-        public static Language fromString(String theCode) {
+        public static Language fromString(String theISO639_1Code) {
             for (Language language : values()) {
-                if (language.iso639_1.equalsIgnoreCase(theCode)) {
+                if (language.locale.getLanguage().equalsIgnoreCase(theISO639_1Code)) {
                     return language;
                 }
             }
             return null;
         }
     }
+
     public static Language DEFAULT_LANGUAGE = Language.GERMAN;
 
     public static enum MESSAGES {
