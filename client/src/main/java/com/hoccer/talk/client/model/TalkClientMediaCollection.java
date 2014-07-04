@@ -147,11 +147,11 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     }
 
     public void registerListener(Listener listener) {
-        mListenerArray.addListener(listener);
+        mListenerArray.registerListener(listener);
     }
 
     public void unregisterListener(Listener listener) {
-        mListenerArray.removeListener(listener);
+        mListenerArray.unregisterListener(listener);
     }
 
     @Override

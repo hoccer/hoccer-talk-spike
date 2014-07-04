@@ -12,14 +12,14 @@ public class WeakListenerArray<Listener> implements Iterable<Listener>{
     private ArrayList<WeakReference<Listener>> mItemList = new ArrayList<WeakReference<Listener>>();
 
     // Adds the given listener to array
-    public void addListener(Listener listener) {
+    public void registerListener(Listener listener) {
         if(!mItemList.contains(listener)) {
             mItemList.add(new WeakReference<Listener>(listener));
         }
     }
 
     // Removes the given listener instance from array
-    public void removeListener(Listener listener) {
+    public void unregisterListener(Listener listener) {
         for (Iterator<WeakReference<Listener>> iterator = mItemList.iterator();
              iterator.hasNext(); ) {
             WeakReference<Listener> weakListener = iterator.next();
