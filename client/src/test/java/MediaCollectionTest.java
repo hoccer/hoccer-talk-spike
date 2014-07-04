@@ -797,7 +797,7 @@ public class MediaCollectionTest {
             value = initValue;
         }
     }
-    
+
     private List<TalkClientMediaCollectionRelation> findMediaCollectionRelationsOrderedByIndex(int collectionId) {
 
         List<TalkClientMediaCollectionRelation> relations = null;

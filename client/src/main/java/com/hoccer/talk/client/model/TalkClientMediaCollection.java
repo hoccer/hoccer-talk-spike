@@ -14,7 +14,7 @@ import java.util.*;
  * Encapsulates a collection of media items with a specific order. The data is kept in sync with the database.
  */
 @DatabaseTable(tableName = "mediaCollection")
-public class TalkClientMediaCollection {
+public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
     // collection update/change listener
     public interface Listener {
@@ -70,7 +70,7 @@ public class TalkClientMediaCollection {
     }
 
     // Appends the given item to the collection
-    public void add(TalkClientDownload item) {
+    public void addItem(TalkClientDownload item) {
         if(createRelation(item, mItemList.size())) {
             mItemList.add(item);
             for(Listener listener : mListenerArray) {
@@ -80,9 +80,9 @@ public class TalkClientMediaCollection {
     }
 
     // Inserts the given item into the collection
-    public void add(int index, TalkClientDownload item) {
+    public void addItem(int index, TalkClientDownload item) {
         if(index >= mItemList.size()) {
-            add(item); // simply append
+            addItem(item); // simply append
         } else {
             if(createRelation(item, index)) {
                 mItemList.add(index, item);
@@ -94,15 +94,15 @@ public class TalkClientMediaCollection {
     }
 
     // Removes the given item from the collection
-    public void remove(TalkClientDownload item) {
+    public void removeItem(TalkClientDownload item) {
         int index = mItemList.indexOf(item);
         if(index >= 0) {
-            remove(index);
+            removeItem(index);
         }
     }
 
     // Removes the item at the given index from the collection
-    public void remove(int index) {
+    public void removeItem(int index) {
         if(removeRelation(index)) {
             TalkClientDownload item = mItemList.get(index);
             mItemList.remove(index);
@@ -155,14 +155,33 @@ public class TalkClientMediaCollection {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
+    public Iterator<TalkClientDownload> iterator() {
+        return new Iterator<TalkClientDownload>() {
+            int mCurrentIndex = 0;
 
-        TalkClientMediaCollection collection = (TalkClientMediaCollection) o;
-        if(collection == null) {
-            return false;
-        }
-        return mCollectionId == collection.mCollectionId;
+            @Override
+            public boolean hasNext() {
+                return mCurrentIndex < mItemList.size();
+            }
+
+            @Override
+            public TalkClientDownload next() {
+                if(mCurrentIndex < mItemList.size()) {
+                    return mItemList.get(mCurrentIndex++);
+                } else {
+                    throw new NoSuchElementException("There is no next item in media collection.");
+                }
+            }
+
+            @Override
+            public void remove() {
+                if(mCurrentIndex < mItemList.size()) {
+                    removeItem(mCurrentIndex);
+                } else {
+                    throw new NoSuchElementException("There is no next item in media collection.");
+                }
+            }
+        };
     }
 
     private List<TalkClientDownload> findMediaCollectionItemsOrderedByIndex() {
