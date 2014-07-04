@@ -619,7 +619,7 @@ public class UpdateAgent extends NotificationDeferrer {
         clearRequestContext(context);
     }
 
-    public void requestUserAlert(final String clientId, final StaticSystemMessage.MESSAGES message) {
+    public void requestUserAlert(final String clientId, final StaticSystemMessage.Message message) {
         Runnable notificationGenerator = new Runnable() {
             @Override
             public void run() {
@@ -627,8 +627,12 @@ public class UpdateAgent extends NotificationDeferrer {
                 if (conn == null || !conn.isConnected()) {
                     return;
                 }
-                TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(clientId);
-                String messageString = StaticSystemMessage.generateMessage(clientId, clientHostInfo, message);
+                TalkClient talkClient = mDatabase.findClientById(clientId);
+                if (talkClient == null) {
+                    return;
+                }
+                TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(talkClient.getClientId());
+                String messageString = new StaticSystemMessage(talkClient, clientHostInfo, message).generateMessage();
                 LOG.info("requestUserAlert");
                 conn.getClientRpc().alertUser(messageString);
             }
