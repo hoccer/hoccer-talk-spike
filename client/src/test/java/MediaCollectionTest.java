@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static junit.framework. TestCase.assertTrue;
@@ -786,6 +787,27 @@ public class MediaCollectionTest {
         }
 
         int index = 0;
+        for(TalkClientDownload item : collection) {
+            assertEquals(expectedItemList.get(index++), item);
+        }
+
+        // test remove element via iterator
+        index = 0;
+        int removeIndex = 2;
+        for (Iterator<TalkClientDownload> iterator = collection.iterator();
+             iterator.hasNext(); ) {
+            if(index == removeIndex) {
+                iterator.remove();
+                break;
+            }
+            iterator.next();
+            index++;
+        }
+
+        // expect item has been removed
+        expectedItemList.remove(removeIndex);
+
+        index = 0;
         for(TalkClientDownload item : collection) {
             assertEquals(expectedItemList.get(index++), item);
         }
