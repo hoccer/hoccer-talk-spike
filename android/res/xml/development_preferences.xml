@@ -100,6 +100,14 @@
                 android:title="@string/preference_database_title"
                 android:defaultValue="hoccer-talk.db"/>
 
+        <ListPreference
+                android:key="preference_data_import"
+                android:title="Import data ..."/>
+
+        <Preference
+                android:key="preference_data_export"
+                android:title="Export data" />
+
         <CheckBoxPreference
                 android:key="preference_environment_update"
                 android:title="Enable environment updates"
