@@ -8,11 +8,11 @@ import android.widget.BaseAdapter;
 import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.view.AudioAttachmentView;
@@ -257,17 +257,13 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         }
     }
 
-    public void loadAttachmentsFromCollection(int collectionId) {
-        try {
-            List<TalkClientDownload> downloads;
-            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
-
-            downloads = database.findClientDownloadByCollectionId(collectionId);
-            createAttachmentItemsFromTalkClientDownloads(downloads);
-
-        } catch (SQLException e) {
-            LOG.error(e);
+    public void loadAttachmentsFromCollection(TalkClientMediaCollection collection) {
+        List<TalkClientDownload> downloads = new ArrayList<TalkClientDownload>();
+        for (int i = 0; i< collection.size(); ++i) {
+            downloads.add(collection.getItem(i));
         }
+
+        createAttachmentItemsFromTalkClientDownloads(downloads);
     }
 
     public void loadAttachmentsFromContact(int contactId, String contentMediaType) {
@@ -294,7 +290,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         }
     }
 
-    private void createAttachmentItemsFromTalkClientDownloads(List<TalkClientDownload> downloads) {
+    private void createAttachmentItemsFromTalkClientDownloads(Iterable<TalkClientDownload> downloads) {
         if (downloads != null) {
             for (TalkClientDownload download : downloads) {
                 if (!isRecordedAudio(download.getFileName())) {

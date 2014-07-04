@@ -8,19 +8,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.adapter.AttachmentListAdapter;
-import com.hoccer.xo.android.adapter.AttachmentListFilterAdapter;
-import com.hoccer.xo.android.adapter.ContactsAdapter;
-import com.hoccer.xo.android.adapter.SearchResultsAdapter;
+import com.hoccer.xo.android.adapter.*;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
@@ -41,19 +38,22 @@ public class AudioAttachmentListFragment extends XoListFragment {
     public static final String AUDIO_ATTACHMENT_REMOVED_ACTION = "com.hoccer.xo.android.fragment.AUDIO_ATTACHMENT_REMOVED_ACTION";
     public static final String TALK_CLIENT_MESSAGE_ID_EXTRA = "com.hoccer.xo.android.fragment.TALK_CLIENT_MESSAGE_ID_EXTRA";
 
-    private enum DisplayMode { ALL_ATTACHMENTS, COLLECTION_ATTACHMENTS, AUDIO_ATTACHMENTS,}
 
+    private enum DisplayMode { ALL_ATTACHMENTS, COLLECTION_ATTACHMENTS, AUDIO_ATTACHMENTS,}
     private MediaPlayerService mMediaPlayerService;
 
     public static final int ALL_CONTACTS_ID = -1;
 
     private final static Logger LOG = Logger.getLogger(AudioAttachmentListFragment.class);
+
     private ServiceConnection mConnection;
     private AttachmentListAdapter mAttachmentListAdapter;
+    private AttachmentListFilterAdapter mAttachmentListFilterAdapter;
     private SearchResultsAdapter mResultsAdapter;
-    private ContactsAdapter mContactsAdapter;
+    private ContactSearchResultAdapter  mContactsAdapter;
     private int mFilteredContactId = 0;
     private int mMediaCollectionId = 0;
+    private MenuItem mSearchMenuItem;
     private ActionMode mActionMode;
     private ActionMode.Callback mActionModeCallback;
     private DisplayMode mDisplayMode;
@@ -65,8 +65,17 @@ public class AudioAttachmentListFragment extends XoListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        determineDisplayMode();
         setHasOptionsMenu(true);
         mFilteredContactId = ALL_CONTACTS_ID;
+        mAttachmentListAdapter = new AttachmentListAdapter(getActivity());
+        mAttachmentListAdapter.setContentMediaType(mCurrentContentMediaType);
+        loadAttachments();
+
+        if (mDisplayMode != DisplayMode.COLLECTION_ATTACHMENTS) {
+            mContactsAdapter = new ContactSearchResultAdapter(getXoActivity());
+            mContactsAdapter.onCreate();
+        }
     }
 
     @Override
@@ -80,15 +89,9 @@ public class AudioAttachmentListFragment extends XoListFragment {
     public void onStart() {
         super.onStart();
 
-        determineDisplayMode();
-
-        mAttachmentListAdapter = new AttachmentListAdapter(getActivity());
-        mAttachmentListAdapter.setContentMediaType(mCurrentContentMediaType);
-        if (!mInSearchMode) {
-            setListAdapter(mAttachmentListAdapter);
+        if (mDisplayMode != DisplayMode.COLLECTION_ATTACHMENTS) {
+            mContactsAdapter.requestReload();
         }
-
-        loadAttachments();
 
         XoApplication.getXoClient().registerTransferListener(mAttachmentListAdapter);
 
@@ -106,11 +109,26 @@ public class AudioAttachmentListFragment extends XoListFragment {
     public void onResume() {
         super.onResume();
 
-        if (mInSearchMode) {
+        determineDisplayMode();
+
+        if (mDisplayMode != DisplayMode.COLLECTION_ATTACHMENTS) {
+            if (mContactsAdapter == null) {
+                mContactsAdapter = new ContactSearchResultAdapter(getXoActivity());
+                mContactsAdapter.onCreate();
+                mContactsAdapter.requestReload();
+            }
+
+            mContactsAdapter.onResume();
+        }
+
+        if (mSearchMenuItem != null && mSearchMenuItem.isActionViewExpanded()) {
+            SearchView searchView = (SearchView) mSearchMenuItem.getActionView();
+            mInSearchMode = true;
             setListAdapter(mResultsAdapter);
         } else {
             setListAdapter(mAttachmentListAdapter);
         }
+
     }
 
     @Override
@@ -132,12 +150,12 @@ public class AudioAttachmentListFragment extends XoListFragment {
             default:
                 ab.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
                 ab.setDisplayShowTitleEnabled(false);
-                AttachmentListFilterAdapter filterAdapter = new AttachmentListFilterAdapter(getXoActivity());
-                ab.setListNavigationCallbacks(filterAdapter, new AttachmentListFilterHandler());
-                ab.setSelectedNavigationItem(filterAdapter.getPosition(mFilteredContactId));
+                mAttachmentListFilterAdapter = new AttachmentListFilterAdapter(getXoActivity());
+                ab.setListNavigationCallbacks(mAttachmentListFilterAdapter, new AttachmentListFilterHandler());
+                ab.setSelectedNavigationItem(mAttachmentListFilterAdapter.getPositionForContactId(mFilteredContactId));
         }
 
-        initSearchWidget(menu);
+        setupSearchWidget(menu);
     }
 
     @Override
@@ -146,6 +164,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
         ActionBar ab = getActivity().getActionBar();
         ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         ab.setDisplayShowTitleEnabled(true);
+        setListAdapter(null);
     }
 
     @Override
@@ -169,9 +188,11 @@ public class AudioAttachmentListFragment extends XoListFragment {
     }
 
     private void loadAttachments() {
+        mAttachmentListAdapter.clear();
+
         switch (mDisplayMode) {
             case COLLECTION_ATTACHMENTS:
-                mAttachmentListAdapter.loadAttachmentsFromCollection(mMediaCollectionId);
+                mAttachmentListAdapter.loadAttachmentsFromCollection(mCurrentCollection);
                 break;
             case AUDIO_ATTACHMENTS:
             case ALL_ATTACHMENTS:
@@ -293,15 +314,15 @@ public class AudioAttachmentListFragment extends XoListFragment {
         getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
-    private void initSearchWidget(Menu menu) {
+    private void setupSearchWidget(Menu menu) {
 
         SearchActionHandler handler = new SearchActionHandler();
 
-        MenuItem searchMenuItem = menu.findItem(R.id.menu_search);
-        searchMenuItem.setOnActionExpandListener(handler);
+        mSearchMenuItem = menu.findItem(R.id.menu_search);
+        mSearchMenuItem.setOnActionExpandListener(handler);
 
         SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-        final SearchView searchView = (SearchView) searchMenuItem.getActionView();
+        SearchView searchView = (SearchView) mSearchMenuItem.getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
         searchView.setIconifiedByDefault(false);
         searchView.setOnQueryTextListener(handler);
@@ -309,13 +330,22 @@ public class AudioAttachmentListFragment extends XoListFragment {
     }
 
     private void searchAttachmentList(final String query) {
-        if (mInSearchMode) {
+        if (mInSearchMode && !query.isEmpty()) {
             if (mResultsAdapter == null) {
                 mResultsAdapter = new SearchResultsAdapter();
             }
 
             mResultsAdapter.clear();
+
+            if (mDisplayMode != DisplayMode.COLLECTION_ATTACHMENTS) {
+                mContactsAdapter.searchForContactsByName(query);
+                if (mContactsAdapter.getCount() > 0) {
+                    mResultsAdapter.addSection("Contacts", mContactsAdapter);
+                }
+            }
+
             AttachmentListAdapter audioAttachments = new AttachmentListAdapter(getXoActivity());
+            // TODO consider moving this part into AttachmentListAdapter
             List<AudioAttachmentItem> items = mAttachmentListAdapter.getAttachmentItems();
 
             for (AudioAttachmentItem item : items) {
@@ -326,10 +356,6 @@ public class AudioAttachmentListFragment extends XoListFragment {
                         (artist != null && artist.toLowerCase().contains(query.toLowerCase()))) {
                     audioAttachments.addItem(item);
                 }
-            }
-
-            if (mDisplayMode != DisplayMode.COLLECTION_ATTACHMENTS) {
-                // TODO load contacts into a contacts adapter
             }
 
             if (audioAttachments.getCount() > 0) {
@@ -364,6 +390,25 @@ public class AudioAttachmentListFragment extends XoListFragment {
         }
     }
 
+    private void filterAttachmentsByContactId(int selectedContactId) {
+        if (mFilteredContactId != selectedContactId) {
+            mFilteredContactId = selectedContactId;
+            mAttachmentListAdapter.clear();
+            mAttachmentListAdapter.loadAttachmentsFromContact(mFilteredContactId, mCurrentContentMediaType);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mAttachmentListAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+    }
+
+    private void showSoftKeyboard() {
+        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+    }
+
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
 
         @Override
@@ -392,8 +437,14 @@ public class AudioAttachmentListFragment extends XoListFragment {
                 }
 
                 getXoActivity().showFullscreenPlayer();
-            } else {
+            } else if (selectedItem instanceof TalkClientContact) {
+                mInSearchMode = false;
+                mSearchMenuItem.collapseActionView();
 
+                getActivity().getActionBar().setSelectedNavigationItem(mAttachmentListFilterAdapter
+                        .getPositionForContactId(((TalkClientContact) selectedItem).getClientContactId()));
+                filterAttachmentsByContactId(((TalkClientContact) selectedItem).getClientContactId());
+                setListAdapter(mAttachmentListAdapter);
             }
         }
 
@@ -453,18 +504,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
         @Override
         public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-            int selectedContactId = Integer.valueOf(new Long(itemId).intValue());
-            if (mFilteredContactId != selectedContactId) {
-                mFilteredContactId = selectedContactId;
-                mAttachmentListAdapter.clear();
-                mAttachmentListAdapter.loadAttachmentsFromContact(mFilteredContactId, mCurrentContentMediaType);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAttachmentListAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
+            filterAttachmentsByContactId(Integer.valueOf(new Long(itemId).intValue()));
 
             return true;
         }
@@ -474,8 +514,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
         @Override
         public boolean onQueryTextSubmit(String query) {
-            InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+            showSoftKeyboard();
 
             return true;
         }
@@ -493,7 +532,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
         public boolean onMenuItemActionExpand(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
                 mInSearchMode = true;
-                
+
                 SearchView searchView = (SearchView) item.getActionView();
                 if (searchView.getQuery().length() > 0) {
                     searchAttachmentList(searchView.getQuery().toString());
@@ -508,11 +547,12 @@ public class AudioAttachmentListFragment extends XoListFragment {
             if (item.getItemId() == R.id.menu_search) {
                 mInSearchMode = false;
                 mResultsAdapter.clear();
-                Toast.makeText(getActivity(),"onMenuItemActionCollapse", Toast.LENGTH_LONG).show();
                 setListAdapter(mAttachmentListAdapter);
+                getActivity().getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
             }
 
             return true;
         }
     }
+
 }

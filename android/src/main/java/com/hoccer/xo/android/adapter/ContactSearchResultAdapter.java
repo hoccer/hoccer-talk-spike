@@ -12,17 +12,49 @@ import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by nico on 03/07/2014.
  */
 public class ContactSearchResultAdapter extends ContactsAdapter {
 
+    private List<TalkClientContact> mFoundContacts;
 
     public ContactSearchResultAdapter(XoActivity activity) {
         super(activity);
         setShowTokens(false);
+        mFoundContacts = new ArrayList<TalkClientContact>();
+    }
+
+    public void searchForContactsByName(CharSequence query) {
+        mFoundContacts.clear();
+
+        if (query.length() > 0) {
+            for (TalkClientContact contact : mClientContacts) {
+                String name = contact.getName().toLowerCase();
+                if (name.startsWith(query.toString().toLowerCase())) {
+                    mFoundContacts.add(contact);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return mFoundContacts.get(position);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return VIEW_TYPE_CLIENT;
+    }
+
+    @Override
+    public int getCount() {
+        return mFoundContacts.size();
     }
 
     @Override
