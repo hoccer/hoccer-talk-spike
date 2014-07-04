@@ -2,12 +2,14 @@ package com.hoccer.xo.android.activity;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Environment;
 import android.view.*;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.util.XoImportExportUtils;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.release.R;
 
@@ -30,6 +32,8 @@ import android.widget.Toast;
 
 import java.io.*;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class XoPreferenceActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -69,14 +73,17 @@ public class XoPreferenceActivity extends PreferenceActivity
                     public void onConnected(MediaPlayerService service) {
                         updateActionBarIcons();
                     }
+
                     @Override
                     public void onDisconnected() {
                     }
+
                     @Override
                     public void onAction(String action, MediaPlayerService service) {
                         updateActionBarIcons();
                     }
-                });
+                }
+        );
     }
 
     @Override
@@ -195,9 +202,22 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if (preference.getKey().equals("preference_import")) {
             doImport();
             return true;
+        } else if (preference.getKey().equals("preference_data_export")) {
+            exportData();
+        } else if (preference.getKey().equals("preference_data_import")) {
+//            importData();
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
+    }
+
+    private void exportData() {
+        try {
+            XoImportExportUtils.exportData();
+        } catch (IOException e) {
+            LOG.error("Data export failed.", e);
+            Toast.makeText(this, "Data export failed", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void doImport() {
@@ -224,7 +244,8 @@ public class XoPreferenceActivity extends PreferenceActivity
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                     }
-                });
+                }
+        );
     }
 
     private void importCredentials(File credentialsFile, String password) {
@@ -269,7 +290,8 @@ public class XoPreferenceActivity extends PreferenceActivity
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                     }
-                });
+                }
+        );
     }
 
     private void exportCredentials(String password) {
@@ -292,7 +314,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         Toast.makeText(this, R.string.export_credentials_success, Toast.LENGTH_LONG).show();
     }
 
-    private void openFullScreenPlayer(){
+    private void openFullScreenPlayer() {
         Intent resultIntent = new Intent(this, FullscreenPlayerActivity.class);
         startActivity(resultIntent);
     }
