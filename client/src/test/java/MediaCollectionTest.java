@@ -15,6 +15,7 @@ import org.junit.Test;
 import java.sql.SQLException;
 import java.util.List;
 
+import static junit.framework. TestCase.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.fail;
@@ -605,6 +606,75 @@ public class MediaCollectionTest {
             assertEquals(4, relations.get(4).getIndex());
             assertEquals(item4.getClientDownloadId(), relations.get(4).getItem().getClientDownloadId());
         }
+
+        // move item to invalid index and expect IndexOutOfBoundsExceptions and no changes in MediaCollection and database
+        boolean exceptionThrown = false;
+        try {
+            collection.reorderItemIndex(1, -1);
+        } catch(IndexOutOfBoundsException e) {
+            exceptionThrown = true;
+        }
+
+        assertTrue(exceptionThrown);
+
+        assertEquals(5, collection.size());
+        assertEquals(item1.getClientDownloadId(), collection.getItem(0).getClientDownloadId());
+        assertEquals(item2.getClientDownloadId(), collection.getItem(1).getClientDownloadId());
+        assertEquals(item3.getClientDownloadId(), collection.getItem(2).getClientDownloadId());
+        assertEquals(item0.getClientDownloadId(), collection.getItem(3).getClientDownloadId());
+        assertEquals(item4.getClientDownloadId(), collection.getItem(4).getClientDownloadId());
+
+        // check database directly
+        {
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            assertNotNull(relations);
+            assertEquals(5, relations.size());
+            assertEquals(0, relations.get(0).getIndex());
+            assertEquals(item1.getClientDownloadId(), relations.get(0).getItem().getClientDownloadId());
+            assertEquals(1, relations.get(1).getIndex());
+            assertEquals(item2.getClientDownloadId(), relations.get(1).getItem().getClientDownloadId());
+            assertEquals(2, relations.get(2).getIndex());
+            assertEquals(item3.getClientDownloadId(), relations.get(2).getItem().getClientDownloadId());
+            assertEquals(3, relations.get(3).getIndex());
+            assertEquals(item0.getClientDownloadId(), relations.get(3).getItem().getClientDownloadId());
+            assertEquals(4, relations.get(4).getIndex());
+            assertEquals(item4.getClientDownloadId(), relations.get(4).getItem().getClientDownloadId());
+        }
+
+        // move item to invalid index and expect IndexOutOfBoundsExceptions and no changes in MediaCollection and database
+        exceptionThrown = false;
+        try {
+            collection.reorderItemIndex(3, 6);
+        } catch(IndexOutOfBoundsException e) {
+            exceptionThrown = true;
+        }
+
+        assertTrue(exceptionThrown);
+
+        assertEquals(5, collection.size());
+        assertEquals(item1.getClientDownloadId(), collection.getItem(0).getClientDownloadId());
+        assertEquals(item2.getClientDownloadId(), collection.getItem(1).getClientDownloadId());
+        assertEquals(item3.getClientDownloadId(), collection.getItem(2).getClientDownloadId());
+        assertEquals(item0.getClientDownloadId(), collection.getItem(3).getClientDownloadId());
+        assertEquals(item4.getClientDownloadId(), collection.getItem(4).getClientDownloadId());
+
+        // check database directly
+        {
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            assertNotNull(relations);
+            assertEquals(5, relations.size());
+            assertEquals(0, relations.get(0).getIndex());
+            assertEquals(item1.getClientDownloadId(), relations.get(0).getItem().getClientDownloadId());
+            assertEquals(1, relations.get(1).getIndex());
+            assertEquals(item2.getClientDownloadId(), relations.get(1).getItem().getClientDownloadId());
+            assertEquals(2, relations.get(2).getIndex());
+            assertEquals(item3.getClientDownloadId(), relations.get(2).getItem().getClientDownloadId());
+            assertEquals(3, relations.get(3).getIndex());
+            assertEquals(item0.getClientDownloadId(), relations.get(3).getItem().getClientDownloadId());
+            assertEquals(4, relations.get(4).getIndex());
+            assertEquals(item4.getClientDownloadId(), relations.get(4).getItem().getClientDownloadId());
+        }
+    }
     }
 
     private List<TalkClientMediaCollectionRelation> findMediaCollectionRelationsOrderedByIndex(int collectionId) {
