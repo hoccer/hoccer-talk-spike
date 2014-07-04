@@ -62,6 +62,7 @@ public class MediaCollectionTest {
     public void testCreateCollection() {
         LOG.info("testCreateCollection");
 
+        // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
         mDatabase.registerListener(new IXoMediaCollectionListener() {
@@ -132,6 +133,7 @@ public class MediaCollectionTest {
             fail();
         }
 
+        // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
         mDatabase.registerListener(new IXoMediaCollectionListener() {
@@ -145,7 +147,7 @@ public class MediaCollectionTest {
                 onMediaCollectionDeletedCalled.value = true;
             }
         });
-        
+
         try {
             mDatabase.deleteMediaCollection(collection);
         } catch (SQLException e) {
@@ -188,6 +190,7 @@ public class MediaCollectionTest {
             fail();
         }
 
+        // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
         mDatabase.registerListener(new IXoMediaCollectionListener() {
@@ -798,6 +801,7 @@ public class MediaCollectionTest {
         final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
 
+        // register MediaCollection listener
         TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
             public void onCollectionNameChanged(TalkClientMediaCollection collection) {
                 assertEquals(expectedCollectionName, collection.getName());
@@ -877,6 +881,7 @@ public class MediaCollectionTest {
         final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
 
+        // register MediaCollection listener
         TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
             public void onCollectionNameChanged(TalkClientMediaCollection collection) {
                 onNameChangedCalled.value = true;
