@@ -25,6 +25,7 @@ public class WeakListenerArray<Listener> implements Iterable<Listener>{
             WeakReference<Listener> weakListener = iterator.next();
             if (weakListener.get() == listener) {
                 iterator.remove();
+                return;
             }
         }
     }
