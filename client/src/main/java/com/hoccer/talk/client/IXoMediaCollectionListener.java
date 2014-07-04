@@ -7,9 +7,7 @@ import com.hoccer.talk.client.model.TalkClientMediaCollection;
  */
 public interface IXoMediaCollectionListener {
 
-    void onMediaCollectionCreated(TalkClientMediaCollection collection);
+    void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated);
 
-    void onMediaCollectionRemoved(TalkClientMediaCollection collection);
-
-    void onMediaCollectionUpdated(TalkClientMediaCollection collection);
+    void onMediaCollectionDeleted(TalkClientMediaCollection collectionDeleted);
 }

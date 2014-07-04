@@ -674,15 +674,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     //////// MediaCollection Management ////////
 
-    public interface MediaCollectionListener {
-        void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated);
-        void onMediaCollectionDeleted(TalkClientMediaCollection collectionDeleted);
-    }
-
     private Map<Integer, WeakReference<TalkClientMediaCollection>> mMediaCollectionCache =
             new HashMap<Integer, WeakReference<TalkClientMediaCollection>>();
 
-    private WeakListenerArray<MediaCollectionListener> mMediaCollectionListenerArray = new WeakListenerArray<MediaCollectionListener>();
+    private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListenerArray = new WeakListenerArray<IXoMediaCollectionListener>();
 
     @Override
     public TalkClientMediaCollection findMediaCollectionById(Integer id) throws SQLException {
@@ -720,7 +715,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         TalkClientMediaCollection collection = new TalkClientMediaCollection(collectionName);
         mMediaCollections.createIfNotExists(collection);
         collection = prepareMediaCollection(collection);
-        for(MediaCollectionListener listener : mMediaCollectionListenerArray) {
+        for(IXoMediaCollectionListener listener : mMediaCollectionListenerArray) {
             listener.onMediaCollectionCreated(collection);
         }
         return collection;
@@ -741,9 +736,19 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         collection.clear();
         mMediaCollections.delete(collection);
         mMediaCollectionCache.remove(collection.getId());
-        for(MediaCollectionListener listener : mMediaCollectionListenerArray) {
+        for(IXoMediaCollectionListener listener : mMediaCollectionListenerArray) {
             listener.onMediaCollectionDeleted(collection);
         }
+    }
+
+    @Override
+    public void registerListener(IXoMediaCollectionListener listener) {
+        mMediaCollectionListenerArray.registerListener(listener);
+    }
+
+    @Override
+    public void unregisterListener(IXoMediaCollectionListener listener) {
+        mMediaCollectionListenerArray.unregisterListener(listener);
     }
 
     // The returned Dao should not be used directly to alter the database, use TalkClientMediaCollection instead

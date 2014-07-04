@@ -1,4 +1,5 @@
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
+import com.hoccer.talk.client.IXoMediaCollectionListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
@@ -61,6 +62,20 @@ public class MediaCollectionTest {
     public void testCreateCollection() {
         LOG.info("testCreateCollection");
 
+        final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
+        mDatabase.registerListener(new IXoMediaCollectionListener() {
+            @Override
+            public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
+                onMediaCollectionCreatedCalled.value = true;
+            }
+
+            @Override
+            public void onMediaCollectionDeleted(TalkClientMediaCollection collectionDeleted) {
+                onMediaCollectionDeletedCalled.value = true;
+            }
+        });
+
         String collectionName = "testCreateCollection_collection";
         TalkClientMediaCollection collection = null;
         try {
@@ -73,6 +88,10 @@ public class MediaCollectionTest {
         assertNotNull(collection);
         assertEquals(collectionName, collection.getName());
         assertEquals(0, collection.size());
+
+        // listener call check
+        assertTrue(onMediaCollectionCreatedCalled.value);
+        assertFalse(onMediaCollectionDeletedCalled.value);
 
         TalkClientMediaCollection collectionCopy = null;
         try {
@@ -113,12 +132,30 @@ public class MediaCollectionTest {
             fail();
         }
 
+        final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
+        mDatabase.registerListener(new IXoMediaCollectionListener() {
+            @Override
+            public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
+                onMediaCollectionCreatedCalled.value = true;
+            }
+
+            @Override
+            public void onMediaCollectionDeleted(TalkClientMediaCollection collectionDeleted) {
+                onMediaCollectionDeletedCalled.value = true;
+            }
+        });
+        
         try {
             mDatabase.deleteMediaCollection(collection);
         } catch (SQLException e) {
             e.printStackTrace();
             fail();
         }
+
+        // listener call check
+        assertFalse(onMediaCollectionCreatedCalled.value);
+        assertTrue(onMediaCollectionDeletedCalled.value);
 
         // check database directly
         {
@@ -151,12 +188,30 @@ public class MediaCollectionTest {
             fail();
         }
 
+        final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
+        mDatabase.registerListener(new IXoMediaCollectionListener() {
+            @Override
+            public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
+                onMediaCollectionCreatedCalled.value = true;
+            }
+
+            @Override
+            public void onMediaCollectionDeleted(TalkClientMediaCollection collectionDeleted) {
+                onMediaCollectionDeletedCalled.value = true;
+            }
+        });
+
         try {
             mDatabase.deleteMediaCollectionById(collection.getId());
         } catch (SQLException e) {
             e.printStackTrace();
             fail();
         }
+
+        // listener call check
+        assertFalse(onMediaCollectionCreatedCalled.value);
+        assertTrue(onMediaCollectionDeletedCalled.value);
 
         // check database directly
         {
