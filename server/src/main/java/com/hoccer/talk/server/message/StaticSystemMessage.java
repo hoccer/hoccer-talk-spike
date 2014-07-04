@@ -18,9 +18,9 @@ public class StaticSystemMessage {
 
     public static enum Message {
         UPDATE_NAGGING(
-                "Bitte XO updaten und die aktuellste Version aus deinem App Store installieren! Ältere Versionen werden nicht mehr unterstützt!${if storeLink} Besuche den Store: ${storeLink}${end}",
-                "Please update XO and install the latest version from your App store! Outdated versions are no longer supported!${if storeLink} Visit the store: ${storeLink}${end}");
-
+                "Bitte XO updaten und die aktuellste Version aus deinem App Store installieren! Ältere Versionen werden nicht mehr unterstützt!", //${if storeLink} Besuche den Store: ${storeLink}${end}",
+                "Please update XO and install the latest version from your App store! Outdated versions are no longer supported!" //${if storeLink} Visit the store: ${storeLink}${end}");
+        );
         public final String de;
         public final String en;
 
