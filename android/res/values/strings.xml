@@ -46,6 +46,10 @@
     <string name="nearby_yes">Yes</string>
     <string name="nearby_no">No</string>
 
+    <!-- Nearby delete archive request -->
+    <string name="dialog_confirm_nearby_deletion_title">Confirm deletion</string>
+    <string name="dialog_confirm_nearby_deletion_message">Do you really want to delete messages from this group?</string>
+
     <!-- Contact list items -->
     <string name="contact_name_new_client">New Friend</string>
     <string name="contact_name_new_group">New Group</string>

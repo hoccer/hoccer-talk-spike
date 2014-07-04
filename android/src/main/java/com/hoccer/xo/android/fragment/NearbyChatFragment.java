@@ -135,7 +135,7 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
                 });
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("SQL Exception while retrieving current nearby group: ", e);
         }
     }
 
