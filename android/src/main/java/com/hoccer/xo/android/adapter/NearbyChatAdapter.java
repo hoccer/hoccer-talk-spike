@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -21,11 +22,15 @@ import java.util.List;
 public class NearbyChatAdapter extends ChatAdapter {
     private XoActivity mXoActivity;
     private LayoutInflater mInflater;
+    private ListView mListView;
+    private NearbyChatAdapter mAdapter;
 
     public NearbyChatAdapter(ListView listView, XoActivity activity) {
         super(listView, activity, null);
+        mListView = listView;
         mXoActivity = activity;
         mInflater = (LayoutInflater)activity.getSystemService(activity.LAYOUT_INFLATER_SERVICE);
+        mAdapter = this;
     }
 
     @Override
@@ -86,6 +91,7 @@ public class NearbyChatAdapter extends ChatAdapter {
                                         public void onClick(DialogInterface dialog, int id) {
                                             try {
                                                 mDatabase.deleteAllMessagesFromContactId(chatItem.getConversationContactId());
+                                                initialize();
                                             } catch (SQLException e) {
                                                 e.printStackTrace();
                                             }

@@ -1,14 +1,12 @@
 package com.hoccer.talk.server.update;
 
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.talk.model.*;
 import com.hoccer.talk.rpc.ITalkRpcClient;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.hoccer.talk.server.agents.NotificationDeferrer;
+import com.hoccer.talk.server.message.StaticSystemMessage;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import com.hoccer.talk.util.MapUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -634,6 +632,28 @@ public class UpdateAgent extends NotificationDeferrer {
 
     public void clearRequestContext() {
         clearRequestContext(context);
+    }
+
+    public void requestUserAlert(final String clientId, final StaticSystemMessage.Message message) {
+        Runnable notificationGenerator = new Runnable() {
+            @Override
+            public void run() {
+                final TalkRpcConnection conn = mServer.getClientConnection(clientId);
+                if (conn == null || !conn.isConnected()) {
+                    return;
+                }
+                TalkClient talkClient = mDatabase.findClientById(clientId);
+                if (talkClient == null) {
+                    return;
+                }
+                TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(talkClient.getClientId());
+                String messageString = new StaticSystemMessage(talkClient, clientHostInfo, message).generateMessage();
+                LOG.info("requestUserAlert");
+                conn.getClientRpc().alertUser(messageString);
+            }
+        };
+
+        queueOrExecute(context, notificationGenerator);
     }
 
 }

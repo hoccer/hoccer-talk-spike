@@ -161,6 +161,13 @@
             <artifactId>annotations</artifactId>
             <version>9.0.4</version>
         </dependency>
+
+        <!-- A simple Templating engine - used for message templating-->
+        <dependency>
+            <groupId>com.floreysoft</groupId>
+            <artifactId>jmte</artifactId>
+            <version>3.0</version>
+        </dependency>
     </dependencies>
     <repositories>
     </repositories>

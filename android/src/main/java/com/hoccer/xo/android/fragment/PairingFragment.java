@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.QrCodeGeneratingActivity;
+import com.hoccer.xo.android.activity.QrScannerActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.release.R;
 
@@ -154,11 +157,15 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onClick(View v) {
         if (v == mQrShowButton) {
             LOG.debug("onClick(qrShow)");
-            getXoActivity().showBarcode();
+            String qrString = getXoActivity().getBarcodeString();
+            Intent qr = new Intent(getActivity(), QrCodeGeneratingActivity.class);
+            qr.putExtra("QR", qrString);
+            getActivity().startActivity(qr);
         }
         if (v == mQrScanButton) {
             LOG.debug("onClick(qrScan)");
-            getXoActivity().scanBarcode();
+            Intent qrScanner = new Intent(getActivity(), QrScannerActivity.class);
+            getActivity().startActivity(qrScanner);
         }
         if (v == mTokenSendSms) {
             LOG.debug("onClick(smsSend)");
