@@ -19,11 +19,13 @@ public class TalkServerConfiguration {
 
     private static final Logger LOG = Logger.getLogger(TalkServerConfiguration.class);
 
-    public static final int THREADS_DELIVERY = 1;
-    public static final int THREADS_UPDATE = 1;
-    public static final int THREADS_PUSH = 1;
-    public static final int THREADS_PING = 2; // XXX HIGHER COUNT?
-    public static final int THREADS_CLEANING = 4;
+    // Note: A ScheduledThreadPoolExecutor does not spawn more threads than defined as core pool size
+    // see http://stackoverflow.com/questions/11678021/why-doesnt-scheduledexecutorservice-spawn-threads-as-needed
+    public static final int THREADS_DELIVERY = 20; // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+    public static final int THREADS_UPDATE = 20;   // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+    public static final int THREADS_PUSH = 1;      // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+    public static final int THREADS_PING = 10;     // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+    public static final int THREADS_CLEANING = 4;  // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
 
     public static final int PING_INTERVAL = 300; // in seconds
     public static final boolean PERFORM_PING_AT_INTERVALS = false;
