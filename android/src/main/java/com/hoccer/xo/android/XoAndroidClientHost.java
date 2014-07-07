@@ -240,7 +240,7 @@ public class XoAndroidClientHost implements IXoClientHost {
         String serverUri;
         try {
             if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
-                serverUri = mContext.getResources().getStringArray(R.array.servers_development)[0];
+                serverUri = PreferenceManager.getDefaultSharedPreferences(mContext).getString("preference_server_uri", mContext.getResources().getStringArray(R.array.servers_development)[0]);
             } else {
                 serverUri = mContext.getResources().getString(R.string.servers_production);
             }

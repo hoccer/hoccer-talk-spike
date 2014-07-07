@@ -4,12 +4,12 @@
     <string name="url_scheme">hxo://</string>
 
     <!--Servers-->
-    <string name="servers_production">wss://talkserver.talk.hoccer.de:8443/</string>
+    <string name="servers_production">wss://talkserver.talk.hoccer.de/</string>
 
     <!--Development Mode Only-->
     <string-array name="servers_development">
         <item name="1">wss://talkserver-test1.talk.hoccer.de:8443/</item>
-        <item name="2">wss://talkserver.talk.hoccer.de:8443/</item>
+        <item name="2">wss://talkserver.talk.hoccer.de/</item>
     </string-array>
 
     <string-array name="databases_development">
