@@ -40,6 +40,10 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         if (query.length() > 0) {
 
             for (TalkClientContact contact : mClientContacts) {
+                if(contact.isSelf()) {
+                    continue;
+                }
+
                 String name = contact.getName().toLowerCase();
                 if (name.startsWith(mLastQuery)) {
                     mFoundContacts.add(contact);
