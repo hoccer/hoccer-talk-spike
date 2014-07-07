@@ -72,6 +72,7 @@
     <string name="pairing_qr_scan">QR Code scannen</string>
     <string name="pairing_token_generating">Erzeugen...</string>
     <string name="pairing_token_send_sms">Einladen via SMS</string>
+    <string name="pairing_token_send_email">Einladen via e-mail</string>
     <string name="pairing_success">Kontakt wurde erfolgreich hinzugefügt</string>
     <string name="dialog_pairing_failed_title">Der Kontakt konnte nicht hinzugefügt werden</string>
     <string name="dialog_pairing_failed_message">Der eingegebene Code ist ungültig.</string>
@@ -235,6 +236,12 @@
     <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar setzen.
     </string>
     <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App HoccerXO zum sicheren Chatten! Jetzt herunterladen: http://hoccer.com/ Dann mich als Kontakt hinzufügen: %1$s%2$s
+        \nxo %3$s
+    </string>
+    <string name="email_invitation_text">Hey!\nI\'m now using the free app Hoccer XO for secure
+        chatting. Download it now:\nhttp://hoccer.com/\nThen add me as a contact:\n
+        &lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;
+        %1$s%2$s
         \nxo %3$s
     </string>
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>

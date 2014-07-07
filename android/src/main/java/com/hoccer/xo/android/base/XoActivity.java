@@ -5,6 +5,7 @@ import android.content.*;
 import android.graphics.drawable.ColorDrawable;
 import android.os.*;
 import android.support.v4.app.FragmentActivity;
+import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -770,6 +771,22 @@ public abstract class XoActivity extends FragmentActivity {
 
                 startActivity(intent);
             }
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        }
+    }
+
+    public void composeInviteEmail(String token) {
+        LOG.debug("composeInviteEmail(" + token + ")");
+
+        try {
+            TalkClientContact self = mDatabase.findSelfContact(false);
+            String message = String
+                    .format(getString(R.string.email_invitation_text), XoClientConfiguration.HXO_URL_SCHEME, token, self.getName());
+            Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
+            email.putExtra(Intent.EXTRA_SUBJECT,"Join me at Hoccer!");
+            email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));
+            startActivity(Intent.createChooser(email, "Choose Email Client"));
         } catch (SQLException e) {
             LOG.error("sql error", e);
         }

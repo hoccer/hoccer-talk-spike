@@ -2,6 +2,7 @@ package com.hoccer.xo.android.fragment;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -30,6 +31,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     TextView mTokenMessage;
     TextView mTokenText;
     Button mTokenSendSms;
+    Button mTokenSendEmail;
 
     EditText mTokenEdit;
     Button mTokenPairButton;
@@ -42,9 +44,16 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     TextWatcher mTextWatcher;
 
     String mActiveToken;
+    String mTokenFromEmail;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Intent intent = getActivity().getIntent();
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            Uri uri = intent.getData();
+            mTokenFromEmail = uri.toString();
+        }
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -63,6 +72,10 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         mTokenSendSms = (Button) view.findViewById(R.id.pairing_token_sms);
         mTokenSendSms.setEnabled(false);
         mTokenSendSms.setOnClickListener(this);
+
+        mTokenSendEmail = (Button) view.findViewById(R.id.pairing_token_email);
+        mTokenSendEmail.setEnabled(false);
+        mTokenSendEmail.setOnClickListener(this);
 
         mTokenEdit = (EditText) view.findViewById(R.id.pairing_token_edit);
         mTokenEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
@@ -130,6 +143,9 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
             }
         };
         mTokenEdit.addTextChangedListener(mTextWatcher);
+        if (mTokenFromEmail != null || !mTokenSendEmail.equals("")) {
+            performPairing(mTokenFromEmail);
+        }
     }
 
     @Override
@@ -171,6 +187,10 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
             LOG.debug("onClick(smsSend)");
             getXoActivity().composeInviteSms(mTokenText.getText().toString());
         }
+        if (v == mTokenSendEmail) {
+            LOG.debug("onClick(smsSend)");
+            getXoActivity().composeInviteEmail(mTokenText.getText().toString());
+        }
     }
 
     public void requestNewToken() {
@@ -178,6 +198,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         mTokenText.setVisibility(View.GONE);
         mTokenMessage.setVisibility(View.VISIBLE);
         mTokenSendSms.setEnabled(false);
+        mTokenSendEmail.setEnabled(false);
         XoApplication.getExecutor().schedule(new Runnable() {
             @Override
             public void run() {
@@ -189,6 +210,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
                         mTokenText.setVisibility(View.VISIBLE);
                         mTokenMessage.setVisibility(View.GONE);
                         mTokenSendSms.setEnabled(true);
+                        mTokenSendEmail.setEnabled(true);
                     }
                 });
             }
