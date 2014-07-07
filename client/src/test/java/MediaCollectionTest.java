@@ -971,6 +971,41 @@ public class MediaCollectionTest {
         }
     }
 
+    @Test
+    public void testToArray() {
+        LOG.info("testToArray");
+
+        final String collectionName = "testToArray_collection";
+        TalkClientMediaCollection collection = null;
+
+        int itemCount = 10;
+        ArrayList<TalkClientDownload> expectedItemList = new ArrayList<TalkClientDownload>();
+        for(int i = 0; i < itemCount; i++) {
+            expectedItemList.add(new TalkClientDownload());
+        }
+        try {
+            collection = mDatabase.createMediaCollection(collectionName);
+
+            for(TalkClientDownload item : expectedItemList) {
+                mDatabase.saveClientDownload(item);
+                collection.addItem(item);
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+            e.printStackTrace();
+            fail();
+        }
+
+        TalkClientDownload[] itemList = collection.toArray();
+
+        assertEquals(expectedItemList.size(), itemList.length);
+
+        int index = 0;
+        for(TalkClientDownload item : expectedItemList) {
+            assertEquals(item, itemList[index++]);
+        }
+    }
+
     private class ValueContainer<T> {
         public T value;
         public ValueContainer(T initValue) {

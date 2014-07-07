@@ -170,6 +170,11 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
         }
     }
 
+    // Returns a copy of the internal TalkClientDownload array
+    public TalkClientDownload[] toArray() {
+        return mItemList.toArray(new TalkClientDownload[mItemList.size()]);
+    }
+
     public void registerListener(Listener listener) {
         mListenerArray.registerListener(listener);
     }
