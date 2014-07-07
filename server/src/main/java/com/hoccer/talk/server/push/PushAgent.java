@@ -100,9 +100,13 @@ public class PushAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                LOG.info(" -> initializing Message Push for clientId: '" + client.getClientId() +"'!");
-                pushMessage.perform();
-                LOG.info(" -> Message Push done for clientId: '" + client.getClientId() +"'!");
+                try {
+                    LOG.info(" -> initializing Message Push for clientId: '" + client.getClientId() +"'!");
+                    pushMessage.perform();
+                    LOG.info(" -> Message Push done for clientId: '" + client.getClientId() +"'!");
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, 0, TimeUnit.MILLISECONDS);
     }
@@ -147,10 +151,14 @@ public class PushAgent {
                 mExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        // no longer outstanding
-                        mOutstanding.remove(clientId);
-                        // perform the request
-                        request.perform();
+                        try {
+                            // no longer outstanding
+                            mOutstanding.remove(clientId);
+                            // perform the request
+                            request.perform();
+                        } catch (Throwable t) {
+                            LOG.error("caught and swallowed exception escaping runnable", t);
+                        }
                     }
                 }, delay, TimeUnit.MILLISECONDS);
                 mOutstanding.put(clientId, request);
@@ -204,7 +212,11 @@ public class PushAgent {
             mExecutor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    invalidateApns();
+                    try {
+                        invalidateApns();
+                    } catch (Throwable t) {
+                        LOG.error("caught and swallowed exception escaping runnable", t);
+                    }
                 }
             }, delay, interval, TimeUnit.SECONDS);
         }

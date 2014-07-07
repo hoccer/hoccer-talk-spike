@@ -50,14 +50,23 @@ public class CleaningAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                scheduleCleanAllClients();
+                try {
+                    scheduleCleanAllClients();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, mConfig.getCleanupAllClientsDelay(), TimeUnit.SECONDS);
+
         LOG.info("Cleaning deliveries scheduling will start in '" + mConfig.getCleanupAllDeliveriesDelay() + "' seconds.");
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                scheduleCleanAllDeliveries();
+                try {
+                    scheduleCleanAllDeliveries();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, mConfig.getCleanupAllDeliveriesDelay(), TimeUnit.SECONDS);
 
@@ -78,7 +87,11 @@ public class CleaningAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                doCleanAllFinishedDeliveries();
+                try {
+                    doCleanAllFinishedDeliveries();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, mConfig.getCleanupAllDeliveriesInterval(), TimeUnit.SECONDS);
     }
@@ -88,16 +101,24 @@ public class CleaningAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                doCleanAllClients();
+                try {
+                    doCleanAllClients();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
-        }, mConfig.getCleanupAllClientsInterval(), TimeUnit.SECONDS);
+        } , mConfig.getCleanupAllClientsInterval(), TimeUnit.SECONDS);
     }
 
     public void cleanFinishedDelivery(final TalkDelivery finishedDelivery) {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                doCleanFinishedDelivery(finishedDelivery);
+                try {
+                    doCleanFinishedDelivery(finishedDelivery);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         });
     }

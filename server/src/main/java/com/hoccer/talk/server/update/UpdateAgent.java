@@ -49,39 +49,43 @@ public class UpdateAgent extends NotificationDeferrer {
         Runnable notificationGenerator = new Runnable() {
             @Override
             public void run() {
-                LOG.debug("RPUFG: update " + clientId + " for group " + groupId);
-                TalkRpcConnection conn = mServer.getClientConnection(clientId);
-                if (conn == null || !conn.isConnected()) {
-                    return;
-                }
-                ITalkRpcClient rpc = conn.getClientRpc();
                 try {
-                    TalkGroupMember member = mDatabase.findGroupMemberForClient(groupId, clientId);
-                    if (member.isInvited() || member.isJoined()) {
-                        List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-                        for (TalkGroupMember otherMember : members) {
-                            if (!clientId.equals(otherMember.getClientId())) {
-                                 if (otherMember.isJoined() || otherMember.isInvited()) {
-                                    String otherClientId = otherMember.getClientId();
-                                    LOG.debug("RPUFG: delivering presence of " + otherClientId + " to "+clientId);
-                                    TalkPresence presence = mDatabase.findPresenceForClient(otherClientId);
-                                    if (presence.getConnectionStatus() == null) {
-                                        updateConnectionStatus(presence);
+                    LOG.debug("RPUFG: update " + clientId + " for group " + groupId);
+                    TalkRpcConnection conn = mServer.getClientConnection(clientId);
+                    if (conn == null || !conn.isConnected()) {
+                        return;
+                    }
+                    ITalkRpcClient rpc = conn.getClientRpc();
+                    try {
+                        TalkGroupMember member = mDatabase.findGroupMemberForClient(groupId, clientId);
+                        if (member.isInvited() || member.isJoined()) {
+                            List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
+                            for (TalkGroupMember otherMember : members) {
+                                if (!clientId.equals(otherMember.getClientId())) {
+                                    if (otherMember.isJoined() || otherMember.isInvited()) {
+                                        String otherClientId = otherMember.getClientId();
+                                        LOG.debug("RPUFG: delivering presence of " + otherClientId + " to "+clientId);
+                                        TalkPresence presence = mDatabase.findPresenceForClient(otherClientId);
+                                        if (presence.getConnectionStatus() == null) {
+                                            updateConnectionStatus(presence);
+                                        }
+                                        // Calling Client via RPC
+                                        rpc.presenceUpdated(presence);
+                                    } else {
+                                        LOG.debug("RPUFG: target " + otherMember.getClientId() + " is not invited or joined");
                                     }
-                                    // Calling Client via RPC
-                                    rpc.presenceUpdated(presence);
                                 } else {
-                                    LOG.debug("RPUFG: target " + otherMember.getClientId() + " is not invited or joined");
+                                    LOG.debug("RPUFG: not sending presence update for group " + member.getGroupId()+" to self "+clientId);
                                 }
-                            } else {
-                                LOG.debug("RPUFG: not sending presence update for group " + member.getGroupId()+" to self "+clientId);
                             }
+                        } else {
+                            LOG.debug("RPUFG: not invited or joined in group " + member.getGroupId());
                         }
-                    } else {
-                        LOG.debug("RPUFG: not invited or joined in group " + member.getGroupId());
+                    } catch (Throwable t) {
+                        LOG.error("exception in runnable", t);
                     }
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         };
@@ -93,19 +97,23 @@ public class UpdateAgent extends NotificationDeferrer {
         Runnable notificationGenerator = new Runnable() {
             @Override
             public void run() {
-                LOG.debug("RPUC: updating " + targetClientId + " with presence of " + clientId);
-                TalkPresence presence = mDatabase.findPresenceForClient(clientId);
-                TalkRpcConnection targetConnection = mServer.getClientConnection(targetClientId);
-                if (targetConnection == null || !targetConnection.isConnected()) {
-                    LOG.debug("RPUC: target not connected");
-                    return;
-                }
-                updateConnectionStatus(presence);
                 try {
-                    // Calling Client via RPC
-                    targetConnection.getClientRpc().presenceUpdated(presence);
+                    LOG.debug("RPUC: updating " + targetClientId + " with presence of " + clientId);
+                    TalkPresence presence = mDatabase.findPresenceForClient(clientId);
+                    TalkRpcConnection targetConnection = mServer.getClientConnection(targetClientId);
+                    if (targetConnection == null || !targetConnection.isConnected()) {
+                        LOG.debug("RPUC: target not connected");
+                        return;
+                    }
+                    updateConnectionStatus(presence);
+                    try {
+                        // Calling Client via RPC
+                        targetConnection.getClientRpc().presenceUpdated(presence);
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         };
@@ -117,15 +125,19 @@ public class UpdateAgent extends NotificationDeferrer {
         Runnable notificationGenerator = new Runnable() {
             @Override
             public void run() {
-                // retrieve the current presence of the client
-                TalkPresence presence = mDatabase.findPresenceForClient(clientId);
-                // if we actually have a presence
-                if (presence != null) {
-                    if (fields == null || fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
-                        updateConnectionStatus(presence);
+                try {
+                    // retrieve the current presence of the client
+                    TalkPresence presence = mDatabase.findPresenceForClient(clientId);
+                    // if we actually have a presence
+                    if (presence != null) {
+                        if (fields == null || fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
+                            updateConnectionStatus(presence);
+                        }
+                        // propagate the presence to all friends
+                        performPresenceUpdate(presence, fields);
                     }
-                    // propagate the presence to all friends
-                    performPresenceUpdate(presence, fields);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         };
@@ -148,7 +160,7 @@ public class UpdateAgent extends NotificationDeferrer {
         for (TalkRelationship relationship : relationships) {
             // if the other clients relation is friendly to or has been invited by present client
             // Clients that have blocked present client therefore will not be included here
-            if (relationship.isFriend() || relationship.invitedMe()) {
+            if (relationship.isDirectlyRelated()) {
                 LOG.trace(tag + "including friend " + relationship.getClientId());
                 clientIds.add(relationship.getClientId());
             }
@@ -170,6 +182,13 @@ public class UpdateAgent extends NotificationDeferrer {
                 }
             }
         }
+/*
+        // I think it is better to distribute the presence even to blocking clients
+        // because there are some corner cases like the connection flag and
+        // possibly others that need to be handled; maybe we can better live
+        // with updating the presence to blocking clients and request from
+        // the user to delete a contact when he does not want to know anything
+        // about it.
 
         // do not send presence to clients the present client has blocked
         List<TalkRelationship> my_relationships = mDatabase.findRelationships(selfClientId);
@@ -182,7 +201,7 @@ public class UpdateAgent extends NotificationDeferrer {
             }
         }
         //TODO: deal with blocked group members in conjunction with group key distribution
-
+*/
         // remove self
         LOG.trace(tag + "excluding self " + selfClientId);
         clientIds.remove(selfClientId);
@@ -222,10 +241,14 @@ public class UpdateAgent extends NotificationDeferrer {
         Runnable notificationGenerator = new Runnable() {
             @Override
             public void run() {
-                TalkRpcConnection clientConnection = mServer.getClientConnection(relationship.getClientId());
-                if (clientConnection != null && clientConnection.isLoggedIn()) {
-                    // Calling Client via RPC
-                    clientConnection.getClientRpc().relationshipUpdated(relationship);
+                try {
+                    TalkRpcConnection clientConnection = mServer.getClientConnection(relationship.getClientId());
+                    if (clientConnection != null && clientConnection.isLoggedIn()) {
+                        // Calling Client via RPC
+                        clientConnection.getClientRpc().relationshipUpdated(relationship);
+                    }
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         };
@@ -236,20 +259,24 @@ public class UpdateAgent extends NotificationDeferrer {
         Runnable notificationGenerator = new Runnable() {
             @Override
             public void run() {
-                TalkGroup updatedGroup = mDatabase.findGroupById(groupId);
-                if (updatedGroup != null) {
-                    TalkRpcConnection connection = mServer.getClientConnection(clientId);
-                    if (connection == null || !connection.isConnected()) {
-                        return;
-                    }
+                try {
+                    TalkGroup updatedGroup = mDatabase.findGroupById(groupId);
+                    if (updatedGroup != null) {
+                        TalkRpcConnection connection = mServer.getClientConnection(clientId);
+                        if (connection == null || !connection.isConnected()) {
+                            return;
+                        }
 
-                    // Calling Client via RPC
-                    ITalkRpcClient rpc = connection.getClientRpc();
-                    try {
-                        rpc.groupUpdated(updatedGroup);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        // Calling Client via RPC
+                        ITalkRpcClient rpc = connection.getClientRpc();
+                        try {
+                            rpc.groupUpdated(updatedGroup);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         };
@@ -260,75 +287,83 @@ public class UpdateAgent extends NotificationDeferrer {
         Runnable notification = new Runnable() {
             @Override
             public void run() {
-                TalkGroup updatedGroup = mDatabase.findGroupById(groupId);
-                if (updatedGroup != null) {
-                    List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-                    for (TalkGroupMember member : members) {
-                        if (member.isJoined() || member.isInvited() || member.isGroupRemoved()) {
-                            TalkRpcConnection connection = mServer.getClientConnection(member.getClientId());
-                            if (connection == null || !connection.isConnected()) {
-                                continue;
-                            }
+                try {
+                    TalkGroup updatedGroup = mDatabase.findGroupById(groupId);
+                    if (updatedGroup != null) {
+                        List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
+                        for (TalkGroupMember member : members) {
+                            if (member.isJoined() || member.isInvited() || member.isGroupRemoved()) {
+                                TalkRpcConnection connection = mServer.getClientConnection(member.getClientId());
+                                if (connection == null || !connection.isConnected()) {
+                                    continue;
+                                }
 
-                            // Calling Client via RPC
-                            ITalkRpcClient rpc = connection.getClientRpc();
-                            try {
-                                rpc.groupUpdated(updatedGroup);
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                // Calling Client via RPC
+                                ITalkRpcClient rpc = connection.getClientRpc();
+                                try {
+                                    rpc.groupUpdated(updatedGroup);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         };
         queueOrExecute(context, notification);
     }
 
-    // TODO: optimze update calls based in isNew
+    // TODO: optimize update calls based in isNew
     public void requestGroupMembershipUpdate(final String groupId, final String clientId, final boolean isNew) {
         LOG.debug("requestGroupMembershipUpdate for group " + groupId + " client " + clientId);
         Runnable notificationGenerator = new Runnable() {
             @Override
             public void run() {
-                TalkGroupMember updatedMember = mDatabase.findGroupMemberForClient(groupId, clientId);
-                if (updatedMember == null) {
-                    LOG.debug("requestGroupMembershipUpdate updatedMember is null");
-                    return;
-                }
-                TalkGroupMember foreignMember = new TalkGroupMember();
-                foreignMember.foreignUpdateWith(updatedMember);
-
-                List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-                LOG.debug("requestGroupMembershipUpdate found " + members.size() + " members");
-                boolean someOneWasNotified = false;
-                for (TalkGroupMember member : members) {
-                    if (member.isJoined() || member.isInvited() || member.isGroupRemoved() || member.getClientId().equals(clientId)) {
-                        TalkRpcConnection connection = mServer.getClientConnection(member.getClientId());
-                        if (connection == null || !connection.isConnected()) {
-                            LOG.debug("requestGroupMembershipUpdate - refrain from updating not connected member client " + member.getClientId());
-                            continue;
-                        }
-
-                        // Calling Client via RPC
-                        ITalkRpcClient rpc = connection.getClientRpc();
-                        try {
-                            if (member.getClientId().equals(clientId)) {
-                                // is own membership
-                                rpc.groupMemberUpdated(updatedMember);
-                            } else {
-                                rpc.groupMemberUpdated(foreignMember);
-                            }
-                            someOneWasNotified = true;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        LOG.debug("requestGroupMembershipUpdate - not updating client " + member.getClientId() + ", state=" + member.getState() + ", self=" + member.getClientId().equals(clientId));
+                try {
+                    TalkGroupMember updatedMember = mDatabase.findGroupMemberForClient(groupId, clientId);
+                    if (updatedMember == null) {
+                        LOG.debug("requestGroupMembershipUpdate updatedMember is null");
+                        return;
                     }
-                }
-                if (someOneWasNotified) {
-                    checkAndRequestGroupMemberKeys(groupId);
+                    TalkGroupMember foreignMember = new TalkGroupMember();
+                    foreignMember.foreignUpdateWith(updatedMember);
+
+                    List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
+                    LOG.debug("requestGroupMembershipUpdate found " + members.size() + " members");
+                    boolean someOneWasNotified = false;
+                    for (TalkGroupMember member : members) {
+                        if (member.isJoined() || member.isInvited() || member.isGroupRemoved() || member.getClientId().equals(clientId)) {
+                            TalkRpcConnection connection = mServer.getClientConnection(member.getClientId());
+                            if (connection == null || !connection.isConnected()) {
+                                LOG.debug("requestGroupMembershipUpdate - refrain from updating not connected member client " + member.getClientId());
+                                continue;
+                            }
+
+                            // Calling Client via RPC
+                            ITalkRpcClient rpc = connection.getClientRpc();
+                            try {
+                                if (member.getClientId().equals(clientId)) {
+                                    // is own membership
+                                    rpc.groupMemberUpdated(updatedMember);
+                                } else {
+                                    rpc.groupMemberUpdated(foreignMember);
+                                }
+                                someOneWasNotified = true;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            LOG.debug("requestGroupMembershipUpdate - not updating client " + member.getClientId() + ", state=" + member.getState() + ", self=" + member.getClientId().equals(clientId));
+                        }
+                    }
+                    if (someOneWasNotified) {
+                        checkAndRequestGroupMemberKeys(groupId);
+                    }
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         };
@@ -341,32 +376,36 @@ public class UpdateAgent extends NotificationDeferrer {
         Runnable notificationGenerator = new Runnable() {
             @Override
             public void run() {
-                TalkGroupMember newMember = mDatabase.findGroupMemberForClient(groupId, newMemberClientId);
-                if (newMember == null) {
-                    LOG.debug("requestGroupMembershipUpdateForNewMember can't find newMember, is null");
-                    return;
-                }
-                List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-                LOG.debug("requestGroupMembershipUpdateForNewMember found " + members.size() + " members");
-                TalkRpcConnection connection = mServer.getClientConnection(newMember.getClientId());
-                if (connection == null || !connection.isConnected()) {
-                    LOG.debug("requestGroupMembershipUpdateForNewMember - new client no longer connected " + newMember.getClientId());
-                    return;
-                }
-                // Calling Client via RPC
-                ITalkRpcClient rpc = connection.getClientRpc();
-                for (TalkGroupMember member : members) {
-                    // do not send out updates for own membership or dead members
-                    if (!member.getClientId().equals(newMemberClientId) && (member.isJoined() || member.isInvited())) {
-                        try {
-                            member.setEncryptedGroupKey(null);
-                            rpc.groupMemberUpdated(member);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        LOG.debug("requestGroupMembershipUpdateForNewMember - not updating with member " + member.getClientId() + ", state=" + member.getState());
+                try {
+                    TalkGroupMember newMember = mDatabase.findGroupMemberForClient(groupId, newMemberClientId);
+                    if (newMember == null) {
+                        LOG.debug("requestGroupMembershipUpdateForNewMember can't find newMember, is null");
+                        return;
                     }
+                    List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
+                    LOG.debug("requestGroupMembershipUpdateForNewMember found " + members.size() + " members");
+                    TalkRpcConnection connection = mServer.getClientConnection(newMember.getClientId());
+                    if (connection == null || !connection.isConnected()) {
+                        LOG.debug("requestGroupMembershipUpdateForNewMember - new client no longer connected " + newMember.getClientId());
+                        return;
+                    }
+                    // Calling Client via RPC
+                    ITalkRpcClient rpc = connection.getClientRpc();
+                    for (TalkGroupMember member : members) {
+                        // do not send out updates for own membership or dead members
+                        if (!member.getClientId().equals(newMemberClientId) && (member.isJoined() || member.isInvited())) {
+                            try {
+                                member.setEncryptedGroupKey(null);
+                                rpc.groupMemberUpdated(member);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            LOG.debug("requestGroupMembershipUpdateForNewMember - not updating with member " + member.getClientId() + ", state=" + member.getState());
+                        }
+                    }
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         };
@@ -402,31 +441,35 @@ public class UpdateAgent extends NotificationDeferrer {
         Runnable checker = new Runnable() {
             @Override
             public void run() {
-                TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("groupKeyCheck-"+groupId);
-
-                boolean acquired = lock.tryLock();
-                LOG.debug("checkAndRequestGroupMemberKeys trylock groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting="+lock.getWaiting());
-
-                if (!acquired && lock.getWaiting() > 0) {
-                    // we are sure that that there are other threads waiting to be performed
-                    // so we can just throw away this request
-                    LOG.debug("checkAndRequestGroupMemberKeys enough waiters, throwing away request: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting="+lock.getWaiting());
-                    return;
-                }
-
                 try {
-                    LOG.debug("checkAndRequestGroupMemberKeys will lock groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
-                    if (!acquired) {
-                        lock.lock();
+                    TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("groupKeyCheck-"+groupId);
+
+                    boolean acquired = lock.tryLock();
+                    LOG.debug("checkAndRequestGroupMemberKeys trylock groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting="+lock.getWaiting());
+
+                    if (!acquired && lock.getWaiting() > 0) {
+                        // we are sure that that there are other threads waiting to be performed
+                        // so we can just throw away this request
+                        LOG.debug("checkAndRequestGroupMemberKeys enough waiters, throwing away request: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting="+lock.getWaiting());
+                        return;
                     }
-                    LOG.debug("checkAndRequestGroupMemberKeys acquired lock for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
-                    performCheckAndRequestGroupMemberKeys(groupId);
-                    LOG.debug("checkAndRequestGroupMemberKeys ready for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
-                } catch (InterruptedException e) {
-                    LOG.debug("checkAndRequestGroupMemberKeys: interrupted" + e);
-                } finally {
-                    LOG.debug("checkAndRequestGroupMemberKeys releasing lock for groupId: '" + groupId + "' with id "+lock+", hash="+lock.hashCode()+",thread="+Thread.currentThread());
-                    lock.unlock();
+
+                    try {
+                        LOG.debug("checkAndRequestGroupMemberKeys will lock groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
+                        if (!acquired) {
+                            lock.lock();
+                        }
+                        LOG.debug("checkAndRequestGroupMemberKeys acquired lock for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
+                        performCheckAndRequestGroupMemberKeys(groupId);
+                        LOG.debug("checkAndRequestGroupMemberKeys ready for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
+                    } catch (InterruptedException e) {
+                        LOG.debug("checkAndRequestGroupMemberKeys: interrupted" + e);
+                    } finally {
+                        LOG.debug("checkAndRequestGroupMemberKeys releasing lock for groupId: '" + groupId + "' with id "+lock+", hash="+lock.hashCode()+",thread="+Thread.currentThread());
+                        lock.unlock();
+                    }
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         };
@@ -638,18 +681,22 @@ public class UpdateAgent extends NotificationDeferrer {
         Runnable notificationGenerator = new Runnable() {
             @Override
             public void run() {
-                final TalkRpcConnection conn = mServer.getClientConnection(clientId);
-                if (conn == null || !conn.isConnected()) {
-                    return;
+                try {
+                    final TalkRpcConnection conn = mServer.getClientConnection(clientId);
+                    if (conn == null || !conn.isConnected()) {
+                        return;
+                    }
+                    TalkClient talkClient = mDatabase.findClientById(clientId);
+                    if (talkClient == null) {
+                        return;
+                    }
+                    TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(talkClient.getClientId());
+                    String messageString = new StaticSystemMessage(talkClient, clientHostInfo, message).generateMessage();
+                    LOG.info("requestUserAlert");
+                    conn.getClientRpc().alertUser(messageString);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
-                TalkClient talkClient = mDatabase.findClientById(clientId);
-                if (talkClient == null) {
-                    return;
-                }
-                TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(talkClient.getClientId());
-                String messageString = new StaticSystemMessage(talkClient, clientHostInfo, message).generateMessage();
-                LOG.info("requestUserAlert");
-                conn.getClientRpc().alertUser(messageString);
             }
         };
 

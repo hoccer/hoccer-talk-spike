@@ -502,6 +502,26 @@ public class TalkDelivery {
     }
 
     @JsonIgnore
+    public boolean isOutUpToDate() {
+        return  getTimeUpdatedOut().getTime() > getTimeChanged().getTime();
+    }
+
+    @JsonIgnore
+    public boolean isInUpToDate() {
+        return  getTimeUpdatedIn().getTime() > getTimeChanged().getTime();
+    }
+
+    @JsonIgnore
+    public boolean isOutStaleFor(long msec) {
+        return getTimeUpdatedOut().getTime()+msec <= new Date().getTime();
+    }
+
+    @JsonIgnore
+    public boolean isInStaleFor(long msec) {
+        return getTimeUpdatedIn().getTime()+msec <= new Date().getTime();
+    }
+
+    @JsonIgnore
     public boolean isClientDelivery() {
         return receiverId != null && groupId == null;
     }
