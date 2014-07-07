@@ -1,5 +1,7 @@
 package com.hoccer.xo.android.adapter;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +9,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
@@ -16,10 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NearbyChatAdapter extends ChatAdapter {
+    private XoActivity mXoActivity;
     private LayoutInflater mInflater;
 
     public NearbyChatAdapter(ListView listView, XoActivity activity) {
         super(listView, activity, null);
+        mXoActivity = activity;
         mInflater = (LayoutInflater)activity.getSystemService(activity.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -66,23 +71,41 @@ public class NearbyChatAdapter extends ChatAdapter {
         if (chatItem.isSeparator()) {
             convertView = mInflater.inflate(R.layout.item_chat_separator, null);
             TextView tv = (TextView) convertView.findViewById(R.id.tv_header);
-            //TODO: make deletion by clicking on separator
-//            tv.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    try {
-//                        mDatabase.deleteAllMessagesFromContactId(chatItem.getConversationContactId());
-//                        runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                notifyDataSetChanged();
-//                            }
-//                        });
-//                    } catch (SQLException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
+            tv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            XoDialogs.showYesNoDialog("ConfirmDeletion",
+                                    R.string.dialog_confirm_nearby_deletion_title,
+                                    R.string.dialog_confirm_nearby_deletion_message,
+                                    mXoActivity,
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            try {
+                                                mDatabase.deleteAllMessagesFromContactId(chatItem.getConversationContactId());
+                                            } catch (SQLException e) {
+                                                e.printStackTrace();
+                                            }
+                                            notifyDataSetChanged();
+                                        }
+                                    },
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int id) {
+                                        }
+                                    }
+                            );
+
+
+
+                            notifyDataSetChanged();
+                        }
+                    });
+                }
+            });
             tv.setText(chatItem.getText());
             convertView.setTag("SEPARATOR");
             return convertView;

@@ -1043,11 +1043,9 @@ public class XoClient implements JsonRpcConnection.Listener {
                             LOG.error("createGroup: defective membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
                         }
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        LOG.error("SQL error: ", e);
                     }
                     // end of error checking section
-
-
 
                 } catch (JsonRpcClientException e) {
                     LOG.error("Error while creating group: ", e);

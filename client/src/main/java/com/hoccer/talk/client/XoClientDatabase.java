@@ -430,9 +430,11 @@ public class XoClientDatabase {
 
         ArrayList<TalkClientMessage> nearbyMessages = new ArrayList<TalkClientMessage>();
         for (TalkClientMessage message : messages) {
-            if (message.getConversationContact().getContactType().equals("group")) {
-                if (message.getConversationContact().getGroupPresence().isTypeNearby()) {
-                    nearbyMessages.add(message);
+            if (message.getConversationContact() != null && message.getConversationContact().getContactType() != null) {
+                if (message.getConversationContact().getContactType().equals("group")) {
+                    if (message.getConversationContact().getGroupPresence().isTypeNearby()) {
+                        nearbyMessages.add(message);
+                    }
                 }
             }
         }
@@ -451,8 +453,6 @@ public class XoClientDatabase {
             orderedMessages.add(separator);
             orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(),nearbyMessages.size(), 0));
         }
-
-
         return orderedMessages;
     }
 
