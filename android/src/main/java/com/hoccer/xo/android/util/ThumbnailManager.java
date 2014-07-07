@@ -94,7 +94,7 @@ public class ThumbnailManager {
         String thumbnailFilename = uri.substring(uri.lastIndexOf("/") + 1, uri.length());
         int index = thumbnailFilename.lastIndexOf(".");
         String taggedFilename = thumbnailFilename.substring(0, index) + String.valueOf(tag) + thumbnailFilename.substring(index);
-        return XoApplication.getThumbnailDirectory() + taggedFilename;
+        return XoApplication.getThumbnailDirectory() + File.separator + taggedFilename;
     }
 
     private Bitmap loadThumbnailForImage(String uri, String tag) {
