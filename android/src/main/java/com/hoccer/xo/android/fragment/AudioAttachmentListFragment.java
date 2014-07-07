@@ -426,7 +426,6 @@ public class AudioAttachmentListFragment extends XoListFragment {
                     List<AudioAttachmentItem> itemList = new ArrayList<AudioAttachmentItem>();
                     itemList.add(selectedAudioItem);
                     position = 0;
-                    toggleSearchMode(false);
                     mMediaPlayerService.setMediaList(itemList);
                 } else {
                     setMediaList();
