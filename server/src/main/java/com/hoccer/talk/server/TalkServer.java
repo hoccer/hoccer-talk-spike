@@ -126,19 +126,61 @@ public class TalkServer {
 
     public class NonReentrantLock{
 
-        private boolean isLocked = false;
+        private boolean mIsLocked;
+        private int mWaiting;
+        public String mName;
 
-        public synchronized void lock()
-                throws InterruptedException{
-            while(isLocked){
-                wait();
+        NonReentrantLock() {
+            mIsLocked = false;
+            mWaiting = 0;
+            mName = "<unnamed>";
+        }
+
+        NonReentrantLock(String name) {
+            mIsLocked = false;
+            mWaiting = 0;
+            mName = name;
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public boolean isLocked() {
+            return mIsLocked;
+        }
+
+        public int getWaiting() {
+            return mWaiting;
+        }
+
+        public synchronized boolean tryLock()  {
+            System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock");
+            if (!mIsLocked) {
+                mIsLocked = true;
+                System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock : acquired lock");
+                return true;
             }
-            isLocked = true;
+            System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock : not locking, is already locked");
+            return false;
+        }
+
+        public synchronized void lock() throws InterruptedException{
+            while (mIsLocked) {
+                System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" wait");
+                ++mWaiting;
+                this.wait();
+                --mWaiting;
+                System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" wakeup");
+            }
+            mIsLocked = true;
+            System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" acquired lock");
         }
 
         public synchronized void unlock(){
-            isLocked = false;
-            notify();
+            mIsLocked = false;
+            System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" unlock");
+            this.notify();
         }
     }
 
@@ -180,7 +222,7 @@ public class TalkServer {
         synchronized (mNonReentrantIdLocks) {
             NonReentrantLock lock = mNonReentrantIdLocks.get(id);
             if (lock == null) {
-                lock = new NonReentrantLock();
+                lock = new NonReentrantLock(id);
                 mNonReentrantIdLocks.put(id, lock);
             }
             return lock;

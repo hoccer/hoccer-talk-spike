@@ -230,40 +230,52 @@ public abstract class JsonRpcConnection {
      * Dispatch an incoming request (for subclasses to call)
      */
     public void handleRequest(ObjectNode request) {
+        LOG.debug("handleRequest id="+ request.get("id"));
         if (mServer != null) {
             try {
                 for (ConnectionEventListener l : mConnectionEventListeners) {
+                    LOG.debug("handleRequest onPreHandleRequest id="+ request.get("id"));
                     l.onPreHandleRequest(this, request);
                 }
+                LOG.debug("handleRequest serverid="+ request.get("id"));
                 mServer.handleRequest(mServerHandler, request, this);
+                LOG.debug("handleRequest server done id="+ request.get("id"));
             } catch (Throwable throwable) {
                 LOG.error("Exception handling request", throwable);
             } finally {
                 for (ConnectionEventListener l : mConnectionEventListeners) {
+                    LOG.debug("handleRequest onPostHandleRequest id="+ request.get("id"));
                     l.onPostHandleRequest(this, request);
                 }
             }
         }
+        LOG.debug("handleRequest done id="+ request.get("id"));
     }
 
     /**
      * Dispatch an incoming response (for subclasses to call)
      */
     public void handleResponse(ObjectNode response) {
+        LOG.debug("handleResponse id="+ response.get("id"));
         if (mClient != null) {
             try {
                 for (ConnectionEventListener l : mConnectionEventListeners) {
+                    LOG.debug("handleResponse onPreHandleResponse id="+ response.get("id"));
                     l.onPreHandleResponse(this, response);
                 }
+                LOG.debug("handleResponse client id="+ response.get("id"));
                 mClient.handleResponse(response, this);
+                LOG.debug("handleResponse client done id="+ response.get("id"));
             } catch (Throwable throwable) {
                 LOG.error("Exception handling response", throwable);
             } finally {
                 for (ConnectionEventListener l : mConnectionEventListeners) {
+                    LOG.debug("handleResponse onPostHandleResponse id="+ response.get("id"));
                     l.onPostHandleResponse(this, response);
                 }
             }
         }
+        LOG.debug("handleResponse done id="+ response.get("id"));
     }
 
     /**

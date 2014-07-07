@@ -403,14 +403,29 @@ public class UpdateAgent extends NotificationDeferrer {
             @Override
             public void run() {
                 TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("groupKeyCheck-"+groupId);
+
+                boolean acquired = lock.tryLock();
+                LOG.debug("checkAndRequestGroupMemberKeys trylock groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting="+lock.getWaiting());
+
+                if (!acquired && lock.getWaiting() > 0) {
+                    // we are sure that that there are other threads waiting to be performed
+                    // so we can just throw away this request
+                    LOG.debug("checkAndRequestGroupMemberKeys enough waiters, throwing away request: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting="+lock.getWaiting());
+                    return;
+                }
+
                 try {
-                    lock.lock();
-                    LOG.debug("checkAndRequestGroupMemberKeys acquired lock for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode());
+                    LOG.debug("checkAndRequestGroupMemberKeys will lock groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
+                    if (!acquired) {
+                        lock.lock();
+                    }
+                    LOG.debug("checkAndRequestGroupMemberKeys acquired lock for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
                     performCheckAndRequestGroupMemberKeys(groupId);
+                    LOG.debug("checkAndRequestGroupMemberKeys ready for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
                 } catch (InterruptedException e) {
                     LOG.debug("checkAndRequestGroupMemberKeys: interrupted" + e);
                 } finally {
-                    LOG.debug("performCheckAndRequestGroupMemberKeys releasing lock for groupId: '" + groupId + "' with id "+lock+", hash="+lock.hashCode());
+                    LOG.debug("checkAndRequestGroupMemberKeys releasing lock for groupId: '" + groupId + "' with id "+lock+", hash="+lock.hashCode()+",thread="+Thread.currentThread());
                     lock.unlock();
                 }
             }
@@ -485,7 +500,7 @@ public class UpdateAgent extends NotificationDeferrer {
                             requestGroupKeys(newKeymaster.getClientId(), group.getGroupId(), sharedKeyId, sharedKeyIdSalt, outOfDateMembers);
                             return;
                         }
-                        // fall through to next block if best candidate does not meet MAX_ALLOWED_LATENCY
+                        // fall through to next block if best candidate does not meet MAX_ALLOWED_KEY_REQUEST_LATENCY
                     }
                     if (!keyMasterCandidatesWithoutCurrentKey.isEmpty()) {
                         // nobody with a current key is online, but we have other admins online, so purchase a new group key
@@ -496,7 +511,7 @@ public class UpdateAgent extends NotificationDeferrer {
                             requestGroupKeys(newKeymaster.getClientId(), group.getGroupId(), null, null, outOfDateMembers);
                             return;
                         }
-                        // fall through to next block if best candidate does not meet MAX_ALLOWED_LATENCY
+                        // fall through to next block if best candidate does not meet MAX_ALLOWED_KEY_REQUEST_LATENCY
                     }
                     // we have out of date key members, but no suitable candidate for group key generation
                     LOG.warn("performCheckAndRequestGroupMemberKeys:" + outOfDateMembers.size() + " members have no key in group " + groupId + ", but no suitable keymaster available");
