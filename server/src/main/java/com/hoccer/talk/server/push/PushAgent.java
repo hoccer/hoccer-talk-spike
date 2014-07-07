@@ -47,7 +47,7 @@ public class PushAgent {
 
     public PushAgent(TalkServer server) {
         mExecutor = Executors.newScheduledThreadPool(
-            TalkServerConfiguration.THREADS_PUSH,
+            server.getConfiguration().getPushAgentThreadPoolSize(),
             new NamedThreadFactory("push-agent")
         );
         mServer = server;

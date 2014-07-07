@@ -25,10 +25,15 @@ public class UpdateAgent extends NotificationDeferrer {
     private static final ThreadLocal<ArrayList<Runnable>> context = new ThreadLocal<ArrayList<Runnable>>();
 
     private final static Long MAX_ALLOWED_KEY_REQUEST_LATENCY = 10000L;
+    private final TalkServerConfiguration mConfig;
 
     public UpdateAgent(TalkServer server) {
-        super(TalkServerConfiguration.THREADS_UPDATE, "update-agent");
+        super(
+            server.getConfiguration().getUpdateAgentThreadPoolSize(),
+            "update-agent"
+        );
         mServer = server;
+        mConfig = mServer.getConfiguration();
         mDatabase = mServer.getDatabase();
     }
 
@@ -419,9 +424,9 @@ public class UpdateAgent extends NotificationDeferrer {
                     if (!acquired) {
                         lock.lock();
                     }
-                    LOG.debug("checkAndRequestGroupMemberKeys acquired lock for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
+                    LOG.debug("checkAndRequestGroupMemberKeys acquired lock for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode() + ",thread=" + Thread.currentThread());
                     performCheckAndRequestGroupMemberKeys(groupId);
-                    LOG.debug("checkAndRequestGroupMemberKeys ready for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread());
+                    LOG.debug("checkAndRequestGroupMemberKeys ready for groupId: '" + groupId + "' with id " + lock + ", hash=" + lock.hashCode() + ",thread=" + Thread.currentThread());
                 } catch (InterruptedException e) {
                     LOG.debug("checkAndRequestGroupMemberKeys: interrupted" + e);
                 } finally {

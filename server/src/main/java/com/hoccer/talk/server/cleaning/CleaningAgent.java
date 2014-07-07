@@ -43,7 +43,7 @@ public class CleaningAgent {
         mConfig = mServer.getConfiguration();
         mDatabase = mServer.getDatabase();
         mExecutor = Executors.newScheduledThreadPool(
-            TalkServerConfiguration.THREADS_CLEANING,
+            mConfig.getCleaningAgentThreadPoolSize(),
             new NamedThreadFactory("cleaning-agent")
         );
         LOG.info("Cleaning clients scheduling will start in '" + mConfig.getCleanupAllClientsDelay() + "' seconds.");

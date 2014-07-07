@@ -39,13 +39,17 @@ public class PingAgent {
 
     private final AtomicInteger mPingFailures = new AtomicInteger();
     private final AtomicInteger mPingSuccesses = new AtomicInteger();
+    private final TalkServerConfiguration mConfig;
 
     private Timer mPingLatency;
 
+
+
     public PingAgent(TalkServer server) {
         mServer = server;
+        mConfig = mServer.getConfiguration();
         mExecutor = Executors.newScheduledThreadPool(
-                TalkServerConfiguration.THREADS_PING,
+                mConfig.getPingAgentThreadPoolSize(),
                 new NamedThreadFactory("ping-agent")
         );
         initializeMetrics(mServer.getMetrics());
