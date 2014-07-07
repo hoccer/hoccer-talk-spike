@@ -44,7 +44,6 @@ public class PingAgent {
     private Timer mPingLatency;
 
 
-
     public PingAgent(TalkServer server) {
         mServer = server;
         mConfig = mServer.getConfiguration();
@@ -150,5 +149,4 @@ public class PingAgent {
             performPing(connection.getClientId());
         }
     }
-
 }

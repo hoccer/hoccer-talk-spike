@@ -13,8 +13,8 @@ public class DeliveryAgent extends NotificationDeferrer {
 
     public DeliveryAgent(TalkServer server) {
         super(
-            server.getConfiguration().getDeliveryAgentThreadPoolSize(),
-            "delivery-agent"
+                server.getConfiguration().getDeliveryAgentThreadPoolSize(),
+                "delivery-agent"
         );
         mServer = server;
     }
