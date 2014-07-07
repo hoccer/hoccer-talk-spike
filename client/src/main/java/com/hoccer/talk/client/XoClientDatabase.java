@@ -2,6 +2,7 @@ package com.hoccer.talk.client;
 
 import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.model.*;
+import com.hoccer.talk.util.WeakListenerArray;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.field.DataType;
@@ -676,6 +677,8 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     private Map<Integer, WeakReference<TalkClientMediaCollection>> mMediaCollectionCache =
             new HashMap<Integer, WeakReference<TalkClientMediaCollection>>();
 
+    private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListenerArray = new WeakListenerArray<IXoMediaCollectionListener>();
+
     @Override
     public TalkClientMediaCollection findMediaCollectionById(Integer id) throws SQLException {
         TalkClientMediaCollection collection = mMediaCollections.queryForId(id);
@@ -706,23 +709,46 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return collections;
     }
 
+    // Creates a new MediaCollection instance with the given name.
     @Override
     public TalkClientMediaCollection createMediaCollection(String collectionName) throws SQLException {
         TalkClientMediaCollection collection = new TalkClientMediaCollection(collectionName);
         mMediaCollections.createIfNotExists(collection);
-        return prepareMediaCollection(collection);
+        collection = prepareMediaCollection(collection);
+        for(IXoMediaCollectionListener listener : mMediaCollectionListenerArray) {
+            listener.onMediaCollectionCreated(collection);
+        }
+        return collection;
     }
 
-    @Override
-    public void deleteMediaCollection(TalkClientMediaCollection collection) throws SQLException {
-        mMediaCollectionCache.remove(collection.getId());
-        mMediaCollections.delete(collection);
-    }
-
+    // Deletes the given collection from database.
+    // Note: The collection will be cleared. Do not use the collection instance after deletion.
     @Override
     public void deleteMediaCollectionById(int collectionId) throws SQLException {
-        mMediaCollectionCache.remove(collectionId);
-        mMediaCollections.deleteById(collectionId);
+        TalkClientMediaCollection collection = findMediaCollectionById(collectionId);
+        deleteMediaCollection(collection);
+    }
+
+    // Deletes the given collection from database.
+    // Note: The collection will be cleared. Do not use the collection instance after deletion.
+    @Override
+    public void deleteMediaCollection(TalkClientMediaCollection collection) throws SQLException {
+        collection.clear();
+        mMediaCollections.delete(collection);
+        mMediaCollectionCache.remove(collection.getId());
+        for(IXoMediaCollectionListener listener : mMediaCollectionListenerArray) {
+            listener.onMediaCollectionDeleted(collection);
+        }
+    }
+
+    @Override
+    public void registerListener(IXoMediaCollectionListener listener) {
+        mMediaCollectionListenerArray.registerListener(listener);
+    }
+
+    @Override
+    public void unregisterListener(IXoMediaCollectionListener listener) {
+        mMediaCollectionListenerArray.unregisterListener(listener);
     }
 
     // The returned Dao should not be used directly to alter the database, use TalkClientMediaCollection instead

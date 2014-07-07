@@ -289,4 +289,10 @@
         <item>IN DER NÄHE</item>
     </string-array>
 
+    <string name="search_section_caption_contacts">Kontakte</string>
+    <string name="search_section_caption_files">Dateien</string>
+    <string name="search_section_caption_images">Bilddateien</string>
+    <string name="search_section_caption_audio_files">Audiodateien</string>
+    <string name="search_section_caption_video_files">Videodateien</string>
+
 </resources>

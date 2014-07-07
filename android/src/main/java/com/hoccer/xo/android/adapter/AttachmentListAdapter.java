@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import com.hoccer.talk.client.IXoTransferListener;
-import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -34,29 +33,37 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     private SparseBooleanArray mSelections;
 
-    public AttachmentListAdapter(Activity pXoContext) {
-        this(pXoContext, null, MediaPlayerService.UNDEFINED_CONTACT_ID);
+    public AttachmentListAdapter(Activity activity) {
+        this(activity, null, MediaPlayerService.UNDEFINED_CONTACT_ID);
     }
 
-    public AttachmentListAdapter(Activity pXoContext, String pContentMediaType) {
-        this(pXoContext, pContentMediaType, MediaPlayerService.UNDEFINED_CONTACT_ID);
+    public AttachmentListAdapter(Activity activity, String pContentMediaType) {
+        this(activity, pContentMediaType, MediaPlayerService.UNDEFINED_CONTACT_ID);
     }
 
-    public AttachmentListAdapter(Activity pXoContext, int pConversationContactId) {
-        this(pXoContext, null, pConversationContactId);
+    public AttachmentListAdapter(Activity activity, int pConversationContactId) {
+        this(activity, null, pConversationContactId);
     }
 
     public AttachmentListAdapter(Activity activity, String pContentMediaType, int pConversationContactId) {
         mActivity = activity;
-        setContentMediaType(pContentMediaType);
-        setConversationContactId(pConversationContactId);
+        setContentMediaTypeFilter(pContentMediaType);
+        setContactIdFilter(pConversationContactId);
     }
 
-    public List<AudioAttachmentItem> getAttachmentItems() {
+    public AttachmentListAdapter createDuplicate() {
+        AttachmentListAdapter adapter = new AttachmentListAdapter(mActivity, mContentMediaType, mConversationContactId);
+        adapter.setAttachmentItems(mAttachmentItems);
+
+        return adapter;
+    }
+
+    public List<AudioAttachmentItem> getAttachmentList() {
         return mAttachmentItems;
     }
 
     public void setAttachmentItems(List<AudioAttachmentItem> items) {
+        mAttachmentItems.clear();
         mAttachmentItems.addAll(items);
         mActivity.runOnUiThread(new Runnable() {
             @Override
@@ -64,10 +71,6 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
                 notifyDataSetChanged();
             }
         });
-    }
-
-    public int getConversationContactId() {
-        return mConversationContactId;
     }
 
     @Override
@@ -109,7 +112,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         return audioRowView;
     }
 
-    public void setContentMediaType(String pContentMediaType) {
+    public void setContentMediaTypeFilter(String pContentMediaType) {
         mContentMediaType = pContentMediaType;
     }
 
@@ -117,8 +120,12 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         return mContentMediaType;
     }
 
-    public void setConversationContactId(int pConversationContactId) {
+    public void setContactIdFilter(int pConversationContactId) {
         mConversationContactId = pConversationContactId;
+    }
+
+    public int getConversationContactId() {
+        return mConversationContactId;
     }
 
     @Override
@@ -238,7 +245,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         this.mSelections = selections;
     }
 
-    public void loadAttachmentList() {
+    public void loadAttachments() {
         try {
             List<TalkClientDownload> downloads;
             if (mContentMediaType != null) {
@@ -251,7 +258,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
                 downloads = XoApplication.getXoClient().getDatabase().findAllClientDownloads();
             }
 
-            createAttachmentItemsFromTalkClientDownloads(downloads);
+            createAttachmentsFromTalkClientDownloads(downloads);
         } catch (SQLException e) {
             LOG.error(e);
         }
@@ -263,34 +270,10 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
             downloads.add(collection.getItem(i));
         }
 
-        createAttachmentItemsFromTalkClientDownloads(downloads);
+        createAttachmentsFromTalkClientDownloads(downloads);
     }
 
-    public void loadAttachmentsFromContact(int contactId, String contentMediaType) {
-        mConversationContactId = contactId;
-        mContentMediaType = contentMediaType;
-        try {
-            List<TalkClientDownload> downloads;
-            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
-
-            if (contentMediaType != null) {
-                if (contactId != MediaPlayerService.UNDEFINED_CONTACT_ID) {
-                    downloads = database.findClientDownloadByMediaTypeAndConversationContactId(ContentMediaType.AUDIO, contactId);
-                } else {
-                    downloads = database.findClientDownloadByMediaType(contentMediaType);
-                }
-            } else {
-                downloads = database.findAllClientDownloads();
-            }
-
-            createAttachmentItemsFromTalkClientDownloads(downloads);
-
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-    }
-
-    private void createAttachmentItemsFromTalkClientDownloads(Iterable<TalkClientDownload> downloads) {
+    private void createAttachmentsFromTalkClientDownloads(Iterable<TalkClientDownload> downloads) {
         if (downloads != null) {
             for (TalkClientDownload download : downloads) {
                 if (!isRecordedAudio(download.getFileName())) {
@@ -303,6 +286,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
             }
         }
     }
+
     private void updateCheckedItems() {
         SparseBooleanArray updatedSelection = new SparseBooleanArray(mSelections.size());
 

@@ -25,6 +25,10 @@ public interface IXoMediaCollectionDatabase {
 
     void deleteMediaCollectionById(int collectionId) throws SQLException;
 
+    void registerListener(IXoMediaCollectionListener listener);
+
+    void unregisterListener(IXoMediaCollectionListener listener);
+
     Dao<TalkClientMediaCollection, Integer> getMediaCollectionDao();
 
     Dao<TalkClientMediaCollectionRelation, Integer> getMediaCollectionRelationDao();
