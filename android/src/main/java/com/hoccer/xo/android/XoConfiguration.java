@@ -26,7 +26,7 @@ public class XoConfiguration {
     public static final String INTERNAL_THUMBNAILS = "thumbnails";
 
     /* Enable or disable development settings in preferences */
-    public static final boolean DEVELOPMENT_MODE_ENABLED = false;
+    public static final boolean DEVELOPMENT_MODE_ENABLED = true;
 
     /* true: log level = debug, log to sdcard activated*/
     public static final boolean TESTING_MODE_ENABLED = false;
