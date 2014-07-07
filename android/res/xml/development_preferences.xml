@@ -102,11 +102,12 @@
 
         <ListPreference
                 android:key="preference_data_import"
-                android:title="Import data ..."/>
+                android:title="Import data ..."
+                android:defaultValue="0"/>
 
         <Preference
                 android:key="preference_data_export"
-                android:title="Export data" />
+                android:title="Export data"/>
 
         <CheckBoxPreference
                 android:key="preference_environment_update"
