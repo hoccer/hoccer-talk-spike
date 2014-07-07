@@ -127,6 +127,11 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
     }
 
     public void showPlaceholder() {
+
+        if (mActivity == null) {
+            return;
+        }
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -140,6 +145,11 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
     }
 
     private void hidePlaceholder() {
+
+        if (mActivity == null) {
+            return;
+        }
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
