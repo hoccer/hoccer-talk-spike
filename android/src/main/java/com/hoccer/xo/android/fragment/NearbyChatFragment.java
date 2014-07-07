@@ -73,7 +73,9 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
 
     @Override
     public void onDestroy() {
-        mNearbyAdapter.onDestroy();
+        if (mNearbyAdapter != null) {
+            mNearbyAdapter.onDestroy();
+        }
         super.onDestroy();
     }
 

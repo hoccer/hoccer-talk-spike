@@ -9,8 +9,6 @@ import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.widget.TextView;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
@@ -70,8 +68,6 @@ public abstract class XoActivity extends FragmentActivity {
 
     public final static int REQUEST_SELECT_ATTACHMENT = 42;
 
-    public final static int REQUEST_SCAN_BARCODE = IntentIntegrator.REQUEST_CODE; // XXX dirty
-
     protected Logger LOG = null;
 
     /**
@@ -113,11 +109,6 @@ public abstract class XoActivity extends FragmentActivity {
      * Ongoing attachment selection
      */
     ContentSelection mAttachmentSelection = null;
-
-    /**
-     * ZXing wrapper service
-     */
-    IntentIntegrator mBarcodeService = null;
 
     boolean mUpEnabled = false;
 
@@ -278,9 +269,6 @@ public abstract class XoActivity extends FragmentActivity {
         // get and configure the action bar
         mActionBar = getActionBar();
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-
-        // get the barcode scanning service
-        mBarcodeService = new IntentIntegrator(this);
 
         // screen state listener
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
@@ -581,18 +569,6 @@ public abstract class XoActivity extends FragmentActivity {
             }
             return;
         }
-
-        if (requestCode == REQUEST_SCAN_BARCODE) {
-            IntentResult barcode = IntentIntegrator
-                    .parseActivityResult(requestCode, resultCode, data);
-            if (barcode != null) {
-                LOG.debug("scanned barcode: " + barcode.getContents());
-                String code = barcode.getContents();
-                if (code.startsWith(getResources().getString(R.string.url_scheme))) {
-                    mBarcodeToken = code.replace(getResources().getString(R.string.url_scheme), "");
-                }
-            }
-        }
     }
 
     protected void enableUpNavigation() {
@@ -748,25 +724,21 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     public void scanBarcode() {
-        LOG.debug("scanBarcode()");
-        wakeClient();
-        mBarcodeService.initiateScan(IntentIntegrator.QR_CODE_TYPES);
+        LOG.debug("showBarcode()");
+        Intent qrScanner = new Intent(this, QrScannerActivity.class);
+        startActivity(qrScanner);
     }
 
     public void showBarcode() {
-        LOG.debug("showBarcode()");
-        XoApplication.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                final String token = getXoClient().generatePairingToken();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mBarcodeService.shareText(getResources().getString(R.string.url_scheme) + token);
-                    }
-                });
-            }
-        });
+        LOG.debug("scanBarcode()");
+        String qrString = getBarcodeString();
+        Intent qr = new Intent(this, QrCodeGeneratingActivity.class);
+        qr.putExtra("QR", qrString);
+        startActivity(qr);
+    }
+
+    public String getBarcodeString() {
+        return getXoClient().getHost().getUrlScheme() + getXoClient().generatePairingToken();
     }
 
     public void composeInviteSms(String token) {

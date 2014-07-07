@@ -707,6 +707,10 @@ public class XoClientDatabase {
                 delivery.setState(TalkDelivery.STATE_FAILED_ACKNOWLEDGED);
             }
 
+            if(delivery.getMessageId() == null) {
+                saveDelivery(delivery);
+                continue;
+            }
             TalkClientMessage message = findMessageByMessageId(delivery.getMessageId(), false);
             if(message != null) {
                 TalkClientUpload upload = message.getAttachmentUpload();
