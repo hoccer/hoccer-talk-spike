@@ -1,16 +1,15 @@
 package com.hoccer.xo.android.adapter;
 
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.XoAdapter;
+import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.release.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +29,12 @@ public class FriendRequestAdapter extends XoAdapter {
     }
 
     private void loadPendingFriendRequests() {
+        if (mActivity == null) {
+            return;
+        }
         int countBefore = getCount();
         mItems = mActivity.getXoDatabase().findAllPendingFriendRequests();
-        if(mListener != null && countBefore != getCount()) {
+        if (mListener != null && countBefore != getCount()) {
             mListener.onItemCountChanged(getCount());
         }
     }
@@ -55,7 +57,7 @@ public class FriendRequestAdapter extends XoAdapter {
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         TalkClientContact contact = getItem(i);
-        if(view == null) {
+        if (view == null) {
             LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.item_contact_client, null);
         }
