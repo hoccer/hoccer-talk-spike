@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
 import com.hoccer.xo.android.base.XoActionbarActivity;
@@ -20,6 +21,8 @@ import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
+
+import java.sql.SQLException;
 
 public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
@@ -35,7 +38,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     int mContactId;
     private IContentObject mClipboardAttachment;
     private getContactIdInConversation m_checkIdReceiver;
-
 
     @Override
     protected int getLayoutResource() {
@@ -64,7 +66,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         m_checkIdReceiver = new getContactIdInConversation();
         registerReceiver(m_checkIdReceiver, filter);
 
-        // handle converse intent
+		// handle converse intent
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
             mContactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
@@ -73,6 +75,25 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
                 LOG.error("invalid contact id");
             } else {
                 showMessageFragment();
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        LOG.debug("onResume()");
+        super.onResume();
+
+        Intent intent = getIntent();
+
+        // handle converse intent
+        if (intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
+            int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
+            m_checkIdReceiver.setId(contactId);
+            if (contactId == -1) {
+                LOG.error("invalid contact id");
+            } else {
+                mContactId = contactId;
             }
         }
     }

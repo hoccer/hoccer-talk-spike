@@ -9,6 +9,7 @@ import com.codahale.metrics.servlets.MetricsServlet;
 import com.hoccer.scm.GitInfo;
 import com.hoccer.talk.server.database.JongoDatabase;
 import com.hoccer.talk.server.database.OrmliteDatabase;
+import com.hoccer.talk.server.database.migrations.DatabaseMigrationManager;
 import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
 import com.hoccer.talk.server.cryptoutils.*;
 import com.hoccer.talk.servlets.CertificateInfoServlet;
@@ -42,36 +43,58 @@ public class TalkServerMain {
     private void run() {
         // load configuration
         TalkServerConfiguration config = initializeConfiguration();
-
         config.report();
 
+        checkApnsCertificateExpirationStatus(config);
+
+        // select and instantiate database backend
+        ITalkServerDatabase db = initializeDatabase(config);
+        // ensure that the db is actually online and working
+        db.reportPing();
+
+        migrateDatabase(db);
+
+        LOG.info("Initializing talk server");
+        TalkServer talkServer = new TalkServer(config, db);
+
+
+        LOG.info("Initializing jetty");
+        Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
+        setupServerHandlers(webServer, talkServer);
+
+        // TODO: take care of proper signal handling (?) here. We never see the "Server has quit" line, currently.
+        // run and stop when interrupted
+        try {
+            LOG.info("Starting server");
+            webServer.start();
+            webServer.join();
+            LOG.info("Server has quit");
+        } catch (Exception e) {
+            LOG.error("Exception in server", e);
+        }
+    }
+
+    private void checkApnsCertificateExpirationStatus(TalkServerConfiguration config) {
         // report APNS expiry
         if (config.isApnsEnabled()) {
-            final P12CertificateChecker p12Verifier = new P12CertificateChecker(config.getApnsCertPath(), config.getApnsCertPassword());
+            final P12CertificateChecker p12ProductionVerifier = new P12CertificateChecker(
+                    config.getApnsCertProductionPath(),
+                    config.getApnsCertProductionPassword());
+            final P12CertificateChecker p12SandboxVerifier = new P12CertificateChecker(
+                    config.getApnsCertProductionPath(),
+                    config.getApnsCertProductionPassword());
             try {
-                LOG.info("APNS expiryDate is: " + p12Verifier.getCertificateExpiryDate());
-                LOG.info("APNS expiration status: " + p12Verifier.isExpired());
+                LOG.info("APNS production cert expiryDate is: " + p12ProductionVerifier.getCertificateExpiryDate());
+                LOG.info("APNS production cert expiration status: " + p12ProductionVerifier.isExpired());
+                LOG.info("APNS sandbox cert expiryDate is: " + p12SandboxVerifier.getCertificateExpiryDate());
+                LOG.info("APNS sandbox cert expiration status: " + p12SandboxVerifier.isExpired());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
 
-        // select and instantiate database backend
-        ITalkServerDatabase db = initializeDatabase(config);
-        db.reportPing();
-
-        // log about server init
-        LOG.info("Initializing talk server");
-
-        // create the talk server
-        TalkServer talkServer = new TalkServer(config, db);
-
-        // log about jetty init
-        LOG.info("Initializing jetty");
-
-        // create jetty instance
-        Server s = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
-
+    private void setupServerHandlers(Server server, TalkServer talkServer) {
         // all metrics servlets are handled here
         ServletContextHandler metricsContextHandler = new ServletContextHandler();
         metricsContextHandler.setContextPath("/metrics");
@@ -98,17 +121,13 @@ public class TalkServerMain {
         handlerCollection.addHandler(clientHandler);
         handlerCollection.addHandler(serverInfoContextHandler);
         handlerCollection.addHandler(metricsContextHandler);
-        s.setHandler(handlerCollection);
+        server.setHandler(handlerCollection);
+    }
 
-        // run and stop when interrupted
-        try {
-            LOG.info("Starting server");
-            s.start();
-            s.join();
-            LOG.info("Server has quit");
-        } catch (Exception e) {
-            LOG.error("Exception in server", e);
-        }
+    private void migrateDatabase(ITalkServerDatabase database) {
+        LOG.info("applying database migrations");
+        DatabaseMigrationManager migrationManager = new DatabaseMigrationManager(database);
+        migrationManager.executeAllMigrations();
     }
 
     private TalkServerConfiguration initializeConfiguration() {
@@ -128,14 +147,13 @@ public class TalkServerMain {
             } catch (IOException e) {
                 LOG.error("Could not load configuration", e);
             }
-            // if we could load it then configure using it
             if (properties != null) {
                 configuration.configureFromProperties(properties);
             }
         }
 
         // also read additional bundled property files
-        LOG.info("Loading bundled properties...");
+        LOG.info("Loading bundled properties (server.properties)...");
         Properties bundled_properties = new Properties();
         try {
             InputStream bundledConfigIs = TalkServerConfiguration.class.getResourceAsStream("/server.properties");
@@ -145,7 +163,7 @@ public class TalkServerMain {
             LOG.error("Unable to load bundled configuration", e);
         }
 
-        LOG.info("Loading GIT properties...");
+        LOG.info("Loading GIT properties (git.properties)...");
         Properties git_properties = new Properties();
         try {
             InputStream gitConfigIs = TalkServerConfiguration.class.getResourceAsStream("/git.properties");
@@ -175,6 +193,7 @@ public class TalkServerMain {
         BasicConfigurator.configure();
         TalkServerMain main = new TalkServerMain();
         new JCommander(main, args);
+        // hand the property file over to log4j mechanism as well
         PropertyConfigurator.configure(main.config);
         main.run();
     }

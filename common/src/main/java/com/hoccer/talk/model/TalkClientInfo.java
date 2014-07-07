@@ -19,6 +19,9 @@ public class TalkClientInfo {
     /** A build number of the client program; on iOS it is the build number */
     int clientBuildNumber;
 
+    /** The build variant. Currently valid values: [debug|release] */
+    String clientBuildVariant;
+
     /** A canonicalized IETF BCP 47 language identifier for the current client UI language, e.g. 'de' for german */
     String clientLanguage;
 
@@ -79,6 +82,14 @@ public class TalkClientInfo {
 
     public void setClientBuildNumber(int clientBuildNumber) {
         this.clientBuildNumber = clientBuildNumber;
+    }
+
+    public String getClientBuildVariant() {
+        return clientBuildVariant;
+    }
+
+    public void setClientBuildVariant(String clientBuildVariant) {
+        this.clientBuildVariant = clientBuildVariant;
     }
 
     public String getClientLanguage() {

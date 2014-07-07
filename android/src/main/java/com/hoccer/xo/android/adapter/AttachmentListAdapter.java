@@ -164,6 +164,11 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         }
     }
 
+    @Override
+    public void onDownloadFailed(TalkClientDownload download) {
+
+    }
+
     private void updateCheckedItems() {
         SparseBooleanArray updatedSelection = new SparseBooleanArray(mSelections.size());
 
@@ -198,6 +203,11 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
+
+    }
+
+    @Override
+    public void onUploadFailed(TalkClientUpload upload) {
 
     }
 

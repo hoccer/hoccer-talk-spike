@@ -31,7 +31,8 @@ import java.sql.SQLException;
  * Fragment for display and editing of group profiles.
  */
 public class GroupProfileFragment extends XoFragment
-        implements View.OnClickListener, IXoContactListener, ActionMode.Callback {
+        implements View.OnClickListener, IXoContactListener, ActionMode.Callback,
+        AdapterView.OnItemClickListener {
 
     public static final String ARG_CREATE_GROUP = "ARG_CREATE_GROUP";
     public static final String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
@@ -139,15 +140,30 @@ public class GroupProfileFragment extends XoFragment
             mGroupMemberAdapter.onCreate();
             mGroupMemberAdapter.onResume();
 
-            mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                @Override
-                public boolean shouldShow(TalkClientContact contact) {
-                    return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup) || contact.isSelf();
-                }
-            });
+            if(mGroup.getGroupPresence().isTypeNearby()) {
+                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
+                    @Override
+                    public boolean shouldShow(TalkClientContact contact) {
+                        return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup) && !contact.isSelf();
+                    }
+                });
+            } else {
+                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
+                    @Override
+                    public boolean shouldShow(TalkClientContact contact) {
+                        return contact.isClientGroupInvited(mGroup) || contact
+                                .isClientGroupJoined(mGroup) || contact.isSelf();
+                    }
+                });
+            }
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
         mGroupMemberAdapter.requestReload();
+        if(mGroup != null && mGroup.getGroupPresence().isTypeNearby()) {
+            mGroupMembersList.setOnItemClickListener(this);
+        } else {
+            mGroupMembersList.setOnItemClickListener(null);
+        }
         setHasOptionsMenu(true);
     }
 
@@ -339,7 +355,12 @@ public class GroupProfileFragment extends XoFragment
             name = mGroupNameEdit.getText().toString();
         }
 
-        mGroupNameText.setText(name);
+
+        if(mGroup.getGroupPresence().isTypeNearby()) {
+            mGroupNameText.setText(R.string.nearby_text);
+        } else {
+            mGroupNameText.setText(name);
+        }
         mGroupNameEdit.setText(name);
 
         switch (mMode) {
@@ -626,6 +647,12 @@ public class GroupProfileFragment extends XoFragment
         update(mGroup);
 
         configureOptionsMenuItems(mOptionsMenu);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        TalkClientContact contact = (TalkClientContact) adapterView.getItemAtPosition(i);
+        getXoActivity().showContactConversation(contact);
     }
 
 }

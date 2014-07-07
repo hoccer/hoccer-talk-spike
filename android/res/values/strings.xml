@@ -30,6 +30,7 @@
     <string name="menu_about">About</string>
     <string name="menu_reconnect">Reconnect</string>
     <string name="menu_quit">Quit</string>
+    <string name="menu_clear_conversation">Clear conversation</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_category_friends">Friends</string>
@@ -58,6 +59,10 @@
     <string name="nearby_yes">Yes</string>
     <string name="nearby_no">No</string>
 
+    <!-- Nearby delete archive request -->
+    <string name="dialog_confirm_nearby_deletion_title">Confirm deletion</string>
+    <string name="dialog_confirm_nearby_deletion_message">Do you really want to delete messages from this group?</string>
+
     <!-- Contact list items -->
     <string name="contact_name_new_client">New Friend</string>
     <string name="contact_name_new_group">New Group</string>
@@ -85,9 +90,14 @@
     <string name="pairing_qr_scan">Scan QR code</string>
     <string name="pairing_token_generating">Generating...</string>
     <string name="pairing_token_send_sms">Send via SMS</string>
+    <string name="pairing_token_send_email">Send via e-mail</string>
     <string name="pairing_success">Pairing succeeded</string>
     <string name="dialog_pairing_failed_title">Pairing failed</string>
     <string name="dialog_pairing_failed_message">The code you have entered is invalid.</string>
+	<string name="paired_with">You successfully paired with </string>
+    <string name="pairing_incorrect_code">Incorrect code, please try again.</string>
+    <string name="pairing_scanner">QR scanner</string>
+    <string name="pairing_generator">QR identifier</string>
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Change my image</string>
@@ -105,6 +115,14 @@
     <string name="profile_user_unblock_button">Unblock this user</string>
     <string name="profile_user_depair_button">Depair this user</string>
     <string name="profile_user_delete_button">Delete this user</string>
+
+    <string name="friend_request_add_as_friend">Add as a friend</string>
+    <string name="friend_request_cancel_invitation">Cancel invitation</string>
+    <string name="friend_request_accept_invitation">Accept invitation</string>
+    <string name="friend_request_decline_invitation">Decline invitation</string>
+    <string name="friend_request_invited_me_description">wants to be your friend.</string>
+    <string name="friend_request_invited_by_you_description">has received an invitation from you.</string>
+
     <string name="group_name_hint">Group name</string>
     <string name="profile_group_members_title">Members</string>
     <string name="profile_group_create_button">Create group</string>
@@ -240,6 +258,7 @@
     <string name="pref_auto_downloads_mobile">On mobile networks</string>
     <string name="pref_auto_download_wifi">On wireless networks</string>
     <string name="pref_auto_download">Automatic downloads</string>
+    <string name="pref_confirm_messages_seen">Confirm seen messages</string>
     <string name="pref_credentials">Credentials</string>
     <string name="pref_export_credentials">Export credentials</string>
     <string name="pref_import_credentials">Import credentials</string>
@@ -258,6 +277,13 @@
     </string>
     <string name="sms_invitation_text">Hey! I\'m now using the free app Hoccer XO for secure
         chatting. Download it now: http://hoccer.com/ Then add me as a contact: %1$s%2$s
+        \nxo %3$s
+    </string>
+    <string name="email_invitation_text">Hey!\nI\'m now using the free app Hoccer XO for secure
+        chatting. Download it now:\n
+        &lt;a href=http://hoccer.com/"&gt;http://hoccer.com/&lt;a&gt;\n
+        Then add me as a contact:\n
+        &lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;
         \nxo %3$s
     </string>
     <string name="dialog_export_credentials_title">Export credentials</string>
@@ -286,6 +312,7 @@
 
     <string-array name="tab_names">
         <item>CHATS</item>
+        <item>INVITATIONS</item>
         <item>NEARBY</item>
     </string-array>
 
@@ -294,5 +321,14 @@
     <string name="placeholder_nearby_text">Waiting for others nearby...</string>
     <string name="actionbar_default_title">Hoccer</string>
     <string name="content_audio_caption">Music</string>
+    <string name="nearby_info_usercount">%1$d Users are Nearby</string>
+    <string name="profile_nickname_text">Nickname</string>
+    <string name="seen_text">seen</string>
+    <string name="nearby_text">all nearby</string>
+    <string name="error_send_message">Could not send message.</string>
+    <string name="pref_privacy_title">Privacy</string>
+    <string name="nearby_saved">Nearby saved</string>
+    <string name="error_send_message_empty_group">There is nobody in this group.</string>
+    <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
 
 </resources>

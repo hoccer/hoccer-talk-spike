@@ -87,7 +87,6 @@ public class MessagingFragment extends XoListFragment
         mMessageList = (OverscrollListView) view.findViewById(android.R.id.list);
         mEmptyText = (TextView) view.findViewById(R.id.messaging_empty);
         mCompositionFragment = new CompositionFragment();
-        mCompositionFragment.setContact(mContact);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_container, mCompositionFragment).commit();
     }
@@ -109,6 +108,7 @@ public class MessagingFragment extends XoListFragment
         }
 
         mMessageList.setAdapter(mAdapter);
+        mCompositionFragment.setContact(mContact);
 
         configureMotionInterpreterForContact(mContact);
         XoApplication.getXoClient().registerContactListener(this);

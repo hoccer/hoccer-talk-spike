@@ -86,7 +86,7 @@ public class TestHelper {
         return groupId;
     }
 
-    public static void inviteToGroup(XoClient invitingClient, XoClient invitedClient, String groupId) throws SQLException {
+    public static void inviteToGroup(XoClient invitingClient, XoClient invitedClient, String groupId) throws SQLException, InterruptedException {
         await("invitingClient knows group via groupId").untilCall(to(invitingClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
 
         invitingClient.inviteClientToGroup(groupId, invitedClient.getSelfContact().getClientId());
@@ -96,6 +96,10 @@ public class TestHelper {
         TalkClientContact groupContact = invitedClient.getDatabase().findContactByGroupId(groupId, false);
         assertTrue("invitedClient is invited to group", groupContact.getGroupMember().isInvited());
         assertEquals("invited client membership is actually the invitedClient", groupContact.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
+
+        // TODO: There are some currently unknown conditions missing that ensure that the invitation actually properly occured
+        // removing this sleep leads to some failures, esp. involving the group key generation by members (instead of admins)
+        Thread.sleep(1000);
     }
 
     public static void joinGroup(final XoClient joiningClient, final String groupId) {

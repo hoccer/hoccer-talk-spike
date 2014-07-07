@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.hoccer.xo.release"
 
-          android:versionCode="35"
-          android:versionName="2.1.4">
+          android:versionCode="39"
+          android:versionName="2.1.0">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
     <uses-sdk
@@ -60,6 +60,7 @@
     <!-- Wifi-Scanning for location grouping -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Declare permission for controlling our own push package -->
     <permission
@@ -103,12 +104,28 @@
             </intent-filter>
         </activity>
 
+        <!-- Nearby contacts activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.NearbyContactsActivity"
+                android:label="@string/actionbar_default_title"
+                android:configChanges="keyboardHidden|orientation|screenSize"
+                android:screenOrientation="portrait">
+        </activity>
+
         <!-- Messaging activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MessagingActivity"
                 android:label="@string/actionbar_default_title"
                 android:windowSoftInputMode="stateHidden"
                 android:exported="true"
+                android:configChanges="keyboardHidden|orientation|screenSize">
+        </activity>
+
+        <!-- Nearby History activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.NearbyHistoryMessagingActivity"
+                android:label="@string/actionbar_default_title"
+                android:windowSoftInputMode="stateHidden"
                 android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
 
@@ -177,11 +194,15 @@
         <!-- Pairing activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.PairingActivity"
+                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait">
-            <action android:name="android.intent.action.VIEW"/>
-            <category android:name="android.intent.category.BROWSABLE"/>
-            <data android:scheme="hxo"/>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="hxo"/>
+            </intent-filter>
         </activity>
 
         <!-- Preference activity -->
@@ -229,6 +250,19 @@
         <activity
                 android:name="com.hoccer.xo.android.activity.MapsLocationActivity"
                 android:label="@string/selectlocation_title">
+        </activity>
+
+
+        <!-- Test Qr generator activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.QrCodeGeneratingActivity"
+                android:label="@string/pairing_generator">
+        </activity>
+
+        <!-- Test Qr scanner activity -->
+        <activity android:name="com.hoccer.xo.android.activity.QrScannerActivity"
+                  android:label="@string/pairing_scanner"
+                  android:screenOrientation="portrait">
         </activity>
 
         <!-- Connection and delivery service -->

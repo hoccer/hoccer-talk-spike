@@ -89,15 +89,16 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         if (avatarUri == null) {
             if (mContact.isGroup()) {
                 if(mContact.getGroupPresence().isTypeNearby()) {
-                    avatarUri = "drawable://" + R.drawable.avatar_default_location;
+                    setAvatarImage(R.drawable.avatar_default_location);
                 } else {
-                    avatarUri = "drawable://" + R.drawable.avatar_default_group;
+                    setAvatarImage(R.drawable.avatar_default_group);
                 }
             } else {
-                avatarUri = "drawable://" + R.drawable.avatar_default_contact;
+                setAvatarImage(R.drawable.avatar_default_contact);
             }
+        } else {
+            setAvatarImage(avatarUri);
         }
-        setAvatarImage(avatarUri);
     }
 
     private void resetAvatar() {
@@ -139,6 +140,10 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
                 }
             }
         });
+    }
+
+    public void setAvatarImage(int resourceId) {
+        setAvatarImage("drawable://" + resourceId);
     }
 
     /**
