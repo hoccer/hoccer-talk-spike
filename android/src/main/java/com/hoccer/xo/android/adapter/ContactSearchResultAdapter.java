@@ -90,10 +90,6 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
 
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
-//        Spannable contactName = new SpannableString(contact.getName());
-//        int highlightStart = contact.getName().toLowerCase().indexOf(mLastQuery);
-//        contactName.setSpan(new ForegroundColorSpan(Color.BLACK), highlightStart, highlightStart + mLastQuery.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
         nameView.setText(getHighlightedSearchResult(contact.getName(), mLastQuery));
         TextView typeView = (TextView) view.findViewById(R.id.contact_type);
 
@@ -110,16 +106,11 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
 
     @Override
     protected void updateToken(View view, TalkClientSmsToken token) {
-
     }
 
     private Spannable getHighlightedSearchResult(String text, String query) {
         Spannable result = new SpannableString(text);
-        int highlightStart = text.toLowerCase().indexOf(query);
-        if (highlightStart >= 0) {
-            result.setSpan(new ForegroundColorSpan(Color.BLACK), highlightStart, highlightStart + mLastQuery.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-
+        result.setSpan(new ForegroundColorSpan(Color.BLACK), 0, mLastQuery.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         return result;
     }
 }

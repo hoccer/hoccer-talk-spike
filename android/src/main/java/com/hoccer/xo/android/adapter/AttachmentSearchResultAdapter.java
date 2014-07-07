@@ -106,9 +106,17 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
 
     private Spannable getHighlightedSearchResult(String text, String query) {
         Spannable result = new SpannableString(text);
-        int highlightStart = text.toLowerCase().indexOf(query);
-        if (highlightStart >= 0) {
-            result.setSpan(new ForegroundColorSpan(Color.BLACK), highlightStart, highlightStart + query.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        String lowerCaseText = text.toLowerCase();
+
+        int fromIndex = 0;
+        int highlightStart = 0;
+
+        highlightStart = lowerCaseText.indexOf(query, fromIndex);
+        while(highlightStart >= 0) {
+            int highlightEnd = highlightStart + query.length();
+            result.setSpan(new ForegroundColorSpan(Color.BLACK), highlightStart, highlightEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            fromIndex = highlightEnd;
+            highlightStart = lowerCaseText.indexOf(query, fromIndex);
         }
 
         return result;
