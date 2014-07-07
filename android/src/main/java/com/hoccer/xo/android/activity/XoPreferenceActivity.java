@@ -2,7 +2,7 @@ package com.hoccer.xo.android.activity;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Environment;
+import android.os.*;
 import android.view.*;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
@@ -21,9 +21,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -32,8 +29,6 @@ import android.widget.Toast;
 
 import java.io.*;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class XoPreferenceActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -64,7 +59,6 @@ public class XoPreferenceActivity extends PreferenceActivity
             addPreferencesFromResource(R.xml.preferences);
         }
         getListView().setBackgroundColor(Color.WHITE);
-
         mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
         mMediaPlayerServiceConnector.connect(this,
                 MediaPlayerService.PLAYSTATE_CHANGED_ACTION,
@@ -203,6 +197,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             doImport();
             return true;
         } else if (preference.getKey().equals("preference_data_export")) {
+            preference.setEnabled(false);
             exportData();
         } else if (preference.getKey().equals("preference_data_import")) {
 //            importData();
@@ -212,12 +207,27 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void exportData() {
-        try {
-            XoImportExportUtils.exportData();
-        } catch (IOException e) {
-            LOG.error("Data export failed.", e);
-            Toast.makeText(this, "Data export failed", Toast.LENGTH_LONG).show();
-        }
+        new AsyncTask<Void, Void, File>() {
+            @Override
+            protected File doInBackground(Void... params) {
+                try {
+                    return XoImportExportUtils.getInstance(getBaseContext()).exportDatabaseAndAttachments();
+                } catch (IOException e) {
+                    LOG.error("Data export failed.", e);
+                    return null;
+                }
+            }
+            @Override
+            protected void onPostExecute(File file) {
+                super.onPostExecute(file);
+                if (file != null) {
+                    Toast.makeText(getBaseContext(), "Data exported to " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
+                }
+                findPreference("preference_data_export").setEnabled(true);
+            }
+        }.execute();
     }
 
     private void doImport() {

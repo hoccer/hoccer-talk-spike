@@ -1,6 +1,6 @@
 package com.hoccer.xo.android.util;
 
-import android.os.Environment;
+import android.content.Context;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
@@ -12,26 +12,51 @@ import java.util.zip.ZipOutputStream;
 
 public class XoImportExportUtils {
 
+    private static final String EXPORT_DIRECTORY = "export";
     public static String DB_FILEPATH = "/data/data/com.hoccer.xo.release/databases/hoccer.db";
 
     private static final Logger LOG = Logger.getLogger(XoImportExportUtils.class);
 
-    private File exportFile;
+    private Context context;
 
-    public static void exportData() throws IOException {
-        File databaseExport = exportDatabase();
-        zipAttachmentsAndDatabaseExport(databaseExport);
+    private static XoImportExportUtils INSTANCE = null;
+
+    private XoImportExportUtils(Context context) {
+        this.context = context;
     }
 
-    public static void importDatabase(File importFile) {
+    public static XoImportExportUtils getInstance(Context context) {
+        if (INSTANCE == null) {
+            INSTANCE = new XoImportExportUtils(context);
+        }
+        return INSTANCE;
     }
 
-    private static File exportDatabase() {
+    public File exportDatabaseAndAttachments() throws IOException {
+        return zipAttachmentsAndDatabaseExport(exportDatabaseToFile());
+    }
 
-        File filesExternalDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        String now = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fileName = String.format("hoccer_talk_export_%s.db", now);
-        File exportFile = new File(filesExternalDir, fileName);
+    private File zipAttachmentsAndDatabaseExport(File databaseExportFile) throws IOException {
+        File exportFile = createExportFile("zip");
+
+        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(exportFile));
+        zos.setLevel(ZipOutputStream.STORED);
+        File attachmentDirectory = XoApplication.getAttachmentDirectory();
+        try {
+            for (File fileEntry : attachmentDirectory.listFiles()) {
+                addZipEntry(zos, fileEntry);
+            }
+            addZipEntry(zos, databaseExportFile);
+            databaseExportFile.delete();
+        } finally {
+            zos.close();
+        }
+
+        return exportFile;
+    }
+
+    private File exportDatabaseToFile() {
+        File exportFile = createExportFile("db");
 
         String inFileName = DB_FILEPATH;
         File dbFile = new File(inFileName);
@@ -59,27 +84,7 @@ public class XoImportExportUtils {
         return exportFile;
     }
 
-    private static void zipAttachmentsAndDatabaseExport(File databaseExportFile) throws IOException {
-
-        File filesExternalDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        String now = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String exportFileName = String.format("hoccer_talk_export_%s.zip", now);
-        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(new File(filesExternalDir, exportFileName)));
-        zos.setLevel(ZipOutputStream.STORED);
-
-        File attachmentDirectory = XoApplication.getAttachmentDirectory();
-        try {
-            for (File fileEntry : attachmentDirectory.listFiles()) {
-                addZipEntry(zos, fileEntry);
-            }
-            addZipEntry(zos, databaseExportFile);
-        } finally {
-            zos.close();
-        }
-
-    }
-
-    private static void addZipEntry(ZipOutputStream zos, File fileEntry) throws IOException {
+    private void addZipEntry(ZipOutputStream zos, File fileEntry) throws IOException {
         FileInputStream in = new FileInputStream(fileEntry);
         ZipEntry entry = new ZipEntry(fileEntry.getName());
         zos.putNextEntry(entry);
@@ -91,5 +96,12 @@ public class XoImportExportUtils {
         }
         in.close();
         zos.closeEntry();
+    }
+
+    public File createExportFile(String extension) {
+        File directory = context.getExternalFilesDir(XoImportExportUtils.EXPORT_DIRECTORY);
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String fileName = String.format("hoccer_talk_export_%s.%s", timestamp, extension);
+        return new File(directory, fileName);
     }
 }
