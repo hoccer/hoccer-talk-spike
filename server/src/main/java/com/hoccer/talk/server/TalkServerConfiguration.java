@@ -6,7 +6,9 @@ import org.apache.log4j.Logger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Encapsulation of server configuration
@@ -14,7 +16,6 @@ import java.util.Properties;
  * This gets initialized with defaults and can then
  * be overloaded from a property file.
  */
-
 public class TalkServerConfiguration {
 
     private static final Logger LOG = Logger.getLogger(TalkServerConfiguration.class);
@@ -178,6 +179,22 @@ public class TalkServerConfiguration {
                 this.value = Integer.valueOf(rawValue);
             } else if (PropertyTypes.BOOLEAN.equals(this.type)) {
                 this.value = Boolean.valueOf(rawValue);
+            }
+        }
+    }
+
+    static {
+        verifyConfigurableProperties();
+    }
+
+    private static void verifyConfigurableProperties() {
+        final Set<String> keys = new HashSet<String>();
+        for (ConfigurableProperties configurableProperty : ConfigurableProperties.values()) {
+            // check key uniqueness
+            if (keys.contains(configurableProperty.key)) {
+                throw new RuntimeException("Key: '" + configurableProperty.key + "' is doubly present. This is an error in the configuration setup! Keys have to be unique!");
+            } else {
+                keys.add(configurableProperty.key);
             }
         }
     }
