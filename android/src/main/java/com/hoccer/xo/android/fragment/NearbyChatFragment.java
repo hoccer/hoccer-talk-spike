@@ -174,7 +174,7 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
                         final List<TalkClientContact> allNearbyContacts = getXoDatabase().findAllNearbyContacts();
                         mUserCountText.setText(mActivity.getResources().getString(R.string.nearby_info_usercount, allNearbyContacts.size() - 1));
                     } catch (SQLException e) {
-                        LOG.error("SQL Exception while retrieving current nearby group: ", e);
+                        LOG.error("SQL Exception while retrieving current nearby contacts: ", e);
                     }
                 }
             });
