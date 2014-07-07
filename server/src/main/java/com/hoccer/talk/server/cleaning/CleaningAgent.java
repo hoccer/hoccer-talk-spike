@@ -12,7 +12,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Cleaning agent
@@ -43,8 +45,8 @@ public class CleaningAgent {
         mConfig = mServer.getConfiguration();
         mDatabase = mServer.getDatabase();
         mExecutor = Executors.newScheduledThreadPool(
-            TalkServerConfiguration.THREADS_CLEANING,
-            new NamedThreadFactory("cleaning-agent")
+                mConfig.getCleaningAgentThreadPoolSize(),
+                new NamedThreadFactory("cleaning-agent")
         );
         LOG.info("Cleaning clients scheduling will start in '" + mConfig.getCleanupAllClientsDelay() + "' seconds.");
         mExecutor.schedule(new Runnable() {
@@ -65,7 +67,7 @@ public class CleaningAgent {
 
     // TODO: Also clean groups (normal and nearby)
 
-    public void cleanClientData(final String clientId) {
+    private void cleanClientData(final String clientId) {
         LOG.debug("cleaning client " + clientId);
         doCleanKeysForClient(clientId);
         doCleanTokensForClient(clientId);
@@ -177,15 +179,15 @@ public class CleaningAgent {
     private void doCleanDeliveriesForMessage(String messageId, TalkMessage message) {
         boolean keepMessage = false;
         List<TalkDelivery> deliveries = mDatabase.findDeliveriesForMessage(messageId);
-        LOG.debug("Found "+deliveries.size()+" deliveries for messageId: "+messageId);
+        LOG.debug("Found " + deliveries.size() + " deliveries for messageId: " + messageId);
         for (TalkDelivery delivery : deliveries) {
             // confirmed and failed deliveries can always be deleted
             if (delivery.isFinished()) {
-                LOG.debug("Deleting delivery with state '" + delivery.getState() + "' and attachmentState '"+ delivery.getAttachmentState()+"', messageId: "+messageId+", receiverId:"+delivery.getReceiverId());
+                LOG.debug("Deleting delivery with state '" + delivery.getState() + "' and attachmentState '" + delivery.getAttachmentState() + "', messageId: " + messageId + ", receiverId:" + delivery.getReceiverId());
                 mDatabase.deleteDelivery(delivery);
                 continue;
             }
-            LOG.debug("Keeping delivery with state '" + delivery.getState() + "' and attachmentState '"+ delivery.getAttachmentState()+"', messageId: "+messageId+", receiverId:"+delivery.getReceiverId());
+            LOG.debug("Keeping delivery with state '" + delivery.getState() + "' and attachmentState '" + delivery.getAttachmentState() + "', messageId: " + messageId + ", receiverId:" + delivery.getReceiverId());
             keepMessage = true;
         }
         if (message != null && !keepMessage) {
@@ -288,5 +290,4 @@ public class CleaningAgent {
         // delete the message itself
         mDatabase.deleteMessage(message);
     }
-
 }
