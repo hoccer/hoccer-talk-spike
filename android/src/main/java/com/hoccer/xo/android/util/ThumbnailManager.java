@@ -17,15 +17,14 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +62,7 @@ public class ThumbnailManager {
         final int cacheSize = 1024 * 1024 * memClass / 8;
         mMemoryLruCache = new LruCache(cacheSize);
         mStubDrawable = new ColorDrawable(Color.LTGRAY);
-        mRunningRenderJobs = new HashMap<String, AsyncTask>();
+        mRunningRenderJobs = Collections.synchronizedMap(new HashMap<String, AsyncTask>());
     }
 
     /**
@@ -91,7 +90,7 @@ public class ThumbnailManager {
         } else {
             imageView.setImageDrawable(mStubDrawable);
             if (uri != null) {
-                queueThumbnailCreation(uri, imageView, maskResource, tag);
+                queueImageThumbnailCreation(uri, imageView, maskResource, tag);
             }
         }
     }
@@ -186,12 +185,14 @@ public class ThumbnailManager {
         return result;
     }
 
-    private void queueThumbnailCreation(String uri, ImageView imageView, int maskResource, String tag) {
+    private void queueImageThumbnailCreation(String uri, ImageView imageView, int maskResource, String tag) {
         String key = taggedThumbnailUri(uri, tag);
-        if (!mRunningRenderJobs.containsKey(key)) {
-            ImageThumbnailRenderer imageThumbnailRenderer = new ImageThumbnailRenderer();
-            mRunningRenderJobs.put(key, imageThumbnailRenderer);
-            imageThumbnailRenderer.execute(uri, imageView, maskResource, tag);
+        synchronized (mRunningRenderJobs) {
+            if (!mRunningRenderJobs.containsKey(key)) {
+                ImageThumbnailRenderer imageThumbnailRenderer = new ImageThumbnailRenderer();
+                mRunningRenderJobs.put(key, imageThumbnailRenderer);
+                imageThumbnailRenderer.execute(uri, imageView, maskResource, tag);
+            }
         }
     }
 
@@ -281,7 +282,9 @@ public class ThumbnailManager {
             } else {
                 mImageToLoad.mImageView.setImageDrawable(mStubDrawable);
             }
-            mRunningRenderJobs.remove(mThumbnailUri);
+            synchronized (mRunningRenderJobs) {
+                mRunningRenderJobs.remove(mThumbnailUri);
+            }
         }
     }
 
@@ -318,7 +321,9 @@ public class ThumbnailManager {
                 mThumbnailView.setImageDrawable(mStubDrawable);
             }
 
-            mRunningRenderJobs.remove(mThumbnailUri);
+            synchronized (mRunningRenderJobs) {
+                mRunningRenderJobs.remove(mThumbnailUri);
+            }
         }
     }
 
@@ -338,15 +343,22 @@ public class ThumbnailManager {
             bitmap = loadThumbnailForUri(uri, tag);
         }
         if (bitmap == null) {
+            queueVideoThumbnailCreation(uri, imageView, maskResource, tag);
+        } else {
+            imageView.setImageBitmap(bitmap);
+            imageView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void queueVideoThumbnailCreation(String uri, ImageView imageView, int maskResource, String tag) {
+        String taggedUri = taggedThumbnailUri(uri, tag);
+        synchronized (mRunningRenderJobs) {
             if (!mRunningRenderJobs.containsKey(taggedUri)) {
                 imageView.setImageDrawable(mStubDrawable);
                 VideoThumbnailRenderer videoThumbnailRenderer = new VideoThumbnailRenderer();
                 mRunningRenderJobs.put(taggedUri, videoThumbnailRenderer);
                 videoThumbnailRenderer.execute(uri, imageView, maskResource, tag);
             }
-        } else {
-            imageView.setImageBitmap(bitmap);
-            imageView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -366,16 +378,14 @@ public class ThumbnailManager {
     }
 
     private Bitmap renderThumbnailForVideo(Bitmap bitmap, int maskResource) {
-
-        Bitmap original = bitmap;
-        Bitmap mask = getNinePatchMask(maskResource, original.getWidth(), original.getHeight(), mContext);
-        Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_8888);
-        Bitmap overlay = Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap mask = getNinePatchMask(maskResource, bitmap.getWidth(), bitmap.getHeight(), mContext);
+        Bitmap result = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap overlay = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         overlay.eraseColor(0x88000000);
         Canvas c = new Canvas(result);
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
-        c.drawBitmap(original, 0, 0, null);
+        c.drawBitmap(bitmap, 0, 0, null);
         c.drawBitmap(overlay, 0, 0, null);
         c.drawBitmap(mask, 0, 0, paint);
         paint.setXfermode(null);
