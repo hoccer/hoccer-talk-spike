@@ -106,20 +106,20 @@ public class JsonRpcClientRequest {
 
     /** Should be called when a matching response has been received */
     public void handleResponse(ObjectNode response) {
-        LOG.debug("handleResponse id="+response.get("id")+" before lock "+mLock+" thread "+Thread.currentThread());
+        LOG.trace("handleResponse id="+response.get("id")+" before lock "+mLock+" thread "+Thread.currentThread());
         mLock.lock();
-        LOG.debug("handleResponse id="+response.get("id")+" acquired lock "+mLock+" thread "+Thread.currentThread());
+        LOG.trace("handleResponse id="+response.get("id")+" acquired lock "+mLock+" thread "+Thread.currentThread());
         try {
             if (!isDone()) {
                 mResponse = response;
-                LOG.debug("handleResponse id="+response.get("id")+" signaling  condition "+mCondition+" thread "+Thread.currentThread());
+                LOG.trace("handleResponse id="+response.get("id")+" signaling  condition "+mCondition+" thread "+Thread.currentThread());
                 mCondition.signalAll();
             } else {
-                LOG.debug("handleResponse id="+response.get("id")+" not signallung, mDisconnected="+mDisconnected+"mResponse != null="+(mResponse != null)+"mException="+mException+", thread "+Thread.currentThread());
+                LOG.trace("handleResponse id="+response.get("id")+" not signalling, mDisconnected="+mDisconnected+"mResponse != null="+(mResponse != null)+"mException="+mException+", thread "+Thread.currentThread());
 
             }
         } finally {
-            LOG.debug("handleResponse id="+response.get("id")+" unlocking lock "+mLock+" thread "+Thread.currentThread());
+            LOG.trace("handleResponse id="+response.get("id")+" unlocking lock "+mLock+" thread "+Thread.currentThread());
             mLock.unlock();
         }
     }
@@ -134,7 +134,7 @@ public class JsonRpcClientRequest {
      * This call will block, limited by the request timeout.
      */
     public Object waitForResponse(Type returnType) throws Throwable {
-        LOG.debug("waitForResponse type="+returnType+" locking lock "+mLock+" thread "+Thread.currentThread());
+        LOG.trace("waitForResponse type="+returnType+" locking lock "+mLock+" thread "+Thread.currentThread());
         mLock.lock();
         try {
             // wait until done or timeout is reached
@@ -150,23 +150,23 @@ public class JsonRpcClientRequest {
                 }
                 // wait for state changes
                 try {
-                    LOG.debug("waitForResponse type="+returnType+" wait for condition "+mCondition+" thread "+Thread.currentThread());
+                    LOG.trace("waitForResponse type="+returnType+" wait for condition "+mCondition+" thread "+Thread.currentThread());
                     mCondition.await(timeLeft, TimeUnit.MILLISECONDS);
-                    LOG.debug("waitForResponse type="+returnType+" awake from condition "+mCondition+" thread "+Thread.currentThread());
+                    LOG.trace("waitForResponse type="+returnType+" awake from condition "+mCondition+" thread "+Thread.currentThread());
                 } catch (InterruptedException e) {
-                    LOG.debug("waitForResponse type="+returnType+" interrupted exception: "+e+" thread "+Thread.currentThread());
+                    LOG.trace("waitForResponse type="+returnType+" interrupted exception: "+e+" thread "+Thread.currentThread());
                 }
             }
 
             // throw if we got disconnected
             if (mDisconnected) {
-                LOG.debug("waitForResponse type="+returnType+" disconnected, thread "+Thread.currentThread());
+                LOG.trace("waitForResponse type="+returnType+" disconnected, thread "+Thread.currentThread());
                 throw new JsonRpcClientDisconnect();
             }
 
             // detect rpc failures
             if (mException != null) {
-                LOG.debug("waitForResponse type="+returnType+" exception:"+mException+", thread "+Thread.currentThread());
+                LOG.trace("waitForResponse type="+returnType+" exception:"+mException+", thread "+Thread.currentThread());
                 throw new RuntimeException("JSON-RPC failure", mException);
             }
 
@@ -174,7 +174,7 @@ public class JsonRpcClientRequest {
             if (mResponse.has("error")
                     && mResponse.get("error") != null
                     && !mResponse.get("error").isNull()) {
-                LOG.debug("waitForResponse type="+returnType+" error:"+mResponse.get("error")+", thread "+Thread.currentThread());
+                LOG.trace("waitForResponse type="+returnType+" error:"+mResponse.get("error")+", thread "+Thread.currentThread());
                 // resolve and throw the exception
                 if (mClient.getExceptionResolver() == null) {
                     throw DefaultExceptionResolver.INSTANCE.resolveException(mResponse);
@@ -187,7 +187,7 @@ public class JsonRpcClientRequest {
             if (mResponse.has("result")
                     && !mResponse.get("result").isNull()
                     && mResponse.get("result") != null) {
-                LOG.debug("waitForResponse type="+returnType+" result:"+mResponse.get("result")+", thread "+Thread.currentThread());
+                LOG.trace("waitForResponse type="+returnType+" result:"+mResponse.get("result")+", thread "+Thread.currentThread());
                 if (returnType == null) {
                     // XXX warn
                     return null;
@@ -202,7 +202,7 @@ public class JsonRpcClientRequest {
                 return mapper.readValue(returnJsonParser, returnJavaType);
             }
         } finally {
-            LOG.debug("waitForResponse type="+returnType+" unlocking lock "+mLock+" thread "+Thread.currentThread());
+            LOG.trace("waitForResponse type="+returnType+" unlocking lock "+mLock+" thread "+Thread.currentThread());
             mLock.unlock();
         }
         return null;

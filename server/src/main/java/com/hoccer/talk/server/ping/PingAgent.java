@@ -65,8 +65,12 @@ public class PingAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                pingReadyClients();
-                schedulePingAllReadyClients();
+                try {
+                    pingReadyClients();
+                    schedulePingAllReadyClients();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, TalkServerConfiguration.PING_INTERVAL, TimeUnit.SECONDS);
     }
@@ -112,7 +116,11 @@ public class PingAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                performPing(clientId);
+                try {
+                    performPing(clientId);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, 3, TimeUnit.SECONDS);
     }

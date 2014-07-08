@@ -1,5 +1,6 @@
 package better.jsonrpc.core;
 
+import better.jsonrpc.util.RunnableHandlingExceptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -95,7 +96,8 @@ public class JsonRpcExecutorConnection extends JsonRpcLocalConnection {
             public void run() {
                 try {
                     JsonRpcExecutorConnection.super.sendRequest(request);
-                } catch (Exception e) {
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         });
@@ -109,7 +111,8 @@ public class JsonRpcExecutorConnection extends JsonRpcLocalConnection {
             public void run() {
                 try {
                     JsonRpcExecutorConnection.super.sendResponse(response);
-                } catch (Exception e) {
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         });
@@ -123,7 +126,8 @@ public class JsonRpcExecutorConnection extends JsonRpcLocalConnection {
             public void run() {
                 try {
                     JsonRpcExecutorConnection.super.sendNotification(notification);
-                } catch (Exception e) {
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         });

@@ -385,12 +385,17 @@ public class JongoDatabase implements ITalkServerDatabase {
         List<TalkPresence> res = new ArrayList<TalkPresence>();
         // set to collect clients into
         Set<String> clients = new HashSet<String>();
+        // set to collect clients which may have been added to the presence set
+        // since the client has received presences the last time
+        Set<String> mustInclude = new HashSet<String>();
         // collect clients known through relationships
         List<TalkRelationship> relationships = findRelationshipsByOtherClient(clientId);
         for (TalkRelationship relationship : relationships) {
-            // if the relation is friendly
-            if (relationship.isFriend()) {
+            if (relationship.isDirectlyRelated()) {
                 clients.add(relationship.getClientId());
+                if (relationship.getLastChanged().after(lastKnown)) {
+                    mustInclude.add(relationship.getClientId());
+                }
             }
         }
         // collect clients known through groups
@@ -402,6 +407,9 @@ public class JongoDatabase implements ITalkServerDatabase {
                 for (TalkGroupMember otherMember : otherMembers) {
                     if (otherMember.isInvited() || otherMember.isJoined()) {
                         clients.add(otherMember.getClientId());
+                        if (otherMember.getLastChanged().after(lastKnown) || ownMember.getLastChanged().after(lastKnown)) {
+                            mustInclude.add(otherMember.getClientId());
+                        }
                     }
                 }
             }
@@ -412,7 +420,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         for (String client : clients) {
             TalkPresence pres = findPresenceForClient(client);
             if (pres != null) {
-                if (pres.getTimestamp().after(lastKnown)) {
+                if (pres.getTimestamp().after(lastKnown) || mustInclude.contains(client)) {
                     res.add(pres);
                 }
             }

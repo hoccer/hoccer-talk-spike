@@ -25,6 +25,7 @@ import com.hoccer.talk.server.ping.PingAgent;
 import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import com.hoccer.talk.server.update.UpdateAgent;
+import com.hoccer.talk.util.CountedSet;
 import de.undercouch.bson4jackson.BsonFactory;
 import org.jetbrains.annotations.Nullable;
 
@@ -128,18 +129,21 @@ public class TalkServer {
 
         private boolean mIsLocked;
         private int mWaiting;
+        private CountedSet<String> mWaiterTypes;
         public String mName;
 
         NonReentrantLock() {
             mIsLocked = false;
             mWaiting = 0;
             mName = "<unnamed>";
+            mWaiterTypes = new CountedSet<String>();
         }
 
         NonReentrantLock(String name) {
             mIsLocked = false;
             mWaiting = 0;
             mName = name;
+            mWaiterTypes = new CountedSet<String>();
         }
 
         public String getName() {
@@ -155,31 +159,53 @@ public class TalkServer {
         }
 
         public synchronized boolean tryLock()  {
-            System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock");
+            //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock");
             if (!mIsLocked) {
                 mIsLocked = true;
-                System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock : acquired lock");
+                //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock : acquired lock");
                 return true;
             }
-            System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock : not locking, is already locked");
+            //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock : not locking, is already locked");
             return false;
         }
 
         public synchronized void lock() throws InterruptedException{
             while (mIsLocked) {
-                System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" wait");
+                //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" wait");
                 ++mWaiting;
                 this.wait();
                 --mWaiting;
-                System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" wakeup");
+                //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" wakeup");
             }
             mIsLocked = true;
-            System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" acquired lock");
+            //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" acquired lock");
+        }
+
+        public synchronized int getWaiting(String waiterType) {
+            if (mWaiting > 0) {
+                return mWaiterTypes.getCount(waiterType);
+            } else {
+                return 0;
+            }
+        }
+
+        public synchronized void lock(String waiterType) throws InterruptedException{
+            while (mIsLocked) {
+                //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" lockWithWaiterType '"+waiterType+"' wait");
+                ++mWaiting;
+                mWaiterTypes.add(waiterType);
+                this.wait();
+                mWaiterTypes.remove(waiterType);
+                --mWaiting;
+                //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" lockWithWaiterType '"+waiterType+"' wakeup");
+            }
+            mIsLocked = true;
+            //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" lockWithWaiterType '"+waiterType+"' acquired lock");
         }
 
         public synchronized void unlock(){
             mIsLocked = false;
-            System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" unlock");
+            //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" unlock");
             this.notify();
         }
     }
