@@ -165,11 +165,15 @@
         <!-- Pairing activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.PairingActivity"
+                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait">
-            <action android:name="android.intent.action.VIEW"/>
-            <category android:name="android.intent.category.BROWSABLE"/>
-            <data android:scheme="hxo"/>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="hxo"/>
+            </intent-filter>
         </activity>
 
         <!-- Preference activity -->
