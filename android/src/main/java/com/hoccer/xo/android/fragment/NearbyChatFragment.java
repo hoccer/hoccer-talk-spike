@@ -181,7 +181,7 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
     }
 
     private void updateViews() {
-        if (mNearbyAdapter != null) {
+        if (mNearbyAdapter != null && mActivity != null) {
             mList.post(new Runnable() {
                 @Override
                 public void run() {

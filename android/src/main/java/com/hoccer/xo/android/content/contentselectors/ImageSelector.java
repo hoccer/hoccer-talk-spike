@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import com.hoccer.xo.android.util.ColorSchemeManager;
@@ -15,11 +16,9 @@ import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
+import java.sql.SQLException;
 
 public class ImageSelector implements IContentSelector {
 
@@ -91,21 +90,17 @@ public class ImageSelector implements IContentSelector {
                 try {
                     String displayName = cursor.getString(columnIndex);
                     final Uri contentUri = selectedContent;
-                    Bitmap bmp = getBitmap(context, displayName, contentUri);
+                    Bitmap bmp = getBitmap(context, contentUri);
                     File imageFile = new File(XoApplication.getAttachmentDirectory(), displayName);
 
                     bmp.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(imageFile));
 
                     int fileWidth = bmp.getWidth();
                     int fileHeight = bmp.getHeight();
-                    int orientation = 0;
-                    double aspectRatio = (double) bmp.getWidth() / (double) bmp.getHeight();
 
-                    int orientationIndex = cursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION);
-                    if (orientationIndex != -1) {
-                        orientation = cursor.getInt(orientationIndex);
-                        aspectRatio = calculateAspectRatio(fileWidth, fileHeight, orientation);
-                    }
+                    int orientation = retrieveOrientation(context, contentUri, imageFile.getAbsolutePath());
+                    double aspectRatio = calculateAspectRatio(fileWidth, fileHeight, orientation);
+
                     LOG.debug("Aspect ratio: " + fileWidth + " x " + fileHeight + " @ " + aspectRatio + " / " + orientation + "°");
 
                     SelectedContent contentObject = new SelectedContent(intent, "file://" + imageFile.getAbsolutePath());
@@ -124,11 +119,9 @@ public class ImageSelector implements IContentSelector {
         return null;
     }
 
-    private Bitmap getBitmap(Context context, String fileName, Uri url) {
-        File cacheDir = XoApplication.getAttachmentDirectory();
-        File f = new File(cacheDir, fileName);
+    private Bitmap getBitmap(Context context, Uri url) {
         try {
-            InputStream is = null;
+            InputStream is;
             if (url.toString().startsWith("content://com.google.android.gallery3d")) {
                 is = context.getContentResolver().openInputStream(url);
             } else {
@@ -147,10 +140,10 @@ public class ImageSelector implements IContentSelector {
                 MediaStore.Images.Media.MIME_TYPE,
                 MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.SIZE,
+                // TODO: since this fields are not available below API Level 16 we will not use them for now. Comment all following lines in when fully available.
                 // MediaStore.Images.Media.WIDTH,
                 // MediaStore.Images.Media.HEIGHT,
                 MediaStore.Images.Media.TITLE,
-                MediaStore.Images.Media.ORIENTATION
         };
 
         Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
@@ -159,23 +152,16 @@ public class ImageSelector implements IContentSelector {
         int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
         int dataIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
         int sizeIndex = cursor.getColumnIndex(MediaStore.Images.Media.SIZE);
-
-        //TODO: since this fields are not available below API Level 16 we will not use them for now. Comment all following lines in when fully available.
         // int widthIndex = cursor.getColumnIndex(MediaStore.Images.Media.WIDTH);
         // int heightIndex = cursor.getColumnIndex(MediaStore.Images.Media.HEIGHT);
         int fileNameIndex = cursor.getColumnIndex(MediaStore.Images.Media.TITLE);
-        int orientationIndex = cursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION);
 
         String mimeType = cursor.getString(mimeTypeIndex);
         String filePath = cursor.getString(dataIndex);
         String fileName = cursor.getString(fileNameIndex);
-
         int fileSize = cursor.getInt(sizeIndex);
         int fileWidth = 0; // cursor.getInt(widthIndex);
         int fileHeight = 0; // cursor.getInt(heightIndex);
-        int orientation = cursor.getInt(orientationIndex);
-        double aspectRatio;
-
         cursor.close();
 
         if (filePath == null) {
@@ -193,7 +179,6 @@ public class ImageSelector implements IContentSelector {
         // Validating image measurements
         //if (fileWidth == 0 || fileHeight == 0) {
         //    LOG.debug("Could not retrieve image measurements from content database. Will use values extracted from file instead.");
-
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
@@ -201,10 +186,12 @@ public class ImageSelector implements IContentSelector {
         fileHeight = options.outHeight;
         //}
 
-        aspectRatio = calculateAspectRatio(fileWidth, fileHeight, orientation);
+        int orientation = retrieveOrientation(context, contentUri, filePath);
+        double aspectRatio = calculateAspectRatio(fileWidth, fileHeight, orientation);
 
         LOG.debug("Aspect ratio: " + fileWidth + " x " + fileHeight + " @ " + aspectRatio + " / " + orientation + "°");
 
+        //
         SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
         contentObject.setFileName(fileName);
         contentObject.setContentType(mimeType);
@@ -212,6 +199,53 @@ public class ImageSelector implements IContentSelector {
         contentObject.setContentLength(fileSize);
         contentObject.setContentAspectRatio(aspectRatio);
         return contentObject;
+    }
+
+    private int retrieveOrientation(Context context, Uri contentUri, String filePath) {
+        String[] columns = {
+                MediaStore.Images.Media.ORIENTATION
+        };
+
+        // Try with content database first
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
+        } catch (Exception e) {
+            LOG.error("Exception while retrieving image orientation " + contentUri);
+        }
+        if (cursor != null) {
+            cursor.moveToFirst();
+            int orientationIndex = cursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION);
+            return cursor.getInt(orientationIndex);
+
+        } else {
+
+            // Try exif data instead
+            int degree = 0;
+            ExifInterface exif = null;
+            try {
+                exif = new ExifInterface(filePath);
+            } catch (IOException ex) {
+                LOG.error("IOException while retrieving image orientation " + filePath);
+            }
+            if (exif != null) {
+                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);
+                if (orientation != -1) {
+                    switch (orientation) {
+                        case ExifInterface.ORIENTATION_ROTATE_90:
+                            degree = 90;
+                            break;
+                        case ExifInterface.ORIENTATION_ROTATE_180:
+                            degree = 180;
+                            break;
+                        case ExifInterface.ORIENTATION_ROTATE_270:
+                            degree = 270;
+                            break;
+                    }
+                }
+            }
+            return degree;
+        }
     }
 
     private double calculateAspectRatio(int fileWidth, int fileHeight, int orientation) {
