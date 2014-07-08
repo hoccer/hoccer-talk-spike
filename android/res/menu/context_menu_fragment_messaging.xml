@@ -8,4 +8,18 @@
             android:icon="@drawable/ic_delete"
             android:visible="true"
             android:showAsAction="always"/>
+
+    <item
+            android:id="@+id/menu_add_to_collection"
+            android:title="@string/add_to_collection"
+            android:icon="@drawable/ic_action_add_to_list"
+            android:visible="true"
+            android:showAsAction="always"/>
+
+    <item
+            android:id="@+id/menu_share"
+            android:title="@string/share_with_contact"
+            android:icon="@drawable/ic_dark_social_share"
+            android:visible="true"
+            android:showAsAction="always"/>
 </menu>

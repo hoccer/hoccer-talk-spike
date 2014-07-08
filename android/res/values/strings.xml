@@ -238,6 +238,8 @@
     <string name="menu_collections">Collections</string>
     <string name="new_media_collection">New collection</string>
     <string name="enter_new_collection_name">Please enter the name for the new collection:</string>
+    <string name="add_to_collection">Add to collection</string>
+    <string name="share_with_contact">Share</string>
 
     <!-- Preferences -->
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>

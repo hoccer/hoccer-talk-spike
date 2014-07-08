@@ -486,6 +486,12 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
                     mode.finish();
                     return true;
+                case R.id.menu_share:
+                    // show contact selection fragment
+                    break;
+                case R.id.menu_add_to_collection:
+                    // show media collection selection fragment
+
                 default:
                     return false;
             }
