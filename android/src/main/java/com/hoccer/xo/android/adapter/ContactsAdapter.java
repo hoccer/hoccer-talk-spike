@@ -63,7 +63,6 @@ public abstract class ContactsAdapter extends XoAdapter
 
     List<TalkClientSmsToken> mSmsTokens = new ArrayList<TalkClientSmsToken>();
     List<TalkClientContact> mClientContacts = new ArrayList<TalkClientContact>();
-    List<TalkClientMessage> mArchivedNearbyMessages = new ArrayList<TalkClientMessage>();
 
     public Filter getFilter() {
         return mFilter;
