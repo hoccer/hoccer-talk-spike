@@ -29,11 +29,11 @@ import java.util.*;
 @DatabaseTable(tableName = "clientContact")
 public class TalkClientContact implements Serializable {
 
-    public @interface ClientMethodOnly {};
-    public @interface ClientOrGroupMethodOnly {};
-    public @interface ClientOrSelfMethodOnly {};
-    public @interface GroupMethodOnly {};
-    public @interface SelfMethodOnly {};
+    public @interface ClientMethodOnly {}
+    public @interface ClientOrGroupMethodOnly {}
+    public @interface ClientOrSelfMethodOnly {}
+    public @interface GroupMethodOnly {}
+    public @interface SelfMethodOnly {}
 
     public static final String TYPE_SELF   = "self";
     public static final String TYPE_CLIENT = "client";

@@ -1,18 +1,17 @@
 package com.hoccer.xo.android.content.contentselectors;
 
-import android.graphics.drawable.Drawable;
-import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.ContentMediaTypes;
-import com.hoccer.xo.android.content.SelectedContent;
-
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.content.ContentMediaTypes;
+import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -143,8 +142,8 @@ public class ImageSelector implements IContentSelector {
     }
 
     private SelectedContent createFromFile(Context context, Intent intent) {
-        Uri selectedContent = intent.getData();
-        String[] filePathColumn = {
+        Uri contentUri = intent.getData();
+        String[] columns = {
                 MediaStore.Images.Media.MIME_TYPE,
                 MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.SIZE,
@@ -154,7 +153,7 @@ public class ImageSelector implements IContentSelector {
                 MediaStore.Images.Media.ORIENTATION
         };
 
-        Cursor cursor = context.getContentResolver().query(selectedContent, filePathColumn, null, null, null);
+        Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
         cursor.moveToFirst();
 
         int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
@@ -180,7 +179,7 @@ public class ImageSelector implements IContentSelector {
         cursor.close();
 
         if (filePath == null) {
-            filePath = selectedContent.toString();
+            filePath = contentUri.toString();
         }
 
         // Validating file size

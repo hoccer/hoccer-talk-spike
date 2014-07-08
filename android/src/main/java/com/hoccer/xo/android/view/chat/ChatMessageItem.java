@@ -164,7 +164,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             avatarView.setVisibility(View.GONE);
             updateSeenStatus(view);
 
-            messageText.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.bubble_green, true));
+            messageText.setBackgroundDrawable(ColorSchemeManager.fillOutgoingMessageBackround(mContext, R.drawable.bubble_green, mMessage.getOutgoingDelivery().getState()));
 
             messageText.setTextColor(
                     mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
@@ -208,23 +208,23 @@ public class ChatMessageItem implements AttachmentTransferListener {
         }
     }
 
-
-    public int getBackgroundResource() {
-        String currentState = mMessage.getOutgoingDelivery().getState();
-        if(currentState == null) {
-            return R.drawable.bubble_light_green;
-        }
-        if (currentState.equals(TalkDelivery.STATE_DELIVERING)) {
-            return R.drawable.bubble_light_green;
-        } else if(currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red;
-        } else if(currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red;
-        }
-
-
-        return R.drawable.bubble_green;
-    }
+//
+//    public int getBackgroundResource() {
+//        String currentState = mMessage.getOutgoingDelivery().getState();
+//        if(currentState == null) {
+//            return R.drawable.bubble_light_green;
+//        }
+//        if (currentState.equals(TalkDelivery.STATE_DELIVERING)) {
+//            return R.drawable.bubble_light_green;
+//        } else if(currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
+//            return R.drawable.bubble_red;
+//        } else if(currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+//            return R.drawable.bubble_red;
+//        }
+//
+//
+//        return R.drawable.bubble_green;
+//    }
 
     private String getMessageTimestamp(TalkClientMessage message) {
         String timeStamp = null;

@@ -24,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
@@ -691,6 +690,16 @@ public abstract class XoActivity extends FragmentActivity {
         startActivity(new Intent(this, PairingActivity.class));
     }
 
+    public void showPreferences() {
+        LOG.debug("showPreferences()");
+        startActivity(new Intent(this, XoPreferenceActivity.class));
+    }
+
+    public void selectAvatar() {
+        LOG.debug("selectAvatar()");
+        mAvatarSelection = ContentRegistry.get(this).selectAvatar(this, REQUEST_SELECT_AVATAR);
+    }
+
     public void showAudioAttachmentList() {
         LOG.debug("showAudioAttachmentList()");
         Intent intent = new Intent(this, AudioAttachmentListActivity.class);
@@ -700,26 +709,6 @@ public abstract class XoActivity extends FragmentActivity {
     public void showFullscreenPlayer() {
         LOG.debug("showFullscreenPlayer()");
         startActivity(new Intent(this, FullscreenPlayerActivity.class));
-    }
-
-    public void showAbout() {
-        LOG.debug("showAbout()");
-        startActivity(new Intent(this, AboutActivity.class));
-    }
-
-    public void showLicenses() {
-        LOG.debug("showLicenses()");
-        startActivity(new Intent(this, LicensesActivity.class));
-    }
-
-    public void showPreferences() {
-        LOG.debug("showPreferences()");
-        startActivity(new Intent(this, XoPreferenceActivity.class));
-    }
-
-    public void selectAvatar() {
-        LOG.debug("selectAvatar()");
-        mAvatarSelection = ContentRegistry.get(this).selectAvatar(this, REQUEST_SELECT_AVATAR);
     }
 
     public void selectAttachment() {
@@ -746,7 +735,7 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     public String getBarcodeString() {
-        return XoClientConfiguration.HXO_URL_SCHEME + getXoClient().generatePairingToken();
+        return getXoClient().getHost().getUrlScheme() + getXoClient().generatePairingToken();
     }
 
     public void composeInviteSms(String token) {
@@ -756,7 +745,7 @@ public abstract class XoActivity extends FragmentActivity {
             TalkClientContact self = mDatabase.findSelfContact(false);
 
             String message = String
-                    .format(getString(R.string.sms_invitation_text), XoClientConfiguration.HXO_URL_SCHEME, token, self.getName());
+                    .format(getString(R.string.sms_invitation_text), getResources().getString(R.string.url_scheme), token, self.getName());
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //At least KitKat
                 String defaultSmsPackageName = Telephony.Sms
@@ -788,7 +777,7 @@ public abstract class XoActivity extends FragmentActivity {
         try {
             TalkClientContact self = mDatabase.findSelfContact(false);
             String message = String
-                    .format(getString(R.string.email_invitation_text), XoClientConfiguration.HXO_URL_SCHEME, token, self.getName());
+                    .format(getString(R.string.email_invitation_text), getXoClient().getHost().getUrlScheme(), token, self.getName());
             Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
             email.putExtra(Intent.EXTRA_SUBJECT,"Join me at Hoccer!");
             email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));

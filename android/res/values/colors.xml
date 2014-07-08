@@ -4,6 +4,8 @@
     <color name="xo_app_incoming_message_color">#ffc8c8c8</color>
     <color name="xo_incoming_message_background">#e3e3e3</color>
     <color name="xo_incoming_message_textColor">#000000</color>
+    <color name="xo_compose_message_no_state_color">#ffffff</color>
+    <color name="xo_compose_message_bad_state_color">#ffe51f1b</color>
     <color name="xo_compose_message_background">#ffffff</color>
     <color name="xo_compose_message_divider">#ffbfbfbf</color>
     <color name="xo_compose_message_textColor">#ffffff</color>

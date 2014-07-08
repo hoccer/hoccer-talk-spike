@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.hoccer.xo.release"
 
-          android:versionCode="39"
+          android:versionCode="40"
           android:versionName="2.1.0">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -82,14 +82,14 @@
                 android:value="@integer/google_play_services_version"/>
 
         <!--API key for Google Maps Android API v2 for RELEASE certificate-->
-        <meta-data
-                android:name="com.google.android.maps.v2.API_KEY"
-                android:value="AIzaSyBDd2wBF1gH9UcU2KcAPXXKI9G6HQattkM"/>
-
-        <!-- API key for Google Maps Android API v2 based on DEBUG certificate -->
         <!--<meta-data-->
         <!--android:name="com.google.android.maps.v2.API_KEY"-->
-        <!--android:value="AIzaSyC9hBvAarkQ9ktS0rWZ5Row-MXRatv8Dj0"/>-->
+        <!--android:value="AIzaSyBDd2wBF1gH9UcU2KcAPXXKI9G6HQattkM"/>-->
+
+        <!-- API key for Google Maps Android API v2 based on DEBUG certificate -->
+        <meta-data
+                android:name="com.google.android.maps.v2.API_KEY"
+                android:value="AIzaSyC9hBvAarkQ9ktS0rWZ5Row-MXRatv8Dj0"/>
 
         <!-- Contact list - our main activity -->
         <activity
@@ -216,34 +216,14 @@
                     android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
         </activity>
 
-        <!-- About activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.AboutActivity"
-                android:label="@string/actionbar_default_title"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
-                android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="com.hoccer.xo.ABOUT"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
+        <!--Legal Imprint activity-->
+        <activity android:name="com.hoccer.xo.android.activity.LegalImprintActivity"
+                  android:label="@string/actionbar_default_title"
+                  android:parentActivityName="com.hoccer.xo.android.activity.XoPreferenceActivity"
+                  android:screenOrientation="portrait" >
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
-        </activity>
-
-        <!-- Licenses activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.LicensesActivity"
-                android:label="@string/actionbar_default_title"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
-                android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="com.hoccer.xo.LICENSES"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
+                    android:value="com.hoccer.xo.android.activity.XoPreferenceActivity"/>
         </activity>
 
         <!-- Maps selection activity -->

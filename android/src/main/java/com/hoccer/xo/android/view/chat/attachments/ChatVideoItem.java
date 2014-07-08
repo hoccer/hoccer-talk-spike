@@ -74,7 +74,7 @@ public class ChatVideoItem extends ChatMessageItem {
 
         if (contentObject.getContentDataUrl() != null) {
             mAttachmentView.setBackgroundDrawable(null);
-            ThumbnailManager.getInstance(mContext).displayThumbnailForVideo(contentObject.getContentDataUrl(), rootView, mask, tag);
+            ThumbnailManager.getInstance(mContext).displayThumbnailForVideo(contentObject.getContentDataUrl(), thumbnailView, mask, tag);
         }
 
         playButton.setOnClickListener(new View.OnClickListener() {

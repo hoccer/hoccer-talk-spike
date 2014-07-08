@@ -1,87 +1,48 @@
-/*
- * AboutFragment.java
- * HoccerXO Chat
- *
- * Created by Bjoern Heller 5/16/13 1:16 AM
- * Copyright (c) 2013. Hoccer Betriebs GmbH
- */
-
 package com.hoccer.xo.android.fragment;
 
+import android.app.Fragment;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.base.XoFragment;
+import android.widget.TextView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-
 /**
  * Fragment that shows the "about" web page
- *
- * This uses webapp caching to cache the page.
  */
-public class AboutFragment extends XoFragment {
+public class AboutFragment extends Fragment {
+
 
     private static final Logger LOG = Logger.getLogger(AboutFragment.class);
 
-    private WebView mAboutWebView;
-    private String mAboutString;
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        LOG.debug("onCreate()");
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_about, container, false);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        LOG.debug("onCreateView()");
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        try {
+            TextView appNameView = (TextView) view.findViewById(R.id.tv_about_app_name);
+            appNameView.setText(R.string.app_name);
 
-        // inflate the layout
-        View v = inflater.inflate(R.layout.fragment_about, container, false);
+            TextView appVersionView = (TextView) view.findViewById(R.id.tv_about_app_version);
+            String versionName = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0)
+                    .versionName;
+            appVersionView.setText(String.format(getString(R.string.about_version_description), versionName));
 
-        // get the web view
-        mAboutWebView = (WebView)v.findViewById(R.id.about_webview);
-        // open all links in its own window
-        mAboutWebView.setWebViewClient(new WebViewClient());
-        mAboutWebView.setWebChromeClient(new WebChromeClient());
-
-        mAboutString = getResources().getString(R.string.about_url);
-
-        // get settings for web view
-        WebSettings webSettings = mAboutWebView.getSettings();
-        // enable Javascript inside web view
-        webSettings.setJavaScriptEnabled(true);
-        // always zoom out on load
-        webSettings.setLoadWithOverviewMode(true);
-        // set viewport to its own dimensions
-        webSettings.setUseWideViewPort(true);
-        // cache configuration in android web view
-        webSettings.setAppCacheMaxSize(1024 * 1024 * 8);
-        webSettings.setAppCachePath(getActivity().getFilesDir().toString() + File.separator + "webapp-cache");
-        webSettings.setAppCacheEnabled(true);
-        // set cache mode
-        webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-
-        return v;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onResume() {
-        LOG.debug("onResume()");
         super.onResume();
-        // load our target URL
-        mAboutWebView.loadUrl(mAboutString);
     }
 
 }

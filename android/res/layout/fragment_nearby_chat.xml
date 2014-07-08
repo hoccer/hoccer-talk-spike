@@ -71,12 +71,6 @@
             android:textSize="8pt"
             android:text="@string/placeholder_conversations_text"/>
 
-    <ListView
-            android:id="@android:id/list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentTop="true"/>
-
     <RelativeLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"

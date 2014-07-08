@@ -57,12 +57,10 @@
         <Preference
                 android:title="@string/menu_about"
                 android:key="preference_about">
-            <intent android:action="com.hoccer.xo.ABOUT"/>
         </Preference>
         <Preference
                 android:title="@string/menu_licenses"
                 android:key="preference_licenses">
-            <intent android:action="com.hoccer.xo.LICENSES"/>
         </Preference>
     </PreferenceCategory>
 
@@ -98,17 +96,15 @@
 
         <ListPreference
                 android:key="preference_server_uri"
-                android:entries="@array/servers"
-                android:entryValues="@array/servers"
-                android:title="Select Server URI"
-                android:defaultValue="wss://talkserver.talk.hoccer.de:8443/"/>
+                android:entries="@array/servers_development"
+                android:entryValues="@array/servers_development"
+                android:title="Select Server URI"/>
 
         <ListPreference
                 android:key="preference_database"
-                android:entries="@array/databases"
-                android:entryValues="@array/database_values"
-                android:title="@string/preference_database_title"
-                android:defaultValue="hoccer-talk.db"/>
+                android:entries="@array/databases_development"
+                android:entryValues="@array/database_values_development"
+                android:title="@string/preference_database_title"/>
 
         <CheckBoxPreference
                 android:key="preference_environment_update"
