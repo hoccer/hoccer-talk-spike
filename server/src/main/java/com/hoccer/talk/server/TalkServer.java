@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 
 /**
  * Main object of the Talk server
@@ -121,10 +122,35 @@ public class TalkServer {
     AtomicInteger mConnectionsTotal = new AtomicInteger();
     AtomicInteger mConnectionsOpen = new AtomicInteger();
 
+    Map<String,String> mIdLocks;
+
+    public class NonReentrantLock{
+
+        private boolean isLocked = false;
+
+        public synchronized void lock()
+                throws InterruptedException{
+            while(isLocked){
+                wait();
+            }
+            isLocked = true;
+        }
+
+        public synchronized void unlock(){
+            isLocked = false;
+            notify();
+        }
+    }
+
+    Map<String,NonReentrantLock> mNonReentrantIdLocks;
+
     /**
      * Create and initialize a Hoccer Talk server
      */
     public TalkServer(TalkServerConfiguration configuration, ITalkServerDatabase database) {
+        mIdLocks = new HashMap<String, String>();
+        mNonReentrantIdLocks = new HashMap<String, NonReentrantLock>();
+
         mConfiguration = configuration;
         mDatabase = database;
 
@@ -150,9 +176,46 @@ public class TalkServer {
         mJmxReporter.start();
     }
 
-    /**
-     * @return the JSON mapper used by this server
-     */
+    public NonReentrantLock idLockNonReentrant(String id) {
+        synchronized (mNonReentrantIdLocks) {
+            NonReentrantLock lock = mNonReentrantIdLocks.get(id);
+            if (lock == null) {
+                lock = new NonReentrantLock();
+                mNonReentrantIdLocks.put(id, lock);
+            }
+            return lock;
+        }
+    }
+
+    public String idLock(String id) {
+        synchronized (mIdLocks) {
+            String lock = mIdLocks.get(id);
+            if (lock == null) {
+                lock = new String(id);
+                mIdLocks.put(id, lock);
+            }
+            return lock;
+        }
+    }
+
+    // lock for two Ids at the same time; note that the individual id will not be locked that way
+    public Object dualIdLock(String prefix, String id1, String id2) {
+        if (id1.compareTo(id2) > 0)   {
+            return idLock(prefix + id1 + id2);
+        } else {
+            return idLock(prefix + id2 + id1);
+        }
+    }
+
+    // TODO: call this when we are through with an id (e.g. message)
+    public void removeIdLock(String id) {
+        mIdLocks.remove(id);
+    }
+
+
+        /**
+         * @return the JSON mapper used by this server
+         */
     public ObjectMapper getJsonMapper() {
         return mJsonMapper;
     }

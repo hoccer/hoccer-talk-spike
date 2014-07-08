@@ -19,40 +19,36 @@ public class TalkAttachment {
 
     /** The download URL of attached file */
     @DatabaseField
-    private
-    String url;
+    private String url;
 
     /**
      * An optional file name for the attachment; the receiver must make sure that it does not
      * collide with other file names
      */
     @DatabaseField
-    private
-    String fileName;
+    private String fileName;
 
     /** MIME type of attached file */
     @DatabaseField
-    private
-    String mimeType;
+    private String mimeType;
 
     /** String of decimal digits denoting the size of attached file in bytes */
     @DatabaseField
-    private
-    String contentSize;
+    private String contentSize;
 
     /** Media-type of attached file, currently image, video, audio, contact, geolocation, data */
     @DatabaseField
-    private
-    String mediaType;
+    private String mediaType;
 
     /** Aspect-ratio for the preview of an attachment */
     @DatabaseField
-    private
-    double aspectRatio;
+    private double aspectRatio;
 
     @DatabaseField
-    private
-    String hmac;
+    private String hmac;
+
+    @DatabaseField
+    private String fileId;
 
     public TalkAttachment() {
         this.aspectRatio = 1.0;
@@ -117,5 +113,21 @@ public class TalkAttachment {
 
     public void setHmac(String hmac) {
         this.hmac = hmac;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
+    public int getAttachmentId() {
+        return attachmentId;
+    }
+
+    public void setAttachmentId(int attachmentId) {
+        this.attachmentId = attachmentId;
     }
 }

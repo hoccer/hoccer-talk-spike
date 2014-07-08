@@ -13,10 +13,10 @@ public abstract class XoListFragment extends ListFragment implements IXoFragment
 
     protected Logger LOG = null;
 
-    private XoActivity mActivity;
+    protected XoActivity mActivity;
 
     public XoListFragment() {
-        LOG = Logger.getLogger(getClass());
+        LOG = Logger.getLogger(((Object) this).getClass());
     }
 
     public File getAvatarDirectory() {

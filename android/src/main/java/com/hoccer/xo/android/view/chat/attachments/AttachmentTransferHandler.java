@@ -284,6 +284,13 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
     }
 
     @Override
+    public void onDownloadFailed(TalkClientDownload download) {
+        if (download == mContent) {
+            setTransferAction(getTransferState(mContent));
+        }
+    }
+
+    @Override
     public void onDownloadStateChanged(TalkClientDownload download) {
         if (download == mContent) {
             setTransferAction(getTransferState(mContent));
@@ -306,6 +313,13 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
 
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
+        if (upload == mContent) {
+            setTransferAction(getTransferState(mContent));
+        }
+    }
+
+    @Override
+    public void onUploadFailed(TalkClientUpload upload) {
         if (upload == mContent) {
             setTransferAction(getTransferState(mContent));
         }

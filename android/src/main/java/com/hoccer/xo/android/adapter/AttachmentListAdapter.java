@@ -26,7 +26,8 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
     private final Activity mActivity;
-    private List<AudioAttachmentItem> mAudioAttachmentItems;
+    private List<AudioAttachmentItem> mAudioAttachmentItems = new ArrayList<AudioAttachmentItem>();
+
     private String mContentMediaType;
     private int mConversationContactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
 
@@ -48,11 +49,20 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         mActivity = activity;
         setContentMediaType(pContentMediaType);
         setConversationContactId(pConversationContactId);
-        loadAttachmentList();
     }
 
     public List<AudioAttachmentItem> getAudioAttachmentItems() {
         return mAudioAttachmentItems;
+    }
+
+    public void setAudioAttachmentItems( List<AudioAttachmentItem> items) {
+        mAudioAttachmentItems.addAll(items);
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     public int getConversationContactId() {
@@ -100,6 +110,10 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     public void setContentMediaType(String pContentMediaType) {
         mContentMediaType = pContentMediaType;
+    }
+
+    public String getContentMediaType() {
+        return mContentMediaType;
     }
 
     public void setConversationContactId(int pConversationContactId) {
@@ -150,6 +164,11 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         }
     }
 
+    @Override
+    public void onDownloadFailed(TalkClientDownload download) {
+
+    }
+
     private void updateCheckedItems() {
         SparseBooleanArray updatedSelection = new SparseBooleanArray(mSelections.size());
 
@@ -188,6 +207,11 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     @Override
+    public void onUploadFailed(TalkClientUpload upload) {
+
+    }
+
+    @Override
     public void onUploadStateChanged(TalkClientUpload upload) {
 
     }
@@ -202,12 +226,45 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         });
     }
 
+    public boolean removeItem(AudioAttachmentItem item) {
+        boolean isRemovable = mAudioAttachmentItems.contains(item);
+        if (isRemovable) {
+            mAudioAttachmentItems.remove(mAudioAttachmentItems.indexOf(item));
+            mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
+                }
+            });
+        }
+        return isRemovable;
+    }
+
+    public void addItem(AudioAttachmentItem item){
+        mAudioAttachmentItems.add(item);
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
+    }
+
+    public void clear(){
+        mAudioAttachmentItems.clear();
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
+    }
+
     public void setSelections(SparseBooleanArray selections) {
         this.mSelections = selections;
     }
 
-    private void loadAttachmentList() {
-        mAudioAttachmentItems = new ArrayList<AudioAttachmentItem>();
+    public void loadAttachmentList() {
         try {
             List<TalkClientDownload> downloads;
             if (mContentMediaType != null) {

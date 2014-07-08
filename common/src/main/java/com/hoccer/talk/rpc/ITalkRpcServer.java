@@ -326,6 +326,55 @@ public interface ITalkRpcServer {
      **/
     void unblockClient(String clientId);
 
+    /** Invite the given client to become a friend
+     * @param clientId is a UUID denoting the client to block
+     * @talk.preconditions client must be logged in, other client must not be be friend
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server set relationShip with the client to invited, reverse relationship to invitedMe and notify partners via relationshipUpdated
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects set relationShips, update time stamp
+     * @talk.errors.server
+     **/
+    void inviteFriend(String clientId);
+
+    /** retract friend invitation with the given client
+     * @param clientId is a UUID denoting the client to unblock
+     * @talk.preconditions client must be logged in, other client must be invited
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server set relationShip with the client to 'none' and notify partner via relationshipUpdated
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects set relationShip with the client to none again, update time stamp
+     * @talk.errors.server  returns exception object when clientId unknown or no relationship exists
+     **/
+    void disinviteFriend(String clientId);
+
+
+    /** accept the given client as friend
+     * @param clientId is a UUID denoting the client to block
+     * @talk.preconditions client must be logged in, other client must have invited me as friend
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server set relationShip with the client to friend and notify partner via relationshipUpdated
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects set relationShip with the client to friend, update time stamp
+     * @talk.errors.server
+     **/
+    void acceptFriend(String clientId);
+
+    /** refuse to become friend with the given client
+     * @param clientId is a UUID denoting the client to refuse friendship
+     * @talk.preconditions client must be logged in, other client must have invited me as friend
+     * @talk.preconditions.server none
+     * @talk.preconditions.client none
+     * @talk.behavior.server set relationShip with the client to 'none' and notify partner via relationshipUpdated
+     * @talk.behavior.client
+     * @talk.statechanges.serverobjects set relationShip with the client to none again, update time stamp
+     * @talk.errors.server  returns exception object when clientId unknown or no relationship exists
+     **/
+    void refuseFriend(String clientId);
+
     /** Depair the given client, removing the relationship between clients
      * @param clientId is a UUID denoting the client to unblock
      * @talk.preconditions client must be logged in, other client must be blocked or friend
@@ -351,7 +400,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects store message and delivery objects, stamp with timeAccepted and create a message id
      * @talk.errors.server
      **/
-	TalkDelivery[] deliveryRequest(TalkMessage m, TalkDelivery[] d);
+	TalkDelivery[] outDeliveryRequest(TalkMessage m, TalkDelivery[] d);
 
     /** Confirm reception of the message with the given message id
      * @param messageId is the server-provided message id
@@ -364,7 +413,9 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects update state in delivery object to 'delivered', update timeChanged
      * @talk.errors.server
      **/
-	TalkDelivery   deliveryConfirm(String messageId);
+    TalkDelivery   inDeliveryConfirmUnseen(String messageId);
+    TalkDelivery   inDeliveryConfirmSeen(String messageId);
+    TalkDelivery   inDeliveryConfirmPrivate(String messageId);
 
     /** Acknowledge reception of outgoing message delivery confirmation
      * @param messageId is the server-provided message id
@@ -378,7 +429,15 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects update state in delivery object to 'confirmed', update timeChanged
      * @talk.errors.server
      **/
-    TalkDelivery   deliveryAcknowledge(String messageId, String recipientId);
+    TalkDelivery   outDeliveryAcknowledgeSeen(String messageId, String recipientId);
+    TalkDelivery   outDeliveryAcknowledgeUnseen(String messageId, String recipientId);
+    TalkDelivery   outDeliveryAcknowledgePrivate(String messageId, String recipientId);
+
+    // As sender, acknowledge a "failed" delivery
+    TalkDelivery   outDeliveryAcknowledgeFailed(String messageId, String recipientId);
+
+    // As sender, acknowledge a "rejected" delivery
+    TalkDelivery   outDeliveryAcknowledgeRejected(String messageId, String recipientId);
 
     /**
      * Reject/abort a delivery
@@ -395,7 +454,12 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects update state in delivery object to 'aborted', update timeChanged
      * @talk.errors.server
      **/
-    TalkDelivery deliveryAbort(String messageId, String recipientId);
+
+    // abort a delivery as sender
+    TalkDelivery outDeliveryAbort(String messageId, String recipientId);
+
+    // reject a delivery as receiver
+    TalkDelivery inDeliveryReject(String messageId, String reason);
 
     /**
      * Create a new group on the server
@@ -591,6 +655,43 @@ public interface ITalkRpcServer {
         public String downloadUrl;
     }
 
+    // can be called by the creator/uploader to remove it in case the transfer was cancelled
+    //void deleteFile(String fileId);
+
+    // should be called by the receiver of an transfer file after download; the server can the delete the file in case
+    String receivedFile(String fileId);
+
+    // should be called by the receiver of an transfer file if the user has aborted the download
+    String abortedFileDownload(String fileId);
+
+    // should be called by the receiver of an transfer file if the client has exceeded the download retry count
+    String failedFileDownload(String fileId);
+
+    // should be called by the receiver of an transfer file when a final attachment sender set state has been seen
+    String acknowledgeAbortedFileUpload(String fileId);
+    String acknowledgeFailedFileUpload(String fileId);
+
+    //------ sender attachment state indication methods
+    // should be called by the sender of an transfer file after upload has been started
+    String startedFileUpload(String fileId);
+
+    // should be called by the sender of an transfer file when the upload has been paused
+    String pausedFileUpload(String fileId);
+
+    // should be called by the sender of an transfer file after upload has been finished
+    String finishedFileUpload(String fileId);
+
+    // should be called by the sender of an transfer file when the upload is aborted by the user
+    String abortedFileUpload(String fileId);
+
+    // should be called by the sender of an transfer file when upload retry count has been exceeded
+    String failedFileUpload(String fileId);
+
+    // should be called by the sender of an transfer file when a final attachment receiver set state has been seen
+    String acknowledgeReceivedFile(String fileId, String receiverId);
+    String acknowledgeAbortedFileDownload(String fileId, String receiverId);
+    String acknowledgeFailedFileDownload(String fileId, String receiverId);
+
     /** provide environment record for location based grouping
      * @param environment denotes the geoposition and other environment data for grouping
      * @return a group id for a transient group id the client is in
@@ -618,6 +719,8 @@ public interface ITalkRpcServer {
 
     Boolean[] isMemberInGroups(String[] groupIds);
 
+    // return true if for each client the caller is related to by a relationsShip or by an active group membership
+    Boolean[] isContactOf(String[] clientIds);
 }
 
 /**

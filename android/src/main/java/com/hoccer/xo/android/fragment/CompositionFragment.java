@@ -5,13 +5,18 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
@@ -21,15 +26,11 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 public class CompositionFragment extends XoFragment implements View.OnClickListener,
         View.OnLongClickListener, MotionGestureListener {
+
+    private static final int STRESS_TEST_MESSAGE_COUNT = 15;
 
     private EditText mTextEdit;
 
@@ -109,7 +110,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             }
         };
         mTextEdit.addTextChangedListener(mTextWatcher);
-
     }
 
     @Override
@@ -161,7 +161,20 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     public void setContact(TalkClientContact contact) {
+        LOG.debug("setContact(" + contact.getClientContactId() + ")");
         mContact = contact;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mTextEdit.setVisibility(View.VISIBLE);
+                mSendButton.setVisibility(View.VISIBLE);
+                mAddAttachmentButton.setVisibility(View.VISIBLE);
+
+                mTextEdit.setEnabled(true);
+                mSendButton.setEnabled(true);
+                mAddAttachmentButton.setEnabled(true);
+            }
+        });
     }
 
     private boolean isComposed() {
@@ -182,7 +195,32 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private boolean isSendMessagePossible() {
-        return !(mContact.isGroup() && mContact.getGroupMemberships().size() == 1);
+        boolean isBlocked = isBlocked();
+
+        boolean isEmptyGroup = false;
+        if(mContact.isGroup() && mContact.getGroupMemberships().size() == 1) {
+            isEmptyGroup = true;
+        }
+
+        return !isBlocked && !isEmptyGroup;
+    }
+
+    private boolean isBlocked() {
+        if(!mContact.isGroup() && !mContact.isNearby()) {
+            TalkRelationship clientRelationship = mContact.getClientRelationship();
+            if (clientRelationship != null && clientRelationship.getState()
+                    .equals(TalkRelationship.STATE_BLOCKED)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isEmptyGroup() {
+        if(mContact.isGroup() && mContact.getGroupMemberships().size() == 1) {
+            return true;
+        }
+        return false;
     }
 
     private void sendComposedMessage() {
@@ -190,8 +228,12 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             return;
         }
 
-        if (!isSendMessagePossible()) {
-            showAlertSendMessageNotPossible();
+        boolean isAborted = false;
+        if (isBlocked()) {
+            Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
+            isAborted = true;
+        } else if (isEmptyGroup()) {
+            Toast.makeText(getXoActivity(), R.string.error_send_message_empty_group, Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -205,8 +247,15 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         if (mAttachment != null) {
             upload = SelectedContent.createAttachmentUpload(mAttachment);
         }
-        getXoClient()
-                .requestDelivery(getXoClient().composeClientMessage(mContact, messageText, upload));
+
+        if(isAborted) {
+            TalkClientMessage message = getXoClient()
+                    .composeClientMessage(mContact, messageText, upload);
+            getXoClient().markMessagesAsAborted(message);
+        } else {
+            getXoClient()
+                    .requestDelivery(getXoClient().composeClientMessage(mContact, messageText, upload));
+        }
         clearComposedMessage();
     }
 
@@ -226,7 +275,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     public boolean onLongClick(View v) {
         boolean longpressHandled = false;
         if (mLastMessage != null && !mLastMessage.equals("")) {
-            for (int i = 0; i < 15; i++) {
+            for (int i = 0; i < STRESS_TEST_MESSAGE_COUNT; i++) {
                 getXoClient().requestDelivery(getXoClient()
                         .composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)));
             }
@@ -245,22 +294,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             getXoSoundPool().playThrowSound();
             sendComposedMessage();
         }
-    }
-
-    public void blockInput(boolean doBlock) {
-        if(doBlock) {
-            mTextEdit.setVisibility(View.GONE);
-            mSendButton.setVisibility(View.GONE);
-            mAddAttachmentButton.setVisibility(View.GONE);
-        } else {
-            mTextEdit.setVisibility(View.VISIBLE);
-            mSendButton.setVisibility(View.VISIBLE);
-            mAddAttachmentButton.setVisibility(View.VISIBLE);
-        }
-
-        mTextEdit.setEnabled(!doBlock);
-        mSendButton.setEnabled(!doBlock);
-        mAddAttachmentButton.setEnabled(!doBlock);
     }
 
     private class AddAttachmentOnClickListener implements View.OnClickListener {
@@ -292,7 +325,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            switch(which) {
+            switch (which) {
                 case 0:
                     mAttachment = null;
                     getXoActivity().selectAttachment();

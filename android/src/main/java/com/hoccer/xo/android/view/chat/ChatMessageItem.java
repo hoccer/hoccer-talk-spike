@@ -15,6 +15,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
@@ -128,7 +129,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     protected void configureViewForMessage(View view) {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.av_message_avatar);
         TextView messageTime = (TextView) view.findViewById(R.id.tv_message_time);
-        TextView messageName = (TextView) view.findViewById(R.id.tv_message_contact_name);
+        TextView messageInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
         TextView messageText = (TextView) view.findViewById(R.id.tv_message_text);
 
         // Adjust layout for incoming / outgoing message
@@ -138,8 +139,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
             } else {
                 avatarView.setVisibility(View.GONE);
             }
-            messageName.setVisibility(View.VISIBLE);
-            messageName.setText(mMessage.getSenderContact().getName());
+            messageInfo.setVisibility(View.VISIBLE);
+            messageInfo.setText(mMessage.getSenderContact().getNickname());
+            messageInfo.setTextColor(messageInfo.getResources().getColor(android.R.color.secondary_text_dark));
 
             messageText.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.bubble_grey, false));
 
@@ -160,7 +162,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         } else {
             avatarView.setVisibility(View.GONE);
-            messageName.setVisibility(View.GONE);
+            updateSeenStatus(view);
 
             messageText.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.bubble_green, true));
 
@@ -184,6 +186,44 @@ public class ChatMessageItem implements AttachmentTransferListener {
         messageText.setText(mMessage.getText());
 
         mMessageText = messageText;
+    }
+
+    private void updateSeenStatus(View view) {
+        TextView messageInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
+        if(mMessage.getConversationContact().isGroup()) {
+            messageInfo.setVisibility(View.GONE);
+            return;
+        }
+
+        String currentState = mMessage.getOutgoingDelivery().getState();
+        if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
+                || currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED))
+                && !mMessage.getOutgoingDelivery().isGroupDelivery()) {
+
+            messageInfo.setVisibility(View.VISIBLE);
+            messageInfo.setTextColor(view.getResources().getColor(R.color.xo_app_main_color));
+            messageInfo.setText(R.string.seen_text);
+        } else {
+            messageInfo.setVisibility(View.GONE);
+        }
+    }
+
+
+    public int getBackgroundResource() {
+        String currentState = mMessage.getOutgoingDelivery().getState();
+        if(currentState == null) {
+            return R.drawable.bubble_light_green;
+        }
+        if (currentState.equals(TalkDelivery.STATE_DELIVERING)) {
+            return R.drawable.bubble_light_green;
+        } else if(currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
+            return R.drawable.bubble_red;
+        } else if(currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+            return R.drawable.bubble_red;
+        }
+
+
+        return R.drawable.bubble_green;
     }
 
     private String getMessageTimestamp(TalkClientMessage message) {
@@ -386,4 +426,15 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return mMessage != null ? mMessage.hashCode() : 0;
     }
 
+    public boolean isSeparator() {
+        return mMessage.getMessageId() != null &&  mMessage.getMessageId().equals("SEPARATOR");
+    }
+
+    public String getText() {
+        return mMessage.getText();
+    }
+
+    public int getConversationContactId() {
+        return mMessage.getConversationContact().getClientContactId();
+    }
 }

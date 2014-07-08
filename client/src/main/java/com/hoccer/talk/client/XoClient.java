@@ -12,13 +12,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMembership;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSelf;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.crypto.CryptoJSON;
 import com.hoccer.talk.crypto.RSACryptor;
@@ -136,13 +130,13 @@ public class XoClient implements JsonRpcConnection.Listener {
     ScheduledFuture<?> mAutoDisconnectFuture;
     ScheduledFuture<?> mKeepAliveFuture;
 
-    Set<IXoPairingListener> mPairingListeners = new HashSet<IXoPairingListener>();
-    Set<IXoContactListener> mContactListeners = new HashSet<IXoContactListener>();
-    Set<IXoMessageListener> mMessageListeners = new HashSet<IXoMessageListener>();
-    Set<IXoStateListener> mStateListeners = new HashSet<IXoStateListener>();
-    Set<IXoUnseenListener> mUnseenListeners = new HashSet<IXoUnseenListener>();
-    Set<IXoTokenListener> mTokenListeners = new HashSet<IXoTokenListener>();
-    Set<IXoAlertListener> mAlertListeners = new HashSet<IXoAlertListener>();
+    List<IXoPairingListener> mPairingListeners = new ArrayList<IXoPairingListener>();
+    List<IXoContactListener> mContactListeners = new ArrayList<IXoContactListener>();
+    List<IXoMessageListener> mMessageListeners = new ArrayList<IXoMessageListener>();
+    List<IXoStateListener> mStateListeners = new ArrayList<IXoStateListener>();
+    List<IXoUnseenListener> mUnseenListeners = new ArrayList<IXoUnseenListener>();
+    List<IXoTokenListener> mTokenListeners = new ArrayList<IXoTokenListener>();
+    List<IXoAlertListener> mAlertListeners = new ArrayList<IXoAlertListener>();
 
     Set<String> mGroupKeyUpdateInProgess = new HashSet<String>();
 
@@ -364,7 +358,9 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     public synchronized void registerStateListener(IXoStateListener listener) {
-        mStateListeners.add(listener);
+        if (!mStateListeners.contains(listener)) {
+            mStateListeners.add(listener);
+        }
     }
 
     public synchronized void unregisterStateListener(IXoStateListener listener) {
@@ -372,7 +368,9 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     public synchronized void registerContactListener(IXoContactListener listener) {
-        mContactListeners.add(listener);
+        if (!mContactListeners.contains(listener)) {
+            mContactListeners.add(listener);
+        }
     }
 
     public synchronized void unregisterContactListener(IXoContactListener listener) {
@@ -380,7 +378,9 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     public synchronized void registerMessageListener(IXoMessageListener listener) {
-        mMessageListeners.add(listener);
+        if (!mMessageListeners.contains(listener)) {
+            mMessageListeners.add(listener);
+        }
     }
 
     public synchronized void unregisterMessageListener(IXoMessageListener listener) {
@@ -388,7 +388,9 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     public synchronized void registerUnseenListener(IXoUnseenListener listener) {
-        mUnseenListeners.add(listener);
+        if (!mUnseenListeners.contains(listener)) {
+            mUnseenListeners.add(listener);
+        }
     }
 
     public synchronized void unregisterUnseenListener(IXoUnseenListener listener) {
@@ -404,7 +406,9 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     public synchronized void registerTokenListener(IXoTokenListener listener) {
-        mTokenListeners.add(listener);
+        if (!mTokenListeners.contains(listener)) {
+            mTokenListeners.add(listener);
+        }
     }
 
     public synchronized void unregisterTokenListener(IXoTokenListener listener) {
@@ -412,7 +416,9 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     public synchronized void registerPairingListener(IXoPairingListener listener) {
-        mPairingListeners.add(listener);
+        if (!mPairingListeners.contains(listener)) {
+            mPairingListeners.add(listener);
+        }
     }
 
     public synchronized void unregisterPairingListener(IXoPairingListener listener) {
@@ -420,7 +426,9 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     public synchronized void registerAlertListener(IXoAlertListener listener) {
-        mAlertListeners.add(listener);
+        if (!mAlertListeners.contains(listener)) {
+            mAlertListeners.add(listener);
+        }
     }
 
     public synchronized void unregisterAlertListener(IXoAlertListener listener) {
@@ -592,6 +600,7 @@ public class XoClient implements JsonRpcConnection.Listener {
             clientInfo.setSystemName(mClientHost.getSystemName());
             clientInfo.setSystemLanguage(mClientHost.getSystemLanguage());
             clientInfo.setSystemVersion(mClientHost.getSystemVersion());
+            clientInfo.setClientBuildVariant(mClientHost.getClientBuildVariant());
             if (mClientHost.isSupportModeEnabled()) {
                 clientInfo.setSupportTag(mClientHost.getSupportTag());
             }
@@ -653,7 +662,9 @@ public class XoClient implements JsonRpcConnection.Listener {
                     presence.setClientStatus(newStatus);
                 }
                 mDatabase.savePresence(presence);
-                for (IXoContactListener listener : mContactListeners) {
+
+                for (int i = 0; i < mContactListeners.size(); i++) {
+                    IXoContactListener listener = mContactListeners.get(i);
                     listener.onClientPresenceChanged(mSelfContact);
                 }
 
@@ -674,7 +685,8 @@ public class XoClient implements JsonRpcConnection.Listener {
                     presence.setConnectionStatus(newStatus);
                     mSelfContact.updatePresence(presence);
                     mDatabase.savePresence(presence);
-                    for (IXoContactListener listener : mContactListeners) {
+                    for (int i = 0; i < mContactListeners.size(); i++) {
+                        IXoContactListener listener = mContactListeners.get(i);
                         listener.onClientPresenceChanged(mSelfContact);
                     }
 
@@ -715,7 +727,8 @@ public class XoClient implements JsonRpcConnection.Listener {
                     mSelfContact.setAvatarUpload(upload);
                     mDatabase.savePresence(presence);
                     mDatabase.saveContact(mSelfContact);
-                    for (IXoContactListener listener : mContactListeners) {
+                    for (int i = 0; i < mContactListeners.size(); i++) {
+                        IXoContactListener listener = mContactListeners.get(i);
                         listener.onClientPresenceChanged(mSelfContact);
                     }
                     LOG.debug("sending new presence");
@@ -751,7 +764,8 @@ public class XoClient implements JsonRpcConnection.Listener {
                        LOG.error("Error while sending new group presence: " , e);
                    }
                }
-               for (IXoContactListener listener : mContactListeners) {
+               for (int i = 0; i < mContactListeners.size(); i++) {
+                   IXoContactListener listener = mContactListeners.get(i);
                    listener.onGroupPresenceChanged(group);
                }
            }
@@ -796,7 +810,8 @@ public class XoClient implements JsonRpcConnection.Listener {
                     }
                     mTransferAgent.requestUpload(upload);
                     LOG.debug("group presence update");
-                    for (IXoContactListener listener : mContactListeners) {
+                    for (int i = 0; i < mContactListeners.size(); i++) {
+                        IXoContactListener listener = mContactListeners.get(i);
                         listener.onGroupPresenceChanged(group);
                     }
                 } catch (Exception e) {
@@ -865,7 +880,8 @@ public class XoClient implements JsonRpcConnection.Listener {
                         LOG.error("SQL error", e);
                     }
 
-                    for (IXoContactListener listener : mContactListeners) {
+                    for (int i = 0; i < mContactListeners.size(); i++) {
+                        IXoContactListener listener = mContactListeners.get(i);
                         listener.onContactRemoved(contact);
                     }
 
@@ -905,6 +921,50 @@ public class XoClient implements JsonRpcConnection.Listener {
                 @Override
                 public void run() {
                     mServerRpc.unblockClient(contact.getClientId());
+                }
+            });
+        }
+    }
+
+    public void inviteFriend(final TalkClientContact contact) {
+        if (contact.isClient()) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mServerRpc.inviteFriend(contact.getClientId());
+                }
+            });
+        }
+    }
+
+    public void disinviteFriend(final TalkClientContact contact) {
+        if (contact.isClient()) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mServerRpc.disinviteFriend(contact.getClientId());
+                }
+            });
+        }
+    }
+
+    public void acceptFriend(final TalkClientContact contact) {
+        if (contact.isClient()) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mServerRpc.acceptFriend(contact.getClientId());
+                }
+            });
+        }
+    }
+
+    public void declineFriend(final TalkClientContact contact) {
+        if (contact.isClient()) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mServerRpc.refuseFriend(contact.getClientId());
                 }
             });
         }
@@ -958,7 +1018,8 @@ public class XoClient implements JsonRpcConnection.Listener {
 
                     LOG.debug("new group contact " + groupContact.getClientContactId());
 
-                    for (IXoContactListener listener : mContactListeners) {
+                    for (int i = 0; i < mContactListeners.size(); i++) {
+                        IXoContactListener listener = mContactListeners.get(i);
                         listener.onContactAdded(groupContact);
                     }
 
@@ -980,11 +1041,9 @@ public class XoClient implements JsonRpcConnection.Listener {
                             LOG.error("createGroup: defective membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
                         }
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        LOG.error("SQL error: ", e);
                     }
                     // end of error checking section
-
-
 
                 } catch (JsonRpcClientException e) {
                     LOG.error("Error while creating group: ", e);
@@ -1411,7 +1470,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                                     }
                                 } else {
                                     // TODO: properly handle group deletion, the following code just marks the group and members as deleted
-                                    LOG.info("Removing members and group with name="+ groupContact.getName());
+                                    LOG.info("Removing members and group with name="+ groupContact.getNickname());
                                     TalkGroup groupPresence = groupContact.getGroupPresence();
                                     groupPresence.setState(TalkGroup.STATE_NONE);
                                     mDatabase.saveGroup(groupPresence);
@@ -1423,7 +1482,8 @@ public class XoClient implements JsonRpcConnection.Listener {
                                             mDatabase.saveGroupMember(member);
                                         }
                                     }
-                                    for (IXoContactListener listener : mContactListeners) {
+                                    for (int j = 0; j < mContactListeners.size(); j++) {
+                                        IXoContactListener listener = mContactListeners.get(j);
                                         listener.onGroupMembershipChanged(groupContact);
                                         listener.onGroupPresenceChanged(groupContact);
                                     }
@@ -1487,7 +1547,7 @@ public class XoClient implements JsonRpcConnection.Listener {
         // construct message and delivery objects
         final TalkClientMessage clientMessage = new TalkClientMessage();
         final TalkMessage message = new TalkMessage();
-        final TalkDelivery delivery = new TalkDelivery();
+        final TalkDelivery delivery = new TalkDelivery(true);
 
         final String messageTag = message.generateMessageTag();
         message.setBody(messageText);
@@ -1587,6 +1647,8 @@ public class XoClient implements JsonRpcConnection.Listener {
             }
 
             // encrypt group key with each member's public key
+            // TODO: if there is no groupkey to encrypt, create one!
+            // generateGroupKey();
             byte[] rawGroupKey = Base64.decodeBase64(groupContact.getGroupKey().getBytes(Charset.forName("UTF-8")));
             List<String> encryptedGroupKeys = new ArrayList<String>();
             for (TalkClientContact clientContact : clientsInGroup) {
@@ -1639,11 +1701,16 @@ public class XoClient implements JsonRpcConnection.Listener {
             LOG.debug("server: incomingDelivery()");
             updateIncomingDelivery(d, m);
         }
+        @Override
+        public void incomingDeliveryUpdated(TalkDelivery d) {
+            LOG.debug("server: incomingDeliveryUpdate()");
+            updateIncomingDelivery(d);
+        }
 
         @Override
-        public void outgoingDelivery(TalkDelivery d) {
+        public void outgoingDeliveryUpdated(TalkDelivery delivery) {
             LOG.debug("server: outgoingDelivery()");
-            updateOutgoingDelivery(d);
+            updateOutgoingDelivery(delivery);
         }
 
         @Override
@@ -1889,7 +1956,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                 try {
                     clientMessage.setProgressState(true);
                     mDatabase.saveClientMessage(clientMessage);
-                    resultingDeliveries = mServerRpc.deliveryRequest(message, delivery);
+                    resultingDeliveries = mServerRpc.outDeliveryRequest(message, delivery);
 
                 } catch (Exception e) {
                     LOG.error("error while performing delivery request for message " + clientMessage.getClientMessageId(), e);
@@ -2038,9 +2105,19 @@ public class XoClient implements JsonRpcConnection.Listener {
         }
     }
 
+    public TalkClientContact getCurrentNearbyGroup() {
+        try {
+            return mDatabase.findContactByGroupId(mEnvironmentGroupId, false);
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+        return null;
+    }
+
 
     public void sendDestroyEnvironment(final String type) {
         if (this.getState() == STATE_ACTIVE) {
+            mEnvironmentGroupId = null;
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -2076,6 +2153,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                 groupContact = mDatabase.findContactByGroupId(groupId, false);
                 if(groupContact == null) {
                     LOG.warn("outgoing message for unknown group " + groupId);
+                    //TODO: return; ??
                 }
             }
 
@@ -2105,17 +2183,71 @@ public class XoClient implements JsonRpcConnection.Listener {
             LOG.error("SQL error", e);
         }
 
-        if(delivery.getState().equals(TalkDelivery.STATE_DELIVERED)) {
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    mServerRpc.deliveryAcknowledge(delivery.getMessageId(), delivery.getReceiverId());
-                }
-            });
-        }
+        sendDeliveryConfirmation(delivery);
 
         for(IXoMessageListener listener: mMessageListeners) {
             listener.onMessageStateChanged(clientMessage);
+        }
+    }
+
+    private void sendDeliveryConfirmation(final TalkDelivery delivery) {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TalkDelivery result = null;
+                    if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_SEEN)) {
+                        result = mServerRpc.outDeliveryAcknowledgeSeen(delivery.getMessageId(), delivery.getReceiverId());
+                    } else if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_UNSEEN)) {
+                        result = mServerRpc.outDeliveryAcknowledgeUnseen(delivery.getMessageId(), delivery.getReceiverId());
+                    } else if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_PRIVATE)) {
+                        result = mServerRpc.outDeliveryAcknowledgePrivate(delivery.getMessageId(), delivery.getReceiverId());
+                    } else if (delivery.getState().equals(TalkDelivery.STATE_FAILED)) {
+                        result = mServerRpc.outDeliveryAcknowledgeFailed(delivery.getMessageId(), delivery.getReceiverId());
+                    } else if (delivery.getState().equals(TalkDelivery.STATE_REJECTED)) {
+                        result = mServerRpc.outDeliveryAcknowledgeRejected(delivery.getMessageId(), delivery.getReceiverId());
+                    }
+                    if (result != null) {
+                        updateOutgoingDelivery(result);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while sending delivery confirmation: ", e);
+                }
+            }
+        });
+    }
+
+    private void updateIncomingDelivery(final TalkDelivery delivery) {
+        LOG.debug("updateIncomingDelivery (Only)(" + delivery.getMessageId() + ")");
+        TalkClientMessage clientMessage = null;
+        try {
+
+            clientMessage = mDatabase.findMessageByMessageId(delivery.getMessageId(), false);
+            if(clientMessage == null) {
+                throw new RuntimeException("updateIncomingDelivery: message not find, id="+delivery.getMessageId());
+            }
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+            return;
+        }
+
+        try {
+            clientMessage.updateIncoming(delivery);
+
+            TalkClientDownload attachmentDownload = clientMessage.getAttachmentDownload();
+
+            mDatabase.saveDelivery(clientMessage.getIncomingDelivery());
+
+            if(attachmentDownload != null) {
+                mTransferAgent.registerDownload(attachmentDownload);
+            }
+
+            for(IXoMessageListener listener: mMessageListeners) {
+
+                listener.onMessageStateChanged(clientMessage);
+            }
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
         }
     }
 
@@ -2134,9 +2266,9 @@ public class XoClient implements JsonRpcConnection.Listener {
                     return;
                 }
             }
-            senderContact = mDatabase.findContactByClientId(message.getSenderId(), false);
+            senderContact = mDatabase.findContactByClientId(delivery.getSenderId(), false);
             if(senderContact == null) {
-                LOG.warn("incoming message from unknown client " + message.getSenderId());
+                LOG.warn("incoming message from unknown client " + delivery.getSenderId());
                 return;
             }
             clientMessage = mDatabase.findMessageByMessageId(delivery.getMessageId(), false);
@@ -2158,6 +2290,7 @@ public class XoClient implements JsonRpcConnection.Listener {
         }
 
         boolean messageFailed = true;
+        String reason = "unknown";
         try {
             decryptMessage(clientMessage, delivery, message);
 
@@ -2187,25 +2320,48 @@ public class XoClient implements JsonRpcConnection.Listener {
             notifyUnseenMessages(newMessage);
             messageFailed = false;
         } catch (GeneralSecurityException e) {
+            reason = "decryption problem" + e;
+            LOG.error("decryption problem", e);
         } catch (IOException e) {
+            reason = "io error" + e;
+            LOG.error("io error", e);
         } catch (SQLException e) {
+            reason = "sql error" + e;
+            LOG.error("sql error", e);
         }
         if (!messageFailed) {
             if(delivery.getState().equals(TalkDelivery.STATE_DELIVERING)) {
+                final XoClient that = this;
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
                         LOG.debug("confirming " + delivery.getMessageId());
-                        mServerRpc.deliveryConfirm(delivery.getMessageId());
+
+                        try {
+                            TalkDelivery result;
+                            boolean sendDeliveryConfirmation = mClientHost.isSendDeliveryConfirmationEnabled();
+                            if (sendDeliveryConfirmation) {
+                                result = mServerRpc.inDeliveryConfirmUnseen(delivery.getMessageId());
+                            } else {
+                                result = mServerRpc.inDeliveryConfirmPrivate(delivery.getMessageId());
+                            }
+                            that.updateIncomingDelivery(result);
+
+                        } catch (Exception e) {
+                            LOG.error("Error while sending delivery confirmation: ", e);
+                        }
                     }
                 });
             }
         } else {
+            final XoClient that = this;
+            final String finalReason = reason;
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    LOG.debug("aborting " + delivery.getMessageId());
-                    mServerRpc.deliveryAbort(delivery.getMessageId(),delivery.getReceiverId());
+                    LOG.debug("rejecting " + delivery.getMessageId());
+                    TalkDelivery result = mServerRpc.inDeliveryReject(delivery.getMessageId(), finalReason);
+                    that.updateIncomingDelivery(result);
                 }
             });
         }
@@ -2431,6 +2587,8 @@ public class XoClient implements JsonRpcConnection.Listener {
             attachment.setMimeType(upload.getContentType());
             attachment.setAspectRatio(upload.getAspectRatio());
             attachment.setHmac(upload.getContentHmac());
+            attachment.setFileId(upload.getFileId());
+            message.setAttachmentFileId(attachment.getFileId());
         }
 
         // encrypt body and attachment dtor
@@ -2454,13 +2612,14 @@ public class XoClient implements JsonRpcConnection.Listener {
             LOG.error("error encrypting", e);
         }
 
+        message.setTimeSent(new Date());
+        byte[] hmac = message.computeHMAC();
+        message.setMessageTag(new String(Base64.encodeBase64(hmac)));
+
         // start the attachment upload
         if(upload != null) {
             mTransferAgent.requestUpload(upload);
         }
-        message.setTimeSent(new Date());
-        byte[] hmac = message.computeHMAC();
-        message.setMessageTag(new String(Base64.encodeBase64(hmac)));
 
     }
 
@@ -2527,7 +2686,8 @@ public class XoClient implements JsonRpcConnection.Listener {
         });
         }
 
-        for (IXoContactListener listener : mContactListeners) {
+        for (int i = 0; i < mContactListeners.size(); i++) {
+            IXoContactListener listener = mContactListeners.get(i);
             listener.onClientPresenceChanged(clientContact);
         }
     }
@@ -2636,7 +2796,8 @@ public class XoClient implements JsonRpcConnection.Listener {
             LOG.error("SQL error", e);
         }
 
-        for (IXoContactListener listener : mContactListeners) {
+        for (int i = 0; i < mContactListeners.size(); i++) {
+            IXoContactListener listener = mContactListeners.get(i);
             listener.onClientRelationshipChanged(clientContact);
         }
     }
@@ -2684,7 +2845,8 @@ public class XoClient implements JsonRpcConnection.Listener {
 
         LOG.info("updateGroupPresence(" + group.getGroupId() + ") - saved");
 
-        for (IXoContactListener listener : mContactListeners) {
+        for (int i = 0; i < mContactListeners.size(); i++) {
+            IXoContactListener listener = mContactListeners.get(i);
             listener.onGroupPresenceChanged(groupContact);
         }
     }
@@ -2694,11 +2856,13 @@ public class XoClient implements JsonRpcConnection.Listener {
 
         // reset group state
         TalkGroup groupPresence = groupContact.getGroupPresence();
-        groupPresence.setState(TalkGroup.STATE_NONE);
+        groupPresence.setState(TalkGroup.STATE_KEPT);
 
         try {
             // remove all group members
-            for (TalkClientMembership membership : groupContact.getGroupMemberships()) {
+            ForeignCollection<TalkClientMembership> groupMemberships = groupContact
+                    .getGroupMemberships();
+            for (TalkClientMembership membership : groupMemberships) {
 
                 // reset nearby status of group member contact
                 TalkClientContact groupMemberContact = membership.getClientContact();
@@ -2839,7 +3003,8 @@ public class XoClient implements JsonRpcConnection.Listener {
             }
         }
 
-        for (IXoContactListener listener : mContactListeners) {
+        for (int i = 0; i < mContactListeners.size(); i++) {
+            IXoContactListener listener = mContactListeners.get(i);
             listener.onGroupMembershipChanged(groupContact);
         }
 
@@ -2926,10 +3091,6 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     private void generateGroupKey(TalkClientContact group) {
-        if(!group.isGroupAdmin()) {
-            LOG.warn("we are not admin, must not generate a group key");
-            return;
-        }
         try {
             // generate the new key
             byte[] newGroupKey = AESCryptor.makeRandomBytes(AESCryptor.KEY_SIZE);
@@ -3032,6 +3193,15 @@ public class XoClient implements JsonRpcConnection.Listener {
             @Override
             public void run() {
                 message.markAsSeen();
+
+                if (mClientHost.isSendDeliveryConfirmationEnabled()) {
+                    try {
+                        mServerRpc.inDeliveryConfirmSeen(message.getMessageId());
+                    } catch (Exception e) {
+                        LOG.error("Error while sending delivery confirmation: ", e);
+                    }
+                }
+
                 try {
                     mDatabase.saveClientMessage(message);
                 } catch (SQLException e) {
@@ -3052,4 +3222,17 @@ public class XoClient implements JsonRpcConnection.Listener {
         }
     }
 
+    public void markMessagesAsAborted(TalkClientMessage message) {
+        message.getOutgoingDelivery().setState(TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
+        try {
+            mDatabase.saveDelivery(message.getOutgoingDelivery());
+        } catch (SQLException e) {
+            LOG.error("error while saving a message which will never be sent since the receiver is blocked or the group is empty", e);
+        }
+
+        int length = mMessageListeners.size();
+        for(int i = 0; i < length; i++) {
+            mMessageListeners.get(i).onMessageStateChanged(message);
+        }
+    }
 }
