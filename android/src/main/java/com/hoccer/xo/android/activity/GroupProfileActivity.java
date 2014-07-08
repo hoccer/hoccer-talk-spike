@@ -3,7 +3,7 @@ package com.hoccer.xo.android.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
-import android.view.*;
+import android.view.View;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;

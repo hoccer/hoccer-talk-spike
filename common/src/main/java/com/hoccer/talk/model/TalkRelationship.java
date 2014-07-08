@@ -84,6 +84,11 @@ public class TalkRelationship {
         return STATE_INVITED_ME.equals(state);
     }
 
+    @JsonIgnore
+    public boolean isDirectlyRelated() {
+        return isFriend() || isInvited() || isBlocked() || invitedMe();
+    }
+
     public String getClientId() {
         return clientId;
     }

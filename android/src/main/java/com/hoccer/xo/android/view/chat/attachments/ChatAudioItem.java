@@ -60,9 +60,18 @@ public class ChatAudioItem extends ChatMessageItem {
             fileNameTextView.setTextColor(textColor);
             playButton.setImageResource(iconId);
 
-            String extension = contentObject.getContentDataUrl();
-            extension = extension.substring(extension.lastIndexOf("."), extension.length());
-            fileNameTextView.setText(contentObject.getFileName() + extension);
+            String extension = "";
+            String dataUrl = contentObject.getContentDataUrl();
+            if (dataUrl != null) {
+                extension = dataUrl.substring(dataUrl.lastIndexOf("."), dataUrl.length());
+            }
+
+            String displayName = "";
+            String filename = contentObject.getFileName();
+            if (filename != null) {
+                displayName = filename + extension;
+            }
+            fileNameTextView.setText(displayName);
 
             playButton.setOnClickListener(new View.OnClickListener() {
                 @Override
