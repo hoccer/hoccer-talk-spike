@@ -36,6 +36,7 @@ public class RichContactsAdapter extends ContactsAdapter {
 
     public RichContactsAdapter(XoActivity activity, boolean showNearbyHistory) {
         super(activity, showNearbyHistory);
+        setShowTokens(true);
     }
 
     @Override
