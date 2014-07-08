@@ -25,6 +25,14 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
+    private static final String DB_TYPE_STRING = "VARCHAR";
+    private static final String DB_TYPE_DATE = "DATE";
+    private static final String DB_TYPE_BOOLEAN = "BOOLEAN";
+    private static final String DB_TYPE_INTEGER = "INTEGER";
+
+
+
+
     private static String DATABASE_NAME = "hoccer-talk.db";
 
     private static final int DATABASE_VERSION = 16;
@@ -160,23 +168,34 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             }
             if (oldVersion < 16) {
                 Dao<TalkDelivery, Integer> talkDeliveries = getDao(TalkDelivery.class);
-                talkDeliveries.executeRaw("ALTER TABLE `delivery` ADD COLUMN `timeAttachmentReceived` DATE"); // TODO: got SQL Exception
-                talkDeliveries.executeRaw("ALTER TABLE `delivery` ADD COLUMN `attachmentState` VARCHAR");
-                talkDeliveries.executeRaw("ALTER TABLE `delivery` ADD COLUMN `reason` VARCHAR");
+                talkDeliveries.executeRaw(addColumn("delivery", "timeAttachmentReceived", DB_TYPE_DATE));
+                talkDeliveries.executeRaw(addColumn("delivery", "attachmentState", DB_TYPE_STRING));
+                talkDeliveries.executeRaw(addColumn("delivery", "reason", DB_TYPE_STRING));
 
                 Dao<TalkClientUpload, Integer> talkClientUploads = getDao(TalkClientUpload.class);
-                talkClientUploads.executeRaw("ALTER TABLE `clientUpload` ADD COLUMN `fileId` VARCHAR");
+                talkClientUploads.executeRaw(addColumn("clientUpload", "fileId", DB_TYPE_STRING));
                 Dao<TalkClientDownload, Integer> talkClientDownloads = getDao(TalkClientDownload.class);
-                talkClientDownloads.executeRaw("ALTER TABLE `clientDownload` ADD COLUMN `fileId` VARCHAR");
+                talkClientDownloads.executeRaw(addColumn("clientDownload", "fileId", DB_TYPE_STRING));
 
                 Dao<TalkClientContact, Integer> talkClientContacts = getDao(TalkClientContact.class);
-                talkClientContacts.executeRaw("ALTER TABLE `clientContact` ADD COLUMN `nickname` VARCHAR");
+                talkClientContacts.executeRaw(addColumn("clientContact", "nickname", DB_TYPE_STRING));
+
+                Dao<TalkRelationship, Integer> talkRelationships = getDao(TalkRelationship.class);
+                talkRelationships.executeRaw(addColumn("relationship", "unblockState", DB_TYPE_STRING));
+
+                Dao<TalkMessage, Integer> talkMessages = getDao(TalkMessage.class);
+                talkMessages.executeRaw(addColumn("message", "attachmentUploadFinished", DB_TYPE_STRING));
+                talkMessages.executeRaw(addColumn("message", "attachmentUploadStarted", DB_TYPE_STRING));
 
                 migrateDeliveryStates();
             }
         } catch (SQLException e) {
             LOG.error("sql error upgrading database", e);
         }
+    }
+
+    private String addColumn(String tableName, String columnName, String type) {
+        return "ALTER TABLE `" + tableName + "` ADD COLUMN `" + columnName + "` " + type;
     }
 
     private void migrateDeliveryStates() {

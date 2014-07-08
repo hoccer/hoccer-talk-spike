@@ -77,9 +77,14 @@
     <string name="pairing_qr_scan">Scan QR code</string>
     <string name="pairing_token_generating">Generating...</string>
     <string name="pairing_token_send_sms">Send via SMS</string>
+    <string name="pairing_token_send_email">Send via e-mail</string>
     <string name="pairing_success">Pairing succeeded</string>
     <string name="dialog_pairing_failed_title">Pairing failed</string>
     <string name="dialog_pairing_failed_message">The code you have entered is invalid.</string>
+	<string name="paired_with">You successfully paired with </string>
+    <string name="pairing_incorrect_code">Incorrect code, please try again.</string>
+    <string name="pairing_scanner">QR scanner</string>
+    <string name="pairing_generator">QR identifier</string>
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Change my image</string>
@@ -246,6 +251,13 @@
     </string>
     <string name="sms_invitation_text">Hey! I\'m now using the free app Hoccer XO for secure
         chatting. Download it now: http://hoccer.com/ Then add me as a contact: %1$s%2$s
+        \nxo %3$s
+    </string>
+    <string name="email_invitation_text">Hey!\nI\'m now using the free app Hoccer XO for secure
+        chatting. Download it now:\n
+        &lt;a href=http://hoccer.com/"&gt;http://hoccer.com/&lt;a&gt;\n
+        Then add me as a contact:\n
+        &lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;
         \nxo %3$s
     </string>
     <string name="dialog_export_credentials_title">Export credentials</string>

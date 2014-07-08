@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -16,6 +18,8 @@ import android.widget.TextView;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.QrCodeGeneratingActivity;
+import com.hoccer.xo.android.activity.QrScannerActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.release.R;
 
@@ -27,6 +31,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     TextView mTokenMessage;
     TextView mTokenText;
     Button mTokenSendSms;
+    Button mTokenSendEmail;
 
     EditText mTokenEdit;
     Button mTokenPairButton;
@@ -39,9 +44,16 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     TextWatcher mTextWatcher;
 
     String mActiveToken;
+    String mTokenFromEmail;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Intent intent = getActivity().getIntent();
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            Uri uri = intent.getData();
+            mTokenFromEmail = uri.toString();
+        }
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -60,6 +72,10 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         mTokenSendSms = (Button) view.findViewById(R.id.pairing_token_sms);
         mTokenSendSms.setEnabled(false);
         mTokenSendSms.setOnClickListener(this);
+
+        mTokenSendEmail = (Button) view.findViewById(R.id.pairing_token_email);
+        mTokenSendEmail.setEnabled(false);
+        mTokenSendEmail.setOnClickListener(this);
 
         mTokenEdit = (EditText) view.findViewById(R.id.pairing_token_edit);
         mTokenEdit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
@@ -127,6 +143,9 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
             }
         };
         mTokenEdit.addTextChangedListener(mTextWatcher);
+        if (mTokenFromEmail != null || !mTokenSendEmail.equals("")) {
+            performPairing(mTokenFromEmail);
+        }
     }
 
     @Override
@@ -154,15 +173,23 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onClick(View v) {
         if (v == mQrShowButton) {
             LOG.debug("onClick(qrShow)");
-            getXoActivity().showBarcode();
+            String qrString = getXoActivity().getBarcodeString();
+            Intent qr = new Intent(getActivity(), QrCodeGeneratingActivity.class);
+            qr.putExtra("QR", qrString);
+            getActivity().startActivity(qr);
         }
         if (v == mQrScanButton) {
             LOG.debug("onClick(qrScan)");
-            getXoActivity().scanBarcode();
+            Intent qrScanner = new Intent(getActivity(), QrScannerActivity.class);
+            getActivity().startActivity(qrScanner);
         }
         if (v == mTokenSendSms) {
             LOG.debug("onClick(smsSend)");
             getXoActivity().composeInviteSms(mTokenText.getText().toString());
+        }
+        if (v == mTokenSendEmail) {
+            LOG.debug("onClick(smsSend)");
+            getXoActivity().composeInviteEmail(mTokenText.getText().toString());
         }
     }
 
@@ -171,6 +198,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         mTokenText.setVisibility(View.GONE);
         mTokenMessage.setVisibility(View.VISIBLE);
         mTokenSendSms.setEnabled(false);
+        mTokenSendEmail.setEnabled(false);
         XoApplication.getExecutor().schedule(new Runnable() {
             @Override
             public void run() {
@@ -182,6 +210,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
                         mTokenText.setVisibility(View.VISIBLE);
                         mTokenMessage.setVisibility(View.GONE);
                         mTokenSendSms.setEnabled(true);
+                        mTokenSendEmail.setEnabled(true);
                     }
                 });
             }

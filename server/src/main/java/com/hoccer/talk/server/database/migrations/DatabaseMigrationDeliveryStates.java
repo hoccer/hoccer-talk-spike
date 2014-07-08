@@ -39,7 +39,11 @@ public class DatabaseMigrationDeliveryStates extends BaseDatabaseMigration imple
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                mDatabase.changeDeliveryFieldValue("state", startState, targetState);
+                try {
+                    mDatabase.changeDeliveryFieldValue("state", startState, targetState);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         });
         LOG.info("scheduled migrating state for deliveries from: '" + startState + "' to '" + targetState + "'");

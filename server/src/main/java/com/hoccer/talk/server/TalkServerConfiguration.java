@@ -6,7 +6,9 @@ import org.apache.log4j.Logger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Encapsulation of server configuration
@@ -14,16 +16,12 @@ import java.util.Properties;
  * This gets initialized with defaults and can then
  * be overloaded from a property file.
  */
-
 public class TalkServerConfiguration {
 
     private static final Logger LOG = Logger.getLogger(TalkServerConfiguration.class);
 
-    public static final int THREADS_DELIVERY = 1;
-    public static final int THREADS_UPDATE = 1;
-    public static final int THREADS_PUSH = 1;
-    public static final int THREADS_PING = 2; // XXX HIGHER COUNT?
-    public static final int THREADS_CLEANING = 4;
+    // Note: A ScheduledThreadPoolExecutor does not spawn more threads than defined as core pool size
+    // see http://stackoverflow.com/questions/11678021/why-doesnt-scheduledexecutorservice-spawn-threads-as-needed
 
     public static final int PING_INTERVAL = 300; // in seconds
     public static final boolean PERFORM_PING_AT_INTERVALS = false;
@@ -43,6 +41,7 @@ public class TalkServerConfiguration {
         LISTEN_PORT(PROPERTY_PREFIX + ".listen.port",
                 PropertyTypes.INTEGER,
                 8080),
+
         // DATABASE
         DATABASE_BACKEND(PROPERTY_PREFIX + ".db.backend",
                 PropertyTypes.STRING,
@@ -59,10 +58,15 @@ public class TalkServerConfiguration {
         JONGO_MAX_WAIT_TIME(PROPERTY_PREFIX + ".jongo.maxWaitTime",
                 PropertyTypes.INTEGER,
                 5 * 1000), // in milliseconds (5 seconds)
-        // PUSH GENERIC
+
+        // PUSH AGENT GENERIC
         PUSH_RATE_LIMIT(PROPERTY_PREFIX + ".push.rateLimit",
                 PropertyTypes.INTEGER,
                 15000),
+        PUSH_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".push.threadPoolSize",
+                PropertyTypes.INTEGER,
+                1), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+
         // APNS
         APNS_ENABLED(PROPERTY_PREFIX + ".apns.enabled",
                 PropertyTypes.BOOLEAN,
@@ -85,6 +89,7 @@ public class TalkServerConfiguration {
         APNS_INVALIDATE_INTERVAL(PROPERTY_PREFIX + ".apns.invalidate.interval",
                 PropertyTypes.INTEGER,
                 3600), // in seconds
+
         // GCM
         GCM_ENABLED(PROPERTY_PREFIX + ".gcm.enabled",
                 PropertyTypes.BOOLEAN,
@@ -92,7 +97,8 @@ public class TalkServerConfiguration {
         GCM_API_KEY(PROPERTY_PREFIX + ".gcm.apikey",
                 PropertyTypes.STRING,
                 "AIzaSyA25wabV4kSQTaF73LTgTkjmw0yZ8inVr8"), // TODO: Do we really need this api key in code here?
-        // CLEANUP
+
+        // CLEANING AGENT
         CLEANUP_ALL_CLIENTS_DELAY(PROPERTY_PREFIX + ".cleanup.allClientsDelay",
                 PropertyTypes.INTEGER,
                 7200), // in seconds (2 hours)
@@ -105,6 +111,25 @@ public class TalkServerConfiguration {
         CLEANUP_ALL_DELIVERIES_INTERVAL(PROPERTY_PREFIX + ".cleanup.allDeliveriesInterval",
                 PropertyTypes.INTEGER,
                 60 * 60 * 6), // in seconds (every 6 hours)
+        CLEANUP_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".cleanup.threadPoolSize",
+                PropertyTypes.INTEGER,
+                4), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+
+        // UPDATE AGENT
+        UPDATE_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".update.threadPoolSize",
+                PropertyTypes.INTEGER,
+                20), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+
+        // DELIVERY AGENT
+        DELIVERY_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".delivery.threadPoolSize",
+                PropertyTypes.INTEGER,
+                20), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+
+        // PING AGENT
+        PING_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".ping.threadPoolSize",
+                PropertyTypes.INTEGER,
+                10), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+
         // FILECACHE
         FILECACHE_CONTROL_URL(PROPERTY_PREFIX + ".filecache.controlUrl",
                 PropertyTypes.STRING,
@@ -115,6 +140,7 @@ public class TalkServerConfiguration {
         FILECACHE_DOWNLOAD_BASE(PROPERTY_PREFIX + ".filecache.downloadBase",
                 PropertyTypes.STRING,
                 "http://localhost:8081/download/"),
+
         // MISC
         SUPPORT_TAG(PROPERTY_PREFIX + ".support.tag",
                 PropertyTypes.STRING,
@@ -153,6 +179,22 @@ public class TalkServerConfiguration {
                 this.value = Integer.valueOf(rawValue);
             } else if (PropertyTypes.BOOLEAN.equals(this.type)) {
                 this.value = Boolean.valueOf(rawValue);
+            }
+        }
+    }
+
+    static {
+        verifyConfigurableProperties();
+    }
+
+    private static void verifyConfigurableProperties() {
+        final Set<String> keys = new HashSet<String>();
+        for (ConfigurableProperties configurableProperty : ConfigurableProperties.values()) {
+            // check key uniqueness
+            if (keys.contains(configurableProperty.key)) {
+                throw new RuntimeException("Key: '" + configurableProperty.key + "' is doubly present. This is an error in the configuration setup! Keys have to be unique!");
+            } else {
+                keys.add(configurableProperty.key);
             }
         }
     }
@@ -207,11 +249,11 @@ public class TalkServerConfiguration {
                         "\n - Other:" +
                         MessageFormat.format("\n   * support tag: ''{0}''", this.getSupportTag()) +
                         "\n - Threads:" +
-                        MessageFormat.format("\n   * DeliveryAgent Threads Poolsize:     {0}", THREADS_DELIVERY) +
-                        MessageFormat.format("\n   * CleanupAgent  Threads Poolsize:     {0}", THREADS_CLEANING) +
-                        MessageFormat.format("\n   * PushAgent     Threads Poolsize:     {0}", THREADS_PUSH) +
-                        MessageFormat.format("\n   * PingAgent     Threads Poolsize:     {0}", THREADS_PING) +
-                        MessageFormat.format("\n   * UpdateAgent   Threads Poolsize:     {0}", THREADS_UPDATE) +
+                        MessageFormat.format("\n   * DeliveryAgent Threads Poolsize:     {0}", this.getDeliveryAgentThreadPoolSize()) +
+                        MessageFormat.format("\n   * CleanupAgent  Threads Poolsize:     {0}", this.getCleaningAgentThreadPoolSize()) +
+                        MessageFormat.format("\n   * PushAgent     Threads Poolsize:     {0}", this.getPushAgentThreadPoolSize()) +
+                        MessageFormat.format("\n   * PingAgent     Threads Poolsize:     {0}", this.getPingAgentThreadPoolSize()) +
+                        MessageFormat.format("\n   * UpdateAgent   Threads Poolsize:     {0}", this.getUpdateAgentThreadPoolSize()) +
                         "\n - Ping:" +
                         MessageFormat.format("\n   * Ping interval (in s):               {0}", PING_INTERVAL) +
                         MessageFormat.format("\n   * perform ping at intervals:          {0}", PERFORM_PING_AT_INTERVALS) +
@@ -365,5 +407,25 @@ public class TalkServerConfiguration {
 
     public GitInfo getGitInfo() {
         return gitInfo;
+    }
+
+    public int getCleaningAgentThreadPoolSize() {
+        return (Integer) ConfigurableProperties.CLEANUP_THREAD_POOL_SIZE.value;
+    }
+
+    public int getUpdateAgentThreadPoolSize() {
+        return (Integer) ConfigurableProperties.UPDATE_THREAD_POOL_SIZE.value;
+    }
+
+    public int getDeliveryAgentThreadPoolSize() {
+        return (Integer) ConfigurableProperties.DELIVERY_THREAD_POOL_SIZE.value;
+    }
+
+    public int getPingAgentThreadPoolSize() {
+        return (Integer) ConfigurableProperties.PING_THREAD_POOL_SIZE.value;
+    }
+
+    public int getPushAgentThreadPoolSize() {
+        return (Integer) ConfigurableProperties.PUSH_THREAD_POOL_SIZE.value;
     }
 }

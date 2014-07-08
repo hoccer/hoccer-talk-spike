@@ -25,11 +25,13 @@ import com.hoccer.talk.server.ping.PingAgent;
 import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import com.hoccer.talk.server.update.UpdateAgent;
+import com.hoccer.talk.util.CountedSet;
 import de.undercouch.bson4jackson.BsonFactory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 
 /**
  * Main object of the Talk server
@@ -121,13 +123,101 @@ public class TalkServer {
     AtomicInteger mConnectionsTotal = new AtomicInteger();
     AtomicInteger mConnectionsOpen = new AtomicInteger();
 
-    Map<String,Object> mIdLocks;
+    Map<String,String> mIdLocks;
+
+    public class NonReentrantLock{
+
+        private boolean mIsLocked;
+        private int mWaiting;
+        private CountedSet<String> mWaiterTypes;
+        public String mName;
+
+        NonReentrantLock() {
+            mIsLocked = false;
+            mWaiting = 0;
+            mName = "<unnamed>";
+            mWaiterTypes = new CountedSet<String>();
+        }
+
+        NonReentrantLock(String name) {
+            mIsLocked = false;
+            mWaiting = 0;
+            mName = name;
+            mWaiterTypes = new CountedSet<String>();
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public boolean isLocked() {
+            return mIsLocked;
+        }
+
+        public int getWaiting() {
+            return mWaiting;
+        }
+
+        public synchronized boolean tryLock()  {
+            //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock");
+            if (!mIsLocked) {
+                mIsLocked = true;
+                //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock : acquired lock");
+                return true;
+            }
+            //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" tryLock : not locking, is already locked");
+            return false;
+        }
+
+        public synchronized void lock() throws InterruptedException{
+            while (mIsLocked) {
+                //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" wait");
+                ++mWaiting;
+                this.wait();
+                --mWaiting;
+                //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" wakeup");
+            }
+            mIsLocked = true;
+            //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" acquired lock");
+        }
+
+        public synchronized int getWaiting(String waiterType) {
+            if (mWaiting > 0) {
+                return mWaiterTypes.getCount(waiterType);
+            } else {
+                return 0;
+            }
+        }
+
+        public synchronized void lock(String waiterType) throws InterruptedException{
+            while (mIsLocked) {
+                //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" lockWithWaiterType '"+waiterType+"' wait");
+                ++mWaiting;
+                mWaiterTypes.add(waiterType);
+                this.wait();
+                mWaiterTypes.remove(waiterType);
+                --mWaiting;
+                //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" lockWithWaiterType '"+waiterType+"' wakeup");
+            }
+            mIsLocked = true;
+            //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" lockWithWaiterType '"+waiterType+"' acquired lock");
+        }
+
+        public synchronized void unlock(){
+            mIsLocked = false;
+            //System.out.println("NonReentrantLock +"+mName+" Thread " + Thread.currentThread()+" unlock");
+            this.notify();
+        }
+    }
+
+    Map<String,NonReentrantLock> mNonReentrantIdLocks;
 
     /**
      * Create and initialize a Hoccer Talk server
      */
     public TalkServer(TalkServerConfiguration configuration, ITalkServerDatabase database) {
-        mIdLocks = new HashMap<String, Object>();
+        mIdLocks = new HashMap<String, String>();
+        mNonReentrantIdLocks = new HashMap<String, NonReentrantLock>();
 
         mConfiguration = configuration;
         mDatabase = database;
@@ -154,13 +244,26 @@ public class TalkServer {
         mJmxReporter.start();
     }
 
-    public Object idLock(String id) {
-        Object lock = mIdLocks.get(id);
-        if (lock == null) {
-            lock = new Object();
-            mIdLocks.put(id, lock);
+    public NonReentrantLock idLockNonReentrant(String id) {
+        synchronized (mNonReentrantIdLocks) {
+            NonReentrantLock lock = mNonReentrantIdLocks.get(id);
+            if (lock == null) {
+                lock = new NonReentrantLock(id);
+                mNonReentrantIdLocks.put(id, lock);
+            }
+            return lock;
         }
-        return lock;
+    }
+
+    public String idLock(String id) {
+        synchronized (mIdLocks) {
+            String lock = mIdLocks.get(id);
+            if (lock == null) {
+                lock = new String(id);
+                mIdLocks.put(id, lock);
+            }
+            return lock;
+        }
     }
 
     // lock for two Ids at the same time; note that the individual id will not be locked that way

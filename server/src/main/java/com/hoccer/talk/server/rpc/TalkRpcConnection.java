@@ -32,9 +32,6 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      */
     private static final Logger LOG = Logger.getLogger(TalkRpcConnection.class);
 
-    // TODO find a better place for this message...
-    private static final String UPDATE_NAGGING_MESSAGE = "Bitte update XO und installiere die neueste Version. Tolle neue Funktionen warten auf dich! Please update XO and install the new version. Great new features are waiting for you!";
-
     /**
      * Server this connection belongs to
      */
@@ -221,17 +218,6 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         mServer.connectionOpened(this);
     }
 
-    private void nagUserUpdate() {
-        mClientRpc.alertUser(UPDATE_NAGGING_MESSAGE);
-        // Additional Nagging for APNS enabled devices since some don't support alertUser properly
-        /*if (mTalkClient.isPushCapable() &&
-            mTalkClient.isApnsCapable()) {
-            this.mNagWhenOffline = true;
-            LOG.info("Nagging clientId '" + mTalkClient.getClientId() + "' about update - ONLINE-HOOK");
-            mServer.getPushAgent().submitSystemMessage(mTalkClient, UPDATE_NAGGING_MESSAGE);
-        }*/
-    }
-
     /**
      * Callback: underlying connection is now closed
      *
@@ -240,14 +226,6 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     @Override
     public void onClose(JsonRpcConnection connection) {
         LOG.info("[connectionId: '" + getConnectionId() + "'] connection closed");
-        /*try {
-            if (this.mNagWhenOffline) {
-                LOG.info("Nagging clientId '" + mTalkClient.getClientId() + "' about update - OFFLINE-HOOK");
-                mServer.getPushAgent().submitSystemMessage(mTalkClient, UPDATE_NAGGING_MESSAGE);
-            }
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }*/
         mServer.connectionClosed(this);
     }
 
@@ -291,12 +269,6 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         // tell the client if it doesn't have push
         if (!mTalkClient.isPushCapable()) {
             mClientRpc.pushNotRegistered();
-        }
-
-        // Tell the client that he is outdated and should upgrade
-        if (isLegacyMode()) {
-            LOG.info("Legacy mode active -> Issuing upgrade nagging to client");
-            nagUserUpdate();
         }
     }
 
@@ -408,7 +380,6 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     public boolean isLegacyMode() {
         return mLegacyMode;
     }
-
 
     public Long getLastPingLatency() {
         return mLastPingLatency;

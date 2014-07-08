@@ -95,7 +95,8 @@ public class JsonRpcExecutorConnection extends JsonRpcLocalConnection {
             public void run() {
                 try {
                     JsonRpcExecutorConnection.super.sendRequest(request);
-                } catch (Exception e) {
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         });
@@ -109,7 +110,8 @@ public class JsonRpcExecutorConnection extends JsonRpcLocalConnection {
             public void run() {
                 try {
                     JsonRpcExecutorConnection.super.sendResponse(response);
-                } catch (Exception e) {
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         });
@@ -123,7 +125,8 @@ public class JsonRpcExecutorConnection extends JsonRpcLocalConnection {
             public void run() {
                 try {
                     JsonRpcExecutorConnection.super.sendNotification(notification);
-                } catch (Exception e) {
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         });
