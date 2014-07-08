@@ -1550,7 +1550,7 @@ public class XoClient implements JsonRpcConnection.Listener {
         final TalkDelivery delivery = new TalkDelivery(true);
 
         final String messageTag = message.generateMessageTag();
-        message.setBody(messageText);
+//        message.setBody(messageText);
         message.setSenderId(getSelfContact().getClientId());
 
         delivery.setMessageTag(messageTag);
@@ -1919,16 +1919,12 @@ public class XoClient implements JsonRpcConnection.Listener {
 
             LOG.debug(clientMessages.size() + " messages to deliver");
 
-            TalkDelivery[] deliveries = new TalkDelivery[clientMessages.size()];
-            TalkMessage[] messages = new TalkMessage[clientMessages.size()];
-
             for(int i = 0; i < clientMessages.size(); i++) {
-                TalkClientMessage clientMessage = clientMessages.get(i);
+                final TalkClientMessage clientMessage = clientMessages.get(i);
+                final TalkMessage message = clientMessage.getMessage();
+                final TalkDelivery delivery = clientMessage.getOutgoingDelivery();
 
                 LOG.debug("preparing delivery of message " + clientMessage.getClientMessageId());
-
-                deliveries[i] = clientMessage.getOutgoingDelivery();
-                messages[i] = clientMessage.getMessage();
 
                 TalkClientUpload attachmentUpload = clientMessage.getAttachmentUpload();
                 if (attachmentUpload != null) {
@@ -1937,26 +1933,23 @@ public class XoClient implements JsonRpcConnection.Listener {
                     }
                 }
                 try {
-                    encryptMessage(clientMessage, deliveries[i], messages[i]);
+                    encryptMessage(clientMessage, delivery, message);
                 } catch (Exception e) {
                     LOG.error("error while encrypting message " + clientMessage.getClientMessageId(), e);
+                    continue;
                 }
-            }
 
-            for(int i = 0; i < clientMessages.size(); i++) {
-                TalkClientMessage clientMessage =  clientMessages.get(i);
+                TalkDelivery[] deliveries = new TalkDelivery[1];
+                deliveries[0] = clientMessage.getOutgoingDelivery();
 
                 LOG.debug(i + " delivering message " + clientMessage.getClientMessageId());
 
-                TalkMessage message = messages[i];
-                TalkDelivery[] delivery = new TalkDelivery[1];
-                delivery[0] = deliveries[i];
                 TalkDelivery[] resultingDeliveries = new TalkDelivery[0];
 
                 try {
                     clientMessage.setProgressState(true);
                     mDatabase.saveClientMessage(clientMessage);
-                    resultingDeliveries = mServerRpc.outDeliveryRequest(message, delivery);
+                    resultingDeliveries = mServerRpc.outDeliveryRequest(message, deliveries);
 
                 } catch (Exception e) {
                     LOG.error("error while performing delivery request for message " + clientMessage.getClientMessageId(), e);
@@ -1965,7 +1958,8 @@ public class XoClient implements JsonRpcConnection.Listener {
                     mDatabase.saveClientMessage(clientMessage);
                 }
 
-                for(int j = 0; j < resultingDeliveries.length; j++) {
+                int length = resultingDeliveries.length;
+                for(int j = 0; j < length; j++) {
                     updateOutgoingDelivery(resultingDeliveries[j]);
                 }
             }
@@ -2494,6 +2488,11 @@ public class XoClient implements JsonRpcConnection.Listener {
 
         LOG.debug("encrypting message with id '" + clientMessage.getClientMessageId() + "'");
 
+        if(message.getBody() != null) {
+            LOG.error("message has already body");
+            return;
+        }
+
         TalkClientContact receiver = clientMessage.getConversationContact();
         if(receiver == null) {
             LOG.error("no receiver");
@@ -2595,7 +2594,7 @@ public class XoClient implements JsonRpcConnection.Listener {
         try {
             // encrypt body
             LOG.trace("encrypting body");
-            byte[] encryptedBody = AESCryptor.encrypt(plainKey, AESCryptor.NULL_SALT, message.getBody().getBytes("UTF-8"));
+            byte[] encryptedBody = AESCryptor.encrypt(plainKey, AESCryptor.NULL_SALT, clientMessage.getText().getBytes("UTF-8"));
             message.setBody(new String(Base64.encodeBase64(encryptedBody)));
             // encrypt attachment dtor
             if(attachment != null) {
