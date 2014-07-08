@@ -17,12 +17,13 @@ public class TalkTool extends CommandLineApplication<TalkToolContext> {
     private final String DEFAULT_FILES_DIR = "/files";
     private final String UPLOAD_DIR = "/upload";
     private final String DOWNLOAD_DIR = "/download";
+    private final String TALK_TOOL_SERVER_URI = "wss://talkserver.talk.hoccer.de:8443/";
 
     TalkToolContext mContext;
 
     @Parameter(names = {"-s", "-server"},
             description = "Talkserver to use (complete uri)")
-    private String server = XoClientConfiguration.SERVER_URI;
+    private String server = TALK_TOOL_SERVER_URI;
 
     @Parameter(names = "-dbfile",
             description = "If true database is stored in a file. By default memory mode is used.",

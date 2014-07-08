@@ -149,7 +149,7 @@ public class XoClient implements JsonRpcConnection.Listener {
     /** Last client activity */
     long mLastActivity = 0;
 
-    int mIdleTimeout = XoClientConfiguration.IDLE_TIMEOUT;
+    int mIdleTimeout = 0;
 
     ObjectMapper mJsonMapper;
 
@@ -171,6 +171,8 @@ public class XoClient implements JsonRpcConnection.Listener {
     public void initialize(IXoClientHost host) {
         // remember the host
         mClientHost = host;
+
+        mIdleTimeout = mClientHost.getIdleTimeout();
 
         // fetch executor and db immediately
         mExecutor = host.getBackgroundExecutor();
@@ -197,7 +199,7 @@ public class XoClient implements JsonRpcConnection.Listener {
 
         // create RPC object mapper (BSON or JSON)
         JsonFactory rpcFactory;
-        if(XoClientConfiguration.USE_BSON_PROTOCOL) {
+        if(mClientHost.getUseBsonProtocol()) {
             rpcFactory = new BsonFactory();
         } else {
             rpcFactory = jsonFactory;
@@ -234,13 +236,13 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     protected void createJsonRpcClient(URI uri, WebSocketClient wsClient, ObjectMapper rpcMapper) {
-        String protocol = XoClientConfiguration.USE_BSON_PROTOCOL
-                ? XoClientConfiguration.PROTOCOL_STRING_BSON
-                : XoClientConfiguration.PROTOCOL_STRING_JSON;
+        String protocol = mClientHost.getUseBsonProtocol()
+                ? mClientHost.getBsonProtocolString()
+                : mClientHost.getJsonProtocolString();
         mConnection = new JsonRpcWsClient(uri, protocol, wsClient, rpcMapper);
-        mConnection.setMaxIdleTime(XoClientConfiguration.CONNECTION_IDLE_TIMEOUT);
-        mConnection.setSendKeepAlives(XoClientConfiguration.KEEPALIVE_ENABLED);
-        if(XoClientConfiguration.USE_BSON_PROTOCOL) {
+        mConnection.setMaxIdleTime(mClientHost.getConnectionIdleTimeout());
+        mConnection.setSendKeepAlives(mClientHost.getKeepAliveEnabled());
+        if(mClientHost.getUseBsonProtocol()) {
             mConnection.setSendBinaryMessages(true);
         }
     }
@@ -1261,7 +1263,7 @@ public class XoClient implements JsonRpcConnection.Listener {
     private void doConnect() {
         LOG.debug("performing connect on connection #" + mConnection.getConnectionId());
         try {
-            mConnection.connect(XoClientConfiguration.CONNECT_TIMEOUT, TimeUnit.SECONDS);
+            mConnection.connect(mClientHost.getConnectTimeout(), TimeUnit.SECONDS);
         } catch (Exception e) {
             LOG.warn("[connection #" + mConnection.getConnectionId() + "] exception while connecting: ", e);
         }
@@ -1307,7 +1309,7 @@ public class XoClient implements JsonRpcConnection.Listener {
 
     private void scheduleKeepAlive() {
         shutdownKeepAlive();
-        if(XoClientConfiguration.KEEPALIVE_ENABLED) {
+        if(mClientHost.getKeepAliveEnabled()) {
             mKeepAliveFuture = mExecutor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
@@ -1319,8 +1321,8 @@ public class XoClient implements JsonRpcConnection.Listener {
                     }
                 }
             },
-                    XoClientConfiguration.KEEPALIVE_INTERVAL,
-                    XoClientConfiguration.KEEPALIVE_INTERVAL,
+                    mClientHost.getKeepAliveInterval(),
+                    mClientHost.getKeepAliveInterval(),
                     TimeUnit.SECONDS);
         }
     }
@@ -1345,11 +1347,11 @@ public class XoClient implements JsonRpcConnection.Listener {
             // compute variable backoff component
             double variableTime =
                     Math.random() * Math.min(
-                            XoClientConfiguration.RECONNECT_BACKOFF_VARIABLE_MAXIMUM,
-                            variableFactor * XoClientConfiguration.RECONNECT_BACKOFF_VARIABLE_FACTOR);
+                            mClientHost.getReconnectBackoffVariableMaximum(),
+                            variableFactor * mClientHost.getReconnectBackoffVariableFactor());
 
             // compute total backoff
-            double totalTime = XoClientConfiguration.RECONNECT_BACKOFF_FIXED_DELAY + variableTime;
+            double totalTime = mClientHost.getReconnectBackoffFixedDelay() + variableTime;
 
             // convert to msecs
             backoffDelay = (int) Math.round(1000.0 * totalTime);
@@ -3127,8 +3129,8 @@ public class XoClient implements JsonRpcConnection.Listener {
             @Override
             public void run() {
                 // check if the url is for a pairing token
-                if(urlString.startsWith(XoClientConfiguration.HXO_URL_SCHEME)) {
-                    String token = urlString.substring(XoClientConfiguration.HXO_URL_SCHEME.length());
+                if(urlString.startsWith(mClientHost.getUrlScheme())) {
+                    String token = urlString.substring(mClientHost.getUrlScheme().length());
                     // build new token object
                     TalkClientSmsToken tokenObject = new TalkClientSmsToken();
                     tokenObject.setSender(sender);

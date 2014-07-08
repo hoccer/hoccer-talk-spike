@@ -143,7 +143,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
             }
         };
         mTokenEdit.addTextChangedListener(mTextWatcher);
-        if (mTokenFromEmail != null || !mTokenSendEmail.equals("")) {
+        if (mTokenFromEmail != null && !mTokenFromEmail.equals("")) {
             performPairing(mTokenFromEmail);
         }
     }

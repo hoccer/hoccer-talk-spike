@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.*;
 import com.hoccer.xo.android.XoApplication;
@@ -158,6 +159,10 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if (preference.getKey().equals("preference_import")) {
             doImport();
             return true;
+        } else if (preference.getKey().equals("preference_about")) {
+            showAbout();
+        } else if (preference.getKey().equals("preference_licenses")) {
+            showLicense();
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
@@ -253,6 +258,18 @@ public class XoPreferenceActivity extends PreferenceActivity
             Toast.makeText(this, R.string.export_credentials_failure, Toast.LENGTH_LONG).show();
         }
         Toast.makeText(this, R.string.export_credentials_success, Toast.LENGTH_LONG).show();
+    }
+
+    private void showAbout() {
+        Intent intent = new Intent(this, LegalImprintActivity.class);
+        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_ABOUT);
+        startActivity(intent);
+    }
+
+    private void showLicense() {
+        Intent intent = new Intent(this, LegalImprintActivity.class);
+        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_LICENSES);
+        startActivity(intent);
     }
 
 }

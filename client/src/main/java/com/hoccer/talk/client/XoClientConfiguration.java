@@ -2,45 +2,6 @@ package com.hoccer.talk.client;
 
 public class XoClientConfiguration {
 
-    public static final boolean USE_BSON_PROTOCOL = true;
-
-    public static final String PROTOCOL_STRING_JSON = "com.hoccer.talk.v4";
-    public static final String PROTOCOL_STRING_BSON = "com.hoccer.talk.v4.bson";
-
-    public static final String SERVER_URI = "wss://talkserver-test1.talk.hoccer.de:8443/";
-//    public static final String SERVER_URI = "wss://talkserver.talk.hoccer.de:8443/";
-
-
-    /** Transfer executor thread count */
-    public static final int TRANSFER_THREADS = 2;
-
-    /** Connection timeout (seconds) */
-    public static final int CONNECT_TIMEOUT = 15;
-
-    /** Idle timeout for client activity (seconds) */
-    public static final int IDLE_TIMEOUT = 600;
-
-    /** Send K-A keepalives */
-    public static final boolean KEEPALIVE_ENABLED = true;
-    /** Interval to send K-A keepalives at */
-    public static final int KEEPALIVE_INTERVAL = 120;
-
-    /** WS connection idle timeout (msecs) */
-    public static final int CONNECTION_IDLE_TIMEOUT = 900 * 1000;
-
-    /** WS connection max text message size */
-    public static final int CONNECTION_MAX_TEXT_SIZE = 1 << 16;
-
-    /** WS connection max binary message size */
-    public static final int CONNECTION_MAX_BINARY_SIZE = 1 << 16;
-
-    /** Fixed reconnect backoff delay (secs) */
-    public static final double RECONNECT_BACKOFF_FIXED_DELAY = 3.0;
-    /** Variable reconnect backoff delay - time factor (seconds) */
-    public static final double RECONNECT_BACKOFF_VARIABLE_FACTOR = 1.0;
-    /** Variable reconnect backoff delay - time maximum (seconds) */
-    public static final double RECONNECT_BACKOFF_VARIABLE_MAXIMUM = 120.0;
-
     /** Enable the session cache to improve connection latency */
     public static final boolean TLS_SESSION_CACHE_ENABLED = true;
 
@@ -68,8 +29,4 @@ public class XoClientConfiguration {
             "TLSv1.1",
             "TLSv1"
     };
-
-    /** The app's URL scheme for registration links */
-    public static final String HXO_URL_SCHEME = "hxo://";
-
 }
