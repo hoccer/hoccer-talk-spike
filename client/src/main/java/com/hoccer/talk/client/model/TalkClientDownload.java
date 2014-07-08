@@ -931,4 +931,12 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        TalkClientDownload download = (TalkClientDownload) obj;
+        if (clientDownloadId == download.getClientDownloadId()) {
+            return true;
+        }
+        return false;
+    }
 }

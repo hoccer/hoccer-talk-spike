@@ -123,7 +123,7 @@
                     android:value="com.hoccer.xo.android.activity.MessagingActivity"/>
         </activity>
 
-        <!-- AudioAttachmentList activity -->
+        <!-- MediaBrowserActivity activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MediaBrowserActivity"
                 android:label="@string/actionbar_default_title"
@@ -135,6 +135,13 @@
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
+        </activity>
+
+        <!-- MediaCollectionSelection activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.MediaCollectionSelectionActivity"
+                android:label="@string/collections"
+                android:screenOrientation="portrait">
         </activity>
 
         <!-- FullscreenPlayerActivity activity -->

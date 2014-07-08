@@ -339,4 +339,11 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
         }
         return true;
     }
+
+    public boolean hasItem(TalkClientDownload item) {
+        if (mItemList.contains(item)) {
+            return true;
+        }
+        return false;
+    }
 }

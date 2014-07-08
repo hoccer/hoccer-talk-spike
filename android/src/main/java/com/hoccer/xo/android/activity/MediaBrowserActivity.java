@@ -18,7 +18,7 @@ public class MediaBrowserActivity extends XoActionbarActivity {
 
     @Override
     protected int getLayoutResource() {
-        return R.layout.activity_media_browser;
+        return R.layout.default_framelayout;
     }
 
     @Override
