@@ -89,7 +89,7 @@ public class ImageSelector implements IContentSelector {
                 try {
                     String displayName = cursor.getString(columnIndex);
                     final Uri contentUri = selectedContent;
-                    Bitmap bmp = getBitmap(context, displayName, contentUri);
+                    Bitmap bmp = getBitmap(context, contentUri);
                     File imageFile = new File(XoApplication.getAttachmentDirectory(), displayName);
 
                     bmp.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(imageFile));
