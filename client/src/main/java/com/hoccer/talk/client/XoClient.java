@@ -843,14 +843,19 @@ public class XoClient implements JsonRpcConnection.Listener {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                if (mServerRpc.pairByToken(token)) {
-                    for (IXoPairingListener listener : mPairingListeners) {
-                        listener.onTokenPairingSucceeded(token);
+
+                try {
+                    if (mServerRpc.pairByToken(token)) {
+                        for (IXoPairingListener listener : mPairingListeners) {
+                            listener.onTokenPairingSucceeded(token);
+                        }
+                    } else {
+                        for (IXoPairingListener listener : mPairingListeners) {
+                            listener.onTokenPairingFailed(token);
+                        }
                     }
-                } else {
-                    for (IXoPairingListener listener : mPairingListeners) {
-                        listener.onTokenPairingFailed(token);
-                    }
+                } catch (Exception e) {
+                    LOG.error("Error while paring using token: " + token, e);
                 }
             }
         });
