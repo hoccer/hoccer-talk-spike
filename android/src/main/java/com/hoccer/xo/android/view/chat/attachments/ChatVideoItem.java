@@ -60,10 +60,10 @@ public class ChatVideoItem extends ChatMessageItem {
 
         if (mMessage.isIncoming()) {
             rootView.setGravity(Gravity.LEFT);
-            mask = R.drawable.bubble_grey;
+            mask = R.drawable.chat_bubble_incoming;
         } else {
             rootView.setGravity(Gravity.RIGHT);
-            mask = R.drawable.bubble_green;
+            mask = R.drawable.chat_bubble_compose;
         }
 
         videoTitle.setTextColor(textColor);

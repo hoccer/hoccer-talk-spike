@@ -143,7 +143,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             messageInfo.setText(mMessage.getSenderContact().getNickname());
             messageInfo.setTextColor(messageInfo.getResources().getColor(android.R.color.secondary_text_dark));
 
-            messageText.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.bubble_grey, false));
+            messageText.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.chat_bubble_incoming, false));
 
             messageText
                     .setTextColor(mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
@@ -164,7 +164,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             avatarView.setVisibility(View.GONE);
             updateSeenStatus(view);
 
-            messageText.setBackgroundDrawable(ColorSchemeManager.fillOutgoingMessageBackround(mContext, R.drawable.bubble_green, mMessage.getOutgoingDelivery().getState()));
+            messageText.setBackgroundDrawable(ColorSchemeManager.fillOutgoingMessageBackround(mContext, R.drawable.chat_bubble_compose, mMessage.getOutgoingDelivery().getState()));
 
             messageText.setTextColor(
                     mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
@@ -207,24 +207,6 @@ public class ChatMessageItem implements AttachmentTransferListener {
             messageInfo.setVisibility(View.GONE);
         }
     }
-
-//
-//    public int getBackgroundResource() {
-//        String currentState = mMessage.getOutgoingDelivery().getState();
-//        if(currentState == null) {
-//            return R.drawable.bubble_light_green;
-//        }
-//        if (currentState.equals(TalkDelivery.STATE_DELIVERING)) {
-//            return R.drawable.bubble_light_green;
-//        } else if(currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
-//            return R.drawable.bubble_red;
-//        } else if(currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
-//            return R.drawable.bubble_red;
-//        }
-//
-//
-//        return R.drawable.bubble_green;
-//    }
 
     private String getMessageTimestamp(TalkClientMessage message) {
         String timeStamp = null;
@@ -284,7 +266,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         // adjust layout for incoming / outgoing attachment
         if (mMessage.isIncoming()) {
-            mAttachmentView.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.bubble_grey, false));
+            mAttachmentView.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.chat_bubble_incoming, false));
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentView.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
             float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
@@ -292,7 +274,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             layoutParams.rightMargin = (int) marginRight;
             mAttachmentView.setLayoutParams(layoutParams);
         } else {
-            mAttachmentView.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.bubble_green, true));
+            mAttachmentView.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.chat_bubble_compose, true));
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentView.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
             float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
