@@ -75,10 +75,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:textColor="@android:color/secondary_text_dark"
-                android:layout_alignLeft="@+id/tv_message_text"
+                android:layout_alignRight="@+id/tv_message_text"
                 android:layout_below="@+id/tv_message_text"
                 android:textSize="10dp"
-                android:text="alsbdfadlskf"/>
+                android:text="SEEN"/>
     </RelativeLayout>
 
 
