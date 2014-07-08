@@ -171,7 +171,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (mConnection.isLegacyMode()) {
             mServer.getUpdateAgent().requestUserAlert(
                     mConnection.getClientId(),
-                    StaticSystemMessage.MESSAGES.UPDATE_NAGGING);
+                    StaticSystemMessage.Message.UPDATE_NAGGING);
         }
         requireIsNotOutdated();
 

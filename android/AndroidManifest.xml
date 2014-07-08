@@ -165,11 +165,15 @@
         <!-- Pairing activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.PairingActivity"
+                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait">
-            <action android:name="android.intent.action.VIEW"/>
-            <category android:name="android.intent.category.BROWSABLE"/>
-            <data android:scheme="hxo"/>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="hxo"/>
+            </intent-filter>
         </activity>
 
         <!-- Preference activity -->
@@ -183,34 +187,14 @@
                     android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
         </activity>
 
-        <!-- About activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.AboutActivity"
-                android:label="@string/actionbar_default_title"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
-                android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="com.hoccer.xo.ABOUT"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
+        <!--Legal Imprint activity-->
+        <activity android:name="com.hoccer.xo.android.activity.LegalImprintActivity"
+                  android:label="@string/actionbar_default_title"
+                  android:parentActivityName="com.hoccer.xo.android.activity.XoPreferenceActivity"
+                  android:screenOrientation="portrait" >
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
-        </activity>
-
-        <!-- Licenses activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.LicensesActivity"
-                android:label="@string/actionbar_default_title"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
-                android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="com.hoccer.xo.LICENSES"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
+                    android:value="com.hoccer.xo.android.activity.XoPreferenceActivity"/>
         </activity>
 
         <!-- Maps selection activity -->

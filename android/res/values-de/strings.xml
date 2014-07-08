@@ -24,7 +24,7 @@
     <string name="menu_add_attachment">Anhang hinzufügen</string>
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
-    <string name="menu_about">Über uns</string>
+    <string name="menu_about">Über Hoccer XO</string>
     <string name="menu_reconnect">erneut verbinden</string>
     <string name="menu_quit">schließen</string>
     <string name="menu_clear_conversation">Chat löschen</string>
@@ -72,6 +72,7 @@
     <string name="pairing_qr_scan">QR Code scannen</string>
     <string name="pairing_token_generating">Erzeugen...</string>
     <string name="pairing_token_send_sms">Einladen via SMS</string>
+    <string name="pairing_token_send_email">Einladen via e-mail</string>
     <string name="pairing_success">Kontakt wurde erfolgreich hinzugefügt</string>
     <string name="dialog_pairing_failed_title">Der Kontakt konnte nicht hinzugefügt werden</string>
     <string name="dialog_pairing_failed_message">Der eingegebene Code ist ungültig.</string>
@@ -237,6 +238,12 @@
     <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App HoccerXO zum sicheren Chatten! Jetzt herunterladen: http://hoccer.com/ Dann mich als Kontakt hinzufügen: %1$s%2$s
         \nxo %3$s
     </string>
+    <string name="email_invitation_text">Hey!\nI\'m now using the free app Hoccer XO for secure
+        chatting. Download it now:\nhttp://hoccer.com/\nThen add me as a contact:\n
+        &lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;
+        %1$s%2$s
+        \nxo %3$s
+    </string>
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>
     <string name="export_credentials_success">Zugangsdaten erfolgreich exportiert.</string>
     <string name="export_credentials_failure">Es ist ein Fehler beim exportieren der Zugangsdaten aufgetreten.</string>
@@ -279,5 +286,8 @@
         <item>EINLADUNGEN</item>
         <item>IN DER NÄHE</item>
     </string-array>
+
+    <string name="about_advert_text">Hoccer XO \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Hoccer neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Hoccer XO ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
+    <string name="about_version_description">Version %1$s</string>
 
 </resources>

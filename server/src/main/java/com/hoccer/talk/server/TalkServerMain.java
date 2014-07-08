@@ -57,7 +57,6 @@ public class TalkServerMain {
         LOG.info("Initializing talk server");
         TalkServer talkServer = new TalkServer(config, db);
 
-
         LOG.info("Initializing jetty");
         Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
         setupServerHandlers(webServer, talkServer);
