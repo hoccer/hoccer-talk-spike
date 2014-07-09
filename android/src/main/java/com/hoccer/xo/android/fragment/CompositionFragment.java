@@ -199,17 +199,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         mAttachment = null;
     }
 
-    private boolean isSendMessagePossible() {
-        boolean isBlocked = isBlocked();
-
-        boolean isEmptyGroup = false;
-        if (mContact.isGroup() && mContact.getGroupMemberships().size() == 1) {
-            isEmptyGroup = true;
-        }
-
-        return !isBlocked && !isEmptyGroup;
-    }
-
     private boolean isBlocked() {
         if (!mContact.isGroup() && !mContact.isNearby()) {
             TalkRelationship clientRelationship = mContact.getClientRelationship();
