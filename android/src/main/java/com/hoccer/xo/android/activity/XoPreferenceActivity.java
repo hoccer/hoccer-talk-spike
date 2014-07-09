@@ -79,7 +79,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void initDataImportPreferences() {
-        ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
+        final ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
         if (listPreference != null) {
             File exportDir = new File(XoApplication.getAttachmentDirectory(), XoImportExportUtils.EXPORT_DIRECTORY);
             File[] exportFiles = exportDir.listFiles();
@@ -97,6 +97,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        listPreference.setEnabled(false);
                         importData(entries[Integer.parseInt((String) newValue)]);
                         return true;
                     }
