@@ -209,10 +209,12 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) { // enter first
         if (contact.isGroup()) {
-            if (isNearbyConversationPossible()) {
-                activateNearbyChat();
-                updateViews();
+            if (mCurrentNearbyGroup == null || mCurrentNearbyGroup != contact) {
+                if (isNearbyConversationPossible()) {
+                    activateNearbyChat();
+                    updateViews();
 
+                }
             }
         }
     }
