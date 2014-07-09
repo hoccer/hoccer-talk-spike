@@ -4,6 +4,7 @@ import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.ZipEntry;
@@ -55,6 +56,9 @@ public class XoImportExportUtils {
                 String extension = filename.substring(filename.lastIndexOf(".") + 1);
                 if (extension.equals("db")) {
                     file = new File(DB_FILEPATH);
+                    if (file.exists()){
+                        file.delete();
+                    }
                 } else {
                     file = new File(XoApplication.getAttachmentDirectory(), filename);
                 }
@@ -65,6 +69,8 @@ public class XoImportExportUtils {
         } finally {
             zis.close();
         }
+
+        initDatabase();
     }
 
     private File zipAttachmentsAndDatabaseExport(File databaseExportFile) throws IOException {
@@ -136,5 +142,13 @@ public class XoImportExportUtils {
         String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String fileName = String.format("hoccer_talk_export_%s.%s", timestamp, extension);
         return new File(directory, fileName);
+    }
+
+    private void initDatabase() {
+        try {
+            XoApplication.getXoClient().getDatabase().initialize();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
