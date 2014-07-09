@@ -150,7 +150,7 @@ public class ClientMessage extends TalkToolCommand {
             Console.warn("WARN <ClientMessage::sendMessage> The sender doesn't know the recipient. Doing nothing.");
         } else {
             TalkClientMessage clientMessage = sender.getClient().composeClientMessage(recipientContact, messageText, attachment);
-            sender.getClient().requestDelivery(clientMessage);
+            sender.getClient().sendMessage(clientMessage.getMessageTag());
         }
     }
 }

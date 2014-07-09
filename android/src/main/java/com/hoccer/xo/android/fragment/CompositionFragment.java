@@ -257,7 +257,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText, upload);
             getXoClient().markMessagesAsAborted(message);
         } else {
-            getXoClient().requestDelivery(getXoClient().composeClientMessage(mContact, messageText, upload));
+            getXoClient()
+                    .sendMessage(getXoClient().composeClientMessage(mContact, messageText, upload).getMessageTag());
         }
         clearComposedMessage();
     }
@@ -288,8 +289,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         boolean longpressHandled = false;
         if (mLastMessage != null && !mLastMessage.equals("")) {
             for (int i = 0; i < STRESS_TEST_MESSAGE_COUNT; i++) {
-                getXoClient().requestDelivery(getXoClient()
-                        .composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)));
+                getXoClient().sendMessage(getXoClient()
+                        .composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
             }
             longpressHandled = true;
             clearComposedMessage();
