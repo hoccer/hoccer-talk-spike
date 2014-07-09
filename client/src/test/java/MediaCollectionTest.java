@@ -235,6 +235,75 @@ public class MediaCollectionTest {
     }
 
     @Test
+    public void testCreateCollectionFromExisting() {
+        LOG.info("testCreateCollectionFromExisting");
+
+        String collectionName = "testCreateCollection_collection";
+        TalkClientDownload item0 = new TalkClientDownload();
+        TalkClientDownload item1 = new TalkClientDownload();
+        TalkClientDownload item2 = new TalkClientDownload();
+        TalkClientDownload item3 = new TalkClientDownload();
+
+        // create MediaCollection and add to database 'manually' to avoid caching
+        // note: this is for testing purposes only
+        {
+            TalkClientMediaCollection collection = new TalkClientMediaCollection(collectionName);
+            try {
+                mDatabase.getMediaCollectionDao().create(collection);
+                collection.setDatabase(mDatabase);
+
+                // create some items and addItem to collection
+                mDatabase.saveClientDownload(item0);
+                mDatabase.saveClientDownload(item1);
+                mDatabase.saveClientDownload(item2);
+                mDatabase.saveClientDownload(item3);
+
+                collection.addItem(item0);
+                collection.addItem(item1);
+                collection.addItem(item2);
+                collection.addItem(item3);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                fail();
+            }
+        }
+
+        TalkClientMediaCollection collection = null;
+        try {
+            List<TalkClientMediaCollection> collections = mDatabase.findMediaCollectionsByName(collectionName);
+
+            assertEquals(1, collections.size());
+            collection = collections.get(0);
+
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+            e.printStackTrace();
+            fail();
+        }
+
+        assertEquals(4, collection.size());
+        assertEquals(item0.getClientDownloadId(), collection.getItem(0).getClientDownloadId());
+        assertEquals(item1.getClientDownloadId(), collection.getItem(1).getClientDownloadId());
+        assertEquals(item2.getClientDownloadId(), collection.getItem(2).getClientDownloadId());
+        assertEquals(item3.getClientDownloadId(), collection.getItem(3).getClientDownloadId());
+
+        // check database directly
+        {
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            assertNotNull(relations);
+            assertEquals(4, relations.size());
+            assertEquals(0, relations.get(0).getIndex());
+            assertEquals(item0.getClientDownloadId(), relations.get(0).getItem().getClientDownloadId());
+            assertEquals(1, relations.get(1).getIndex());
+            assertEquals(item1.getClientDownloadId(), relations.get(1).getItem().getClientDownloadId());
+            assertEquals(2, relations.get(2).getIndex());
+            assertEquals(item2.getClientDownloadId(), relations.get(2).getItem().getClientDownloadId());
+            assertEquals(3, relations.get(3).getIndex());
+            assertEquals(item3.getClientDownloadId(), relations.get(3).getItem().getClientDownloadId());
+        }
+    }
+
+    @Test
     public void testAddItems() {
         LOG.info("testAddItems");
 
