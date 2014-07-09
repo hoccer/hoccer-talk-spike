@@ -78,17 +78,17 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public boolean getUseBsonProtocol() {
-        return false;
+        return true;
     }
 
     @Override
     public String getBsonProtocolString() {
-        return null;
+        return "com.hoccer.talk.v4.bson";
     }
 
     @Override
     public String getJsonProtocolString() {
-        return null;
+        return "com.hoccer.talk.v4";
     }
 
     @Override
@@ -98,12 +98,12 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public int getConnectTimeout() {
-        return 0;
+        return 15;
     }
 
     @Override
     public int getIdleTimeout() {
-        return 0;
+        return 300;
     }
 
     @Override
@@ -113,32 +113,32 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public int getKeepAliveInterval() {
-        return 0;
+        return 120;
     }
 
     @Override
     public int getConnectionIdleTimeout() {
-        return 0;
+        return 900000;
     }
 
     @Override
     public float getReconnectBackoffFixedDelay() {
-        return 0;
+        return 3;
     }
 
     @Override
     public float getReconnectBackoffVariableFactor() {
-        return 0;
+        return 1;
     }
 
     @Override
     public float getReconnectBackoffVariableMaximum() {
-        return 0;
+        return 120;
     }
 
     @Override
     public String getUrlScheme() {
-        return null;
+        return "hxo://";
     }
 
     @Override
