@@ -48,7 +48,13 @@ public class MediaBrowserActivity extends XoActionbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                    getSupportFragmentManager().popBackStack();
+                    return true;
+                }
+                break;
             case R.id.menu_collections:
                 showCollectionListFragment();
                 return true;
