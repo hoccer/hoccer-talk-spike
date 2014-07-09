@@ -1103,17 +1103,24 @@ public class XoClient implements JsonRpcConnection.Listener {
         });
     }
 
-    public void requestDelivery(TalkClientMessage message) {
-        for(IXoMessageListener listener: mMessageListeners) {
-            listener.onMessageAdded(message);
+    //TODO: messages which fail will be sent after the next sync
+    public void sendMessage(String talkMessageTag) {
+        try {
+            TalkClientMessage message = mDatabase.findMessageByMessageTag(talkMessageTag, false);
+            for(IXoMessageListener listener: mMessageListeners) {
+                listener.onMessageAdded(message);
+            }
+            if(TalkDelivery.STATE_NEW.equals(message.getOutgoingDelivery().getState())) {
+                requestDelivery(message);
+            }
+        } catch (SQLException e) {
+            LOG.error(e);
         }
-        requestDelivery();
     }
 
-    private void requestDelivery() {
-
+    private void requestDelivery(final TalkClientMessage message) {
         if (mState < STATE_ACTIVE) {
-            LOG.info("requestDelivery() - cannot perform delivery in INACTIVE state.");
+            LOG.info("requestSendAllPendingMessages() - cannot perform delivery in INACTIVE state.");
             return;
         }
 
@@ -1121,7 +1128,28 @@ public class XoClient implements JsonRpcConnection.Listener {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                performDeliveries();
+                List<TalkClientMessage> messages = new ArrayList<TalkClientMessage>();
+                messages.add(message);
+                performDeliveries(messages);
+            }
+        });
+    }
+
+    private void requestSendAllPendingMessages() {
+        if (mState < STATE_ACTIVE) {
+            LOG.info("requestSendAllPendingMessages() - cannot perform delivery in INACTIVE state.");
+            return;
+        }
+
+        resetIdle();
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    performDeliveries(mDatabase.findMessagesForDelivery());
+                } catch (SQLException e) {
+                    LOG.error("error while retrieving pending messages", e);
+                }
             }
         });
     }
@@ -1207,7 +1235,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                     mServerRpc.ready();
                     LOG.info("[connection #" + mConnection.getConnectionId() + "] connected and ready");
                     LOG.info("Delivering potentially unsent messages.");
-                    requestDelivery();
+                    requestSendAllPendingMessages();
                 }
             });
         }
@@ -1918,12 +1946,10 @@ public class XoClient implements JsonRpcConnection.Listener {
         LOG.debug("login: successful");
     }
 
-    private void performDeliveries() {
+    private void performDeliveries(final List<TalkClientMessage> clientMessages) {
         LOG.debug("performDeliveries()");
 
         try {
-            List<TalkClientMessage> clientMessages = mDatabase.findMessagesForDelivery();
-
             LOG.debug(clientMessages.size() + " messages to deliver");
 
             for(int i = 0; i < clientMessages.size(); i++) {
@@ -1957,7 +1983,6 @@ public class XoClient implements JsonRpcConnection.Listener {
                     clientMessage.setProgressState(true);
                     mDatabase.saveClientMessage(clientMessage);
                     resultingDeliveries = mServerRpc.outDeliveryRequest(message, deliveries);
-
                 } catch (Exception e) {
                     LOG.error("error while performing delivery request for message " + clientMessage.getClientMessageId(), e);
 
@@ -2332,7 +2357,6 @@ public class XoClient implements JsonRpcConnection.Listener {
         }
         if (!messageFailed) {
             if(delivery.getState().equals(TalkDelivery.STATE_DELIVERING)) {
-                final XoClient that = this;
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -2346,7 +2370,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                             } else {
                                 result = mServerRpc.inDeliveryConfirmPrivate(delivery.getMessageId());
                             }
-                            that.updateIncomingDelivery(result);
+                            updateIncomingDelivery(result);
 
                         } catch (Exception e) {
                             LOG.error("Error while sending delivery confirmation: ", e);

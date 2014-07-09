@@ -16,7 +16,6 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoDialogs;
@@ -27,8 +26,6 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.release.R;
-
-import java.sql.SQLException;
 
 public class CompositionFragment extends XoFragment implements View.OnClickListener,
         View.OnLongClickListener, MotionGestureListener {
@@ -263,7 +260,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             getXoClient().markMessagesAsAborted(message);
         } else {
             getXoClient()
-                    .requestDelivery(getXoClient().composeClientMessage(mContact, messageText, upload));
+                    .sendMessage(getXoClient().composeClientMessage(mContact, messageText, upload).getMessageTag());
         }
         clearComposedMessage();
     }
@@ -294,8 +291,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         boolean longpressHandled = false;
         if (mLastMessage != null && !mLastMessage.equals("")) {
             for (int i = 0; i < STRESS_TEST_MESSAGE_COUNT; i++) {
-                getXoClient().requestDelivery(getXoClient()
-                        .composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)));
+                getXoClient().sendMessage(getXoClient()
+                        .composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
             }
             longpressHandled = true;
             clearComposedMessage();
