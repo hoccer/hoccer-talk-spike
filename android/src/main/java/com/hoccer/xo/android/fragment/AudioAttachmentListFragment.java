@@ -160,6 +160,9 @@ public class AudioAttachmentListFragment extends XoListFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_attachment_list, menu);
+        if (mDisplayMode == DisplayMode.AUDIO_ATTACHMENTS) {
+            menu.findItem(R.id.menu_collections).setVisible(true);
+        }
         setupSearchWidget(menu);
     }
 
