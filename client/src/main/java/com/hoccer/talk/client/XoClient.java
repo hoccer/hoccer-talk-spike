@@ -2234,7 +2234,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                         result = mServerRpc.outDeliveryAcknowledgeRejected(delivery.getMessageId(), delivery.getReceiverId());
                     }
                     if (result != null) {
-                        updateOutgoingDelivery(result);
+                        mDatabase.saveDelivery(result);
                     }
                 } catch (Exception e) {
                     LOG.error("Error while sending delivery confirmation: ", e);
