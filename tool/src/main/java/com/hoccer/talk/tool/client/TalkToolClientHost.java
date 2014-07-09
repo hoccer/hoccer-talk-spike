@@ -93,7 +93,7 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public int getTransferThreads() {
-        return 0;
+        return 2;
     }
 
     @Override
@@ -198,7 +198,6 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public boolean isSendDeliveryConfirmationEnabled() {
-        return false;
+        return true;
     }
-
 }
