@@ -449,19 +449,25 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) throws SQLException {
         TalkClientMediaCollection mediaCollection = getXoDatabase().findMediaCollectionById(mediaCollectionId);
+        List<String> addedFilenames = new ArrayList<String>();
         for (int index = 0; index < mSelectedItems.size(); ++index) {
             int pos = mSelectedItems.keyAt(index);
             if (mSelectedItems.get(pos)) {
-                TalkClientDownload item = (TalkClientDownload) mAttachmentListAdapter.getItem(pos).getContentObject();
-                if (!mediaCollection.hasItem(item)) {
-                    mediaCollection.addItem(item);
-                    String.format(mMediaPlayerService.getString(R.string.added_attachment_to_collection), item.getFileName(), mediaCollection.getName());
-                    Toast.makeText(getActivity(), String.format(mMediaPlayerService.getString(R.string.added_attachment_to_collection), item.getFileName(), mediaCollection.getName()), Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getActivity(), String.format(mMediaPlayerService.getString(R.string.attachment_already_added_to_collection), item.getFileName(), mediaCollection.getName()), Toast.LENGTH_LONG).show();
+                TalkClientDownload download = (TalkClientDownload) mAttachmentListAdapter.getItem(pos).getContentObject();
+                if (addAttachmentToCollection(mediaCollection, download)) {
+                    addedFilenames.add(download.getFileName());
                 }
             }
         }
+        Toast.makeText(getActivity(), String.format(mMediaPlayerService.getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
+    }
+
+    private boolean addAttachmentToCollection(TalkClientMediaCollection mediaCollection, TalkClientDownload item) {
+        if (!mediaCollection.hasItem(item)) {
+            mediaCollection.addItem(item);
+            return true;
+        }
+        return false;
     }
 
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
