@@ -386,12 +386,12 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientMessage> findNearbyMessages(long count, long offset) throws SQLException {
-        List<TalkClientMessage> list =  getAllNearbyGroupMessages();
+        List<TalkClientMessage> list = getAllNearbyGroupMessages();
         if (offset + count > list.size()) {
             count = list.size() - offset;
         }
         ArrayList<TalkClientMessage> res = new ArrayList<TalkClientMessage>();
-        for (int i = (int)offset; i<offset+count; i++) {
+        for (int i = (int) offset; i < offset + count; i++) {
             res.add(list.get(i));
         }
         return res;
@@ -404,9 +404,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     private List<TalkClientMessage> getAllNearbyGroupMessages() throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
         builder.orderBy("timestamp", true);
-        List<TalkClientMessage> list =  builder.query();
+        List<TalkClientMessage> list = builder.query();
         ArrayList<TalkClientMessage> res = new ArrayList<TalkClientMessage>();
-        for (TalkClientMessage t: list) {
+        for (TalkClientMessage t : list) {
             if (t.getConversationContact().getContactType().equals("group")) {
                 if (t.getConversationContact().getGroupPresence().isTypeNearby()) {
                     res.add(t);
@@ -691,7 +691,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .eq("name", name)
                 .query();
 
-        for(int i = 0; i < collections.size(); i++) {
+        for (int i = 0; i < collections.size(); i++) {
             TalkClientMediaCollection preparedCollection = prepareMediaCollection(collections.get(i));
             collections.set(i, preparedCollection);
         }
@@ -702,9 +702,24 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public List<TalkClientMediaCollection> findAllMediaCollections() throws SQLException {
         List<TalkClientMediaCollection> collections = mMediaCollections.queryForAll();
 
-        for(int i = 0; i < collections.size(); i++) {
+        for (int i = 0; i < collections.size(); i++) {
             TalkClientMediaCollection preparedCollection = prepareMediaCollection(collections.get(i));
             collections.set(i, preparedCollection);
+        }
+        return collections;
+    }
+
+    @Override
+    public List<TalkClientMediaCollection> findAllMediaCollectionsContainingItem(TalkClientDownload item) throws SQLException {
+
+        List<TalkClientMediaCollectionRelation> relations = mMediaCollectionRelations.queryBuilder()
+                .where()
+                .eq("item", item.getClientDownloadId()).query();
+
+        List<TalkClientMediaCollection> collections = new ArrayList<TalkClientMediaCollection>();
+        for (TalkClientMediaCollectionRelation relation : relations) {
+            TalkClientMediaCollection preparedCollection = findMediaCollectionById(relation.getMediaCollectionId());
+            collections.add(preparedCollection);
         }
         return collections;
     }
@@ -715,7 +730,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         TalkClientMediaCollection collection = new TalkClientMediaCollection(collectionName);
         mMediaCollections.createIfNotExists(collection);
         collection = prepareMediaCollection(collection);
-        for(IXoMediaCollectionListener listener : mMediaCollectionListenerArray) {
+        for (IXoMediaCollectionListener listener : mMediaCollectionListenerArray) {
             listener.onMediaCollectionCreated(collection);
         }
         return collection;
@@ -736,7 +751,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         collection.clear();
         mMediaCollections.delete(collection);
         mMediaCollectionCache.remove(collection.getId());
-        for(IXoMediaCollectionListener listener : mMediaCollectionListenerArray) {
+        for (IXoMediaCollectionListener listener : mMediaCollectionListenerArray) {
             listener.onMediaCollectionDeleted(collection);
         }
     }
@@ -766,9 +781,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     // Returns an already cached collection with the same id or the prepared collection
     private TalkClientMediaCollection prepareMediaCollection(TalkClientMediaCollection collection) {
         WeakReference<TalkClientMediaCollection> cachedWeakCollection = mMediaCollectionCache.get(collection.getId());
-        if(cachedWeakCollection != null) {
+        if (cachedWeakCollection != null) {
             TalkClientMediaCollection cachedCollection = cachedWeakCollection.get();
-            if(cachedCollection != null) {
+            if (cachedCollection != null) {
                 return cachedCollection;
             } else {
                 // cleanup weak null reference

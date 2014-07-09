@@ -19,6 +19,8 @@ public interface IXoMediaCollectionDatabase {
 
     List<TalkClientMediaCollection> findAllMediaCollections() throws SQLException;
 
+    List<TalkClientMediaCollection> findAllMediaCollectionsContainingItem(TalkClientDownload item) throws SQLException;
+
     TalkClientMediaCollection createMediaCollection(String collectionName) throws SQLException;
 
     void deleteMediaCollection(TalkClientMediaCollection collection) throws SQLException;
