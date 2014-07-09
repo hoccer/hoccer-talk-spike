@@ -15,10 +15,14 @@ import android.widget.*;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.talk.client.model.TalkClientMediaCollectionRelation;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
-import com.hoccer.xo.android.adapter.*;
+import com.hoccer.xo.android.adapter.AttachmentListAdapter;
+import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
+import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
+import com.hoccer.xo.android.adapter.SearchResultsAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
@@ -43,13 +47,15 @@ public class AudioAttachmentListFragment extends XoListFragment {
     public static final int SELECT_COLLECTION_REQUEST = 1;
     private SparseBooleanArray mSelectedItems;
 
-    private enum DisplayMode {ALL_ATTACHMENTS, COLLECTION_ATTACHMENTS, AUDIO_ATTACHMENTS,}
+
+    private enum DisplayMode {ALL_ATTACHMENTS, COLLECTION_ATTACHMENTS, AUDIO_ATTACHMENTS;}
 
     private MediaPlayerService mMediaPlayerService;
 
     private final static Logger LOG = Logger.getLogger(AudioAttachmentListFragment.class);
 
     private ServiceConnection mConnection;
+
     private AttachmentListAdapter mAttachmentListAdapter;
     private SearchResultsAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
@@ -61,6 +67,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
     private String mContentMediaTypeFilter;
     private TalkClientMediaCollection mCurrentCollection;
     private boolean mInSearchMode = false;
+    private boolean mRemoveFromCollection = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -147,6 +154,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
                 if (mCurrentCollection != null) {
                     getActivity().getActionBar().setTitle(mCurrentCollection.getName());
                 }
+                mRemoveFromCollection = true;
                 break;
             case AUDIO_ATTACHMENTS:
                 getActivity().getActionBar().setTitle(R.string.menu_music_viewer);
@@ -219,12 +227,41 @@ public class AudioAttachmentListFragment extends XoListFragment {
         }
     }
 
+    private void showRemoveOptionsDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setSingleChoiceItems(R.array.delete_options, 0, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == 0) {
+                    mRemoveFromCollection = true;
+                } else {
+                    mRemoveFromCollection = false;
+                }
+            }
+        });
+        builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (mRemoveFromCollection) {
+                    removeSelectedItemsFromCollection();
+                } else {
+                    showConfirmDeleteDialog();
+                }
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     private void showConfirmDeleteDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.attachment_confirm_delete_dialog_message);
         builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                deleteSelectedAttachments(mSelectedItems);
+                if (mRemoveFromCollection) {
+                    removeSelectedItemsFromCollection();
+                } else {
+                    deleteSelectedAttachments(mSelectedItems);
+                }
             }
         });
         builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
@@ -233,6 +270,17 @@ public class AudioAttachmentListFragment extends XoListFragment {
         });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void removeSelectedItemsFromCollection() {
+        for (int index = 0; index < mSelectedItems.size(); ++index) {
+            int pos = mSelectedItems.keyAt(index);
+            if (mSelectedItems.get(pos)) {
+                TalkClientDownload item = (TalkClientDownload) mAttachmentListAdapter.getItem(pos).getContentObject();
+                mCurrentCollection.removeItem(item);
+                mAttachmentListAdapter.removeItem(pos);
+            }
+        }
     }
 
     private void deleteAudioAttachment(int pos) {
@@ -250,14 +298,20 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
         if (deleteFile(item.getFilePath())) {
             try {
-                int downloadId = ((TalkClientDownload) item.getContentObject()).getClientDownloadId();
+                TalkClientDownload download = (TalkClientDownload) item.getContentObject();
+
+                int downloadId = download.getClientDownloadId();
                 XoApplication.getXoClient().getDatabase().deleteTalkClientDownloadbyId(downloadId);
 
                 int messageId = XoApplication.getXoClient().getDatabase().findMessageByDownloadId(downloadId).getClientMessageId();
                 XoApplication.getXoClient().getDatabase().deleteMessageById(messageId);
 
-                mAttachmentListAdapter.removeItem(pos);
+                List<TalkClientMediaCollection> collections = XoApplication.getXoClient().getDatabase().findAllMediaCollectionsContainingItem(download);
+                for (TalkClientMediaCollection collection : collections) {
+                    collection.removeItem(download);
+                }
 
+                mAttachmentListAdapter.removeItem(pos);
                 mMediaPlayerService.removeMedia(item);
 
                 Intent intent = new Intent(AUDIO_ATTACHMENT_REMOVED_ACTION);
@@ -520,7 +574,11 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
-                    showConfirmDeleteDialog();
+                    if (mDisplayMode == DisplayMode.COLLECTION_ATTACHMENTS) {
+                        showRemoveOptionsDialog();
+                    } else {
+                        showConfirmDeleteDialog();
+                    }
                     mode.finish();
                     return true;
                 case R.id.menu_share:

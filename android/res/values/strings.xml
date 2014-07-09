@@ -51,6 +51,11 @@
     <string name="menu_search">Search</string>
     <string name="search_hint">Search Attachments</string>
 
+    <string-array name="delete_options">
+        <item>Remove from collection</item>
+        <item>Delete file</item>
+    </string-array>
+
     <!-- Nearby location request -->
     <string name="dialog_enable_location_service_title">Location Services</string>
     <string name="dialog_enable_location_service_message">This feature uses location service
