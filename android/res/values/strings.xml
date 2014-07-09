@@ -50,6 +50,10 @@
     <string name="dialog_confirm_nearby_deletion_title">Confirm deletion</string>
     <string name="dialog_confirm_nearby_deletion_message">Do you really want to delete messages from this group?</string>
 
+    <!-- Invitation dialog -->
+    <string name="dialog_invite">Invite</string>
+    <string name="dialog_cancel">Cancel</string>
+
     <!-- Contact list items -->
     <string name="contact_name_new_client">New Friend</string>
     <string name="contact_name_new_group">New Group</string>
