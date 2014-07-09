@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -204,7 +203,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         boolean isBlocked = isBlocked();
 
         boolean isEmptyGroup = false;
-        if(mContact.isGroup() && mContact.getGroupMemberships().size() == 1) {
+        if (mContact.isGroup() && mContact.getGroupMemberships().size() == 1) {
             isEmptyGroup = true;
         }
 
@@ -212,7 +211,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private boolean isBlocked() {
-        if(!mContact.isGroup() && !mContact.isNearby()) {
+        if (!mContact.isGroup() && !mContact.isNearby()) {
             TalkRelationship clientRelationship = mContact.getClientRelationship();
             if (clientRelationship != null && clientRelationship.getState()
                     .equals(TalkRelationship.STATE_BLOCKED)) {
@@ -223,7 +222,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private boolean isEmptyGroup() {
-        if(mContact.isGroup() && mContact.getGroupMemberships().size() == 1) {
+        if (mContact.isGroup() && mContact.getGroupMemberships() != null && mContact.getGroupMemberships().size() <= 1) {
             return true;
         }
         return false;
@@ -254,9 +253,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             upload = SelectedContent.createAttachmentUpload(mAttachment);
         }
 
-        if(isAborted) {
-            TalkClientMessage message = getXoClient()
-                    .composeClientMessage(mContact, messageText, upload);
+        if (isAborted) {
+            TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText, upload);
             getXoClient().markMessagesAsAborted(message);
         } else {
             getXoClient()

@@ -69,7 +69,12 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getXoActivity().getXoClient().registerContactListener(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getXoActivity().getXoClient().unregisterContactListener(this);
     }
 
     @Override
@@ -83,26 +88,26 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
                 deactivateNearbyChat();
             }
         }
-    }
-
-    private boolean isNearbyConversationPossible() {
-        if (mActivity != null) {
-            try {
-                final List<TalkClientContact> allNearbyContacts = getXoDatabase().findAllNearbyContacts();
-                return (allNearbyContacts.size() > 0);
-            } catch (SQLException e) {
-                LOG.error("SQL Exception while retrieving current nearby group: ", e);
-            }
-        }
-        return false;
+        getXoActivity().getXoClient().registerContactListener(this);
     }
 
     @Override
     public void onDestroy() {
+        getXoActivity().getXoClient().unregisterContactListener(this);
         if (mNearbyAdapter != null) {
             mNearbyAdapter.onDestroy();
         }
         super.onDestroy();
+    }
+
+    private boolean isNearbyConversationPossible() {
+        try {
+            final List<TalkClientContact> allNearbyContacts = getXoDatabase().findAllNearbyContacts();
+            return (allNearbyContacts.size() > 0);
+        } catch (SQLException e) {
+            LOG.error("SQL Exception while retrieving current nearby group: ", e);
+        }
+        return false;
     }
 
     private void createAdapter(TalkClientContact nearbyGroup) {
@@ -127,11 +132,6 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
     }
 
     public void showPlaceholder() {
-
-        if (mActivity == null) {
-            return;
-        }
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -145,11 +145,6 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
     }
 
     private void hidePlaceholder() {
-
-        if (mActivity == null) {
-            return;
-        }
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -175,7 +170,7 @@ public class NearbyChatFragment extends XoListFragment implements IXoContactList
     }
 
     private void updateViews() {
-        if (mNearbyAdapter != null && mActivity != null) {
+        if (mNearbyAdapter != null) {
             mList.post(new Runnable() {
                 @Override
                 public void run() {
