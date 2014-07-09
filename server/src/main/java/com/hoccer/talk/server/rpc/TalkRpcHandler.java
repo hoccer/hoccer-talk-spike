@@ -1420,6 +1420,65 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     @Override
+    public TalkGroup createGroupWithMembers(String groupType, String groupTag, String groupName, String[] members, String[] roles) {
+        requireIdentification(true);
+        logCall("createGroupWithMembers(groupName: '"+groupName +"', groupTag='" + groupTag + "')");
+        if (!TalkGroup.GROUP_TYPE_USER.equals(groupType)) {
+            throw new RuntimeException("illegal group type:"+groupType);
+        }
+        if (groupName == null || groupTag == null || groupName.length() > 32) {
+            throw new RuntimeException("group name or tag missing");
+        }
+        if (groupName.length() > 32) {
+            throw new RuntimeException("group name too long (>32)");
+        }
+        TalkGroup group = new TalkGroup();
+        group.setGroupId(UUID.randomUUID().toString());
+        group.setState(TalkGroup.STATE_EXISTS);
+        group.setGroupType(groupType);
+        group.setGroupName(groupName);
+        group.setGroupTag(groupTag);
+
+        if (members.length != roles.length) {
+            throw new RuntimeException("number of members != number of roles");
+        }
+
+        for (String memberId : members) {
+            TalkClient client = mDatabase.findClientById(memberId);
+            if (client == null) {
+                throw new RuntimeException("No such client:"+memberId);
+            }
+        }
+
+        for (String role : roles) {
+            if (!TalkGroupMember.isValidRole(role))  {
+                throw new RuntimeException("Invalid role:"+role);
+            }
+        }
+
+        Date now = new Date();
+        changedGroup(group, now);
+
+        TalkGroupMember groupAdmin = new TalkGroupMember();
+        groupAdmin.setClientId(mConnection.getClientId());
+        groupAdmin.setGroupId(group.getGroupId());
+        groupAdmin.setRole(TalkGroupMember.ROLE_ADMIN);
+        groupAdmin.setState(TalkGroupMember.STATE_JOINED);
+        changedGroupMember(groupAdmin, now, true);
+
+        for (int i = 0; i < members.length;++i) {
+            TalkGroupMember groupMember = new TalkGroupMember();
+            groupMember.setGroupId(group.getGroupId());
+            groupMember.setClientId(members[i]);
+            groupMember.setRole(roles[i]);
+            groupMember.setState(TalkGroupMember.STATE_INVITED);
+            changedGroupMember(groupMember, now, true);
+        }
+
+        return group;
+    }
+
+    @Override
     public TalkGroup[] getGroups(Date lastKnown) {
         requireIdentification(true);
         logCall("getGroups(lastKnown: '" + lastKnown + "')");
