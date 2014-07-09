@@ -1551,7 +1551,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             //  NOTE if this gets removed then the invited users presence might
             //       need touching depending on what the solution to the update problem is
             // notify various things
-            touchGroupMemberPresences(groupId);
+            //touchGroupMemberPresences(groupId);
             mServer.getUpdateAgent().requestGroupUpdate(groupId, clientId);
             mServer.getUpdateAgent().requestGroupMembershipUpdatesForNewMember(groupId, clientId);
 
