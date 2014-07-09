@@ -18,7 +18,7 @@ public class TalkClientMediaCollectionRelation {
     @DatabaseField(columnName = "collection_id")
     private int mMediaCollectionId;
 
-    @DatabaseField(columnName = "item", foreign = true)
+    @DatabaseField(columnName = "item", foreign = true, foreignAutoRefresh = true)
     private TalkClientDownload mItem;
 
     @DatabaseField(columnName = "index")
