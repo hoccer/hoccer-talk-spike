@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--The app's URL scheme for registration links-->
-    <string name="url_scheme">hxo://</string>
+    <string name="url_scheme">wlbmd://</string>
 
     <!--Servers-->
     <string name="servers_production">wss://talkserver.talk.hoccer.de/</string>
