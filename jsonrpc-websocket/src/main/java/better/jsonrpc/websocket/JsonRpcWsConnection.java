@@ -215,6 +215,9 @@ public class JsonRpcWsConnection extends JsonRpcConnection
 
     @Override
     public void onMessage(String data) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("[" + mConnectionId + "] received string data \"" + data + "\"");
+        }
         if (mAcceptTextMessages) {
             // answer keep-alive requests
             if (mAnswerKeepAlives) {
@@ -238,6 +241,9 @@ public class JsonRpcWsConnection extends JsonRpcConnection
 
     @Override
     public void onMessage(byte[] data, int offset, int length) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("[" + mConnectionId + "] received binary data \"" + data.toString() + "\", offset="+offset+", length="+length);
+        }
         if (mAcceptBinaryMessages) {
             // handle keep-alive frames
             if (length == 1) {

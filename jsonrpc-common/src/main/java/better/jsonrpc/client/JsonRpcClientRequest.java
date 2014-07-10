@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.Type;
@@ -26,6 +27,10 @@ import java.util.concurrent.locks.ReentrantLock;
 public class JsonRpcClientRequest {
 
     private static final Logger LOG = Logger.getLogger(JsonRpcClientRequest.class);
+
+    static {
+        // LOG.setLevel(Level.TRACE);
+    }
 
     /** Connection used for the request */
     JsonRpcConnection mConnection;
@@ -134,7 +139,7 @@ public class JsonRpcClientRequest {
      * This call will block, limited by the request timeout.
      */
     public Object waitForResponse(Type returnType) throws Throwable {
-        LOG.trace("waitForResponse type="+returnType+" locking lock "+mLock+" thread "+Thread.currentThread());
+        LOG.trace("waitForResponse type="+returnType+" request id='"+mRequest.get("id")+"', locking lock "+mLock+" thread "+Thread.currentThread());
         mLock.lock();
         try {
             // wait until done or timeout is reached
@@ -150,11 +155,11 @@ public class JsonRpcClientRequest {
                 }
                 // wait for state changes
                 try {
-                    LOG.trace("waitForResponse type="+returnType+" wait for condition "+mCondition+" thread "+Thread.currentThread());
+                    LOG.trace("waitForResponse type="+returnType+" request id="+mRequest.get("id")+", wait for condition "+mCondition+" thread "+Thread.currentThread()+", timeLeft="+timeLeft);
                     mCondition.await(timeLeft, TimeUnit.MILLISECONDS);
-                    LOG.trace("waitForResponse type="+returnType+" awake from condition "+mCondition+" thread "+Thread.currentThread());
+                    LOG.trace("waitForResponse type="+returnType+" request id="+mRequest.get("id")+", awake from condition "+mCondition+" thread "+Thread.currentThread()+", timeLeft="+(timeout - System.currentTimeMillis()));
                 } catch (InterruptedException e) {
-                    LOG.trace("waitForResponse type="+returnType+" interrupted exception: "+e+" thread "+Thread.currentThread());
+                    LOG.trace("waitForResponse type="+returnType+" request id="+mRequest.get("id")+", interrupted exception: "+e+" thread "+Thread.currentThread()+", timeLeft="+(timeout - System.currentTimeMillis()));
                 }
             }
 
@@ -202,7 +207,7 @@ public class JsonRpcClientRequest {
                 return mapper.readValue(returnJsonParser, returnJavaType);
             }
         } finally {
-            LOG.trace("waitForResponse type="+returnType+" unlocking lock "+mLock+" thread "+Thread.currentThread());
+            LOG.trace("waitForResponse type="+returnType+" request id='"+mRequest.get("id")+"', unlocking lock "+mLock+" thread "+Thread.currentThread());
             mLock.unlock();
         }
         return null;
