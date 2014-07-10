@@ -7,7 +7,7 @@ import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 /**
  * Contacts adapter for simple lists

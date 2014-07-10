@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 public class DataSelector implements IContentSelector {
 

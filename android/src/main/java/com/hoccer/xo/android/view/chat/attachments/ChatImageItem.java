@@ -5,7 +5,7 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.ThumbnailManager;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 import android.content.Context;
 import android.content.Intent;

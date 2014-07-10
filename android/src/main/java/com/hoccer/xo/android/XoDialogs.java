@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
 /**

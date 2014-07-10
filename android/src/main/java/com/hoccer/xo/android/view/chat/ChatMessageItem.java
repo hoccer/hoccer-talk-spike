@@ -25,7 +25,7 @@ import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
 import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
 import java.util.Date;

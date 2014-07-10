@@ -9,7 +9,7 @@ import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 import net.hockeyapp.android.CrashManager;
 

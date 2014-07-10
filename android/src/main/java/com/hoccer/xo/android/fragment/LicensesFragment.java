@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;

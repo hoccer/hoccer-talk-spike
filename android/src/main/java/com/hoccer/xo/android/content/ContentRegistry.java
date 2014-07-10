@@ -14,7 +14,7 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.contentselectors.*;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;

@@ -13,7 +13,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

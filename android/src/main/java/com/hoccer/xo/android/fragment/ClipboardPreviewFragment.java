@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.activity.ClipboardPreviewActivity;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
 public class ClipboardPreviewFragment extends XoFragment {

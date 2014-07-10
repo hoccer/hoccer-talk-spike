@@ -25,7 +25,7 @@ import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 public class CompositionFragment extends XoFragment implements View.OnClickListener,
         View.OnLongClickListener, MotionGestureListener {

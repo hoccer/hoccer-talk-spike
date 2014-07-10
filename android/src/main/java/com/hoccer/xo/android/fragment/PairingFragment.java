@@ -21,7 +21,7 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.QrCodeGeneratingActivity;
 import com.hoccer.xo.android.activity.QrScannerActivity;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;

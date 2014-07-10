@@ -4,7 +4,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.NearbyContactsAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 import org.apache.log4j.Logger;
 

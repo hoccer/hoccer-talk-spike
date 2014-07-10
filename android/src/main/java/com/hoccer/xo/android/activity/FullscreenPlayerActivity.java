@@ -5,7 +5,7 @@ import android.support.v4.app.FragmentActivity;
 import com.hoccer.xo.android.fragment.FullscreenPlayerFragment;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
 public class FullscreenPlayerActivity extends FragmentActivity {

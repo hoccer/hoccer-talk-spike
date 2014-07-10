@@ -17,7 +17,7 @@ import com.google.zxing.common.BitMatrix;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 import java.util.EnumMap;
 import java.util.Map;

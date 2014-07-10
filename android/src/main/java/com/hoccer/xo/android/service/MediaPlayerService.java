@@ -23,7 +23,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;

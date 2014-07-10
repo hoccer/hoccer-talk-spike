@@ -13,7 +13,7 @@ import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
 import java.io.*;

@@ -15,7 +15,7 @@ import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.view.OverscrollListView;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;

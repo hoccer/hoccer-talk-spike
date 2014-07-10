@@ -8,7 +8,7 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 /**
  * Activity wrapping a single profile fragment

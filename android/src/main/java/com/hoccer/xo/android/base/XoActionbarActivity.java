@@ -7,7 +7,7 @@ import android.view.MenuItem;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 /**
  * Activity keeps track of synchronizing the mediaplay icon

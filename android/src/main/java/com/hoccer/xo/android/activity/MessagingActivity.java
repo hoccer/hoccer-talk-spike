@@ -20,7 +20,7 @@ import com.hoccer.xo.android.fragment.GroupProfileFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 import java.sql.SQLException;
 

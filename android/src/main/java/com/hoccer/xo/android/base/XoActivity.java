@@ -38,7 +38,7 @@ import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import net.hockeyapp.android.CrashManager;
 import org.apache.log4j.Logger;
 

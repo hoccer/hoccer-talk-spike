@@ -14,7 +14,7 @@ import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;

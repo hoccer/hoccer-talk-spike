@@ -19,7 +19,7 @@ import com.hoccer.xo.android.adapter.ContactsPageAdapter;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.fragment.ContactsFragment;
 import com.hoccer.xo.android.fragment.NearbyChatFragment;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 public class ContactsActivity extends XoActionbarActivity {
 

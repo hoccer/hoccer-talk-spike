@@ -16,7 +16,7 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import ezvcard.Ezvcard;
 import ezvcard.VCard;
 

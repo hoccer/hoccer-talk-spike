@@ -21,7 +21,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

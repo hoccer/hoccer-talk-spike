@@ -30,7 +30,7 @@ import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.view.ArtworkImageView;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;

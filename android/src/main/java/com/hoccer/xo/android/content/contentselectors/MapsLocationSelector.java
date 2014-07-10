@@ -7,7 +7,7 @@ import com.hoccer.xo.android.activity.MapsLocationActivity;
 import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 public class MapsLocationSelector implements IContentSelector {
 

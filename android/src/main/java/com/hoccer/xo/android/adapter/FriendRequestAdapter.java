@@ -9,7 +9,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 import java.util.ArrayList;
 import java.util.List;

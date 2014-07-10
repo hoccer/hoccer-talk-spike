@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import com.hoccer.xo.android.adapter.ContactsPageAdapter;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.release.R;
+import com.hoccer.bofrostmessenger.R;
 
 /**
  * Created by igor on 7/1/14.
