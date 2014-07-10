@@ -172,7 +172,7 @@ public class MediaCollectionTest {
             assertNotNull(collections);
             assertEquals(0, collections.size());
 
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertEquals(0, relations.size());
         }
     }
@@ -229,78 +229,42 @@ public class MediaCollectionTest {
             assertNotNull(collections);
             assertEquals(0, collections.size());
 
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertEquals(0, relations.size());
         }
     }
 
     @Test
-    public void testCreateCollectionFromExisting() {
-        LOG.info("testCreateCollectionFromExisting");
+    public void testCreateCollectionFromDatabase() {
+        LOG.info("testCreateCollectionFromDatabase");
 
-        String collectionName = "testCreateCollection_collection";
-        TalkClientDownload item0 = new TalkClientDownload();
-        TalkClientDownload item1 = new TalkClientDownload();
-        TalkClientDownload item2 = new TalkClientDownload();
-        TalkClientDownload item3 = new TalkClientDownload();
-
-        // create MediaCollection and add to database 'manually' to avoid caching
-        // note: this is for testing purposes only
-        {
-            TalkClientMediaCollection collection = new TalkClientMediaCollection(collectionName);
-            try {
-                mDatabase.getMediaCollectionDao().create(collection);
-                collection.setDatabase(mDatabase);
-
-                // create some items and addItem to collection
-                mDatabase.saveClientDownload(item0);
-                mDatabase.saveClientDownload(item1);
-                mDatabase.saveClientDownload(item2);
-                mDatabase.saveClientDownload(item3);
-
-                collection.addItem(item0);
-                collection.addItem(item1);
-                collection.addItem(item2);
-                collection.addItem(item3);
-            } catch (SQLException e) {
-                e.printStackTrace();
-                fail();
-            }
-        }
+        String collectionName = "testCreateCollectionFromDatabase";
+        List<TalkClientDownload> items = createItems(mDatabase, 5);
 
         TalkClientMediaCollection collection = null;
         try {
-            List<TalkClientMediaCollection> collections = mDatabase.findMediaCollectionsByName(collectionName);
-
-            assertEquals(1, collections.size());
-            collection = collections.get(0);
-
+            collection = mDatabase.createMediaCollection(collectionName);
+            addItemsToCollection(items, collection);
         } catch (SQLException e) {
             LOG.error(e.getMessage());
             e.printStackTrace();
             fail();
         }
 
-        assertEquals(4, collection.size());
-        assertEquals(item0.getClientDownloadId(), collection.getItem(0).getClientDownloadId());
-        assertEquals(item1.getClientDownloadId(), collection.getItem(1).getClientDownloadId());
-        assertEquals(item2.getClientDownloadId(), collection.getItem(2).getClientDownloadId());
-        assertEquals(item3.getClientDownloadId(), collection.getItem(3).getClientDownloadId());
 
-        // check database directly
-        {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
-            assertNotNull(relations);
-            assertEquals(4, relations.size());
-            assertEquals(0, relations.get(0).getIndex());
-            assertEquals(item0.getClientDownloadId(), relations.get(0).getItem().getClientDownloadId());
-            assertEquals(1, relations.get(1).getIndex());
-            assertEquals(item1.getClientDownloadId(), relations.get(1).getItem().getClientDownloadId());
-            assertEquals(2, relations.get(2).getIndex());
-            assertEquals(item2.getClientDownloadId(), relations.get(2).getItem().getClientDownloadId());
-            assertEquals(3, relations.get(3).getIndex());
-            assertEquals(item3.getClientDownloadId(), relations.get(3).getItem().getClientDownloadId());
+        TalkClientMediaCollection collectionCopy = null;
+        try {
+            List<TalkClientMediaCollection> collections = mDatabase.findMediaCollectionsByName(collectionName);
+
+            assertEquals(1, collections.size());
+            collectionCopy = collections.get(0);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+            e.printStackTrace();
+            fail();
         }
+
+        validateItemsInCollection(items, collectionCopy);
     }
 
     @Test
@@ -308,42 +272,29 @@ public class MediaCollectionTest {
         LOG.info("testAddItems");
 
         String collectionName = "testAddItems_collection";
+        int itemCount = 5;
+        List<TalkClientDownload> items = createItems(mDatabase, itemCount);
 
         TalkClientMediaCollection collection = null;
-        TalkClientDownload item0 = new TalkClientDownload();
-        TalkClientDownload item1 = new TalkClientDownload();
-        TalkClientDownload item2 = new TalkClientDownload();
         try {
             collection = mDatabase.createMediaCollection(collectionName);
-
-            // create some items and addItem to collection
-            mDatabase.saveClientDownload(item0);
-            mDatabase.saveClientDownload(item1);
-            mDatabase.saveClientDownload(item2);
-            collection.addItem(item0);
-            collection.addItem(item1);
-            collection.addItem(item2);
+            addItemsToCollection(items, collection);
         } catch (SQLException e) {
             LOG.error(e.getMessage());
             e.printStackTrace();
             fail();
         }
 
-        assertEquals(3, collection.size());
-        assertEquals(item0.getClientDownloadId(), collection.getItem(0).getClientDownloadId());
-        assertEquals(item1.getClientDownloadId(), collection.getItem(1).getClientDownloadId());
-        assertEquals(item2.getClientDownloadId(), collection.getItem(2).getClientDownloadId());
+        validateItemsInCollection(items, collection);
 
         // check database directly
-        List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+        List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
         assertNotNull(relations);
-        assertEquals(3, relations.size());
-        assertEquals(0, relations.get(0).getIndex());
-        assertEquals(item0.getClientDownloadId(), relations.get(0).getItem().getClientDownloadId());
-        assertEquals(1, relations.get(1).getIndex());
-        assertEquals(item1.getClientDownloadId(), relations.get(1).getItem().getClientDownloadId());
-        assertEquals(2, relations.get(2).getIndex());
-        assertEquals(item2.getClientDownloadId(), relations.get(2).getItem().getClientDownloadId());
+        assertEquals(itemCount, relations.size());
+        for(int i = 0; i < itemCount; i++) {
+            assertEquals(i, relations.get(i).getIndex());
+            assertEquals(items.get(i).getClientDownloadId(), relations.get(i).getItem().getClientDownloadId());
+        }
     }
 
     @Test
@@ -384,7 +335,7 @@ public class MediaCollectionTest {
         assertEquals(item1.getClientDownloadId(), collection.getItem(3).getClientDownloadId());
 
         // check database directly
-        List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+        List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
         assertNotNull(relations);
         assertEquals(4, relations.size());
         assertEquals(0, relations.get(0).getIndex());
@@ -435,7 +386,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(4, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -457,7 +408,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(3, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -476,7 +427,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(2, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -494,7 +445,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(2, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -576,7 +527,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(5, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -603,7 +554,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(5, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -630,7 +581,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(5, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -657,7 +608,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(5, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -684,7 +635,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(5, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -711,7 +662,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(5, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -738,7 +689,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(5, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -772,7 +723,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(5, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -806,7 +757,7 @@ public class MediaCollectionTest {
 
         // check database directly
         {
-            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(collection.getId());
+            List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
             assertNotNull(relations);
             assertEquals(5, relations.size());
             assertEquals(0, relations.get(0).getIndex());
@@ -1075,6 +1026,50 @@ public class MediaCollectionTest {
         }
     }
 
+    ////////////////////////////////
+    //////// Helper methods ////////
+    ////////////////////////////////
+
+    private static List<TalkClientDownload> createItems(XoClientDatabase database, int count) {
+        ArrayList<TalkClientDownload> list = new ArrayList<TalkClientDownload>();
+
+        try {
+            for (int i = 0; i < count; i++) {
+                TalkClientDownload item = new TalkClientDownload();
+
+                // set unique value on data field to check serialization
+                item.setContentHmac(String.valueOf(i));
+                database.saveClientDownload(item);
+                list.add(item);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        return list;
+    }
+
+    private static void addItemsToCollection(List<TalkClientDownload> items, TalkClientMediaCollection collection) {
+        for (int i = 0; i < items.size(); i++) {
+            collection.addItem(items.get(i));
+        }
+    }
+
+    private static void validateItemsInCollection(List<TalkClientDownload> expectedItems, TalkClientMediaCollection collection) {
+        assertEquals(expectedItems.size(), collection.size());
+
+        for (int i = 0; i < expectedItems.size(); i++) {
+            TalkClientDownload expectedItem = expectedItems.get(i);
+            TalkClientDownload actualItem = collection.getItem(i);
+
+            assertEquals(expectedItem.getClientDownloadId(), actualItem.getClientDownloadId());
+
+            // check data field to see if it was correctly serialized
+            assertEquals(expectedItem.getContentHmac(), actualItem.getContentHmac());
+        }
+    }
+
     private class ValueContainer<T> {
         public T value;
         public ValueContainer(T initValue) {
@@ -1082,11 +1077,11 @@ public class MediaCollectionTest {
         }
     }
 
-    private List<TalkClientMediaCollectionRelation> findMediaCollectionRelationsOrderedByIndex(int collectionId) {
+    private static List<TalkClientMediaCollectionRelation> findMediaCollectionRelationsOrderedByIndex(XoClientDatabase database, int collectionId) {
 
         List<TalkClientMediaCollectionRelation> relations = null;
         try {
-             relations = mDatabase.getMediaCollectionRelationDao().queryBuilder()
+             relations = database.getMediaCollectionRelationDao().queryBuilder()
                     .orderBy("index", true)
                     .where()
                     .eq("collection_id", collectionId)
