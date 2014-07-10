@@ -329,7 +329,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         public void onClick(DialogInterface dialog, int which) {
             switch (which) {
                 case 0:
-                    mAttachment = null;
+                    clearAttachment();
                     getXoActivity().selectAttachment();
                     break;
                 case 1:

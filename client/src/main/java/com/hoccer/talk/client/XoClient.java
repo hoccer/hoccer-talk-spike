@@ -1461,6 +1461,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                     LOG.debug("sync: HELLO");
                     hello();
                     LOG.debug("sync: updating presence");
+                    setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
                     ScheduledFuture sendPresenceFuture = sendPresence();
                     LOG.debug("sync: syncing presences");
                     TalkPresence[] presences = mServerRpc.getPresences(never);
@@ -2007,7 +2008,6 @@ public class XoClient implements JsonRpcConnection.Listener {
                 presence = new TalkPresence();
                 presence.setClientId(contact.getClientId());
                 presence.setClientName("Client");
-                //presence.setClientStatus(TalkPresence.CONN_STATUS_ONLINE);
                 presence.setTimestamp(new Date());
                 contact.updatePresence(presence);
                 mDatabase.savePresence(presence);

@@ -536,40 +536,40 @@ public abstract class XoActivity extends FragmentActivity {
         if (requestCode == REQUEST_SELECT_AVATAR) {
             if (mAvatarSelection != null) {
                 ImageSelector selector = (ImageSelector) mAvatarSelection.getSelector();
-                startExternalActivityForResult(selector.createCropIntent(this, data.getData()),
-                        REQUEST_CROP_AVATAR);
+                startExternalActivityForResult(selector.createCropIntent(this, data.getData()), REQUEST_CROP_AVATAR);
             }
-            return;
-        }
-
-        if (requestCode == REQUEST_CROP_AVATAR) {
+        } else if (requestCode == REQUEST_CROP_AVATAR) {
             data = selectedAvatarPreProcessing(data);
             if (data != null) {
-                IContentObject co = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection,
-                        data);
-                if (co != null) {
-                    LOG.debug("selected avatar " + co.getContentDataUrl());
+                IContentObject contentObject = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection, data);
+                if (contentObject != null) {
+                    LOG.debug("selected avatar " + contentObject.getContentDataUrl());
                     for (IXoFragment fragment : mTalkFragments) {
-                        fragment.onAvatarSelected(co);
+                        fragment.onAvatarSelected(contentObject);
                     }
                 }
             } else {
-                Toast.makeText(this, R.string.error_avatar_selection, Toast.LENGTH_LONG).show();
+                showAvatarSelectionError();
             }
-            return;
-        }
-
-        if (requestCode == REQUEST_SELECT_ATTACHMENT) {
-            IContentObject co = ContentRegistry.get(this)
-                    .createSelectedAttachment(mAttachmentSelection, data);
-            if (co != null) {
-                LOG.debug("selected attachment " + co.getContentDataUrl());
+        } else if (requestCode == REQUEST_SELECT_ATTACHMENT) {
+            IContentObject contentObject = ContentRegistry.get(this).createSelectedAttachment(mAttachmentSelection, data);
+            if (contentObject != null) {
+                LOG.debug("selected attachment " + contentObject.getContentDataUrl());
                 for (IXoFragment fragment : mTalkFragments) {
-                    fragment.onAttachmentSelected(co);
+                    fragment.onAttachmentSelected(contentObject);
                 }
+            } else {
+                showAttachmentSelectionError();
             }
-            return;
         }
+    }
+
+    private void showAvatarSelectionError() {
+        Toast.makeText(this, R.string.error_avatar_selection, Toast.LENGTH_LONG).show();
+    }
+
+    private void showAttachmentSelectionError() {
+        Toast.makeText(this, R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
     }
 
     protected void enableUpNavigation() {
@@ -710,8 +710,7 @@ public abstract class XoActivity extends FragmentActivity {
 
         setBackgroundActive();
 
-        mAttachmentSelection = ContentRegistry.get(this)
-                .selectAttachment(this, REQUEST_SELECT_ATTACHMENT);
+        mAttachmentSelection = ContentRegistry.get(this).selectAttachment(this, REQUEST_SELECT_ATTACHMENT);
     }
 
     public void scanBarcode() {

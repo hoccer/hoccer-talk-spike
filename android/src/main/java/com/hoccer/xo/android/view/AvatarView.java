@@ -1,5 +1,12 @@
 package com.hoccer.xo.android.view;
 
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
@@ -9,14 +16,6 @@ import com.hoccer.xo.release.R;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
-
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.util.AttributeSet;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 /**
  * A view holding an AspectImageView and a presence indicator.
@@ -28,7 +27,8 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     private DisplayImageOptions mDefaultOptions;
     private float mCornerRadius = 0.0f;
     private AspectImageView mAvatarImage;
-    private View mPresenceIndicator;
+    private View mPresenceIndicatorActive;
+    private View mPresenceIndicatorInactive;
 
     private TalkClientContact mContact;
 
@@ -45,7 +45,8 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         addView(layout);
 
         mAvatarImage = (AspectImageView) this.findViewById(R.id.avatar_image);
-        mPresenceIndicator = this.findViewById(R.id.presence_indicator_view);
+        mPresenceIndicatorActive = this.findViewById(R.id.presence_indicator_view_active);
+        mPresenceIndicatorInactive = this.findViewById(R.id.presence_indicator_view_inactive);
 
         float scale = getResources().getDisplayMetrics().density;
         int pixel = (int) (mCornerRadius * scale + 0.5f);
@@ -80,7 +81,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     }
 
     private void updateAvatar() {
-        if(mContact == null) {
+        if (mContact == null) {
             resetAvatar();
             return;
         }
@@ -89,7 +90,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
         if (avatarUri == null) {
             if (mContact.isGroup()) {
-                if(mContact.getGroupPresence().isTypeNearby()) {
+                if (mContact.getGroupPresence().isTypeNearby()) {
                     setAvatarImage(R.drawable.avatar_default_location);
                 } else {
                     setAvatarImage(R.drawable.avatar_default_group);
@@ -160,25 +161,38 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         post(new Runnable() {
             @Override
             public void run() {
-                if (mContact == null) {
-                    return;
-                }
-                TalkPresence presence = null;
-                if (mContact.isClient()) {
-                    presence = mContact.getClientPresence();
-                } else {
-                    mPresenceIndicator.setVisibility(View.INVISIBLE);
-                    return;
-                }
-                if (presence != null) {
-                    if (presence.isPresent()) {
-                        mPresenceIndicator.setVisibility(View.VISIBLE);
-                    } else {
-                        mPresenceIndicator.setVisibility(View.INVISIBLE);
+
+                if (mContact != null && mContact.isClient()) {
+                    TalkPresence presence = mContact.getClientPresence();
+                    if (presence != null) {
+                        if (presence.isConnected()) {
+                            if (presence.isPresent()) {
+                                showPresenceIndicatorActive();
+                            } else {
+                                showPresenceIndicatorInactive();
+                            }
+                            return;
+                        }
                     }
                 }
+                hidePresenceIndicator();
             }
         });
+    }
+
+    private void showPresenceIndicatorActive() {
+        mPresenceIndicatorActive.setVisibility(View.VISIBLE);
+        mPresenceIndicatorInactive.setVisibility(View.INVISIBLE);
+    }
+
+    private void showPresenceIndicatorInactive() {
+        mPresenceIndicatorActive.setVisibility(View.INVISIBLE);
+        mPresenceIndicatorInactive.setVisibility(View.VISIBLE);
+    }
+
+    private void hidePresenceIndicator() {
+        mPresenceIndicatorActive.setVisibility(View.INVISIBLE);
+        mPresenceIndicatorInactive.setVisibility(View.INVISIBLE);
     }
 
     @Override

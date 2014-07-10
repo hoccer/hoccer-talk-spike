@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.net.URL;
-import java.sql.SQLException;
 
 public class ImageSelector implements IContentSelector {
 
@@ -48,6 +47,34 @@ public class ImageSelector implements IContentSelector {
         return intent;
     }
 
+    @Override
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        } else {
+            Uri selectedContent = intent.getData();
+            if (selectedContent.toString().startsWith("content://com.google.android.gallery3d")) {
+                return createFromPicasa(context, intent);
+            } else {
+                return createFromFile(context, intent);
+            }
+        }
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        Uri contentUri = intent.getData();
+        String[] columns = {
+                MediaStore.Images.Media.MIME_TYPE
+        };
+        Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
+        cursor.moveToFirst();
+        int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
+        String mimeType = cursor.getString(mimeTypeIndex);
+        return (mimeType.startsWith("image"));
+    }
+
     public Intent createCropIntent(Context context, Uri data) {
         Intent intent = new Intent("com.android.camera.action.CROP", android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
@@ -64,17 +91,6 @@ public class ImageSelector implements IContentSelector {
         File tmpFile = new File(XoApplication.getAttachmentDirectory(), "tmp_crop");
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tmpFile));
         return intent;
-    }
-
-
-    @Override
-    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        Uri selectedContent = intent.getData();
-        if (selectedContent.toString().startsWith("content://com.google.android.gallery3d")) {
-            return createFromPicasa(context, intent);
-        } else {
-            return createFromFile(context, intent);
-        }
     }
 
     private SelectedContent createFromPicasa(final Context context, Intent intent) {
@@ -114,7 +130,6 @@ public class ImageSelector implements IContentSelector {
                 }
             }
         }
-
         return null;
     }
 

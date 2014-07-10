@@ -87,6 +87,11 @@ public class ClipboardSelector implements IContentSelector {
         return contentObject;
     }
 
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
+    }
+
     public boolean canProcessClipboard() {
         return mClipboard.canProcessClipboard();
     }
