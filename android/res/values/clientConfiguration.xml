@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--The app's URL scheme for registration links-->
-    <string name="url_scheme">hxo://</string>
+    <string name="url_scheme">hxod://</string>
 
     <!--Servers-->
-    <string name="servers_production">wss://talkserver.talk.hoccer.de/</string>
+    <string name="servers_production">wss://talkserver-test1.talk.hoccer.de/</string>
 
     <!--Development Mode Only-->
     <string-array name="servers_development">
-        <item name="1">wss://talkserver-test1.talk.hoccer.de:8443/</item>
+        <item name="1">wss://talkserver-test1.talk.hoccer.de/</item>
         <item name="2">wss://talkserver.talk.hoccer.de/</item>
     </string-array>
 
