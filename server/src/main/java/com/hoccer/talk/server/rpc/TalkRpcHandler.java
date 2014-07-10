@@ -1254,13 +1254,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     setDeliveryState(delivery, confirmationState, true, false);
                     mStatistics.signalMessageConfirmedSucceeded();
                 } else {
-                    throw new RuntimeException("deliveryConfirm: no state change path to '"+confirmationState+"' from current delivery state ="+delivery.getState()+") : message id '" + messageId + "' client id '" + clientId + "'");
+                    throw new RuntimeException("inDeliveryConfirm: no state change path to '"+confirmationState+"' from current delivery state '"+delivery.getState()+"' : message id '" + messageId + "' client id '" + clientId + "'");
                 }
                 TalkDelivery result = new TalkDelivery();
                 result.updateWith(delivery, TalkDelivery.REQUIRED_IN_UPDATE_FIELDS_SET);
                 return result;
             } else {
-                throw new RuntimeException("deliveryConfirm '"+confirmationState+"': no delivery found for message with id '" + messageId + "' for client with id '" + clientId + "'");
+                throw new RuntimeException("inDeliveryConfirm '"+confirmationState+"': no delivery found for message with id '" + messageId + "' for client with id '" + clientId + "'");
             }
         }
     }
@@ -1826,6 +1826,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 TalkDelivery delivery = mDatabase.findDelivery(message.getMessageId(), clientId);
                 if (delivery != null) {
                     LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (download), messageId="+message.getMessageId()+", delivery="+delivery.getId());
+
+                    if (TalkDelivery.ATTACHMENT_STATE_RECEIVED.equals(delivery.getAttachmentState()) &&
+                        TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState)) {
+                        LOG.info("AttachmentState already 'received', ignoring next state 'uploaded' (download) returning state 'received', messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                        return delivery.getAttachmentState();
+                    }
+
                     if (!delivery.nextAttachmentStateAllowed(nextState)) {
                         throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
                     }
