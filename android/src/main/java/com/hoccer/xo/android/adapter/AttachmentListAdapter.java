@@ -5,6 +5,7 @@ import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import com.hoccer.talk.client.IXoDownloadListener;
 import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
@@ -21,7 +22,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AttachmentListAdapter extends BaseAdapter implements IXoTransferListener {
+public class AttachmentListAdapter extends BaseAdapter implements IXoTransferListener, IXoDownloadListener {
 
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
@@ -266,10 +267,9 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     public void loadAttachmentsFromCollection(TalkClientMediaCollection collection) {
         List<TalkClientDownload> downloads = new ArrayList<TalkClientDownload>();
-        for (int i = 0; i< collection.size(); ++i) {
+        for (int i = 0; i < collection.size(); ++i) {
             downloads.add(collection.getItem(i));
         }
-
         createAttachmentsFromTalkClientDownloads(downloads);
     }
 
@@ -308,8 +308,16 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         if (fileName.startsWith("recording")) {
             return true;
         }
-
         return false;
     }
 
+    @Override
+    public void onDownloadAdded(TalkClientDownload download) {
+
+    }
+
+    @Override
+    public void onDownloadRemoved(TalkClientDownload download) {
+        removeItem(AudioAttachmentItem.create(download.getContentDataUrl(), download, false));
+    }
 }
