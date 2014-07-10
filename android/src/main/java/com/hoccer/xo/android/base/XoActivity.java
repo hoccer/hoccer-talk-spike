@@ -784,8 +784,9 @@ public abstract class XoActivity extends FragmentActivity {
             TalkClientContact self = mDatabase.findSelfContact(false);
             String message = String
                     .format(getString(R.string.email_invitation_text), XoClientConfiguration.HXO_URL_SCHEME, token, self.getName());
-            Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + recipients));
+            Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:dummy@mail.gov"));
             email.putExtra(Intent.EXTRA_SUBJECT,"Join me at Hoccer!");
+            email.putExtra(Intent.EXTRA_BCC, recipients.split(";"));
             email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));
             startActivity(Intent.createChooser(email, "Choose Email Client"));
         } catch (SQLException e) {

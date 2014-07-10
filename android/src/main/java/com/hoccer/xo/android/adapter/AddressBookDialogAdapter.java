@@ -11,30 +11,33 @@ import android.os.Build;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 import android.support.v4.widget.CursorAdapter;
+import android.text.SpannableString;
+import android.text.TextUtils;
+import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.QuickContactBadge;
-import android.widget.TextView;
+import android.widget.*;
 import com.hoccer.xo.release.R;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 
 public class AddressBookDialogAdapter extends CursorAdapter {
 
+    public static String mSearchTerm;
     private LayoutInflater mInflater;
     private Context mContext;
-    private ArrayList<String> mRecipientsList = new ArrayList<String>();
+    private TextAppearanceSpan highlightTextSpan;
+    private Set<String> mRecipientsSet = new HashSet<String>();
 
     public AddressBookDialogAdapter(Context context) {
         super(context, null, 0);
         mContext = context;
         mInflater = LayoutInflater.from(context);
+        highlightTextSpan = new TextAppearanceSpan(mContext, R.style.searchTextHiglight);
     }
 
     private class ViewHolder {
@@ -42,6 +45,14 @@ public class AddressBookDialogAdapter extends CursorAdapter {
         TextView detailedInfo;
         QuickContactBadge quickContact;
         CheckBox checkBox;
+    }
+
+    private int indexOfSearchQuery(String displayName) {
+        if (!TextUtils.isEmpty(mSearchTerm)) {
+            return displayName.toLowerCase(Locale.getDefault()).indexOf(
+                    mSearchTerm.toLowerCase(Locale.getDefault()));
+        }
+        return -1;
     }
 
     @Override
@@ -67,14 +78,29 @@ public class AddressBookDialogAdapter extends CursorAdapter {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 if (checked) {
-                    mRecipientsList.add(detailedInfo);
+                    mRecipientsSet.add(detailedInfo);
                 } else {
-                    mRecipientsList.remove(detailedInfo);
+                    mRecipientsSet.remove(detailedInfo);
                 }
             }
         });
+        if (mRecipientsSet.contains(detailedInfo)) {
+            holder.checkBox.setChecked(true);
+        } else {
+            holder.checkBox.setChecked(false);
+        }
         holder.displayName.setText(displayName);
         holder.detailedInfo.setText(detailedInfo);
+        final int startIndex = indexOfSearchQuery(displayName);
+        if (startIndex == -1) {
+            holder.displayName.setText(displayName);
+        } else {
+            final SpannableString highlightedName = new SpannableString(displayName);
+            highlightedName.setSpan(highlightTextSpan, startIndex,
+                    startIndex + mSearchTerm.length(), 0);
+            holder.displayName.setText(highlightedName);
+        }
+
         final Uri contactUri = Contacts.getLookupUri(
                 cursor.getLong(ContactsQuery.ID),
                 cursor.getString(ContactsQuery.LOOKUP_KEY));
@@ -130,9 +156,21 @@ public class AddressBookDialogAdapter extends CursorAdapter {
                         "=" + ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE;
 
         @SuppressLint("InlinedApi")
+        final static String SELECTION_WITH_PHONES_FILTERED =
+                (hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) +
+                        " LIKE ? " + " AND " + ContactsContract.CommonDataKinds.Phone.TYPE +
+                        "=" + ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE;
+
+        @SuppressLint("InlinedApi")
         final static String SELECTION_WITH_EMAILS =
                 (hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) +
                         "<>''" + " AND " + ContactsContract.Data.MIMETYPE + "=" + "='" +
+                        ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE + "'";
+
+        @SuppressLint("InlinedApi")
+        final static String SELECTION_WITH_EMAILS_FILTERED =
+                (hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) +
+                        " LIKE ? " + " AND " + ContactsContract.Data.MIMETYPE + "=" + "='" +
                         ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE + "'";
 
         @SuppressLint("InlinedApi")
@@ -174,7 +212,7 @@ public class AddressBookDialogAdapter extends CursorAdapter {
 
     public String getRecipients() {
         String result = "";
-        for (String recipient: mRecipientsList) {
+        for (String recipient: mRecipientsSet) {
             result += recipient + ";";
         }
         return result;

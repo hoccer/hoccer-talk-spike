@@ -48,4 +48,9 @@
         <item name="android:layout_marginRight">@dimen/profile_container_margin_horizontal</item>
     </style>
 
+    <style name="searchTextHiglight">
+        <item name="android:textColor">#FF33B5E5</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>

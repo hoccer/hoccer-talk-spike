@@ -2,6 +2,7 @@ package com.hoccer.xo.android.dialog;
 
 import android.app.Dialog;
 import android.app.LoaderManager;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -9,13 +10,12 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-//import android.support.v4.app.LoaderManager;
-//import android.support.v4.content.CursorLoader;
-//import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SearchView;
 import com.hoccer.xo.android.adapter.AddressBookDialogAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.release.R;
@@ -29,6 +29,7 @@ public class AddressBookDialog extends Dialog implements LoaderManager.LoaderCal
     private String mToken;
     private Button mInviteButton;
     private Button mCancelButton;
+    private SearchView mSearchView;
     private ListView mListView;
     private XoActivity mXoActivity;
 
@@ -51,9 +52,10 @@ public class AddressBookDialog extends Dialog implements LoaderManager.LoaderCal
         setContentView(R.layout.dialog_multi_invitation);
         mAdapter = new AddressBookDialogAdapter(mContext);
         if (mManager.getLoader(AddressBookDialogAdapter.ContactsQuery.QUERY_ID) != null) {
-            mManager.destroyLoader(AddressBookDialogAdapter.ContactsQuery.QUERY_ID);
+            mManager.restartLoader(AddressBookDialogAdapter.ContactsQuery.QUERY_ID, null, this);
+        } else {
+            mManager.initLoader(AddressBookDialogAdapter.ContactsQuery.QUERY_ID, null, this);
         }
-        mManager.initLoader(AddressBookDialogAdapter.ContactsQuery.QUERY_ID, null, this);
         mListView = (ListView) findViewById(R.id.lv_address_book_dialog);
         mListView.setAdapter(mAdapter);
         mCancelButton = (Button) findViewById(R.id.bt_cancel);
@@ -78,24 +80,66 @@ public class AddressBookDialog extends Dialog implements LoaderManager.LoaderCal
                 }
             }
         });
+        mSearchView = (SearchView) findViewById(R.id.tv_search);
+        mSearchView.setIconifiedByDefault(false);
+        initSearchView();
+    }
+
+    private void initSearchView() {
+        final SearchManager searchManager = (SearchManager) mXoActivity.getSystemService(Context.SEARCH_SERVICE);
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(mXoActivity.getComponentName()));
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String queryText) {
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                String newFilter = !TextUtils.isEmpty(newText) ? newText : null;
+                if (AddressBookDialogAdapter.mSearchTerm == null && newFilter == null) {
+                    return true;
+                }
+                if (AddressBookDialogAdapter.mSearchTerm != null && AddressBookDialogAdapter.mSearchTerm.equals(newFilter)) {
+                    return true;
+                }
+                AddressBookDialogAdapter.mSearchTerm = newFilter;
+                mManager.restartLoader(AddressBookDialogAdapter.ContactsQuery.QUERY_ID, null, AddressBookDialog.this);
+                return true;
+            }
+        });
+        if (AddressBookDialogAdapter.mSearchTerm != null) {
+            final String savedSearchTerm = AddressBookDialogAdapter.mSearchTerm;
+            mSearchView.setQuery(savedSearchTerm, false);
+        }
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
         if (id == AddressBookDialogAdapter.ContactsQuery.QUERY_ID) {
+            String[] params = null;
             Uri contentUri;
-            contentUri = AddressBookDialogAdapter.ContactsQuery.CONTENT_URI;
             String selection = "";
-            if (mAddressBookFilter.equals(ContactsContract.Contacts.HAS_PHONE_NUMBER)) {
-                selection = AddressBookDialogAdapter.ContactsQuery.SELECTION_WITH_PHONES;
+            contentUri = AddressBookDialogAdapter.ContactsQuery.CONTENT_URI;
+            if (AddressBookDialogAdapter.mSearchTerm != null) {
+                if (mAddressBookFilter.equals(ContactsContract.Contacts.HAS_PHONE_NUMBER)) {
+                    selection = AddressBookDialogAdapter.ContactsQuery.SELECTION_WITH_PHONES_FILTERED;
+                } else {
+                    selection = AddressBookDialogAdapter.ContactsQuery.SELECTION_WITH_EMAILS_FILTERED;
+                }
+                params = new String[] {"%"+AddressBookDialogAdapter.mSearchTerm+"%"};
             } else {
-                selection = AddressBookDialogAdapter.ContactsQuery.SELECTION_WITH_EMAILS;
+                if (mAddressBookFilter.equals(ContactsContract.Contacts.HAS_PHONE_NUMBER)) {
+                    selection = AddressBookDialogAdapter.ContactsQuery.SELECTION_WITH_PHONES;
+                } else {
+                    selection = AddressBookDialogAdapter.ContactsQuery.SELECTION_WITH_EMAILS;
+                }
             }
             return new CursorLoader(mContext,
                     contentUri,
                     AddressBookDialogAdapter.ContactsQuery.PROJECTION,
                     selection,
-                    null,
+                    params,
                     AddressBookDialogAdapter.ContactsQuery.SORT_ORDER);
         }
         return  null;
