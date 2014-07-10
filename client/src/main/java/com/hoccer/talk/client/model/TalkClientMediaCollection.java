@@ -62,8 +62,10 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
     // this method should only by called by the database on instantiation
     public void setDatabase(IXoMediaCollectionDatabase db) {
-        mDatabase = db;
-        mItemList = findMediaCollectionItemsOrderedByIndex();
+        if(mDatabase == null) {
+            mDatabase = db;
+            mItemList = findMediaCollectionItemsOrderedByIndex();
+        }
     }
 
     public void setName(String name) {

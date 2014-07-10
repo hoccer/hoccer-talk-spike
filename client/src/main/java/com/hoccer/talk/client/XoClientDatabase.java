@@ -690,10 +690,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     //////// MediaCollection Management ////////
 
-    private Map<Integer, WeakReference<TalkClientMediaCollection>> mMediaCollectionCache =
-            new HashMap<Integer, WeakReference<TalkClientMediaCollection>>();
-
-
     @Override
     public TalkClientMediaCollection findMediaCollectionById(Integer id) throws SQLException {
         TalkClientMediaCollection collection = mMediaCollections.queryForId(id);
@@ -765,7 +761,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public void deleteMediaCollection(TalkClientMediaCollection collection) throws SQLException {
         collection.clear();
         mMediaCollections.delete(collection);
-        mMediaCollectionCache.remove(collection.getId());
         for (IXoMediaCollectionListener listener : mMediaCollectionListeners) {
             listener.onMediaCollectionDeleted(collection);
         }
@@ -795,19 +790,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     // Returns an already cached collection with the same id or the prepared collection
     private TalkClientMediaCollection prepareMediaCollection(TalkClientMediaCollection collection) {
-        WeakReference<TalkClientMediaCollection> cachedWeakCollection = mMediaCollectionCache.get(collection.getId());
-        if (cachedWeakCollection != null) {
-            TalkClientMediaCollection cachedCollection = cachedWeakCollection.get();
-            if (cachedCollection != null) {
-                return cachedCollection;
-            } else {
-                // cleanup weak null reference
-                mMediaCollectionCache.remove(collection.getId());
-            }
-        }
-
         collection.setDatabase(this);
-        mMediaCollectionCache.put(collection.getId(), new WeakReference<TalkClientMediaCollection>(collection));
         return collection;
     }
 }
