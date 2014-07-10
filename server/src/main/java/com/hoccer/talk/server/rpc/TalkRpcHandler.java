@@ -1827,12 +1827,6 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 if (delivery != null) {
                     LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (download), messageId="+message.getMessageId()+", delivery="+delivery.getId());
 
-                    if (TalkDelivery.ATTACHMENT_STATE_RECEIVED.equals(delivery.getAttachmentState()) &&
-                        TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState)) {
-                        LOG.info("AttachmentState already 'received', ignoring next state 'uploaded' (download) returning state 'received', messageId="+message.getMessageId()+", delivery="+delivery.getId());
-                        return delivery.getAttachmentState();
-                    }
-
                     if (!delivery.nextAttachmentStateAllowed(nextState)) {
                         throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
                     }
@@ -1923,6 +1917,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         // for some calls we update only a specific delivery, while for other calls we update only the delivery with the proper receiverId
                         if (receiverId == null || delivery.getReceiverId().equals(receiverId)) {
                             LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (upload), messageId="+message.getMessageId()+", delivery="+delivery.getId());
+
+                            if (TalkDelivery.ATTACHMENT_STATE_RECEIVED.equals(delivery.getAttachmentState()) &&
+                                    TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState)) {
+                                LOG.info("AttachmentState already 'received', ignoring next state 'uploaded' (download) returning state 'received', messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                                return delivery.getAttachmentState();
+                            }
+
                             if (!delivery.nextAttachmentStateAllowed(nextState)) {
                                 throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
                             }
