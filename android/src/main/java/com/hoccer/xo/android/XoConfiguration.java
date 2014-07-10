@@ -11,7 +11,7 @@ import org.apache.log4j.PatternLayout;
  * This class collects various android-specific settings for the XO client.
  */
 public class XoConfiguration {
-	
+
     /* HockeyApp constant id  */
     public static final String HOCKEYAPP_ID = "60f2a55705e94d33e62a7b1643671f46";
 
@@ -26,7 +26,7 @@ public class XoConfiguration {
     public static final String INTERNAL_THUMBNAILS = "thumbnails";
 
     /* Enable or disable development settings in preferences */
-    public static final boolean DEVELOPMENT_MODE_ENABLED = true;
+    public static final boolean DEVELOPMENT_MODE_ENABLED = false;
 
     /* true: log level = debug, log to sdcard activated*/
     public static final boolean TESTING_MODE_ENABLED = false;
