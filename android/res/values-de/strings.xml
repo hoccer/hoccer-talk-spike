@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Hoccer XO</string>
+    <string name="app_name">Bofrost Messenger</string>
 
     <string name="demo_message">Lorem ipsum dolor...</string>
 
@@ -27,7 +27,7 @@
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
 	<string name="menu_music_viewer">Musik</string>
-    <string name="menu_about">Über Hoccer XO</string>
+    <string name="menu_about">Über Bofrost Messenger</string>
     <string name="menu_reconnect">erneut verbinden</string>
     <string name="menu_quit">schließen</string>
     <string name="menu_clear_conversation">Chat löschen</string>
@@ -256,11 +256,11 @@
     <string name="profile_compare_key_description">Für ein Extra an Sicherheit vergleiche diesen Fingerabdruck mit dem Fingerabdruck, den deine Freunde in deiner Kontaktkarte sehen.</string>
     <string name="pref_please_wait">Bitte warten...</string>
     <string name="my_profile_title">Mein Profil</string>
-    <string name="welcome_to_title">Willkommen bei XO!</string>
+    <string name="welcome_to_title">Willkommen bei Bofrost!</string>
     <string name="contact_item_receive_attachment">%1$s Datei erhalten</string>
     <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar setzen.
     </string>
-    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App HoccerXO zum sicheren Chatten! Jetzt herunterladen: http://hoccer.com/ Dann mich als Kontakt hinzufügen: %1$s%2$s
+    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App Bofrost Messenger zum sicheren Chatten! Jetzt herunterladen: http://bofrost.com/ Dann mich als Kontakt hinzufügen: %1$s%2$s
         \nxo %3$s
     </string>
     <string name="email_invitation_text">Hey!\nI\'m now using the free app Hoccer XO for secure
@@ -283,7 +283,7 @@
 
     <string name="placeholder_conversations_text">Lade deine Freunde zum Chatten ein!</string>
     <string name="placeholder_nearby_text">Warten auf andere Nearby-Nutzer...</string>
-    <string name="actionbar_default_title">Hoccer</string>
+    <string name="actionbar_default_title">Bofrost</string>
     <string name="content_audio_caption">Musik</string>
     <string name="nearby_info_usercount">%1$d Benutzer in der Nähe</string>
     <string name="profile_nickname_text">Anzeigename</string>
@@ -312,7 +312,7 @@
         <item>IN DER NÄHE</item>
     </string-array>
 
-    <string name="about_advert_text">Hoccer XO \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Hoccer neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Hoccer XO ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
+    <string name="about_advert_text">Bofrost Messenger \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Bofrost neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Bofrost Messenger ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s</string>
 
 </resources>
