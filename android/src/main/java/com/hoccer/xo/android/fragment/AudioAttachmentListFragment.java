@@ -15,7 +15,6 @@ import android.widget.*;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
-import com.hoccer.talk.client.model.TalkClientMediaCollectionRelation;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
@@ -80,6 +79,8 @@ public class AudioAttachmentListFragment extends XoListFragment {
         mAttachmentListAdapter.setContentMediaTypeFilter(mContentMediaTypeFilter);
         loadAttachments();
 
+        XoApplication.getXoClient().getDatabase().registerDownloadListener(mAttachmentListAdapter);
+
         if (mDisplayMode != DisplayMode.COLLECTION_ATTACHMENTS) {
             mSearchContactsAdapter = new ContactSearchResultAdapter(getXoActivity());
             mSearchContactsAdapter.onCreate();
@@ -129,8 +130,6 @@ public class AudioAttachmentListFragment extends XoListFragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        determineDisplayMode();
 
         if (mDisplayMode != DisplayMode.COLLECTION_ATTACHMENTS) {
             if (mSearchContactsAdapter == null) {
@@ -185,6 +184,12 @@ public class AudioAttachmentListFragment extends XoListFragment {
         super.onStop();
         XoApplication.getXoClient().unregisterTransferListener(mAttachmentListAdapter);
         getActivity().unbindService(mConnection);
+    }
+
+    @Override
+    public void onDestroy() {
+        XoApplication.getXoClient().getDatabase().unregisterDownloadListener(mAttachmentListAdapter);
+        super.onDestroy();
     }
 
     @Override
@@ -300,10 +305,9 @@ public class AudioAttachmentListFragment extends XoListFragment {
             try {
                 TalkClientDownload download = (TalkClientDownload) item.getContentObject();
 
-                int downloadId = download.getClientDownloadId();
-                XoApplication.getXoClient().getDatabase().deleteTalkClientDownloadbyId(downloadId);
+                XoApplication.getXoClient().getDatabase().deleteTalkClientDownload(download);
 
-                int messageId = XoApplication.getXoClient().getDatabase().findMessageByDownloadId(downloadId).getClientMessageId();
+                int messageId = XoApplication.getXoClient().getDatabase().findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
                 XoApplication.getXoClient().getDatabase().deleteMessageById(messageId);
 
                 List<TalkClientMediaCollection> collections = XoApplication.getXoClient().getDatabase().findAllMediaCollectionsContainingItem(download);
@@ -311,7 +315,6 @@ public class AudioAttachmentListFragment extends XoListFragment {
                     collection.removeItem(download);
                 }
 
-                mAttachmentListAdapter.removeItem(pos);
                 mMediaPlayerService.removeMedia(item);
 
                 Intent intent = new Intent(AUDIO_ATTACHMENT_REMOVED_ACTION);
