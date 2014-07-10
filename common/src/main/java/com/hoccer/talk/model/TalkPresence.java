@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-@DatabaseTable(tableName="presence")
+@DatabaseTable(tableName = "presence")
 public class TalkPresence {
 
     public final static String CONN_STATUS_OFFLINE = "offline";
@@ -173,6 +173,7 @@ public class TalkPresence {
             this.setConnectionStatus(p.getConnectionStatus());
         }
     }
+
     @JsonIgnore
     public Set<String> nonNullFields() {
         Set<String> result = new HashSet<String>();
