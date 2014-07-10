@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.net.URL;
-import java.sql.SQLException;
 
 public class ImageSelector implements IContentSelector {
 
@@ -39,6 +38,19 @@ public class ImageSelector implements IContentSelector {
     @Override
     public Drawable getContentIcon() {
         return mIcon;
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        Uri contentUri = intent.getData();
+        String[] columns = {
+                MediaStore.Images.Media.MIME_TYPE
+        };
+        Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
+        cursor.moveToFirst();
+        int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
+        String mimeType = cursor.getString(mimeTypeIndex);
+        return (mimeType.startsWith("image"));
     }
 
     @Override
@@ -66,14 +78,18 @@ public class ImageSelector implements IContentSelector {
         return intent;
     }
 
-
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        Uri selectedContent = intent.getData();
-        if (selectedContent.toString().startsWith("content://com.google.android.gallery3d")) {
-            return createFromPicasa(context, intent);
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
         } else {
-            return createFromFile(context, intent);
+            Uri selectedContent = intent.getData();
+            if (selectedContent.toString().startsWith("content://com.google.android.gallery3d")) {
+                return createFromPicasa(context, intent);
+            } else {
+                return createFromFile(context, intent);
+            }
         }
     }
 

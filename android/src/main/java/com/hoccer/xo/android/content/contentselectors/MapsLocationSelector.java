@@ -45,4 +45,9 @@ public class MapsLocationSelector implements IContentSelector {
         return content;
     }
 
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
+    }
+
 }

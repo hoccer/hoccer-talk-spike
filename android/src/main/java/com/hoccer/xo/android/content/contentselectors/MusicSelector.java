@@ -73,4 +73,9 @@ public class MusicSelector implements IContentSelector {
         return contentObject;
     }
 
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
+    }
+
 }

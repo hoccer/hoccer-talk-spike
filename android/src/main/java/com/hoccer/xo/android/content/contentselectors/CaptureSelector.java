@@ -31,6 +31,11 @@ public class CaptureSelector implements IContentSelector {
     }
 
     @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
+    }
+
+    @Override
     public Intent createSelectionIntent(Context context) {
         return new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     }

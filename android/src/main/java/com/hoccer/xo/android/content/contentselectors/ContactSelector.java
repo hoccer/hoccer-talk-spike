@@ -42,6 +42,11 @@ public class ContactSelector implements IContentSelector {
     }
 
     @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
+    }
+
+    @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
         Uri selectedContent = intent.getData();
         String[] columns = {

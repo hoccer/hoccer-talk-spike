@@ -41,4 +41,9 @@ public class DataSelector implements IContentSelector {
         SelectedContent content = null;
         return null;
     }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
+    }
 }
