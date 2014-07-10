@@ -48,6 +48,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     Dao<TalkClientMediaCollection, Integer> mMediaCollections;
     Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
 
+    private List<IXoDownloadListener> mDownloadListeners = new ArrayList<IXoDownloadListener>();
+    private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListeners = new WeakListenerArray<IXoMediaCollectionListener>();
+
 
     public static void createTables(ConnectionSource cs) throws SQLException {
         TableUtils.createTable(cs, TalkClientContact.class);
@@ -664,12 +667,25 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         deleteBuilder.delete();
     }
 
-    public void deleteTalkClientDownloadbyId(int downloadId) throws SQLException {
+    public void deleteTalkClientDownload(TalkClientDownload download) throws SQLException {
 
         DeleteBuilder<TalkClientDownload, Integer> deleteBuilder = mClientDownloads.deleteBuilder();
         deleteBuilder.where()
-                .eq("clientDownloadId", downloadId);
-        deleteBuilder.delete();
+                .eq("clientDownloadId", download.getClientDownloadId());
+        int deletedRowsCount = deleteBuilder.delete();
+        if (deletedRowsCount > 0) {
+            for (IXoDownloadListener listener : mDownloadListeners) {
+                listener.onDownloadRemoved(download);
+            }
+        }
+    }
+
+    public void registerDownloadListener(IXoDownloadListener listener) {
+        mDownloadListeners.add(listener);
+    }
+
+    public void unregisterDownloadListener(IXoDownloadListener listener) {
+        mDownloadListeners.remove(listener);
     }
 
     //////// MediaCollection Management ////////
@@ -677,7 +693,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     private Map<Integer, WeakReference<TalkClientMediaCollection>> mMediaCollectionCache =
             new HashMap<Integer, WeakReference<TalkClientMediaCollection>>();
 
-    private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListenerArray = new WeakListenerArray<IXoMediaCollectionListener>();
 
     @Override
     public TalkClientMediaCollection findMediaCollectionById(Integer id) throws SQLException {
@@ -730,7 +745,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         TalkClientMediaCollection collection = new TalkClientMediaCollection(collectionName);
         mMediaCollections.createIfNotExists(collection);
         collection = prepareMediaCollection(collection);
-        for (IXoMediaCollectionListener listener : mMediaCollectionListenerArray) {
+        for (IXoMediaCollectionListener listener : mMediaCollectionListeners) {
             listener.onMediaCollectionCreated(collection);
         }
         return collection;
@@ -751,19 +766,19 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         collection.clear();
         mMediaCollections.delete(collection);
         mMediaCollectionCache.remove(collection.getId());
-        for (IXoMediaCollectionListener listener : mMediaCollectionListenerArray) {
+        for (IXoMediaCollectionListener listener : mMediaCollectionListeners) {
             listener.onMediaCollectionDeleted(collection);
         }
     }
 
     @Override
     public void registerListener(IXoMediaCollectionListener listener) {
-        mMediaCollectionListenerArray.registerListener(listener);
+        mMediaCollectionListeners.registerListener(listener);
     }
 
     @Override
     public void unregisterListener(IXoMediaCollectionListener listener) {
-        mMediaCollectionListenerArray.unregisterListener(listener);
+        mMediaCollectionListeners.unregisterListener(listener);
     }
 
     // The returned Dao should not be used directly to alter the database, use TalkClientMediaCollection instead
