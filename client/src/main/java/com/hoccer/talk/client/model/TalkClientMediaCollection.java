@@ -9,7 +9,10 @@ import com.j256.ormlite.table.DatabaseTable;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Encapsulates a collection of media items with a specific order. The data is kept in sync with the database.
@@ -20,9 +23,13 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     // collection update/change listener
     public interface Listener {
         void onCollectionNameChanged(TalkClientMediaCollection collection);
+
         void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex);
+
         void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved);
+
         void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded);
+
         void onCollectionCleared(TalkClientMediaCollection collection);
     }
 
@@ -62,7 +69,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     public void setName(String name) {
         mName = name;
         updateMediaCollection();
-        for(Listener listener : mListenerArray) {
+        for (Listener listener : mListenerArray) {
             listener.onCollectionNameChanged(this);
         }
     }
@@ -73,9 +80,9 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
     // Appends the given item to the collection
     public void addItem(TalkClientDownload item) {
-        if(createRelation(item, mItemList.size())) {
+        if (createRelation(item, mItemList.size())) {
             mItemList.add(item);
-            for(Listener listener : mListenerArray) {
+            for (Listener listener : mListenerArray) {
                 listener.onItemAdded(this, mItemList.size() - 1, item);
             }
         }
@@ -83,12 +90,12 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
     // Inserts the given item into the collection
     public void addItem(int index, TalkClientDownload item) {
-        if(index >= mItemList.size()) {
+        if (index >= mItemList.size()) {
             addItem(item); // simply append
         } else {
-            if(createRelation(item, index)) {
+            if (createRelation(item, index)) {
                 mItemList.add(index, item);
-                for(Listener listener : mListenerArray) {
+                for (Listener listener : mListenerArray) {
                     listener.onItemAdded(this, index, item);
                 }
             }
@@ -98,17 +105,17 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     // Removes the given item from the collection
     public void removeItem(TalkClientDownload item) {
         int index = mItemList.indexOf(item);
-        if(index >= 0) {
+        if (index >= 0) {
             removeItem(index);
         }
     }
 
     // Removes the item at the given index from the collection
     public void removeItem(int index) {
-        if(removeRelation(index)) {
+        if (removeRelation(index)) {
             TalkClientDownload item = mItemList.get(index);
             mItemList.remove(index);
-            for(Listener listener : mListenerArray) {
+            for (Listener listener : mListenerArray) {
                 listener.onItemRemoved(this, index, item);
             }
         }
@@ -117,23 +124,23 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     // Moves the item at index 'from' to index 'to'.
     // Throws an IndexOutOfBoundsException if 'from' or 'to' is out of bounds.
     public void reorderItemIndex(int from, int to) {
-        if(from < 0 || from >= mItemList.size()) {
+        if (from < 0 || from >= mItemList.size()) {
             throw new IndexOutOfBoundsException("'from' parameter is out of bounds [0," + mItemList.size() + "] with value: " + from);
         }
 
-        if(to < 0 || to >= mItemList.size()) {
+        if (to < 0 || to >= mItemList.size()) {
             throw new IndexOutOfBoundsException("'to' parameter is out of bounds [0," + mItemList.size() + "] with value: " + to);
         }
 
-        if(from == to) {
+        if (from == to) {
             return;
         }
 
-        if(reorderRelation(from, to)) {
+        if (reorderRelation(from, to)) {
             TalkClientDownload item = mItemList.get(from);
             mItemList.remove(from);
             mItemList.add(to, item);
-            for(Listener listener : mListenerArray) {
+            for (Listener listener : mListenerArray) {
                 listener.onItemOrderChanged(this, from, to);
             }
         }
@@ -150,7 +157,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
     // Remove all items from collection
     public void clear() {
-        if(mItemList.size() == 0) {
+        if (mItemList.size() == 0) {
             return;
         }
 
@@ -165,7 +172,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
             return;
         }
         mItemList.clear();
-        for(Listener listener : mListenerArray) {
+        for (Listener listener : mListenerArray) {
             listener.onCollectionCleared(this);
         }
     }
@@ -195,7 +202,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
             @Override
             public TalkClientDownload next() {
-                if(mCurrentIndex < mItemList.size()) {
+                if (mCurrentIndex < mItemList.size()) {
                     return mItemList.get(mCurrentIndex++);
                 } else {
                     throw new NoSuchElementException("There is no next item in media collection.");
@@ -204,7 +211,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
             @Override
             public void remove() {
-                if(mCurrentIndex < mItemList.size()) {
+                if (mCurrentIndex < mItemList.size()) {
                     removeItem(mCurrentIndex);
                 } else {
                     throw new NoSuchElementException("There is no next item in media collection.");
@@ -223,10 +230,10 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
                     .eq("collection_id", mCollectionId)
                     .query();
 
-            for(TalkClientMediaCollectionRelation relation : relations) {
+            for (TalkClientMediaCollectionRelation relation : relations) {
                 items.add(relation.getItem());
             }
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -252,16 +259,16 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
             // decrease/increase index of all affected items except the reordered one
             int step = from < to ? -1 : 1;
-            for(int i = 0; i < relations.size(); i++) {
+            for (int i = 0; i < relations.size(); i++) {
                 TalkClientMediaCollectionRelation relation = relations.get(i);
-                if(relation.getIndex() == from) {
+                if (relation.getIndex() == from) {
                     relation.setIndex(to);
                 } else {
                     relation.setIndex(relation.getIndex() + step);
                 }
                 relationDao.update(relation);
             }
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -280,7 +287,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
                     .eq("collection_id", mCollectionId)
                     .query();
 
-            for(int i = 0; i < relations.size(); i++) {
+            for (int i = 0; i < relations.size(); i++) {
                 TalkClientMediaCollectionRelation relation = relations.get(i);
                 relation.setIndex(relation.getIndex() + 1);
                 relationDao.update(relation);
@@ -288,7 +295,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
             TalkClientMediaCollectionRelation newRelation = new TalkClientMediaCollectionRelation(mCollectionId, item, index);
             relationDao.create(newRelation);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -305,7 +312,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
                     .eq("index", index)
                     .queryForFirst();
 
-            if(relationToDelete != null) {
+            if (relationToDelete != null) {
                 relationDao.delete(relationToDelete);
 
                 // decrement index of all items with higher index
@@ -323,7 +330,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
                     relationDao.update(relation);
                 }
             }
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
