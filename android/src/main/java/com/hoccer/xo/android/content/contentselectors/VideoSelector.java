@@ -95,11 +95,11 @@ public class VideoSelector implements IContentSelector {
     public boolean isValidIntent(Context context, Intent intent) {
         Uri contentUri = intent.getData();
         String[] columns = {
-                MediaStore.Images.Media.MIME_TYPE
+                MediaStore.Video.Media.MIME_TYPE
         };
         Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
         cursor.moveToFirst();
-        int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
+        int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Video.Media.MIME_TYPE);
         String mimeType = cursor.getString(mimeTypeIndex);
         return (mimeType.startsWith("video"));
     }
