@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.view.chat;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
@@ -135,6 +136,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         setAvatar(avatarView, mMessage.getSenderContact());
         if (mMessage.isIncoming()) {
             if (mMessage.getConversationContact().isGroup()) {
+                avatarView.setVisibility(View.VISIBLE);
             } else {
                 avatarView.setVisibility(View.GONE);
             }
@@ -142,19 +144,13 @@ public class ChatMessageItem implements AttachmentTransferListener {
             messageInfo.setText(mMessage.getSenderContact().getNickname());
             messageInfo.setTextColor(messageInfo.getResources().getColor(android.R.color.secondary_text_dark));
 
-            messageText.setBackgroundDrawable(
-                    mContext.getResources().getDrawable(R.drawable.bubble_grey));
-            messageText
-                    .setTextColor(mContext.getResources().getColorStateList(android.R.color.black));
-            messageText.setLinkTextColor(
-                    mContext.getResources().getColorStateList(android.R.color.black));
+            messageText.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.bubble_grey));
+            messageText.setTextColor(mContext.getResources().getColorStateList(android.R.color.black));
+            messageText.setLinkTextColor(mContext.getResources().getColorStateList(android.R.color.black));
 
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText
-                    .getLayoutParams();
-            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10,
-                    mContext.getResources().getDisplayMetrics());
-            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30,
-                    mContext.getResources().getDisplayMetrics());
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
+            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
+            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
             layoutParams.leftMargin = (int) marginLeft;
             layoutParams.rightMargin = (int) marginRight;
             messageText.setLayoutParams(layoutParams);
@@ -163,19 +159,13 @@ public class ChatMessageItem implements AttachmentTransferListener {
             avatarView.setVisibility(View.GONE);
             updateSeenStatus(view);
 
-            messageText.setBackgroundDrawable(
-                    mContext.getResources().getDrawable(getBackgroundResource()));
-            messageText.setTextColor(
-                    mContext.getResources().getColorStateList(android.R.color.white));
-            messageText.setLinkTextColor(
-                    mContext.getResources().getColorStateList(android.R.color.white));
+            messageText.setBackgroundDrawable(mContext.getResources().getDrawable(getBackgroundResource()));
+            messageText.setTextColor(mContext.getResources().getColorStateList(android.R.color.white));
+            messageText.setLinkTextColor(mContext.getResources().getColorStateList(android.R.color.white));
 
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText
-                    .getLayoutParams();
-            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30,
-                    mContext.getResources().getDisplayMetrics());
-            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10,
-                    mContext.getResources().getDisplayMetrics());
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
+            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
+            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
             layoutParams.leftMargin = (int) marginLeft;
             layoutParams.rightMargin = (int) marginRight;
             messageText.setLayoutParams(layoutParams);

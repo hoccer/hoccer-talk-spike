@@ -24,6 +24,8 @@ import com.hoccer.xo.android.sms.SmsReceiver;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
@@ -215,7 +217,7 @@ public class XoClientService extends Service {
     private void configureServiceUri() {
         String uriString = mPreferences.getString("preference_service_uri", "");
         if (uriString.isEmpty()) {
-            uriString = XoClientConfiguration.SERVER_URI;
+            uriString = XoApplication.getXoClient().getHost().getServerUri();
         }
         URI uri = URI.create(uriString);
         mClient.setServiceUri(uri);

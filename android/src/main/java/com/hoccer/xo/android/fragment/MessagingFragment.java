@@ -64,10 +64,12 @@ public class MessagingFragment extends XoListFragment
             }
 
         } else {
-            LOG.error("Creating SingleProfileFragment without arguments is not supported.");
+            LOG.error("MessagingFragment requires contactId as argument.");
         }
 
         mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, getXoActivity(), mCompositionFragment);
+
+        createCompositionFragment();
     }
 
     @Override
@@ -86,7 +88,15 @@ public class MessagingFragment extends XoListFragment
 
         mMessageList = (OverscrollListView) view.findViewById(android.R.id.list);
         mEmptyText = (TextView) view.findViewById(R.id.messaging_empty);
+    }
+
+    private void createCompositionFragment() {
+        Bundle bundle = new Bundle();
+        bundle.putInt(CompositionFragment.ARG_CLIENT_CONTACT_ID, mContact.getClientContactId());
+
         mCompositionFragment = new CompositionFragment();
+        mCompositionFragment.setArguments(bundle);
+
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_container, mCompositionFragment).commit();
     }
@@ -108,7 +118,6 @@ public class MessagingFragment extends XoListFragment
         }
 
         mMessageList.setAdapter(mAdapter);
-        mCompositionFragment.setContact(mContact);
 
         configureMotionInterpreterForContact(mContact);
         XoApplication.getXoClient().registerContactListener(this);
@@ -205,11 +214,6 @@ public class MessagingFragment extends XoListFragment
         } else {
             mMotionInterpreter.deactivate();
         }
-    }
-
-    public void setContact(TalkClientContact contact) {
-        LOG.debug("setContact(" + contact.getClientContactId() + ")");
-        mContact = contact;
     }
 
     @Override

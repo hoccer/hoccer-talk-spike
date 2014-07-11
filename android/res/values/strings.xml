@@ -27,7 +27,7 @@
     <string name="menu_profile">Profile</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_music_viewer">Music</string>
-    <string name="menu_about">About</string>
+    <string name="menu_about">About Hoccer XO</string>
     <string name="menu_reconnect">Reconnect</string>
     <string name="menu_quit">Quit</string>
     <string name="menu_clear_conversation">Clear conversation</string>
@@ -273,8 +273,8 @@
     <string name="my_profile_title">My profile</string>
     <string name="welcome_to_title">Welcome to XO!</string>
     <string name="contact_item_receive_attachment">Received %1$s attachment</string>
-    <string name="error_avatar_selection">The image you\'ve selected is not suitable as Avatar.
-    </string>
+    <string name="error_avatar_selection">The image you have selected is not suitable as Avatar.</string>
+    <string name="error_attachment_selection">The file you have selected cannot be used as attachment.</string>
     <string name="sms_invitation_text">Hey! I\'m now using the free app Hoccer XO for secure
         chatting. Download it now: http://hoccer.com/ Then add me as a contact: %1$s%2$s
         \nxo %3$s
@@ -330,5 +330,8 @@
     <string name="nearby_saved">Nearby saved</string>
     <string name="error_send_message_empty_group">There is nobody in this group.</string>
     <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
+
+    <string name="about_advert_text">Hoccer XO \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. Hoccer sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. Hoccer XO provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
+    <string name="about_version_description">Version %1$s</string>
 
 </resources>

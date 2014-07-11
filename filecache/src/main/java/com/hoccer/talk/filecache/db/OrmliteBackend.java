@@ -72,7 +72,11 @@ public class OrmliteBackend extends CacheBackend {
         mExpiryExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                scheduleCleanupFiles();
+                try {
+                    scheduleCleanupFiles();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, mConfiguration.getCleanupFilesDelay(), TimeUnit.SECONDS);
     }
@@ -82,8 +86,11 @@ public class OrmliteBackend extends CacheBackend {
         mExpiryExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                doCleanupFiles();
-            }
+                try {
+                    doCleanupFiles();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }            }
         }, mConfiguration.getCleanupFilesInterval(), TimeUnit.SECONDS);
     }
 

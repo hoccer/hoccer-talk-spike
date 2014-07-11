@@ -1,13 +1,9 @@
 package com.hoccer.talk.server.delivery;
 
-import com.hoccer.talk.rpc.ITalkRpcClient;
 import com.hoccer.talk.server.TalkServer;
-import com.hoccer.talk.server.TalkServerConfiguration;
 import com.hoccer.talk.server.agents.NotificationDeferrer;
-import com.hoccer.talk.server.rpc.TalkRpcConnection;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 public class DeliveryAgent extends NotificationDeferrer {
 
@@ -15,10 +11,13 @@ public class DeliveryAgent extends NotificationDeferrer {
 
     private final TalkServer mServer;
 
+    private final static String FORCE_ALL = "forceAll";
+    private final static String NO_FORCE = "noForce";
+
     public DeliveryAgent(TalkServer server) {
         super(
-            TalkServerConfiguration.THREADS_DELIVERY,
-            "delivery-agent"
+                server.getConfiguration().getDeliveryAgentThreadPoolSize(),
+                "delivery-agent"
         );
         mServer = server;
     }
@@ -37,9 +36,47 @@ public class DeliveryAgent extends NotificationDeferrer {
             @Override
             public void run() {
                 try {
-                    deliveryRequest.perform();
+                    TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("deliveryRequest-"+deliveryRequest.mClientId);
+
+                    boolean acquired = lock.tryLock();
+                    LOG.debug("requestDelivery trylock for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting="+lock.getWaiting()+" withNoForce="+lock.getWaiting(NO_FORCE)+" withForceAll="+lock.getWaiting(FORCE_ALL));
+
+                    if (!acquired && lock.getWaiting(FORCE_ALL) > 0) {
+                        // we are sure that that there are other threads waiting to be performed
+                        // with a forceAll so we can just throw away this request
+                        LOG.debug("requestDelivery enough forceAll waiters, throwing away request for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting withForceAll="+lock.getWaiting(FORCE_ALL));
+                        return;
+                    }
+
+                    if (!deliveryRequest.mForceAll && !acquired && lock.getWaiting(NO_FORCE) > 0) {
+                        // we are sure that that there are other threads waiting to be performed
+                        // so we can just throw away this request
+                        LOG.debug("requestDelivery enough waiters, throwing away request for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+"acquired="+acquired+" waiting withNoForce="+lock.getWaiting(NO_FORCE));
+                        return;
+                    }
+
+                    try {
+                        String waiterType = deliveryRequest.mForceAll ? FORCE_ALL : NO_FORCE;
+                        LOG.debug("requestDelivery will lock mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+", waiterType="+waiterType);
+                        if (!acquired) {
+                            lock.lock(waiterType);
+                        }
+                        LOG.debug("requestDelivery acquired lock for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+", waiterType="+waiterType);
+                        deliveryRequest.perform();
+                        LOG.debug("requestDelivery ready for mClientId: '" + deliveryRequest.mClientId + "' with id " + lock + ", hash=" + lock.hashCode()+",thread="+Thread.currentThread()+", waiterType="+waiterType);
+                    } catch (InterruptedException e) {
+                        LOG.debug("requestDelivery: interrupted" + e);
+                    } finally {
+                        LOG.debug("requestDelivery releasing lock for mClientId: '" + deliveryRequest.mClientId + "' with id "+lock+", hash="+lock.hashCode()+",thread="+Thread.currentThread());
+                        lock.unlock();
+                    }
+                    try {
+                        deliveryRequest.perform();
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         };

@@ -24,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
@@ -532,40 +531,40 @@ public abstract class XoActivity extends FragmentActivity {
         if (requestCode == REQUEST_SELECT_AVATAR) {
             if (mAvatarSelection != null) {
                 ImageSelector selector = (ImageSelector) mAvatarSelection.getSelector();
-                startExternalActivityForResult(selector.createCropIntent(this, data.getData()),
-                        REQUEST_CROP_AVATAR);
+                startExternalActivityForResult(selector.createCropIntent(this, data.getData()), REQUEST_CROP_AVATAR);
             }
-            return;
-        }
-
-        if (requestCode == REQUEST_CROP_AVATAR) {
+        } else if (requestCode == REQUEST_CROP_AVATAR) {
             data = selectedAvatarPreProcessing(data);
             if (data != null) {
-                IContentObject co = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection,
-                        data);
-                if (co != null) {
-                    LOG.debug("selected avatar " + co.getContentDataUrl());
+                IContentObject contentObject = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection, data);
+                if (contentObject != null) {
+                    LOG.debug("selected avatar " + contentObject.getContentDataUrl());
                     for (IXoFragment fragment : mTalkFragments) {
-                        fragment.onAvatarSelected(co);
+                        fragment.onAvatarSelected(contentObject);
                     }
                 }
             } else {
-                Toast.makeText(this, R.string.error_avatar_selection, Toast.LENGTH_LONG).show();
+                showAvatarSelectionError();
             }
-            return;
-        }
-
-        if (requestCode == REQUEST_SELECT_ATTACHMENT) {
-            IContentObject co = ContentRegistry.get(this)
-                    .createSelectedAttachment(mAttachmentSelection, data);
-            if (co != null) {
-                LOG.debug("selected attachment " + co.getContentDataUrl());
+        } else if (requestCode == REQUEST_SELECT_ATTACHMENT) {
+            IContentObject contentObject = ContentRegistry.get(this).createSelectedAttachment(mAttachmentSelection, data);
+            if (contentObject != null) {
+                LOG.debug("selected attachment " + contentObject.getContentDataUrl());
                 for (IXoFragment fragment : mTalkFragments) {
-                    fragment.onAttachmentSelected(co);
+                    fragment.onAttachmentSelected(contentObject);
                 }
+            } else {
+                showAttachmentSelectionError();
             }
-            return;
         }
+    }
+
+    private void showAvatarSelectionError() {
+        Toast.makeText(this, R.string.error_avatar_selection, Toast.LENGTH_LONG).show();
+    }
+
+    private void showAttachmentSelectionError() {
+        Toast.makeText(this, R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
     }
 
     protected void enableUpNavigation() {
@@ -702,16 +701,6 @@ public abstract class XoActivity extends FragmentActivity {
         startActivity(new Intent(this, FullscreenPlayerActivity.class));
     }
 
-    public void showAbout() {
-        LOG.debug("showAbout()");
-        startActivity(new Intent(this, AboutActivity.class));
-    }
-
-    public void showLicenses() {
-        LOG.debug("showLicenses()");
-        startActivity(new Intent(this, LicensesActivity.class));
-    }
-
     public void showPreferences() {
         LOG.debug("showPreferences()");
         startActivity(new Intent(this, XoPreferenceActivity.class));
@@ -727,8 +716,7 @@ public abstract class XoActivity extends FragmentActivity {
 
         setBackgroundActive();
 
-        mAttachmentSelection = ContentRegistry.get(this)
-                .selectAttachment(this, REQUEST_SELECT_ATTACHMENT);
+        mAttachmentSelection = ContentRegistry.get(this).selectAttachment(this, REQUEST_SELECT_ATTACHMENT);
     }
 
     public void scanBarcode() {
@@ -746,7 +734,7 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     public String getBarcodeString() {
-        return XoClientConfiguration.HXO_URL_SCHEME + getXoClient().generatePairingToken();
+        return getXoClient().getHost().getUrlScheme() + getXoClient().generatePairingToken();
     }
 
     public void composeInviteSms(String token) {
@@ -756,7 +744,7 @@ public abstract class XoActivity extends FragmentActivity {
             TalkClientContact self = mDatabase.findSelfContact(false);
 
             String message = String
-                    .format(getString(R.string.sms_invitation_text), XoClientConfiguration.HXO_URL_SCHEME, token, self.getName());
+                    .format(getString(R.string.sms_invitation_text), getResources().getString(R.string.url_scheme), token, self.getName());
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //At least KitKat
                 String defaultSmsPackageName = Telephony.Sms
@@ -788,7 +776,7 @@ public abstract class XoActivity extends FragmentActivity {
         try {
             TalkClientContact self = mDatabase.findSelfContact(false);
             String message = String
-                    .format(getString(R.string.email_invitation_text), XoClientConfiguration.HXO_URL_SCHEME, token, self.getName());
+                    .format(getString(R.string.email_invitation_text), getXoClient().getHost().getUrlScheme(), token, self.getName());
             Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
             email.putExtra(Intent.EXTRA_SUBJECT,"Join me at Hoccer!");
             email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));

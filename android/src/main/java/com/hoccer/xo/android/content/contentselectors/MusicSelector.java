@@ -37,6 +37,11 @@ public class MusicSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        }
+
         Uri selectedContent = intent.getData();
         String[] filePathColumn = {
                 MediaStore.Audio.Media.MIME_TYPE,
@@ -71,6 +76,11 @@ public class MusicSelector implements IContentSelector {
         contentObject.setContentLength(fileSize);
 
         return contentObject;
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
     }
 
 }

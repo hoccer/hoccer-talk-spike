@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-@DatabaseTable(tableName="presence")
+@DatabaseTable(tableName = "presence")
 public class TalkPresence {
 
     public final static String CONN_STATUS_OFFLINE = "offline";
@@ -53,27 +53,27 @@ public class TalkPresence {
 
     @JsonIgnore
     public boolean isOffline() {
-        return connectionStatus == null || connectionStatus.equals(CONN_STATUS_OFFLINE);
+        return (connectionStatus == null || (connectionStatus != null && connectionStatus.equals(CONN_STATUS_OFFLINE)));
     }
 
     @JsonIgnore
     public boolean isBackground() {
-        return connectionStatus != null && connectionStatus.equals(CONN_STATUS_BACKGROUND);
+        return (connectionStatus != null && connectionStatus.equals(CONN_STATUS_BACKGROUND));
     }
 
     @JsonIgnore
     public boolean isOnline() {
-        return (connectionStatus != null) && connectionStatus.equals(CONN_STATUS_ONLINE);
+        return (connectionStatus != null && connectionStatus.equals(CONN_STATUS_ONLINE));
     }
 
     @JsonIgnore
     public boolean isTyping() {
-        return (connectionStatus != null) && connectionStatus.equals(CONN_STATUS_TYPING);
+        return (connectionStatus != null && connectionStatus.equals(CONN_STATUS_TYPING));
     }
 
     @JsonIgnore
     public boolean isPresent() {
-        return (connectionStatus != null) && (connectionStatus.equals(CONN_STATUS_ONLINE) || connectionStatus.equals(CONN_STATUS_TYPING));
+        return (isOnline() || isTyping());
     }
 
     @JsonIgnore
@@ -173,6 +173,7 @@ public class TalkPresence {
             this.setConnectionStatus(p.getConnectionStatus());
         }
     }
+
     @JsonIgnore
     public Set<String> nonNullFields() {
         Set<String> result = new HashSet<String>();

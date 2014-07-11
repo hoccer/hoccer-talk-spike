@@ -1,17 +1,20 @@
 package com.hoccer.xo.android;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.preference.PreferenceManager;
+import android.util.TypedValue;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
-import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
+import com.hoccer.xo.release.R;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
+
+import android.content.Context;
+import android.net.Uri;
+import android.preference.PreferenceManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,6 +93,77 @@ public class XoAndroidClientHost implements IXoClientHost {
     }
 
     @Override
+    public boolean getUseBsonProtocol() {
+        return mContext.getResources().getBoolean(R.bool.use_bson_protocol);
+    }
+
+    @Override
+    public String getBsonProtocolString() {
+        return mContext.getResources().getString(R.string.protocol_bson);
+    }
+
+    @Override
+    public String getJsonProtocolString() {
+        return  mContext.getResources().getString(R.string.protocol_json);
+    }
+
+    @Override
+    public int getTransferThreads() {
+        return  mContext.getResources().getInteger(R.integer.transfer_threads);
+    }
+
+    @Override
+    public int getConnectTimeout() {
+        return mContext.getResources().getInteger(R.integer.connect_timeout);
+    }
+
+    @Override
+    public int getIdleTimeout() {
+        return mContext.getResources().getInteger(R.integer.idle_timeout);
+    }
+
+    @Override
+    public boolean getKeepAliveEnabled() {
+        return mContext.getResources().getBoolean(R.bool.keep_alive_enabled);
+    }
+
+    @Override
+    public int getKeepAliveInterval() {
+        return mContext.getResources().getInteger(R.integer.keep_alive_interval);
+    }
+
+    @Override
+    public int getConnectionIdleTimeout() {
+        return mContext.getResources().getInteger(R.integer.connection_idle_timeout);
+    }
+
+    @Override
+    public float getReconnectBackoffFixedDelay() {
+        TypedValue outValue = new TypedValue();
+        mContext.getResources().getValue(R.dimen.reconnect_backoff_fixed_delay, outValue, true);
+        return outValue.getFloat();
+    }
+
+    @Override
+    public float getReconnectBackoffVariableFactor() {
+        TypedValue outValue = new TypedValue();
+        mContext.getResources().getValue(R.dimen.reconnect_backoff_variable_factor, outValue, true);
+        return outValue.getFloat();
+    }
+
+    @Override
+    public float getReconnectBackoffVariableMaximum() {
+        TypedValue outValue = new TypedValue();
+        mContext.getResources().getValue(R.dimen.reconnect_backoff_variable_maximum, outValue, true);
+        return outValue.getFloat();
+    }
+
+    @Override
+    public String getUrlScheme() {
+        return mContext.getResources().getString(R.string.url_scheme);
+    }
+
+    @Override
     public String getClientName() {
         String clientName = null;
         if (mPackageInfo != null) {
@@ -151,7 +225,7 @@ public class XoAndroidClientHost implements IXoClientHost {
         String systemLanguage = null;
         Locale locale = mContext.getResources().getConfiguration().locale;
         if (locale != null) {
-            systemLanguage = locale.getISO3Language();
+            systemLanguage = locale.getLanguage();
         }
         return systemLanguage;
     }
@@ -164,13 +238,15 @@ public class XoAndroidClientHost implements IXoClientHost {
     @Override
     public String getServerUri() {
         String serverUri;
-        if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-
-            serverUri = preferences.getString("preference_server_uri", XoClientConfiguration.SERVER_URI);
-
-        } else {
-            serverUri = XoClientConfiguration.SERVER_URI;
+        try {
+            if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
+                serverUri = PreferenceManager.getDefaultSharedPreferences(mContext).getString("preference_server_uri", mContext.getResources().getStringArray(R.array.servers_development)[0]);
+            } else {
+                serverUri = mContext.getResources().getString(R.string.servers_production);
+            }
+        }
+        catch(Exception e){
+            serverUri = "server url missing";
         }
         return serverUri;
     }

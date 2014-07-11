@@ -69,18 +69,27 @@
                 android:layout_alignWithParentIfMissing="true"
                 android:visibility="gone"
                 style="@style/AppBaseTheme.Message.Incoming"/>
+
         <TextView
                 android:id="@+id/tv_message_contact_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
+                android:layout_marginLeft="30dp"
                 android:textColor="@android:color/secondary_text_dark"
-                android:layout_alignLeft="@+id/tv_message_text"
+                android:layout_alignParentLeft="true"
                 android:layout_below="@+id/tv_message_text"
-                android:textSize="10dp"
-                android:text="alsbdfadlskf"/>
+                android:textSize="6pt"/>
+
+        <TextView
+                android:id="@+id/tv_message_delivery_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="30dp"
+                android:textColor="@android:color/secondary_text_dark"
+                android:layout_below="@+id/tv_message_text"
+                android:layout_alignParentRight="true"
+                android:textSize="6pt"/>
+
     </RelativeLayout>
-
-
 
 </RelativeLayout>

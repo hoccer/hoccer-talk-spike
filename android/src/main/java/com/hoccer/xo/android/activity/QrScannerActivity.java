@@ -43,8 +43,8 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
                 SymbolSet symbols = scanner.getResults();
                 for (Symbol sym : symbols) {
                     String code = sym.getData();
-                    if (code.startsWith(XoClientConfiguration.HXO_URL_SCHEME)) {
-                        code = code.replace(XoClientConfiguration.HXO_URL_SCHEME, "");
+                    if (code.startsWith(XoApplication.getXoClient().getHost().getUrlScheme())) {
+                        code = code.replace(XoApplication.getXoClient().getHost().getUrlScheme(), "");
                         XoApplication.getXoClient().performTokenPairing(code);
                     } else {
                         runOnUiThread(new Runnable() {
@@ -125,7 +125,7 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
         try {
             c = Camera.open();
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         return c;
     }
@@ -207,8 +207,9 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
         public void surfaceCreated(SurfaceHolder holder) {
             try {
                 mCamera.setPreviewDisplay(holder);
+                mCamera.autoFocus(autoFocusCallback);
             } catch (IOException e) {
-
+                e.printStackTrace();
             }
         }
 
@@ -223,16 +224,15 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
             try {
                 mCamera.stopPreview();
             } catch (Exception e) {
-                //Just skip this exception, as I understood it is not critical
+                e.printStackTrace();
             }
             try {
                 mCamera.setDisplayOrientation(90);
                 mCamera.setPreviewDisplay(mHolder);
                 mCamera.setPreviewCallback(previewCallback);
                 mCamera.startPreview();
-                mCamera.autoFocus(autoFocusCallback);
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
 

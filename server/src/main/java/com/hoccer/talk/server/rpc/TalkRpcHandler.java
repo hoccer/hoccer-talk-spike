@@ -171,7 +171,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (mConnection.isLegacyMode()) {
             mServer.getUpdateAgent().requestUserAlert(
                     mConnection.getClientId(),
-                    StaticSystemMessage.MESSAGES.UPDATE_NAGGING);
+                    StaticSystemMessage.Message.UPDATE_NAGGING);
         }
         requireIsNotOutdated();
 
@@ -1254,13 +1254,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     setDeliveryState(delivery, confirmationState, true, false);
                     mStatistics.signalMessageConfirmedSucceeded();
                 } else {
-                    throw new RuntimeException("deliveryConfirm: no state change path to '"+confirmationState+"' from current delivery state ="+delivery.getState()+") : message id '" + messageId + "' client id '" + clientId + "'");
+                    throw new RuntimeException("inDeliveryConfirm: no state change path to '"+confirmationState+"' from current delivery state '"+delivery.getState()+"' : message id '" + messageId + "' client id '" + clientId + "'");
                 }
                 TalkDelivery result = new TalkDelivery();
                 result.updateWith(delivery, TalkDelivery.REQUIRED_IN_UPDATE_FIELDS_SET);
                 return result;
             } else {
-                throw new RuntimeException("deliveryConfirm '"+confirmationState+"': no delivery found for message with id '" + messageId + "' for client with id '" + clientId + "'");
+                throw new RuntimeException("inDeliveryConfirm '"+confirmationState+"': no delivery found for message with id '" + messageId + "' for client with id '" + clientId + "'");
             }
         }
     }
@@ -1420,6 +1420,65 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     @Override
+    public TalkGroup createGroupWithMembers(String groupType, String groupTag, String groupName, String[] members, String[] roles) {
+        requireIdentification(true);
+        logCall("createGroupWithMembers(groupName: '"+groupName +"', groupTag='" + groupTag + "')");
+        if (!TalkGroup.GROUP_TYPE_USER.equals(groupType)) {
+            throw new RuntimeException("illegal group type:"+groupType);
+        }
+        if (groupName == null || groupTag == null || groupName.length() > 32) {
+            throw new RuntimeException("group name or tag missing");
+        }
+        if (groupName.length() > 32) {
+            throw new RuntimeException("group name too long (>32)");
+        }
+        TalkGroup group = new TalkGroup();
+        group.setGroupId(UUID.randomUUID().toString());
+        group.setState(TalkGroup.STATE_EXISTS);
+        group.setGroupType(groupType);
+        group.setGroupName(groupName);
+        group.setGroupTag(groupTag);
+
+        if (members.length != roles.length) {
+            throw new RuntimeException("number of members != number of roles");
+        }
+
+        for (String memberId : members) {
+            TalkClient client = mDatabase.findClientById(memberId);
+            if (client == null) {
+                throw new RuntimeException("No such client:"+memberId);
+            }
+        }
+
+        for (String role : roles) {
+            if (!TalkGroupMember.isValidRole(role))  {
+                throw new RuntimeException("Invalid role:"+role);
+            }
+        }
+
+        Date now = new Date();
+        changedGroup(group, now);
+
+        TalkGroupMember groupAdmin = new TalkGroupMember();
+        groupAdmin.setClientId(mConnection.getClientId());
+        groupAdmin.setGroupId(group.getGroupId());
+        groupAdmin.setRole(TalkGroupMember.ROLE_ADMIN);
+        groupAdmin.setState(TalkGroupMember.STATE_JOINED);
+        changedGroupMember(groupAdmin, now, true);
+
+        for (int i = 0; i < members.length;++i) {
+            TalkGroupMember groupMember = new TalkGroupMember();
+            groupMember.setGroupId(group.getGroupId());
+            groupMember.setClientId(members[i]);
+            groupMember.setRole(roles[i]);
+            groupMember.setState(TalkGroupMember.STATE_INVITED);
+            changedGroupMember(groupMember, now, true);
+        }
+
+        return group;
+    }
+
+    @Override
     public TalkGroup[] getGroups(Date lastKnown) {
         requireIdentification(true);
         logCall("getGroups(lastKnown: '" + lastKnown + "')");
@@ -1551,7 +1610,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             //  NOTE if this gets removed then the invited users presence might
             //       need touching depending on what the solution to the update problem is
             // notify various things
-            touchGroupMemberPresences(groupId);
+            //touchGroupMemberPresences(groupId);
             mServer.getUpdateAgent().requestGroupUpdate(groupId, clientId);
             mServer.getUpdateAgent().requestGroupMembershipUpdatesForNewMember(groupId, clientId);
 
@@ -1767,6 +1826,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 TalkDelivery delivery = mDatabase.findDelivery(message.getMessageId(), clientId);
                 if (delivery != null) {
                     LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (download), messageId="+message.getMessageId()+", delivery="+delivery.getId());
+
                     if (!delivery.nextAttachmentStateAllowed(nextState)) {
                         throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
                     }
@@ -1857,6 +1917,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         // for some calls we update only a specific delivery, while for other calls we update only the delivery with the proper receiverId
                         if (receiverId == null || delivery.getReceiverId().equals(receiverId)) {
                             LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (upload), messageId="+message.getMessageId()+", delivery="+delivery.getId());
+
+                            if (TalkDelivery.ATTACHMENT_STATE_RECEIVED.equals(delivery.getAttachmentState()) &&
+                                    TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState)) {
+                                LOG.info("AttachmentState already 'received', ignoring next state 'uploaded' (download) returning state 'received', messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                                return delivery.getAttachmentState();
+                            }
+
                             if (!delivery.nextAttachmentStateAllowed(nextState)) {
                                 throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
                             }

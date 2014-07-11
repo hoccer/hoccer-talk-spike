@@ -12,7 +12,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Cleaning agent
@@ -43,21 +45,30 @@ public class CleaningAgent {
         mConfig = mServer.getConfiguration();
         mDatabase = mServer.getDatabase();
         mExecutor = Executors.newScheduledThreadPool(
-            TalkServerConfiguration.THREADS_CLEANING,
-            new NamedThreadFactory("cleaning-agent")
+                mConfig.getCleaningAgentThreadPoolSize(),
+                new NamedThreadFactory("cleaning-agent")
         );
         LOG.info("Cleaning clients scheduling will start in '" + mConfig.getCleanupAllClientsDelay() + "' seconds.");
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                scheduleCleanAllClients();
+                try {
+                    scheduleCleanAllClients();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, mConfig.getCleanupAllClientsDelay(), TimeUnit.SECONDS);
+
         LOG.info("Cleaning deliveries scheduling will start in '" + mConfig.getCleanupAllDeliveriesDelay() + "' seconds.");
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                scheduleCleanAllDeliveries();
+                try {
+                    scheduleCleanAllDeliveries();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, mConfig.getCleanupAllDeliveriesDelay(), TimeUnit.SECONDS);
 
@@ -65,7 +76,7 @@ public class CleaningAgent {
 
     // TODO: Also clean groups (normal and nearby)
 
-    public void cleanClientData(final String clientId) {
+    private void cleanClientData(final String clientId) {
         LOG.debug("cleaning client " + clientId);
         doCleanKeysForClient(clientId);
         doCleanTokensForClient(clientId);
@@ -78,7 +89,11 @@ public class CleaningAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                doCleanAllFinishedDeliveries();
+                try {
+                    doCleanAllFinishedDeliveries();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, mConfig.getCleanupAllDeliveriesInterval(), TimeUnit.SECONDS);
     }
@@ -88,16 +103,24 @@ public class CleaningAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                doCleanAllClients();
+                try {
+                    doCleanAllClients();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
-        }, mConfig.getCleanupAllClientsInterval(), TimeUnit.SECONDS);
+        } , mConfig.getCleanupAllClientsInterval(), TimeUnit.SECONDS);
     }
 
     public void cleanFinishedDelivery(final TalkDelivery finishedDelivery) {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                doCleanFinishedDelivery(finishedDelivery);
+                try {
+                    doCleanFinishedDelivery(finishedDelivery);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         });
     }
@@ -177,15 +200,15 @@ public class CleaningAgent {
     private void doCleanDeliveriesForMessage(String messageId, TalkMessage message) {
         boolean keepMessage = false;
         List<TalkDelivery> deliveries = mDatabase.findDeliveriesForMessage(messageId);
-        LOG.debug("Found "+deliveries.size()+" deliveries for messageId: "+messageId);
+        LOG.debug("Found " + deliveries.size() + " deliveries for messageId: " + messageId);
         for (TalkDelivery delivery : deliveries) {
             // confirmed and failed deliveries can always be deleted
             if (delivery.isFinished()) {
-                LOG.debug("Deleting delivery with state '" + delivery.getState() + "' and attachmentState '"+ delivery.getAttachmentState()+"', messageId: "+messageId+", receiverId:"+delivery.getReceiverId());
+                LOG.debug("Deleting delivery with state '" + delivery.getState() + "' and attachmentState '" + delivery.getAttachmentState() + "', messageId: " + messageId + ", receiverId:" + delivery.getReceiverId());
                 mDatabase.deleteDelivery(delivery);
                 continue;
             }
-            LOG.debug("Keeping delivery with state '" + delivery.getState() + "' and attachmentState '"+ delivery.getAttachmentState()+"', messageId: "+messageId+", receiverId:"+delivery.getReceiverId());
+            LOG.debug("Keeping delivery with state '" + delivery.getState() + "' and attachmentState '" + delivery.getAttachmentState() + "', messageId: " + messageId + ", receiverId:" + delivery.getReceiverId());
             keepMessage = true;
         }
         if (message != null && !keepMessage) {
@@ -288,5 +311,4 @@ public class CleaningAgent {
         // delete the message itself
         mDatabase.deleteMessage(message);
     }
-
 }
