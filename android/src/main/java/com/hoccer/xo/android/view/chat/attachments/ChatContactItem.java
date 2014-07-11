@@ -62,15 +62,13 @@ public class ChatContactItem extends ChatMessageItem {
         ImageButton showButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_show_button);
         ImageButton importButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_import_button);
 
-        int textColor = -1;
-        int iconId = -1;
+        int textColor;
+        int iconId;
         if (mMessage.isIncoming()) {
             textColor = Color.BLACK;
-            iconId = R.drawable.ic_dark_music;
             iconId = R.drawable.ic_dark_contact;
         } else {
             textColor = Color.WHITE;
-            iconId = R.drawable.ic_light_music;
             iconId = R.drawable.ic_light_contact;
         }
 
