@@ -406,6 +406,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("hintApnsUnreadMessages('" + numUnreadMessages + "' unread messages)");
         TalkClient client = mConnection.getClient();
         client.setApnsUnreadMessages(numUnreadMessages);
+        client.setLastPushMessage(null);
         mDatabase.saveClient(client);
     }
 
