@@ -624,6 +624,15 @@ public class XoClientDatabase {
         updateBuilder.update();
     }
 
+    public void deleteMessageById(int messageId) throws SQLException {
+        UpdateBuilder<TalkClientMessage, Integer> updateBuilder = mClientMessages.updateBuilder();
+        updateBuilder.updateColumnValue("deleted", true).where()
+                .eq("deleted", false)
+                .eq("clientMessageId", messageId)
+                .and(2);
+        updateBuilder.update();
+    }
+
     public void deleteAllMessagesFromContactId(int contactId) throws SQLException {
         UpdateBuilder<TalkClientMessage, Integer> updateBuilder = mClientMessages.updateBuilder();
         updateBuilder.updateColumnValue("deleted", true).where()

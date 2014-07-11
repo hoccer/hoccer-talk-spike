@@ -169,6 +169,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         messageText.setText(mMessage.getText());
 
         mMessageText = messageText;
+        configureContextMenu(messageText);
     }
 
     private void updateSeenStatus(View view) {
@@ -327,7 +328,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     protected void displayAttachment(IContentObject contentObject) {
         mContentTransferProgress.setVisibility(View.GONE);
         mContentWrapper.setVisibility(View.VISIBLE);
-        configureContextMenu();
+        configureContextMenu(mContentWrapper);
     }
 
     /**
@@ -372,9 +373,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return state;
     }
 
-    private void configureContextMenu() {
+    private void configureContextMenu(View view) {
         final ChatMessageItem messageItem = this;
-        mContentWrapper.setOnLongClickListener(new View.OnLongClickListener() {
+        view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 XoActivity activity = (XoActivity)mContext;

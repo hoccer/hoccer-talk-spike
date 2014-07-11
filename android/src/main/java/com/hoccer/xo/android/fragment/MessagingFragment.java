@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Intent;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.ChatAdapter;
 import com.hoccer.xo.android.base.XoAdapter;
@@ -105,5 +106,9 @@ public class MessagingFragment extends XoListFragment
         }
 
         mAdapter.onResume();
+    }
+
+    public void updateAdapter() {
+        mAdapter.requestReload();
     }
 }
