@@ -62,7 +62,7 @@ public class PushRequest {
         }
 
         String messageInfo = "undelivered:"+deliveringCount;
-        LOG.debug("push messageInfo='" + messageInfo + "', last info=‘"+mClient.getLastPushMessage()+"'");
+        LOG.debug("push messageInfo='" + messageInfo + "', last info='"+mClient.getLastPushMessage()+"'");
 
         if (messageInfo.equals(mClient.getLastPushMessage())) {
             LOG.debug("info has already been pushed, nothing new to push for client " + mClientId);
