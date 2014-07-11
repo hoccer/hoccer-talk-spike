@@ -3,6 +3,22 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
+            android:title="@string/pref_about_information">
+        <Preference
+                android:title="@string/menu_about"
+                android:key="preference_about">
+        </Preference>
+        <Preference
+                android:title="@string/menu_faq"
+                android:key="preference_faq">
+        </Preference>
+        <Preference
+                android:title="@string/menu_tutorial"
+                android:key="preference_tutorial">
+        </Preference>
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/pref_auto_download">
 
         <CheckBoxPreference
@@ -55,10 +71,6 @@
 
     <PreferenceCategory
             android:title="@string/pref_legal_information">
-        <Preference
-                android:title="@string/menu_about"
-                android:key="preference_about">
-        </Preference>
         <Preference
                 android:title="@string/menu_licenses"
                 android:key="preference_licenses">

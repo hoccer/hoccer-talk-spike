@@ -163,6 +163,10 @@ public class XoPreferenceActivity extends PreferenceActivity
             showAbout();
         } else if (preference.getKey().equals("preference_licenses")) {
             showLicense();
+        } else if (preference.getKey().equals("preference_faq")) {
+            showFaq();
+        } else if (preference.getKey().equals("preference_tutorial")) {
+            showTutorial();
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
@@ -269,6 +273,18 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void showLicense() {
         Intent intent = new Intent(this, LegalImprintActivity.class);
         intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_LICENSES);
+        startActivity(intent);
+    }
+
+    private void showTutorial() {
+        Intent intent = new Intent(this, FaqTutorialActivity.class);
+        intent.putExtra("URL", getResources().getString(R.string.link_tutorial));
+        startActivity(intent);
+    }
+
+    private void showFaq() {
+        Intent intent = new Intent(this, FaqTutorialActivity.class);
+        intent.putExtra("URL", getResources().getString(R.string.link_faq));
         startActivity(intent);
     }
 
