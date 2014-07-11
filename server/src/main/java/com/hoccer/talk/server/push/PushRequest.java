@@ -39,25 +39,51 @@ public class PushRequest {
     }
 
     public void perform() {
-        LOG.debug("pushing " + mClientId);
+        LOG.debug("try perform push for client " + mClientId);
         // get up-to-date client object
-        mClient = mAgent.getDatabase().findClientById(mClientId);
+        ITalkServerDatabase database = mAgent.getDatabase();
+        mClient = database.findClientById(mClientId);
+
         if (mClient == null) {
             LOG.warn("client " + mClientId + " does not exist");
             return;
         }
+
+        List<TalkDelivery> deliveries =
+                database.findDeliveriesForClientInState(
+                        mClient.getClientId(),
+                        TalkDelivery.STATE_DELIVERING);
+
+        int deliveringCount = (deliveries == null) ? 0 : deliveries.size();
+
+        if (deliveringCount == 0) {
+            LOG.debug("no messages to be delivered for " + mClientId);
+            return;
+        }
+
+        String messageInfo = "undelivered:"+deliveringCount;
+        LOG.debug("push messageInfo='" + messageInfo + "', last info=‘"+mClient.getLastPushMessage()+"'");
+
+        if (messageInfo.equals(mClient.getLastPushMessage())) {
+            LOG.debug("info has already been pushed, nothing new to push for client " + mClientId);
+            return;
+        }
+
         // try to perform push
         if (mConfig.isGcmEnabled() && mClient.isGcmCapable()) {
             performGcm();
         } else if (mConfig.isApnsEnabled() && mClient.isApnsCapable()) {
-            performApns();
+            performApns(deliveringCount);
         } else {
             if (mClient.isPushCapable()) {
                 LOG.warn("client " + mClient + " push not available");
             } else {
                 LOG.info("client " + mClientId + " has no registration");
             }
+            return;
         }
+        mClient.setLastPushMessage(messageInfo);
+        database.saveClient(mClient);
     }
 
     private void performGcm() {
@@ -84,9 +110,8 @@ public class PushRequest {
         }
     }
 
-    private void performApns() {
+    private void performApns(int deliveringCount) {
         LOG.info("APNS push for " + mClientId);
-        ITalkServerDatabase database = mAgent.getDatabase();
 
         // We use the production service as default in all cases, even if no client host info is present,
         // sandbox will only be used if buildVariant of host info is 'debug'
@@ -97,13 +122,7 @@ public class PushRequest {
         }
 
         PayloadBuilder b = APNS.newPayload();
-        List<TalkDelivery> deliveries =
-                database.findDeliveriesForClientInState(
-                        mClient.getClientId(),
-                        TalkDelivery.STATE_DELIVERING);
-        int messageCount = 0;
-        messageCount += mClient.getApnsUnreadMessages();
-        messageCount += (deliveries == null) ? 0 : deliveries.size();
+        int messageCount = deliveringCount + mClient.getApnsUnreadMessages();
         if (messageCount > 1) {
             b.localizedKey("apn_new_messages");
             b.localizedArguments(String.valueOf(messageCount));
