@@ -157,7 +157,10 @@ public class ChatContactItem extends ChatMessageItem {
             LOG.error("Could not open VCard at " + mContent.getContentDataUrl());
         }
         try {
-            mVCard = Ezvcard.parse(inputStream).first();
+            Ezvcard.ParserChainTextReader reader = Ezvcard.parse(inputStream);
+            if (reader != null) {
+                mVCard = reader.first();
+            }
         } catch (IOException e) {
             LOG.error("Could not parse VCard", e);
         }

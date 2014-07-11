@@ -42,6 +42,11 @@ public class RingtoneSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        }
+
         Uri selectedContent = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
         String[] filePathColumn = {
                 MediaStore.Audio.Media.MIME_TYPE,
@@ -76,5 +81,10 @@ public class RingtoneSelector implements IContentSelector {
         contentObject.setContentLength(fileSize);
 
         return contentObject;
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
     }
 }

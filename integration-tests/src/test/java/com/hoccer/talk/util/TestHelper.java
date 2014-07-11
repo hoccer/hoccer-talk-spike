@@ -154,7 +154,7 @@ public class TestHelper {
         TalkClientContact recipientContact = sendingClient.getDatabase().findContactByClientId(receivingClient.getSelfContact().getClientId(), false);
         assertNotNull(recipientContact);
         TalkClientMessage message = sendingClient.composeClientMessage(recipientContact, messageText);
-        sendingClient.requestDelivery(message);
+        sendingClient.sendMessage(message.getMessageTag());
 
         await().until(new Callable<Boolean>() {
             @Override

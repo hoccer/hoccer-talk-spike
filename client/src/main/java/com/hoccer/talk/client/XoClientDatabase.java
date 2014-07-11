@@ -131,7 +131,7 @@ public class XoClientDatabase {
     }
 
     public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
-        message.setProgressState(false);
+        // message.setProgressState(false); // TODO: WTF is this? is it ever saved with TRUE?
         mClientMessages.createOrUpdate(message);
     }
 

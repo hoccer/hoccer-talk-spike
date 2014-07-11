@@ -38,6 +38,11 @@ public class CaptureSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        }
+
         Uri selectedContent = intent.getData();
         String[] filePathColumn = {
                 MediaStore.Images.Media.MIME_TYPE,
@@ -79,6 +84,11 @@ public class CaptureSelector implements IContentSelector {
         contentObject.setContentAspectRatio(((float) fileWidth) / ((float) fileHeight));
 
         return contentObject;
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
     }
 
 }

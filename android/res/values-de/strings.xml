@@ -26,8 +26,8 @@
     <string name="menu_add_attachment">Anhang hinzufügen</string>
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
-	<string name="menu_music_viewer">Musik</string>
     <string name="menu_about">Über Hoccer XO</string>
+    <string name="menu_music_viewer">Musik</string>
     <string name="menu_reconnect">erneut verbinden</string>
     <string name="menu_quit">schließen</string>
     <string name="menu_clear_conversation">Chat löschen</string>
@@ -258,8 +258,8 @@
     <string name="my_profile_title">Mein Profil</string>
     <string name="welcome_to_title">Willkommen bei XO!</string>
     <string name="contact_item_receive_attachment">%1$s Datei erhalten</string>
-    <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar setzen.
-    </string>
+    <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar verwenden.</string>
+    <string name="error_attachment_selection">Sie können diese Datei nicht als Anhang verwenden.</string>
     <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App HoccerXO zum sicheren Chatten! Jetzt herunterladen: http://hoccer.com/ Dann mich als Kontakt hinzufügen: %1$s%2$s
         \nxo %3$s
     </string>

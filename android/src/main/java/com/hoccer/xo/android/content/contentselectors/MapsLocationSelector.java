@@ -36,6 +36,12 @@ public class MapsLocationSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        }
+
         SelectedContent content = null;
         if(intent.hasExtra(MapsLocationActivity.EXTRA_GEOJSON)) {
             String json = intent.getStringExtra(MapsLocationActivity.EXTRA_GEOJSON);
@@ -44,6 +50,11 @@ public class MapsLocationSelector implements IContentSelector {
             content.setContentType("application/json");
         }
         return content;
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return (intent.hasExtra(MapsLocationActivity.EXTRA_GEOJSON));
     }
 
 }
