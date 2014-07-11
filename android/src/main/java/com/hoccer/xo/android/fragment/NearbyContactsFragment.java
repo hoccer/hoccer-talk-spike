@@ -32,7 +32,7 @@ public class NearbyContactsFragment extends XoListFragment {
         mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
         mPlaceholderImageFrame.setImageResource(R.drawable.placeholder_chats);
         mPlaceholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
-        mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.fillBackground(getXoActivity(), R.drawable.placeholder_chats_head, true));
+        mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
         hidePlaceholder();
         return view;

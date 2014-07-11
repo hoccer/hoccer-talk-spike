@@ -156,7 +156,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         } else {
             imageResource = android.R.drawable.stat_notify_error;
         }
-        mAddAttachmentButton.setBackground(ColorSchemeManager.fillAttachmentForeground(getXoActivity(), imageResource, true));
+        mAddAttachmentButton.setBackground(ColorSchemeManager.getRepaintedAttachmentDrawable(getXoActivity(), imageResource, true));
         mAddAttachmentButton.setImageResource(android.R.color.transparent);
     }
 

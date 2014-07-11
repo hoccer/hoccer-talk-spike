@@ -3,7 +3,6 @@ package com.hoccer.xo.android.view.chat.attachments;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,7 +66,7 @@ public class ChatContactItem extends ChatMessageItem {
 
         contactName.setTextColor(textColor);
         contactDescription.setTextColor(textColor);
-        showButton.setBackgroundDrawable(ColorSchemeManager.fillAttachmentForeground(mContext, R.drawable.ic_light_contact, mMessage.isIncoming()));
+        showButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_contact, mMessage.isIncoming()));
         importButton.setBackgroundDrawable(showButton.getBackground());
 
         showButton.setOnClickListener(new View.OnClickListener() {

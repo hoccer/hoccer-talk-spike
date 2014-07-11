@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.net.URL;
-import java.sql.SQLException;
 
 public class ImageSelector implements IContentSelector {
 
@@ -29,7 +28,7 @@ public class ImageSelector implements IContentSelector {
 
     public ImageSelector(Context context) {
         mName = context.getResources().getString(R.string.content_images);
-        mIcon = ColorSchemeManager.fillBackground(context, R.drawable.ic_attachment_select_image, true);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_image, true);
     }
 
     @Override

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract;
@@ -25,7 +24,7 @@ public class ContactSelector implements IContentSelector {
 
     public ContactSelector(Context context) {
         mName = context.getResources().getString(R.string.content_contact);
-        mIcon= ColorSchemeManager.fillBackground(context, R.drawable.ic_attachment_select_contact, true);
+        mIcon= ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_contact, true);
     }
 
     @Override

@@ -8,7 +8,7 @@ import com.hoccer.xo.release.R;
 
 public abstract class ColorSchemeManager{
 
-    public static Drawable fillBackground(Context activity, int bgId, boolean primaryColor) {
+    public static Drawable getRepaintedDrawable(Context activity, int bgId, boolean primaryColor) {
 
         int custom_color = (primaryColor) ? activity.getResources().getColor(R.color.xo_app_main_color) : activity.getResources().getColor(R.color.xo_app_incoming_message_color);
 
@@ -19,7 +19,7 @@ public abstract class ColorSchemeManager{
         return myBG;
     }
 
-    public static Drawable fillOutgoingMessageBackround(Context activity, int bgId, String currentState){
+    public static Drawable getRepaintedOutgoingMessageDrawable(Context activity, int bgId, String currentState){
 
         int custom_color = activity.getResources().getColor(R.color.xo_app_main_color);
 
@@ -29,9 +29,10 @@ public abstract class ColorSchemeManager{
         else {
             if (currentState.equals(TalkDelivery.STATE_DELIVERING)) {
                 custom_color = activity.getResources().getColor(R.color.xo_compose_message_no_state_color);
-            } else if (currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
-                custom_color = activity.getResources().getColor(R.color.xo_compose_message_bad_state_color);
-            } else if (currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+            } else if (currentState.equals(TalkDelivery.STATE_ABORTED)
+                    || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)
+                    || currentState.equals(TalkDelivery.STATE_FAILED))
+            {
                 custom_color = activity.getResources().getColor(R.color.xo_compose_message_bad_state_color);
             }
         }
@@ -43,7 +44,7 @@ public abstract class ColorSchemeManager{
         return myBG;
     }
 
-    public static Drawable fillAttachmentForeground(Context activity, int bgId, boolean isIncoming) {
+    public static Drawable getRepaintedAttachmentDrawable(Context activity, int bgId, boolean isIncoming) {
 
         int custom_color = (isIncoming) ? activity.getResources().getColor(R.color.xo_app_attachment_incoming_color) : activity.getResources().getColor(R.color.xo_app_attachment_outgoing_color);
 

@@ -18,7 +18,7 @@ public class CaptureSelector implements IContentSelector {
 
     public CaptureSelector(Context context) {
         mName = context.getResources().getString(R.string.content_capture);
-        mIcon = ColorSchemeManager.fillBackground(context, R.drawable.ic_attachment_select_video, true);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_video, true);
     }
 
     @Override

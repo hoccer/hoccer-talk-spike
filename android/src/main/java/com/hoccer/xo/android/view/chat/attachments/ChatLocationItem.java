@@ -4,7 +4,6 @@ import com.google.android.gms.maps.model.LatLng;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,7 +61,7 @@ public class ChatLocationItem extends ChatMessageItem {
             locationTextView.setTextColor(textColor);
             locationTitleView.setTextColor(textColor);
 
-            locationButton.setBackgroundDrawable(ColorSchemeManager.fillAttachmentForeground(mContext, R.drawable.ic_light_location, mMessage.isIncoming()));
+            locationButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_location, mMessage.isIncoming()));
 
             locationButton.setOnClickListener(new View.OnClickListener() {
                 @Override

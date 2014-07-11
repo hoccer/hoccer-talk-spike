@@ -117,12 +117,12 @@ public class ChatAudioItem extends ChatMessageItem {
 
     private void setPlayButton(){
         mPlayPauseButton.setBackgroundDrawable(null);
-        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.fillAttachmentForeground(mContext, R.drawable.ic_light_play, mMessage.isIncoming()));
+        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_play, mMessage.isIncoming()));
     }
 
     private void setPauseButton(){
         mPlayPauseButton.setBackgroundDrawable(null);
-        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.fillAttachmentForeground(mContext, R.drawable.ic_light_pause, mMessage.isIncoming()));
+        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_pause, mMessage.isIncoming()));
     }
 
     public void updatePlayPauseView() {
