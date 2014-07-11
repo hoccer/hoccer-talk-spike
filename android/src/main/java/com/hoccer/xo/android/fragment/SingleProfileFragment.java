@@ -275,7 +275,6 @@ public class SingleProfileFragment extends XoFragment
                     menu.findItem(R.id.menu_profile_block).setVisible(false);
                     menu.findItem(R.id.menu_profile_unblock).setVisible(false);
                 } else {
-                    menu.findItem(R.id.menu_profile_single).setVisible(false);
                     TalkRelationship relationship = mContact.getClientRelationship();
                     if (relationship == null || relationship.isBlocked()) { // todo != null correct
                         menu.findItem(R.id.menu_profile_block).setVisible(false);
