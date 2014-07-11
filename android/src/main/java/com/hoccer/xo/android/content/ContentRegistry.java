@@ -84,6 +84,7 @@ public class ContentRegistry {
         initializeSelector(new MusicSelector(mContext));
         initializeSelector(new ContactSelector(mContext));
         initializeSelector(new MapsLocationSelector(mContext));
+        initializeSelector(new CaptureSelector(mContext));
 
         mClipboardSelector = new ClipboardSelector(mContext);
     }

@@ -17,7 +17,7 @@ public class CaptureSelector implements IContentSelector {
 
     public CaptureSelector(Context context) {
         mName = context.getResources().getString(R.string.content_capture);
-        mIcon = context.getResources().getDrawable(R.drawable.ic_attachment_select_video);
+        mIcon = context.getResources().getDrawable(R.drawable.ic_attachment_select_image);
     }
 
     @Override
