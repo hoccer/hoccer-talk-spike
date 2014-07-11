@@ -1,5 +1,6 @@
 package com.hoccer.talk.server.database;
 
+import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
@@ -21,8 +22,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(JUnit4.class)
 public class JongoDatabaseTest {
@@ -34,6 +37,9 @@ public class JongoDatabaseTest {
     private JongoDatabase database;
     private MongodProcess mongod;
     private MongodExecutable mongodExecutable;
+
+    // TODO: provide a convenient way to load fixtures into the database as part of a test.
+    // Alternatively we have to setup the state of the database via code, which may be faulty in itself? depends on diligence.
 
     static {
         configureLogging();
@@ -66,7 +72,7 @@ public class JongoDatabaseTest {
         mongod = mongodExecutable.start();
 
         TalkServerConfiguration config = new TalkServerConfiguration();
-        LOG.info("----" + mongodConfig.net().getServerAddress() + " " + mongodConfig.net().getPort());
+        LOG.debug(mongodConfig.net().getServerAddress() + " " + mongodConfig.net().getPort());
         MongoClient mongo = new MongoClient(new ServerAddress(mongodConfig.net().getServerAddress(), mongodConfig.net().getPort()));
         database = new JongoDatabase(config, mongo);
     }
@@ -89,4 +95,76 @@ public class JongoDatabaseTest {
         database.ping();
     }
 
+    @Test
+    public void testLoadAndSaveClient() throws Exception {
+        final TalkClient transientClient = new TalkClient();
+        transientClient.setClientId("foo");
+
+        database.saveClient(transientClient);
+
+        List<TalkClient> clients;
+
+        clients = database.findAllClients();
+        assertEquals(1, clients.size());
+        TalkClient persistedClient = clients.get(0);
+        assertEquals("foo", persistedClient.getClientId());
+
+        final TalkClient anotherTransientClient = new TalkClient();
+        transientClient.setClientId("bar");
+
+        database.saveClient(anotherTransientClient);
+        clients = database.findAllClients();
+        assertEquals(2, clients.size());
+    }
+
+    @Test
+    public void testFindClientById() throws Exception {
+        assertEquals(null, database.findClientById("bar"));
+
+        final TalkClient transientClient1 = new TalkClient();
+        transientClient1.setClientId("foo");
+        transientClient1.setApnsToken("1");
+        database.saveClient(transientClient1);
+
+        final TalkClient transientClient2 = new TalkClient();
+        transientClient2.setClientId("foo");
+        transientClient1.setApnsToken("2");
+        // TODO: This is actually something that should not be possible
+        database.saveClient(transientClient2);
+
+        TalkClient client = database.findClientById(transientClient1.getClientId());
+        assertNotNull(client);
+        assertEquals("foo", client.getClientId());
+        // We expect to get only the first entity...
+        assertEquals("1", client.getApnsToken());
+
+        // ...although two are in the database
+        List<TalkClient> clients = database.findAllClients();
+        assertEquals(2, clients.size());
+    }
+
+    @Test
+    public void testFindClientByApnsToken() {
+        assertEquals(null, database.findClientByApnsToken("bar"));
+
+        final TalkClient transientClient1 = new TalkClient();
+        transientClient1.setClientId("1");
+        transientClient1.setApnsToken("foo");
+        database.saveClient(transientClient1);
+
+        final TalkClient transientClient2 = new TalkClient();
+        transientClient2.setClientId("2");
+        transientClient2.setApnsToken("foo");
+        database.saveClient(transientClient2);
+
+        TalkClient client = database.findClientByApnsToken(transientClient1.getApnsToken());
+        assertNotNull(client);
+        assertEquals("foo", client.getApnsToken());
+        // We expect to get only the first entity...
+        assertEquals("1", client.getClientId());
+
+        // ...although two are in the database
+        List<TalkClient> clients = database.findAllClients();
+        assertEquals(2, clients.size());
+    }
 }

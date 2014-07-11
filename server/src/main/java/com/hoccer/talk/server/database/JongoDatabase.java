@@ -5,6 +5,7 @@ import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.mongodb.*;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 
@@ -127,12 +128,14 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable // null if client for given id does not exist
     public TalkClient findClientById(String clientId) {
         return mClients.findOne("{clientId:#}", clientId)
                 .as(TalkClient.class);
     }
 
     @Override
+    @Nullable // null if client for given apns token does not exist
     public TalkClient findClientByApnsToken(String apnsToken) {
         return mClients.findOne("{apnsToken:#}", apnsToken)
                 .as(TalkClient.class);
