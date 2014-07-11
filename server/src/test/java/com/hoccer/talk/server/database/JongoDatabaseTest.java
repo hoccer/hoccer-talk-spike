@@ -191,4 +191,33 @@ public class JongoDatabaseTest {
 
         // TODO: also test if there are actually 2 messages in db? No API for that currently
     }
+
+    @Test
+    public void testFindMessagesWithAttachmentFileId() {
+        final List<TalkMessage> messageList1 = database.findMessagesWithAttachmentFileId("doesnotexist");
+        assertNotNull(messageList1);
+        assertEquals(0, messageList1.size());
+
+        // TODO: complete me...
+    }
+
+    @Test
+    public void testDeleteMessage() {
+        TalkMessage transientMessage = new TalkMessage();
+        transientMessage.setMessageId("foo");
+        database.saveMessage(transientMessage);
+
+        final TalkMessage persistedMessage = database.findMessageById("foo");
+        assertNotNull(persistedMessage);
+        database.deleteMessage(persistedMessage);
+        assertNull(database.findMessageById("foo"));
+
+        LOG.info(" + " + database.findMessageById(null));
+    }
+
+    // just pointing out a small hole atm - easily fixed as soon as we agree on the approach...
+    @Test(expected = NullPointerException.class)
+    public void testDeleteNullMessage() {
+        database.deleteMessage(null);
+    }
 }

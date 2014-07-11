@@ -165,7 +165,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public void deleteMessage(TalkMessage message) {
+    public void deleteMessage(@Nullable TalkMessage message) {
         mMessages.remove("{messageId:#}", message.getMessageId());
     }
 
