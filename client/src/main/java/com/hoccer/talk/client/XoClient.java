@@ -2106,7 +2106,7 @@ public class XoClient implements JsonRpcConnection.Listener {
 
     public void sendEnvironmentUpdate(TalkEnvironment environment) {
         LOG.debug("sendEnvironmentUpdate()");
-        if (this.getState() == STATE_ACTIVE && environment != null) {
+        if (isActive() && environment != null) {
             if (mEnvironmentUpdateCallPending.compareAndSet(false,true)) {
 
                 final TalkEnvironment environmentToSend = environment;
@@ -2142,7 +2142,7 @@ public class XoClient implements JsonRpcConnection.Listener {
 
 
     public void sendDestroyEnvironment(final String type) {
-        if (this.getState() == STATE_ACTIVE) {
+        if (isActive()) {
             mEnvironmentGroupId = null;
             mExecutor.execute(new Runnable() {
                 @Override
