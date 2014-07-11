@@ -1,6 +1,7 @@
 package com.hoccer.talk.server.database;
 
 import com.hoccer.talk.model.TalkClient;
+import com.hoccer.talk.model.TalkMessage;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
@@ -119,7 +120,7 @@ public class JongoDatabaseTest {
 
     @Test
     public void testFindClientById() throws Exception {
-        assertEquals(null, database.findClientById("bar"));
+        assertNull(database.findClientById("doesnotexist"));
 
         final TalkClient transientClient1 = new TalkClient();
         transientClient1.setClientId("foo");
@@ -145,7 +146,7 @@ public class JongoDatabaseTest {
 
     @Test
     public void testFindClientByApnsToken() {
-        assertEquals(null, database.findClientByApnsToken("bar"));
+        assertNull(database.findClientByApnsToken("doesnotexist"));
 
         final TalkClient transientClient1 = new TalkClient();
         transientClient1.setClientId("1");
@@ -166,5 +167,28 @@ public class JongoDatabaseTest {
         // ...although two are in the database
         List<TalkClient> clients = database.findAllClients();
         assertEquals(2, clients.size());
+    }
+
+    @Test
+    public void testFindMessageById() {
+        assertNull(database.findMessageById("doesnotexist"));
+
+        final TalkMessage transientMessage1 = new TalkMessage();
+        transientMessage1.setMessageId("foo");
+        transientMessage1.setMessageTag("1");
+        database.saveMessage(transientMessage1);
+
+        final TalkMessage transientMessage2 = new TalkMessage();
+        transientMessage2.setMessageId("foo");
+        transientMessage2.setMessageTag("2");
+        database.saveMessage(transientMessage2);
+
+        TalkMessage message = database.findMessageById("foo");
+        assertNotNull(message);
+        assertEquals("foo", message.getMessageId());
+        // We expect to get only the first entity...
+        assertEquals("1", message.getMessageTag());
+
+        // TODO: also test if there are actually 2 messages in db? No API for that currently
     }
 }
