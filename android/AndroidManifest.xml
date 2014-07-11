@@ -64,7 +64,7 @@
 
     <!-- Declare permission for controlling our own push package -->
     <permission
-            android:name="com.hoccer.xo.release.permission.C2D_MESSAGE"
+            android:name="com.hoccer.bofrostmessenger.permission.C2D_MESSAGE"
             android:protectionLevel="signature"/>
 
     <!-- Declare our application -->
