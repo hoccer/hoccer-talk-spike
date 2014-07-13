@@ -179,6 +179,17 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
         }
     }
 
+    // This method should only be called in environments where multiple instances of the same collection can exist
+    // (no instance caching) to ensure that all changes made by another instance are refreshed in this instance.
+    public void refresh() {
+        try {
+            mDatabase.getMediaCollectionDao().refresh(this);
+            mItemList = findMediaCollectionItemsOrderedByIndex();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     // Returns a copy of the internal TalkClientDownload array
     public TalkClientDownload[] toArray() {
         return mItemList.toArray(new TalkClientDownload[mItemList.size()]);
