@@ -108,15 +108,6 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public Map<String, Long> getStatistics() {
-        Map<String, Long> res = new HashMap<String, Long>();
-        for (MongoCollection collection : mCollections) {
-            res.put(collection.getName(), collection.count());
-        }
-        return res;
-    }
-
-    @Override
     public List<TalkClient> findAllClients() {
         List<TalkClient> res = new ArrayList<TalkClient>();
         Iterator<TalkClient> it =

@@ -17,8 +17,6 @@ import java.util.Map;
  */
 public interface ITalkServerDatabase {
 
-    public Map<String, Long> getStatistics();
-
     public List<TalkClient> findAllClients();
 
     public TalkClient findClientById(String clientId);

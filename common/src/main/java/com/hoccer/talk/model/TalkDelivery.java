@@ -325,7 +325,6 @@ public class TalkDelivery {
         return FAILED_STATES_SET.contains(state);
     }
 
-
     @JsonIgnore
     public boolean nextStateAllowed(String nextState) {
         if (!isValidState(state)) {
