@@ -117,6 +117,20 @@ public class TalkDeliveryTest {
         return simpleReentrantGraph;
     }
 
+    private HashMap<String, Set<String>> loopingGraph() {
+        /* Simple Graph that allows the following transitions/states...
+        *
+        * States/Transistions: A => B => C => B
+        * */
+        HashMap<String, Set<String>> loopingGraph = new HashMap<String, Set<String>>();
+
+        // Initial State
+        loopingGraph.put("A", new HashSet<String>(Arrays.asList(new String[]{"B"})));
+        loopingGraph.put("B", new HashSet<String>(Arrays.asList(new String[]{"C"})));
+        loopingGraph.put("C", new HashSet<String>(Arrays.asList(new String[]{"B"})));
+        return loopingGraph;
+    }
+
     private HashMap<String, Set<String>> deepStateGraph() {
         /* Simple Graph that allows the following transitions/states...
         *
@@ -138,6 +152,8 @@ public class TalkDeliveryTest {
     public void testStatePathExistsSimple() throws Exception {
         assertTrue(TalkDelivery.statePathExists(simpleStateGraph(), "ON", "OFF", new HashSet<String>()));
         assertFalse(TalkDelivery.statePathExists(simpleStateGraph(), "OFF", "ON", new HashSet<String>()));
+        assertFalse(TalkDelivery.statePathExists(simpleStateGraph(), "OFF", "OFF", new HashSet<String>()));
+        assertFalse(TalkDelivery.statePathExists(simpleStateGraph(), "ON", "ON", new HashSet<String>()));
     }
 
     @Test
@@ -149,6 +165,15 @@ public class TalkDeliveryTest {
     public void testStatePathExistsCyclic() throws Exception {
         assertTrue(TalkDelivery.statePathExists(simpleCyclicStateGraph(), "ON", "OFF", new HashSet<String>()));
         assertTrue(TalkDelivery.statePathExists(simpleCyclicStateGraph(), "OFF", "ON", new HashSet<String>()));
+    }
+
+    @Test
+    public void testStatePathExistsLooping() throws Exception {
+        assertFalse(TalkDelivery.statePathExists(loopingGraph(), "B", "A", new HashSet<String>()));
+        assertFalse(TalkDelivery.statePathExists(loopingGraph(), "C", "A", new HashSet<String>()));
+        assertTrue(TalkDelivery.statePathExists(loopingGraph(), "B", "B", new HashSet<String>()));
+        assertTrue(TalkDelivery.statePathExists(loopingGraph(), "C", "B", new HashSet<String>()));
+        assertTrue(TalkDelivery.statePathExists(loopingGraph(), "B", "C", new HashSet<String>()));
     }
 
     @Test(expected = RuntimeException.class)
