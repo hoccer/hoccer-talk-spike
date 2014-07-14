@@ -2,12 +2,8 @@ package com.hoccer.xo.android.activity;
 
 import com.hoccer.xo.android.adapter.NearbyChatAdapter;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.fragment.NearbyChatFragment;
 import com.hoccer.xo.release.R;
 
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.widget.ListView;
 
 public class NearbyHistoryMessagingActivity extends XoActivity {
