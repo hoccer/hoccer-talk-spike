@@ -174,6 +174,16 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         }
     }
 
+    public void setActionBarText(TalkClientContact contact) {
+        String title;
+        if (contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
+            title = getResources().getString(R.string.nearby_text);
+        } else {
+            title = contact.getName();
+        }
+        mActionBar.setTitle(title);
+    }
+
     @Override
     public void clipBoardItemSelected(IContentObject contentObject) {
         mCompositionFragment.onAttachmentSelected(contentObject);
@@ -182,7 +192,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
     private void setContact(TalkClientContact contact) {
         LOG.debug("setContact(" + contact.getClientContactId() + ")");
         mContact = contact;
-        mActionBar.setTitle(contact.getName());
+        setActionBarText(contact);
         mMessagingFragment.setContact(contact);
         mCompositionFragment.setContact(contact);
         if (mContact.isDeleted()) {
