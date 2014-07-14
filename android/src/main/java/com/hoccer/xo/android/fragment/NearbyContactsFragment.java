@@ -1,11 +1,15 @@
 package com.hoccer.xo.android.fragment;
 
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.widget.RelativeLayout;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.NearbyContactsAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.release.R;
+import com.sun.javafx.binding.StringFormatter;
 
 import org.apache.log4j.Logger;
 
@@ -36,7 +40,8 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         mPlaceholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
         mPlaceholderImage.setImageResource(R.drawable.placeholder_nearby);
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
-        mPlaceholderText.setText(R.string.placeholder_nearby_text);
+        mPlaceholderText.setMovementMethod(LinkMovementMethod.getInstance());
+        setPlaceholderText();
         return view;
     }
 
@@ -64,6 +69,14 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
             mNearbyAdapter.unregisterListeners();
         }
         super.onDestroy();
+    }
+
+    private void setPlaceholderText() {
+        String link = "<a href=\"" + getResources().getString(R.string.link_tutorial) + "#nearby\">"
+                + getResources().getString(R.string.placeholder_nearby_link_text) + "</a>";
+        String text = String.format(getString(R.string.placeholder_nearby_text), link);
+
+        mPlaceholderText.setText(Html.fromHtml(text));
     }
 
     private boolean isNearbyConversationPossible() {

@@ -261,7 +261,8 @@
     <string name="cant_find_credentials">Kann die Datei "credentials.json" mit den Zugangsdaten nicht finden.</string>
 
     <string name="placeholder_conversations_text">Lade deine Freunde zum Chatten ein!</string>
-    <string name="placeholder_nearby_text">Warten auf andere Nearby-Nutzer...</string>
+    <string name="placeholder_nearby_text">Warten auf Kontakte %1$s...</string>
+    <string name="placeholder_nearby_link_text">in der Nähe</string>
     <string name="actionbar_default_title">Hoccer</string>
     <string name="content_audio_caption">Musik</string>
     <string name="nearby_info_usercount">%1$d Benutzer in der Nähe</string>
