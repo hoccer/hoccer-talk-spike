@@ -95,13 +95,10 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
                 if (avatarDownload != null) {
                     mDatabase.refreshClientDownload(avatarDownload);
                 }
-            }
-            if(!mNearbyContacts.isEmpty()) {
-                if (mNearbyContacts.get(0).isGroup()) {
-                    mNearbyContacts.get(0).setNickname(mXoActivity.getResources().getString(R.string.nearby_text)
-                            + " (" + (mNearbyContacts.size() - 1)+ ")");
+                if(contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
+                    contact.setNickname(mXoActivity.getResources().getString(R.string.nearby_text)  + " (" +
+                    (mNearbyContacts.size()-1) + ")");
                 }
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
