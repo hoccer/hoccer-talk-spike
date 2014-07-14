@@ -142,6 +142,13 @@ public class XoClientDatabase {
         mDeliveries.createOrUpdate(delivery);
     }
 
+    public synchronized void updateDelivery(TalkDelivery delivery) throws SQLException {
+        int updatedRows = mDeliveries.update(delivery);
+        if(updatedRows < 1) {
+            throw new SQLException("cant find record for Delivery: " + delivery.getId().toString());
+        }
+    }
+
     public void savePublicKey(TalkKey publicKey) throws SQLException {
         mPublicKeys.createOrUpdate(publicKey);
     }
