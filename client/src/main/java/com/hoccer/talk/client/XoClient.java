@@ -48,7 +48,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class XoClient implements JsonRpcConnection.Listener {
+public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener {
 
     private static final Logger LOG = Logger.getLogger(XoClient.class);
 
@@ -230,6 +230,7 @@ public class XoClient implements JsonRpcConnection.Listener {
 
         // create transfer agent
         mTransferAgent = new XoTransferAgent(this);
+        mTransferAgent.registerListener(this);
 
         // ensure we have a self contact
         ensureSelfContact();
@@ -1627,7 +1628,6 @@ public class XoClient implements JsonRpcConnection.Listener {
         return clientMessage;
     }
 
-
     /**
      * Client-side RPC implementation
      */
@@ -2210,10 +2210,88 @@ public class XoClient implements JsonRpcConnection.Listener {
         }
 
         sendDeliveryConfirmation(delivery);
+        sendUploadDeliveryConfirmation(delivery);
 
         for(IXoMessageListener listener: mMessageListeners) {
             listener.onMessageStateChanged(clientMessage);
         }
+    }
+
+    private void sendUploadDeliveryConfirmation(final TalkDelivery delivery) {
+        TalkClientUpload clientUpload = null;
+        try {
+            clientUpload = mDatabase.getClientUploadForDelivery(delivery);
+        } catch (SQLException e) {
+            LOG.error("Error while retrieving client upload for delivery", e);
+        }
+
+        if (clientUpload == null) {
+            return;
+        }
+
+        final TalkClientUpload upload = clientUpload;
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String nextState = null;
+                    if (delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED)) {
+                        nextState = mServerRpc.acknowledgeReceivedFile(upload.getFileId(), delivery.getReceiverId());
+                        delivery.setAttachmentState(nextState);
+                    }
+                    if (delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_ABORTED)) {
+                        nextState = mServerRpc.acknowledgeAbortedFileDownload(upload.getFileId(), delivery.getReceiverId());
+                        delivery.setAttachmentState(nextState);
+                    }
+                    if (delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED)) {
+                        nextState = mServerRpc.acknowledgeFailedFileDownload(upload.getFileId(), delivery.getReceiverId());
+                        delivery.setAttachmentState(nextState);
+                    }
+                    if (nextState != null) {
+                        mDatabase.saveDelivery(delivery);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while sending delivery confirmation: ", e);
+                }
+            }
+        });
+    }
+
+    private void sendDownloadAttachmentDeliveryConfirmation(final TalkDelivery delivery) {
+        TalkClientDownload clientDownload = null;
+        try {
+            clientDownload = mDatabase.getClientDownloadForDelivery(delivery);
+        } catch (SQLException e) {
+            LOG.error("Error while retrieving client download for delivery", e);
+        }
+
+        if (clientDownload == null) {
+            return;
+        }
+
+        final TalkClientDownload download = clientDownload;
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String nextState = null;
+                    if (delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_UPLOAD_ABORTED)) {
+                        nextState = mServerRpc.acknowledgeAbortedFileUpload(download.getFileId());
+                        delivery.setAttachmentState(nextState);
+                    }
+                    if (delivery.getAttachmentState().equals(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED)) {
+                        nextState = mServerRpc.acknowledgeFailedFileUpload(download.getFileId());
+                        delivery.setAttachmentState(nextState);
+                    }
+
+                    if (nextState != null) {
+                        mDatabase.saveDelivery(delivery);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while sending attachment delivery confirmation: ", e);
+                }
+            }
+        });
     }
 
     private void sendDeliveryConfirmation(final TalkDelivery delivery) {
@@ -2390,6 +2468,9 @@ public class XoClient implements JsonRpcConnection.Listener {
                 }
             });
         }
+
+
+        sendDownloadAttachmentDeliveryConfirmation(delivery);
     }
 
     private void decryptMessage(TalkClientMessage clientMessage, TalkDelivery delivery, TalkMessage message) throws GeneralSecurityException, IOException, SQLException {
@@ -3265,4 +3346,93 @@ public class XoClient implements JsonRpcConnection.Listener {
             mMessageListeners.get(i).onMessageStateChanged(message);
         }
     }
+
+    private void updateUploadDelivery(TalkClientUpload upload, String state) {
+        try {
+            TalkDelivery delivery = mDatabase.deliveryForUpload(upload);
+            if (delivery != null) {
+                delivery.setAttachmentState(state);
+                mDatabase.saveDelivery(delivery);
+            }
+        } catch (SQLException e) {
+            LOG.error("Error while processing delivery", e);
+        }
+    }
+
+    private void updateDownloadDelivery(TalkClientDownload download, String state) {
+        try {
+            TalkDelivery delivery = mDatabase.deliveryForDownload(download);
+            if (delivery != null) {
+                delivery.setAttachmentState(state);
+                mDatabase.saveDelivery(delivery);
+            }
+        } catch (SQLException e) {
+            LOG.error("Error while processing delivery", e);
+        }
+    }
+
+    @Override
+    public void onDownloadRegistered(TalkClientDownload download) {}
+
+    @Override
+    public void onDownloadStarted(TalkClientDownload download) {}
+
+    @Override
+    public void onDownloadProgress(TalkClientDownload download) {}
+
+    @Override
+    public void onDownloadFinished(TalkClientDownload download) {
+        if (download.getTransferType() == XoTransfer.Type.ATTACHMENT) {
+            String nextState = getServerRpc().receivedFile(download.getFileId());
+            updateDownloadDelivery(download, nextState);
+        }
+    }
+
+    @Override
+    public void onDownloadFailed(TalkClientDownload download) {
+        if (download.getTransferType() == XoTransfer.Type.ATTACHMENT) {
+            String nextState = getServerRpc().failedFileDownload(download.getFileId());
+            updateDownloadDelivery(download, nextState);
+        }
+    }
+
+    @Override
+    public void onDownloadStateChanged(TalkClientDownload download) {}
+
+    @Override
+    public void onUploadStarted(TalkClientUpload upload) {
+        if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
+            String nextState = getServerRpc().startedFileUpload(upload.getFileId());
+            updateUploadDelivery(upload, nextState);
+        }
+    }
+
+    @Override
+    public void onUploadProgress(TalkClientUpload upload) {}
+
+    @Override
+    public void onUploadFinished(TalkClientUpload upload) {
+        if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
+            String nextState = getServerRpc().finishedFileUpload(upload.getFileId());
+            updateUploadDelivery(upload, nextState);
+        }
+    }
+
+    @Override
+    public void onUploadFailed(TalkClientUpload upload) {
+        if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
+            String nextState = getServerRpc().failedFileUpload(upload.getFileId());
+            updateUploadDelivery(upload, nextState);
+        }
+    }
+
+    @Override
+    public void onUploadStateChanged(TalkClientUpload upload) {
+        if(upload.getTransferType() == XoTransfer.Type.ATTACHMENT &&
+            upload.getState() == TalkClientUpload.State.PAUSED) {
+            String nextState = getServerRpc().pausedFileUpload(upload.getFileId());
+            updateUploadDelivery(upload, nextState);
+        }
+    }
+
 }

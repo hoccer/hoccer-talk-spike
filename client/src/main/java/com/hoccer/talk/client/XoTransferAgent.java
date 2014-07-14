@@ -3,6 +3,7 @@ package com.hoccer.talk.client;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.model.TalkDelivery;
 import com.j256.ormlite.dao.Dao;
 import org.apache.http.client.HttpClient;
 import org.apache.log4j.Logger;
@@ -274,7 +275,6 @@ public class XoTransferAgent implements IXoTransferListener {
         }
     }
 
-
     @Override
     public void onDownloadRegistered(TalkClientDownload download) {
         LOG.info("onDownloadRegistered(" + download.getClientDownloadId() + ")");
@@ -309,9 +309,6 @@ public class XoTransferAgent implements IXoTransferListener {
             IXoTransferListener listener = mListeners.get(i);
             listener.onDownloadFinished(download);
         }
-        if (download.getTransferType() == XoTransfer.Type.ATTACHMENT) {
-            mClient.getServerRpc().receivedFile(download.getFileId());
-        }
     }
 
     @Override
@@ -319,9 +316,6 @@ public class XoTransferAgent implements IXoTransferListener {
         LOG.info("onDownloadFailed(" + download.getClientDownloadId() + ")");
         for(IXoTransferListener listener: mListeners) {
             listener.onDownloadFailed(download);
-        }
-        if (download.getTransferType() == XoTransfer.Type.ATTACHMENT) {
-            mClient.getServerRpc().failedFileDownload(download.getFileId());
         }
     }
 
@@ -341,9 +335,6 @@ public class XoTransferAgent implements IXoTransferListener {
             IXoTransferListener listener = mListeners.get(i);
             listener.onUploadStarted(upload);
         }
-        if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
-            mClient.getServerRpc().startedFileUpload(upload.getFileId());
-        }
     }
 
     @Override
@@ -362,9 +353,6 @@ public class XoTransferAgent implements IXoTransferListener {
             IXoTransferListener listener = mListeners.get(i);
             listener.onUploadFinished(upload);
         }
-        if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
-            mClient.getServerRpc().finishedFileUpload(upload.getFileId());
-        }
     }
 
     @Override
@@ -373,19 +361,11 @@ public class XoTransferAgent implements IXoTransferListener {
         for(IXoTransferListener listener: mListeners) {
             listener.onUploadFailed(upload);
         }
-        if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
-            mClient.getServerRpc().failedFileUpload(upload.getFileId());
-        }
     }
 
     @Override
     public void onUploadStateChanged(TalkClientUpload upload) {
         LOG.info("onUploadStateChanged(id: " + upload.getClientUploadId() + ")");
-        if(upload.getTransferType() == XoTransfer.Type.ATTACHMENT &&
-           upload.getState() == TalkClientUpload.State.PAUSED) {
-
-            mClient.getServerRpc().pausedFileUpload(upload.getFileId());
-        }
         for (int i=0; i < mListeners.size(); i++) {
             IXoTransferListener listener = mListeners.get(i);
             listener.onUploadStateChanged(upload);
