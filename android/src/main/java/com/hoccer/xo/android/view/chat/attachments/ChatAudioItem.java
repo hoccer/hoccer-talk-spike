@@ -61,9 +61,13 @@ public class ChatAudioItem extends ChatMessageItem {
             playButton.setImageResource(iconId);
 
             String extension = "";
-            String dataUrl = contentObject.getContentDataUrl();
-            if (dataUrl != null) {
-                extension = dataUrl.substring(dataUrl.lastIndexOf("."), dataUrl.length());
+            try {
+                String dataUrl = contentObject.getContentDataUrl();
+                if (dataUrl != null) {
+                    extension = dataUrl.substring(dataUrl.lastIndexOf("."), dataUrl.length());
+                }
+            } catch (StringIndexOutOfBoundsException e) {
+                LOG.error("ChatAudioItem: error while extracting the file extension. Probably there is none.", e);
             }
 
             String displayName = "";
