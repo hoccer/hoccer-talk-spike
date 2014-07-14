@@ -11,21 +11,32 @@ public class TalkDeliveryTest {
 
     @Test
     public void testCreate() throws Exception {
-        TalkDelivery myEmptyDelivery = new TalkDelivery();
+        final TalkDelivery myEmptyDelivery = new TalkDelivery();
         assertNull(myEmptyDelivery.getState());
         assertNull(myEmptyDelivery.getTimeAccepted());
         assertNull(myEmptyDelivery.getTimeChanged());
         assertNull(myEmptyDelivery.getTimeUpdatedIn());
         assertNull(myEmptyDelivery.getTimeUpdatedOut());
 
-        TalkDelivery myInitializedDelivery = new TalkDelivery(true);
+        final TalkDelivery myInitializedDelivery = new TalkDelivery(true);
         assertEquals(TalkDelivery.STATE_NEW, myInitializedDelivery.getState());
+        assertNotNull(myInitializedDelivery.getTimeAccepted());
+        assertNotNull(myInitializedDelivery.getTimeChanged());
+        assertNotNull(myInitializedDelivery.getTimeUpdatedIn());
+        assertNotNull(myInitializedDelivery.getTimeUpdatedOut());
     }
 
     @Test(expected = RuntimeException.class)
-    public void testSetInvalidStateOnInitializedTalkDelivery() {
-        TalkDelivery myDelivery = new TalkDelivery(true);
+    public void testSetInvalidStateOnInitializedTalkDelivery() throws Exception {
+        final TalkDelivery myDelivery = new TalkDelivery(true);
         myDelivery.setState("foo");
+    }
+
+    @Test
+    public void testSetInvalidStateOnUninitializedTalkDelivery() throws Exception {
+        final TalkDelivery myDelivery = new TalkDelivery();
+        myDelivery.setState("foo");
+        assertEquals("foo", myDelivery.getState());
     }
 
 }
