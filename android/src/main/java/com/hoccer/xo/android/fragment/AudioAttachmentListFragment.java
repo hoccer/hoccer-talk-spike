@@ -609,16 +609,6 @@ public class AudioAttachmentListFragment extends XoListFragment {
         }
     }
 
-    private class AttachmentListFilterHandler implements ActionBar.OnNavigationListener {
-
-        @Override
-        public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-            filterAttachmentsByContactId(Integer.valueOf(new Long(itemId).intValue()));
-
-            return true;
-        }
-    }
-
     private class SearchActionHandler implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
 
         @Override
