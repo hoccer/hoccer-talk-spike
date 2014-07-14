@@ -97,7 +97,7 @@ public class MessagingFragment extends XoListFragment
         mCompositionFragment = new CompositionFragment();
         mCompositionFragment.setArguments(bundle);
 
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_container, mCompositionFragment).commit();
     }
 
