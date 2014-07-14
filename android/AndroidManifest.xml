@@ -190,6 +190,16 @@
                     android:value="com.hoccer.xo.android.activity.XoPreferenceActivity"/>
         </activity>
 
+        <!--FAQ and Tutorial activity-->
+        <activity android:name="com.hoccer.xo.android.activity.FaqTutorialActivity"
+                  android:label="@string/actionbar_default_title"
+                  android:parentActivityName="com.hoccer.xo.android.activity.XoPreferenceActivity"
+                  android:screenOrientation="portrait" >
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.XoPreferenceActivity"/>
+        </activity>
+
         <!-- Maps selection activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MapsLocationActivity"

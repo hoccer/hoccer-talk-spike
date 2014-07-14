@@ -25,9 +25,15 @@
     <string name="menu_profile">Profile</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_about">About Hoccer XO</string>
+    <string name="menu_faq">FAQ</string>
+    <string name="menu_tutorial">Tutorial</string>
     <string name="menu_reconnect">Reconnect</string>
     <string name="menu_quit">Quit</string>
     <string name="menu_clear_conversation">Clear conversation</string>
+
+    <!-- Tutorial and FAQ links -->
+    <string name="link_tutorial">http://hoccer.com/hoccer-xo-tutorial/</string>
+    <string name="link_faq">http://hoccer.com/hoccer-xo-faq/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_category_friends">Friends</string>
@@ -237,6 +243,7 @@
     <string name="pref_export_credentials">Export credentials</string>
     <string name="pref_import_credentials">Import credentials</string>
     <string name="pref_legal_information">Legal Information</string>
+    <string name="pref_about_information">About</string>
     <string name="pref_encryption">Encryption</string>
     <string name="pref_crash_report">Send report after app crashed</string>
     <string name="pref_crash_report_switcher">Enable reporting</string>
