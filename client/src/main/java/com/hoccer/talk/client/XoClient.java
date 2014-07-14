@@ -2325,7 +2325,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.debug("updateIncomingDelivery (Only)(" + delivery.getMessageId() + ")");
         TalkClientMessage clientMessage = null;
         try {
-
             clientMessage = mDatabase.findMessageByMessageId(delivery.getMessageId(), false);
             if(clientMessage == null) {
                 throw new RuntimeException("updateIncomingDelivery: message not find, id="+delivery.getMessageId());
@@ -2337,17 +2336,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         try {
             clientMessage.updateIncoming(delivery);
-
             TalkClientDownload attachmentDownload = clientMessage.getAttachmentDownload();
-
-            mDatabase.saveDelivery(clientMessage.getIncomingDelivery());
-
+            mDatabase.updateDelivery(clientMessage.getIncomingDelivery());
             if(attachmentDownload != null) {
                 mTransferAgent.registerDownload(attachmentDownload);
             }
-
             for(IXoMessageListener listener: mMessageListeners) {
-
                 listener.onMessageStateChanged(clientMessage);
             }
         } catch (SQLException e) {
