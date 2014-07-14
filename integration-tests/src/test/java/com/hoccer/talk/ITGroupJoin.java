@@ -12,6 +12,10 @@ import org.junit.runners.JUnit4;
 
 import java.util.HashMap;
 
+import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.to;
+import static org.hamcrest.Matchers.equalTo;
+
 @RunWith(JUnit4.class)
 public class ITGroupJoin extends IntegrationTest {
 
@@ -43,6 +47,25 @@ public class ITGroupJoin extends IntegrationTest {
         TestHelper.inviteToGroup(invitingClient, invitedClient, groupId);
 
         // join group
+        TestHelper.joinGroup(invitedClient, groupId);
+    }
+
+    @Test
+    public void joinGroupTestWhileAdminIsOffline() throws Exception {
+        XoClient invitingClient = clients.get("client1");
+        XoClient invitedClient = clients.get("client2");
+
+        // create group
+        String groupId = TestHelper.createGroup(invitingClient);
+
+        // invite to group
+        TestHelper.inviteToGroup(invitingClient, invitedClient, groupId);
+
+        // take inviting client offline
+        invitingClient.deactivate();
+        await("invitingClient is inactive").untilCall(to(invitingClient).getState(), equalTo(XoClient.STATE_INACTIVE));
+
+        // invited client joins group
         TestHelper.joinGroup(invitedClient, groupId);
     }
 }

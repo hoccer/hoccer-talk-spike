@@ -251,7 +251,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
         tfb2.setNameFormat("receiving client-%d");
         tfb2.setUncaughtExceptionHandler(this);
-        INCOMING_EXECUTOR = Executors.newScheduledThreadPool(XoConfiguration.CLIENT_THREADS, tfb2.build());
+        INCOMING_EXECUTOR = Executors
+                .newScheduledThreadPool(XoConfiguration.CLIENT_THREADS, tfb2.build());
 
         // create client instance
         LOG.info("creating client");

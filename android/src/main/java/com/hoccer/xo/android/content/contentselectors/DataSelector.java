@@ -38,7 +38,18 @@ public class DataSelector implements IContentSelector {
 
     @Override
     public IContentObject createObjectFromSelectionResult(Context context, Intent intent) {
+
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        }
+
         SelectedContent content = null;
         return null;
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
     }
 }

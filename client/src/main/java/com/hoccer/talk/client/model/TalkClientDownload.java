@@ -97,6 +97,9 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
     @DatabaseField(width = 2000)
     private String downloadUrl;
 
+    @DatabaseField
+    private String fileId;
+
     /**
      * Name of the file the download itself will go to
      *
@@ -126,6 +129,8 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
     private transient long progressRateLimit;
 
     private Timer mTimer;
+
+    private HttpGet mDownloadRequest = null;
 
     public TalkClientDownload() {
         super(Direction.DOWNLOAD);
@@ -231,8 +236,6 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
         LOG.info("[new] initializeAsAvatar(url: '" + url + "')");
         this.type = Type.AVATAR;
 
-        url = checkFilecacheUrl(url); // TODO: ToBeDeleted
-
         this.downloadUrl = url;
         this.downloadFile = id + "-" + timestamp.getTime();
     }
@@ -247,9 +250,6 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
 
         this.aspectRatio = attachment.getAspectRatio();
 
-        String filecacheUrl = checkFilecacheUrl(attachment.getUrl()); // TODO: ToBeDeleted
-        attachment.setUrl(filecacheUrl);
-
         this.downloadUrl = attachment.getUrl();
         this.downloadFile = id;
         this.decryptedFile = UUID.randomUUID().toString();
@@ -261,12 +261,8 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
 
         this.decryptionKey = new String(Hex.encodeHex(key));
         this.contentHmac = attachment.getHmac();
-    }
-    // TODO: DELETE THIS PIECE OF ****
-    private String checkFilecacheUrl(String url) {
-        String migratedUrl = url.substring(url.indexOf("/", 8));
-        migratedUrl = "https://filecache.talk.hoccer.de:8444" + migratedUrl;
-        return migratedUrl;
+
+        this.fileId = attachment.getFileId();
     }
 
     public void provideContentUrl(XoTransferAgent agent, String url) {
@@ -347,11 +343,15 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
         return downloadUrl;
     }
 
+    public String getFileId() {
+        return fileId;
+    }
+
     /**
      * Only used for migrating existing filecache Uris to new host. Delete this Method once
      * the migration is done!
      *
-     * @param url
+     * @param downloadUrl
      */
     @Deprecated
     public void setDownloadUrl(String downloadUrl) {
@@ -496,6 +496,12 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
             }
         }
 
+        if (state == State.PAUSED) {
+            LOG.info("download currently paused.");
+            mDownloadRequest = null;
+            return;
+        }
+
         if (state == State.DOWNLOADING) {
             mTimer = new Timer();
             DownloadTask downloadTask = new DownloadTask(this, agent, downloadFilename);
@@ -562,7 +568,8 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
     }
 
     private boolean performOneRequest(XoTransferAgent agent, String filename) {
-        LOG.debug("performOneRequest(downloadId: '" + clientDownloadId + "', filename: '" + filename + "')");
+        LOG.debug("performOneRequest(downloadId: '" + clientDownloadId + "', filename: '" + filename
+                + "')");
         HttpClient client = agent.getHttpClient();
         XoClientDatabase database = agent.getDatabase();
         RandomAccessFile raf = null;
@@ -570,17 +577,17 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
         try {
             logGetDebug("downloading '" + downloadUrl + "'");
             // create the GET request
-            HttpGet request = new HttpGet(downloadUrl);
+            mDownloadRequest = new HttpGet(downloadUrl);
             // determine the requested range
             String range = null;
             if (contentLength != -1) {
                 long last = contentLength - 1;
                 range = "bytes=" + downloadProgress + "-" + last;
                 logGetDebug("requesting range '" + range + "'");
-                request.addHeader("Range", range);
+                mDownloadRequest.addHeader("Range", range);
             }
             // start performing the request
-            HttpResponse response = client.execute(request);
+            HttpResponse response = client.execute(mDownloadRequest);
             // process status line
             StatusLine status = response.getStatusLine();
             int sc = status.getStatusCode();
@@ -730,8 +737,9 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
     }
 
     private boolean performDecryption(XoTransferAgent agent, String sourceFile, String destinationFile) {
-        LOG.debug("performDecryption(downloadId: '" + clientDownloadId + "', sourceFile: '" + sourceFile + "', " +
-                  "destinationFile: '" + destinationFile + "')");
+        LOG.debug("performDecryption(downloadId: '" + clientDownloadId + "', sourceFile: '"
+                + sourceFile + "', " +
+                "destinationFile: '" + destinationFile + "')");
 
         File source = new File(sourceFile);
 
@@ -842,6 +850,19 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
         return true;
     }
 
+    public void pauseDownload(XoTransferAgent agent) {
+        if(mDownloadRequest != null) {
+            mDownloadRequest.abort();
+        }
+        switchState(agent, State.PAUSED);
+
+    }
+
+    public void resumeDownload(XoTransferAgent agent) {
+        switchState(agent, State.DOWNLOADING);
+        performDownloadAttempt(agent);
+    }
+
     /**
      * Creates a unique file name by checking whether a file already exists in a given directory.
      * In case a file with the same name already exists the given file name will be expanded by an underscore and
@@ -872,6 +893,7 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
 
     private void markFailed(XoTransferAgent agent) {
         switchState(agent, State.FAILED);
+        agent.onDownloadFailed(this);
     }
 
     public void switchState(XoTransferAgent agent, State newState) {

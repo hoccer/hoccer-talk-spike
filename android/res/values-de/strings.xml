@@ -13,6 +13,8 @@
     <string name="common_done">Fertig</string>
     <string name="common_decline">Ablehnen</string>
     <string name="common_accept">Annehmen</string>
+    <string name="common_delete">Löschen</string>
+
 
     <!-- Menu entries -->
     <string name="menu_my_profile">Mein Profil</string>
@@ -24,9 +26,11 @@
     <string name="menu_add_attachment">Anhang hinzufügen</string>
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
-    <string name="menu_about">Über uns</string>
+    <string name="menu_about">Über Hoccer XO</string>
+    <string name="menu_music_viewer">Musik</string>
     <string name="menu_reconnect">erneut verbinden</string>
     <string name="menu_quit">schließen</string>
+    <string name="menu_clear_conversation">Chat löschen</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_category_friends">Freunde</string>
@@ -37,6 +41,15 @@
     <string name="contacts_sms_invitation_description">hat dir eine SMS-Einladung geschickt.
         Möchtest du die Einladung annehmen?
     </string>
+
+    <!-- Deleting attachments -->
+    <string name="attachment_confirm_delete_dialog_message">Willst du die ausgewählten Anhänge wirklich löschen?</string>
+
+    <!-- AudioAttachmentList Fragment -->
+    <string name="audio_attachment_list_all">Alle</string>
+    <string name="audio_attachment_list_unknown">Unbekannt</string>
+    <string name="menu_search">Suche</string>
+    <string name="search_hint">Suche Attachments</string>
 
     <!-- Nearby location request -->
     <string name="dialog_enable_location_service_title">Ortungsdienste</string>
@@ -71,9 +84,14 @@
     <string name="pairing_qr_scan">QR Code scannen</string>
     <string name="pairing_token_generating">Erzeugen...</string>
     <string name="pairing_token_send_sms">Einladen via SMS</string>
+    <string name="pairing_token_send_email">Einladen via e-mail</string>
     <string name="pairing_success">Kontakt wurde erfolgreich hinzugefügt</string>
     <string name="dialog_pairing_failed_title">Der Kontakt konnte nicht hinzugefügt werden</string>
     <string name="dialog_pairing_failed_message">Der eingegebene Code ist ungültig.</string>
+	<string name="paired_with">You successfully paired with </string>
+<string name="pairing_incorrect_code">Incorrect code, please try again.</string>
+<string name="pairing_scanner">QR scanner</string>
+<string name="pairing_generator">QR identifier</string>
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Mein Bild ändern</string>
@@ -91,6 +109,14 @@
     <string name="profile_user_unblock_button">User entblockieren</string>
     <string name="profile_user_depair_button">Verbindung aufheben</string>
     <string name="profile_user_delete_button">Kontakt löschen</string>
+
+    <string name="friend_request_add_as_friend">Als Freund hinzufügen</string>
+    <string name="friend_request_cancel_invitation">Freundschaftsanfrage zurückziehen</string>
+    <string name="friend_request_accept_invitation">Freundschafts- anfrage akzeptieren</string>
+    <string name="friend_request_decline_invitation">Freundschafts- anfrage ablehnen</string>
+    <string name="friend_request_invited_me_description">möchte dein Freund sein.</string>
+    <string name="friend_request_invited_by_you_description">hat eine Einladung von dir bekommen.</string>
+
     <string name="group_name_hint">Gruppenname</string>
     <string name="profile_group_members_title">Mitglieder</string>
     <string name="profile_group_create_button">Gruppe erstellen</string>
@@ -118,6 +144,9 @@
     <string name="content_data">Dokument</string>
     <string name="content_clipboard">Aus Zwischenablage</string>
 
+    <string name="content_not_supported_audio_title">Nicht unterstütztes Format</string>
+    <string name="content_not_supported_audio_msg">Dieser Audio-Anhang kann nicht wiedergegeben werden.</string>
+
     <!-- Client states (used in status fragment) -->
     <string name="client_state_idle">Idle</string>
     <string name="client_state_inactive">Inaktiv</string>
@@ -128,6 +157,10 @@
     <string name="client_state_login">Einloggen</string>
     <string name="client_state_connecting">Verbinden</string>
     <string name="client_state_unknown">unbekannt</string>
+
+    <!-- FullscreenPlayer -->
+    <string name="track_number_filler">von</string>
+    <string name="deleted_contact_name">Entfernter Kontakt</string>
 
     <!-- Attachment type selection dialog -->
     <string name="selectattachment_title">Anhang auswählen</string>
@@ -201,6 +234,12 @@
     <string name="dialog_block_user_message">Bist du dir sicher, dass du diesen Kontakt blockieren möchtest? Du wirst keine weiteren Nachrichten von diesem Kontakt erhalten.
     </string>
 
+    <!-- Media Player -->
+    <string name="media_meta_data_unknown_title">Unbekannter Titel</string>
+    <string name="media_meta_data_unknown_artist">Unbekannter Interpret</string>
+    <string name="media_player_playlist_track_divider">von</string>
+    <string name="media_player_default_filter_label">Alle</string>
+
     <!-- Preferences -->
     <string name="preference_keysize_summary">RSA Schlüssel mit gewählter Schlüssellänge erneuern</string>
     <string name="preference_keysize_title">RSA Schlüssellänge</string>
@@ -208,20 +247,26 @@
     <string name="pref_auto_downloads_mobile">Im mobilen Netz</string>
     <string name="pref_auto_download_wifi">Im WLAN Netz</string>
     <string name="pref_auto_download">Automatischer Download</string>
+    <string name="pref_confirm_messages_seen">Lesebestätigung senden</string>
     <string name="pref_credentials">Zugangsdaten</string>
     <string name="pref_export_credentials">Zugangsdaten exportieren</string>
     <string name="pref_import_credentials">Zugangsdaten importieren</string>
     <string name="pref_legal_information">Rechtliches</string>
     <string name="pref_encryption">Verschlüsselung</string>
-    <string name="profile_compare_key_description">Für ein Extra an Sicherheit vergleiche diesen Fingerabdruck mit dem Fingerabdruck den Deine Freunde in deiner Kontaktkarte sehen
-    </string>
+    <string name="profile_compare_key_description">Für ein Extra an Sicherheit vergleiche diesen Fingerabdruck mit dem Fingerabdruck, den deine Freunde in deiner Kontaktkarte sehen.</string>
     <string name="pref_please_wait">Bitte warten...</string>
     <string name="my_profile_title">Mein Profil</string>
     <string name="welcome_to_title">Willkommen bei XO!</string>
     <string name="contact_item_receive_attachment">%1$s Datei erhalten</string>
-    <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar setzen.
-    </string>
+    <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar verwenden.</string>
+    <string name="error_attachment_selection">Sie können diese Datei nicht als Anhang verwenden.</string>
     <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App HoccerXO zum sicheren Chatten! Jetzt herunterladen: http://hoccer.com/ Dann mich als Kontakt hinzufügen: %1$s%2$s
+        \nxo %3$s
+    </string>
+    <string name="email_invitation_text">Hey!\nI\'m now using the free app Hoccer XO for secure
+        chatting. Download it now:\nhttp://hoccer.com/\nThen add me as a contact:\n
+        &lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;
+        %1$s%2$s
         \nxo %3$s
     </string>
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>
@@ -240,6 +285,14 @@
     <string name="placeholder_nearby_text">Warten auf andere Nearby-Nutzer...</string>
     <string name="actionbar_default_title">Hoccer</string>
     <string name="content_audio_caption">Musik</string>
+    <string name="nearby_info_usercount">%1$d Benutzer in der Nähe</string>
+    <string name="profile_nickname_text">Anzeigename</string>
+    <string name="seen_text">gesehen</string>
+    <string name="nearby_text">Alle in der Nähe</string>
+    <string name="error_send_message">Die Nachricht konnte nicht gesendet werden.</string>
+    <string name="pref_privacy_title">Privatspähre</string>
+    <string name="error_send_message_empty_group">Diese Gruppe ist leer.</string>
+    <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
 
     <string-array name="preference_log_level_names">
         <item>Info</item>
@@ -255,7 +308,11 @@
 
     <string-array name="tab_names">
         <item>CHATS</item>
+        <item>EINLADUNGEN</item>
         <item>IN DER NÄHE</item>
     </string-array>
+
+    <string name="about_advert_text">Hoccer XO \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Hoccer neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Hoccer XO ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
+    <string name="about_version_description">Version %1$s</string>
 
 </resources>

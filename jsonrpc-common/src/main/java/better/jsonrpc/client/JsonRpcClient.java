@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JsonRpcClient {
 
     /** Default request timeout (msecs) */
-    public static final long DEFAULT_REQUEST_TIMEOUT = 5 * 1000;
+    public static final long DEFAULT_REQUEST_TIMEOUT = 30 * 1000;
 
     /** Global logger for clients */
 	private static final Logger LOG = Logger.getLogger(JsonRpcClient.class);
@@ -133,7 +133,7 @@ public class JsonRpcClient {
     public void sendRequest(JsonRpcConnection connection, ObjectNode request) throws Exception {
         // log request
         if (LOG.isInfoEnabled()) {
-            LOG.info("RPC-Client Request [connectionId: '" + connection.getConnectionId() + "']: " + request.toString());
+            LOG.info("RPC-Request -> [" + connection.getConnectionId() + "] " + request.toString());
         }
         // send it
         connection.sendRequest(request);
@@ -145,7 +145,7 @@ public class JsonRpcClient {
     public void sendNotification(JsonRpcConnection connection, ObjectNode notification) throws Exception {
         // log notification
         if (LOG.isInfoEnabled()) {
-            LOG.info("Notification [connectionId: '" + connection.getConnectionId() + "']: " + notification.toString());
+            LOG.info("RPC-Notification -> [" + connection.getConnectionId() + "] " + notification.toString());
         }
         // send it
         connection.sendNotification(notification);
@@ -294,7 +294,7 @@ public class JsonRpcClient {
 			String id = idNode.asText();
             // log response
             if (LOG.isInfoEnabled()) {
-                LOG.info("RPC-Client Response [connectionId: '" + connection.getConnectionId() + "']: " + response.toString());
+                LOG.info("RPC-Response <- [" + connection.getConnectionId() + "] " + response.toString());
             }
             // retrieve the request from the client table
             JsonRpcClientRequest req = null;

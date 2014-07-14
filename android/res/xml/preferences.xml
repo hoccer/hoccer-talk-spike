@@ -18,6 +18,17 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:title="@string/pref_privacy_title">
+
+        <CheckBoxPreference
+                android:key="preference_confirm_messages_seen"
+                android:title="@string/pref_confirm_messages_seen"
+                android:defaultValue="true"/>
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
             android:title="@string/pref_credentials">
         <Preference
                 android:title="@string/pref_export_credentials"
@@ -47,12 +58,10 @@
         <Preference
                 android:title="@string/menu_about"
                 android:key="preference_about">
-            <intent android:action="com.hoccer.xo.ABOUT"/>
         </Preference>
         <Preference
                 android:title="@string/menu_licenses"
                 android:key="preference_licenses">
-            <intent android:action="com.hoccer.xo.LICENSES"/>
         </Preference>
     </PreferenceCategory>
 
