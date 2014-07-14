@@ -2397,6 +2397,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             TalkClientDownload attachmentDownload = clientMessage.getAttachmentDownload();
 
             if(attachmentDownload != null) {
+                String attachmentFileId = clientMessage.getMessage().getAttachmentFileId();
+                attachmentDownload.setFileId(attachmentFileId);
                 mDatabase.saveClientDownload(clientMessage.getAttachmentDownload());
             }
             mDatabase.saveMessage(clientMessage.getMessage());
