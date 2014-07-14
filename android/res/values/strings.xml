@@ -305,7 +305,8 @@
     <string name="content_audio_caption">Music</string>
     <string name="nearby_info_usercount">%1$d Users are Nearby</string>
     <string name="profile_nickname_text">Nickname</string>
-    <string name="seen_text">seen</string>
+    <string name="attachment_seen_text">seen</string>
+    <string name="attachment_expects_text">expects attachment</string>
     <string name="nearby_text">All nearby</string>
     <string name="error_send_message">Could not send message.</string>
     <string name="pref_privacy_title">Privacy</string>

@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.view.chat;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
@@ -184,14 +183,20 @@ public class ChatMessageItem implements AttachmentTransferListener {
             return;
         }
 
-        String currentState = mMessage.getOutgoingDelivery().getState();
-        if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
+        TalkDelivery outgoingDelivery = mMessage.getOutgoingDelivery();
+        String currentState = outgoingDelivery.getState();
+        String attachmentState = outgoingDelivery.getAttachmentState();
+        if (attachmentState != null && (!attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED) && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED))) {
+            deliveryInfo.setVisibility(View.VISIBLE);
+            deliveryInfo.setTextColor(view.getResources().getColor(R.color.xo_app_main_color));
+            deliveryInfo.setText(R.string.attachment_expects_text);
+        } else if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
                 || currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED))
-                && !mMessage.getOutgoingDelivery().isGroupDelivery()) {
+                && !outgoingDelivery.isGroupDelivery()) {
 
             deliveryInfo.setVisibility(View.VISIBLE);
             deliveryInfo.setTextColor(view.getResources().getColor(R.color.xo_app_main_color));
-            deliveryInfo.setText(R.string.seen_text);
+            deliveryInfo.setText(R.string.attachment_seen_text);
         } else {
             deliveryInfo.setVisibility(View.GONE);
         }
@@ -209,8 +214,6 @@ public class ChatMessageItem implements AttachmentTransferListener {
         } else if(currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
             return R.drawable.bubble_red;
         }
-
-
         return R.drawable.bubble_green;
     }
 
