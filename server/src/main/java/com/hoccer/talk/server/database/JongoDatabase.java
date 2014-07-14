@@ -166,6 +166,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable
     public TalkDelivery findDelivery(String messageId, String clientId) {
         return mDeliveries.findOne("{messageId:#,receiverId:#}", messageId, clientId)
                 .as(TalkDelivery.class);
