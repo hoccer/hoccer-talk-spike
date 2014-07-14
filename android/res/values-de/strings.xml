@@ -71,15 +71,15 @@
     <string name="pairing_qr_show">QR Code anzeigen</string>
     <string name="pairing_qr_scan">QR Code scannen</string>
     <string name="pairing_token_generating">Erzeugen...</string>
-    <string name="pairing_token_send_sms">Einladen via SMS</string>
-    <string name="pairing_token_send_email">Einladen via e-mail</string>
+    <string name="pairing_token_send_sms">Einladen per SMS</string>
+    <string name="pairing_token_send_email">Einladen per e-mail</string>
     <string name="pairing_success">Kontakt wurde erfolgreich hinzugefügt</string>
     <string name="dialog_pairing_failed_title">Der Kontakt konnte nicht hinzugefügt werden</string>
     <string name="dialog_pairing_failed_message">Der eingegebene Code ist ungültig.</string>
-	<string name="paired_with">You successfully paired with </string>
-<string name="pairing_incorrect_code">Incorrect code, please try again.</string>
-<string name="pairing_scanner">QR scanner</string>
-<string name="pairing_generator">QR identifier</string>
+	<string name="paired_with">Du bist nun befreundet mit </string>
+<string name="pairing_incorrect_code">Ungültiger Code. Bitte versuche es erneut.</string>
+<string name="pairing_scanner">QR-Scanner</string>
+<string name="pairing_generator">QR-Code</string>
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Mein Bild ändern</string>
@@ -184,7 +184,7 @@
     <string name="common_group_invite">Eingeladen</string>
     <string name="common_friend">Freund</string>
     <string name="menu_licenses">Lizenzen</string>
-    <string name="feature_not_available">Dieses Feature ist noch nicht verfügbar</string>
+    <string name="feature_not_available">Diese Funktion ist noch nicht verfügbar</string>
     <string name="file_chooser_string">Datei auswählen</string>
     <string name="open_file">Datei öffnen</string>
     <string name="error_no_such_app">keine installierte App kann diese Datei öffnen</string>
@@ -228,7 +228,7 @@
     <string name="pref_import_credentials">Zugangsdaten importieren</string>
     <string name="pref_legal_information">Rechtliches</string>
     <string name="pref_encryption">Verschlüsselung</string>
-    <string name="profile_compare_key_description">Für ein Extra an Sicherheit vergleiche diesen Fingerabdruck mit dem Fingerabdruck, den deine Freunde in deiner Kontaktkarte sehen.</string>
+    <string name="profile_compare_key_description">Für ein Extra an Sicherheit, vergleiche diesen Fingerabdruck mit dem Fingerabdruck, den deine Freunde in deiner Kontaktkarte sehen.</string>
     <string name="pref_please_wait">Bitte warten...</string>
     <string name="my_profile_title">Mein Profil</string>
     <string name="welcome_to_title">Willkommen bei XO!</string>
@@ -246,11 +246,11 @@
     </string>
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>
     <string name="export_credentials_success">Zugangsdaten erfolgreich exportiert.</string>
-    <string name="export_credentials_failure">Es ist ein Fehler beim exportieren der Zugangsdaten aufgetreten.</string>
+    <string name="export_credentials_failure">Es ist ein Fehler beim Exportieren der Zugangsdaten aufgetreten.</string>
 
     <string name="dialog_import_credentials_title">Zugangsdaten importieren</string>
     <string name="import_credentials_success">Zugangsdaten erfolgreich importiert.\nBitte starten Sie die App neu.</string>
-    <string name="import_credentials_failure">Es ist ein Fehler beim importieren der Zugangsdaten aufgetreten.</string>
+    <string name="import_credentials_failure">Es ist ein Fehler beim Importieren der Zugangsdaten aufgetreten.</string>
 
     <string name="enter_password">Passwort:</string>
     <string name="no_password">Bitte geben Sie ein Passwort ein.</string>
