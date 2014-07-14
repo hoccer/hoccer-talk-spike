@@ -94,7 +94,7 @@
     <repository>
       <id>hoccer</id>
       <name>Archiva Managed Hoccer Repository</name>
-      <url>https://archiva.hoccer.de/repository/hoccer</url>
+      <url>https://archiva.hoccer.com/repository/hoccer</url>
     </repository>
   </distributionManagement>
 </project>
