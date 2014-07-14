@@ -205,12 +205,11 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
         }
 
         public void surfaceCreated(SurfaceHolder holder) {
-            try {
-                mCamera.setPreviewDisplay(holder);
-                mCamera.autoFocus(autoFocusCallback);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                mCamera.setPreviewDisplay(holder);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
 
         public void surfaceDestroyed(SurfaceHolder holder) {
@@ -222,6 +221,8 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
                 return;
             }
             try {
+                mCamera.cancelAutoFocus();
+                mCamera.setPreviewCallback(null);
                 mCamera.stopPreview();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -231,6 +232,7 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
                 mCamera.setPreviewDisplay(mHolder);
                 mCamera.setPreviewCallback(previewCallback);
                 mCamera.startPreview();
+                mCamera.autoFocus(autoFocusCallback);
             } catch (Exception e) {
                 e.printStackTrace();
             }
