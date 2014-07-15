@@ -2582,7 +2582,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         // add decrypted information to message
         if (decryptedBody != null) {
-            //LOG.debug("Setting message's body to '" + decryptedBody + "' after decryption");
             clientMessage.setText(decryptedBody);
         }
         if(decryptedAttachment != null) {
