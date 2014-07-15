@@ -12,6 +12,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 
@@ -407,6 +408,24 @@ public abstract class ContactsAdapter extends XoAdapter
 
     public void setOnItemCountChangedListener(OnItemCountChangedListener onItemCountChangedListener) {
         mOnItemCountChangedListener = onItemCountChangedListener;
+    }
+
+    public String[] getMembersIds() {
+        String[] ids = new String[mClientContacts.size()];
+        int i = 0;
+        for (TalkClientContact c: mClientContacts) {
+            ids[i++] = c.getClientId();
+        }
+        return ids;
+    }
+
+    public String[] getMembersRoles() {
+        String[] ids = new String[mClientContacts.size()];
+        int i = 0;
+        for (TalkClientContact c: mClientContacts) {
+            ids[i++] = TalkGroupMember.ROLE_MEMBER;
+        }
+        return ids;
     }
 
     public interface Filter {

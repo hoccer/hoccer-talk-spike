@@ -47,6 +47,7 @@ public class GroupProfileFragment extends XoFragment
     private TextView mGroupNameText;
     private EditText mGroupNameEdit;
     private Button mGroupCreateButton;
+    private Button mMakePermanentButton;
     private LinearLayout mGroupMembersContainer;
     private TextView mGroupMembersTitle;
     private ListView mGroupMembersList;
@@ -103,12 +104,19 @@ public class GroupProfileFragment extends XoFragment
                 mGroupCreateButton.setEnabled(false);
             }
         });
+        mMakePermanentButton = (Button) v.findViewById(R.id.profile_group_button_make_permanent);
+        mMakePermanentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                makeNearbyPermanent();
+                mGroupCreateButton.setEnabled(false);
+            }
+        });
         mGroupMembersContainer = (LinearLayout) v.findViewById(R.id.profile_group_members_container);
         mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
         mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
         return v;
     }
-
 
     @Override
     public void onResume() {
@@ -272,6 +280,21 @@ public class GroupProfileFragment extends XoFragment
         }
     }
 
+    private void makeNearbyPermanent() {
+        String newGroupName = mGroupNameEdit.getText().toString();
+
+        TalkClientContact groupContact = TalkClientContact.createGroupContact();
+        TalkGroup groupPresence = new TalkGroup();
+        groupPresence.setGroupTag(groupContact.getGroupTag());
+        groupContact.updateGroupPresence(groupPresence);
+
+        if (groupContact != null && !groupContact.isGroupRegistered()) {
+            groupContact.getGroupPresence().setGroupName(newGroupName + " permanent");
+            getXoClient().createGroupWithContacts(groupContact, mGroupMemberAdapter.getMembersIds(), mGroupMemberAdapter.getMembersRoles());
+//            mMode = Mode.EDIT_GROUP;
+        }
+    }
+
     public void saveEditedGroup() {
         String newGroupName = mGroupNameEdit.getText().toString();
         if (newGroupName.isEmpty()) {
@@ -339,6 +362,7 @@ public class GroupProfileFragment extends XoFragment
 
         if(mGroup.getGroupPresence().isTypeNearby()) {
             mGroupNameText.setText(R.string.nearby_text);
+            mMakePermanentButton.setVisibility(View.VISIBLE);
         } else {
             mGroupNameText.setText(name);
         }

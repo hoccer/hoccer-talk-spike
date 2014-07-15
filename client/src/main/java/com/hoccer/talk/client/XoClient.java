@@ -1059,6 +1059,90 @@ public class XoClient implements JsonRpcConnection.Listener {
         });
     }
 
+    public void createGroupWithContacts(final TalkClientContact groupContact, final String[] members, final String[] roles) {
+        LOG.debug("createGroupWithContacts()");
+        resetIdle();
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    LOG.debug("creating group");
+                    TalkGroup groupPresence = groupContact.getGroupPresence();
+                    TalkClientUpload avatarUpload = groupContact.getAvatarUpload();
+                    groupContact.setAvatarUpload(null);
+
+                    TalkGroupMember member = new TalkGroupMember();
+                    member.setClientId(mSelfContact.getClientId());
+                    member.setRole(TalkGroupMember.ROLE_ADMIN);
+                    member.setState(TalkGroupMember.STATE_JOINED);
+                    member.setMemberKeyId(mSelfContact.getPublicKey().getKeyId()); // TODO: make sure all members are properly updated when the public key changes
+                    groupContact.updateGroupMember(member);
+                    generateGroupKey(groupContact);
+                    LOG.debug("creating group on server");
+
+                    String tag = groupContact.getGroupTag();
+                    String name = groupContact.getName();
+                    TalkGroup createdGroup = mServerRpc.createGroupWithMembers(TalkGroup.GROUP_TYPE_USER, tag,
+                            name, members, roles);
+
+                    if(createdGroup == null) {
+                        return;
+                    }
+
+                    groupPresence.setGroupId(createdGroup.getGroupId());
+                    groupPresence.setState(TalkGroup.STATE_NONE);
+                    member.setGroupId(createdGroup.getGroupId());
+                    groupContact.updateGroupId(createdGroup.getGroupId());
+                    groupContact.updateGroupPresence(groupPresence);
+
+                    try {
+                        mDatabase.saveGroupMember(member);
+                        mDatabase.saveGroup(groupPresence);
+                        mDatabase.saveContact(groupContact);
+                        TalkClientMembership membership = mDatabase.findMembershipByContacts(
+                                groupContact.getClientContactId(), mSelfContact.getClientContactId(), true);
+                        membership.updateGroupMember(member);
+                        mDatabase.saveClientMembership(membership);
+                    } catch (SQLException e) {
+                        LOG.error("sql error", e);
+                    }
+
+                    LOG.debug("new group contact " + groupContact.getClientContactId());
+
+                    for (int i = 0; i < mContactListeners.size(); i++) {
+                        IXoContactListener listener = mContactListeners.get(i);
+                        listener.onContactAdded(groupContact);
+                    }
+
+                    if(avatarUpload != null) {
+                        setGroupAvatar(groupContact, avatarUpload);
+                    }
+
+                    // start of error checking section, remove when all works
+                    TalkClientMembership membership = null;
+                    try {
+                        LOG.error("createGroup: looking for membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
+                        membership = mDatabase.findMembershipByContacts(
+                                groupContact.getClientContactId(), mSelfContact.getClientContactId(), false);
+                        if (membership == null) {
+                            LOG.error("createGroup: not found: membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
+                        }
+                        // just for error checking purposes, the following condition should never be true
+                        if (membership != null && (membership.getGroupContact().getContactType() == null || membership.getClientContact().getContactType() == null)) {
+                            LOG.error("createGroup: defective membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
+                        }
+                    } catch (SQLException e) {
+                        LOG.error("SQL error: ", e);
+                    }
+                    // end of error checking section
+
+                } catch (JsonRpcClientException e) {
+                    LOG.error("Error while creating group: ", e);
+                }
+            }
+        });
+    }
+
     public void inviteClientToGroup(final String groupId, final String clientId) {
         resetIdle();
         mExecutor.execute(new Runnable() {
