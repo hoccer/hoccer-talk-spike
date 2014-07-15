@@ -22,8 +22,6 @@ import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
-import java.sql.SQLException;
-
 public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
@@ -66,7 +64,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         m_checkIdReceiver = new getContactIdInConversation();
         registerReceiver(m_checkIdReceiver, filter);
 
-		// handle converse intent
+        // handle converse intent
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
             mContactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
@@ -143,6 +141,16 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
                 clipboard.storeAttachment(mClipboardAttachment);
                 mClipboardAttachment = null;
         }
+    }
+
+    public void setActionBarText(TalkClientContact contact) {
+        String title;
+        if (contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
+            title = getResources().getString(R.string.nearby_text);
+        } else {
+            title = contact.getName();
+        }
+        mActionBar.setTitle(title);
     }
 
     @Override

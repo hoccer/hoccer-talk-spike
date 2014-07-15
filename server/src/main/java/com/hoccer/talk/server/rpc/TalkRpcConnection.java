@@ -276,12 +276,17 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * Called by handler when the client has called ready()
      */
     public void readyClient() {
-        if (isLoggedIn() && mTalkClient != null) { // TODO: why do we have these checks here anyway? They seems quite redundant
+        // Q: Why do we have these checks here anyway? They seems quite redundant
+        // A: Defensive programming in case someone makes changes that break the contract,
+        //    or when strange things happen due to timing issues like spontaneous disconnection
+        //    or bugs that cause this function to be called at the wrong time.
+        if (isLoggedIn() && mTalkClient != null) {
             LOG.info("[connectionId: '" + getConnectionId() + "'] signalled Ready: " + mTalkClient.getClientId());
 
             // mark connection as logged in
             ITalkServerDatabase database = mServer.getDatabase();
             mTalkClient.setTimeReady(new Date());
+            mTalkClient.setLastPushMessage(null);
             database.saveClient(mTalkClient);
 
             // notify server abount ready state

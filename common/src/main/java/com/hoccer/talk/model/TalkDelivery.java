@@ -283,21 +283,28 @@ public class TalkDelivery {
             // we have already been here
             return false;
         }
+        // TODO: use containsKey() for this?
         final Set<String> aFollows = graph.get(stateA);
         if (aFollows == null) {
             throw new RuntimeException("state A ='" + stateA + "' does not exist");
         }
+
+        // TODO: use containsKey() for this?
         final Set<String> bFollows = graph.get(stateB);
         if (bFollows == null) {
             throw new RuntimeException("state B ='" + stateB + "' does not exist");
         }
+
         if (aFollows.contains(stateB)) {
             return true;
         }
+        // TODO: HashSet<String> downTrack = new HashSet<String>(track);
         HashSet downTrack = new HashSet(track);
         downTrack.add(stateA);
         for (String next : aFollows) {
-            if (statePathExists(graph, next, stateB, downTrack)) return true;
+            if (statePathExists(graph, next, stateB, downTrack)) {
+                return true;
+            }
         }
         return false;
     }
@@ -325,22 +332,25 @@ public class TalkDelivery {
         return FAILED_STATES_SET.contains(state);
     }
 
-
-    @JsonIgnore
-    public boolean nextStateAllowed(String nextState) {
-        if (!isValidState(state)) {
+    public static boolean nextStateAllowed(String currentState, String nextState) {
+        if (!isValidState(currentState)) {
             return true;
         }
         if (!isValidState(nextState)) {
             return false;
         }
-        if (state.equals(nextState)) {
+        if (currentState.equals(nextState)) {
             return true;
         }
-        if (isFinalState(state)) {
+        if (isFinalState(currentState)) {
             return false;
         }
-        return statePathExists(state, nextState);
+        return statePathExists(currentState, nextState);
+    }
+
+    @JsonIgnore
+    public boolean nextStateAllowed(String nextState) {
+        return nextStateAllowed(this.state, nextState);
     }
 
     public static boolean isValidAttachmentState(String state) {
