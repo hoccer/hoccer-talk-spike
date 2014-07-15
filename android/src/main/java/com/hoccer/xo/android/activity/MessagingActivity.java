@@ -179,7 +179,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         if (contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
             title = getResources().getString(R.string.nearby_text);
         } else {
-            title = contact.getName();
+            title = contact.getNickname();
         }
         mActionBar.setTitle(title);
     }
