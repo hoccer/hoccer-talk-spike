@@ -28,7 +28,7 @@ public class ClipboardSelector implements IContentSelector {
 
     public ClipboardSelector(Context context) {
         mName = context.getResources().getString(R.string.content_clipboard);
-        mIcon = ColorSchemeManager.fillBackground(context, R.drawable.ic_attachment_select_data, true);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_data, true);
         mClipboard = Clipboard.get(context);
     }
 
@@ -86,6 +86,11 @@ public class ClipboardSelector implements IContentSelector {
         }
         mClipboard.clearClipBoard();
         return contentObject;
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
     }
 
     public boolean canProcessClipboard() {

@@ -22,7 +22,7 @@ public class RingtoneSelector implements IContentSelector {
 
     public RingtoneSelector(Context context) {
         mName = context.getResources().getString(R.string.content_ringtone);
-        mIcon = ColorSchemeManager.fillBackground(context, R.drawable.ic_attachment_select_music, true);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_music, true);
     }
 
     @Override
@@ -42,6 +42,11 @@ public class RingtoneSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        }
+
         Uri selectedContent = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
         String[] filePathColumn = {
                 MediaStore.Audio.Media.MIME_TYPE,
@@ -76,5 +81,10 @@ public class RingtoneSelector implements IContentSelector {
         contentObject.setContentLength(fileSize);
 
         return contentObject;
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
     }
 }

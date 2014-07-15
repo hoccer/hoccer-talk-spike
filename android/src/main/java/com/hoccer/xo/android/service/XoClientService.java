@@ -1,36 +1,7 @@
 package com.hoccer.xo.android.service;
 
 import android.app.*;
-import android.content.res.AssetManager;
-import com.google.android.gcm.GCMRegistrar;
-
-import com.hoccer.talk.android.push.TalkPushService;
-import com.hoccer.talk.client.IXoStateListener;
-import com.hoccer.talk.client.IXoTokenListener;
-import com.hoccer.talk.client.IXoTransferListener;
-import com.hoccer.talk.client.IXoUnseenListener;
-import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.XoClientConfiguration;
-import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoConfiguration;
-import com.hoccer.xo.android.activity.ContactsActivity;
-import com.hoccer.xo.android.activity.MessagingActivity;
-import com.hoccer.xo.android.sms.SmsReceiver;
-import com.hoccer.bofrostmessenger.R;
-
-import org.apache.log4j.Logger;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
@@ -42,6 +13,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import com.google.android.gcm.GCMRegistrar;
+import com.hoccer.bofrostmessenger.R;
 import com.hoccer.talk.android.push.TalkPushService;
 import com.hoccer.talk.client.*;
 import com.hoccer.talk.client.model.*;
@@ -50,11 +22,8 @@ import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.activity.ContactsActivity;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.sms.SmsReceiver;
-import com.hoccer.bofrostmessenger.R;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;

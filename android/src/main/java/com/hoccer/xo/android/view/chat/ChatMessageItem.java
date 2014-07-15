@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.view.chat;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
@@ -136,6 +137,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         setAvatar(avatarView, mMessage.getSenderContact());
         if (mMessage.isIncoming()) {
             if (mMessage.getConversationContact().isGroup()) {
+                avatarView.setVisibility(View.VISIBLE);
             } else {
                 avatarView.setVisibility(View.GONE);
             }
@@ -143,19 +145,16 @@ public class ChatMessageItem implements AttachmentTransferListener {
             messageInfo.setText(mMessage.getSenderContact().getNickname());
             messageInfo.setTextColor(messageInfo.getResources().getColor(android.R.color.secondary_text_dark));
 
-            messageText.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.chat_bubble_incoming, false));
+            messageText.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_incoming, false));
 
             messageText
                     .setTextColor(mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
             messageText.setLinkTextColor(
                     mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
 
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText
-                    .getLayoutParams();
-            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10,
-                    mContext.getResources().getDisplayMetrics());
-            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30,
-                    mContext.getResources().getDisplayMetrics());
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
+            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
+            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
             layoutParams.leftMargin = (int) marginLeft;
             layoutParams.rightMargin = (int) marginRight;
             messageText.setLayoutParams(layoutParams);
@@ -164,19 +163,16 @@ public class ChatMessageItem implements AttachmentTransferListener {
             avatarView.setVisibility(View.GONE);
             updateSeenStatus(view);
 
-            messageText.setBackgroundDrawable(ColorSchemeManager.fillOutgoingMessageBackround(mContext, R.drawable.chat_bubble_compose, mMessage.getOutgoingDelivery().getState()));
+            messageText.setBackgroundDrawable(ColorSchemeManager.getRepaintedOutgoingMessageDrawable(mContext, R.drawable.chat_bubble_compose, mMessage.getOutgoingDelivery().getState()));
 
             messageText.setTextColor(
                     mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
             messageText.setLinkTextColor(
                     mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
 
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText
-                    .getLayoutParams();
-            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30,
-                    mContext.getResources().getDisplayMetrics());
-            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10,
-                    mContext.getResources().getDisplayMetrics());
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
+            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
+            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
             layoutParams.leftMargin = (int) marginLeft;
             layoutParams.rightMargin = (int) marginRight;
             messageText.setLayoutParams(layoutParams);
@@ -266,7 +262,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         // adjust layout for incoming / outgoing attachment
         if (mMessage.isIncoming()) {
-            mAttachmentView.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.chat_bubble_incoming, false));
+            mAttachmentView.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_incoming, false));
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentView.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
             float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
@@ -274,7 +270,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             layoutParams.rightMargin = (int) marginRight;
             mAttachmentView.setLayoutParams(layoutParams);
         } else {
-            mAttachmentView.setBackgroundDrawable(ColorSchemeManager.fillBackground(mContext, R.drawable.chat_bubble_compose, true));
+            mAttachmentView.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_compose, true));
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentView.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
             float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());

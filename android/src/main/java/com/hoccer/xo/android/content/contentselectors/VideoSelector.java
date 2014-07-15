@@ -19,7 +19,7 @@ public class VideoSelector implements IContentSelector {
 
     public VideoSelector(Context context) {
         mName = context.getResources().getString(R.string.content_video);
-        mIcon = ColorSchemeManager.fillBackground(context, R.drawable.ic_attachment_select_video, true);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_video, true);
     }
 
     @Override
@@ -41,6 +41,12 @@ public class VideoSelector implements IContentSelector {
 
     @Override
     public IContentObject createObjectFromSelectionResult(Context context, Intent intent) {
+
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        }
+
         Uri selectedContent = intent.getData();
         String[] filePathColumn = {
                 MediaStore.Video.Media.MIME_TYPE,
@@ -86,4 +92,16 @@ public class VideoSelector implements IContentSelector {
         return contentObject;
     }
 
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        Uri contentUri = intent.getData();
+        String[] columns = {
+                MediaStore.Video.Media.MIME_TYPE
+        };
+        Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
+        cursor.moveToFirst();
+        int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Video.Media.MIME_TYPE);
+        String mimeType = cursor.getString(mimeTypeIndex);
+        return (mimeType.startsWith("video"));
+    }
 }
