@@ -69,7 +69,7 @@ public class ChatAudioItem extends ChatMessageItem {
                 extension = dataUrl.substring(dataUrl.lastIndexOf("."), dataUrl.length());
             }
         } catch (StringIndexOutOfBoundsException e) {
-            LOG.error("ChatAudioItem: error while extracting the file extension. Probably there is none.", e);
+            LOG.error("ChatAudioItem: error while extracting the file extension. Probably there is none.");
         }
 
         String displayName = "";
