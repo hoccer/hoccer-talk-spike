@@ -3,6 +3,7 @@ package com.hoccer.xo.android.fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.*;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
@@ -30,9 +31,8 @@ public class MessagingFragment extends XoListFragment
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
 
     private static final Logger LOG = Logger.getLogger(MessagingFragment.class);
-    private static final int OVERSCROLL_THRESHOLD = -5;
 
-    private OverscrollListView mMessageList;
+    private ListView mMessageListView;
 
     private MotionInterpreter mMotionInterpreter;
 
@@ -42,11 +42,7 @@ public class MessagingFragment extends XoListFragment
 
     private ChatAdapter mAdapter;
 
-    private View mOverscrollIndicator;
-
     private CompositionFragment mCompositionFragment;
-
-    private boolean mInOverscroll = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -85,8 +81,6 @@ public class MessagingFragment extends XoListFragment
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        mMessageList = (OverscrollListView) view.findViewById(android.R.id.list);
         mEmptyText = (TextView) view.findViewById(R.id.messaging_empty);
     }
 
@@ -110,14 +104,14 @@ public class MessagingFragment extends XoListFragment
         }
 
         setHasOptionsMenu(true);
+        mMessageListView = getListView();
 
-        if (mAdapter == null) {
-            mAdapter = new ChatAdapter(mMessageList, getXoActivity(), mContact);
-            mAdapter.setAdapterReloadListener(this);
-            mAdapter.onCreate();
-        }
+        mAdapter = new ChatAdapter(mMessageListView, getXoActivity(), mContact);
+        mAdapter.setAdapterReloadListener(this);
+        mAdapter.onCreate();
 
-        mMessageList.setAdapter(mAdapter);
+        mMessageListView.setAdapter(mAdapter);
+
 
         configureMotionInterpreterForContact(mContact);
         XoApplication.getXoClient().registerContactListener(this);
@@ -161,7 +155,7 @@ public class MessagingFragment extends XoListFragment
     public boolean onOptionsItemSelected(MenuItem item) {
         LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
 
-        IMessagingFragmentManager mgr = (IMessagingFragmentManager)getActivity();
+        IMessagingFragmentManager mgr = (IMessagingFragmentManager) getActivity();
         switch (item.getItemId()) {
             case R.id.menu_profile_single:
                 if (mContact != null && mgr != null) {
