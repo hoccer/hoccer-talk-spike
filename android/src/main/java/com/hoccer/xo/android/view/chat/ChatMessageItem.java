@@ -186,7 +186,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
         TalkDelivery outgoingDelivery = mMessage.getOutgoingDelivery();
         String currentState = outgoingDelivery.getState();
         String attachmentState = outgoingDelivery.getAttachmentState();
-        if (attachmentState != null && (!attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED) && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED))) {
+        if (attachmentState != null && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_NONE) &&
+                (!attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED)
+                && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED))) {
             deliveryInfo.setVisibility(View.VISIBLE);
             deliveryInfo.setTextColor(view.getResources().getColor(R.color.xo_app_main_color));
 
@@ -199,9 +201,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
             deliveryInfo.setVisibility(View.VISIBLE);
             deliveryInfo.setTextColor(view.getResources().getColor(R.color.xo_app_main_color));
-            deliveryInfo.setText(R.string.attachment_seen_text);
+            deliveryInfo.setText(R.string.message_seen_text);
         } else {
-            deliveryInfo.setVisibility(View.GONE);
+            deliveryInfo.setVisibility(View.VISIBLE);
+            deliveryInfo.setText(R.string.message_unseen_text);
         }
     }
 

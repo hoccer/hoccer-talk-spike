@@ -305,7 +305,7 @@
     <string name="content_audio_caption">Music</string>
     <string name="nearby_info_usercount">%1$d Users are Nearby</string>
     <string name="profile_nickname_text">Nickname</string>
-    <string name="attachment_seen_text">seen</string>
+    <string name="message_seen_text">read</string>
     <string name="nearby_text">All nearby</string>
     <string name="error_send_message">Could not send message.</string>
     <string name="pref_privacy_title">Privacy</string>
@@ -325,5 +325,6 @@
     <string name="message_state_data">file</string>
     <string name="message_state_contact">vcard</string>
     <string name="message_state_location">location</string>
+    <string name="message_unseen_text">unread</string>
 
 </resources>
