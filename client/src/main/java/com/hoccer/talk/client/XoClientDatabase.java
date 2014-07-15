@@ -142,6 +142,13 @@ public class XoClientDatabase {
         mDeliveries.createOrUpdate(delivery);
     }
 
+    public synchronized void updateDelivery(TalkDelivery delivery) throws SQLException {
+        int updatedRows = mDeliveries.update(delivery);
+        if(updatedRows < 1) {
+            throw new SQLException("cant find record for Delivery: " + delivery.getId().toString());
+        }
+    }
+
     public void savePublicKey(TalkKey publicKey) throws SQLException {
         mPublicKeys.createOrUpdate(publicKey);
     }
@@ -605,6 +612,69 @@ public class XoClientDatabase {
         return false;
     }
 
+    public TalkClientMessage getClientMessageForDelivery(TalkDelivery delivery) throws SQLException {
+        TalkClientMessage messageForDelivery = mClientMessages.queryBuilder()
+                .where()
+                        .eq("messageTag", delivery.getMessageTag())
+                        .eq("messageId", delivery.getMessageId())
+                    .or(2)
+                    .eq("deleted", false)
+                .and(2)
+                .queryForFirst();
+        return messageForDelivery;
+    }
+
+    public TalkClientMessage getClientMessageForUpload(TalkClientUpload upload) throws SQLException {
+        QueryBuilder<TalkClientUpload, Integer> clientUploads = mClientUploads.queryBuilder();
+        clientUploads.where().eq("clientUploadId", upload.getClientUploadId());
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
+        TalkClientMessage messageForUpload = clientMessages.join(clientUploads).where()
+                .eq("deleted", false)
+                .queryForFirst();
+        return messageForUpload;
+    }
+
+    public TalkClientMessage getClientMessageForDownload(TalkClientDownload download) throws SQLException {
+        QueryBuilder<TalkClientDownload, Integer> clientDownloads = mClientDownloads.queryBuilder();
+        clientDownloads.where().eq("clientDownloadId", download.getClientDownloadId());
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
+        TalkClientMessage messageForUpload = clientMessages.join(clientDownloads).where()
+                .eq("deleted", false)
+                .queryForFirst();
+        return messageForUpload;
+    }
+
+    public TalkClientUpload getClientUploadForDelivery(TalkDelivery delivery) throws SQLException {
+        TalkClientMessage message = getClientMessageForDelivery(delivery);
+        if (message != null) {
+            return message.getAttachmentUpload();
+        }
+        return null;
+    }
+
+    public TalkClientDownload getClientDownloadForDelivery(TalkDelivery delivery) throws SQLException  {
+        TalkClientMessage message = getClientMessageForDelivery(delivery);
+        if (message != null) {
+            return message.getAttachmentDownload();
+        }
+        return null;
+    }
+
+    public TalkDelivery deliveryForUpload(TalkClientUpload upload) throws SQLException {
+        TalkClientMessage message = getClientMessageForUpload(upload);
+        if (message != null) {
+            return message.getOutgoingDelivery();
+        }
+        return null;
+    }
+
+    public TalkDelivery deliveryForDownload(TalkClientDownload download) throws SQLException {
+        TalkClientMessage message = getClientMessageForDownload(download);
+        if (message != null) {
+            return message.getIncomingDelivery();
+        }
+        return null;
+    }
 
     public void deleteAllClientContacts() throws SQLException {
         UpdateBuilder<TalkClientContact, Integer> updateBuilder = mClientContacts.updateBuilder();
@@ -752,5 +822,4 @@ public class XoClientDatabase {
                 break;
         }
     }
-
 }

@@ -25,9 +25,15 @@
     <string name="menu_profile">Profile</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_about">About Hoccer XO</string>
+    <string name="menu_faq">FAQ</string>
+    <string name="menu_tutorial">Tutorial</string>
     <string name="menu_reconnect">Reconnect</string>
     <string name="menu_quit">Quit</string>
     <string name="menu_clear_conversation">Clear conversation</string>
+
+    <!-- Tutorial and FAQ links -->
+    <string name="link_tutorial">http://hoccer.com/hoccer-xo-tutorial/</string>
+    <string name="link_faq">http://hoccer.com/hoccer-xo-faq/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_category_friends">Friends</string>
@@ -237,6 +243,7 @@
     <string name="pref_export_credentials">Export credentials</string>
     <string name="pref_import_credentials">Import credentials</string>
     <string name="pref_legal_information">Legal Information</string>
+    <string name="pref_about_information">About</string>
     <string name="pref_encryption">Encryption</string>
     <string name="pref_crash_report">Send report after app crashed</string>
     <string name="pref_crash_report_switcher">Enable reporting</string>
@@ -292,12 +299,13 @@
 
     <string name="preference_database_title">Local Database</string>
     <string name="placeholder_conversations_text">Invite friends to chat with!</string>
-    <string name="placeholder_nearby_text">Waiting for others nearby...</string>
+    <string name="placeholder_nearby_text">Waiting for others %1$s...</string>
+    <string name="placeholder_nearby_link_text">nearby</string>
     <string name="actionbar_default_title">Hoccer</string>
     <string name="content_audio_caption">Music</string>
     <string name="nearby_info_usercount">%1$d Users are Nearby</string>
     <string name="profile_nickname_text">Nickname</string>
-    <string name="seen_text">seen</string>
+    <string name="message_seen_text">read</string>
     <string name="nearby_text">All nearby</string>
     <string name="error_send_message">Could not send message.</string>
     <string name="pref_privacy_title">Privacy</string>
@@ -307,5 +315,16 @@
 
     <string name="about_advert_text">Hoccer XO \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. Hoccer sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. Hoccer XO provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s</string>
+
+    <!-- media types for "expecting ..." in message states -->
+    <string name="attachment_expects_text">expects %1$s</string>
+    <string name="message_state_default">attachment</string>
+    <string name="message_state_image">image</string>
+    <string name="message_state_video">video</string>
+    <string name="message_state_audio">audio</string>
+    <string name="message_state_data">file</string>
+    <string name="message_state_contact">vcard</string>
+    <string name="message_state_location">location</string>
+    <string name="message_unseen_text">unread</string>
 
 </resources>
