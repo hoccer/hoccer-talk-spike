@@ -2327,7 +2327,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         try {
             clientMessage = mDatabase.findMessageByMessageId(delivery.getMessageId(), false);
             if(clientMessage == null) {
-                throw new RuntimeException("updateIncomingDelivery: message not find, id="+delivery.getMessageId());
+                throw new RuntimeException("updateIncomingDelivery: message not found, id=" + delivery.getMessageId());
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
