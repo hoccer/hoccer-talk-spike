@@ -61,6 +61,8 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
     @Override
     public void onPause() {
         super.onPause();
+
+        getXoActivity().getXoClient().unregisterContactListener(this);
     }
 
     @Override
