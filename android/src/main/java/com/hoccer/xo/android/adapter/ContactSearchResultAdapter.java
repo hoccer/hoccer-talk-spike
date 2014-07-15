@@ -90,6 +90,16 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
     }
 
     @Override
+    protected int getNearbyHistoryLayout() {
+        return 0;
+    }
+
+    @Override
+    protected void updateNearbyHistoryLayout(View v) {
+
+    }
+
+    @Override
     protected void updateContact(View view, TalkClientContact contact) {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
 
