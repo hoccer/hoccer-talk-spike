@@ -234,6 +234,16 @@ public class
         });
     }
 
+    private boolean isValidMessage(TalkClientMessage message) {
+        if(message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
+            return true;
+        }
+        if(!message.getText().isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
@@ -254,7 +264,7 @@ public class
     @Override
     public void onMessageAdded(final TalkClientMessage message) {
         LOG.debug("onMessageAdded()");
-        if (message.getConversationContact() == mContact) {
+        if (message.getConversationContact() == mContact && isValidMessage(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -284,7 +294,7 @@ public class
     @Override
     public void onMessageStateChanged(final TalkClientMessage message) {
         LOG.debug("onMessageStateChanged()");
-        if (message.getConversationContact() == mContact) {
+        if (message.getConversationContact() == mContact && isValidMessage(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
