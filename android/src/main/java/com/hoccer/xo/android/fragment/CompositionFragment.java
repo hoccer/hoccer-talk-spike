@@ -180,7 +180,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         } else {
             imageResource = android.R.drawable.stat_notify_error;
         }
-        mAddAttachmentButton.setBackground(ColorSchemeManager.getRepaintedAttachmentDrawable(getXoActivity(), imageResource, true));
+
+        mAddAttachmentButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(getXoActivity(), imageResource, true));
         mAddAttachmentButton.setImageResource(android.R.color.transparent);
     }
 
@@ -200,7 +201,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     private void clearAttachment() {
         mAddAttachmentButton.setOnClickListener(new AddAttachmentOnClickListener());
-        mAddAttachmentButton.setBackground(null);
+        mAddAttachmentButton.setBackgroundDrawable(null);
         mAddAttachmentButton.setImageResource(R.drawable.ic_light_content_attachment);
         mAttachment = null;
     }
