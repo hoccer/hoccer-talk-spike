@@ -153,7 +153,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         } else {
             avatarView.setVisibility(View.GONE);
-            updateSeenStatus(view);
+            updateMessageStatus(view);
 
             messageContactInfo.setVisibility(View.GONE);
 
@@ -176,7 +176,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
 
-    private void updateSeenStatus(View view) {
+    private void updateMessageStatus(View view) {
         TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
         if(mMessage.getConversationContact().isGroup()) {
             deliveryInfo.setVisibility(View.GONE);
@@ -189,7 +189,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
         if (attachmentState != null && (!attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED) && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED))) {
             deliveryInfo.setVisibility(View.VISIBLE);
             deliveryInfo.setTextColor(view.getResources().getColor(R.color.xo_app_main_color));
-            deliveryInfo.setText(R.string.attachment_expects_text);
+
+            String text = view.getResources().getString(R.string.attachment_expects_text);
+            String mediaType = view.getResources().getString(getMediaTextResource());
+            deliveryInfo.setText(String.format(text, mediaType));
         } else if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
                 || currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED))
                 && !outgoingDelivery.isGroupDelivery()) {
@@ -427,5 +430,35 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     public int getConversationContactId() {
         return mMessage.getConversationContact().getClientContactId();
+    }
+
+    public int getMediaTextResource() {
+        int stringResource = -1;
+        ChatItemType type = getType();
+        switch(type) {
+            case ChatItemWithImage:
+                stringResource = R.string.message_state_image;
+                break;
+            case ChatItemWithVideo:
+                stringResource = R.string.message_state_video;
+                break;
+            case ChatItemWithAudio:
+                stringResource = R.string.message_state_audio;
+                break;
+            case ChatItemWithData:
+                stringResource = R.string.message_state_data;
+                break;
+            case ChatItemWithContact:
+                stringResource = R.string.message_state_contact;
+                break;
+            case ChatItemWithLocation:
+                stringResource = R.string.message_state_location;
+                break;
+            default:
+                LOG.error("No case statement for ChatItemType " + type.toString());
+                stringResource = R.string.message_state_default;
+                break;
+        }
+        return stringResource;
     }
 }

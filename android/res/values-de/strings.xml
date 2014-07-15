@@ -268,7 +268,6 @@
     <string name="nearby_info_usercount">%1$d Benutzer in der Nähe</string>
     <string name="profile_nickname_text">Anzeigename</string>
     <string name="attachment_seen_text">gesehen</string>
-    <string name="attachment_expects_text">erwartet Anhang</string>
     <string name="nearby_text">Alle in der Nähe</string>
     <string name="error_send_message">Die Nachricht konnte nicht gesendet werden.</string>
     <string name="pref_privacy_title">Privatspähre</string>
@@ -295,5 +294,15 @@
 
     <string name="about_advert_text">Hoccer XO \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Hoccer neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Hoccer XO ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s</string>
+
+    <!-- media types for "expecting ..." in message states -->
+    <string name="attachment_expects_text">erwartet %1$s</string>
+    <string name="message_state_default">Anhang</string>
+    <string name="message_state_image">Bild</string>
+    <string name="message_state_video">Video</string>
+    <string name="message_state_audio">Audio</string>
+    <string name="message_state_data">Datei</string>
+    <string name="message_state_contact">vCard</string>
+    <string name="message_state_location">Position</string>
 
 </resources>

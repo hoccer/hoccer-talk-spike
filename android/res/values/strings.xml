@@ -306,7 +306,6 @@
     <string name="nearby_info_usercount">%1$d Users are Nearby</string>
     <string name="profile_nickname_text">Nickname</string>
     <string name="attachment_seen_text">seen</string>
-    <string name="attachment_expects_text">expects attachment</string>
     <string name="nearby_text">All nearby</string>
     <string name="error_send_message">Could not send message.</string>
     <string name="pref_privacy_title">Privacy</string>
@@ -316,5 +315,15 @@
 
     <string name="about_advert_text">Hoccer XO \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. Hoccer sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. Hoccer XO provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s</string>
+
+    <!-- media types for "expecting ..." in message states -->
+    <string name="attachment_expects_text">expects %1$s</string>
+    <string name="message_state_default">attachment</string>
+    <string name="message_state_image">image</string>
+    <string name="message_state_video">video</string>
+    <string name="message_state_audio">audio</string>
+    <string name="message_state_data">file</string>
+    <string name="message_state_contact">vcard</string>
+    <string name="message_state_location">location</string>
 
 </resources>
