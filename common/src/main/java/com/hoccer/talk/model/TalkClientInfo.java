@@ -19,7 +19,10 @@ public class TalkClientInfo {
     /** A build number of the client program; on iOS it is the build number */
     int clientBuildNumber;
 
-    /** A canonicalized IETF BCP 47 language identifier for the current client UI language, e.g. 'de' for german */
+    /** The build variant. Currently valid values: [debug|release] */
+    String clientBuildVariant;
+
+    /** A ISO 639-1 language identifier for the current client UI language, e.g. 'de' for german */
     String clientLanguage;
 
     /** Name of the operating system, e.g. 'iPhone OS' */
@@ -28,7 +31,7 @@ public class TalkClientInfo {
     /** Version of the operating system, e.g. '7.0.4' */
     String systemVersion;
 
-    /** A canonicalized IETF BCP 47 language identifier for the current system language , e.g. 'de' for german */
+    /** A ISO 639-1 language identifier for the current system language , e.g. 'de' for german */
     String systemLanguage;
 
     /** A hardware device name identifier, e.g. 'iPhone6,1' */
@@ -79,6 +82,14 @@ public class TalkClientInfo {
 
     public void setClientBuildNumber(int clientBuildNumber) {
         this.clientBuildNumber = clientBuildNumber;
+    }
+
+    public String getClientBuildVariant() {
+        return clientBuildVariant;
+    }
+
+    public void setClientBuildVariant(String clientBuildVariant) {
+        this.clientBuildVariant = clientBuildVariant;
     }
 
     public String getClientLanguage() {

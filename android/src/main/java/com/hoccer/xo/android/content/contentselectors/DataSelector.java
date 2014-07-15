@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
 
 public class DataSelector implements IContentSelector {
@@ -14,7 +15,7 @@ public class DataSelector implements IContentSelector {
 
     public DataSelector(Context context) {
         mName = context.getResources().getString(R.string.content_data);
-        mIcon = context.getResources().getDrawable(R.drawable.ic_attachment_select_data);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_data, true);
     }
 
     @Override
@@ -38,7 +39,18 @@ public class DataSelector implements IContentSelector {
 
     @Override
     public IContentObject createObjectFromSelectionResult(Context context, Intent intent) {
+
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        }
+
         SelectedContent content = null;
         return null;
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
     }
 }

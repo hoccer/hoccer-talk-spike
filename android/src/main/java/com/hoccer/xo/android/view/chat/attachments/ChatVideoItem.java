@@ -3,7 +3,6 @@ package com.hoccer.xo.android.view.chat.attachments;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.*;
 import android.net.Uri;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -12,6 +11,7 @@ import android.widget.*;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.ThumbnailManager;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
@@ -51,17 +51,19 @@ public class ChatVideoItem extends ChatMessageItem {
         ImageView thumbnailView = (ImageView) mContentWrapper.findViewById(R.id.iv_video_preview);
         RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
 
-        int textColor;
+        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
+
+        videoTitle.setTextColor(textColor);
+        videoDescription.setTextColor(textColor);
+        playButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_play, mMessage.isIncoming()));
         int mask;
 
         if (mMessage.isIncoming()) {
-            textColor = Color.BLACK;
             rootView.setGravity(Gravity.LEFT);
-            mask = R.drawable.bubble_grey;
+            mask = R.drawable.chat_bubble_incoming;
         } else {
-            textColor = Color.WHITE;
             rootView.setGravity(Gravity.RIGHT);
-            mask = R.drawable.bubble_green;
+            mask = R.drawable.chat_bubble_compose;
         }
 
         videoTitle.setTextColor(textColor);
@@ -72,7 +74,7 @@ public class ChatVideoItem extends ChatMessageItem {
 
         if (contentObject.getContentDataUrl() != null) {
             mAttachmentView.setBackgroundDrawable(null);
-            ThumbnailManager.getInstance(mContext).displayThumbnailForVideo(contentObject.getContentDataUrl(), rootView, mask, tag);
+            ThumbnailManager.getInstance(mContext).displayThumbnailForVideo(contentObject.getContentDataUrl(), thumbnailView, mask, tag);
         }
 
         playButton.setOnClickListener(new View.OnClickListener() {

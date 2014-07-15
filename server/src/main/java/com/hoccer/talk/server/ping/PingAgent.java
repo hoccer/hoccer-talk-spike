@@ -39,13 +39,16 @@ public class PingAgent {
 
     private final AtomicInteger mPingFailures = new AtomicInteger();
     private final AtomicInteger mPingSuccesses = new AtomicInteger();
+    private final TalkServerConfiguration mConfig;
 
     private Timer mPingLatency;
 
+
     public PingAgent(TalkServer server) {
         mServer = server;
+        mConfig = mServer.getConfiguration();
         mExecutor = Executors.newScheduledThreadPool(
-                TalkServerConfiguration.THREADS_PING,
+                mConfig.getPingAgentThreadPoolSize(),
                 new NamedThreadFactory("ping-agent")
         );
         initializeMetrics(mServer.getMetrics());
@@ -62,8 +65,12 @@ public class PingAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                pingReadyClients();
-                schedulePingAllReadyClients();
+                try {
+                    pingReadyClients();
+                    schedulePingAllReadyClients();
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, TalkServerConfiguration.PING_INTERVAL, TimeUnit.SECONDS);
     }
@@ -109,7 +116,11 @@ public class PingAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                performPing(clientId);
+                try {
+                    performPing(clientId);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, 3, TimeUnit.SECONDS);
     }
@@ -146,5 +157,4 @@ public class PingAgent {
             performPing(connection.getClientId());
         }
     }
-
 }

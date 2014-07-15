@@ -3,7 +3,6 @@ package com.hoccer.xo.android.view.chat.attachments;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 import ezvcard.Ezvcard;
@@ -62,22 +62,12 @@ public class ChatContactItem extends ChatMessageItem {
         ImageButton showButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_show_button);
         ImageButton importButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_import_button);
 
-        int textColor = -1;
-        int iconId = -1;
-        if (mMessage.isIncoming()) {
-            textColor = Color.BLACK;
-            iconId = R.drawable.ic_dark_music;
-            iconId = R.drawable.ic_dark_contact;
-        } else {
-            textColor = Color.WHITE;
-            iconId = R.drawable.ic_light_music;
-            iconId = R.drawable.ic_light_contact;
-        }
+        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
 
         contactName.setTextColor(textColor);
         contactDescription.setTextColor(textColor);
-        showButton.setImageResource(iconId);
-        importButton.setImageResource(iconId);
+        showButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_contact, mMessage.isIncoming()));
+        importButton.setBackgroundDrawable(showButton.getBackground());
 
         showButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,7 +157,10 @@ public class ChatContactItem extends ChatMessageItem {
             LOG.error("Could not open VCard at " + mContent.getContentDataUrl());
         }
         try {
-            mVCard = Ezvcard.parse(inputStream).first();
+            Ezvcard.ParserChainTextReader reader = Ezvcard.parse(inputStream);
+            if (reader != null) {
+                mVCard = reader.first();
+            }
         } catch (IOException e) {
             LOG.error("Could not parse VCard", e);
         }

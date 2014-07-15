@@ -3,7 +3,6 @@ package com.hoccer.xo.android.view.chat.attachments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -14,6 +13,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.service.MediaPlayerService;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
@@ -57,18 +57,29 @@ public class ChatAudioItem extends ChatMessageItem {
 
         TextView captionTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_caption);
         TextView fileNameTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_name);
+        mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
+        setPlayButton();
 
         if(mMessage.isIncoming()) {
-            captionTextView.setTextColor(Color.BLACK);
-            fileNameTextView.setTextColor(Color.BLACK);
+            captionTextView.setTextColor(mContext.getResources().getColor(R.color.xo_incoming_message_textColor));
+            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_incoming_message_textColor));
         } else {
-            captionTextView.setTextColor(Color.WHITE);
-            fileNameTextView.setTextColor(Color.WHITE);
+            captionTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
+            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
         }
 
-        String extension = contentObject.getContentDataUrl();
-        extension = extension.substring(extension.lastIndexOf("."), extension.length());
-        fileNameTextView.setText(contentObject.getFileName() + extension);
+		String extension = "";
+        String dataUrl = contentObject.getContentDataUrl();
+        if (dataUrl != null) {
+        	extension = dataUrl.substring(dataUrl.lastIndexOf("."), dataUrl.length());
+        }
+
+        String displayName = "";
+        String filename = contentObject.getFileName();
+        if (filename != null) {
+            displayName = filename + extension;
+        }
+        fileNameTextView.setText(displayName);
 
         mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
         mPlayPauseButton.setOnClickListener(new View.OnClickListener() {
@@ -114,9 +125,23 @@ public class ChatAudioItem extends ChatMessageItem {
         }
     }
 
+    private void setPlayButton(){
+        mPlayPauseButton.setBackgroundDrawable(null);
+        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_play, mMessage.isIncoming()));
+    }
+
+    private void setPauseButton(){
+        mPlayPauseButton.setBackgroundDrawable(null);
+        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_pause, mMessage.isIncoming()));
+    }
+
     public void updatePlayPauseView() {
-        if ( mPlayPauseButton != null) {
-            mPlayPauseButton.setImageResource((isActive()) ? R.drawable.ic_dark_pause : R.drawable.ic_dark_play);
+        if(mPlayPauseButton != null && mMessage != null) {
+            if (isActive()) {
+                setPauseButton();
+            } else {
+                setPlayButton();
+            }
         }
     }
 

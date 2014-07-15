@@ -16,6 +16,7 @@ public class TalkGroupMember {
 
     public static final String ROLE_ADMIN = "admin";
     public static final String ROLE_MEMBER = "member";
+    public static final String ROLE_NEARBY_MEMBER = "nearbyMember";
 
     public static boolean isValidRole(String role) {
         return ROLE_ADMIN.equals(role) || ROLE_MEMBER.equals(role);
@@ -75,8 +76,13 @@ public class TalkGroupMember {
     }
 
     @JsonIgnore
+    public boolean isNearby() {
+        return this.state.equals(STATE_JOINED) && this.role.equals(ROLE_NEARBY_MEMBER);
+    }
+
+    @JsonIgnore
     public boolean isMember() {
-        return this.state.equals(STATE_JOINED) && (this.role.equals(ROLE_ADMIN) || this.role.equals(ROLE_MEMBER));
+        return this.state.equals(STATE_JOINED) && (this.role.equals(ROLE_MEMBER) || this.role.equals(ROLE_NEARBY_MEMBER) || this.role.equals(ROLE_ADMIN));
     }
 
     @JsonIgnore

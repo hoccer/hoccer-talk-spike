@@ -160,10 +160,6 @@ public class ContactsActivity extends XoActionbarActivity {
 
         @Override
         public void onPageSelected(int position) {
-            Fragment fragment = mAdapter.getItem(position);
-            if (fragment instanceof ContactsFragment) {
-                mAdapter.showNearbyPlaceholder();
-            }
             refreshEnvironmentUpdater();
         }
 

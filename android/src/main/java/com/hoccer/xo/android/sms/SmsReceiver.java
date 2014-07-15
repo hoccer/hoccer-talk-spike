@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
-import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.xo.android.service.XoClientService;
+import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.util.regex.Matcher;
@@ -21,9 +21,6 @@ public class SmsReceiver extends BroadcastReceiver {
     public static final String EXTRA_SMS_SENDER       = "com.hoccer.talk.android.SMS_SENDER";
     public static final String EXTRA_SMS_BODY       = "com.hoccer.talk.android.SMS_BODY";
     public static final String EXTRA_SMS_URL_RECEIVED = "com.hoccer.talk.android.SMS_URL_RECEIVED";
-
-    private static final String URL_PATTERN_SOURCE = ".*(" + XoClientConfiguration.HXO_URL_SCHEME + "[a-zA-Z0-9]*).*";
-    private static final Pattern URL_PATTERN = Pattern.compile(URL_PATTERN_SOURCE, Pattern.DOTALL);
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -62,10 +59,14 @@ public class SmsReceiver extends BroadcastReceiver {
      * @return true if the message is for us
      */
     private boolean handleMessage(Context context, String sender, String body) {
+
+        String urlPatternSource = ".*(" + context.getResources().getString(R.string.url_scheme) + "[a-zA-Z0-9]*).*";
+        Pattern urlPattern = Pattern.compile(urlPatternSource, Pattern.DOTALL);
+
         // do a simple string check first
-        if(body.contains(XoClientConfiguration.HXO_URL_SCHEME)) {
+        if(body.contains(context.getResources().getString(R.string.url_scheme))) {
             // regex-match the URL
-            Matcher matcher = URL_PATTERN.matcher(body);
+            Matcher matcher = urlPattern.matcher(body);
             if(matcher.matches() && matcher.groupCount() > 0) {
                 String url = matcher.group(1);
                 // log the received token

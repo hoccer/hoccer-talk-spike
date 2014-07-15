@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.view.chat;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
@@ -19,6 +20,7 @@ import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
@@ -128,53 +130,49 @@ public class ChatMessageItem implements AttachmentTransferListener {
     protected void configureViewForMessage(View view) {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.av_message_avatar);
         TextView messageTime = (TextView) view.findViewById(R.id.tv_message_time);
-        TextView messageName = (TextView) view.findViewById(R.id.tv_message_contact_name);
+        TextView messageInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
         TextView messageText = (TextView) view.findViewById(R.id.tv_message_text);
 
         // Adjust layout for incoming / outgoing message
         setAvatar(avatarView, mMessage.getSenderContact());
         if (mMessage.isIncoming()) {
             if (mMessage.getConversationContact().isGroup()) {
+                avatarView.setVisibility(View.VISIBLE);
             } else {
                 avatarView.setVisibility(View.GONE);
             }
-            messageName.setVisibility(View.VISIBLE);
-            messageName.setText(mMessage.getSenderContact().getName());
+            messageInfo.setVisibility(View.VISIBLE);
+            messageInfo.setText(mMessage.getSenderContact().getNickname());
+            messageInfo.setTextColor(messageInfo.getResources().getColor(android.R.color.secondary_text_dark));
 
-            messageText.setBackgroundDrawable(
-                    mContext.getResources().getDrawable(R.drawable.bubble_grey));
+            messageText.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_incoming, false));
+
             messageText
-                    .setTextColor(mContext.getResources().getColorStateList(android.R.color.black));
+                    .setTextColor(mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
             messageText.setLinkTextColor(
-                    mContext.getResources().getColorStateList(android.R.color.black));
+                    mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
 
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText
-                    .getLayoutParams();
-            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10,
-                    mContext.getResources().getDisplayMetrics());
-            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30,
-                    mContext.getResources().getDisplayMetrics());
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
+            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
+            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
             layoutParams.leftMargin = (int) marginLeft;
             layoutParams.rightMargin = (int) marginRight;
             messageText.setLayoutParams(layoutParams);
 
         } else {
             avatarView.setVisibility(View.GONE);
-            messageName.setVisibility(View.GONE);
+            updateSeenStatus(view);
 
-            messageText.setBackgroundDrawable(
-                    mContext.getResources().getDrawable(getBackgroundResource()));
+            messageText.setBackgroundDrawable(ColorSchemeManager.getRepaintedOutgoingMessageDrawable(mContext, R.drawable.chat_bubble_compose, mMessage.getOutgoingDelivery().getState()));
+
             messageText.setTextColor(
-                    mContext.getResources().getColorStateList(android.R.color.white));
+                    mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
             messageText.setLinkTextColor(
-                    mContext.getResources().getColorStateList(android.R.color.white));
+                    mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
 
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText
-                    .getLayoutParams();
-            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30,
-                    mContext.getResources().getDisplayMetrics());
-            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10,
-                    mContext.getResources().getDisplayMetrics());
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
+            float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
+            float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
             layoutParams.leftMargin = (int) marginLeft;
             layoutParams.rightMargin = (int) marginRight;
             messageText.setLayoutParams(layoutParams);
@@ -186,22 +184,24 @@ public class ChatMessageItem implements AttachmentTransferListener {
         mMessageText = messageText;
     }
 
-
-    public int getBackgroundResource() {
-        String currentState = mMessage.getOutgoingDelivery().getMessageId();
-        if(currentState == null) {
-            return R.drawable.bubble_green;
+    private void updateSeenStatus(View view) {
+        TextView messageInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
+        if(mMessage.getConversationContact().isGroup()) {
+            messageInfo.setVisibility(View.GONE);
+            return;
         }
-        if (currentState.equals(TalkDelivery.STATE_DELIVERING)) {
-            return R.drawable.bubble_grey;
-        } else if(currentState.equals(TalkDelivery.STATE_DELIVERED)) {
-            return R.drawable.bubble_green;
-        } else if(currentState.equals(TalkDelivery.STATE_ABORTED)) {
 
-        } else if(currentState.equals(TalkDelivery.STATE_FAILED)) {
+        String currentState = mMessage.getOutgoingDelivery().getState();
+        if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
+                || currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED))
+                && !mMessage.getOutgoingDelivery().isGroupDelivery()) {
 
+            messageInfo.setVisibility(View.VISIBLE);
+            messageInfo.setTextColor(view.getResources().getColor(R.color.xo_app_main_color));
+            messageInfo.setText(R.string.seen_text);
+        } else {
+            messageInfo.setVisibility(View.GONE);
         }
-        return R.drawable.bubble_green;
     }
 
     private String getMessageTimestamp(TalkClientMessage message) {
@@ -262,7 +262,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         // adjust layout for incoming / outgoing attachment
         if (mMessage.isIncoming()) {
-            mAttachmentView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.bubble_grey));
+            mAttachmentView.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_incoming, false));
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentView.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
             float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
@@ -270,7 +270,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             layoutParams.rightMargin = (int) marginRight;
             mAttachmentView.setLayoutParams(layoutParams);
         } else {
-            mAttachmentView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.bubble_green));
+            mAttachmentView.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_compose, true));
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentView.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
             float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
@@ -404,4 +404,15 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return mMessage != null ? mMessage.hashCode() : 0;
     }
 
+    public boolean isSeparator() {
+        return mMessage.getMessageId() != null &&  mMessage.getMessageId().equals("SEPARATOR");
+    }
+
+    public String getText() {
+        return mMessage.getText();
+    }
+
+    public int getConversationContactId() {
+        return mMessage.getConversationContact().getClientContactId();
+    }
 }

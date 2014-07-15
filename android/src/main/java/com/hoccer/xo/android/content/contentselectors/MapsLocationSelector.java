@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import com.hoccer.xo.android.activity.MapsLocationActivity;
 import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
 
 public class MapsLocationSelector implements IContentSelector {
@@ -15,7 +16,7 @@ public class MapsLocationSelector implements IContentSelector {
 
     public MapsLocationSelector(Context context) {
         mName = context.getResources().getString(R.string.content_location);
-        mIcon = context.getResources().getDrawable(R.drawable.ic_attachment_select_location);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_location, true);
     }
 
     @Override
@@ -35,6 +36,12 @@ public class MapsLocationSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        }
+
         SelectedContent content = null;
         if(intent.hasExtra(MapsLocationActivity.EXTRA_GEOJSON)) {
             String json = intent.getStringExtra(MapsLocationActivity.EXTRA_GEOJSON);
@@ -43,6 +50,11 @@ public class MapsLocationSelector implements IContentSelector {
             content.setContentType("application/json");
         }
         return content;
+    }
+
+    @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return (intent.hasExtra(MapsLocationActivity.EXTRA_GEOJSON));
     }
 
 }

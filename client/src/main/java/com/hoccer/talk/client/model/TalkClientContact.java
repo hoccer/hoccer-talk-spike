@@ -29,11 +29,11 @@ import java.util.*;
 @DatabaseTable(tableName = "clientContact")
 public class TalkClientContact implements Serializable {
 
-    public @interface ClientMethodOnly {};
-    public @interface ClientOrGroupMethodOnly {};
-    public @interface ClientOrSelfMethodOnly {};
-    public @interface GroupMethodOnly {};
-    public @interface SelfMethodOnly {};
+    public @interface ClientMethodOnly {}
+    public @interface ClientOrGroupMethodOnly {}
+    public @interface ClientOrSelfMethodOnly {}
+    public @interface GroupMethodOnly {}
+    public @interface SelfMethodOnly {}
 
     public static final String TYPE_SELF   = "self";
     public static final String TYPE_CLIENT = "client";
@@ -101,6 +101,9 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField
     private boolean isNearby;
+
+    @DatabaseField
+    private String nickname;
     
 
     public TalkClientContact() {
@@ -394,6 +397,17 @@ public class TalkClientContact implements Serializable {
 
     public void setPrivateKey(TalkPrivateKey privateKey) {
         this.privateKey = privateKey;
+    }
+
+    public String getNickname() {
+        if(nickname == null || nickname.isEmpty()) {
+            return getName();
+        }
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     @SelfMethodOnly

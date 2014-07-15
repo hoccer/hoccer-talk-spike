@@ -174,6 +174,11 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     @Override
+    public void onDownloadFailed(TalkClientDownload download) {
+
+    }
+
+    @Override
     public void onDownloadStateChanged(TalkClientDownload download) {
 
     }
@@ -190,6 +195,11 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
+
+    }
+
+    @Override
+    public void onUploadFailed(TalkClientUpload upload) {
 
     }
 

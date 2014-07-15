@@ -14,9 +14,7 @@ public class MediaPlaylist implements ListIterator<AudioAttachmentItem> {
     private static final Logger LOG = Logger.getLogger(MediaPlaylist.class);
 
     private List<AudioAttachmentItem> mAudioAttachmentItems = new ArrayList<AudioAttachmentItem>();
-
     private List<Integer> mPlaylistOrder = new ArrayList<Integer>();
-
     private RepeatMode mRepeatMode = RepeatMode.NO_REPEAT;
 
     private int mCurrentIndex = -1;

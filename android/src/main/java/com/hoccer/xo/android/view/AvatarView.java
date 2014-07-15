@@ -27,7 +27,8 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     private DisplayImageOptions mDefaultOptions;
     private float mCornerRadius = 0.0f;
     private AspectImageView mAvatarImage;
-    private View mPresenceIndicator;
+    private View mPresenceIndicatorActive;
+    private View mPresenceIndicatorInactive;
 
     private TalkClientContact mContact;
 
@@ -44,7 +45,8 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         addView(layout);
 
         mAvatarImage = (AspectImageView) this.findViewById(R.id.avatar_image);
-        mPresenceIndicator = this.findViewById(R.id.presence_indicator_view);
+        mPresenceIndicatorActive = this.findViewById(R.id.presence_indicator_view_active);
+        mPresenceIndicatorInactive = this.findViewById(R.id.presence_indicator_view_inactive);
 
         float scale = getResources().getDisplayMetrics().density;
         int pixel = (int) (mCornerRadius * scale + 0.5f);
@@ -79,7 +81,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     }
 
     private void updateAvatar() {
-        if(mContact == null) {
+        if (mContact == null) {
             resetAvatar();
             return;
         }
@@ -88,16 +90,17 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
         if (avatarUri == null) {
             if (mContact.isGroup()) {
-                if(mContact.getGroupPresence().isTypeNearby()) {
-                    avatarUri = "drawable://" + R.drawable.avatar_default_location;
+                if (mContact.getGroupPresence().isTypeNearby()) {
+                    setAvatarImage(R.drawable.avatar_default_location);
                 } else {
-                    avatarUri = "drawable://" + R.drawable.avatar_default_group;
+                    setAvatarImage(R.drawable.avatar_default_group);
                 }
             } else {
-                avatarUri = "drawable://" + R.drawable.avatar_default_contact;
+                setAvatarImage(R.drawable.avatar_default_contact);
             }
+        } else {
+            setAvatarImage(avatarUri);
         }
-        setAvatarImage(avatarUri);
     }
 
     private void resetAvatar() {
@@ -141,6 +144,10 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         });
     }
 
+    public void setAvatarImage(int resourceId) {
+        setAvatarImage("drawable://" + resourceId);
+    }
+
     /**
      * Sets the url for the default avatar image. Value can be null.
      *
@@ -154,25 +161,38 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         post(new Runnable() {
             @Override
             public void run() {
-                if (mContact == null) {
-                    return;
-                }
-                TalkPresence presence = null;
-                if (mContact.isClient()) {
-                    presence = mContact.getClientPresence();
-                } else {
-                    mPresenceIndicator.setVisibility(View.INVISIBLE);
-                    return;
-                }
-                if (presence != null) {
-                    if (presence.isPresent()) {
-                        mPresenceIndicator.setVisibility(View.VISIBLE);
-                    } else {
-                        mPresenceIndicator.setVisibility(View.INVISIBLE);
+
+                if (mContact != null && mContact.isClient()) {
+                    TalkPresence presence = mContact.getClientPresence();
+                    if (presence != null) {
+                        if (presence.isConnected()) {
+                            if (presence.isPresent()) {
+                                showPresenceIndicatorActive();
+                            } else {
+                                showPresenceIndicatorInactive();
+                            }
+                            return;
+                        }
                     }
                 }
+                hidePresenceIndicator();
             }
         });
+    }
+
+    private void showPresenceIndicatorActive() {
+        mPresenceIndicatorActive.setVisibility(View.VISIBLE);
+        mPresenceIndicatorInactive.setVisibility(View.INVISIBLE);
+    }
+
+    private void showPresenceIndicatorInactive() {
+        mPresenceIndicatorActive.setVisibility(View.INVISIBLE);
+        mPresenceIndicatorInactive.setVisibility(View.VISIBLE);
+    }
+
+    private void hidePresenceIndicator() {
+        mPresenceIndicatorActive.setVisibility(View.INVISIBLE);
+        mPresenceIndicatorInactive.setVisibility(View.INVISIBLE);
     }
 
     @Override

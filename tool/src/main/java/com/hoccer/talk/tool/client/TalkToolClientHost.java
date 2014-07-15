@@ -77,13 +77,78 @@ public class TalkToolClientHost implements IXoClientHost {
     }
 
     @Override
+    public boolean getUseBsonProtocol() {
+        return true;
+    }
+
+    @Override
+    public String getBsonProtocolString() {
+        return "com.hoccer.talk.v4.bson";
+    }
+
+    @Override
+    public String getJsonProtocolString() {
+        return "com.hoccer.talk.v4";
+    }
+
+    @Override
+    public int getTransferThreads() {
+        return 2;
+    }
+
+    @Override
+    public int getConnectTimeout() {
+        return 15;
+    }
+
+    @Override
+    public int getIdleTimeout() {
+        return 300;
+    }
+
+    @Override
+    public boolean getKeepAliveEnabled() {
+        return false;
+    }
+
+    @Override
+    public int getKeepAliveInterval() {
+        return 120;
+    }
+
+    @Override
+    public int getConnectionIdleTimeout() {
+        return 900000;
+    }
+
+    @Override
+    public float getReconnectBackoffFixedDelay() {
+        return 3;
+    }
+
+    @Override
+    public float getReconnectBackoffVariableFactor() {
+        return 1;
+    }
+
+    @Override
+    public float getReconnectBackoffVariableMaximum() {
+        return 120;
+    }
+
+    @Override
+    public String getUrlScheme() {
+        return "hxo://";
+    }
+
+    @Override
     public String getClientName() {
-        return null;
+        return "Talk";
     }
 
     @Override
     public String getClientLanguage() {
-        return null;
+        return "en";
     }
 
     @Override
@@ -94,6 +159,11 @@ public class TalkToolClientHost implements IXoClientHost {
     @Override
     public int getClientVersionCode() {
         return 0;
+    }
+
+    @Override
+    public String getClientBuildVariant() {
+        return "release";
     }
 
     @Override
@@ -108,7 +178,7 @@ public class TalkToolClientHost implements IXoClientHost {
 
     @Override
     public String getSystemName() {
-        return null;
+        return "TalkTool";
     }
 
     @Override
@@ -126,4 +196,8 @@ public class TalkToolClientHost implements IXoClientHost {
         return 1024;
     }
 
+    @Override
+    public boolean isSendDeliveryConfirmationEnabled() {
+        return true;
+    }
 }

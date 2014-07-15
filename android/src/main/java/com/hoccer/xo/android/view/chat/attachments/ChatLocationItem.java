@@ -4,7 +4,6 @@ import com.google.android.gms.maps.model.LatLng;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +18,7 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
@@ -56,19 +56,12 @@ public class ChatLocationItem extends ChatMessageItem {
             TextView locationTitleView = (TextView) locationLayout.findViewById(R.id.tv_location_title);
             ImageButton locationButton = (ImageButton) locationLayout.findViewById(R.id.ib_content_location);
 
-            int textColor = -1;
-            int iconId = -1;
-            if(mMessage.isIncoming()) {
-                textColor = Color.BLACK;
-                iconId = R.drawable.ic_dark_location;
-            } else {
-                textColor = Color.WHITE;
-                iconId = R.drawable.ic_light_location;
-            }
+            int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
 
             locationTextView.setTextColor(textColor);
             locationTitleView.setTextColor(textColor);
-            locationButton.setImageResource(iconId);
+
+            locationButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_location, mMessage.isIncoming()));
 
             locationButton.setOnClickListener(new View.OnClickListener() {
                 @Override
