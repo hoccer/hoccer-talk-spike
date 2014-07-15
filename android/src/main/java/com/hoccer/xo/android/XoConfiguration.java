@@ -26,10 +26,10 @@ public class XoConfiguration {
     public static final String INTERNAL_THUMBNAILS = "thumbnails";
 
     /* Enable or disable development settings in preferences */
-    public static final boolean DEVELOPMENT_MODE_ENABLED = true;
+    public static final boolean DEVELOPMENT_MODE_ENABLED = false;
 
-    /* true: log level = debug, log to sdcard activated*/
-    public static final boolean TESTING_MODE_ENABLED = false;
+    /* true: log level = debug, log to sdcard activated */
+    public static final boolean TESTING_MODE_ENABLED = true;
 
     /**
      * Background executor thread count
@@ -66,7 +66,7 @@ public class XoConfiguration {
     public static final Layout LOG_FILE_LAYOUT = new PatternLayout("[%t] %-5p %c - %m%n");
 
     /** Whether to reconnect explicitly on connection changes */
-    public static final boolean CONNECTIVITY_RECONNECT_ON_CHANGE = true;
+    public static final boolean CONNECTIVITY_RECONNECT_ON_CHANGE = false;
 
     /** Delay after which new activities send their first keepalive (seconds) */
     public static final int SERVICE_KEEPALIVE_PING_DELAY    = 60;

@@ -381,9 +381,11 @@ public class XoClientService extends Service {
                 }
             }
 
+            // TODO: is this check too early ? Last if-statement above deactivates client when network dead.
             boolean netState = activeNetwork.isConnected();
             int netType = activeNetwork.getType();
 
+            // TODO: will this be executed while the XoClient is still activating / connecting / syncing on other threads ?
             if (XoConfiguration.CONNECTIVITY_RECONNECT_ON_CHANGE) {
                 if (netState && !mClient.isIdle()) {
                     if (!mPreviousConnectionState

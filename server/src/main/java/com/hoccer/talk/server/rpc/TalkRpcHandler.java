@@ -406,6 +406,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("hintApnsUnreadMessages('" + numUnreadMessages + "' unread messages)");
         TalkClient client = mConnection.getClient();
         client.setApnsUnreadMessages(numUnreadMessages);
+        client.setLastPushMessage(null);
         mDatabase.saveClient(client);
     }
 
@@ -1474,7 +1475,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
             groupMember.setState(TalkGroupMember.STATE_INVITED);
             changedGroupMember(groupMember, now, true);
         }
-
+        for (int i = 0; i < members.length;++i) {
+            // send the presence of all other group members to the new group member
+            mServer.getUpdateAgent().requestPresenceUpdateForClientOfMembersOfGroup(members[i], group.getGroupId());
+        }
         return group;
     }
 
