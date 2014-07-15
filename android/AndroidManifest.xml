@@ -3,7 +3,7 @@
           package="com.hoccer.xo.release"
 
           android:versionCode="43"
-          android:versionName="2.1.0">
+          android:versionName="2.2.0">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
     <uses-sdk
