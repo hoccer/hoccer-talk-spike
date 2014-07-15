@@ -377,7 +377,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void pause() {
-        mMediaPlayer.pause();
+        if (mMediaPlayer != null) {
+            mMediaPlayer.pause();
+        }
         setPaused(true);
         setStopped(false);
         if (isNotificationActive()) {
@@ -388,17 +390,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     public void stop() {
         if (mMediaPlayer != null) {
-            mAudioManager.abandonAudioFocus(mAudioFocusChangeListener);
             mMediaPlayer.release();
             mMediaPlayer = null;
-            setPaused(false);
-            setStopped(true);
-            mPlaylist.clear();
-            if (isNotificationActive()) {
-                removeNotification();
-            }
-            broadcastPlayStateChanged();
         }
+        mAudioManager.abandonAudioFocus(mAudioFocusChangeListener);
+        setPaused(false);
+        setStopped(true);
+        mPlaylist.clear();
+        if (isNotificationActive()) {
+            removeNotification();
+        }
+        broadcastPlayStateChanged();
     }
 
     private boolean isNotificationActive() {
