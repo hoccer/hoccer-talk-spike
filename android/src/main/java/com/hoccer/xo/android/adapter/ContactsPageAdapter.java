@@ -5,13 +5,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import com.hoccer.xo.android.fragment.ContactsFragment;
 import com.hoccer.xo.android.fragment.FriendRequestFragment;
-import com.hoccer.xo.android.fragment.NearbyChatFragment;
+import com.hoccer.xo.android.fragment.NearbyContactsFragment;
 
 public class ContactsPageAdapter extends FragmentPagerAdapter {
     private int mCount;
     private ContactsFragment mContactsFragment;
     private FriendRequestFragment mFriendRequestFragment;
-    private NearbyChatFragment mNearbyChatFragment;
+    private NearbyContactsFragment mNearbyChatFragment;
 
     public ContactsPageAdapter(FragmentManager fm, int count) {
         super(fm);
@@ -19,7 +19,7 @@ public class ContactsPageAdapter extends FragmentPagerAdapter {
 
         mContactsFragment = new ContactsFragment();
         mFriendRequestFragment = new FriendRequestFragment();
-        mNearbyChatFragment = new NearbyChatFragment();
+        mNearbyChatFragment = new NearbyContactsFragment();
     }
 
     @Override

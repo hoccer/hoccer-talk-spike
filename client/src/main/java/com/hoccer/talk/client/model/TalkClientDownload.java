@@ -358,6 +358,10 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
         return fileId;
     }
 
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
     /**
      * Only used for migrating existing filecache Uris to new host. Delete this Method once
      * the migration is done!
