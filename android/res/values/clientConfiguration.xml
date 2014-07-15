@@ -4,7 +4,7 @@
     <string name="url_scheme">wlbm://</string>
 
     <!--Servers-->
-    <string name="servers_production">wss://talkserver-test1.talk.hoccer.de/</string>
+    <string name="servers_production">wss://192.76.129.21:443</string>
 
     <!--Development Mode Only-->
     <string-array name="servers_development">
