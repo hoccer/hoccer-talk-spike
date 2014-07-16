@@ -73,7 +73,7 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
 
     private Runnable doAutoFocus = new Runnable() {
         public void run() {
-            if (mCamera!= null) {
+            if (mCamera!= null && hasAutoFocus) {
                 mCamera.autoFocus(autoFocusCB);
             }
         }

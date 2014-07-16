@@ -96,8 +96,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
                     mDatabase.refreshClientDownload(avatarDownload);
                 }
                 if(contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
-                    contact.setNickname(mXoActivity.getResources().getString(R.string.nearby_text)  + " (" +
-                    (mNearbyContacts.size()-1) + ")");
+                    contact.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
                 }
             }
         } catch (SQLException e) {
@@ -114,7 +113,8 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         TextView lastMessageText = (TextView) view.findViewById(R.id.contact_last_message);
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
-        nameView.setText(contact.getNickname());
+        nameView.setText(contact.getNickname()  + " (" +
+                (mNearbyContacts.size()-1) + ")");
         avatarView.setContact(contact);
 
         typeView.setText("");
