@@ -513,22 +513,22 @@ public class TalkDelivery {
 
     @JsonIgnore
     public boolean isOutUpToDate() {
-        return  getTimeUpdatedOut().getTime() > getTimeChanged().getTime();
+        return getTimeUpdatedOut().getTime() > getTimeChanged().getTime();
     }
 
     @JsonIgnore
     public boolean isInUpToDate() {
-        return  getTimeUpdatedIn().getTime() > getTimeChanged().getTime();
+        return getTimeUpdatedIn().getTime() > getTimeChanged().getTime();
     }
 
     @JsonIgnore
     public boolean isOutStaleFor(long msec) {
-        return getTimeUpdatedOut().getTime()+msec <= new Date().getTime();
+        return getTimeUpdatedOut().getTime() + msec <= new Date().getTime();
     }
 
     @JsonIgnore
     public boolean isInStaleFor(long msec) {
-        return getTimeUpdatedIn().getTime()+msec <= new Date().getTime();
+        return getTimeUpdatedIn().getTime() + msec <= new Date().getTime();
     }
 
     @JsonIgnore

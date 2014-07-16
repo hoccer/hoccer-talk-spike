@@ -4,15 +4,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
 @RunWith(JUnit4.class)
 public class TalkDeliveryTest {
+
+    /*
+    * Note: the attributes are currently package local. Since the test suite is also in the same package as the tested class we could
+    * use the attributes directly. We are using the getters/setters though for the most part.
+    * */
 
     @Test
     public void testCreate() throws Exception {
@@ -204,4 +206,44 @@ public class TalkDeliveryTest {
         assertFalse(TalkDelivery.statePathExists(deepStateGraph(), "F", "E", new HashSet<String>()));
     }
 
+    @Test
+    public void testUpdateWithOtherDelivery() throws Exception {
+        final TalkDelivery firstDelivery = new TalkDelivery();
+        TalkDelivery secondDelivery = new TalkDelivery();
+
+        firstDelivery.setMessageId("messageId");
+        firstDelivery.setMessageTag("messageTag");
+        firstDelivery.setSenderId("senderId");
+        firstDelivery.setReceiverId("receiverId");
+        firstDelivery.setGroupId("groupId");
+        firstDelivery.setState("state");
+        firstDelivery.setKeyId("keyId");
+        firstDelivery.setKeyCiphertext("keyCypherText");
+        firstDelivery.setTimeAccepted(new Date(0));
+        firstDelivery.setTimeChanged(new Date(10000));
+        firstDelivery.setTimeUpdatedIn(new Date(20000));
+        firstDelivery.setTimeUpdatedOut(new Date(30000));
+        firstDelivery.setTimeAttachmentReceived(new Date(40000));
+        firstDelivery.setAttachmentState("attachmentState");
+
+        secondDelivery.updateWith(firstDelivery);
+
+        assertEquals("messageId", secondDelivery.getMessageId());
+        assertEquals("messageTag", secondDelivery.getMessageTag());
+        assertEquals("senderId", secondDelivery.getSenderId());
+
+        assertEquals("receiverId", secondDelivery.getReceiverId());
+        assertEquals("groupId", secondDelivery.getGroupId());
+        assertEquals("state", secondDelivery.getState());
+        assertEquals("keyId", secondDelivery.getKeyId());
+
+        assertEquals("keyCypherText", secondDelivery.getKeyCiphertext());
+        assertEquals("attachmentState", secondDelivery.getAttachmentState());
+
+        assertEquals(new Date(0), secondDelivery.getTimeAccepted());
+        assertEquals(new Date(10000), secondDelivery.getTimeChanged());
+        assertEquals(new Date(20000), secondDelivery.getTimeUpdatedIn());
+        assertEquals(new Date(30000), secondDelivery.getTimeUpdatedOut());
+        assertEquals(new Date(40000), secondDelivery.getTimeAttachmentReceived());
+    }
 }
