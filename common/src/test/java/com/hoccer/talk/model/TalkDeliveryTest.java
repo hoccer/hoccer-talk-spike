@@ -209,7 +209,7 @@ public class TalkDeliveryTest {
     @Test
     public void testUpdateWithOtherDelivery() throws Exception {
         final TalkDelivery firstDelivery = new TalkDelivery();
-        TalkDelivery secondDelivery = new TalkDelivery();
+        final TalkDelivery secondDelivery = new TalkDelivery();
 
         firstDelivery.setMessageId("messageId");
         firstDelivery.setMessageTag("messageTag");
@@ -225,6 +225,7 @@ public class TalkDeliveryTest {
         firstDelivery.setTimeUpdatedOut(new Date(30000));
         firstDelivery.setTimeAttachmentReceived(new Date(40000));
         firstDelivery.setAttachmentState("attachmentState");
+        firstDelivery.setReason("because");
 
         secondDelivery.updateWith(firstDelivery);
 
@@ -245,5 +246,125 @@ public class TalkDeliveryTest {
         assertEquals(new Date(20000), secondDelivery.getTimeUpdatedIn());
         assertEquals(new Date(30000), secondDelivery.getTimeUpdatedOut());
         assertEquals(new Date(40000), secondDelivery.getTimeAttachmentReceived());
+
+        // It seems only reason is not copied over - is this intentional?
+        assertNull(secondDelivery.getReason());
+    }
+
+    @Test
+    public void testUpdateWithOtherDeliveryAndNullFields() throws Exception {
+        // updateWith(deliver, fields) should work exactly like updateWith(delivery) if fields is null
+        final TalkDelivery firstDelivery = new TalkDelivery();
+        final TalkDelivery secondDelivery = new TalkDelivery();
+
+        firstDelivery.setMessageId("messageId");
+        firstDelivery.setMessageTag("messageTag");
+        firstDelivery.setSenderId("senderId");
+        firstDelivery.setReceiverId("receiverId");
+        firstDelivery.setGroupId("groupId");
+        firstDelivery.setState("state");
+        firstDelivery.setKeyId("keyId");
+        firstDelivery.setKeyCiphertext("keyCypherText");
+        firstDelivery.setTimeAccepted(new Date(0));
+        firstDelivery.setTimeChanged(new Date(10000));
+        firstDelivery.setTimeUpdatedIn(new Date(20000));
+        firstDelivery.setTimeUpdatedOut(new Date(30000));
+        firstDelivery.setTimeAttachmentReceived(new Date(40000));
+        firstDelivery.setAttachmentState("attachmentState");
+        firstDelivery.setReason("because");
+
+        secondDelivery.updateWith(firstDelivery, null);
+
+        assertEquals("messageId", secondDelivery.getMessageId());
+        assertEquals("messageTag", secondDelivery.getMessageTag());
+        assertEquals("senderId", secondDelivery.getSenderId());
+
+        assertEquals("receiverId", secondDelivery.getReceiverId());
+        assertEquals("groupId", secondDelivery.getGroupId());
+        assertEquals("state", secondDelivery.getState());
+        assertEquals("keyId", secondDelivery.getKeyId());
+
+        assertEquals("keyCypherText", secondDelivery.getKeyCiphertext());
+        assertEquals("attachmentState", secondDelivery.getAttachmentState());
+
+        assertEquals(new Date(0), secondDelivery.getTimeAccepted());
+        assertEquals(new Date(10000), secondDelivery.getTimeChanged());
+        assertEquals(new Date(20000), secondDelivery.getTimeUpdatedIn());
+        assertEquals(new Date(30000), secondDelivery.getTimeUpdatedOut());
+        assertEquals(new Date(40000), secondDelivery.getTimeAttachmentReceived());
+
+        // It seems only reason is not copied over - is this intentional?
+        assertNull(secondDelivery.getReason());
+    }
+
+    @Test
+    public void testUpdateWithOtherDeliveryAndFields() throws Exception {
+        final TalkDelivery firstDelivery = new TalkDelivery();
+        final TalkDelivery secondDelivery = new TalkDelivery();
+
+        firstDelivery.setMessageId("messageId");
+        firstDelivery.setMessageTag("messageTag");
+        firstDelivery.setSenderId("senderId");
+        firstDelivery.setReceiverId("receiverId");
+        firstDelivery.setGroupId("groupId");
+        firstDelivery.setState("state");
+        firstDelivery.setKeyId("keyId");
+        firstDelivery.setKeyCiphertext("keyCypherText");
+        firstDelivery.setTimeAccepted(new Date(0));
+        firstDelivery.setTimeChanged(new Date(10000));
+        firstDelivery.setTimeUpdatedIn(new Date(20000));
+        firstDelivery.setTimeUpdatedOut(new Date(30000));
+        firstDelivery.setTimeAttachmentReceived(new Date(40000));
+        firstDelivery.setAttachmentState("attachmentState");
+        firstDelivery.setReason("because");
+
+        secondDelivery.setMessageId("_messageId");
+        secondDelivery.setMessageTag("_messageTag");
+        secondDelivery.setSenderId("_senderId");
+        secondDelivery.setReceiverId("_receiverId");
+        secondDelivery.setGroupId("_groupId");
+        secondDelivery.setState("_state");
+        secondDelivery.setKeyId("_keyId");
+        secondDelivery.setKeyCiphertext("_keyCypherText");
+        secondDelivery.setTimeAccepted(new Date(1));
+        secondDelivery.setTimeChanged(new Date(10001));
+        secondDelivery.setTimeUpdatedIn(new Date(20001));
+        secondDelivery.setTimeUpdatedOut(new Date(30001));
+        secondDelivery.setTimeAttachmentReceived(new Date(40001));
+        secondDelivery.setAttachmentState("_attachmentState");
+        secondDelivery.setReason("_because");
+
+        // copy only a few fields...
+        secondDelivery.updateWith(firstDelivery,
+                new HashSet<String>(
+                        Arrays.asList(new String[]{
+                                TalkDelivery.FIELD_ATTACHMENT_STATE,
+                                TalkDelivery.FIELD_STATE,
+                                TalkDelivery.FIELD_REASON,
+                                TalkDelivery.FIELD_TIME_UPDATED_IN
+                        })
+                )
+        );
+
+        assertEquals("_messageId", secondDelivery.getMessageId());
+        assertEquals("_messageTag", secondDelivery.getMessageTag());
+        assertEquals("_senderId", secondDelivery.getSenderId());
+
+        assertEquals("_receiverId", secondDelivery.getReceiverId());
+        assertEquals("_groupId", secondDelivery.getGroupId());
+        assertEquals("state", secondDelivery.getState());
+        assertEquals("_keyId", secondDelivery.getKeyId());
+
+        assertEquals("_keyCypherText", secondDelivery.getKeyCiphertext());
+        assertEquals("attachmentState", secondDelivery.getAttachmentState());
+
+        assertEquals(new Date(1), secondDelivery.getTimeAccepted());
+        assertEquals(new Date(10001), secondDelivery.getTimeChanged());
+        assertEquals(new Date(20000), secondDelivery.getTimeUpdatedIn());
+        assertEquals(new Date(30001), secondDelivery.getTimeUpdatedOut());
+        assertEquals(new Date(40001), secondDelivery.getTimeAttachmentReceived());
+
+        // It seems only reason is not copied over - is this intentional?
+        assertEquals("_because", secondDelivery.getReason());
     }
 }
