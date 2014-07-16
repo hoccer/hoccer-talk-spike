@@ -178,7 +178,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     private void updateMessageStatus(View view) {
         TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
-        if(mMessage.getConversationContact().isGroup()) {
+        if(mMessage.getConversationContact().isGroup() ) {
             deliveryInfo.setVisibility(View.GONE);
             return;
         }
@@ -186,26 +186,34 @@ public class ChatMessageItem implements AttachmentTransferListener {
         TalkDelivery outgoingDelivery = mMessage.getOutgoingDelivery();
         String currentState = outgoingDelivery.getState();
         String attachmentState = outgoingDelivery.getAttachmentState();
+        deliveryInfo.setVisibility(View.VISIBLE);
         if (attachmentState != null && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_NONE) &&
                 (!attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED)
                 && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED))) {
-            deliveryInfo.setVisibility(View.VISIBLE);
-            deliveryInfo.setTextColor(view.getResources().getColor(R.color.xo_app_main_color));
 
             String text = view.getResources().getString(R.string.attachment_expects_text);
             String mediaType = view.getResources().getString(getMediaTextResource());
-            deliveryInfo.setText(String.format(text, mediaType));
+            setMessageStatusText(deliveryInfo, text);
         } else if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
                 || currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED))
                 && !outgoingDelivery.isGroupDelivery()) {
 
-            deliveryInfo.setVisibility(View.VISIBLE);
-            deliveryInfo.setTextColor(view.getResources().getColor(R.color.xo_app_main_color));
-            deliveryInfo.setText(R.string.message_seen_text);
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_seen_text));
+        } else if(currentState.equals(TalkDelivery.STATE_DELIVERED_UNSEEN) ||
+                  currentState.equals(TalkDelivery.STATE_DELIVERED_UNSEEN_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_unseen_text));
+        } else if(currentState.equals(TalkDelivery.STATE_DELIVERED_PRIVATE) ||
+                  currentState.equals(TalkDelivery.STATE_DELIVERED_PRIVATE_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_privat_text));
         } else {
-            deliveryInfo.setVisibility(View.VISIBLE);
-            deliveryInfo.setText(R.string.message_unseen_text);
+            deliveryInfo.setVisibility(View.GONE);
         }
+    }
+
+    private void setMessageStatusText(TextView messageStatusLabel, String text) {
+        messageStatusLabel.setVisibility(View.VISIBLE);
+        messageStatusLabel.setText(text);
+        messageStatusLabel.setTextColor(messageStatusLabel.getResources().getColor(R.color.xo_app_main_color));
     }
 
     public int getBackgroundResource() {

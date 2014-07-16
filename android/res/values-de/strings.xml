@@ -308,5 +308,6 @@
 
     <string name="nearby_saved">Nahebei gespeichert</string>
     <string name="message_unseen_text">ungelesen</string>
+    <string name="message_privat_text">zugestellt</string>
 
 </resources>

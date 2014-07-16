@@ -326,5 +326,6 @@
     <string name="message_state_contact">vcard</string>
     <string name="message_state_location">location</string>
     <string name="message_unseen_text">unread</string>
+    <string name="message_privat_text">delivered</string>
 
 </resources>

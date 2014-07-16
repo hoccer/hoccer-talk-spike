@@ -113,9 +113,13 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         TextView lastMessageText = (TextView) view.findViewById(R.id.contact_last_message);
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
-        nameView.setText(contact.getNickname()  + " (" +
-                (mNearbyContacts.size()-1) + ")");
+        if(contact.isGroup()) {
+            nameView.setText(contact.getNickname() + " (" + (mNearbyContacts.size() - 1) + ")");
+        } else {
+            nameView.setText(contact.getNickname());
+        }
         avatarView.setContact(contact);
+
 
         typeView.setText("");
         lastMessageText.setText("");
@@ -233,12 +237,12 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
 
     @Override
     public void onMessageRemoved(TalkClientMessage message) {
-
+        updateAdapter();
     }
 
     @Override
     public void onMessageStateChanged(TalkClientMessage message) {
-
+        updateAdapter();
     }
 
     @Override
