@@ -193,7 +193,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
             String text = view.getResources().getString(R.string.attachment_expects_text);
             String mediaType = view.getResources().getString(getMediaTextResource());
-            setMessageStatusText(deliveryInfo, text);
+            setMessageStatusText(deliveryInfo, String.format(text, mediaType));
         } else if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
                 || currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED))
                 && !outgoingDelivery.isGroupDelivery()) {
