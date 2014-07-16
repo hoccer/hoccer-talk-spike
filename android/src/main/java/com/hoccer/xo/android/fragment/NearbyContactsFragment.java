@@ -94,7 +94,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     private void deactivateNearbyChat() {
         showPlaceholder();
-        destroyAdapter();
+//        destroyAdapter();
         mCurrentNearbyGroup = null;
     }
 
@@ -110,18 +110,18 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         });
     }
 
-    private void destroyAdapter() {
-        if (mNearbyAdapter != null) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    setListAdapter(null);
-                }
-            });
-            mNearbyAdapter.unregisterListeners();
-            mNearbyAdapter = null;
-        }
-    }
+//    private void destroyAdapter() {
+//        if (mNearbyAdapter != null) {
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    setListAdapter(null);
+//                }
+//            });
+//            mNearbyAdapter.unregisterListeners();
+//            mNearbyAdapter = null;
+//        }
+//    }
 
     private void updateContactList() {
         if (mNearbyAdapter != null) {
@@ -203,8 +203,12 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) { // enter - second
-        updateContactList();
-        if (!isNearbyConversationPossible()) {
+        if (isNearbyConversationPossible()) {
+            if (mCurrentNearbyGroup == null || contact != mCurrentNearbyGroup) {
+                activateNearbyChat();
+                updateContactList();
+            }
+        } else {
             deactivateNearbyChat();
         }
     }
