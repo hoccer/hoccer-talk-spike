@@ -29,7 +29,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static String DATABASE_NAME = "hoccer-talk.db";
 
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 17;
 
     private static AndroidTalkDatabase INSTANCE = null;
 
@@ -183,7 +183,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
                 migrateDeliveryStates();
             }
-            if (oldVersion < 16) {
+            if (oldVersion < 17) {
                 TableUtils.createTable(cs, TalkClientMediaCollection.class);
             }
         } catch (SQLException e) {
