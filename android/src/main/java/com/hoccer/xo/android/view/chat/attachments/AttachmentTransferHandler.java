@@ -46,38 +46,48 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
     @Override
     public void onClick(View v) {
         if (v == mTransferControl) {
-            setTransferAction(getTransferState(mContent));
-            switch (mTransferAction) {
-                case REQUEST_DOWNLOAD:
-                    if (mContent instanceof TalkClientDownload) {
-                        LOG.debug("Will resume download for " + ((TalkClientDownload) mContent).getDownloadUrl());
-                        TalkClientDownload download = (TalkClientDownload) mContent;
-                        XoApplication.getXoClient().requestDownload(download);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    setTransferAction(getTransferState(mContent));
+                    switch (mTransferAction) {
+                        case REQUEST_DOWNLOAD:
+                            if (mContent instanceof TalkClientDownload) {
+                                LOG.debug("Will resume download for " + ((TalkClientDownload) mContent).getDownloadUrl());
+                                TalkClientDownload download = (TalkClientDownload) mContent;
+                                XoApplication.getXoClient().requestDownload(download);
+                            }
+                            break;
+                        case CANCEL_DOWNLOAD:
+                            if (mContent instanceof TalkClientDownload) {
+                                LOG.debug("Will pause download for " + ((TalkClientDownload) mContent).getDownloadUrl());
+                                TalkClientDownload download = (TalkClientDownload) mContent;
+                                XoApplication.getXoClient().cancelDownload(download);
+                            }
+                            break;
+                        case REQUEST_UPLOAD:
+                            if (mContent instanceof TalkClientUpload) {
+                                LOG.debug("Will resume upload for " + ((TalkClientUpload) mContent).getUploadUrl());
+                                TalkClientUpload upload = (TalkClientUpload) mContent;
+                                XoApplication.getXoClient().getTransferAgent().requestUpload(upload);
+                            }
+                            break;
+                        case CANCEL_UPLOAD:
+                            if (mContent instanceof TalkClientUpload) {
+                                LOG.debug("Will pause upload for " + ((TalkClientUpload) mContent).getUploadUrl());
+                                TalkClientUpload upload = (TalkClientUpload) mContent;
+                                XoApplication.getXoClient().getTransferAgent().cancelUpload(upload);
+                            }
                     }
-                    break;
-                case CANCEL_DOWNLOAD:
-                    if (mContent instanceof TalkClientDownload) {
-                        LOG.debug("Will pause download for " + ((TalkClientDownload) mContent).getDownloadUrl());
-                        TalkClientDownload download = (TalkClientDownload) mContent;
-                        XoApplication.getXoClient().cancelDownload(download);
-                    }
-                    break;
-                case REQUEST_UPLOAD:
-                    if (mContent instanceof TalkClientUpload) {
-                        LOG.debug("Will resume upload for " + ((TalkClientUpload) mContent).getUploadUrl());
-                        TalkClientUpload upload = (TalkClientUpload) mContent;
-                        XoApplication.getXoClient().getTransferAgent().requestUpload(upload);
-                    }
-                    break;
-                case CANCEL_UPLOAD:
-                    if (mContent instanceof TalkClientUpload) {
-                        LOG.debug("Will pause upload for " + ((TalkClientUpload) mContent).getUploadUrl());
-                        TalkClientUpload upload = (TalkClientUpload) mContent;
-                        XoApplication.getXoClient().getTransferAgent().cancelUpload(upload);
-                    }
-            }
+                    mTransferControl.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mTransferControl.invalidate();
+                        }
+                    });
+                }
+            }).start();
         }
-        mTransferControl.invalidate();
     }
 
     private ContentState getTransferState(IContentObject object) {

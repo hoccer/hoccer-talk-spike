@@ -168,6 +168,8 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
                 return ContentState.DOWNLOAD_DECRYPTING;
             case DETECTING:
                 return ContentState.DOWNLOAD_DETECTING;
+            case PAUSED:
+                return ContentState.DOWNLOAD_PAUSED;
             /* old states */
             case REQUESTED:
             case STARTED:
@@ -328,13 +330,6 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
             LOG.debug("download with id '" + clientDownloadId + "' fixed");
             saveProgress(agent);
             agent.onDownloadStateChanged(this);
-        }
-        if (state == State.COMPLETE) {
-            // retrigger android media scanner
-            if (type == Type.ATTACHMENT && contentUrl == null) {
-                LOG.debug("triggering media scanner");
-                agent.onDownloadFinished(this);
-            }
         }
     }
 
@@ -585,12 +580,17 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
     private boolean performOneRequest(XoTransferAgent agent, String filename) {
         LOG.debug("performOneRequest(downloadId: '" + clientDownloadId + "', filename: '" + filename
                 + "')");
+        agent.onDownloadStarted(this);
         HttpClient client = agent.getHttpClient();
         XoClientDatabase database = agent.getDatabase();
         RandomAccessFile raf = null;
         FileDescriptor fd = null;
         try {
             logGetDebug("downloading '" + downloadUrl + "'");
+            if(mDownloadRequest != null) {
+                LOG.info("Download already in progress");
+                return false;
+            }
             // create the GET request
             mDownloadRequest = new HttpGet(downloadUrl);
             // determine the requested range
@@ -856,6 +856,7 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
             }
             synchronized (this) {
                 switchState(agent, State.COMPLETE);
+                agent.onDownloadFinished(this);
             }
         } catch (Exception e) {
             LOG.error("detection error", e);
@@ -868,9 +869,9 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
     public void pauseDownload(XoTransferAgent agent) {
         if(mDownloadRequest != null) {
             mDownloadRequest.abort();
+            mDownloadRequest = null;
         }
         switchState(agent, State.PAUSED);
-
     }
 
     public void resumeDownload(XoTransferAgent agent) {
@@ -975,5 +976,7 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
             setTransferFailures(transferFailures + 1);
         }
     }
+
+
 
 }

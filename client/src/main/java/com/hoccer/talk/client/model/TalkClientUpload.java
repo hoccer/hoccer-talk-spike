@@ -555,6 +555,9 @@ public class TalkClientUpload extends XoTransfer implements IContentObject {
                 LOG.warn("[uploadId: '" + clientUploadId + "'] no range header in upload response");
             }
             uploadResponse.getEntity().consumeContent();
+        } catch(IOException e) {
+            LOG.error("Connection terminated", e);
+            return false;
         } catch (Exception e) {
             LOG.error("Exception while performing upload request: ", e);
         }
@@ -613,6 +616,8 @@ public class TalkClientUpload extends XoTransfer implements IContentObject {
     public void pauseUpload(XoTransferAgent agent) {
         if(mUploadRequest != null) {
             mUploadRequest.abort();
+            mUploadRequest = null;
+            LOG.debug("aborted current Upload request. Upload can still resume.");
         }
         switchState(agent, State.PAUSED);
     }
