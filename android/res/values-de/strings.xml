@@ -253,6 +253,7 @@
     <string name="add_to_collection">Einer Sammlung hinzufügen</string>
     <string name="share_with_contact">Teilen</string>
     <string name="added_attachment_to_collection">%1$s zur Sammlung \'%2$s\' hinzugefügt</string>
+    <string name="select_recipients">Empfänger auswählen</string>
 
     <!-- Preferences -->
     <string name="preference_keysize_summary">RSA Schlüssel mit gewählter Schlüssellänge erneuern</string>
@@ -324,6 +325,11 @@
         <item>CHATS</item>
         <item>EINLADUNGEN</item>
         <item>IN DER NÄHE</item>
+    </string-array>
+
+    <string-array name="recipient_selection_tab_names">
+        <item>KONTAKTE</item>
+        <item>GRUPPEN</item>
     </string-array>
 
     <string name="search_section_caption_contacts">Kontakte</string>

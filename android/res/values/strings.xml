@@ -264,6 +264,7 @@
     <string name="add_to_collection">Add to collection</string>
     <string name="share_with_contact">Share</string>
     <string name="added_attachment_to_collection">Added %1$s to \'%2$s\' collection</string>
+    <string name="select_recipients">Select recipients</string>
 
     <!-- Preferences -->
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>
@@ -328,6 +329,11 @@
         <item>CHATS</item>
         <item>INVITATIONS</item>
         <item>NEARBY</item>
+    </string-array>
+
+    <string-array name="recipient_selection_tab_names">
+        <item>CONTACTS</item>
+        <item>GROUPS</item>
     </string-array>
 
     <string name="about_url">http://www.hoccer.com/xo-about-view</string>

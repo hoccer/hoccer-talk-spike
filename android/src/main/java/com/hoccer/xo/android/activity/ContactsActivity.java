@@ -17,7 +17,6 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsPageAdapter;
 import com.hoccer.xo.android.base.XoActionbarActivity;
-import com.hoccer.xo.android.fragment.ContactsFragment;
 import com.hoccer.xo.android.fragment.NearbyChatFragment;
 import com.hoccer.xo.release.R;
 
@@ -139,14 +138,14 @@ public class ContactsActivity extends XoActionbarActivity {
 
         switch (item.getItemId()) {
             case R.id.menu_audio_attachment_list:
-                showAudioAttachmentList();
+                startMediaBrowserActivity();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void showAudioAttachmentList() {
+    public void startMediaBrowserActivity() {
         Intent intent = new Intent(this, MediaBrowserActivity.class);
         startActivity(intent);
     }

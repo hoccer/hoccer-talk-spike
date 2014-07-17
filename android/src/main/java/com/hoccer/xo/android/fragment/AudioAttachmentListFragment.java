@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.fragment;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.*;
@@ -12,11 +11,15 @@ import android.util.SparseBooleanArray;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.model.TalkClient;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.activity.ContactSelectionActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentListAdapter;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
@@ -24,6 +27,8 @@ import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SearchResultsAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
+import com.hoccer.xo.android.content.ContentRegistry;
+import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
@@ -44,6 +49,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
     public static final int ALL_CONTACTS_ID = -1;
     public static final int SELECT_COLLECTION_REQUEST = 1;
+    public static final int SELECT_CONTACT_REQUEST = 2;
     private SparseBooleanArray mSelectedItems;
 
 
@@ -97,12 +103,18 @@ public class AudioAttachmentListFragment extends XoListFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SELECT_COLLECTION_REQUEST) {
-            if (resultCode == getActivity().RESULT_OK) {
-                Integer mediaCollectionId = data.getIntExtra(MediaCollectionSelectionListFragment.MEDIA_COLLECTION_ID_EXTRA, -1);
-                if (mediaCollectionId > -1) {
-                    addSelectedAttachmentsToCollection(mediaCollectionId);
-                }
+        if (resultCode == getActivity().RESULT_OK) {
+            switch (requestCode) {
+                case SELECT_COLLECTION_REQUEST:
+                    Integer mediaCollectionId = data.getIntExtra(MediaCollectionSelectionListFragment.MEDIA_COLLECTION_ID_EXTRA, -1);
+                    if (mediaCollectionId > -1) {
+                        addSelectedAttachmentsToCollection(mediaCollectionId);
+                    }
+                    break;
+                case SELECT_CONTACT_REQUEST:
+                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.SELECTED_CONTACT_IDS_EXTRA);
+                    sendSelectedAttachmentsToContacts(contactSelections);
+                    break;
             }
         }
     }
@@ -480,7 +492,11 @@ public class AudioAttachmentListFragment extends XoListFragment {
         }
     }
 
-    private void startMediaCollectionSelectionListActivity() {
+    private void startContactSelectionActivity() {
+        startActivityForResult(new Intent(getActivity(), ContactSelectionActivity.class), SELECT_CONTACT_REQUEST);
+    }
+
+    private void startMediaCollectionSelectionActivity() {
         startActivityForResult(new Intent(getActivity(), MediaCollectionSelectionActivity.class), SELECT_COLLECTION_REQUEST);
     }
 
@@ -495,13 +511,9 @@ public class AudioAttachmentListFragment extends XoListFragment {
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) throws SQLException {
         TalkClientMediaCollection mediaCollection = getXoDatabase().findMediaCollectionById(mediaCollectionId);
         List<String> addedFilenames = new ArrayList<String>();
-        for (int index = 0; index < mSelectedItems.size(); ++index) {
-            int pos = mSelectedItems.keyAt(index);
-            if (mSelectedItems.get(pos)) {
-                TalkClientDownload download = (TalkClientDownload) mAttachmentListAdapter.getItem(pos).getContentObject();
-                if (addAttachmentToCollection(mediaCollection, download)) {
-                    addedFilenames.add(download.getFileName());
-                }
+        for (TalkClientDownload download : getSelectedAttachments()) {
+            if (addAttachmentToCollection(mediaCollection, download)) {
+                addedFilenames.add(download.getFileName());
             }
         }
         if (!addedFilenames.isEmpty()) {
@@ -515,6 +527,74 @@ public class AudioAttachmentListFragment extends XoListFragment {
             return true;
         }
         return false;
+    }
+
+    private void sendSelectedAttachmentsToContacts(List<Integer> contactIds) {
+        for (Integer contactId : contactIds) {
+            sendSelectedAttachmentsToContact(retrieveContactById(contactId));
+        }
+    }
+
+    private void sendSelectedAttachmentsToContact(TalkClientContact contact) {
+        for (TalkClientDownload download : getSelectedAttachments()) {
+            TalkClientUpload upload = createTalkClientUpload(download);
+            createMessageAndSend(contact, upload);
+        }
+    }
+
+    private void createMessageAndSend(TalkClientContact contact, TalkClientUpload upload) {
+        String messageTag = XoApplication.getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
+        XoApplication.getXoClient().sendMessage(messageTag);
+    }
+
+    private TalkClientContact retrieveContactById(Integer contactId) {
+        TalkClientContact contact = null;
+        try {
+            contact = XoApplication.getXoClient().getDatabase().findClientContactById(contactId);
+        } catch (SQLException e) {
+            LOG.error("Contact not found for id: " + contactId, e);
+        }
+        return contact;
+    }
+
+    private TalkClientUpload createTalkClientUpload(TalkClientDownload download) {
+        File fileToUpload = new File(download.getDataFile());
+        if (!fileToUpload.exists()) {
+            LOG.error("Error creating file from TalkClientDownloadObject.");
+            return null;
+        }
+
+        String fileName = download.getFileName();
+        String url = fileToUpload.getAbsolutePath();
+        String contentType = download.getContentType();
+        String mediaType = download.getMediaType();
+        double aspectRatio = download.getAspectRatio();
+        int contentLength = (int) fileToUpload.length();
+        String contentHmac = download.getContentHmac();
+
+        TalkClientUpload upload = new TalkClientUpload();
+        upload.initializeAsAttachment(
+                fileName,
+                url,
+                url,
+                contentType,
+                mediaType,
+                aspectRatio,
+                contentLength,
+                contentHmac);
+        return upload;
+    }
+
+    private List<TalkClientDownload> getSelectedAttachments() {
+        List<TalkClientDownload> downloads = new ArrayList<TalkClientDownload>();
+        for (int index = 0; index < mSelectedItems.size(); ++index) {
+            int pos = mSelectedItems.keyAt(index);
+            if (mSelectedItems.get(pos)) {
+                TalkClientDownload download = (TalkClientDownload) mAttachmentListAdapter.getItem(pos).getContentObject();
+                downloads.add(download);
+            }
+        }
+        return downloads;
     }
 
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
@@ -585,11 +665,12 @@ public class AudioAttachmentListFragment extends XoListFragment {
                     mode.finish();
                     return true;
                 case R.id.menu_share:
-                    // show contact selection fragment
+                    mode.finish();
+                    startContactSelectionActivity();
                     return false;
                 case R.id.menu_add_to_collection:
                     mode.finish();
-                    startMediaCollectionSelectionListActivity();
+                    startMediaCollectionSelectionActivity();
                     return false;
                 default:
                     return false;
