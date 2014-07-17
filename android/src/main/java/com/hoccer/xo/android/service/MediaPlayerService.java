@@ -44,8 +44,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private MediaPlayer mMediaPlayer = null;
     private NotificationCompat.Builder mBuilder;
 
-    private boolean paused = false;
-    private boolean stopped = true;
+    private boolean mPaused = false;
+    private boolean mStopped = true;
 
     private AudioAttachmentItem mCurrentAudioAttachmentItem;
     private AudioAttachmentItem mTempAudioAttachmentItem;
@@ -438,11 +438,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public boolean isPaused() {
-        return paused;
+        return mPaused;
     }
 
     public boolean isStopped() {
-        return stopped;
+        return mStopped;
     }
 
     public int getTotalDuration() {
@@ -546,11 +546,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     private void setPaused(boolean paused) {
-        this.paused = paused;
+        this.mPaused = paused;
     }
 
     private void setStopped(boolean stopped) {
-        this.stopped = stopped;
+        this.mStopped = stopped;
     }
 
 }
