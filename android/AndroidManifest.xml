@@ -161,6 +161,13 @@
                 android:screenOrientation="portrait">
         </activity>
 
+        <!-- ContactSelectionActivity activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.ContactSelectionActivity"
+                android:label="@string/select_recipients"
+                android:screenOrientation="portrait">
+        </activity>
+
         <!-- FullscreenPlayerActivity activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.FullscreenPlayerActivity"

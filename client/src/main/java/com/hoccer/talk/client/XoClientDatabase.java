@@ -160,6 +160,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public void saveClientDownload(TalkClientDownload download) throws SQLException {
         mClientDownloads.createOrUpdate(download);
+
+        for (IXoDownloadListener listener : mDownloadListeners) {
+            listener.onDownloadSaved(download);
+        }
     }
 
     public void saveClientUpload(TalkClientUpload upload) throws SQLException {
@@ -188,11 +192,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
     }
 
-    public List<TalkClientContact> findAllClientContacts() throws SQLException {
-        return findAllClientContactsOrderedByRecentMessage();
-    }
-
-    private List<TalkClientContact> findAllClientContactsOrderedByRecentMessage() throws SQLException {
+    public List<TalkClientContact> findAllClientContactsOrderedByRecentMessage() throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> recentUnreadMessages = mClientMessages.queryBuilder();
         QueryBuilder<TalkClientContact, Integer> recentSenders = mClientContacts.queryBuilder();
         recentUnreadMessages.orderBy("timestamp", false);
@@ -214,6 +214,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             }
         }
         return orderedListOfDistinctSenders;
+    }
+
+    public List<TalkClientContact> findAllClientContacts() throws SQLException {
+        return mClientContacts.queryBuilder().where()
+                .eq("contactType", TalkClientContact.TYPE_CLIENT)
+                .eq("deleted", false)
+                .and(2)
+                .query();
     }
 
     public List<TalkClientContact> findAllGroupContacts() throws SQLException {
@@ -447,19 +455,19 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             }
         }
         ArrayList<TalkClientContact> allNearbyGroupsOrdered = new ArrayList<TalkClientContact>();
-        for (TalkClientMessage m: nearbyMessages) {
+        for (TalkClientMessage m : nearbyMessages) {
             if (!allNearbyGroupsOrdered.contains(m.getConversationContact())) {
                 allNearbyGroupsOrdered.add(m.getConversationContact());
             }
         }
         ArrayList<TalkClientMessage> orderedMessages = new ArrayList<TalkClientMessage>();
-        for (TalkClientContact c: allNearbyGroupsOrdered) {
+        for (TalkClientContact c : allNearbyGroupsOrdered) {
             TalkClientMessage separator = new TalkClientMessage();
             separator.setConversationContact(c);
             separator.setText("Nearby: " + c.getNickname());
             separator.setMessageId("SEPARATOR");
             orderedMessages.add(separator);
-            orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(),nearbyMessages.size(), 0));
+            orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(), nearbyMessages.size(), 0));
         }
         return orderedMessages;
     }
@@ -803,28 +811,28 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
      * failed -> failedAcknowledged */
     public void migrateDeliveryStates() throws SQLException {
         List<TalkDelivery> talkDeliveries = mDeliveries.queryForAll();
-        for(TalkDelivery delivery : talkDeliveries) {
+        for (TalkDelivery delivery : talkDeliveries) {
             if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_OLD)) {
                 delivery.setState(TalkDelivery.STATE_DELIVERED_PRIVATE);
             } else if (delivery.getState().equals(TalkDelivery.STATE_CONFIRMED_OLD)) {
                 delivery.setState(TalkDelivery.STATE_DELIVERED_PRIVATE_ACKNOWLEDGED);
-            } else if(delivery.getState().equals(TalkDelivery.STATE_ABORTED_OLD)) {
+            } else if (delivery.getState().equals(TalkDelivery.STATE_ABORTED_OLD)) {
                 delivery.setState(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED);
-            } else if(delivery.getState().equals(TalkDelivery.STATE_FAILED_OLD)) {
+            } else if (delivery.getState().equals(TalkDelivery.STATE_FAILED_OLD)) {
                 delivery.setState(TalkDelivery.STATE_FAILED_ACKNOWLEDGED);
             }
 
-            if(delivery.getMessageId() == null) {
+            if (delivery.getMessageId() == null) {
                 saveDelivery(delivery);
                 continue;
             }
             TalkClientMessage message = findMessageByMessageId(delivery.getMessageId(), false);
-            if(message != null) {
+            if (message != null) {
                 TalkClientUpload upload = message.getAttachmentUpload();
                 TalkClientDownload download;
-                if(upload == null) {
+                if (upload == null) {
                     download = message.getAttachmentDownload();
-                    if(download != null) {
+                    if (download != null) {
                         migrateTalkClientDownload(delivery, download);
                     } else { // there is no Attachment in this delivery
                         delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
@@ -839,23 +847,29 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     private void migrateTalkClientUpload(TalkDelivery delivery, TalkClientUpload upload) {
-        switch(upload.getState()) {
-            case COMPLETE: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
+        switch (upload.getState()) {
+            case COMPLETE:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
                 break;
-            case FAILED: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED);
+            case FAILED:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED);
                 break;
-            default: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
+            default:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
                 break;
         }
     }
 
     private void migrateTalkClientDownload(TalkDelivery delivery, TalkClientDownload download) {
-        switch(download.getState()) {
-            case COMPLETE: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
+        switch (download.getState()) {
+            case COMPLETE:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
                 break;
-            case FAILED: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED);
+            case FAILED:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED);
                 break;
-            default: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
+            default:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
                 break;
         }
     }
