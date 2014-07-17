@@ -3,7 +3,6 @@ package com.hoccer.talk.client;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.model.TalkDelivery;
 import com.j256.ormlite.dao.Dao;
 import org.apache.http.client.HttpClient;
 import org.apache.log4j.Logger;
@@ -17,11 +16,15 @@ public class XoTransferAgent implements IXoTransferListener {
 
     private static final Logger LOG = Logger.getLogger(XoTransferAgent.class);
 
+    private static final long TASK_TIMEOUT = 30;
+
+
     XoClient mClient;
     XoClientDatabase mDatabase;
     IXoClientDatabaseBackend mDatabaseBackend; // for fixups
 
-    ScheduledExecutorService mExecutor;
+    private final ScheduledExecutorService mUploadExecutor;
+    private final ScheduledExecutorService mDownloadExecutor;
 
     List<IXoTransferListener> mListeners;
 
@@ -34,10 +37,18 @@ public class XoTransferAgent implements IXoTransferListener {
         mClient = client;
         mDatabase = mClient.getDatabase();
         mDatabaseBackend = mClient.getHost().getDatabaseBackend();
-        ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
-        tfb.setNameFormat("transfer-%d");
-        tfb.setUncaughtExceptionHandler(client.getHost().getUncaughtExceptionHandler());
-        mExecutor = Executors.newScheduledThreadPool(client.getHost().getTransferThreads(), tfb.build());
+
+        ThreadFactoryBuilder tfbUpload = new ThreadFactoryBuilder();
+        tfbUpload.setNameFormat("upload-%d");
+        tfbUpload.setUncaughtExceptionHandler(client.getHost().getUncaughtExceptionHandler());
+        mUploadExecutor = Executors.newScheduledThreadPool(client.getHost().getTransferThreads(), tfbUpload.build());
+
+        ThreadFactoryBuilder tfbDownload = new ThreadFactoryBuilder();
+        tfbDownload.setNameFormat("download-%d");
+        tfbDownload.setUncaughtExceptionHandler(client.getHost().getUncaughtExceptionHandler());
+        mDownloadExecutor = Executors.newScheduledThreadPool(client.getHost().getTransferThreads(), tfbDownload.build());
+
+
         mListeners = new ArrayList<IXoTransferListener>();
         mDownloadsById = new HashMap<Integer, TalkClientDownload>();
         mUploadsById = new HashMap<Integer, TalkClientUpload>();
@@ -159,20 +170,16 @@ public class XoTransferAgent implements IXoTransferListener {
 
                 mDownloadsById.put(downloadId, download);
 
-                mExecutor.execute(new Runnable() {
+                mDownloadExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
                         LOG.info("performing download " + downloadId + " in state " + download.getState());
-                        onDownloadStarted(download);
                         try {
-                            download.performDownloadAttempt(XoTransferAgent.this);
+                            download.resumeDownload(XoTransferAgent.this);
+//                            download.performDownloadAttempt(XoTransferAgent.this);
                         } catch (Exception e) {
                             LOG.error("error performing download", e);
                         }
-                        synchronized (mDownloadsById) {
-                            mDownloadsById.remove(downloadId);
-                        }
-                        onDownloadFinished(download);
                     }
                 });
             } else {
@@ -189,15 +196,13 @@ public class XoTransferAgent implements IXoTransferListener {
 
     public void resumeDownload(TalkClientDownload download) {
         LOG.info("resumeUpload(" + download.getClientDownloadId() + ")");
-        download.resumeDownload(this);
-        synchronized (mUploadsById) {
-            mDownloadsById.put(download.getClientDownloadId(), download);
-        }
+        requestDownload(download);
     }
 
     public void cancelDownload(TalkClientDownload download) {
         LOG.info("cancelDownload(" + download.getClientDownloadId() + ")");
         synchronized (mDownloadsById) {
+            download.pauseDownload(this);
             mDownloadsById.remove(download.getClientDownloadId());
         }
     }
@@ -233,21 +238,21 @@ public class XoTransferAgent implements IXoTransferListener {
 
                 mUploadsById.put(uploadId, upload);
 
-                mExecutor.execute(new Runnable() {
+                mUploadExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
                         LOG.info("performing upload with id '" + uploadId + "' in state '" + upload.getState() + "'");
+
                         try {
-                            upload.performUploadAttempt(XoTransferAgent.this);
+                            upload.resumeUpload(XoTransferAgent.this);
+//                            upload.performUploadAttempt(XoTransferAgent.this);
                         } catch (Exception e) {
                             LOG.error("error performing upload", e);
                         }
-                        synchronized (mUploadsById) {
-                            mUploadsById.remove(uploadId);
-                        }
-                        onUploadFinished(upload);
                     }
                 });
+
+
             } else {
                 LOG.info("upload " + upload.getClientUploadId() + " already active");
             }
@@ -262,15 +267,13 @@ public class XoTransferAgent implements IXoTransferListener {
 
     public void resumeUpload(TalkClientUpload upload) {
         LOG.info("resumeUpload(" + upload.getClientUploadId() + ")");
-        upload.resumeUpload(this);
-        synchronized (mUploadsById) {
-            mUploadsById.put(upload.getClientUploadId(), upload);
-        }
+        requestUpload(upload);
     }
 
     public void cancelUpload(TalkClientUpload upload) {
         LOG.info("cancelUpload(" + upload.getClientUploadId() + ")");
         synchronized (mUploadsById) {
+            upload.pauseUpload(this);
             mUploadsById.remove(upload.getClientUploadId());
         }
     }
@@ -305,6 +308,8 @@ public class XoTransferAgent implements IXoTransferListener {
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
         LOG.info("onDownloadFinished(" + download.getClientDownloadId() + ")");
+        mDownloadsById.remove(download.getClientDownloadId());
+        LOG.info("removed Download with id (" + download.getClientDownloadId() + ") from HashMap");
         for (int i=0; i < mListeners.size(); i++) {
             IXoTransferListener listener = mListeners.get(i);
             listener.onDownloadFinished(download);
@@ -349,6 +354,8 @@ public class XoTransferAgent implements IXoTransferListener {
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
         LOG.info("onUploadFinished(" + upload.getClientUploadId() + ")");
+        LOG.info("removed Upload with id (" + upload.getClientUploadId() + ") from HashMap");
+        mUploadsById.remove(upload.getClientUploadId());
         for (int i=0; i < mListeners.size(); i++) {
             IXoTransferListener listener = mListeners.get(i);
             listener.onUploadFinished(upload);
