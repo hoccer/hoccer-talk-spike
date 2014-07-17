@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--The app's URL scheme for registration links-->
-    <string name="url_scheme">wlbmd://</string>
+    <string name="url_scheme">wlbm://</string>
 
     <!--Servers-->
     <string name="servers_production">wss://192.76.129.21:443/</string>
