@@ -95,7 +95,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                     int headSetState = intent.getIntExtra("state", 0);
 
                     if (headSetState == 0) {
-                        pause();
+                        if (mMediaPlayer != null && !isStopped()) {
+                            pause();
+                        }
                     }
                 }
             }
@@ -377,9 +379,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void pause() {
-        if (mMediaPlayer != null) {
-            mMediaPlayer.pause();
-        }
+        mMediaPlayer.pause();
+
         setPaused(true);
         setStopped(false);
         if (isNotificationActive()) {
@@ -470,7 +471,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
         try {
             TalkClientMessage message;
-            if (getCurrentMediaItem().getContentObject() instanceof  TalkClientDownload) {
+            if (getCurrentMediaItem().getContentObject() instanceof TalkClientDownload) {
                 int attachmentId = ((TalkClientDownload) getCurrentMediaItem().getContentObject()).getClientDownloadId();
                 message = XoApplication.getXoClient().getDatabase().findClientMessageByTalkClientDownloadId(attachmentId);
                 if (message != null) {
