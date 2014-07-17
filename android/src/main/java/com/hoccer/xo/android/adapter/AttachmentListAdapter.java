@@ -322,7 +322,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     @Override
-    public void onDownloadAdded(TalkClientDownload download) {
+    public void onDownloadSaved(TalkClientDownload download) {
 
     }
 
