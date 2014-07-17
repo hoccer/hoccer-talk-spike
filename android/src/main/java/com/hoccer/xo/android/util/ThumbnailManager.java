@@ -20,10 +20,7 @@ import android.widget.ImageView;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -153,6 +150,9 @@ public class ThumbnailManager {
     }
 
     private Bitmap scaleBitmap(Bitmap bitmap, Context context) {
+        if (bitmap == null || context == null) {
+            return null;
+        }
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         float scaledHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DEFAULT_HEIGHT_DP, metrics);
         float scaledWidth = bitmap.getWidth() * (scaledHeight / bitmap.getHeight());
