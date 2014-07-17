@@ -110,7 +110,7 @@ public abstract class ContactsAdapter extends XoAdapter
                     newTokens = new ArrayList<TalkClientSmsToken>();
                 }
 
-                List<TalkClientContact> newClients = mDatabase.findAllClientContacts();
+                List<TalkClientContact> newClients = mDatabase.findAllClientContactsOrderedByRecentMessage();
                 LOG.debug("found " + newClients.size() + " contacts");
 
                 if(mFilter != null) {

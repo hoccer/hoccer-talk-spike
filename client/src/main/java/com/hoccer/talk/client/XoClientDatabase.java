@@ -188,10 +188,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
     }
 
-    public List<TalkClientContact> findAllClientContacts() throws SQLException {
-        return findAllClientContactsOrderedByRecentMessage();
-    }
-
     private List<TalkClientContact> findAllClientContactsOrderedByRecentMessage() throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> recentUnreadMessages = mClientMessages.queryBuilder();
         QueryBuilder<TalkClientContact, Integer> recentSenders = mClientContacts.queryBuilder();
@@ -214,6 +210,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             }
         }
         return orderedListOfDistinctSenders;
+    }
+
+    public List<TalkClientContact> findAllClientContacts() throws SQLException {
+        return mClientContacts.queryBuilder().where()
+                .eq("contactType", TalkClientContact.TYPE_CLIENT)
+                .eq("deleted", false)
+                .and(2)
+                .query();
     }
 
     public List<TalkClientContact> findAllGroupContacts() throws SQLException {
