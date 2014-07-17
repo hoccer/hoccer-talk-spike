@@ -11,12 +11,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
@@ -27,8 +27,12 @@ import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.bofrostmessenger.R;
 
+import java.sql.SQLException;
+
 public class CompositionFragment extends XoFragment implements View.OnClickListener,
         View.OnLongClickListener, MotionGestureListener {
+
+    public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
 
     private static final int STRESS_TEST_MESSAGE_COUNT = 15;
 
@@ -45,6 +49,26 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private String mLastMessage = null;
 
     private ImageButton mAddAttachmentButton;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
+            if (clientContactId == -1) {
+                LOG.error("invalid contact id");
+            } else {
+                try {
+                    mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                } catch (SQLException e) {
+                    LOG.error("sql error", e);
+                }
+            }
+        } else {
+            LOG.error("MessagingFragment requires contactId as argument.");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -156,25 +180,13 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         } else {
             imageResource = android.R.drawable.stat_notify_error;
         }
-        mAddAttachmentButton.setBackground(ColorSchemeManager.fillAttachmentForeground(getXoActivity(), imageResource, true));
+
+        mAddAttachmentButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(getXoActivity(), imageResource, true));
         mAddAttachmentButton.setImageResource(android.R.color.transparent);
     }
 
-    public void setContact(TalkClientContact contact) {
-        LOG.debug("setContact(" + contact.getClientContactId() + ")");
+    public void updateContact(TalkClientContact contact) {
         mContact = contact;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mTextEdit.setVisibility(View.VISIBLE);
-                mSendButton.setVisibility(View.VISIBLE);
-                mAddAttachmentButton.setVisibility(View.VISIBLE);
-
-                mTextEdit.setEnabled(true);
-                mSendButton.setEnabled(true);
-                mAddAttachmentButton.setEnabled(true);
-            }
-        });
     }
 
     private boolean isComposed() {
@@ -189,24 +201,13 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     private void clearAttachment() {
         mAddAttachmentButton.setOnClickListener(new AddAttachmentOnClickListener());
-        mAddAttachmentButton.setBackground(null);
+        mAddAttachmentButton.setBackgroundDrawable(null);
         mAddAttachmentButton.setImageResource(R.drawable.ic_light_content_attachment);
         mAttachment = null;
     }
 
-    private boolean isSendMessagePossible() {
-        boolean isBlocked = isBlocked();
-
-        boolean isEmptyGroup = false;
-        if(mContact.isGroup() && mContact.getGroupMemberships().size() == 1) {
-            isEmptyGroup = true;
-        }
-
-        return !isBlocked && !isEmptyGroup;
-    }
-
     private boolean isBlocked() {
-        if(!mContact.isGroup() && !mContact.isNearby()) {
+        if (!mContact.isGroup() && !mContact.isNearby()) {
             TalkRelationship clientRelationship = mContact.getClientRelationship();
             if (clientRelationship != null && clientRelationship.getState()
                     .equals(TalkRelationship.STATE_BLOCKED)) {
@@ -217,7 +218,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private boolean isEmptyGroup() {
-        if(mContact.isGroup() && mContact.getGroupMemberships().size() == 1) {
+        if (mContact.isGroup() && mContact.getGroupMemberships() != null && mContact.getGroupMemberships().size() <= 1) {
             return true;
         }
         return false;
@@ -248,13 +249,12 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             upload = SelectedContent.createAttachmentUpload(mAttachment);
         }
 
-        if(isAborted) {
-            TalkClientMessage message = getXoClient()
-                    .composeClientMessage(mContact, messageText, upload);
+        if (isAborted) {
+            TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText, upload);
             getXoClient().markMessagesAsAborted(message);
         } else {
             getXoClient()
-                    .requestDelivery(getXoClient().composeClientMessage(mContact, messageText, upload));
+                    .sendMessage(getXoClient().composeClientMessage(mContact, messageText, upload).getMessageTag());
         }
         clearComposedMessage();
     }
@@ -276,8 +276,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         boolean longpressHandled = false;
         if (mLastMessage != null && !mLastMessage.equals("")) {
             for (int i = 0; i < STRESS_TEST_MESSAGE_COUNT; i++) {
-                getXoClient().requestDelivery(getXoClient()
-                        .composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)));
+                getXoClient().sendMessage(getXoClient()
+                        .composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
             }
             longpressHandled = true;
             clearComposedMessage();
@@ -327,7 +327,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         public void onClick(DialogInterface dialog, int which) {
             switch (which) {
                 case 0:
-                    mAttachment = null;
+                    clearAttachment();
                     getXoActivity().selectAttachment();
                     break;
                 case 1:

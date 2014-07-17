@@ -5,6 +5,7 @@ import better.jsonrpc.server.JsonRpcServer;
 import better.jsonrpc.util.ProxyUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.util.Vector;
@@ -26,6 +27,10 @@ public abstract class JsonRpcConnection {
      * Global logger, may be used by subclasses
      */
     protected static final Logger LOG = Logger.getLogger(JsonRpcConnection.class);
+
+    static {
+        // LOG.setLevel(Level.TRACE);
+    }
 
     /**
      * Global counter for connection IDs

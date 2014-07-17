@@ -295,6 +295,18 @@ public class XoPreferenceActivity extends PreferenceActivity
         Toast.makeText(this, R.string.export_credentials_success, Toast.LENGTH_LONG).show();
     }
 
+    private void showAbout() {
+        Intent intent = new Intent(this, LegalImprintActivity.class);
+        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_ABOUT);
+        startActivity(intent);
+    }
+
+    private void showLicense() {
+        Intent intent = new Intent(this, LegalImprintActivity.class);
+        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_LICENSES);
+        startActivity(intent);
+    }
+
     private void openFullScreenPlayer(){
         Intent resultIntent = new Intent(this, FullscreenPlayerActivity.class);
         startActivity(resultIntent);
@@ -312,16 +324,4 @@ public class XoPreferenceActivity extends PreferenceActivity
             }
         }
     }
-    private void showAbout() {
-        Intent intent = new Intent(this, LegalImprintActivity.class);
-        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_ABOUT);
-        startActivity(intent);
-    }
-
-    private void showLicense() {
-        Intent intent = new Intent(this, LegalImprintActivity.class);
-        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_LICENSES);
-        startActivity(intent);
-    }
-
 }

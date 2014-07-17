@@ -10,7 +10,6 @@ import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.bofrostmessenger.R;
-import com.sun.tools.javac.util.Log;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import android.content.Context;
