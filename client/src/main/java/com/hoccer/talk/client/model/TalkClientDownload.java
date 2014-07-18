@@ -48,7 +48,7 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 @DatabaseTable(tableName = "clientDownload")
-public class TalkClientDownload extends XoTransfer implements IContentObject {
+public class TalkClientDownload extends XoTransfer {
 
     /** Maximum amount of retry attempts when downloading an attachment */
     public static final int MAX_DOWNLOAD_RETRY = 16;

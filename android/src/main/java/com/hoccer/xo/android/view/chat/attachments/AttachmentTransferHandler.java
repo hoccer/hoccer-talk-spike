@@ -3,7 +3,9 @@ package com.hoccer.xo.android.view.chat.attachments;
 
 import android.content.res.Resources;
 import android.view.View;
+
 import com.hoccer.talk.client.IXoTransferListener;
+import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -154,13 +156,11 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                 break;
             case UPLOAD_COMPLETE:
                 LOG.debug("Upload complete for " + ((TalkClientUpload) mContent).getUploadUrl());
-                XoApplication.getXoClient().unregisterTransferListener(this);
                 break;
             case DOWNLOAD_FAILED:
                 break;
             case DOWNLOAD_COMPLETE:
                 LOG.debug("Download complete for " + ((TalkClientDownload) mContent).getDownloadUrl());
-                XoApplication.getXoClient().unregisterTransferListener(this);
                 break;
             default:
                 break;
@@ -175,11 +175,9 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
      * TODO: move this into the AttachmentTransferControlView class.
      */
     protected void updateTransferControl() {
-
         mTransferControl.post(new Runnable() {
             @Override
             public void run() {
-
                 int length = 0;
                 int progress = 0;
                 Resources res = mTransferControl.getResources();
@@ -269,76 +267,12 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
     }
 
     @Override
-    public void onDownloadRegistered(TalkClientDownload download) {
+    public void onStateChanged(TalkClientUpload.State state) {
+        setTransferAction(getTransferState(mContent));
     }
 
     @Override
-    public void onDownloadStarted(TalkClientDownload download) {
-        if (download == mContent) {
-            setTransferAction(getTransferState(mContent));
-        }
-    }
-
-    @Override
-    public void onDownloadProgress(TalkClientDownload download) {
-        if (download == mContent) {
-            setTransferAction(getTransferState(mContent));
-        }
-    }
-
-    @Override
-    public void onDownloadFinished(TalkClientDownload download) {
-        if (download == mContent) {
-            setTransferAction(getTransferState(mContent));
-        }
-    }
-
-    @Override
-    public void onDownloadFailed(TalkClientDownload download) {
-        if (download == mContent) {
-            setTransferAction(getTransferState(mContent));
-        }
-    }
-
-    @Override
-    public void onDownloadStateChanged(TalkClientDownload download) {
-        if (download == mContent) {
-            setTransferAction(getTransferState(mContent));
-        }
-    }
-
-    @Override
-    public void onUploadStarted(TalkClientUpload upload) {
-        if (upload == mContent) {
-            setTransferAction(getTransferState(mContent));
-        }
-    }
-
-    @Override
-    public void onUploadProgress(TalkClientUpload upload) {
-        if (upload == mContent) {
-            setTransferAction(getTransferState(mContent));
-        }
-    }
-
-    @Override
-    public void onUploadFinished(TalkClientUpload upload) {
-        if (upload == mContent) {
-            setTransferAction(getTransferState(mContent));
-        }
-    }
-
-    @Override
-    public void onUploadFailed(TalkClientUpload upload) {
-        if (upload == mContent) {
-            setTransferAction(getTransferState(mContent));
-        }
-    }
-
-    @Override
-    public void onUploadStateChanged(TalkClientUpload upload) {
-        if (upload == mContent) {
-            setTransferAction(getTransferState(mContent));
-        }
+    public void onProgress(int progress) {
+        setTransferAction(getTransferState(mContent));
     }
 }

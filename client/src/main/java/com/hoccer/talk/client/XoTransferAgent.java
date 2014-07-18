@@ -3,7 +3,7 @@ package com.hoccer.talk.client;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.j256.ormlite.dao.Dao;
+
 import org.apache.http.client.HttpClient;
 import org.apache.log4j.Logger;
 
@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class XoTransferAgent implements IXoTransferListener {
+public class XoTransferAgent implements IXoTransferListenerOld {
 
     private static final Logger LOG = Logger.getLogger(XoTransferAgent.class);
 
@@ -26,7 +26,7 @@ public class XoTransferAgent implements IXoTransferListener {
     private final ScheduledExecutorService mUploadExecutor;
     private final ScheduledExecutorService mDownloadExecutor;
 
-    List<IXoTransferListener> mListeners;
+    List<IXoTransferListenerOld> mListeners;
 
     HttpClient mHttpClient;
 
@@ -49,7 +49,7 @@ public class XoTransferAgent implements IXoTransferListener {
         mDownloadExecutor = Executors.newScheduledThreadPool(client.getHost().getTransferThreads(), tfbDownload.build());
 
 
-        mListeners = new ArrayList<IXoTransferListener>();
+        mListeners = new ArrayList<IXoTransferListenerOld>();
         mDownloadsById = new HashMap<Integer, TalkClientDownload>();
         mUploadsById = new HashMap<Integer, TalkClientUpload>();
         initializeHttpClient();
@@ -71,66 +71,14 @@ public class XoTransferAgent implements IXoTransferListener {
         return mHttpClient;
     }
 
-    public void registerListener(IXoTransferListener listener) {
+    public void registerListener(IXoTransferListenerOld listener) {
         if (!mListeners.contains(listener)) {
             mListeners.add(listener);
         }
     }
 
-    public void unregisterListener(IXoTransferListener listener) {
+    public void unregisterListener(IXoTransferListenerOld listener) {
         mListeners.remove(listener);
-    }
-
-    public void runFixups() {
-        LOG.debug("checking for transfers that need db fixups");
-        try {
-            Dao<TalkClientDownload, Integer> downloadDao = mDatabaseBackend.getDao(TalkClientDownload.class);
-            Dao<TalkClientUpload, Integer> uploadDao = mDatabaseBackend.getDao(TalkClientUpload.class);
-
-            List<TalkClientDownload> fixupDownloads = downloadDao.queryBuilder()
-                .where()
-                        .eq("state", TalkClientDownload.State.REQUESTED)
-                        .eq("state", TalkClientDownload.State.STARTED)
-                                .eq("state", TalkClientDownload.State.DETECTING)
-                                .eq("state", TalkClientDownload.State.COMPLETE)
-                            .or(2)
-                                .isNull("dataFile")
-                                .isNull("contentUrl")
-                            .or(2)
-                        .and(2)
-                            .isNull("mediaType")
-                            .eq("type", TalkClientDownload.Type.AVATAR)
-                        .and(2)
-                    .or(4)
-                .query();
-            if(!fixupDownloads.isEmpty()) {
-                LOG.info(fixupDownloads.size() + " downloads need fixing");
-                for(TalkClientDownload download: fixupDownloads) {
-                    LOG.debug("fixing download " + download.getClientDownloadId());
-                    download.fixupVersion7(this);
-                }
-            }
-
-            List<TalkClientUpload> fixupUploads = uploadDao.queryBuilder()
-                .where()
-                        .eq("state", TalkClientUpload.State.REGISTERED)
-                        .eq("state", TalkClientUpload.State.STARTED)
-                        .isNull("dataFile")
-                            .isNull("mediaType")
-                            .eq("type", TalkClientDownload.Type.AVATAR)
-                        .and(2)
-                    .or(5)
-                .query();
-            if(!fixupUploads.isEmpty()) {
-                LOG.info(fixupUploads.size() + " uploads need fixing");
-                for(TalkClientUpload upload: fixupUploads) {
-                    LOG.debug("fixing upload " + upload.getClientUploadId());
-                    upload.fixupVersion7(this);
-                }
-            }
-        } catch (SQLException e) {
-            LOG.error("SQL error in db fixup", e);
-        }
     }
 
     public boolean isDownloadActive(TalkClientDownload download) {
@@ -244,7 +192,7 @@ public class XoTransferAgent implements IXoTransferListener {
                         LOG.info("performing upload with id '" + uploadId + "' in state '" + upload.getState() + "'");
 
                         try {
-                            upload.resumeUpload(XoTransferAgent.this);
+                            upload.start(XoTransferAgent.this);
 //                            upload.performUploadAttempt(XoTransferAgent.this);
                         } catch (Exception e) {
                             LOG.error("error performing upload", e);
@@ -261,7 +209,7 @@ public class XoTransferAgent implements IXoTransferListener {
 
     public void pauseUpload(TalkClientUpload upload) {
         LOG.info("pauseUpload(" + upload.getClientUploadId() + ")");
-        upload.pauseUpload(this);
+        upload.pause(this);
         cancelUpload(upload);
     }
 
@@ -273,7 +221,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void cancelUpload(TalkClientUpload upload) {
         LOG.info("cancelUpload(" + upload.getClientUploadId() + ")");
         synchronized (mUploadsById) {
-            upload.pauseUpload(this);
+            upload.cancel(this);
             mUploadsById.remove(upload.getClientUploadId());
         }
     }
@@ -282,7 +230,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onDownloadRegistered(TalkClientDownload download) {
         LOG.info("onDownloadRegistered(" + download.getClientDownloadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onDownloadRegistered(download);
         }
     }
@@ -291,7 +239,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onDownloadStarted(TalkClientDownload download) {
         LOG.info("onDownloadStarted(" + download.getClientDownloadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onDownloadStarted(download);
         }
     }
@@ -300,7 +248,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onDownloadProgress(TalkClientDownload download) {
         LOG.trace("onDownloadProgress(" + download.getClientDownloadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onDownloadProgress(download);
         }
     }
@@ -311,7 +259,7 @@ public class XoTransferAgent implements IXoTransferListener {
         mDownloadsById.remove(download.getClientDownloadId());
         LOG.info("removed Download with id (" + download.getClientDownloadId() + ") from HashMap");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onDownloadFinished(download);
         }
     }
@@ -319,7 +267,7 @@ public class XoTransferAgent implements IXoTransferListener {
     @Override
     public void onDownloadFailed(TalkClientDownload download) {
         LOG.info("onDownloadFailed(" + download.getClientDownloadId() + ")");
-        for(IXoTransferListener listener: mListeners) {
+        for(IXoTransferListenerOld listener: mListeners) {
             listener.onDownloadFailed(download);
         }
     }
@@ -328,7 +276,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onDownloadStateChanged(TalkClientDownload download) {
         LOG.info("onDownloadStateChanged(" + download.getClientDownloadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onDownloadStateChanged(download);
         }
     }
@@ -337,7 +285,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onUploadStarted(TalkClientUpload upload) {
         LOG.info("onUploadStarted(id: " + upload.getClientUploadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onUploadStarted(upload);
         }
     }
@@ -346,7 +294,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onUploadProgress(TalkClientUpload upload) {
         LOG.trace("onUploadProgress(" + upload.getClientUploadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onUploadProgress(upload);
         }
     }
@@ -357,7 +305,7 @@ public class XoTransferAgent implements IXoTransferListener {
         LOG.info("removed Upload with id (" + upload.getClientUploadId() + ") from HashMap");
         mUploadsById.remove(upload.getClientUploadId());
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onUploadFinished(upload);
         }
     }
@@ -365,7 +313,7 @@ public class XoTransferAgent implements IXoTransferListener {
     @Override
     public void onUploadFailed(TalkClientUpload upload) {
         LOG.info("onUploadFailed(" + upload.getClientUploadId() + ")");
-        for(IXoTransferListener listener: mListeners) {
+        for(IXoTransferListenerOld listener: mListeners) {
             listener.onUploadFailed(upload);
         }
     }
@@ -374,7 +322,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onUploadStateChanged(TalkClientUpload upload) {
         LOG.info("onUploadStateChanged(id: " + upload.getClientUploadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onUploadStateChanged(upload);
         }
     }

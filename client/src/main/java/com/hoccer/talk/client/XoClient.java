@@ -48,7 +48,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener {
+public class XoClient implements JsonRpcConnection.Listener, IXoTransferListenerOld {
 
     private static final Logger LOG = Logger.getLogger(XoClient.class);
 
@@ -400,11 +400,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mUnseenListeners.remove(listener);
     }
 
-    public synchronized void registerTransferListener(IXoTransferListener listener) {
+    public synchronized void registerTransferListener(IXoTransferListenerOld listener) {
         mTransferAgent.registerListener(listener);
     }
 
-    public synchronized void unregisterTransferListener(IXoTransferListener listener) {
+    public synchronized void unregisterTransferListener(IXoTransferListenerOld listener) {
         mTransferAgent.unregisterListener(listener);
     }
 
@@ -506,13 +506,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void activate() {
         LOG.debug("client: activate()");
         if(mState == STATE_INACTIVE) {
-            // run transfer fixups on database in background
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    mTransferAgent.runFixups();
-                }
-            });
             if(isIdle()) {
                 switchState(STATE_IDLE, "client activated idle");
             } else {

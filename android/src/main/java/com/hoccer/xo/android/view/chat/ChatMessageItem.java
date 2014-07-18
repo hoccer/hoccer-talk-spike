@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -323,7 +325,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
             // create handler for a pending attachment transfer
             mAttachmentTransferHandler = new AttachmentTransferHandler(mContentTransferControl, contentObject, this);
-            XoApplication.getXoClient().registerTransferListener(mAttachmentTransferHandler);
+
+            ((XoTransfer) contentObject).setTransferListener(mAttachmentTransferHandler);
             mContentTransferControl.setOnClickListener(new AttachmentTransferHandler(mContentTransferControl, contentObject, this));
 
         } else {
