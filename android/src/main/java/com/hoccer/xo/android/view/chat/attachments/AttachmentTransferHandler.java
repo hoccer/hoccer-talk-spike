@@ -6,6 +6,7 @@ import android.view.View;
 
 import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.XoTransferAgent;
+import com.hoccer.talk.client.model.IXoTransferState;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentState;
@@ -266,7 +267,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
     }
 
     @Override
-    public void onStateChanged(TalkClientUpload.State state) {
+    public void onStateChanged(IXoTransferState state) {
         setTransferAction(getTransferState(mContent));
     }
 

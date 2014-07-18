@@ -24,6 +24,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Hex;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.Set;
+
 
 @DatabaseTable(tableName = "clientUpload")
 public class TalkClientUpload extends XoTransfer implements IXoTransferObject, IProgressListener {
@@ -41,6 +43,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private XoTransferAgent mTransferAgent;
 
+    @Nullable
     private IXoTransferListener mTransferListener = null;
 
     public enum State implements IXoTransferState {
@@ -228,7 +231,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private void setState(State newState) {
         LOG.info("[upload " + clientUploadId + "] switching to state " + newState);
         state = newState;
-        mTransferListener.onStateChanged(state);
+        if (mTransferListener != null) {
+            mTransferListener.onStateChanged(state);
+        }
     }
 
     private void doRegisteringAction() {

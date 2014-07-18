@@ -1965,6 +1965,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 final TalkMessage message = clientMessage.getMessage();
                 final TalkDelivery delivery = clientMessage.getOutgoingDelivery();
 
+                TalkClientUpload upload = clientMessage.getAttachmentUpload();
+                // start the attachment upload
+                if(upload != null) {
+                    mTransferAgent.startOrRestartUpload(upload);
+                }
+
                 LOG.debug("preparing delivery of message " + clientMessage.getClientMessageId());
                 try {
                     encryptMessage(clientMessage, delivery, message);
@@ -2721,12 +2727,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         message.setTimeSent(new Date());
         byte[] hmac = message.computeHMAC();
         message.setMessageTag(new String(Base64.encodeBase64(hmac)));
-
-        // start the attachment upload
-        if(upload != null) {
-            mTransferAgent.startOrRestartUpload(upload);
-        }
-
     }
 
     private void updateClientPresence(TalkPresence presence, Set<String> fields) {
