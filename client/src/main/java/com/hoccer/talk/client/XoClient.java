@@ -2339,7 +2339,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             TalkClientDownload attachmentDownload = clientMessage.getAttachmentDownload();
             mDatabase.updateDelivery(clientMessage.getIncomingDelivery());
             if(attachmentDownload != null) {
-                mTransferAgent.registerDownload(attachmentDownload);
+                mTransferAgent.onDownloadRegistered(attachmentDownload);
             }
             for(IXoMessageListener listener: mMessageListeners) {
                 listener.onMessageStateChanged(clientMessage);
@@ -2406,7 +2406,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mDatabase.saveClientMessage(clientMessage);
 
             if(attachmentDownload != null) {
-                mTransferAgent.registerDownload(attachmentDownload);
+                mTransferAgent.startOrRestartDownload(attachmentDownload);
             }
 
             for(IXoMessageListener listener: mMessageListeners) {

@@ -40,8 +40,8 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         mDownloadExecutor = createScheduledThreadPool("download-%d");
 
         mListeners = new ArrayList<IXoTransferListenerOld>();
-        mDownloadsById = new ConcurrentHashMap<Integer, TalkClientDownload>();//new HashMap<Integer, TalkClientDownload>();
-        mUploadsById = new ConcurrentHashMap<Integer, TalkClientUpload>()//new HashMap<Integer, TalkClientUpload>();
+        mDownloadsById = new ConcurrentHashMap<Integer, TalkClientDownload>();
+        mUploadsById = new ConcurrentHashMap<Integer, TalkClientUpload>();
         initializeHttpClient();
     }
 
@@ -89,23 +89,8 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         }
     }
 
-    public void registerDownload(final TalkClientDownload download) {
-        try {
-            mDatabase.saveClientDownload(download);
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
-        if(download.getState() == TalkClientDownload.State.INITIALIZING) {
-            LOG.info("registerDownload(" + download.getClientDownloadId() + ")");
-            download.switchState(this, TalkClientDownload.State.NEW);
-            onDownloadRegistered(download);
-        }
-    }
-
     public void startOrRestartDownload(final TalkClientDownload download) {
         LOG.info("startOrRestartDownload()");
-        registerDownload(download);
-
         Collections.synchronizedMap(mDownloadsById);
         synchronized (mDownloadsById) {
             final int downloadId = download.getClientDownloadId();
