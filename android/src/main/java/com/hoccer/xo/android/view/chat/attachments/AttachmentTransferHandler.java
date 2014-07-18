@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.view.View;
 
 import com.hoccer.talk.client.IXoTransferListener;
-import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -71,7 +70,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                             if (mContent instanceof TalkClientUpload) {
                                 LOG.debug("Will resume upload for " + ((TalkClientUpload) mContent).getUploadUrl());
                                 TalkClientUpload upload = (TalkClientUpload) mContent;
-                                XoApplication.getXoClient().getTransferAgent().requestUpload(upload);
+                                XoApplication.getXoClient().getTransferAgent().startOrRestartUpload(upload);
                             }
                             break;
                         case CANCEL_UPLOAD:

@@ -43,7 +43,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private IXoTransferListener mTransferListener = null;
 
-    public enum State {
+    public enum State implements IXoTransferState {
         NEW {
             @Override
             public Set<State> possibleFollowUps() {

@@ -2,7 +2,9 @@ package com.hoccer.talk.client;
 
 import com.hoccer.talk.content.IContentObject;
 
-public abstract class XoTransfer implements IContentObject {
+public abstract class XoTransfer<T> implements IContentObject {
+
+    public enum State{};
 
     protected IXoTransferListener mTransferListener;
 
@@ -20,7 +22,6 @@ public abstract class XoTransfer implements IContentObject {
         mDirection = direction;
     }
 
-
     public Direction getDirection() {
         return mDirection;
     }
@@ -32,7 +33,6 @@ public abstract class XoTransfer implements IContentObject {
     public boolean isUpload() {
         return mDirection == Direction.UPLOAD;
     }
-
 
     public abstract Type getTransferType();
 

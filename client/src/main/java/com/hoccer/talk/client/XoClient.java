@@ -47,9 +47,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class XoClient implements JsonRpcConnection.Listener, IXoTransferListenerOld {
 
@@ -717,7 +714,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 // ignore this
             }
         });
-        mTransferAgent.requestUpload(upload);
+        mTransferAgent.startOrRestartUpload(upload);
     }
 
     private void sendPresenceUpdateWithNewAvatar(final TalkClientUpload upload) {
@@ -813,7 +810,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                             LOG.error("Error while sending new group presence: " , e);
                         }
                     }
-                    mTransferAgent.requestUpload(upload);
+                    mTransferAgent.startOrRestartUpload(upload);
                     LOG.debug("group presence update");
                     for (int i = 0; i < mContactListeners.size(); i++) {
                         IXoContactListener listener = mContactListeners.get(i);
@@ -2726,7 +2723,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         // start the attachment upload
         if(upload != null) {
-            mTransferAgent.requestUpload(upload);
+            mTransferAgent.startOrRestartUpload(upload);
         }
 
     }
@@ -2781,7 +2778,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("updateClientPresence", e);
         }
         if(avatarDownload != null && wantDownload) {
-            mTransferAgent.requestDownload(avatarDownload);
+            mTransferAgent.startOrRestartDownload(avatarDownload);
         }
 
         final TalkClientContact fContact = clientContact;
@@ -3000,7 +2997,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("SQL Error when saving avatar download", e);
         }
         if(avatarDownload != null) {
-            mTransferAgent.requestDownload(avatarDownload);
+            mTransferAgent.startOrRestartDownload(avatarDownload);
         }
     }
 
@@ -3223,7 +3220,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void requestDownload(TalkClientDownload download) {
-        mTransferAgent.requestDownload(download);
+        mTransferAgent.startOrRestartDownload(download);
     }
 
     public void cancelDownload(TalkClientDownload download) {
