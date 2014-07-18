@@ -537,10 +537,10 @@ public class AudioAttachmentListFragment extends XoListFragment {
             TalkClientUpload upload = null;
             try {
                 upload = createTalkClientUpload(download);
+                createMessageAndSendUploadToContact(contact, upload);
             } catch (FileNotFoundException e) {
                 Toast.makeText(getActivity(), String.format(getString(R.string.error_could_not_find_file_for_sending), download.getFileName()), Toast.LENGTH_LONG).show();
             }
-            createMessageAndSendUploadToContact(contact, upload);
         }
     }
 
