@@ -18,7 +18,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Hex;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +38,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private XoTransferAgent mTransferAgent;
 
-    @Nullable
-    private List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
+    protected List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
 
     public enum State implements IXoTransferState {
         NEW {
@@ -187,8 +185,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         mTransferAgent = agent;
         if (state == State.NEW) {
             switchState(State.REGISTERING);
+        } else if (state != State.COMPLETE && state != State.FAILED) {
+            switchState(State.UPLOADING);
         }
-        switchState(State.UPLOADING);
     }
 
     @Override
@@ -241,7 +240,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private void setState(State newState) {
         LOG.info("[upload " + clientUploadId + "] switching to state " + newState);
         state = newState;
-        for (IXoTransferListener listener : mTransferListeners) {
+
+        for (int i = 0; i < mTransferListeners.size(); i++) {
+            IXoTransferListener listener = mTransferListeners.get(i);
             listener.onStateChanged(state);
         }
     }
@@ -497,7 +498,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     @Override
     public void onProgress(int progress) {
         this.progress = progress;
-        for (IXoTransferListener listener : mTransferListeners) {
+        for (int i = 0; i < mTransferListeners.size(); i++) {
+            IXoTransferListener listener = mTransferListeners.get(i);
             listener.onProgress(this.progress);
         }
     }
@@ -681,5 +683,19 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     public void provideEncryptionKey(String key) {
         this.encryptionKey = key;
+    }
+
+    @Override
+    public void registerTransferListener(IXoTransferListener listener) {
+        if (!mTransferListeners.contains(listener)) {
+            mTransferListeners.add(listener);
+        }
+    }
+
+    @Override
+    public void unregisterTransferListener(IXoTransferListener listener) {
+        if (mTransferListeners.contains(listener)) {
+            mTransferListeners.remove(listener);
+        }
     }
 }

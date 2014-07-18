@@ -8,8 +8,6 @@ public abstract class XoTransfer<T> implements IContentObject {
 
     public enum State {}
 
-    protected List<IXoTransferListener> mTransferListeners;
-
     public enum Direction {
         UPLOAD, DOWNLOAD
     }
@@ -46,16 +44,7 @@ public abstract class XoTransfer<T> implements IContentObject {
         return getTransferType() == Type.ATTACHMENT;
     }
 
-    public void registerTransferListener(IXoTransferListener listener) {
-        if (!mTransferListeners.contains(listener)) {
-            mTransferListeners.add(listener);
-        }
-    }
+    public abstract void registerTransferListener(IXoTransferListener listener);
 
-    public void unregisterTransferListener(IXoTransferListener listener) {
-        if (mTransferListeners.contains(listener)) {
-            mTransferListeners.remove(listener);
-        }
-    }
-
+    public abstract void unregisterTransferListener(IXoTransferListener listener);
 }

@@ -1961,9 +1961,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         for(int i = 0; i < clientMessages.size(); i++) {
             final TalkClientMessage clientMessage = clientMessages.get(i);
             final TalkClientUpload upload = clientMessage.getAttachmentUpload();
-            // start the attachment upload
             if (upload != null) {
-                mTransferAgent.startOrRestartUpload(upload);
                 upload.registerTransferListener(new IXoTransferListener() {
                     @Override
                     public void onStateChanged(IXoTransferState state) {
@@ -1978,6 +1976,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         // Noop
                     }
                 });
+
+                // start the attachment upload
+                mTransferAgent.startOrRestartUpload(upload);
             } else {
                 performDelivery(clientMessage);
             }

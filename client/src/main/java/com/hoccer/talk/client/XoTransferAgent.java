@@ -90,7 +90,6 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
     public void startOrRestartDownload(final TalkClientDownload download) {
         LOG.info("startOrRestartDownload()");
-        Collections.synchronizedMap(mDownloadsById);
         synchronized (mDownloadsById) {
             final int downloadId = download.getClientDownloadId();
             if(!mDownloadsById.containsKey(downloadId)) {
@@ -148,7 +147,11 @@ public class XoTransferAgent implements IXoTransferListenerOld {
                                 " | contenttype: " + upload.getContentType() +
                                 " | clientUploadId: " + upload.getClientUploadId());
 
-        Collections.synchronizedMap(mUploadsById);
+        if (upload.getState() == TalkClientUpload.State.COMPLETE) {
+            mUploadsById.remove(upload.getClientUploadId());
+            return;
+        }
+
         synchronized (mUploadsById) {
             final int uploadId = upload.getClientUploadId();
             if(!mUploadsById.containsKey(uploadId)) {
