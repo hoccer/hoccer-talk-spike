@@ -43,7 +43,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     private XoTransferAgent mTransferAgent;
 
-    private IXoTransferListener mTransferListener = null;
+    protected List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
 
     public enum State implements IXoTransferState {
         INITIALIZING {
@@ -161,6 +161,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.aspectRatio = 1.0;
         this.downloadProgress = 0;
         this.contentLength = -1;
+        mTransferListeners = new ArrayList<IXoTransferListener>();
     }
 
     /**
@@ -261,7 +262,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     private void setState(State newState) {
         LOG.info("[download " + clientDownloadId + "] switching to state " + newState);
         state = newState;
-        mTransferListener.onStateChanged(state);
+
+        for (IXoTransferListener listener : mTransferListeners) {
+            listener.onStateChanged(state);
+        }
     }
 
     private void doDownloadingAction() {
@@ -273,8 +277,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
         LOG.debug("performDownloadRequest(downloadId: '" + clientDownloadId + "', filename: '" + downloadFilename + "')");
         HttpClient client = mTransferAgent.getHttpClient();
-        RandomAccessFile raf = null;
-        FileDescriptor fd = null;
+        RandomAccessFile randomAccessFile = null;
+        FileDescriptor fileDescriptor = null;
         try {
             logGetDebug("downloading '" + downloadUrl + "'");
             // create the GET request
@@ -287,7 +291,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 logGetDebug("requesting range '" + range + "'");
                 mDownloadRequest.addHeader("Range", range);
             }
+
             mTransferAgent.onDownloadStarted(this);
+
             // start performing the request
             HttpResponse response = client.execute(mDownloadRequest);
             // process status line
@@ -311,17 +317,18 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             }
 
             HttpEntity entity = response.getEntity();
-            InputStream is = entity.getContent();
-            File f = new File(downloadFilename);
-            logGetDebug("destination: '" + f.toString() + "'");
-            f.createNewFile();
-            raf = new RandomAccessFile(f, "rw");
-            fd = raf.getFD();
-            raf.setLength(contentLength);
+            InputStream inputStream = entity.getContent();
+            File file = new File(downloadFilename);
+            logGetDebug("destination: '" + file.toString() + "'");
+            file.createNewFile();
+            randomAccessFile = new RandomAccessFile(file, "rw");
+            fileDescriptor = randomAccessFile.getFD();
+            randomAccessFile.setLength(contentLength);
             logGetDebug("will retrieve '" + bytesToGo + "' bytes");
-            raf.seek(bytesStart);
+            randomAccessFile.seek(bytesStart);
 
-            if (copyData(bytesToGo, raf, fd, is)) {
+            if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
+                fileDescriptor.sync();
                 switchState(State.PAUSED);
                 return;
             }
@@ -331,9 +338,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             switchState(State.FAILED);
             return;
         } finally {
-            if (fd != null) {
+            if (fileDescriptor != null) {
                 try {
-                    fd.sync();
+                    fileDescriptor.sync();
                 } catch (SyncFailedException e) {
                     LOG.warn("sync failed while handling download exception", e);
                 }
@@ -881,6 +888,20 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         String migratedUrl = url.substring(url.indexOf("/", 8));
         migratedUrl = "https://filecache.talk.hoccer.de:8444" + migratedUrl;
         return migratedUrl;
+    }
+
+    @Override
+    public void registerTransferListener(IXoTransferListener listener) {
+        if (!mTransferListeners.contains(listener)) {
+            mTransferListeners.add(listener);
+        }
+    }
+
+    @Override
+    public void unregisterTransferListener(IXoTransferListener listener) {
+        if (mTransferListeners.contains(listener)) {
+            mTransferListeners.remove(listener);
+        }
     }
 
 }
