@@ -1,7 +1,6 @@
 package com.hoccer.talk.client.model;
 
 import com.google.appengine.api.blobstore.ByteRange;
-
 import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoTransfer;
@@ -14,12 +13,7 @@ import com.hoccer.talk.util.IProgressListener;
 import com.hoccer.talk.util.ProgressOutputHttpEntity;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
-import org.apache.http.Header;
-import org.apache.http.HttpMessage;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
+import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.log4j.Logger;
@@ -93,11 +87,15 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     @DatabaseField
     private String fileName;
 
-    /** Plain data file */
+    /**
+     * Plain data file
+     */
     @DatabaseField(width = 2000)
     private String dataFile;
 
-    /** Plain data size */
+    /**
+     * Plain data size
+     */
     @DatabaseField
     private int dataLength;
 
@@ -110,19 +108,27 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     @DatabaseField
     private String encryptionKey;
 
-    /** Size of upload */
+    /**
+     * Size of upload
+     */
     @DatabaseField
     private int uploadLength;
 
-    /** URL for upload */
+    /**
+     * URL for upload
+     */
     @DatabaseField(width = 2000)
     private String uploadUrl;
 
-    /** URL for download */
+    /**
+     * URL for download
+     */
     @DatabaseField(width = 2000)
     private String downloadUrl;
 
-    /** Id for file transfer */
+    /**
+     * Id for file transfer
+     */
     @DatabaseField
     private String fileId;
 
@@ -161,7 +167,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     public void initializeAsAttachment(String fileName, String contentUrl, String url, String contentType, String mediaType, double aspectRatio,
-            int contentLength, String hmac) {
+                                       int contentLength, String hmac) {
         LOG.info("[new] initializing as attachment: " + url + " length " + contentLength);
         this.type = Type.ATTACHMENT;
         this.contentUrl = contentUrl;
@@ -199,7 +205,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     /**********************************************************************************************/
     /************************************** PRIVATE METHODS ***************************************/
     /**********************************************************************************************/
-    /**********************************************************************************************/
+    /**
+     * ******************************************************************************************
+     */
     private void switchState(State newState) {
         if (!state.possibleFollowUps().contains(newState)) {
             LOG.warn("State " + newState.toString() + " is no possible followup to " + state.toString());
@@ -396,7 +404,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private boolean isUploadComplete(Header checkRangeHeader) {
-        if(checkRangeHeader == null) {
+        if (checkRangeHeader == null) {
             return false;
         }
         int last = uploadLength - 1;
@@ -481,11 +489,13 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     /**********************************************************************************************/
     /***************************** IProgressListener implementation *******************************/
     /**********************************************************************************************/
-    /**********************************************************************************************/
+    /**
+     * ******************************************************************************************
+     */
     @Override
     public void onProgress(int progress) {
         this.progress = progress;
-        if(mTransferListener != null) {
+        if (mTransferListener != null) {
             mTransferListener.onProgress(this.progress);
         }
     }
@@ -494,7 +504,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     /**********************************************************************************************/
     /********************************* XoTransfer implementation **********************************/
     /**********************************************************************************************/
-    /**********************************************************************************************/
+    /**
+     * ******************************************************************************************
+     */
     @Override
     public Type getTransferType() {
         return type;
@@ -504,7 +516,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     /**********************************************************************************************/
     /******************************* IContentObject implementation ********************************/
     /**********************************************************************************************/
-    /**********************************************************************************************/
+    /**
+     * ******************************************************************************************
+     */
     @Override
     public boolean isContentAvailable() {
         // uploaded content is always available

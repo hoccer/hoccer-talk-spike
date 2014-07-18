@@ -1,9 +1,7 @@
 package com.hoccer.talk.client.model;
 
 import com.google.appengine.api.blobstore.ByteRange;
-
 import com.hoccer.talk.client.IXoTransferListener;
-import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.content.ContentDisposition;
@@ -12,14 +10,9 @@ import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.TalkAttachment;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
+import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
@@ -30,16 +23,7 @@ import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypes;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.io.SyncFailedException;
+import java.io.*;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.sql.SQLException;
@@ -48,7 +32,9 @@ import java.util.*;
 @DatabaseTable(tableName = "clientDownload")
 public class TalkClientDownload extends XoTransfer implements IXoTransferObject {
 
-    /** Maximum amount of retry attempts when downloading an attachment */
+    /**
+     * Maximum amount of retry attempts when downloading an attachment
+     */
     public static final int MAX_DOWNLOAD_RETRY = 16;
 
     private final static Logger LOG = Logger.getLogger(TalkClientDownload.class);
@@ -130,7 +116,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     @DatabaseField
     private String dataFile;
 
-    /** URL to download */
+    /**
+     * URL to download
+     */
     @DatabaseField(width = 2000)
     private String downloadUrl;
 
@@ -139,7 +127,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     /**
      * Name of the file the download itself will go to
-     *
+     * <p/>
      * This is relative to the result of computeDownloadDirectory().
      */
     @DatabaseField(width = 2000)
@@ -235,7 +223,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     /**********************************************************************************************/
     /************************************** PRIVATE METHODS ***************************************/
     /**********************************************************************************************/
-    /**********************************************************************************************/
+    /**
+     * ******************************************************************************************
+     */
     private void switchState(State newState) {
         if (!state.possibleFollowUps().contains(newState)) {
             LOG.warn("State " + newState.toString() + " is no possible followup to " + state.toString());
@@ -257,7 +247,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 break;
             case DECRYPTING:
                 doDecryptingAction();
-                case DETECTING:
+            case DETECTING:
                 doDetectingAction();
             case COMPLETE:
                 doCompleteAction();
@@ -315,7 +305,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
             int bytesStart = downloadProgress;
             int bytesToGo = contentLengthValue;
-            if(!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
+            if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
                 switchState(State.PAUSED);
                 return;
             }
@@ -331,7 +321,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             logGetDebug("will retrieve '" + bytesToGo + "' bytes");
             raf.seek(bytesStart);
 
-            if(copyData(bytesToGo, raf, fd, is)) {
+            if (copyData(bytesToGo, raf, fd, is)) {
                 switchState(State.PAUSED);
                 return;
             }
@@ -451,7 +441,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doPausedAction() {
-        if(mDownloadRequest != null) {
+        if (mDownloadRequest != null) {
             mDownloadRequest.abort();
             mDownloadRequest = null;
             LOG.debug("aborted current Download request. Download can still resume.");
@@ -647,7 +637,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
      * In case a file with the same name already exists the given file name will be expanded by an underscore and
      * a running number (foo_1.bar) to prevent the existing file from being overwritten.
      *
-     * @param file The given file name
+     * @param file      The given file name
      * @param extension The given file extension
      * @param directory The directory to check
      * @return The file name including running number and extension (foo_1.bar)
@@ -682,7 +672,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     /**********************************************************************************************/
     /********************************* XoTransfer implementation **********************************/
     /**********************************************************************************************/
-    /**********************************************************************************************/
+    /**
+     * ******************************************************************************************
+     */
     @Override
     public Type getTransferType() {
         return type;
@@ -692,7 +684,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     /**********************************************************************************************/
     /******************************* IContentObject implementation ********************************/
     /**********************************************************************************************/
-    /**********************************************************************************************/
+    /**
+     * ******************************************************************************************
+     */
     @Override
     public boolean isContentAvailable() {
         return state == State.COMPLETE;
@@ -854,7 +848,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     public void setTransferFailures(int transferFailures) {
         this.transferFailures = transferFailures;
-        if(transferFailures > 16) {
+        if (transferFailures > 16) {
             // max retries reached. stop download and reset retries
             LOG.debug("cancel Downloads. No more retries.");
             mTimer.cancel();
