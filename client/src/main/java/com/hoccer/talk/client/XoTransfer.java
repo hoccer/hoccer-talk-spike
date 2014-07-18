@@ -2,11 +2,13 @@ package com.hoccer.talk.client;
 
 import com.hoccer.talk.content.IContentObject;
 
+import java.util.List;
+
 public abstract class XoTransfer<T> implements IContentObject {
 
     public enum State{};
 
-    protected IXoTransferListener mTransferListener;
+    protected List<IXoTransferListener> mTransferListeners;
 
     public enum Direction {
         UPLOAD, DOWNLOAD
@@ -44,8 +46,16 @@ public abstract class XoTransfer<T> implements IContentObject {
         return getTransferType() == Type.ATTACHMENT;
     }
 
-    public void setTransferListener(IXoTransferListener listener) {
-        mTransferListener = listener;
+    public void registerTransferListener(IXoTransferListener listener) {
+        if (!mTransferListeners.contains(listener)) {
+            mTransferListeners.add(listener);
+        }
+    }
+
+    public void unregisterTransferListener(IXoTransferListener listener) {
+        if (mTransferListeners.contains(listener)) {
+            mTransferListeners.remove(listener);
+        }
     }
 
 }

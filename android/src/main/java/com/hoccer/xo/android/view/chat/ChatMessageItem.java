@@ -326,7 +326,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             // create handler for a pending attachment transfer
             mAttachmentTransferHandler = new AttachmentTransferHandler(mContentTransferControl, contentObject, this);
 
-            ((XoTransfer) contentObject).setTransferListener(mAttachmentTransferHandler);
+            ((XoTransfer) contentObject).registerTransferListener(mAttachmentTransferHandler);
             mContentTransferControl.setOnClickListener(new AttachmentTransferHandler(mContentTransferControl, contentObject, this));
 
         } else {

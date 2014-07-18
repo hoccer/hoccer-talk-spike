@@ -24,7 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -38,7 +40,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private XoTransferAgent mTransferAgent;
 
     @Nullable
-    private IXoTransferListener mTransferListener = null;
+    private List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
 
     public enum State implements IXoTransferState {
         NEW {
@@ -239,8 +241,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private void setState(State newState) {
         LOG.info("[upload " + clientUploadId + "] switching to state " + newState);
         state = newState;
-        if (mTransferListener != null) {
-            mTransferListener.onStateChanged(state);
+        for (IXoTransferListener listener : mTransferListeners) {
+            listener.onStateChanged(state);
         }
     }
 
@@ -495,8 +497,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     @Override
     public void onProgress(int progress) {
         this.progress = progress;
-        if (mTransferListener != null) {
-            mTransferListener.onProgress(this.progress);
+        for (IXoTransferListener listener : mTransferListeners) {
+            listener.onProgress(this.progress);
         }
     }
 

@@ -701,7 +701,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void setClientAvatar(final TalkClientUpload upload) {
         LOG.debug("new avatar as upload " + upload);
         resetIdle();
-        upload.setTransferListener(new IXoTransferListener() {
+        upload.registerTransferListener(new IXoTransferListener() {
             @Override
             public void onStateChanged(IXoTransferState state) {
                 TalkClientUpload.State uploadState = (TalkClientUpload.State) state;
@@ -771,7 +771,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void setGroupAvatar(final TalkClientContact group, final TalkClientUpload upload) {
-        upload.setTransferListener(new IXoTransferListener() {
+        upload.registerTransferListener(new IXoTransferListener() {
             @Override
             public void onStateChanged(IXoTransferState state) {
                 TalkClientUpload.State uploadState = (TalkClientUpload.State) state;
@@ -1956,54 +1956,70 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void performDeliveries(final List<TalkClientMessage> clientMessages) {
         LOG.debug("performDeliveries()");
+        LOG.debug(clientMessages.size() + " messages to deliver");
+
+        for(int i = 0; i < clientMessages.size(); i++) {
+            final TalkClientMessage clientMessage = clientMessages.get(i);
+            final TalkClientUpload upload = clientMessage.getAttachmentUpload();
+            // start the attachment upload
+            if (upload != null) {
+                mTransferAgent.startOrRestartUpload(upload);
+                upload.registerTransferListener(new IXoTransferListener() {
+                    @Override
+                    public void onStateChanged(IXoTransferState state) {
+                        if (TalkClientUpload.State.UPLOADING.equals(state)) {
+                            upload.unregisterTransferListener(this);
+                            performDelivery(clientMessage);
+                        }
+                    }
+
+                    @Override
+                    public void onProgress(int progress) {
+                        // Noop
+                    }
+                });
+            } else {
+                performDelivery(clientMessage);
+            }
+        }
+    }
+
+    private void performDelivery(TalkClientMessage clientMessage) {
+        final TalkMessage message = clientMessage.getMessage();
+        final TalkDelivery delivery = clientMessage.getOutgoingDelivery();
+        LOG.debug("preparing delivery of message " + clientMessage.getClientMessageId());
+        try {
+            encryptMessage(clientMessage, delivery, message);
+        } catch (Exception e) {
+            LOG.error("error while encrypting message " + clientMessage.getClientMessageId(), e);
+        }
+
+        TalkDelivery[] deliveries = new TalkDelivery[1];
+        deliveries[0] = clientMessage.getOutgoingDelivery();
+
+        LOG.debug(" delivering message " + clientMessage.getClientMessageId());
+
+        TalkDelivery[] resultingDeliveries = new TalkDelivery[0];
 
         try {
-            LOG.debug(clientMessages.size() + " messages to deliver");
 
-            for(int i = 0; i < clientMessages.size(); i++) {
-                final TalkClientMessage clientMessage = clientMessages.get(i);
-                final TalkMessage message = clientMessage.getMessage();
-                final TalkDelivery delivery = clientMessage.getOutgoingDelivery();
+            try {
+                clientMessage.setProgressState(true);
+                mDatabase.saveClientMessage(clientMessage);
+                resultingDeliveries = mServerRpc.outDeliveryRequest(message, deliveries);
+            } catch (Exception e) {
+                LOG.error("error while performing delivery request for message " + clientMessage.getClientMessageId(), e);
 
-                TalkClientUpload upload = clientMessage.getAttachmentUpload();
-                // start the attachment upload
-                if(upload != null) {
-                    mTransferAgent.startOrRestartUpload(upload);
-                }
-
-                LOG.debug("preparing delivery of message " + clientMessage.getClientMessageId());
-                try {
-                    encryptMessage(clientMessage, delivery, message);
-                } catch (Exception e) {
-                    LOG.error("error while encrypting message " + clientMessage.getClientMessageId(), e);
-                    continue;
-                }
-
-                TalkDelivery[] deliveries = new TalkDelivery[1];
-                deliveries[0] = clientMessage.getOutgoingDelivery();
-
-                LOG.debug(i + " delivering message " + clientMessage.getClientMessageId());
-
-                TalkDelivery[] resultingDeliveries = new TalkDelivery[0];
-
-                try {
-                    clientMessage.setProgressState(true);
-                    mDatabase.saveClientMessage(clientMessage);
-                    resultingDeliveries = mServerRpc.outDeliveryRequest(message, deliveries);
-                } catch (Exception e) {
-                    LOG.error("error while performing delivery request for message " + clientMessage.getClientMessageId(), e);
-
-                    clientMessage.setProgressState(false);
-                    mDatabase.saveClientMessage(clientMessage);
-                }
-
-                int length = resultingDeliveries.length;
-                for(int j = 0; j < length; j++) {
-                    updateOutgoingDelivery(resultingDeliveries[j]);
-                }
+                clientMessage.setProgressState(false);
+                mDatabase.saveClientMessage(clientMessage);
             }
         } catch (SQLException e) {
-            LOG.error("SQL error while performing deliveries: ", e);
+            LOG.error("SQL Error while saving delivery", e);
+        }
+
+        int length = resultingDeliveries.length;
+        for(int j = 0; j < length; j++) {
+            updateOutgoingDelivery(resultingDeliveries[j]);
         }
     }
 
