@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
@@ -49,14 +50,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     /** Maximum amount of retry attempts when downloading an attachment */
     public static final int MAX_DOWNLOAD_RETRY = 16;
-
-    /**
-     * Minimum amount of progress to justify a db update
-     *
-     * This amount of data can be lost in case of crashes.
-     * In all other cases progress will be saved.
-     */
-    private final static int PROGRESS_SAVE_MINIMUM = 1 << 16;
 
     private final static Logger LOG = Logger.getLogger(TalkClientDownload.class);
 
@@ -169,8 +162,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     @DatabaseField(width = 128)
     private String contentHmac;
-
-    private transient long progressRateLimit;
 
     private Timer mTimer;
 
@@ -290,20 +281,183 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             return;
         }
 
-        mTimer = new Timer();
-        DownloadTask downloadTask = new DownloadTask(this, mTransferAgent, downloadFilename);
-        mTimer.scheduleAtFixedRate(downloadTask, 0, 5 * 1000);
+        LOG.debug("performDownloadRequest(downloadId: '" + clientDownloadId + "', filename: '" + downloadFilename + "')");
+        HttpClient client = mTransferAgent.getHttpClient();
+        RandomAccessFile raf = null;
+        FileDescriptor fd = null;
         try {
-            synchronized (this) {
-                this.wait();
+            logGetDebug("downloading '" + downloadUrl + "'");
+            // create the GET request
+            mDownloadRequest = new HttpGet(downloadUrl);
+            // determine the requested range
+            String range = null;
+            if (contentLength != -1) {
+                long last = contentLength - 1;
+                range = "bytes=" + downloadProgress + "-" + last;
+                logGetDebug("requesting range '" + range + "'");
+                mDownloadRequest.addHeader("Range", range);
             }
-        } catch (InterruptedException e) {
-            LOG.error("Error while performing download attempt: ", e);
+            mTransferAgent.onDownloadStarted(this);
+            // start performing the request
+            HttpResponse response = client.execute(mDownloadRequest);
+            // process status line
+            StatusLine status = response.getStatusLine();
+            int sc = status.getStatusCode();
+            logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
+            if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
+                switchState(State.PAUSED);
+                return;
+            }
+
+            int contentLengthValue = getContentLengthFromResponse(response);
+            ByteRange contentRange = getContentRange(response);
+            setContentTypeByResponse(response);
+
+            int bytesStart = downloadProgress;
+            int bytesToGo = contentLengthValue;
+            if(!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
+                switchState(State.PAUSED);
+                return;
+            }
+
+            HttpEntity entity = response.getEntity();
+            InputStream is = entity.getContent();
+            File f = new File(downloadFilename);
+            logGetDebug("destination: '" + f.toString() + "'");
+            f.createNewFile();
+            raf = new RandomAccessFile(f, "rw");
+            fd = raf.getFD();
+            raf.setLength(contentLength);
+            logGetDebug("will retrieve '" + bytesToGo + "' bytes");
+            raf.seek(bytesStart);
+
+            if(copyData(bytesToGo, raf, fd, is)) {
+                switchState(State.PAUSED);
+                return;
+            }
+
+        } catch (Exception e) {
+            LOG.error("download exception", e);
+            switchState(State.FAILED);
+            return;
+        } finally {
+            if (fd != null) {
+                try {
+                    fd.sync();
+                } catch (SyncFailedException e) {
+                    LOG.warn("sync failed while handling download exception", e);
+                }
+            }
+
+            // update state
+            if (downloadProgress == contentLength) {
+                if (decryptionKey != null) {
+                    switchState(State.DECRYPTING);
+                } else {
+                    dataFile = downloadFilename;
+                    switchState(State.DETECTING);
+                }
+            } else {
+                switchState(State.PAUSED);
+            }
         }
     }
 
-    private void doPausedAction() {
+    private boolean copyData(int bytesToGo, RandomAccessFile raf, FileDescriptor fd, InputStream is) {
+        byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
+        while (bytesToGo > 0) {
+            try {
+                logGetTrace("bytesToGo: '" + bytesToGo + "'");
+                logGetTrace("downloadProgress: '" + downloadProgress + "'");
+                // determine how much to copy
+                int bytesToRead = Math.min(buffer.length, bytesToGo);
+                // perform the copy
+                int bytesRead = is.read(buffer, 0, bytesToRead);
+                logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");
+                if (bytesRead == -1) {
+                    logGetWarning("eof with '" + bytesToGo + "' bytes to go");
+                    return false;
+                }
+                raf.write(buffer, 0, bytesRead);
+                fd.sync();
+                downloadProgress += bytesRead;
+                bytesToGo -= bytesRead;
 
+                fd = null;
+                raf.close();
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isValidContentRange(ByteRange contentRange, int bytesToGo) {
+        if (contentRange != null) {
+            if (contentRange.getStart() != downloadProgress) {
+                logGetError("server returned wrong offset");
+                return false;
+            }
+            if (contentRange.hasEnd()) {
+                int rangeSize = (int) (contentRange.getEnd() - contentRange.getStart() + 1);
+                if (rangeSize != bytesToGo) {
+                    logGetError("server returned range not corresponding to content length");
+                    return false;
+                }
+            }
+            if (contentRange.hasTotal()) {
+                if (contentLength == -1) {
+                    long total = contentRange.getTotal();
+                    logGetDebug("inferred content length '" + total + "' from range");
+                    contentLength = (int) total;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void setContentTypeByResponse(HttpResponse response) {
+        Header contentTypeHeader = response.getFirstHeader("Content-Type");
+        if (contentTypeHeader != null) {
+            String contentTypeValue = contentTypeHeader.getValue();
+            if (contentType == null) {
+                logGetDebug("got content type '" + contentTypeValue + "'");
+                contentType = contentTypeValue;
+            }
+        }
+    }
+
+    private ByteRange getContentRange(HttpResponse response) {
+        Header contentRangeHeader = response.getFirstHeader("Content-Range");
+        if (contentRangeHeader != null) {
+            String contentRangeString = contentRangeHeader.getValue();
+            logGetDebug("got range '" + contentRangeString + "'");
+            return ByteRange.parseContentRange(contentRangeString);
+        }
+        return null;
+    }
+
+    private int getContentLengthFromResponse(HttpResponse response) {
+        Header contentLengthHeader = response.getFirstHeader("Content-Length");
+        int contentLengthValue = this.contentLength;
+        if (contentLengthHeader != null) {
+            String contentLengthString = contentLengthHeader.getValue();
+            contentLengthValue = Integer.valueOf(contentLengthString);
+            logGetDebug("got content length '" + contentLengthValue + "'");
+        }
+        return contentLengthValue;
+    }
+
+    private void doPausedAction() {
+        if(mDownloadRequest != null) {
+            mDownloadRequest.abort();
+            mDownloadRequest = null;
+            LOG.debug("aborted current Download request. Download can still resume.");
+        }
+        saveToDatabase();
+        mTransferAgent.onDownloadStateChanged(this);
     }
 
     private void doDecryptingAction() {
@@ -334,9 +488,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 int bytesRead = is.read(buffer, 0, bytesToCopy);
                 dos.write(buffer, 0, bytesRead);
                 bytesToGo -= bytesRead;
-//                if (!mTransferAgent.isDownloadActive(this)) {
-//                    return true;
-//                }
             }
 
             dos.flush();
@@ -498,180 +649,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         LOG.error("[downloadId: '" + clientDownloadId + "'] GET " + message);
     }
 
-    private boolean performDownloadRequest(XoTransferAgent agent, String filename) {
-        LOG.debug("performDownloadRequest(downloadId: '" + clientDownloadId + "', filename: '" + filename + "')");
-        agent.onDownloadStarted(this);
-        HttpClient client = agent.getHttpClient();
-        XoClientDatabase database = agent.getDatabase();
-        RandomAccessFile raf = null;
-        FileDescriptor fd = null;
-        try {
-            logGetDebug("downloading '" + downloadUrl + "'");
-            if(mDownloadRequest != null) {
-                LOG.info("Download already in progress");
-                return false;
-            }
-            // create the GET request
-            mDownloadRequest = new HttpGet(downloadUrl);
-            // determine the requested range
-            String range = null;
-            if (contentLength != -1) {
-                long last = contentLength - 1;
-                range = "bytes=" + downloadProgress + "-" + last;
-                logGetDebug("requesting range '" + range + "'");
-                mDownloadRequest.addHeader("Range", range);
-            }
-            // start performing the request
-            HttpResponse response = client.execute(mDownloadRequest);
-            // process status line
-            StatusLine status = response.getStatusLine();
-            int sc = status.getStatusCode();
-            logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
-            if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
-                // client error - mark as failed
-                if (sc >= 400 && sc <= 499) {
-                    switchState(State.PAUSED);
-                }
-                return false;
-            }
-            // parse content length from response
-            Header contentLengthHeader = response.getFirstHeader("Content-Length");
-            int contentLengthValue = this.contentLength;
-            if (contentLengthHeader != null) {
-                String contentLengthString = contentLengthHeader.getValue();
-                contentLengthValue = Integer.valueOf(contentLengthString);
-                logGetDebug("got content length '" + contentLengthValue + "'");
-            }
-            // parse content range from response
-            ByteRange contentRange = null;
-            Header contentRangeHeader = response.getFirstHeader("Content-Range");
-            if (contentRangeHeader != null) {
-                String contentRangeString = contentRangeHeader.getValue();
-                logGetDebug("got range '" + contentRangeString + "'");
-                contentRange = ByteRange.parseContentRange(contentRangeString);
-            }
-            // remember content type if we don't have one yet
-            Header contentTypeHeader = response.getFirstHeader("Content-Type");
-            if (contentTypeHeader != null) {
-                String contentTypeValue = contentTypeHeader.getValue();
-                if (contentType == null) {
-                    logGetDebug("got content type '" + contentTypeValue + "'");
-                    contentType = contentTypeValue;
-                }
-            }
-            // get ourselves a buffer
-            byte[] buffer = new byte[1 << 12];
-            // determine what to copy
-            int bytesStart = downloadProgress;
-            int bytesToGo = contentLengthValue;
-            if (contentRange != null) {
-                if (contentRange.getStart() != downloadProgress) {
-                    logGetError("server returned wrong offset");
-                    switchState(State.PAUSED);
-                    return false;
-                }
-                if (contentRange.hasEnd()) {
-                    int rangeSize = (int) (contentRange.getEnd() - contentRange.getStart() + 1);
-                    if (rangeSize != bytesToGo) {
-                        logGetError("server returned range not corresponding to content length");
-                        switchState(State.PAUSED);
-                        return false;
-                    }
-                }
-                if (contentRange.hasTotal()) {
-                    if (contentLength == -1) {
-                        long total = contentRange.getTotal();
-                        logGetDebug("inferred content length '" + total + "' from range");
-                        contentLength = (int) total;
-                    }
-                }
-            }
-            if (contentLength == -1) {
-                logGetError("could not determine content length");
-                switchState(State.PAUSED);
-                return false;
-            }
-            // handle content
-            HttpEntity entity = response.getEntity();
-            InputStream is = entity.getContent();
-            // create and open destination file
-            File f = new File(filename);
-            logGetDebug("destination: '" + f.toString() + "'");
-            f.createNewFile();
-            raf = new RandomAccessFile(f, "rw");
-            fd = raf.getFD();
-            // resize the file
-            raf.setLength(contentLength);
-            // log about what we are to do
-            logGetDebug("will retrieve '" + bytesToGo + "' bytes");
-            // seek to start of region
-            raf.seek(bytesStart);
-            // copy data
-            int savedProgress = downloadProgress;
-            while (bytesToGo > 0) {
-                logGetTrace("bytesToGo: '" + bytesToGo + "'");
-                logGetTrace("downloadProgress: '" + downloadProgress + "'");
-                // determine how much to copy
-                int bytesToRead = Math.min(buffer.length, bytesToGo);
-                // perform the copy
-                int bytesRead = is.read(buffer, 0, bytesToRead);
-                logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");
-                if (bytesRead == -1) {
-                    logGetWarning("eof with '" + bytesToGo + "' bytes to go");
-                    return false;
-                }
-                raf.write(buffer, 0, bytesRead);
-                //raf.getFD().sync();
-                // sync the file
-                fd.sync();
-                // update state
-                downloadProgress += bytesRead;
-                bytesToGo -= bytesRead;
-                // call listeners
-                notifyProgress(agent);
-                if (!agent.isDownloadActive(this)) {
-                    return true;
-                }
-            }
-
-            // close streams
-            fd = null;
-            raf.close();
-            is.close();
-        } catch (Exception e) {
-            LOG.error("download exception", e);
-
-            switchState(State.FAILED);
-
-            return false;
-        } finally {
-            if (fd != null) {
-                try {
-                    fd.sync();
-                } catch (SyncFailedException e) {
-                    LOG.warn("sync failed while handling download exception", e);
-                }
-            }
-            try {
-                database.saveClientDownload(this);
-            } catch (SQLException e) {
-                LOG.warn("save failed while handling download exception", e);
-            }
-
-            // update state
-            if (downloadProgress == contentLength) {
-                if (decryptionKey != null) {
-                    switchState(State.DECRYPTING);
-                } else {
-                    dataFile = filename;
-                    switchState(State.DETECTING);
-                }
-            }
-        }
-
-        return true;
-    }
-
     /**
      * Creates a unique file name by checking whether a file already exists in a given directory.
      * In case a file with the same name already exists the given file name will be expanded by an underscore and
@@ -700,10 +677,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return newFileName + extension;
     }
 
-    private void notifyProgress(XoTransferAgent agent) {
-        agent.onDownloadProgress(this);
-    }
-
     private void saveToDatabase() {
         try {
             mTransferAgent.getDatabase().saveClientDownload(this);
@@ -712,36 +685,36 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-    private class DownloadTask extends TimerTask {
-
-        private final XoTransferAgent mAgent;
-
-        private final String mFilename;
-
-        private final TalkClientDownload mDownload;
-
-        public DownloadTask(TalkClientDownload download, XoTransferAgent agent, String filename) {
-            mAgent = agent;
-            mFilename = filename;
-            mDownload = download;
-        }
-
-        @Override
-        public void run() {
-            LOG.info("[downloadId: '" + clientDownloadId + "'] download attempt " + transferFailures + "/"
-                    + MAX_DOWNLOAD_RETRY);
-            boolean success = performDownloadRequest(mAgent, mFilename);
-            if (success) {
-                LOG.info("[downloadId: '" + clientDownloadId + "'] download succeeded");
-                synchronized (mDownload) {
-                    mDownload.notify();
-                }
-                this.cancel();
-            }
-            LOG.info("[downloadId: '" + clientDownloadId + "'] download failed");
-            setTransferFailures(transferFailures + 1);
-        }
-    }
+//    private class DownloadTask extends TimerTask {
+//
+//        private final XoTransferAgent mAgent;
+//
+//        private final String mFilename;
+//
+//        private final TalkClientDownload mDownload;
+//
+//        public DownloadTask(TalkClientDownload download, XoTransferAgent agent, String filename) {
+//            mAgent = agent;
+//            mFilename = filename;
+//            mDownload = download;
+//        }
+//
+//        @Override
+//        public void run() {
+//            LOG.info("[downloadId: '" + clientDownloadId + "'] download attempt " + transferFailures + "/"
+//                    + MAX_DOWNLOAD_RETRY);
+//            boolean success = performDownloadRequest(mAgent, mFilename);
+//            if (success) {
+//                LOG.info("[downloadId: '" + clientDownloadId + "'] download succeeded");
+//                synchronized (mDownload) {
+//                    mDownload.notify();
+//                }
+//                this.cancel();
+//            }
+//            LOG.info("[downloadId: '" + clientDownloadId + "'] download failed");
+//            setTransferFailures(transferFailures + 1);
+//        }
+//    }
 
     ///////// getters and setters
 
