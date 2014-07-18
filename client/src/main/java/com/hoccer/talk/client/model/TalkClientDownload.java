@@ -530,7 +530,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
                 // client error - mark as failed
                 if (sc >= 400 && sc <= 499) {
-                    switchState(State.FAILED);
+                    switchState(State.PAUSED);
                 }
                 return false;
             }
@@ -567,14 +567,14 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             if (contentRange != null) {
                 if (contentRange.getStart() != downloadProgress) {
                     logGetError("server returned wrong offset");
-                    switchState(State.FAILED);
+                    switchState(State.PAUSED);
                     return false;
                 }
                 if (contentRange.hasEnd()) {
                     int rangeSize = (int) (contentRange.getEnd() - contentRange.getStart() + 1);
                     if (rangeSize != bytesToGo) {
                         logGetError("server returned range not corresponding to content length");
-                        switchState(State.FAILED);
+                        switchState(State.PAUSED);
                         return false;
                     }
                 }
@@ -588,7 +588,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             }
             if (contentLength == -1) {
                 logGetError("could not determine content length");
-                switchState(State.FAILED);
+                switchState(State.PAUSED);
                 return false;
             }
             // handle content
