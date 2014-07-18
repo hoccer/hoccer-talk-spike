@@ -584,13 +584,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         mTransferAgent.onDownloadFailed(this);
     }
 
-
-
-    /**********************************************************************************************/
-    /***************************************** UGLIES *********************************************/
-    /**********************************************************************************************/
-    /**********************************************************************************************/
-
     private String computeDecryptionDirectory(XoTransferAgent agent) {
         String directory = null;
         switch (this.type) {
@@ -685,46 +678,21 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-//    private class DownloadTask extends TimerTask {
-//
-//        private final XoTransferAgent mAgent;
-//
-//        private final String mFilename;
-//
-//        private final TalkClientDownload mDownload;
-//
-//        public DownloadTask(TalkClientDownload download, XoTransferAgent agent, String filename) {
-//            mAgent = agent;
-//            mFilename = filename;
-//            mDownload = download;
-//        }
-//
-//        @Override
-//        public void run() {
-//            LOG.info("[downloadId: '" + clientDownloadId + "'] download attempt " + transferFailures + "/"
-//                    + MAX_DOWNLOAD_RETRY);
-//            boolean success = performDownloadRequest(mAgent, mFilename);
-//            if (success) {
-//                LOG.info("[downloadId: '" + clientDownloadId + "'] download succeeded");
-//                synchronized (mDownload) {
-//                    mDownload.notify();
-//                }
-//                this.cancel();
-//            }
-//            LOG.info("[downloadId: '" + clientDownloadId + "'] download failed");
-//            setTransferFailures(transferFailures + 1);
-//        }
-//    }
-
-    ///////// getters and setters
-
-    /* XoTransfer implementation */
+    /**********************************************************************************************/
+    /**********************************************************************************************/
+    /********************************* XoTransfer implementation **********************************/
+    /**********************************************************************************************/
+    /**********************************************************************************************/
     @Override
     public Type getTransferType() {
         return type;
     }
 
-    /* IContentObject implementation */
+    /**********************************************************************************************/
+    /**********************************************************************************************/
+    /******************************* IContentObject implementation ********************************/
+    /**********************************************************************************************/
+    /**********************************************************************************************/
     @Override
     public boolean isContentAvailable() {
         return state == State.COMPLETE;
@@ -736,18 +704,18 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             case INITIALIZING:
             case NEW:
                 return ContentState.DOWNLOAD_NEW;
-            case COMPLETE:
-                return ContentState.DOWNLOAD_COMPLETE;
-            case FAILED:
-                return ContentState.DOWNLOAD_FAILED;
             case DOWNLOADING:
                 return ContentState.DOWNLOAD_DOWNLOADING;
+            case PAUSED:
+                return ContentState.DOWNLOAD_PAUSED;
             case DECRYPTING:
                 return ContentState.DOWNLOAD_DECRYPTING;
             case DETECTING:
                 return ContentState.DOWNLOAD_DETECTING;
-            case PAUSED:
-                return ContentState.DOWNLOAD_PAUSED;
+            case FAILED:
+                return ContentState.DOWNLOAD_FAILED;
+            case COMPLETE:
+                return ContentState.DOWNLOAD_COMPLETE;
             default:
                 throw new RuntimeException("Unknown download state '" + state + "'");
         }
