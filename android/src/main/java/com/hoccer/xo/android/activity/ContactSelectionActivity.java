@@ -157,8 +157,8 @@ public class ContactSelectionActivity extends XoActionbarActivity implements Con
     }
 
     private void createFragments() {
-        mClientContactSelectionFragment = createContactSelectionFragment(CLIENT_CONTACT_MODE);
-        mGroupContactSelectionFragment = createContactSelectionFragment(GROUP_CONTACT_MODE);
+        mClientContactSelectionFragment = ContactSelectionFragment.create(CLIENT_CONTACT_MODE);
+        mGroupContactSelectionFragment = ContactSelectionFragment.create(GROUP_CONTACT_MODE);
     }
 
     private void setupViewPager() {
@@ -182,14 +182,6 @@ public class ContactSelectionActivity extends XoActionbarActivity implements Con
         resultIntent.putIntegerArrayListExtra(SELECTED_CONTACT_IDS_EXTRA, collectSelectedContactIds());
         setResult(RESULT_OK, resultIntent);
         finish();
-    }
-
-    private ContactSelectionFragment createContactSelectionFragment(int mode) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(ContactSelectionFragment.ARG_CLIENT_OR_GROUP_MODE, mode);
-        ContactSelectionFragment fragment = new ContactSelectionFragment();
-        fragment.setArguments(bundle);
-        return fragment;
     }
 
     private ArrayList<Integer> collectSelectedContactIds() {
