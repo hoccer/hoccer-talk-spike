@@ -337,18 +337,19 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             LOG.debug("aborted current Upload request. Upload can still resume.");
         }
         saveToDatabase();
+        mTransferAgent.onUploadStateChanged(this);
     }
 
     private void doCompleteAction() {
         deleteTemporaryFile();
-        mTransferAgent.onUploadFinished(this);
         saveToDatabase();
+        mTransferAgent.onUploadFinished(this);
     }
 
     private void doFailedAction() {
         deleteTemporaryFile();
-        mTransferAgent.onUploadFailed(this);
         saveToDatabase();
+        mTransferAgent.onUploadFailed(this);
     }
 
     private boolean performCheckRequest() throws IOException {
