@@ -47,6 +47,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class XoClient implements JsonRpcConnection.Listener, IXoTransferListenerOld {
 
@@ -701,23 +704,30 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void setClientAvatar(final TalkClientUpload upload) {
         LOG.debug("new avatar as upload " + upload);
         resetIdle();
+        upload.setTransferListener(new IXoTransferListener() {
+            @Override
+            public void onStateChanged(TalkClientUpload.State state) {
+                if (state == TalkClientUpload.State.UPLOADING) {
+                    sendPresenceUpdateWithNewAvatar(upload);
+                }
+            }
+
+            @Override
+            public void onProgress(int progress) {
+                // ignore this
+            }
+        });
+        mTransferAgent.requestUpload(upload);
+    }
+
+    private void sendPresenceUpdateWithNewAvatar(final TalkClientUpload upload) {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                LOG.debug("registering client avatar");
-                if(!upload.performRegistration(mTransferAgent, false)) {
-                    LOG.error("avatar upload registration failed");
-                    return;
-                }
-                String downloadUrl = upload.getDownloadUrl();
-                if(downloadUrl == null) {
-                    LOG.error("registered avatar upload without download url");
-                    return;
-                }
-                mTransferAgent.requestUpload(upload);
                 try {
+                    String downloadUrl = upload.getDownloadUrl();
                     TalkPresence presence = mSelfContact.getClientPresence();
-                    if(presence != null) {
+                    if (presence != null) {
                         presence.setAvatarUrl(downloadUrl);
                     }
                     mSelfContact.setAvatarUpload(upload);
@@ -732,7 +742,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 } catch (Exception e) {
                     LOG.error("setClientAvatar", e);
                 }
-
             }
         });
     }
