@@ -7,7 +7,6 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import org.apache.http.client.HttpClient;
 import org.apache.log4j.Logger;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;

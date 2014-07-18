@@ -6,7 +6,7 @@ import java.util.List;
 
 public abstract class XoTransfer<T> implements IContentObject {
 
-    public enum State{};
+    public enum State {}
 
     protected List<IXoTransferListener> mTransferListeners;
 
