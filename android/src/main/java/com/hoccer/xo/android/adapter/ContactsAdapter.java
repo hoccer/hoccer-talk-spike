@@ -419,15 +419,6 @@ public abstract class ContactsAdapter extends XoAdapter
         return ids;
     }
 
-    public String[] getMembersRoles() {
-        String[] ids = new String[mClientContacts.size()];
-        int i = 0;
-        for (TalkClientContact c: mClientContacts) {
-            ids[i++] = TalkGroupMember.ROLE_MEMBER;
-        }
-        return ids;
-    }
-
     public interface Filter {
         public boolean shouldShow(TalkClientContact contact);
     }

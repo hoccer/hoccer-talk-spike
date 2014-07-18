@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,8 +14,10 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
@@ -26,6 +29,9 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Fragment for display and editing of group profiles.
@@ -35,6 +41,8 @@ public class GroupProfileFragment extends XoFragment
         AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
+    private boolean BACK_PRESSED = false;
+
 
     public enum Mode {
         PROFILE,
@@ -51,13 +59,16 @@ public class GroupProfileFragment extends XoFragment
     private LinearLayout mGroupMembersContainer;
     private TextView mGroupMembersTitle;
     private ListView mGroupMembersList;
-
     private ContactsAdapter mGroupMemberAdapter;
+
     private TalkClientContact mGroup;
     private IContentObject mAvatarToSet;
     private ImageView mAvatarImage;
 
     private Menu mOptionsMenu;
+
+    private ArrayList<TalkClientContact> mClientsFromNearby = new ArrayList<TalkClientContact>();
+    private ArrayList<TalkClientContact> mClientsFromNearbyToInvite = new ArrayList<TalkClientContact>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,10 +82,14 @@ public class GroupProfileFragment extends XoFragment
         LOG.debug("onCreateView()");
 
         View v = inflater.inflate(R.layout.fragment_group_profile, container, false);
+        v.setFocusableInTouchMode(true);
+        v.setOnKeyListener(new onBackPressListener());
 
         mAvatarImage = (ImageView) v.findViewById(R.id.profile_group_profile_image);
         mGroupNameText = (TextView) v.findViewById(R.id.profile_group_name);
         mGroupNameEdit = (EditText) v.findViewById(R.id.profile_group_name_edit);
+        mGroupNameEdit.setFocusableInTouchMode(true);
+        mGroupNameEdit.setOnKeyListener(new onBackPressListener());
         mGroupNameEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
@@ -118,6 +133,17 @@ public class GroupProfileFragment extends XoFragment
         return v;
     }
 
+    class onBackPressListener implements View.OnKeyListener {
+
+        @Override
+        public boolean onKey(View view, int i, KeyEvent keyEvent) {
+            if (i == KeyEvent.KEYCODE_BACK && mMode == Mode.EDIT_GROUP) {
+                BACK_PRESSED = true;
+            }
+            return false;
+        }
+    }
+
     @Override
     public void onResume() {
         LOG.debug("onResume()");
@@ -134,6 +160,13 @@ public class GroupProfileFragment extends XoFragment
                     @Override
                     public boolean shouldShow(TalkClientContact contact) {
                         return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup) && !contact.isSelf();
+                    }
+                });
+            } else if (!mClientsFromNearby.isEmpty()){
+                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
+                    @Override
+                    public boolean shouldShow(TalkClientContact contact) {
+                        return mClientsFromNearbyToInvite.contains(contact);
                     }
                 });
             } else {
@@ -280,21 +313,6 @@ public class GroupProfileFragment extends XoFragment
         }
     }
 
-    private void makeNearbyPermanent() {
-        String newGroupName = mGroupNameEdit.getText().toString();
-
-        TalkClientContact groupContact = TalkClientContact.createGroupContact();
-        TalkGroup groupPresence = new TalkGroup();
-        groupPresence.setGroupTag(groupContact.getGroupTag());
-        groupContact.updateGroupPresence(groupPresence);
-
-        if (groupContact != null && !groupContact.isGroupRegistered()) {
-            groupContact.getGroupPresence().setGroupName(newGroupName + " permanent");
-            getXoClient().createGroupWithContacts(groupContact, mGroupMemberAdapter.getMembersIds(), mGroupMemberAdapter.getMembersRoles());
-//            mMode = Mode.EDIT_GROUP;
-        }
-    }
-
     public void saveEditedGroup() {
         String newGroupName = mGroupNameEdit.getText().toString();
         if (newGroupName.isEmpty()) {
@@ -303,6 +321,12 @@ public class GroupProfileFragment extends XoFragment
         mGroupNameText.setText(newGroupName);
 
         getXoClient().setGroupName(mGroup, newGroupName);
+    }
+
+    private void makeNearbyPermanent() {
+        Intent intent = new Intent(getActivity(), GroupProfileActivity.class);
+        intent.putExtra(GroupProfileActivity.EXTRA_MAKE_FROM_NEARBY, mGroupMemberAdapter.getMembersIds());
+        getActivity().startActivity(intent);
     }
 
     private void updateAvatar(TalkClientContact contact) {
@@ -339,7 +363,7 @@ public class GroupProfileFragment extends XoFragment
         updateAvatar(contact);
 
         mGroupMembersTitle.setVisibility(contact.isGroupRegistered() ? View.VISIBLE : View.GONE);
-        mGroupMembersList.setVisibility(contact.isGroupRegistered() ? View.VISIBLE : View.GONE);
+        mGroupMembersList.setVisibility(contact.isGroupRegistered() || !mClientsFromNearby.isEmpty() ? View.VISIBLE : View.GONE);
 
         String name = null;
 
@@ -442,10 +466,41 @@ public class GroupProfileFragment extends XoFragment
         update(mGroup);
     }
 
+    public void createGroupFromNearby(String[] clientIds) {
+        mMode = Mode.EDIT_GROUP;
+        List<String> ids = Arrays.asList(clientIds);
+        try {
+            List<TalkClientContact> allContacts = getXoDatabase().findAllClientContacts();
+            for (TalkClientContact c: allContacts) {
+                if (c.isClient() && ids.contains(c.getClientId())) {
+                    mClientsFromNearby.add(c);
+                }
+            }
+            mClientsFromNearbyToInvite.addAll(mClientsFromNearby);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        LOG.debug("createGroupFromNearby()");
+
+        mGroup = TalkClientContact.createGroupContact();
+        TalkGroup groupPresence = new TalkGroup();
+        groupPresence.setGroupTag(mGroup.getGroupTag());
+        mGroup.updateGroupPresence(groupPresence);
+        update(mGroup);
+        getActivity().startActionMode(this);
+    }
+
+    public void updateContactLis(ArrayList<TalkClientContact> mContactsToInvite) {
+        mClientsFromNearbyToInvite.clear();
+        mClientsFromNearbyToInvite.addAll(mContactsToInvite);
+        mGroupMemberAdapter.requestReload();
+    }
+
     private void manageGroupMembers() {
         LOG.debug("manageGroupMembers()");
-        new GroupManageDialog(mGroup)
-                .show(getXoActivity().getFragmentManager(), "GroupManageDialog");
+        GroupManageDialog dialog = new GroupManageDialog(mGroup, mClientsFromNearby, mClientsFromNearbyToInvite);
+        dialog.setTargetFragment(this, 0);
+        dialog.show(getXoActivity().getSupportFragmentManager(), "GroupManageDialog");
     }
 
     private void joinGroup() {
@@ -618,11 +673,25 @@ public class GroupProfileFragment extends XoFragment
 
     @Override
     public void onDestroyActionMode(ActionMode actionMode) {
-        mAvatarImage.setOnClickListener(null);
-        String newGroupName = mGroupNameEdit.getText().toString();
-        if (!newGroupName.isEmpty()) {
-            saveEditedGroup();
+        if (!BACK_PRESSED) {
+            if (!mClientsFromNearbyToInvite.isEmpty()) {
+                String newGroupName = mGroupNameEdit.getText().toString();
+                if (mGroup != null && !mGroup.isGroupRegistered()) {
+                    if (newGroupName.isEmpty()) {
+                        newGroupName = "Permanent nearby";
+                    }
+                    mGroup.getGroupPresence().setGroupName(newGroupName);
+                    getXoClient().createGroupWithContacts(mGroup, getMembersIds(), getMembersRoles());
+                }
+            } else {
+                String newGroupName = mGroupNameEdit.getText().toString();
+                if (!newGroupName.isEmpty()) {
+                    saveEditedGroup();
+                }
+            }
         }
+        BACK_PRESSED = false;
+        mAvatarImage.setOnClickListener(null);
         mMode = Mode.PROFILE;
         update(mGroup);
 
@@ -633,6 +702,24 @@ public class GroupProfileFragment extends XoFragment
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         TalkClientContact contact = (TalkClientContact) adapterView.getItemAtPosition(i);
         getXoActivity().showContactConversation(contact);
+    }
+
+    private String[] getMembersIds() {
+        String[] ids = new String[mClientsFromNearbyToInvite.size()];
+        int i = 0;
+        for (TalkClientContact c: mClientsFromNearbyToInvite) {
+            ids[i++] = c.getClientId();
+        }
+        return ids;
+    }
+
+    private String[] getMembersRoles() {
+        String[] ids = new String[mClientsFromNearbyToInvite.size()];
+        int i = 0;
+        for (TalkClientContact c: mClientsFromNearbyToInvite) {
+            ids[i++] = TalkGroupMember.ROLE_MEMBER;
+        }
+        return ids;
     }
 
 }
