@@ -10,6 +10,7 @@ import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.rpc.ITalkRpcServer;
+import com.hoccer.talk.util.IProgressListener;
 import com.hoccer.talk.util.ProgressOutputHttpEntity;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -32,15 +33,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 @DatabaseTable(tableName = "clientUpload")
-public class TalkClientUpload extends XoTransfer implements IXoTransferObject {
-
-    /**
-     * Minimum amount of progress to justify a db update
-     *
-     * Can be large since this only concerns display.
-     * For real uploads the check request will fix the progress.
-     */
-    private final static int PROGRESS_SAVE_MINIMUM = 1 << 16;
+public class TalkClientUpload extends XoTransfer implements IXoTransferObject, IProgressListener {
 
     private final static Logger LOG = Logger.getLogger(TalkClientUpload.class);
 
@@ -210,7 +203,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject {
             return;
         }
         setState(newState);
-        switch (newState) {
+        switch (state) {
             case NEW:
                 switchState(State.REGISTERING);
                 break;
@@ -299,7 +292,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject {
             }
 
             is.skip(this.progress);
-            mUploadRequest.setEntity(new ProgressOutputHttpEntity(is, bytesToGo, mTransferListener));
+            mUploadRequest.setEntity(new ProgressOutputHttpEntity(is, bytesToGo, this));
             LOG.trace("PUT-upload '" + uploadUrl + "' commencing");
             logRequestHeaders(mUploadRequest, "PUT-upload response header ");
             mTransferAgent.onUploadStarted(this);
@@ -343,16 +336,19 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject {
             mUploadRequest = null;
             LOG.debug("aborted current Upload request. Upload can still resume.");
         }
+        saveToDatabase();
     }
 
     private void doCompleteAction() {
         deleteTemporaryFile();
         mTransferAgent.onUploadFinished(this);
+        saveToDatabase();
     }
 
     private void doFailedAction() {
         deleteTemporaryFile();
         mTransferAgent.onUploadFailed(this);
+        saveToDatabase();
     }
 
     private boolean performCheckRequest() throws IOException {
@@ -457,7 +453,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject {
             File file = new File(path);
             file.delete();
         }
-        saveToDatabase();
     }
 
     private HttpClient createHttpClientAndSetHeaders() {
@@ -473,6 +468,20 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject {
             mUploadRequest.addHeader("Content-Range", uploadRange);
         }
         return client;
+    }
+
+
+    /**********************************************************************************************/
+    /**********************************************************************************************/
+    /***************************** IProgressListener implementation *******************************/
+    /**********************************************************************************************/
+    /**********************************************************************************************/
+    @Override
+    public void onProgress(int progress) {
+        this.progress = progress;
+        if(mTransferListener != null) {
+            mTransferListener.onProgress(this.progress);
+        }
     }
 
     /**********************************************************************************************/

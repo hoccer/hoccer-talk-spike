@@ -4,7 +4,7 @@ import com.hoccer.talk.content.IContentObject;
 
 public abstract class XoTransfer implements IContentObject {
 
-    protected IXoTransferListener mProgressListener;
+    protected IXoTransferListener mTransferListener;
 
     public enum Direction {
         UPLOAD, DOWNLOAD
@@ -45,7 +45,7 @@ public abstract class XoTransfer implements IContentObject {
     }
 
     public void setTransferListener(IXoTransferListener listener) {
-        mProgressListener = listener;
+        mTransferListener = listener;
     }
 
 }
