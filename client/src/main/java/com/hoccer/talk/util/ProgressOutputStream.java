@@ -9,11 +9,11 @@ public class ProgressOutputStream extends OutputStream {
 
     private static final Logger LOG = Logger.getLogger(ProgressOutputStream.class);
 
-    int mProgress;
+    private int mProgress;
 
-    OutputStream mWrapped;
+    private final OutputStream mWrapped;
 
-    IProgressListener mListener;
+    private final IProgressListener mListener;
 
     public ProgressOutputStream(OutputStream wrapped, IProgressListener listener) {
         mWrapped = wrapped;

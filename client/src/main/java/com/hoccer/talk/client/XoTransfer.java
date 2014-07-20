@@ -2,8 +2,6 @@ package com.hoccer.talk.client;
 
 import com.hoccer.talk.content.IContentObject;
 
-import java.util.List;
-
 public abstract class XoTransfer<T> implements IContentObject {
 
     public enum State {}
@@ -16,7 +14,7 @@ public abstract class XoTransfer<T> implements IContentObject {
         AVATAR, ATTACHMENT
     }
 
-    private Direction mDirection;
+    private final Direction mDirection;
 
     protected XoTransfer(Direction direction) {
         mDirection = direction;

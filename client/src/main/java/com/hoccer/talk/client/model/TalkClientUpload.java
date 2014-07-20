@@ -28,7 +28,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-
 @DatabaseTable(tableName = "clientUpload")
 public class TalkClientUpload extends XoTransfer implements IXoTransferObject, IProgressListener {
 

@@ -1958,7 +1958,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.debug("performDeliveries()");
         LOG.debug(clientMessages.size() + " messages to deliver");
 
-        for(int i = 0; i < clientMessages.size(); i++) {
+        for (int i = 0; i < clientMessages.size(); i++) {
             final TalkClientMessage clientMessage = clientMessages.get(i);
             final TalkClientUpload upload = clientMessage.getAttachmentUpload();
             if (upload != null) {

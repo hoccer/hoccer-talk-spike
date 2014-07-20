@@ -16,20 +16,18 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
     private static final Logger LOG = Logger.getLogger(XoTransferAgent.class);
 
-    private static final long TASK_TIMEOUT = 30;
-
-    private XoClient mClient;
-    private XoClientDatabase mDatabase;
+    private final XoClient mClient;
+    private final XoClientDatabase mDatabase;
 
     private final ScheduledExecutorService mUploadExecutor;
     private final ScheduledExecutorService mDownloadExecutor;
 
-    List<IXoTransferListenerOld> mListeners;
+    private final List<IXoTransferListenerOld> mListeners;
 
-    HttpClient mHttpClient;
+    private HttpClient mHttpClient;
 
-    Map<Integer, TalkClientDownload> mDownloadsById;
-    Map<Integer, TalkClientUpload> mUploadsById;
+    private final Map<Integer, TalkClientDownload> mDownloadsById;
+    private final Map<Integer, TalkClientUpload> mUploadsById;
 
     public XoTransferAgent(XoClient client) {
         mClient = client;

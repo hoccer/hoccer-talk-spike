@@ -32,18 +32,13 @@ import java.util.*;
 @DatabaseTable(tableName = "clientDownload")
 public class TalkClientDownload extends XoTransfer implements IXoTransferObject {
 
-    /**
-     * Maximum amount of retry attempts when downloading an attachment
-     */
-    public static final int MAX_DOWNLOAD_RETRY = 16;
-
     private final static Logger LOG = Logger.getLogger(TalkClientDownload.class);
 
     private static final Detector MIME_DETECTOR = new DefaultDetector(MimeTypes.getDefaultMimeTypes());
 
     private XoTransferAgent mTransferAgent;
 
-    protected List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
+    private List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
 
     public enum State implements IXoTransferState {
         INITIALIZING {
@@ -229,7 +224,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
      */
     private void switchState(State newState) {
         if (!state.possibleFollowUps().contains(newState)) {
-            LOG.warn("State " + newState.toString() + " is no possible followup to " + state.toString());
+            LOG.warn("State " + newState + " is no possible followup to " + state);
             return;
         }
         setState(newState);
@@ -301,6 +296,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             int sc = status.getStatusCode();
             logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
+                LOG.debug("switching to state PAUSED - reason: http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" + HttpStatus.SC_PARTIAL_CONTENT + ")");
                 switchState(State.PAUSED);
                 return;
             }
@@ -312,6 +308,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             int bytesStart = downloadProgress;
             int bytesToGo = contentLengthValue;
             if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
+                LOG.debug("switching to state PAUSED - reason: invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 switchState(State.PAUSED);
                 return;
             }
@@ -319,7 +316,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             HttpEntity entity = response.getEntity();
             InputStream inputStream = entity.getContent();
             File file = new File(downloadFilename);
-            logGetDebug("destination: '" + file.toString() + "'");
+            logGetDebug("destination: '" + file + "'");
             file.createNewFile();
             randomAccessFile = new RandomAccessFile(file, "rw");
             fileDescriptor = randomAccessFile.getFD();
@@ -329,15 +326,14 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
                 fileDescriptor.sync();
+                LOG.debug("switching to state PAUSED - reason: copyData returned 'false'");
                 switchState(State.PAUSED);
-                return;
             }
-
         } catch (Exception e) {
-            LOG.error("download exception", e);
+            LOG.error("download exception -> switching to state FAILED", e);
             switchState(State.FAILED);
-            return;
         } finally {
+            LOG.debug("doDownloadingAction - ensuring file handles are closed...");
             if (fileDescriptor != null) {
                 try {
                     fileDescriptor.sync();
@@ -527,7 +523,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             BufferedInputStream bufferedInputStream = new BufferedInputStream(tis);
 
             Metadata metadata = new Metadata();
-            if (contentType != null && !contentType.equals("application/octet-stream")) {
+            if (contentType != null && !"application/octet-stream".equals(contentType)) {
                 metadata.add(Metadata.CONTENT_TYPE, contentType);
             }
             if (decryptedFile != null) {

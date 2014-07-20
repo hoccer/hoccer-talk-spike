@@ -3,7 +3,6 @@ package com.hoccer.xo.android.view.chat.attachments;
 
 import android.content.res.Resources;
 import android.view.View;
-
 import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.client.model.IXoTransferState;
@@ -32,11 +31,11 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
         CANCEL_UPLOAD,
     }
 
-    private AttachmentTransferListener mListener;
-    private AttachmentTransferControlView mTransferControl;
+    private final AttachmentTransferListener mListener;
+    private final AttachmentTransferControlView mTransferControl;
     private TransferAction mTransferAction = TransferAction.NONE;
 
-    private IContentObject mContent;
+    private final IContentObject mContent;
 
     public AttachmentTransferHandler(AttachmentTransferControlView transferProgress, IContentObject content, AttachmentTransferListener listener) {
         mListener = listener;
