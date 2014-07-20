@@ -37,7 +37,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private XoTransferAgent mTransferAgent;
 
-    protected List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
+    private List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
 
     public enum State implements IXoTransferState {
         NEW {

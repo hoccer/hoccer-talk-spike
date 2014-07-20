@@ -507,7 +507,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doDetectingAction() {
-
         String destinationFilePath;
         if (this.decryptedFile != null) {
             destinationFilePath = computeDecryptionFile(mTransferAgent);
