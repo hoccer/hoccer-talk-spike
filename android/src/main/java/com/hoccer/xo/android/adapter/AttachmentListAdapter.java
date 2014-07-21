@@ -12,6 +12,7 @@ import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.service.MediaPlayerService;
@@ -23,8 +24,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AttachmentListAdapter extends BaseAdapter implements IXoTransferListener, IXoDownloadListener, DragSortListView.DragSortListener {
+public class AttachmentListAdapter extends BaseAdapter implements IXoTransferListener, IXoDownloadListener, DragSortListView.DropListener {
 
+    private static final long INVALID_ID = -1;
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
     private final Activity mActivity;
@@ -36,6 +38,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     private SparseBooleanArray mSelections;
 
     private TalkClientMediaCollection mCollection = null;
+    private boolean mShallDragHandlesShow = false;
 
     public AttachmentListAdapter(Activity activity) {
         this(activity, null, MediaPlayerService.UNDEFINED_CONTACT_ID);
@@ -89,7 +92,19 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        long itemId = INVALID_ID;
+
+        if (position >= 0 || position < mAttachmentItems.size()) {
+            IContentObject contentObject = getItem(position).getContentObject();
+
+            if (contentObject instanceof TalkClientDownload) {
+                itemId = ((TalkClientDownload) contentObject).getClientDownloadId();
+            } else if (contentObject instanceof TalkClientUpload) {
+                itemId = ((TalkClientUpload) contentObject).getClientUploadId();
+            }
+        }
+        
+        return itemId;
     }
 
     @Override
@@ -113,7 +128,15 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         if (mSelections != null) {
             audioRowView.getChildAt(0).setSelected(mSelections.get(position));
         }
+
+        audioRowView.showDragHandle(mShallDragHandlesShow);
+
         return audioRowView;
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
     }
 
     public void setContentMediaTypeFilter(String pContentMediaType) {
@@ -222,16 +245,17 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     @Override
-    public void drag(int from, int to) {
-
-    }
-
-    @Override
     public void drop(int from, int to) {
+        AudioAttachmentItem item = mAttachmentItems.get(from);
+        mAttachmentItems.remove(from);
+        mAttachmentItems.set(to, item);
+        if (mCollection != null) {
+            mCollection.reorderItemIndex(from, to);
+        }
 
+        // TODO: update mSelections
     }
 
-    @Override
     public void remove(int which) {
 
         if (isItemPartOfCollection(getItem(which))) {
@@ -312,6 +336,10 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
             downloads.add(collection.getItem(i));
         }
         createAttachmentsFromTalkClientDownloads(downloads);
+    }
+
+    public void showDragHandles(boolean shallShow) {
+        mShallDragHandlesShow = shallShow;
     }
 
     private void createAttachmentsFromTalkClientDownloads(Iterable<TalkClientDownload> downloads) {

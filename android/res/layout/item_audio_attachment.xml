@@ -59,18 +59,18 @@
             android:layout_alignParentRight="true"
             android:background="@null"
             android:src="@drawable/ic_playing"
-            android:visibility="visible"
+            android:visibility="gone"
             android:layout_marginLeft="@dimen/media_player_layout_margin"/>
 
     <ImageButton
             android:id="@+id/ib_list_drag_handle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="60dp"
             android:src="@drawable/ic_list_draghandle"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:layout_marginLeft="@dimen/media_player_layout_margin"
             android:background="@null"
-            android:visibility="visible"/>
+            android:visibility="gone"/>
 
 </RelativeLayout>

@@ -33,6 +33,9 @@ import com.hoccer.xo.android.content.audio.MediaPlaylist;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
+import com.mobeta.android.dslv.DragSortController;
+import com.mobeta.android.dslv.DragSortListView;
+import com.mobeta.android.dslv.SimpleFloatViewManager;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -53,6 +56,7 @@ public class AudioAttachmentListFragment extends ListFragment {
     public static final int SELECT_COLLECTION_REQUEST = 1;
     public static final int SELECT_CONTACT_REQUEST = 2;
     private SparseBooleanArray mSelectedItems;
+    private DragSortController mDragSortController;
 
 
     private enum DisplayMode {ALL_ATTACHMENTS, COLLECTION_ATTACHMENTS, AUDIO_ATTACHMENTS;}
@@ -76,6 +80,7 @@ public class AudioAttachmentListFragment extends ListFragment {
     private boolean mInSearchMode = false;
     private boolean mRemoveFromCollection = false;
     private XoClientDatabase mDatabase;
+    private DragSortListView mListView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -106,9 +111,13 @@ public class AudioAttachmentListFragment extends ListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
+        mListView = (DragSortListView) inflater.inflate(R.layout.fragment_audio_attachment_list, container, false);
 
-        return inflater.inflate(R.layout.fragment_audio_attachment_list, container, false);
+        initDragSortController();
+        mListView.setOnTouchListener(mDragSortController);
+        mListView.setFloatViewManager(mDragSortController);
+
+        return mListView;
     }
 
     @Override
@@ -166,9 +175,9 @@ public class AudioAttachmentListFragment extends ListFragment {
 
         if (mSearchMenuItem != null && mSearchMenuItem.isActionViewExpanded()) {
             toggleSearchMode(true);
-            setListAdapter(mResultsAdapter);
+            mListView.setAdapter(mResultsAdapter);
         } else {
-            setListAdapter(mAttachmentListAdapter);
+            mListView.setAdapter(mAttachmentListAdapter);
         }
 
         switch (mDisplayMode) {
@@ -611,6 +620,13 @@ public class AudioAttachmentListFragment extends ListFragment {
         return downloads;
     }
 
+    private void initDragSortController() {
+        mDragSortController = new DragSortController(mListView);
+        mDragSortController.setDragHandleId(R.id.ib_list_drag_handle);
+        mDragSortController.setRemoveEnabled(false);
+        mDragSortController.setDragInitMode(DragSortController.ON_LONG_PRESS);
+    }
+
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
 
         @Override
@@ -656,6 +672,16 @@ public class AudioAttachmentListFragment extends ListFragment {
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.context_menu_fragment_messaging, menu);
+
+            if (mDisplayMode == DisplayMode.COLLECTION_ATTACHMENTS) {
+                mListView.setDragEnabled(true);
+                mListView.setDropListener(mAttachmentListAdapter);
+                mDragSortController.setSortEnabled(true);
+
+                mAttachmentListAdapter.showDragHandles(true);
+                mAttachmentListAdapter.notifyDataSetChanged();
+            }
+
             return true;
         }
 
@@ -693,6 +719,14 @@ public class AudioAttachmentListFragment extends ListFragment {
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+            if (mDisplayMode == DisplayMode.COLLECTION_ATTACHMENTS) {
+                mListView.setDragEnabled(false);
+                mListView.setDropListener(null);
+                mDragSortController.setSortEnabled(false);
+
+                mAttachmentListAdapter.showDragHandles(false);
+                mAttachmentListAdapter.notifyDataSetChanged();
+            }
         }
 
         private void setMediaList() {

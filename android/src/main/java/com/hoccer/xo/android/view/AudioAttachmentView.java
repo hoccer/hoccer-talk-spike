@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,6 +27,8 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     private TextView mTitleTextView;
     private TextView mArtistTextView;
     private ImageView mArtworkImageView;
+    private View mPlayStatusView;
+    private ImageButton mDragHandleView;
 
     private static final Logger LOG = Logger.getLogger(AudioAttachmentView.class);
 
@@ -38,6 +41,8 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
         mTitleTextView = ((TextView) findViewById(R.id.tv_title_name));
         mArtistTextView = ((TextView) findViewById(R.id.tv_artist_name));
         mArtworkImageView = ((ImageView) findViewById(R.id.iv_artcover));
+        mPlayStatusView = findViewById(R.id.iv_playing_status);
+        mDragHandleView = (ImageButton) findViewById(R.id.ib_list_drag_handle);
     }
 
     public void setMediaItem(AudioAttachmentItem audioAttachmentItem) {
@@ -58,11 +63,10 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     }
 
     public void updatePlayPauseView() {
-        View view = findViewById(R.id.iv_playing_status);
-        if (isActive()) {
-            view.setVisibility(View.VISIBLE);
+        if (isActive() && !mDragHandleView.isShown()) {
+            mPlayStatusView.setVisibility(View.VISIBLE);
         } else {
-            view.setVisibility(View.GONE);
+            mPlayStatusView.setVisibility(View.GONE);
         }
     }
 
@@ -95,6 +99,22 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
+    }
+
+    public void showDragHandle(boolean shallShow) {
+        if (shallShow) {
+            if (mPlayStatusView.isShown()) {
+                mPlayStatusView.setVisibility(GONE);
+            }
+
+            mDragHandleView.setVisibility(VISIBLE);
+        } else {
+            mDragHandleView.setVisibility(GONE);
+
+            if (isActive()) {
+                mPlayStatusView.setVisibility(VISIBLE);
+            }
+        }
     }
 
     private void updateAudioView() {
