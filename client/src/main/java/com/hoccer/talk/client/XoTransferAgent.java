@@ -11,6 +11,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class XoTransferAgent implements IXoTransferListenerOld {
 
@@ -29,6 +31,8 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     private final Map<Integer, TalkClientDownload> mDownloadsById;
     private final Map<Integer, TalkClientUpload> mUploadsById;
 
+    private final Map<Integer, ScheduledFuture> mDownloadRetryQueue;
+
     public XoTransferAgent(XoClient client) {
         mClient = client;
         mDatabase = mClient.getDatabase();
@@ -39,6 +43,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         mListeners = new ArrayList<IXoTransferListenerOld>();
         mDownloadsById = new ConcurrentHashMap<Integer, TalkClientDownload>();
         mUploadsById = new ConcurrentHashMap<Integer, TalkClientUpload>();
+        mDownloadRetryQueue = new ConcurrentHashMap<Integer, ScheduledFuture>();
         initializeHttpClient();
     }
 
@@ -93,6 +98,10 @@ public class XoTransferAgent implements IXoTransferListenerOld {
             if(!mDownloadsById.containsKey(downloadId)) {
                 LOG.info("requesting download " + downloadId);
                 mDownloadsById.put(downloadId, download);
+                ScheduledFuture future = mDownloadRetryQueue.remove(downloadId);
+                if(future != null) {
+                    future.cancel(true);
+                }
                 mDownloadExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -125,6 +134,22 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         LOG.info("cancelDownload(" + download.getClientDownloadId() + ")");
         download.pause(this);
         mDownloadsById.remove(download.getClientDownloadId());
+    }
+
+    public void scheduleNextDownloadAttempt(final TalkClientDownload download) {
+        if(mDownloadRetryQueue.containsKey(download.getClientDownloadId())) {
+            LOG.debug("download with id (" + download.getClientDownloadId() + ") is already scheduled for retry");
+            return;
+        }
+        int transferFailures = download.getTransferFailures();
+        long delay = 2 * (transferFailures * transferFailures + 1);
+        ScheduledFuture<?> future = mDownloadExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                startOrRestartDownload(download);
+            }
+        }, delay, TimeUnit.SECONDS);
+        mDownloadRetryQueue.put(download.getClientDownloadId(), future);
     }
 
     /**********************************************************************************************/

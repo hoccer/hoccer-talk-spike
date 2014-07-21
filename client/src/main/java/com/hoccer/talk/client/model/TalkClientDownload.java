@@ -36,6 +36,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     private static final Detector MIME_DETECTOR = new DefaultDetector(MimeTypes.getDefaultMimeTypes());
 
+    private static final int MAX_FAILURES = 16;
+
     private XoTransferAgent mTransferAgent;
 
     private List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
@@ -146,7 +148,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     @DatabaseField(width = 128)
     private String contentHmac;
 
-    private Timer mTimer;
+    private boolean isFailed = false;
 
     private HttpGet mDownloadRequest = null;
 
@@ -297,6 +299,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
                 LOG.debug("switching to state PAUSED - reason: http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" + HttpStatus.SC_PARTIAL_CONTENT + ")");
+                isFailed = true;
                 switchState(State.PAUSED);
                 return;
             }
@@ -309,6 +312,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             int bytesToGo = contentLengthValue;
             if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
                 LOG.debug("switching to state PAUSED - reason: invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
+                isFailed = true;
                 switchState(State.PAUSED);
                 return;
             }
@@ -326,6 +330,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
                 LOG.debug("switching to state PAUSED - reason: copyData returned 'false'");
+                isFailed = true;
                 switchState(State.PAUSED);
             }
         } catch (Exception e) {
@@ -341,6 +346,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     switchState(State.DETECTING);
                 }
             } else {
+                isFailed = true;
                 switchState(State.PAUSED);
             }
         }
@@ -443,7 +449,13 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             LOG.debug("aborted current Download request. Download can still resume.");
         }
         saveToDatabase();
+        mTransferAgent.pauseDownload(this);
         mTransferAgent.onDownloadStateChanged(this);
+        if(isFailed && transferFailures <= MAX_FAILURES) {
+            transferFailures++;
+            mTransferAgent.scheduleNextDownloadAttempt(this);
+            isFailed = false;
+        }
     }
 
     private void doDecryptingAction() {
@@ -844,7 +856,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         if (transferFailures > 16) {
             // max retries reached. stop download and reset retries
             LOG.debug("cancel Downloads. No more retries.");
-            mTimer.cancel();
             this.transferFailures = 0;
         }
     }
