@@ -55,7 +55,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         UPLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(COMPLETE, FAILED, PAUSED);
+                return EnumSet.of(COMPLETE, FAILED, PAUSED, UPLOADING);
             }
         },
         PAUSED {
@@ -184,7 +184,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         mTransferAgent = agent;
         if (state == State.NEW) {
             switchState(State.REGISTERING);
-        } else if (state != State.COMPLETE && state != State.FAILED) {
+        } else {
             switchState(State.UPLOADING);
         }
     }
@@ -221,11 +221,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             case REGISTERING:
                 doRegisteringAction();
                 break;
-            case UPLOADING:
-                doUploadingAction();
-                break;
             case PAUSED:
                 doPausedAction();
+                break;
+            case UPLOADING:
+                doUploadingAction();
                 break;
             case COMPLETE:
                 doCompleteAction();
@@ -240,6 +240,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         LOG.info("[upload " + clientUploadId + "] switching to state " + newState);
         state = newState;
 
+        saveToDatabase();
+
+        LOG.debug("notify all listeners about state change");
         for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);
             listener.onStateChanged(state);
@@ -275,17 +278,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private void doUploadingAction() {
-//        try {
-//            if (!performCheckRequest()) {
-//                switchState(State.PAUSED);
-//                return;
-//            }
-//        } catch (IOException e) {
-//            LOG.error(e);
-//            switchState(State.PAUSED);
-//            return;
-//        }
-
         String filename = this.dataFile;
         if (filename == null || filename.isEmpty()) {
             LOG.error("filename was empty");
@@ -322,9 +314,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 // client error - mark as failed
                 if (uploadSc >= 400 && uploadSc <= 499) {
                     switchState(State.PAUSED);
+                    return;
                 }
                 uploadResponse.getEntity().consumeContent();
                 switchState(State.PAUSED); // do we want to restart this task anytime again?
+                return;
             }
             logRequestHeaders(uploadResponse, "PUT-upload response header ");
             // process range header from upload request
@@ -351,58 +345,17 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             mUploadRequest = null;
             LOG.debug("aborted current Upload request. Upload can still resume.");
         }
-        saveToDatabase();
         mTransferAgent.onUploadStateChanged(this);
     }
 
     private void doCompleteAction() {
         deleteTemporaryFile();
-        saveToDatabase();
         mTransferAgent.onUploadFinished(this);
     }
 
     private void doFailedAction() {
         deleteTemporaryFile();
-        saveToDatabase();
         mTransferAgent.onUploadFailed(this);
-    }
-
-    private boolean performCheckRequest() throws IOException {
-        HttpClient client = mTransferAgent.getHttpClient();
-
-        LOG.info("[uploadId: '" + clientUploadId + "'] performing check request");
-
-        int last = uploadLength - 1;
-        //int confirmedProgress = 0;
-        // perform a check request to ensure correct progress
-        HttpPut checkRequest = new HttpPut(uploadUrl);
-        String contentRangeValue = "bytes */" + uploadLength;
-        LOG.trace("PUT-check range '" + contentRangeValue + "'");
-        //checkRequest.addHeader("Content-Range", contentRangeValue);
-        //checkRequest.setHeader("Content-Length","0");
-        LOG.trace("PUT-check '" + uploadUrl + "' commencing");
-        logRequestHeaders(checkRequest, "PUT-check request header ");
-
-        HttpResponse checkResponse = client.execute(checkRequest);
-        StatusLine checkStatus = checkResponse.getStatusLine();
-        int checkSc = checkStatus.getStatusCode();
-        LOG.trace("PUT-check '" + uploadUrl + "' with status '" + checkSc + "': " + checkStatus.getReasonPhrase());
-        if (checkSc != HttpStatus.SC_OK && checkSc != 308 /* resume incomplete */) {
-            checkResponse.getEntity().consumeContent();
-            return false;
-        }
-        logRequestHeaders(checkResponse, "PUT-check response header ");
-
-        // process range header from check request
-        Header checkRangeHeader = checkResponse.getFirstHeader("Range");
-        if (checkRangeHeader != null && isUploadComplete(checkRangeHeader)) {
-            switchState(State.COMPLETE);
-        } else {
-            LOG.warn("[uploadId: '" + clientUploadId + "'] no range header in check response");
-            this.progress = 0;
-        }
-        checkResponse.getEntity().consumeContent();
-        return true;
     }
 
     private boolean isUploadComplete(Header checkRangeHeader) {
@@ -496,6 +449,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
      */
     @Override
     public void onProgress(int progress) {
+        LOG.trace("upload (" + getClientUploadId() + ") progress: " + progress);
         this.progress = progress;
         for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);
