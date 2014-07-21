@@ -230,6 +230,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             return;
         }
         setState(newState);
+
         switch (state) {
             case INITIALIZING:
                 switchState(State.NEW);
@@ -370,6 +371,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 randomAccessFile.write(buffer, 0, bytesRead);
                 downloadProgress += bytesRead;
                 bytesToGo -= bytesRead;
+                for(IXoTransferListener listener : mTransferListeners) {
+                    listener.onProgress(downloadProgress);
+                }
             }
         } catch (IOException e) {
             LOG.error(e);
