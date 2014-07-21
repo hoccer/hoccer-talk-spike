@@ -247,8 +247,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 break;
             case DECRYPTING:
                 doDecryptingAction();
+                break;
             case DETECTING:
                 doDetectingAction();
+                break;
             case COMPLETE:
                 doCompleteAction();
                 break;
@@ -374,7 +376,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 randomAccessFile.write(buffer, 0, bytesRead);
                 downloadProgress += bytesRead;
                 bytesToGo -= bytesRead;
-                for(IXoTransferListener listener : mTransferListeners) {
+                for(int i = 0; i < mTransferListeners.size(); i++) {
+                    IXoTransferListener listener = mTransferListeners.get(i);
                     listener.onProgress(downloadProgress);
                 }
             }
@@ -671,6 +674,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void saveToDatabase() {
+        LOG.debug("save TalkClientUpload (" + getClientDownloadId() + ") to database");
         try {
             mTransferAgent.getDatabase().saveClientDownload(this);
         } catch (SQLException e) {

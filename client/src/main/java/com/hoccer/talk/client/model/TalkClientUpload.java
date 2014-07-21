@@ -287,6 +287,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
         LOG.info("[uploadId: '" + clientUploadId + "'] performing upload request");
         int bytesToGo = uploadLength - this.progress;
+        LOG.debug("bytes to go for Upload (" + getClientUploadId() + "): " + bytesToGo);
+        LOG.debug("current progress: " + progress + " | current upload length: " + uploadLength);
         HttpClient client = createHttpClientAndSetHeaders();
         try {
             InputStream clearIs = mTransferAgent.getClient().getHost().openInputStreamForUrl(filename);
@@ -298,14 +300,14 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 is = clearIs;
             }
 
-            is.skip(this.progress);
-            mUploadRequest.setEntity(new ProgressOutputHttpEntity(is, bytesToGo, this));
+            long skip = is.skip(this.progress);
+            LOG.debug("skipped " + skip + " bytes");
+            mUploadRequest.setEntity(new ProgressOutputHttpEntity(is, bytesToGo, this, progress));
             LOG.trace("PUT-upload '" + uploadUrl + "' commencing");
             logRequestHeaders(mUploadRequest, "PUT-upload response header ");
             mTransferAgent.onUploadStarted(this);
             HttpResponse uploadResponse = client.execute(mUploadRequest);
 
-            this.progress = uploadLength;
             saveToDatabase();
             StatusLine uploadStatus = uploadResponse.getStatusLine();
             int uploadSc = uploadStatus.getStatusCode();
@@ -331,7 +333,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 switchState(State.PAUSED);
             }
         } catch (IOException e) {
-            LOG.error("Connection terminated", e);
+            LOG.error(e);
             switchState(State.PAUSED);
         } catch (Exception e) {
             LOG.error("Exception while performing upload request: ", e);
@@ -401,6 +403,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private void saveToDatabase() {
         try {
+            LOG.debug("save TalkClientUpload (" + getClientUploadId() + ") to database");
             mTransferAgent.getDatabase().saveClientUpload(this);
         } catch (SQLException e) {
             LOG.error("sql error", e);
@@ -431,7 +434,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
         LOG.trace("PUT-upload '" + uploadUrl + "' '" + bytesToGo + "' bytes to go ");
         String uploadRange = "bytes " + this.progress + "-" + last + "/" + uploadLength;
-        LOG.trace("PUT-upload '" + uploadUrl + "' with range '" + uploadRange + "'");
+        LOG.debug("PUT-upload '" + uploadUrl + "' with range '" + uploadRange + "'");
         mUploadRequest = new HttpPut(uploadUrl);
         if (this.progress > 0) {
             mUploadRequest.addHeader("Content-Range", uploadRange);
@@ -449,11 +452,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
      */
     @Override
     public void onProgress(int progress) {
-        LOG.trace("upload (" + getClientUploadId() + ") progress: " + progress);
+        LOG.info("upload (" + getClientUploadId() + ") progress: " + progress + " of " + getContentLength());
         this.progress = progress;
         for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);
-            listener.onProgress(this.progress);
+            listener.onProgressUpdated(this.progress, uploadLength);
         }
     }
 

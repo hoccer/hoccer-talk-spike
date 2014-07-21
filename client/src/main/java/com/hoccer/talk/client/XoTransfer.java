@@ -2,7 +2,7 @@ package com.hoccer.talk.client;
 
 import com.hoccer.talk.content.IContentObject;
 
-public abstract class XoTransfer<T> implements IContentObject {
+public abstract class XoTransfer implements IContentObject {
 
     public enum State {}
 

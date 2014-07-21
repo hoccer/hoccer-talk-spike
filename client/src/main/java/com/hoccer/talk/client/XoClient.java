@@ -711,6 +711,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
 
             @Override
+            public void onProgressUpdated(int progress, int contentLength) {
+
+            }
+
+            @Override
             public void onProgress(int progress) {
                 // ignore this
             }
@@ -778,6 +783,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 if (uploadState == TalkClientUpload.State.UPLOADING) {
                     sendGroupPresenceUpdateWithNewAvatar(group, upload);
                 }
+            }
+
+            @Override
+            public void onProgressUpdated(int progress, int contentLength) {
+
             }
 
             @Override
@@ -1969,6 +1979,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                             upload.unregisterTransferListener(this);
                             performDelivery(clientMessage);
                         }
+                    }
+
+                    @Override
+                    public void onProgressUpdated(int progress, int contentLength) {
+
                     }
 
                     @Override

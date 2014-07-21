@@ -39,7 +39,7 @@ public class AttachmentTransferControlView extends View {
     private float[] mArrowDownload;
     private float[] mArrowUpload;
 
-    private boolean mIsInited = false;
+    private boolean mIsInitialized = false;
     private boolean mPause = false;
     private boolean mGone = false;
     private boolean mIsDownloadingProcess;
@@ -110,7 +110,7 @@ public class AttachmentTransferControlView extends View {
                 if (mStopSpinning && mSpinningProgress == 0) {
                     clean();
                     mGone = true;
-                    mIsInited = false;
+                    mIsInitialized = false;
                     return;
                 }
                 progressHandler.sendEmptyMessageDelayed(0, 1);
@@ -230,13 +230,14 @@ public class AttachmentTransferControlView extends View {
 
     public void setProgressImmediately(int progress) {
         float percentage = progress / (float) mFileSize;
+        mPause = false;
         mShownProgress = 360 * percentage;
         invalidate();
     }
 
     public void prepareToUpload() {
-        if (!mIsInited) {
-            mIsInited = true;
+        if (!mIsInitialized) {
+            mIsInitialized = true;
             mIsDownloadingProcess = false;
             prepareToEncrypt();
             clean();
@@ -244,8 +245,8 @@ public class AttachmentTransferControlView extends View {
     }
 
     public void prepareToDownload() {
-        if (!mIsInited) {
-            mIsInited = true;
+        if (!mIsInitialized) {
+            mIsInitialized = true;
             mIsDownloadingProcess = true;
             prepareToDecrypt();
 //            clean();
@@ -267,13 +268,13 @@ public class AttachmentTransferControlView extends View {
         mGoneAfterFinished = true;
         mStepInDegrees = 1;
         progressHandler.sendEmptyMessage(0);
-        mIsInited = false;
+        mIsInitialized = false;
         return false;
     }
 
     public void finishSpinningAndProceed() {
         mStopSpinning = true;
-        mIsInited = false;
+        mIsInitialized = false;
     }
 
     private void prepareToEncrypt() {

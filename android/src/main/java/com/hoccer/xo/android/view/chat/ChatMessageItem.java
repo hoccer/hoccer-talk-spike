@@ -323,7 +323,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
             mContentTransferProgress.setVisibility(View.VISIBLE);
 
             // create handler for a pending attachment transfer
-            mAttachmentTransferHandler = new AttachmentTransferHandler(mContentTransferControl, contentObject, this);
+            if(mAttachmentTransferHandler == null) {
+                mAttachmentTransferHandler = new AttachmentTransferHandler(mContentTransferControl, contentObject, this);
+            }
 
             ((XoTransfer) contentObject).registerTransferListener(mAttachmentTransferHandler);
             mContentTransferControl.setOnClickListener(new AttachmentTransferHandler(mContentTransferControl, contentObject, this));
