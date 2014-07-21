@@ -108,10 +108,12 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
         mTextWatcher = new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -226,10 +228,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private boolean isEmptyGroup() {
-        if (mContact.isGroup() && mContact.getGroupMemberships() != null && mContact.getGroupMemberships().size() <= 1) {
-            return true;
-        }
-        return false;
+        return (mContact != null && mContact.isEmptyGroup());
     }
 
     private void sendComposedMessage() {
@@ -242,7 +241,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
             isAborted = true;
         } else if (isEmptyGroup()) {
-            Toast.makeText(getXoActivity(), R.string.error_send_message_empty_group, Toast.LENGTH_LONG).show();
+            //Toast.makeText(getXoActivity(), R.string.error_send_message_empty_group, Toast.LENGTH_LONG).show();
+            showAlertSendMessageNotPossible();
             return;
         }
 

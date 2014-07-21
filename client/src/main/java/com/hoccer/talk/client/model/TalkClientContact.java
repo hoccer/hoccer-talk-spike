@@ -508,6 +508,25 @@ public class TalkClientContact implements Serializable {
         return null;
     }
 
+    @GroupMethodOnly
+    public  boolean isEmptyGroup() {
+        return (getActiveGroupMemberCount() <= 1);
+    }
+
+    @GroupMethodOnly
+    public int getActiveGroupMemberCount() {
+        int activeMemberCount = 0;
+        if (getGroupMemberships() != null) {
+            for (TalkClientMembership groupMembership : getGroupMemberships()) {
+                TalkGroupMember groupMember = groupMembership.getMember();
+                if (groupMember.getState().equals(TalkGroupMember.STATE_JOINED)) {
+                    activeMemberCount++;
+                }
+            }
+        }
+        return activeMemberCount;
+    }
+
     public boolean isNearby() {
         return isNearby;
     }
