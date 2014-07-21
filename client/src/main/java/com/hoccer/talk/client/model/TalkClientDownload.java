@@ -325,7 +325,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             randomAccessFile.seek(bytesStart);
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
-                fileDescriptor.sync();
                 LOG.debug("switching to state PAUSED - reason: copyData returned 'false'");
                 switchState(State.PAUSED);
             }
@@ -334,15 +333,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             switchState(State.FAILED);
         } finally {
             LOG.debug("doDownloadingAction - ensuring file handles are closed...");
-            if (fileDescriptor != null) {
-                try {
-                    fileDescriptor.sync();
-                } catch (SyncFailedException e) {
-                    LOG.warn("sync failed while handling download exception", e);
-                }
-            }
-
-            // update state
             if (downloadProgress == contentLength) {
                 if (decryptionKey != null) {
                     switchState(State.DECRYPTING);
@@ -375,12 +365,17 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 downloadProgress += bytesRead;
                 bytesToGo -= bytesRead;
             }
-            fileDescriptor.sync();
-            randomAccessFile.close();
-            inputStream.close();
         } catch (IOException e) {
             LOG.error(e);
             return false;
+        } finally {
+            try {
+                fileDescriptor.sync();
+                randomAccessFile.close();
+                inputStream.close();
+            } catch (IOException e) {
+                LOG.error(e);
+            }
         }
         return true;
     }
@@ -555,9 +550,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     }
                 }
             }
-            synchronized (this) {
-                switchState(State.COMPLETE);
-            }
+            switchState(State.COMPLETE);
         } catch (Exception e) {
             LOG.error("detection error", e);
             switchState(State.FAILED);
