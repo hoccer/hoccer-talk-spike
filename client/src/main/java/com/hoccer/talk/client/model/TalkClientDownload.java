@@ -356,33 +356,31 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-    private boolean copyData(int bytesToGo, RandomAccessFile raf, FileDescriptor fd, InputStream is) {
-        byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
-        while (bytesToGo > 0) {
-            try {
+    private boolean copyData(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) {
+        try {
+            byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
+            while (bytesToGo > 0) {
                 logGetTrace("bytesToGo: '" + bytesToGo + "'");
                 logGetTrace("downloadProgress: '" + downloadProgress + "'");
                 // determine how much to copy
                 int bytesToRead = Math.min(buffer.length, bytesToGo);
                 // perform the copy
-                int bytesRead = is.read(buffer, 0, bytesToRead);
+                int bytesRead = inputStream.read(buffer, 0, bytesToRead);
                 logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");
                 if (bytesRead == -1) {
                     logGetWarning("eof with '" + bytesToGo + "' bytes to go");
                     return false;
                 }
-                raf.write(buffer, 0, bytesRead);
-                fd.sync();
+                randomAccessFile.write(buffer, 0, bytesRead);
                 downloadProgress += bytesRead;
                 bytesToGo -= bytesRead;
-
-                fd = null;
-                raf.close();
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
             }
+            fileDescriptor.sync();
+            randomAccessFile.close();
+            inputStream.close();
+        } catch (IOException e) {
+            LOG.error(e);
+            return false;
         }
         return true;
     }
