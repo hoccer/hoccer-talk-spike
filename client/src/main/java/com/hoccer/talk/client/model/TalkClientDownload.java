@@ -174,6 +174,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 //        url = checkFilecacheUrl(url); // TODO: ToBeDeleted
         this.downloadUrl = url;
         this.downloadFile = id + "-" + timestamp.getTime();
+        switchState(State.NEW);
     }
 
     public void initializeAsAttachment(TalkAttachment attachment, String id, byte[] key) {
@@ -194,14 +195,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.decryptionKey = new String(Hex.encodeHex(key));
         this.contentHmac = attachment.getHmac();
         this.fileId = attachment.getFileId();
+        switchState(State.NEW);
     }
 
     @Override
     public void start(XoTransferAgent agent) {
         mTransferAgent = agent;
-        if (state == State.INITIALIZING) {
-            switchState(State.NEW);
-        }
         switchState(State.DOWNLOADING);
     }
 
@@ -236,7 +235,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 switchState(State.NEW);
                 break;
             case NEW:
-                switchState(State.DOWNLOADING);
+                // DO NOTHING
                 break;
             case DOWNLOADING:
                 doDownloadingAction();
@@ -260,6 +259,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     private void setState(State newState) {
         LOG.info("[download " + clientDownloadId + "] switching to state " + newState);
         state = newState;
+
+        saveToDatabase();
 
         for (IXoTransferListener listener : mTransferListeners) {
             listener.onStateChanged(state);
@@ -452,13 +453,13 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             mDownloadRequest = null;
             LOG.debug("aborted current Download request. Download can still resume.");
         }
-        saveToDatabase();
         mTransferAgent.pauseDownload(this);
         mTransferAgent.onDownloadStateChanged(this);
         if(isFailed && transferFailures <= MAX_FAILURES) {
             transferFailures++;
             mTransferAgent.scheduleNextDownloadAttempt(this);
             isFailed = false;
+            saveToDatabase();
         }
     }
 
@@ -574,12 +575,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doCompleteAction() {
-        saveToDatabase();
         mTransferAgent.onDownloadFinished(this);
     }
 
     private void doFailedAction() {
-        saveToDatabase();
         mTransferAgent.onDownloadFailed(this);
     }
 

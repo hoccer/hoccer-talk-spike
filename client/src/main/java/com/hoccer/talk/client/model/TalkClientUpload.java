@@ -240,6 +240,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         LOG.info("[upload " + clientUploadId + "] switching to state " + newState);
         state = newState;
 
+        saveToDatabase();
+
         for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);
             listener.onStateChanged(state);
@@ -351,19 +353,16 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             mUploadRequest = null;
             LOG.debug("aborted current Upload request. Upload can still resume.");
         }
-        saveToDatabase();
         mTransferAgent.onUploadStateChanged(this);
     }
 
     private void doCompleteAction() {
         deleteTemporaryFile();
-        saveToDatabase();
         mTransferAgent.onUploadFinished(this);
     }
 
     private void doFailedAction() {
         deleteTemporaryFile();
-        saveToDatabase();
         mTransferAgent.onUploadFailed(this);
     }
 
