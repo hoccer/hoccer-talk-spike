@@ -20,7 +20,10 @@ import android.widget.ImageView;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -216,7 +219,6 @@ public class ThumbnailManager {
         BitmapFactory.decodeFile(file.getAbsolutePath(), options);
         int fileHeight = options.outHeight;
         int sampleSize = fileHeight / DEFAULT_HEIGHT_DP;
-
         // Load bitmap in appropriate size
         options = new BitmapFactory.Options();
         options.inSampleSize = sampleSize;
@@ -363,16 +365,11 @@ public class ThumbnailManager {
     }
 
     private Bitmap createVideoThumbnail(String uri, int maskResource, String tag) {
-
         String path = getRealPathFromURI(Uri.parse(uri), mContext);
-        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Images.Thumbnails.FULL_SCREEN_KIND);
-        Bitmap scaled = scaleBitmap(bitmap, mContext);
-        if (scaled != null) {
-            Bitmap result = renderThumbnailForVideo(scaled, maskResource);
-            if (result != null) {
-                saveToThumbnailDirectory(result, uri, tag);
-                return result;
-            }
+        Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Images.Thumbnails.MINI_KIND);
+        Bitmap result = renderThumbnailForVideo(bitmap, maskResource);
+        if (result != null) {
+            saveToThumbnailDirectory(result, uri, tag);
         }
         return null;
     }
