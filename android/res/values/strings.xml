@@ -265,6 +265,7 @@
     <string name="share_with_contact">Share</string>
     <string name="added_attachment_to_collection">Added %1$s to \'%2$s\' collection</string>
     <string name="select_recipients">Select recipients</string>
+    <string name="error_could_not_find_file_for_sending">Couldn\'t find and send file \'%1$s\'</string>
 
     <!-- Preferences -->
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>

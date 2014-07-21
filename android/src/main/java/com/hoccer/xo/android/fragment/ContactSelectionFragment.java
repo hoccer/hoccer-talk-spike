@@ -84,4 +84,12 @@ public class ContactSelectionFragment extends ListFragment {
             }
         });
     }
+
+    public static ContactSelectionFragment create(int mode) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(ARG_CLIENT_OR_GROUP_MODE, mode);
+        ContactSelectionFragment fragment = new ContactSelectionFragment();
+        fragment.setArguments(bundle);
+        return fragment;
+    }
 }

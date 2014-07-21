@@ -11,13 +11,11 @@ import android.util.SparseBooleanArray;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
-import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.model.TalkClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
@@ -27,14 +25,13 @@ import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SearchResultsAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
-import com.hoccer.xo.android.content.ContentRegistry;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -517,7 +514,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
             }
         }
         if (!addedFilenames.isEmpty()) {
-            Toast.makeText(getActivity(), String.format(mMediaPlayerService.getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), String.format(getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -537,12 +534,17 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
     private void sendSelectedAttachmentsToContact(TalkClientContact contact) {
         for (TalkClientDownload download : getSelectedAttachments()) {
-            TalkClientUpload upload = createTalkClientUpload(download);
-            createMessageAndSend(contact, upload);
+            TalkClientUpload upload = null;
+            try {
+                upload = createTalkClientUpload(download);
+                createMessageAndSendUploadToContact(contact, upload);
+            } catch (FileNotFoundException e) {
+                Toast.makeText(getActivity(), String.format(getString(R.string.error_could_not_find_file_for_sending), download.getFileName()), Toast.LENGTH_LONG).show();
+            }
         }
     }
 
-    private void createMessageAndSend(TalkClientContact contact, TalkClientUpload upload) {
+    private void createMessageAndSendUploadToContact(TalkClientContact contact, TalkClientUpload upload) {
         String messageTag = XoApplication.getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
         XoApplication.getXoClient().sendMessage(messageTag);
     }
@@ -557,11 +559,11 @@ public class AudioAttachmentListFragment extends XoListFragment {
         return contact;
     }
 
-    private TalkClientUpload createTalkClientUpload(TalkClientDownload download) {
+    private TalkClientUpload createTalkClientUpload(TalkClientDownload download) throws FileNotFoundException {
         File fileToUpload = new File(download.getDataFile());
         if (!fileToUpload.exists()) {
             LOG.error("Error creating file from TalkClientDownloadObject.");
-            return null;
+            throw new FileNotFoundException(fileToUpload.getAbsolutePath() + " could not be found on file system.");
         }
 
         String fileName = download.getFileName();
