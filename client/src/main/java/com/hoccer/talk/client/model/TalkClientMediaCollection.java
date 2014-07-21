@@ -1,5 +1,6 @@
 package com.hoccer.talk.client.model;
 
+import com.hoccer.talk.client.IXoDownloadListener;
 import com.hoccer.talk.client.IXoMediaCollectionDatabase;
 import com.hoccer.talk.util.WeakListenerArray;
 import com.j256.ormlite.dao.Dao;
@@ -18,7 +19,7 @@ import java.util.NoSuchElementException;
  * Encapsulates a collection of media items with a specific order. The data is kept in sync with the database.
  */
 @DatabaseTable(tableName = "mediaCollection")
-public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
+public class TalkClientMediaCollection implements Iterable<TalkClientDownload>, IXoDownloadListener {
 
     // collection update/change listener
     public interface Listener {
@@ -64,6 +65,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     public void setDatabase(IXoMediaCollectionDatabase db) {
         if(mDatabase == null) {
             mDatabase = db;
+            mDatabase.registerDownloadListener(this);
             mItemList = findMediaCollectionItemsOrderedByIndex();
         }
     }
@@ -211,6 +213,23 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
     public void unregisterListener(Listener listener) {
         mListenerArray.unregisterListener(listener);
+    }
+
+    @Override
+    public void onDownloadSaved(TalkClientDownload download) {
+        // do nothing in case of a new downloaded item
+    }
+
+    @Override
+    public void onDownloadRemoved(TalkClientDownload download) {
+        // remove item from collection if it is contained
+        int index = indexOf(download);
+        if(index >= 0) {
+            removeItem(index);
+            for (Listener listener : mListenerArray) {
+                listener.onItemRemoved(this, index, download);
+            }
+        }
     }
 
     @Override

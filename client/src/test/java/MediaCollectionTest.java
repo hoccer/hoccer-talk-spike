@@ -982,6 +982,76 @@ public class MediaCollectionTest {
     }
 
     @Test
+    public void testDeleteDownload() {
+        LOG.info("testDeleteDownload");
+
+        final String collectionName = "testDeleteDownload_collection";
+        TalkClientMediaCollection collection = null;
+        TalkClientDownload item0 = new TalkClientDownload();
+        TalkClientDownload item1 = new TalkClientDownload();
+        TalkClientDownload item2 = new TalkClientDownload();
+        try {
+            collection = mDatabase.createMediaCollection(collectionName);
+
+            mDatabase.saveClientDownload(item0);
+            mDatabase.saveClientDownload(item1);
+            mDatabase.saveClientDownload(item2);
+
+            collection.addItem(item0);
+            collection.addItem(item1);
+            collection.addItem(item2);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        final ValueContainer<Boolean> onNameChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
+
+        final TalkClientDownload expectedItemRemoved = item1;
+        final int expectedItemRemovedIndex = 1;
+
+        // register MediaCollection listener
+        TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
+            public void onCollectionNameChanged(TalkClientMediaCollection collection) {
+                onNameChangedCalled.value = true;
+            }
+            public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
+                onItemOrderChangedCalled.value = true;
+            }
+            public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
+                assertEquals(expectedItemRemovedIndex, indexRemoved);
+                assertEquals(expectedItemRemoved, itemRemoved);
+                onItemRemovedCalled.value = true;
+            }
+            public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
+                onItemAddedCalled.value = true;
+            }
+            @Override
+            public void onCollectionCleared(TalkClientMediaCollection collection) {
+                onCollectionClearedCalled.value = true;
+            }
+        };
+        collection.registerListener(listener);
+
+        try {
+            mDatabase.deleteTalkClientDownload(expectedItemRemoved);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        assertFalse(onNameChangedCalled.value);
+        assertFalse(onItemOrderChangedCalled.value);
+        assertTrue(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertFalse(onCollectionClearedCalled.value);
+    }
+
+    @Test
     public void testToArray() {
         LOG.info("testToArray");
 

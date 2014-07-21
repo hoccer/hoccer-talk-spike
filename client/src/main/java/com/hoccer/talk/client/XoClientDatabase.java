@@ -49,7 +49,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     Dao<TalkClientMediaCollection, Integer> mMediaCollections;
     Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
 
-    private List<IXoDownloadListener> mDownloadListeners = new ArrayList<IXoDownloadListener>();
+    private WeakListenerArray<IXoDownloadListener> mDownloadListeners = new WeakListenerArray<IXoDownloadListener>();
     private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListeners = new WeakListenerArray<IXoMediaCollectionListener>();
 
 
@@ -874,15 +874,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
     }
 
-
-    public void registerDownloadListener(IXoDownloadListener listener) {
-        mDownloadListeners.add(listener);
-    }
-
-    public void unregisterDownloadListener(IXoDownloadListener listener) {
-        mDownloadListeners.remove(listener);
-    }
-
     //////// MediaCollection Management ////////
 
     @Override
@@ -969,6 +960,16 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     @Override
     public void unregisterListener(IXoMediaCollectionListener listener) {
         mMediaCollectionListeners.unregisterListener(listener);
+    }
+
+    @Override
+    public void registerDownloadListener(IXoDownloadListener listener) {
+        mDownloadListeners.registerListener(listener);
+    }
+
+    @Override
+    public void unregisterDownloadListener(IXoDownloadListener listener) {
+        mDownloadListeners.unregisterListener(listener);
     }
 
     // The returned Dao should not be used directly to alter the database, use TalkClientMediaCollection instead

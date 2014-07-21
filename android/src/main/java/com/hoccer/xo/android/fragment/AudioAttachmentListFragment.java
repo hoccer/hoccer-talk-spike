@@ -319,11 +319,6 @@ public class AudioAttachmentListFragment extends XoListFragment {
                 int messageId = XoApplication.getXoClient().getDatabase().findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
                 XoApplication.getXoClient().getDatabase().deleteMessageById(messageId);
 
-                List<TalkClientMediaCollection> collections = XoApplication.getXoClient().getDatabase().findAllMediaCollectionsContainingItem(download);
-                for (TalkClientMediaCollection collection : collections) {
-                    collection.removeItem(download);
-                }
-
                 mMediaPlayerService.removeMedia(item);
 
                 Intent intent = new Intent(AUDIO_ATTACHMENT_REMOVED_ACTION);
