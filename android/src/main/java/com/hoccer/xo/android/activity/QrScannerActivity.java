@@ -73,8 +73,12 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
 
     private Runnable doAutoFocus = new Runnable() {
         public void run() {
-            if (mCamera!= null && hasAutoFocus) {
-                mCamera.autoFocus(autoFocusCB);
+            try {
+                if (mCamera != null && hasAutoFocus) {
+                    mCamera.autoFocus(autoFocusCB);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     };
@@ -244,8 +248,12 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
         }
 
         public void restartPreview() {
-            mCamera.setPreviewCallback(previewCallback);
-            mCamera.startPreview();
+            try {
+                mCamera.setPreviewCallback(previewCallback);
+                mCamera.startPreview();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
