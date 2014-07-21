@@ -82,7 +82,7 @@ public class MediaCollectionTest {
         try {
             collection = mDatabase.createMediaCollection(collectionName);
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -98,7 +98,7 @@ public class MediaCollectionTest {
         try {
             collectionCopy = mDatabase.findMediaCollectionById(collection.getId());
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -111,7 +111,7 @@ public class MediaCollectionTest {
         try {
         collections = mDatabase.findAllMediaCollections();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -129,7 +129,7 @@ public class MediaCollectionTest {
         try {
             collection = mDatabase.createMediaCollection(collectionName);
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -151,7 +151,7 @@ public class MediaCollectionTest {
         try {
             mDatabase.deleteMediaCollection(collection);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -165,7 +165,7 @@ public class MediaCollectionTest {
             try {
                 collections = mDatabase.findAllMediaCollections();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
                 fail();
             }
 
@@ -186,7 +186,7 @@ public class MediaCollectionTest {
         try {
             collection = mDatabase.createMediaCollection(collectionName);
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -208,7 +208,7 @@ public class MediaCollectionTest {
         try {
             mDatabase.deleteMediaCollectionById(collection.getId());
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -222,7 +222,7 @@ public class MediaCollectionTest {
             try {
                 collections = mDatabase.findAllMediaCollections();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
                 fail();
             }
 
@@ -246,8 +246,7 @@ public class MediaCollectionTest {
             collection = mDatabase.createMediaCollection(collectionName);
             addItemsToCollection(items, collection);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -259,8 +258,7 @@ public class MediaCollectionTest {
             assertEquals(1, collections.size());
             collectionCopy = collections.get(0);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -280,8 +278,7 @@ public class MediaCollectionTest {
             collection = mDatabase.createMediaCollection(collectionName);
             addItemsToCollection(items, collection);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -323,8 +320,7 @@ public class MediaCollectionTest {
             collection.addItem(0, item2); // order: 2 0 1
             collection.addItem(1, item3); // order: 2 3 0 1
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -373,8 +369,7 @@ public class MediaCollectionTest {
             collection.addItem(item2);
             collection.addItem(item3);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -476,8 +471,7 @@ public class MediaCollectionTest {
             collection.addItem(item1);
             collection.addItem(item2);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
         collection.clear();
@@ -513,8 +507,7 @@ public class MediaCollectionTest {
             collection.addItem(item3);
             collection.addItem(item4);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -801,8 +794,7 @@ public class MediaCollectionTest {
             collection.addItem(item3);
             collection.addItem(item4);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -890,8 +882,7 @@ public class MediaCollectionTest {
             collection.addItem(item3);
             collection.addItem(item4);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -959,8 +950,7 @@ public class MediaCollectionTest {
                 collection.addItem(expectedItemList.get(i));
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -1011,8 +1001,7 @@ public class MediaCollectionTest {
                 collection.addItem(item);
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -1043,7 +1032,7 @@ public class MediaCollectionTest {
                 list.add(item);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -1087,7 +1076,8 @@ public class MediaCollectionTest {
                     .eq("collection_id", collectionId)
                     .query();
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
+            fail();
         }
 
         return relations;
