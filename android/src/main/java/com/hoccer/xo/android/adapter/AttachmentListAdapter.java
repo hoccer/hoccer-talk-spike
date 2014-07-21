@@ -35,6 +35,8 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     private SparseBooleanArray mSelections;
 
+    private TalkClientMediaCollection mCollection = null;
+
     public AttachmentListAdapter(Activity activity) {
         this(activity, null, MediaPlayerService.UNDEFINED_CONTACT_ID);
     }
@@ -232,10 +234,11 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     @Override
     public void remove(int which) {
 
-    }
+        if (isItemPartOfCollection(getItem(which))) {
+            mCollection.removeItem((TalkClientDownload) getItem(which).getContentObject());
+        }
 
-    public void removeItem(int pos) {
-        mAttachmentItems.remove(pos);
+        mAttachmentItems.remove(which);
         mActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -283,6 +286,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     public void loadAttachments() {
+        mCollection = null;
         try {
             List<TalkClientDownload> downloads;
             if (mContentMediaType != null) {
@@ -302,6 +306,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     public void loadAttachmentsFromCollection(TalkClientMediaCollection collection) {
+        mCollection = collection;
         List<TalkClientDownload> downloads = new ArrayList<TalkClientDownload>();
         for (int i = 0; i < collection.size(); ++i) {
             downloads.add(collection.getItem(i));
@@ -347,4 +352,18 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         return false;
     }
 
+    private boolean isItemPartOfCollection(AudioAttachmentItem item) {
+        boolean isItemPartOfCollection = false;
+        try {
+            TalkClientDownload contentObject = (TalkClientDownload) item.getContentObject();
+            if (mCollection != null && contentObject != null && mCollection.hasItem(contentObject)) {
+                isItemPartOfCollection = true;
+            }
+
+        } catch (ClassCastException e) {
+
+        }
+
+        return isItemPartOfCollection;
+    }
 }

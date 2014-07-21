@@ -6,11 +6,13 @@ import android.content.*;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.ListFragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.SparseBooleanArray;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
@@ -18,14 +20,17 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
+import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentListAdapter;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SearchResultsAdapter;
+import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
+import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -36,7 +41,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AudioAttachmentListFragment extends XoListFragment {
+public class AudioAttachmentListFragment extends ListFragment {
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
     public static final String ARG_MEDIA_COLLECTION_ID = "com.hoccer.xo.android.fragment.ARG_MEDIA_COLLECTION_ID";
@@ -70,10 +75,19 @@ public class AudioAttachmentListFragment extends XoListFragment {
     private TalkClientMediaCollection mCurrentCollection;
     private boolean mInSearchMode = false;
     private boolean mRemoveFromCollection = false;
+    private XoClientDatabase mDatabase;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mDatabase = new XoClientDatabase(
+                AndroidTalkDatabase.getInstance(getActivity().getApplicationContext()));
+        try {
+            mDatabase.initialize();
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        }
 
         determineDisplayMode();
         setHasOptionsMenu(true);
@@ -85,7 +99,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
         XoApplication.getXoClient().getDatabase().registerDownloadListener(mAttachmentListAdapter);
 
         if (mDisplayMode != DisplayMode.COLLECTION_ATTACHMENTS) {
-            mSearchContactsAdapter = new ContactSearchResultAdapter(getXoActivity());
+            mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
             mSearchContactsAdapter.onCreate();
         }
     }
@@ -142,7 +156,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
         if (mDisplayMode != DisplayMode.COLLECTION_ATTACHMENTS) {
             if (mSearchContactsAdapter == null) {
-                mSearchContactsAdapter = new ContactSearchResultAdapter(getXoActivity());
+                mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
                 mSearchContactsAdapter.onCreate();
                 mSearchContactsAdapter.requestReload();
             }
@@ -290,9 +304,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
         for (int index = 0; index < mSelectedItems.size(); ++index) {
             int pos = mSelectedItems.keyAt(index);
             if (mSelectedItems.get(pos)) {
-                TalkClientDownload item = (TalkClientDownload) mAttachmentListAdapter.getItem(pos).getContentObject();
-                mCurrentCollection.removeItem(item);
-                mAttachmentListAdapter.removeItem(pos);
+                mAttachmentListAdapter.remove(pos);
             }
         }
     }
@@ -427,7 +439,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
         if (mMediaCollectionId > 0) {
             mDisplayMode = DisplayMode.COLLECTION_ATTACHMENTS;
             try {
-                mCurrentCollection = getXoDatabase().findMediaCollectionById(mMediaCollectionId);
+                mCurrentCollection = mDatabase.findMediaCollectionById(mMediaCollectionId);
             } catch (SQLException e) {
                 // TODO display error message?
                 LOG.error(e);
@@ -448,7 +460,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
             mAttachmentListAdapter.setContactIdFilter(mContactIdFilter);
             mAttachmentListAdapter.setContentMediaTypeFilter(mContentMediaTypeFilter);
             mAttachmentListAdapter.loadAttachments();
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mAttachmentListAdapter.notifyDataSetChanged();
@@ -506,7 +518,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
     }
 
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) throws SQLException {
-        TalkClientMediaCollection mediaCollection = getXoDatabase().findMediaCollectionById(mediaCollectionId);
+        TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
         List<String> addedFilenames = new ArrayList<String>();
         for (TalkClientDownload download : getSelectedAttachments()) {
             if (addAttachmentToCollection(mediaCollection, download)) {
@@ -625,7 +637,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
                     mMediaPlayerService.play(position);
                 }
 
-                getXoActivity().showFullscreenPlayer();
+                getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else if (selectedItem instanceof TalkClientContact) {
                 toggleSearchMode(false);
                 mSearchMenuItem.collapseActionView();
