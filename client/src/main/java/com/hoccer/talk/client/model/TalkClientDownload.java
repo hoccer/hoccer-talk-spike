@@ -58,7 +58,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         DOWNLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, DECRYPTING, DETECTING, FAILED);
+                return EnumSet.of(PAUSED, DECRYPTING, DETECTING, FAILED, DOWNLOADING);
             }
         },
         PAUSED {

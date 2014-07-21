@@ -55,7 +55,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         UPLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(COMPLETE, FAILED, PAUSED);
+                return EnumSet.of(COMPLETE, FAILED, PAUSED, UPLOADING);
             }
         },
         PAUSED {
@@ -184,8 +184,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         mTransferAgent = agent;
         if (state == State.NEW) {
             switchState(State.REGISTERING);
+        } else {
+            switchState(State.UPLOADING);
         }
-        switchState(State.UPLOADING);
     }
 
     @Override
@@ -220,11 +221,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             case REGISTERING:
                 doRegisteringAction();
                 break;
-            case UPLOADING:
-                doUploadingAction();
-                break;
             case PAUSED:
                 doPausedAction();
+                break;
+            case UPLOADING:
+                doUploadingAction();
                 break;
             case COMPLETE:
                 doCompleteAction();
@@ -313,9 +314,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 // client error - mark as failed
                 if (uploadSc >= 400 && uploadSc <= 499) {
                     switchState(State.PAUSED);
+                    return;
                 }
                 uploadResponse.getEntity().consumeContent();
                 switchState(State.PAUSED); // do we want to restart this task anytime again?
+                return;
             }
             logRequestHeaders(uploadResponse, "PUT-upload response header ");
             // process range header from upload request
@@ -353,44 +356,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private void doFailedAction() {
         deleteTemporaryFile();
         mTransferAgent.onUploadFailed(this);
-    }
-
-    private boolean performCheckRequest() throws IOException {
-        HttpClient client = mTransferAgent.getHttpClient();
-
-        LOG.info("[uploadId: '" + clientUploadId + "'] performing check request");
-
-        int last = uploadLength - 1;
-        //int confirmedProgress = 0;
-        // perform a check request to ensure correct progress
-        HttpPut checkRequest = new HttpPut(uploadUrl);
-        String contentRangeValue = "bytes */" + uploadLength;
-        LOG.trace("PUT-check range '" + contentRangeValue + "'");
-        //checkRequest.addHeader("Content-Range", contentRangeValue);
-        //checkRequest.setHeader("Content-Length","0");
-        LOG.trace("PUT-check '" + uploadUrl + "' commencing");
-        logRequestHeaders(checkRequest, "PUT-check request header ");
-
-        HttpResponse checkResponse = client.execute(checkRequest);
-        StatusLine checkStatus = checkResponse.getStatusLine();
-        int checkSc = checkStatus.getStatusCode();
-        LOG.trace("PUT-check '" + uploadUrl + "' with status '" + checkSc + "': " + checkStatus.getReasonPhrase());
-        if (checkSc != HttpStatus.SC_OK && checkSc != 308 /* resume incomplete */) {
-            checkResponse.getEntity().consumeContent();
-            return false;
-        }
-        logRequestHeaders(checkResponse, "PUT-check response header ");
-
-        // process range header from check request
-        Header checkRangeHeader = checkResponse.getFirstHeader("Range");
-        if (checkRangeHeader != null && isUploadComplete(checkRangeHeader)) {
-            switchState(State.COMPLETE);
-        } else {
-            LOG.warn("[uploadId: '" + clientUploadId + "'] no range header in check response");
-            this.progress = 0;
-        }
-        checkResponse.getEntity().consumeContent();
-        return true;
     }
 
     private boolean isUploadComplete(Header checkRangeHeader) {
