@@ -225,9 +225,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
         if (currentState.equals(TalkDelivery.STATE_DELIVERING)) {
             return R.drawable.bubble_light_green;
         } else if (currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red;
+            return R.drawable.bubble_red_outgoing;
         } else if (currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red;
+            return R.drawable.bubble_red_outgoing;
         }
         return R.drawable.bubble_green;
     }
