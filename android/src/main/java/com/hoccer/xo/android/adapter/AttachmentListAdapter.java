@@ -16,13 +16,14 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.view.AudioAttachmentView;
+import com.mobeta.android.dslv.DragSortListView;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AttachmentListAdapter extends BaseAdapter implements IXoTransferListener, IXoDownloadListener {
+public class AttachmentListAdapter extends BaseAdapter implements IXoTransferListener, IXoDownloadListener, DragSortListView.DragSortListener {
 
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
@@ -208,6 +209,31 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     }
 
+    @Override
+    public void onDownloadSaved(TalkClientDownload download) {
+
+    }
+
+    @Override
+    public void onDownloadRemoved(TalkClientDownload download) {
+        removeItem(AudioAttachmentItem.create(download.getContentDataUrl(), download, false));
+    }
+
+    @Override
+    public void drag(int from, int to) {
+
+    }
+
+    @Override
+    public void drop(int from, int to) {
+
+    }
+
+    @Override
+    public void remove(int which) {
+
+    }
+
     public void removeItem(int pos) {
         mAttachmentItems.remove(pos);
         mActivity.runOnUiThread(new Runnable() {
@@ -321,13 +347,4 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         return false;
     }
 
-    @Override
-    public void onDownloadSaved(TalkClientDownload download) {
-
-    }
-
-    @Override
-    public void onDownloadRemoved(TalkClientDownload download) {
-        removeItem(AudioAttachmentItem.create(download.getContentDataUrl(), download, false));
-    }
 }

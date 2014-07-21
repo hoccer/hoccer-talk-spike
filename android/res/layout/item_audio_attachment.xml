@@ -6,20 +6,10 @@
                 android:background="@drawable/list_item_attachment_bg"
                 android:padding="@dimen/media_player_layout_margin">
 
-    <ImageButton
-            android:id="@+id/ib_list_drag_handle"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:src="@drawable/ic_list_draghandle"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/media_player_layout_margin"
-            android:background="@null"
-            android:visibility="gone"/>
     <FrameLayout
             android:id="@+id/fl_artwork"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_toRightOf="@+id/ib_list_drag_handle"
             android:layout_marginRight="@dimen/media_player_layout_margin"
             android:layout_centerVertical="true">
         <ImageView
@@ -69,7 +59,18 @@
             android:layout_alignParentRight="true"
             android:background="@null"
             android:src="@drawable/ic_playing"
-            android:visibility="gone"
+            android:visibility="visible"
             android:layout_marginLeft="@dimen/media_player_layout_margin"/>
+
+    <ImageButton
+            android:id="@+id/ib_list_drag_handle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_list_draghandle"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="@dimen/media_player_layout_margin"
+            android:background="@null"
+            android:visibility="visible"/>
 
 </RelativeLayout>
