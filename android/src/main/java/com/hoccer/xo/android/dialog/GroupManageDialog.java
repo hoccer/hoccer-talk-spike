@@ -30,24 +30,17 @@ public class GroupManageDialog extends DialogFragment {
     private ContactsAdapter mAdapter;
     private ArrayList<TalkClientContact> mContactsToInvite;
     private ArrayList<TalkClientContact> mContactsToKick;
-    private ArrayList<TalkClientContact> mContactsFromNearby = new ArrayList<TalkClientContact>();
+    private ArrayList<TalkClientContact> mCurrentContactsInGroup = new ArrayList<TalkClientContact>();
+    private boolean mFromNearby = false;
 
-    public GroupManageDialog() {
-        super();
-
-        mContactsToInvite = new ArrayList();
-        mContactsToKick = new ArrayList();
-    }
-
-    public GroupManageDialog(TalkClientContact group, ArrayList<TalkClientContact> contactsFromNearby, ArrayList<TalkClientContact> contactsFromNearbyToInvite) {
+    public GroupManageDialog(TalkClientContact group, ArrayList<TalkClientContact> currentContactsInGroup, ArrayList<TalkClientContact> contactsFromNearbyToInvite, boolean fromNearby) {
         super();
         mGroup = group;
         mContactsToInvite = new ArrayList();
         mContactsToKick = new ArrayList();
-        if (contactsFromNearby != null) {
-            mContactsFromNearby.addAll(contactsFromNearby);
-            mContactsToInvite.addAll(contactsFromNearbyToInvite);
-        }
+        mCurrentContactsInGroup.addAll(currentContactsInGroup);
+        mContactsToInvite.addAll(contactsFromNearbyToInvite);
+        mFromNearby = fromNearby;
     }
 
     @Override
@@ -57,21 +50,12 @@ public class GroupManageDialog extends DialogFragment {
             mAdapter = new GroupManagementContactsAdapter((XoActivity)getActivity(), mGroup, mContactsToInvite, mContactsToKick);
             mAdapter.onCreate();
             mAdapter.onResume();
-            if (!mContactsFromNearby.isEmpty()){
-                mAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return mContactsFromNearby.contains(contact);
-                    }
-                });
-            } else {
-                mAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return contact.isClient() && (contact.isClientRelated() || contact.isEverRelated());
-                    }
-                });
-            }
+            mAdapter.setFilter(new ContactsAdapter.Filter() {
+                @Override
+                public boolean shouldShow(TalkClientContact contact) {
+                    return mCurrentContactsInGroup.contains(contact) || (contact.isClient() && (contact.isClientRelated() || contact.isEverRelated()));
+                }
+            });
         }
         mAdapter.requestReload();
 
@@ -132,7 +116,7 @@ public class GroupManageDialog extends DialogFragment {
     }
 
     private void updateMemberships() {
-        if (!mContactsFromNearby.isEmpty()) {
+        if (mFromNearby) {
             ((GroupProfileFragment) getTargetFragment()).updateContactLis(mContactsToInvite);
         } else {
             for (TalkClientContact contact : mContactsToInvite) {
