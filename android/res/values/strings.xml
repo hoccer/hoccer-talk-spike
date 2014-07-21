@@ -327,5 +327,6 @@
     <string name="message_state_location">location</string>
     <string name="message_unseen_text">unread</string>
     <string name="message_privat_text">delivered</string>
+    <string name="attachment_failed">Error while downloading File.</string>
 
 </resources>
