@@ -184,9 +184,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         mTransferAgent = agent;
         if (state == State.NEW) {
             switchState(State.REGISTERING);
-        } else if (state != State.COMPLETE && state != State.FAILED) {
-            switchState(State.UPLOADING);
         }
+        switchState(State.UPLOADING);
     }
 
     @Override
@@ -242,6 +241,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
         saveToDatabase();
 
+        LOG.debug("notify all listeners about state change");
         for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);
             listener.onStateChanged(state);
@@ -277,17 +277,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private void doUploadingAction() {
-//        try {
-//            if (!performCheckRequest()) {
-//                switchState(State.PAUSED);
-//                return;
-//            }
-//        } catch (IOException e) {
-//            LOG.error(e);
-//            switchState(State.PAUSED);
-//            return;
-//        }
-
         String filename = this.dataFile;
         if (filename == null || filename.isEmpty()) {
             LOG.error("filename was empty");
@@ -495,6 +484,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
      */
     @Override
     public void onProgress(int progress) {
+        LOG.trace("upload (" + getClientUploadId() + ") progress: " + progress);
         this.progress = progress;
         for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);

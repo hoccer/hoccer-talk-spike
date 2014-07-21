@@ -168,8 +168,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
      * @param id        for avatar, identifying what the avatar belongs to
      * @param timestamp for avatar, takes care of collisions over id
      */
-    public void initializeAsAvatar(String url, String id, Date timestamp) {
+    public void initializeAsAvatar(XoTransferAgent agent, String url, String id, Date timestamp) {
         LOG.info("[new] initializeAsAvatar(url: '" + url + "')");
+        mTransferAgent = agent;
         this.type = Type.AVATAR;
 //        url = checkFilecacheUrl(url); // TODO: ToBeDeleted
         this.downloadUrl = url;
@@ -177,8 +178,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         switchState(State.NEW);
     }
 
-    public void initializeAsAttachment(TalkAttachment attachment, String id, byte[] key) {
+    public void initializeAsAttachment(XoTransferAgent agent, TalkAttachment attachment, String id, byte[] key) {
         LOG.info("[new] initializeAsAttachment(url: '" + attachment.getUrl() + "')");
+        mTransferAgent = agent;
         this.type = Type.ATTACHMENT;
         this.contentType = attachment.getMimeType();
         this.mediaType = attachment.getMediaType();

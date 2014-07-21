@@ -63,7 +63,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                             if (mContent instanceof TalkClientDownload) {
                                 LOG.debug("Will pause download for " + ((TalkClientDownload) mContent).getDownloadUrl());
                                 TalkClientDownload download = (TalkClientDownload) mContent;
-                                XoApplication.getXoClient().cancelDownload(download);
+                                XoApplication.getXoClient().pauseDownload(download);
                             }
                             break;
                         case REQUEST_UPLOAD:
@@ -267,6 +267,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
 
     @Override
     public void onStateChanged(IXoTransferState state) {
+        LOG.debug("transfer state changed to " + state.toString() + ". Update ControlView");
         setTransferAction(getTransferState(mContent));
     }
 
