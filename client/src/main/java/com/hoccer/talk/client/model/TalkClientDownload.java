@@ -247,8 +247,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 break;
             case DECRYPTING:
                 doDecryptingAction();
+                break;
             case DETECTING:
                 doDetectingAction();
+                break;
             case COMPLETE:
                 doCompleteAction();
                 break;
