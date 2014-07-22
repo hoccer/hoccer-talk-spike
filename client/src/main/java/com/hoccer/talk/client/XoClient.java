@@ -699,7 +699,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void setClientAvatar(final TalkClientUpload upload) {
-        LOG.debug("new avatar as upload " + upload);
+        LOG.debug("new client avatar as upload " + upload);
         resetIdle();
         upload.registerTransferListener(new IXoTransferListener() {
             @Override
@@ -776,6 +776,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void setGroupAvatar(final TalkClientContact group, final TalkClientUpload upload) {
+        LOG.debug("new group avatar as upload " + upload);
+        resetIdle();
         upload.registerTransferListener(new IXoTransferListener() {
             @Override
             public void onStateChanged(IXoTransferState state) {
@@ -792,9 +794,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             @Override
             public void onProgress(int progress) {
-
+                // ignore this
             }
         });
+        mTransferAgent.startOrRestartUpload(upload);
     }
 
     private void sendGroupPresenceUpdateWithNewAvatar(final TalkClientContact group, final TalkClientUpload upload) {
