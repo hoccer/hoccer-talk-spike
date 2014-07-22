@@ -22,7 +22,6 @@ import android.widget.*;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
