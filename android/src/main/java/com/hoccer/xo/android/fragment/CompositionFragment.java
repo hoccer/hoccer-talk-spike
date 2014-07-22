@@ -14,13 +14,13 @@ import android.widget.Toast;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
@@ -164,17 +164,17 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
         int imageResource = -1;
         if(mediaType != null) {
-            if(mediaType.equals(ContentMediaTypes.MediaTypeImage)) {
+            if(mediaType.equals(ContentMediaType.IMAGE)) {
                 imageResource = R.drawable.ic_light_image;
-            } else if(mediaType.equals(ContentMediaTypes.MediaTypeVideo)) {
+            } else if(mediaType.equals(ContentMediaType.VIDEO)) {
                 imageResource = R.drawable.ic_light_video;
-            } else if(mediaType.equals(ContentMediaTypes.MediaTypeVCard)) {
+            } else if(mediaType.equals(ContentMediaType.VCARD)) {
                 imageResource = R.drawable.ic_light_contact;
-            } else if(mediaType.equals(ContentMediaTypes.MediaTypeGeolocation)) {
+            } else if(mediaType.equals(ContentMediaType.LOCATION)) {
                 imageResource = R.drawable.ic_light_location;
-            } else if(mediaType.equals(ContentMediaTypes.MediaTypeData)) {
+            } else if(mediaType.equals(ContentMediaType.DATA)) {
                 imageResource = R.drawable.ic_light_data;
-            } else if(mediaType.equals(ContentMediaTypes.MediaTypeAudio)) {
+            } else if(mediaType.equals(ContentMediaType.AUDIO)) {
                 imageResource = R.drawable.ic_light_video;
             }
         } else {

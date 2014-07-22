@@ -9,9 +9,9 @@ import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -122,7 +122,7 @@ public class ImageSelector implements IContentSelector {
                     SelectedContent contentObject = new SelectedContent(intent, "file://" + imageFile.getAbsolutePath());
                     contentObject.setFileName(displayName);
                     contentObject.setContentType("image/jpeg");
-                    contentObject.setContentMediaType(ContentMediaTypes.MediaTypeImage);
+                    contentObject.setContentMediaType(ContentMediaType.IMAGE);
                     contentObject.setContentLength((int) imageFile.length());
                     contentObject.setContentAspectRatio(aspectRatio);
                     return contentObject;
@@ -210,7 +210,7 @@ public class ImageSelector implements IContentSelector {
         SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
         contentObject.setFileName(fileName);
         contentObject.setContentType(mimeType);
-        contentObject.setContentMediaType(ContentMediaTypes.MediaTypeImage);
+        contentObject.setContentMediaType(ContentMediaType.IMAGE);
         contentObject.setContentLength(fileSize);
         contentObject.setContentAspectRatio(aspectRatio);
         return contentObject;
