@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -15,9 +14,9 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.fragment.AudioAttachmentListFragment;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
@@ -243,17 +242,17 @@ public class
         }
 
         if (contentType != null) {
-            if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeImage)) {
+            if (contentType.equalsIgnoreCase(ContentMediaType.IMAGE)) {
                 chatItemType = ChatItemType.ChatItemWithImage;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeVideo)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.VIDEO)) {
                 chatItemType = ChatItemType.ChatItemWithVideo;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeAudio)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.AUDIO)) {
                 chatItemType = ChatItemType.ChatItemWithAudio;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeData)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.DATA)) {
                 chatItemType = ChatItemType.ChatItemWithData;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeVCard)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.VCARD)) {
                 chatItemType = ChatItemType.ChatItemWithContact;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeGeolocation)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.LOCATION)) {
                 chatItemType = ChatItemType.ChatItemWithLocation;
             }
         }

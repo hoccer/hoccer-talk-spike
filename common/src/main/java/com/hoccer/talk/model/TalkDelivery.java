@@ -3,6 +3,7 @@ package com.hoccer.talk.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -513,22 +514,22 @@ public class TalkDelivery {
 
     @JsonIgnore
     public boolean isOutUpToDate() {
-        return  getTimeUpdatedOut().getTime() > getTimeChanged().getTime();
+        return getTimeUpdatedOut().getTime() > getTimeChanged().getTime();
     }
 
     @JsonIgnore
     public boolean isInUpToDate() {
-        return  getTimeUpdatedIn().getTime() > getTimeChanged().getTime();
+        return getTimeUpdatedIn().getTime() > getTimeChanged().getTime();
     }
 
     @JsonIgnore
     public boolean isOutStaleFor(long msec) {
-        return getTimeUpdatedOut().getTime()+msec <= new Date().getTime();
+        return getTimeUpdatedOut().getTime() + msec <= new Date().getTime();
     }
 
     @JsonIgnore
     public boolean isInStaleFor(long msec) {
-        return getTimeUpdatedIn().getTime()+msec <= new Date().getTime();
+        return getTimeUpdatedIn().getTime() + msec <= new Date().getTime();
     }
 
     @JsonIgnore
@@ -687,6 +688,7 @@ public class TalkDelivery {
 
     @JsonIgnore
     public void updateWith(TalkDelivery delivery) {
+        //TODO: Use 'updateWith(delivery, null)' instead...;
         this.messageId = delivery.getMessageId();
         this.messageTag = delivery.getMessageTag();
         this.senderId = delivery.getSenderId();
@@ -752,7 +754,7 @@ public class TalkDelivery {
     }
 
     @JsonIgnore
-    public void updateWith(TalkDelivery delivery, Set<String> fields) {
+    public void updateWith(TalkDelivery delivery, @Nullable Set<String> fields) {
         if (fields == null || fields.contains(TalkDelivery.FIELD_MESSAGE_ID)) {
             this.messageId = delivery.getMessageId();
         }

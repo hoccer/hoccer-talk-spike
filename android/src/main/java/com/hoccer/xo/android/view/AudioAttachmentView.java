@@ -39,7 +39,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     }
 
     public void setMediaItem(AudioAttachmentItem audioAttachmentItem) {
-        if (mAudioAttachmentItem == null || !mAudioAttachmentItem.getFilePath().equals(audioAttachmentItem.getFilePath())) {
+        if (mAudioAttachmentItem == null || !mAudioAttachmentItem.equals(audioAttachmentItem)) {
             mAudioAttachmentItem = audioAttachmentItem;
             updateAudioView();
         }
