@@ -6,10 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,7 +58,6 @@ public class FullscreenPlayerFragment extends Fragment {
     private Runnable mUpdateTimeTask;
     private ValueAnimator mBlinkAnimation;
     private MediaPlayerService mMediaPlayerService;
-    private LoadArtworkTask mCurrentLoadArtworkTask;
 
     private BroadcastReceiver mBroadcastReceiver;
 
@@ -183,10 +179,6 @@ public class FullscreenPlayerFragment extends Fragment {
     }
 
     public void updateTrackData() {
-        if (mCurrentLoadArtworkTask != null && mCurrentLoadArtworkTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mCurrentLoadArtworkTask.cancel(true);
-        }
-
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -212,12 +204,12 @@ public class FullscreenPlayerFragment extends Fragment {
                 mPlaylistIndexLabel.setText(Integer.toString(mMediaPlayerService.getCurrentTrackNumber() + 1));
                 mPlaylistSizeLabel.setText(Integer.toString(mMediaPlayerService.getMediaListSize()));
 
-                if (currentItem.getMetaData().getArtwork() == null) {
-                    mCurrentLoadArtworkTask = new LoadArtworkTask();
-                    mCurrentLoadArtworkTask.execute(currentItem);
-                } else {
-                    mArtworkImageView.setImageDrawable(currentItem.getMetaData().getArtwork());
-                }
+                currentItem.getMetaData().getArtwork(getResources(), new MediaMetaData.ArtworkRetrieverListener() {
+                    @Override
+                    public void onFinished(Drawable artwork) {
+                        mArtworkImageView.setImageDrawable(artwork);
+                    }
+                });
 
                 updatePlayState();
 
@@ -417,29 +409,6 @@ public class FullscreenPlayerFragment extends Fragment {
                 mTimeProgressHandler.postDelayed(this, 1000);
             } catch (Exception e) {
                 LOG.error(e);
-            }
-        }
-    }
-
-    private class LoadArtworkTask extends AsyncTask<AudioAttachmentItem, Void, Drawable> {
-
-        private AudioAttachmentItem mAudioAttachmentItem;
-
-        protected Drawable doInBackground(AudioAttachmentItem... params) {
-            mAudioAttachmentItem = params[0];
-            byte[] artworkRaw = MediaMetaData.getArtwork(mAudioAttachmentItem.getFilePath());
-            if (artworkRaw != null) {
-                return new BitmapDrawable(getResources(), BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
-            } else {
-                return null;
-            }
-        }
-
-        protected void onPostExecute(Drawable artwork) {
-            super.onPostExecute(artwork);
-            if (!this.isCancelled()) {
-                mAudioAttachmentItem.getMetaData().setArtwork(artwork);
-                mArtworkImageView.setImageDrawable(artwork);
             }
         }
     }

@@ -1,10 +1,7 @@
 package com.hoccer.xo.android.view;
 
 import android.content.*;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -22,7 +19,6 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     private Context mContext;
     private AudioAttachmentItem mAudioAttachmentItem;
     private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
-    private DownloadArtworkTask mCurrentTask = null;
 
     private TextView mTitleTextView;
     private TextView mArtistTextView;
@@ -46,7 +42,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     }
 
     public void setMediaItem(AudioAttachmentItem audioAttachmentItem) {
-        if (mAudioAttachmentItem == null || !mAudioAttachmentItem.getFilePath().equals(audioAttachmentItem.getFilePath())) {
+        if (mAudioAttachmentItem == null || !mAudioAttachmentItem.equals(audioAttachmentItem)) {
             mAudioAttachmentItem = audioAttachmentItem;
             updateAudioView();
         }
@@ -127,34 +123,11 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
 
         mArtistTextView.setText(artist.trim());
 
-        if (mCurrentTask != null && mCurrentTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mCurrentTask.cancel(true);
-        }
-        if (mAudioAttachmentItem.getMetaData().getArtwork() == null) {
-            mCurrentTask = new DownloadArtworkTask();
-            mCurrentTask.execute();
-        } else {
-            AudioAttachmentView.this.mArtworkImageView.setImageDrawable(mAudioAttachmentItem.getMetaData().getArtwork());
-        }
-    }
-
-    private class DownloadArtworkTask extends AsyncTask<Void, Void, Drawable> {
-
-        protected Drawable doInBackground(Void... params) {
-            byte[] artworkRaw = MediaMetaData.getArtwork(mAudioAttachmentItem.getFilePath());
-            if (artworkRaw != null) {
-                return new BitmapDrawable(getResources(), BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
-            } else {
-                return null;
+        mAudioAttachmentItem.getMetaData().getArtwork(getResources(), new MediaMetaData.ArtworkRetrieverListener() {
+            @Override
+            public void onFinished(Drawable artwork) {
+                mArtworkImageView.setImageDrawable(artwork);
             }
-        }
-
-        protected void onPostExecute(Drawable artwork) {
-            super.onPostExecute(artwork);
-            if (!this.isCancelled()) {
-                mAudioAttachmentItem.getMetaData().setArtwork(artwork);
-                AudioAttachmentView.this.mArtworkImageView.setImageDrawable(artwork);
-            }
-        }
+        });
     }
 }

@@ -49,7 +49,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     Dao<TalkClientMediaCollection, Integer> mMediaCollections;
     Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
 
-    private List<IXoDownloadListener> mDownloadListeners = new ArrayList<IXoDownloadListener>();
+    private WeakListenerArray<IXoDownloadListener> mDownloadListeners = new WeakListenerArray<IXoDownloadListener>();
     private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListeners = new WeakListenerArray<IXoMediaCollectionListener>();
 
 
@@ -792,13 +792,21 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         deleteBuilder.delete();
     }
 
-    public void deleteTalkClientDownload(TalkClientDownload download) throws SQLException {
+    public void deleteClientDownload(TalkClientDownload download) throws SQLException {
 
         DeleteBuilder<TalkClientDownload, Integer> deleteBuilder = mClientDownloads.deleteBuilder();
         deleteBuilder.where()
                 .eq("clientDownloadId", download.getClientDownloadId());
         int deletedRowsCount = deleteBuilder.delete();
         if (deletedRowsCount > 0) {
+
+            // remove download from all collections
+            List<TalkClientMediaCollection> collections = findAllMediaCollectionsContainingItem(download);
+            for (TalkClientMediaCollection collection : collections) {
+                collection.removeItem(download);
+            }
+
+
             for (IXoDownloadListener listener : mDownloadListeners) {
                 listener.onDownloadRemoved(download);
             }
@@ -874,13 +882,12 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
     }
 
-
     public void registerDownloadListener(IXoDownloadListener listener) {
-        mDownloadListeners.add(listener);
+        mDownloadListeners.registerListener(listener);
     }
 
     public void unregisterDownloadListener(IXoDownloadListener listener) {
-        mDownloadListeners.remove(listener);
+        mDownloadListeners.unregisterListener(listener);
     }
 
     //////// MediaCollection Management ////////

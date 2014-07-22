@@ -104,6 +104,16 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
         }
     }
 
+    // Returns if a given item is contained in this collection or not
+    public boolean hasItem(TalkClientDownload item) {
+        return mItemList.contains(item);
+    }
+
+    // Returns the index of the item if it is contained in this collection or -1
+    public int indexOf(TalkClientDownload item) {
+        return mItemList.indexOf(item);
+    }
+
     // Removes the given item from the collection
     public void removeItem(TalkClientDownload item) {
         int index = mItemList.indexOf(item);
@@ -358,12 +368,5 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
             return false;
         }
         return true;
-    }
-
-    public boolean hasItem(TalkClientDownload item) {
-        if (mItemList.contains(item)) {
-            return true;
-        }
-        return false;
     }
 }

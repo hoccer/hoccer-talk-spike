@@ -335,15 +335,10 @@ public class AudioAttachmentListFragment extends ListFragment {
             try {
                 TalkClientDownload download = (TalkClientDownload) item.getContentObject();
 
-                XoApplication.getXoClient().getDatabase().deleteTalkClientDownload(download);
+                XoApplication.getXoClient().getDatabase().deleteClientDownload(download);
 
                 int messageId = XoApplication.getXoClient().getDatabase().findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
                 XoApplication.getXoClient().getDatabase().deleteMessageById(messageId);
-
-                List<TalkClientMediaCollection> collections = XoApplication.getXoClient().getDatabase().findAllMediaCollectionsContainingItem(download);
-                for (TalkClientMediaCollection collection : collections) {
-                    collection.removeItem(download);
-                }
 
                 mMediaPlayerService.removeMedia(item);
 

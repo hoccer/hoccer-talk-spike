@@ -8,7 +8,6 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
-import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -45,7 +44,9 @@ public class MediaCollectionTest {
 
             @Override
             public <D extends Dao<T, ?>, T> D getDao(Class<T> clazz) throws SQLException {
-                return DaoManager.createDao(mConnectionSource, clazz);
+                D dao = DaoManager.createDao(mConnectionSource, clazz);
+                dao.setObjectCache(true);
+                return dao;
             }
         });
 
@@ -82,7 +83,7 @@ public class MediaCollectionTest {
         try {
             collection = mDatabase.createMediaCollection(collectionName);
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -98,7 +99,7 @@ public class MediaCollectionTest {
         try {
             collectionCopy = mDatabase.findMediaCollectionById(collection.getId());
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -111,7 +112,7 @@ public class MediaCollectionTest {
         try {
         collections = mDatabase.findAllMediaCollections();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -129,7 +130,7 @@ public class MediaCollectionTest {
         try {
             collection = mDatabase.createMediaCollection(collectionName);
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -151,7 +152,7 @@ public class MediaCollectionTest {
         try {
             mDatabase.deleteMediaCollection(collection);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -165,7 +166,7 @@ public class MediaCollectionTest {
             try {
                 collections = mDatabase.findAllMediaCollections();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
                 fail();
             }
 
@@ -186,7 +187,7 @@ public class MediaCollectionTest {
         try {
             collection = mDatabase.createMediaCollection(collectionName);
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -208,7 +209,7 @@ public class MediaCollectionTest {
         try {
             mDatabase.deleteMediaCollectionById(collection.getId());
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -222,7 +223,7 @@ public class MediaCollectionTest {
             try {
                 collections = mDatabase.findAllMediaCollections();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
                 fail();
             }
 
@@ -246,8 +247,7 @@ public class MediaCollectionTest {
             collection = mDatabase.createMediaCollection(collectionName);
             addItemsToCollection(items, collection);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -259,8 +259,7 @@ public class MediaCollectionTest {
             assertEquals(1, collections.size());
             collectionCopy = collections.get(0);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -280,8 +279,7 @@ public class MediaCollectionTest {
             collection = mDatabase.createMediaCollection(collectionName);
             addItemsToCollection(items, collection);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -323,8 +321,7 @@ public class MediaCollectionTest {
             collection.addItem(0, item2); // order: 2 0 1
             collection.addItem(1, item3); // order: 2 3 0 1
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -373,8 +370,7 @@ public class MediaCollectionTest {
             collection.addItem(item2);
             collection.addItem(item3);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -476,8 +472,7 @@ public class MediaCollectionTest {
             collection.addItem(item1);
             collection.addItem(item2);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
         collection.clear();
@@ -513,8 +508,7 @@ public class MediaCollectionTest {
             collection.addItem(item3);
             collection.addItem(item4);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -801,8 +795,7 @@ public class MediaCollectionTest {
             collection.addItem(item3);
             collection.addItem(item4);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -890,8 +883,7 @@ public class MediaCollectionTest {
             collection.addItem(item3);
             collection.addItem(item4);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -959,8 +951,7 @@ public class MediaCollectionTest {
                 collection.addItem(expectedItemList.get(i));
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -992,6 +983,76 @@ public class MediaCollectionTest {
     }
 
     @Test
+    public void testDeleteDownload() {
+        LOG.info("testDeleteDownload");
+
+        final String collectionName = "testDeleteDownload_collection";
+        TalkClientMediaCollection collection = null;
+        TalkClientDownload item0 = new TalkClientDownload();
+        TalkClientDownload item1 = new TalkClientDownload();
+        TalkClientDownload item2 = new TalkClientDownload();
+        try {
+            collection = mDatabase.createMediaCollection(collectionName);
+
+            mDatabase.saveClientDownload(item0);
+            mDatabase.saveClientDownload(item1);
+            mDatabase.saveClientDownload(item2);
+
+            collection.addItem(item0);
+            collection.addItem(item1);
+            collection.addItem(item2);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        final ValueContainer<Boolean> onNameChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
+
+        final TalkClientDownload expectedItemRemoved = item1;
+        final int expectedItemRemovedIndex = 1;
+
+        // register MediaCollection listener
+        TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
+            public void onCollectionNameChanged(TalkClientMediaCollection collection) {
+                onNameChangedCalled.value = true;
+            }
+            public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
+                onItemOrderChangedCalled.value = true;
+            }
+            public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
+                assertEquals(expectedItemRemovedIndex, indexRemoved);
+                assertEquals(expectedItemRemoved, itemRemoved);
+                onItemRemovedCalled.value = true;
+            }
+            public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
+                onItemAddedCalled.value = true;
+            }
+            @Override
+            public void onCollectionCleared(TalkClientMediaCollection collection) {
+                onCollectionClearedCalled.value = true;
+            }
+        };
+        collection.registerListener(listener);
+
+        try {
+            mDatabase.deleteClientDownload(expectedItemRemoved);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        assertFalse(onNameChangedCalled.value);
+        assertFalse(onItemOrderChangedCalled.value);
+        assertTrue(onItemRemovedCalled.value);  // callback is only invoked if MediaCollection instances are cached
+        assertFalse(onItemAddedCalled.value);
+        assertFalse(onCollectionClearedCalled.value);
+    }
+
+    @Test
     public void testToArray() {
         LOG.info("testToArray");
 
@@ -1011,8 +1072,7 @@ public class MediaCollectionTest {
                 collection.addItem(item);
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -1043,7 +1103,7 @@ public class MediaCollectionTest {
                 list.add(item);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -1087,7 +1147,8 @@ public class MediaCollectionTest {
                     .eq("collection_id", collectionId)
                     .query();
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
+            fail();
         }
 
         return relations;

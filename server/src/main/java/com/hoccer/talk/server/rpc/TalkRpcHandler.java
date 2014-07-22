@@ -1934,6 +1934,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
                             delivery.setAttachmentState(nextState);
                             delivery.setTimeChanged(message.getAttachmentUploadStarted());
                             mDatabase.saveDelivery(delivery);
+                            // TODO: guard against delivery.getReceiverId() and receiverId being null
+                            // Or is it just testing if the delivery is not failed?
                             mServer.getDeliveryAgent().requestDelivery(delivery.getReceiverId(), false);
                         }
                     }
