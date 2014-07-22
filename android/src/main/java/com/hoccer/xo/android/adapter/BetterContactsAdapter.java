@@ -9,6 +9,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.AvatarView;
@@ -59,7 +60,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public long getItemId(int i) {
-        return mContactItems.get(i).getTalkClientContact().;
+        return mContactItems.get(i).getTalkClientContact().getClientContactId();
     }
 
     @Override
@@ -71,13 +72,16 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onContactAdded(TalkClientContact contact) {
-
-        updateAll();
+        ContactItem item = new ContactItem(contact);
+        mContactItems.add(item);
+        notifyDataSetChanged();
     }
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-        updateAll();
+        ContactItem item = findContactItemForContact(contact);
+        mContactItems.remove(item);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -88,15 +92,16 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         }
 
         contactItem.update();
+        notifyDataSetChanged();
     }
 
-    // TODO:
     private void updateAll() {
         for (int i = 0; i < mContactItems.size(); i++) {
             ContactItem contactItem = mContactItems.get(i);
             contactItem.update();
         }
 
+        notifyDataSetChanged();
     }
 
     private ContactItem findContactItemForContact(TalkClientContact contact) {
@@ -126,6 +131,19 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onMessageAdded(TalkClientMessage message) {
+        try {
+            if(message.isIncoming()) {
+                TalkDelivery incomingDelivery = message.getIncomingDelivery();
+                TalkClientContact contact = mDatabase.findContactByClientId(incomingDelivery.getReceiverId(), false);
+                if(contact == null) {
+                    return;
+                }
+                ContactItem item = findContactItemForContact(contact);
+                item.update();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         updateAll();
     }
 
@@ -210,6 +228,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
         public ContactItem(TalkClientContact contact) {
             mContact = contact;
+            update();
         }
 
         public TalkClientContact getTalkClientContact() {
