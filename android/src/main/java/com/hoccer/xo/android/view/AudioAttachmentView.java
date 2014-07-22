@@ -12,8 +12,9 @@ import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.cms.MetaData;
 
-public class AudioAttachmentView extends LinearLayout implements View.OnClickListener {
+public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener {
 
     private Context mContext;
     private AudioAttachmentItem mAudioAttachmentItem;
@@ -22,6 +23,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     private TextView mTitleTextView;
     private TextView mArtistTextView;
     private ImageView mArtworkImageView;
+    private MediaMetaData mCurrentMetaData;
 
     private static final Logger LOG = Logger.getLogger(AudioAttachmentView.class);
 
@@ -94,20 +96,26 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     }
 
     private void updateAudioView() {
-        mTitleTextView.setText(mAudioAttachmentItem.getMetaData().getTitleOrFilename(mAudioAttachmentItem.getFilePath()).trim());
+        // ensure that we are not listening to any previous artwork retrieval tasks
+        if(mCurrentMetaData != null) {
+            mCurrentMetaData.unregisterArtworkRetrievalListener(this);
+        }
 
-        String artist = mAudioAttachmentItem.getMetaData().getArtist();
+        mCurrentMetaData = mAudioAttachmentItem.getMetaData();
+        mTitleTextView.setText(mCurrentMetaData.getTitleOrFilename(mAudioAttachmentItem.getFilePath()).trim());
+
+        String artist = mCurrentMetaData.getArtist();
         if (artist == null || artist.isEmpty()) {
             artist = getResources().getString(R.string.media_meta_data_unknown_artist);
         }
 
         mArtistTextView.setText(artist.trim());
 
-        mAudioAttachmentItem.getMetaData().getArtwork(getResources(), new MediaMetaData.ArtworkRetrieverListener() {
-            @Override
-            public void onFinished(Drawable artwork) {
-                mArtworkImageView.setImageDrawable(artwork);
-            }
-        });
+        mCurrentMetaData.getArtwork(getResources(), this);
+    }
+
+    @Override
+    public void onArtworkRetrieveFinished(Drawable artwork) {
+        mArtworkImageView.setImageDrawable(artwork);
     }
 }

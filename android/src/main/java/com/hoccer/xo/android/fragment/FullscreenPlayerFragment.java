@@ -34,7 +34,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
-public class FullscreenPlayerFragment extends Fragment {
+public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.ArtworkRetrieverListener {
 
     static final Logger LOG = Logger.getLogger(FullscreenPlayerFragment.class);
 
@@ -58,6 +58,8 @@ public class FullscreenPlayerFragment extends Fragment {
     private Runnable mUpdateTimeTask;
     private ValueAnimator mBlinkAnimation;
     private MediaPlayerService mMediaPlayerService;
+
+    MediaMetaData mCurrentMetaData = null;
 
     private BroadcastReceiver mBroadcastReceiver;
 
@@ -179,16 +181,21 @@ public class FullscreenPlayerFragment extends Fragment {
     }
 
     public void updateTrackData() {
+        // ensure that we are not listening to any previous artwork retrieval tasks
+        if(mCurrentMetaData != null) {
+            mCurrentMetaData.unregisterArtworkRetrievalListener(this);
+        }
+
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                AudioAttachmentItem currentItem = mMediaPlayerService.getCurrentMediaItem();
-                String trackArtist = currentItem.getMetaData().getArtist();
-                String trackTitle = currentItem.getMetaData().getTitle();
+                mCurrentMetaData = mMediaPlayerService.getCurrentMediaItem().getMetaData();
+                String trackArtist = mCurrentMetaData.getArtist();
+                String trackTitle = mCurrentMetaData.getTitle();
                 int totalDuration = mMediaPlayerService.getTotalDuration();
 
                 if (trackTitle == null || trackTitle.isEmpty()) {
-                    File file = new File(currentItem.getFilePath());
+                    File file = new File(mCurrentMetaData.getFilePath());
                     trackTitle = file.getName();
                 }
 
@@ -204,12 +211,7 @@ public class FullscreenPlayerFragment extends Fragment {
                 mPlaylistIndexLabel.setText(Integer.toString(mMediaPlayerService.getCurrentTrackNumber() + 1));
                 mPlaylistSizeLabel.setText(Integer.toString(mMediaPlayerService.getMediaListSize()));
 
-                currentItem.getMetaData().getArtwork(getResources(), new MediaMetaData.ArtworkRetrieverListener() {
-                    @Override
-                    public void onFinished(Drawable artwork) {
-                        mArtworkImageView.setImageDrawable(artwork);
-                    }
-                });
+                mCurrentMetaData.getArtwork(getResources(), FullscreenPlayerFragment.this);
 
                 updatePlayState();
 
@@ -318,6 +320,11 @@ public class FullscreenPlayerFragment extends Fragment {
                 mRepeatButton.setBackgroundDrawable(buttonStateDrawable);
             }
         });
+    }
+
+    @Override
+    public void onArtworkRetrieveFinished(Drawable artwork) {
+        mArtworkImageView.setImageDrawable(artwork);
     }
 
 

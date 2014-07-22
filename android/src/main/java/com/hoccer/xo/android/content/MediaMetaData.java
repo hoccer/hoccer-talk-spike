@@ -126,17 +126,18 @@ public class MediaMetaData {
 
     // Listener interface for artwork retrieval
     public interface ArtworkRetrieverListener {
-        void onFinished(Drawable artwork);
+        void onArtworkRetrieveFinished(Drawable artwork);
     }
 
     /* Retrieves the artwork asynchronously
-     * Use the listener to perform tasks with the artwork image
+     * Use the listener to perform tasks with the artwork image.
+     * See unregisterTrackRetrievalListener() to remove listener before task is finished
      */
     public void getArtwork(final Resources resources, final ArtworkRetrieverListener listener)
     {
         // already retrieved
         if(mArtworkRetrieved) {
-            listener.onFinished(mArtwork);
+            listener.onArtworkRetrieveFinished(mArtwork);
             return;
         }
 
@@ -177,7 +178,7 @@ public class MediaMetaData {
                     mArtwork = artwork;
                     mArtworkRetrieved = true;
                     for(ArtworkRetrieverListener listener : mArtworkRetrievalListeners) {
-                        listener.onFinished(artwork);
+                        listener.onArtworkRetrieveFinished(artwork);
                     }
 
                     // cleanup listeners and task
@@ -185,6 +186,12 @@ public class MediaMetaData {
                     mArtworkRetrievalTask = null;
                 }
             }.execute();
+        }
+    }
+
+    public void unregisterArtworkRetrievalListener(ArtworkRetrieverListener listener) {
+        if(mArtworkRetrievalListeners != null) {
+            mArtworkRetrievalListeners.unregisterListener(listener);
         }
     }
 }

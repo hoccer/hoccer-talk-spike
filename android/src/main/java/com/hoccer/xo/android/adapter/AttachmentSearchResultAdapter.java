@@ -2,12 +2,8 @@ package com.hoccer.xo.android.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -95,7 +91,7 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
         final ImageView artworkView = (ImageView) attachmentView.findViewById(R.id.iv_artwork);
         attachment.getMetaData().getArtwork(context.getResources(), new MediaMetaData.ArtworkRetrieverListener() {
             @Override
-            public void onFinished(Drawable artwork) {
+            public void onArtworkRetrieveFinished(Drawable artwork) {
                 artworkView.setImageDrawable(artwork);
             }
         });
