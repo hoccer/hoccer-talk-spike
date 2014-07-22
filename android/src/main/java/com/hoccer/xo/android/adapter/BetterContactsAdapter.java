@@ -12,19 +12,13 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
+import com.hoccer.xo.android.view.model.ContactItem;
 
-import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -72,7 +66,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onContactAdded(TalkClientContact contact) {
-        ContactItem item = new ContactItem(contact);
+        ContactItem item = new ContactItem(this, contact);
         mContactItems.add(item);
         notifyDataSetChanged();
     }
@@ -217,75 +211,4 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         updateAll();
     }
 
-
-    private class ContactItem {
-
-        private TalkClientContact mContact;
-
-        private String mLastMessageText;
-        private Date mLastMessageTimeStamp;
-        private long mUnseenMessageCount;
-
-        public ContactItem(TalkClientContact contact) {
-            mContact = contact;
-            update();
-        }
-
-        public TalkClientContact getTalkClientContact() {
-            return mContact;
-        }
-
-        public View getView(View view) {
-            if(view == null) {
-                LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                view = inflater.inflate(R.layout.item_contact_client, null);
-            }
-
-            return configureView(view);
-        }
-
-        private View configureView(View view) {
-            AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
-            TextView nameView = (TextView) view.findViewById(R.id.contact_name);
-            TextView typeView = (TextView) view.findViewById(R.id.contact_type);
-            TextView lastMessageTextView = (TextView) view.findViewById(R.id.contact_last_message);
-            TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
-            TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
-
-            avatarView.setContact(mContact);
-            nameView.setText(mContact.getNickname());
-            setClientType(typeView);
-            setLastMessageTime(lastMessageTimeView);
-            lastMessageTextView.setText(mLastMessageText);
-            unseenView.setText(Long.toString(mUnseenMessageCount));
-
-            return view;
-        }
-
-        private void setClientType(TextView typeView) {
-            if (mContact.isGroup()) {
-                if (mContact.isGroupInvited()) {
-                    typeView.setText(R.string.common_group_invite);
-                } else {
-                    typeView.setText(R.string.common_group);
-                }
-            }
-        }
-
-        private void setLastMessageTime(TextView lastMessageTime) {
-            SimpleDateFormat sdf = new SimpleDateFormat("EEE HH:mm");
-            lastMessageTime.setText(sdf.format(mLastMessageTimeStamp));
-        }
-
-        public void update() {
-            try { // TODO: add proper exception handling
-                mUnseenMessageCount = mDatabase.findUnseenMessageCountByContactId(mContact.getClientContactId());
-                TalkClientMessage message = mDatabase.findLatestMessageByContactId(mContact.getClientContactId());
-                mLastMessageText = message.getText();
-                mLastMessageTimeStamp = message.getTimestamp();
-            } catch (SQLException e) {
-                LOG.error("sql error", e);
-            }
-        }
-    }
 }
