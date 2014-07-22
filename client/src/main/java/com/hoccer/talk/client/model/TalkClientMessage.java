@@ -5,6 +5,7 @@ import com.hoccer.talk.model.TalkMessage;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 import java.util.Set;
@@ -82,6 +83,7 @@ public class TalkClientMessage {
         return outgoingDelivery != null;
     }
 
+    @Nullable
     public String getMessageId() {
         return messageId;
     }
@@ -211,29 +213,29 @@ public class TalkClientMessage {
     }
 
     public void updateIncoming(TalkDelivery delivery, TalkMessage message) {
-        if(outgoingDelivery != null) {
+        if (outgoingDelivery != null) {
             LOG.warn("incoming update for outgoing message");
             return;
         }
         this.message = message;
-        if(incomingDelivery == null) {
+        if (incomingDelivery == null) {
             incomingDelivery = delivery;
         } else {
             Set<String> fields = delivery.nonNullFields();
             incomingDelivery.updateWith(delivery, fields);
-            if(message.getTimeSent() != null) {
+            if (message.getTimeSent() != null) {
                 this.timestamp = message.getTimeSent();
             }
         }
     }
 
     public void updateIncoming(TalkDelivery delivery) {
-        if(outgoingDelivery != null) {
+        if (outgoingDelivery != null) {
             LOG.error("incoming incremental update for outgoing message");
             return;
         }
 
-        if(incomingDelivery == null) {
+        if (incomingDelivery == null) {
             LOG.error("incremental update for not yet received incoming delivery");
             return;
         }
@@ -243,11 +245,11 @@ public class TalkClientMessage {
     }
 
     public void updateOutgoing(TalkDelivery delivery) {
-        if(incomingDelivery != null) {
+        if (incomingDelivery != null) {
             LOG.warn("outgoing update for incoming message");
             return;
         }
-        if(outgoingDelivery == null) {
+        if (outgoingDelivery == null) {
             outgoingDelivery = delivery;
         } else {
             Set<String> fields = delivery.nonNullFields();
@@ -271,16 +273,16 @@ public class TalkClientMessage {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TalkClientMessage)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TalkClientMessage)) {
+            return false;
+        }
 
         TalkClientMessage message = (TalkClientMessage) o;
 
-        if(messageId != null && message.getMessageId() != null) {
-            return messageId.equals(message.getMessageId());
-        }
-
-        return false;
+        return messageId != null && message.getMessageId() != null && messageId.equals(message.getMessageId());
     }
 
     @Override

@@ -4,7 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.IXoTransferListener;
+import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -29,7 +29,7 @@ import java.util.List;
  * To configure list items it uses instances of ChatMessageItem and its subtypes.
  */
 public class
-        ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListener {
+        ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListenerOld {
 
     /**
      * Number of TalkClientMessage objects in a batch
