@@ -641,5 +641,26 @@ public class TalkClientContact implements Serializable {
         return groupContact;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
+        TalkClientContact that = (TalkClientContact) o;
+
+        if (clientContactId != that.clientContactId) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return clientContactId;
+    }
 }
