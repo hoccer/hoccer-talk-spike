@@ -13,7 +13,6 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.hoccer.talk.content.ContentMediaType;
@@ -135,7 +134,7 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
         }
 
         protected Drawable doInBackground(Void... params) {
-            byte[] artworkRaw = MediaMetaData.getArtwork(mAttachment.getFilePath());
+            byte[] artworkRaw = MediaMetaData.retrieveArtwork(mAttachment.getFilePath());
             if (artworkRaw != null) {
                 return new BitmapDrawable(mResources, BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
             } else {

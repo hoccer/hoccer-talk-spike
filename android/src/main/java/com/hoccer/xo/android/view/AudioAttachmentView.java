@@ -121,7 +121,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     private class DownloadArtworkTask extends AsyncTask<Void, Void, Drawable> {
 
         protected Drawable doInBackground(Void... params) {
-            byte[] artworkRaw = MediaMetaData.getArtwork(mAudioAttachmentItem.getFilePath());
+            byte[] artworkRaw = MediaMetaData.retrieveArtwork(mAudioAttachmentItem.getFilePath());
             if (artworkRaw != null) {
                 return new BitmapDrawable(getResources(), BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
             } else {

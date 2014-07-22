@@ -427,7 +427,7 @@ public class FullscreenPlayerFragment extends Fragment {
 
         protected Drawable doInBackground(AudioAttachmentItem... params) {
             mAudioAttachmentItem = params[0];
-            byte[] artworkRaw = MediaMetaData.getArtwork(mAudioAttachmentItem.getFilePath());
+            byte[] artworkRaw = MediaMetaData.retrieveArtwork(mAudioAttachmentItem.getFilePath());
             if (artworkRaw != null) {
                 return new BitmapDrawable(getResources(), BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
             } else {

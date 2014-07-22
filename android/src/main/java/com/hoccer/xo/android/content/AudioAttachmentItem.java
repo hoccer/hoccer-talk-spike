@@ -26,7 +26,7 @@ public class AudioAttachmentItem {
         if (withMetadata) {
             String path = Uri.parse(mediaFilePath).getPath();
             try {
-                mi.setMetaData(MediaMetaData.create(path));
+                mi.setMetaData(MediaMetaData.retrieveMetaData(path));
             } catch (Exception e) {
                 LOG.warn("Cannot load meta-data for file.");
                 return null;

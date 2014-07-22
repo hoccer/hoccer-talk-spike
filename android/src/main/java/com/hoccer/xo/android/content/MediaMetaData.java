@@ -3,16 +3,75 @@ package com.hoccer.xo.android.content;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.util.Log;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MediaMetaData {
 
     private static final Logger LOG = Logger.getLogger(MediaMetaData.class);
+
+    private static Map<String, MediaMetaData> mMetaDataCache = new HashMap<String, MediaMetaData>();
+
+    public static MediaMetaData retrieveMetaData(String mediaFilePath) throws IllegalArgumentException {
+
+        // read and add to cache if not present
+        if(!mMetaDataCache.containsKey(mediaFilePath)) {
+
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            MediaMetaData metaData = new MediaMetaData();
+            retriever.setDataSource(mediaFilePath);
+
+            String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+            if (album == null) {
+                album = retriever.extractMetadata(25); // workaround bug on Galaxy S3 and S4
+            }
+            metaData.setAlbumTitle(album);
+
+            String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+            if (artist == null) {
+                artist = retriever.extractMetadata(26); // workaround bug on Galaxy S3 and S4
+            }
+            metaData.setArtist(artist);
+
+            String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+            if (title == null) {
+                title = retriever.extractMetadata(31); // workaround bug on Galaxy S3 and S4
+            }
+            metaData.setTitle(title);
+
+            metaData.setMimeType(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE));
+
+            if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) != null) {
+                metaData.setHasAudio(true);
+            }
+
+            if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) != null) {
+                metaData.setHasVideo(true);
+            }
+
+            mMetaDataCache.put(mediaFilePath, metaData);
+        }
+
+        return mMetaDataCache.get(mediaFilePath);
+    }
+
+    public static byte[] retrieveArtwork(String filePath) {
+        String path = Uri.parse(filePath).getPath();
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(path);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return retriever.getEmbeddedPicture();
+    }
 
     private String mTitle = null;
     private String mArtist = null;
@@ -88,67 +147,4 @@ public class MediaMetaData {
     public void setArtwork(Drawable artwork) {
         mArtwork = artwork;
     }
-
-    public static MediaMetaData create(String pMediaFilePath) throws IllegalArgumentException {
-
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-
-        MediaMetaData metaData = new MediaMetaData();
-
-        retriever.setDataSource(pMediaFilePath);
-
-        String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-        if(album == null) {
-            album = retriever.extractMetadata(25); // workaround bug on Galaxy S3 and S4
-        }
-        metaData.setAlbumTitle(album);
-
-        String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-        if(artist == null) {
-            artist = retriever.extractMetadata(26); // workaround bug on Galaxy S3 and S4
-        }
-        metaData.setArtist(artist);
-
-        String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-        if(title == null) {
-            title = retriever.extractMetadata(31); // workaround bug on Galaxy S3 and S4
-        }
-        metaData.setTitle(title);
-
-        metaData.setMimeType(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE));
-
-        if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) != null) {
-            metaData.setHasAudio(true);
-        }
-
-        if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) != null) {
-            metaData.setHasVideo(true);
-        }
-
-        return metaData;
-    }
-
-    public static List<MediaMetaData> create(List<String> pMediaFilePathList) throws IllegalArgumentException {
-        ArrayList<MediaMetaData> metaDataList = new ArrayList<MediaMetaData>();
-
-        for (String mediaFilePath : pMediaFilePathList) {
-            metaDataList.add(create(mediaFilePath));
-        }
-
-        return metaDataList;
-    }
-
-    public static byte[] getArtwork(String filePath) {
-        String path = Uri.parse(filePath).getPath();
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        try {
-            retriever.setDataSource(path);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        return retriever.getEmbeddedPicture();
-    }
-
 }
