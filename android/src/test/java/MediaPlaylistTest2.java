@@ -1,9 +1,11 @@
-import com.hoccer.talk.client.IXoClientDatabaseBackend;
-import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.*;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
-import com.hoccer.xo.android.content.audio.MediaPlaylist;
+import com.hoccer.xo.android.content.UserPlaylist;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -13,12 +15,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 
 import static junit.framework. TestCase.assertTrue;
 import static junit.framework. TestCase.assertFalse;
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.fail;
 
 public class MediaPlaylistTest2 {
@@ -205,10 +207,26 @@ public class MediaPlaylistTest2 {
     }
 
     @Test
-    public void testUserPlaylist() {
+    public void testUserPlaylist() throws SQLException {
         LOG.info("testUserPlaylist");
 
+        TalkClientContact user = new TalkClientContact();
+        try {
+            mDatabase.saveContact(user);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        int expectedItemCount = 3;
+        for(int i = 0; i < expectedItemCount; i++) {
+            createAudioDownloadWithUser(user);
+        }
+
         // create user playlist
+        UserPlaylist playlist = new UserPlaylist(mDatabase, null);
+
+        assertEquals(expectedItemCount, playlist.size());
 
         // add item
 
@@ -224,6 +242,43 @@ public class MediaPlaylistTest2 {
         // add item
 
         // remove item
+    }
+
+    //////// Helpers ////////
+
+    private TalkClientDownload createAudioDownloadWithUser(TalkClientContact user) {
+        // create download
+        TalkClientDownload result = new TalkClientDownload();
+
+        // set private fields via reflection two avoid a dozen of objects which usually make up the download
+        try {
+            Class<?> downloadClass = result.getClass();
+            Field mediaTypeField = downloadClass.getDeclaredField("mediaType");
+            mediaTypeField.setAccessible(true);
+            mediaTypeField.set(result, ContentMediaType.AUDIO);
+
+            Field stateField = downloadClass.getDeclaredField("state");
+            stateField.setAccessible(true);
+            stateField.set(result, TalkClientDownload.State.COMPLETE);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        // create message for user and link download
+        TalkClientMessage message = new TalkClientMessage();
+        message.setAttachmentDownload(result);
+        message.setConversationContact(user);
+
+        try {
+            mDatabase.saveClientDownload(result);
+            mDatabase.saveClientMessage(message);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        return result;
     }
 
     private class ValueContainer<T> {
