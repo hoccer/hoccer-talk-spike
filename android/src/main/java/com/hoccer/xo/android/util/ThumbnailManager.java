@@ -371,7 +371,7 @@ public class ThumbnailManager {
         if (result != null) {
             saveToThumbnailDirectory(result, uri, tag);
         }
-        return null;
+        return result;
     }
 
     private Bitmap renderThumbnailForVideo(Bitmap bitmap, int maskResource) {

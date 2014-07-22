@@ -228,7 +228,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private boolean isEmptyGroup() {
-        return (mContact != null && mContact.isEmptyGroup());
+        return (mContact != null && mContact.isGroup() && mContact.isEmptyGroup());
     }
 
     private void sendComposedMessage() {
@@ -240,11 +240,9 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         if (isBlocked()) {
             Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
             isAborted = true;
-        } else if (mContact.isGroup()) {
-            if (isEmptyGroup()) {
+        } else if (isEmptyGroup()) {
                 showAlertSendMessageNotPossible();
                 return;
-            }
         }
 
         String messageText = mTextEdit.getText().toString();
