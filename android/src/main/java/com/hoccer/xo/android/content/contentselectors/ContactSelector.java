@@ -7,7 +7,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import com.hoccer.xo.android.content.ContentMediaTypes;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
@@ -81,7 +81,7 @@ public class ContactSelector implements IContentSelector {
         SelectedContent contentObject = new SelectedContent(intent, contentUriPath);
         contentObject.setFileName("Contact");
         contentObject.setContentType(ContactsContract.Contacts.CONTENT_VCARD_TYPE);
-        contentObject.setContentMediaType(ContentMediaTypes.MediaTypeVCard);
+        contentObject.setContentMediaType(ContentMediaType.VCARD);
 
 
         AssetFileDescriptor fileDescriptor = null;

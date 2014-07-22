@@ -44,8 +44,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private MediaPlayer mMediaPlayer = null;
     private NotificationCompat.Builder mBuilder;
 
-    private boolean paused = false;
-    private boolean stopped = true;
+    private boolean mPaused = false;
+    private boolean mStopped = true;
 
     private AudioAttachmentItem mCurrentAudioAttachmentItem;
     private AudioAttachmentItem mTempAudioAttachmentItem;
@@ -95,7 +95,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                     int headSetState = intent.getIntExtra("state", 0);
 
                     if (headSetState == 0) {
-                        pause();
+                        if (mMediaPlayer != null && !isStopped()) {
+                            pause();
+                        }
                     }
                 }
             }
@@ -378,6 +380,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     public void pause() {
         mMediaPlayer.pause();
+
         setPaused(true);
         setStopped(false);
         if (isNotificationActive()) {
@@ -388,17 +391,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     public void stop() {
         if (mMediaPlayer != null) {
-            mAudioManager.abandonAudioFocus(mAudioFocusChangeListener);
             mMediaPlayer.release();
             mMediaPlayer = null;
-            setPaused(false);
-            setStopped(true);
-            mPlaylist.clear();
-            if (isNotificationActive()) {
-                removeNotification();
-            }
-            broadcastPlayStateChanged();
         }
+        mAudioManager.abandonAudioFocus(mAudioFocusChangeListener);
+        setPaused(false);
+        setStopped(true);
+        mPlaylist.clear();
+        if (isNotificationActive()) {
+            removeNotification();
+        }
+        broadcastPlayStateChanged();
     }
 
     private boolean isNotificationActive() {
@@ -436,11 +439,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public boolean isPaused() {
-        return paused;
+        return mPaused;
     }
 
     public boolean isStopped() {
-        return stopped;
+        return mStopped;
     }
 
     public int getTotalDuration() {
@@ -468,7 +471,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
         try {
             TalkClientMessage message;
-            if (getCurrentMediaItem().getContentObject() instanceof  TalkClientDownload) {
+            if (getCurrentMediaItem().getContentObject() instanceof TalkClientDownload) {
                 int attachmentId = ((TalkClientDownload) getCurrentMediaItem().getContentObject()).getClientDownloadId();
                 message = XoApplication.getXoClient().getDatabase().findClientMessageByTalkClientDownloadId(attachmentId);
                 if (message != null) {
@@ -544,11 +547,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     private void setPaused(boolean paused) {
-        this.paused = paused;
+        this.mPaused = paused;
     }
 
     private void setStopped(boolean stopped) {
-        this.stopped = stopped;
+        this.mStopped = stopped;
     }
 
 }
