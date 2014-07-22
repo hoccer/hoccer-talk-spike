@@ -26,6 +26,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
+/**
+ * TODO:
+ * - add SMS Token Support
+ * - add filtering
+ * - add sort by unseen messages
+ */
 public class BetterContactsAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
 
     private List<ContactItem> mContactItems;
@@ -83,6 +90,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         contactItem.update();
     }
 
+    // TODO:
     private void updateAll() {
         for (int i = 0; i < mContactItems.size(); i++) {
             ContactItem contactItem = mContactItems.get(i);

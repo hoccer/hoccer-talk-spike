@@ -640,4 +640,6 @@ public class TalkClientContact implements Serializable {
         groupContact.updateGroupTag(groupTag);
         return groupContact;
     }
+
+
 }
