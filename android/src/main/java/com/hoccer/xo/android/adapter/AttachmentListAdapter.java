@@ -246,13 +246,15 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     @Override
     public void drop(int from, int to) {
-        AudioAttachmentItem item = mAttachmentItems.get(from);
-        mAttachmentItems.remove(from);
-        mAttachmentItems.set(to, item);
-        if (mCollection != null) {
-            mCollection.reorderItemIndex(from, to);
-        }
+        if (from != to) {
+            AudioAttachmentItem item = mAttachmentItems.get(from);
+            mAttachmentItems.remove(from);
+            mAttachmentItems.set(to, item);
 
+            if (mCollection != null) {
+                mCollection.reorderItemIndex(from, to);
+            }
+        }
         // TODO: update mSelections
     }
 
