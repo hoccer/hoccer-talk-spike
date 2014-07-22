@@ -20,8 +20,6 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
-import com.hoccer.xo.android.adapter.ContactsAdapter;
-import com.hoccer.xo.android.adapter.RichContactsAdapter;
 import com.hoccer.xo.android.content.*;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
@@ -191,13 +189,23 @@ public abstract class XoActivity extends FragmentActivity {
     public void startExternalActivity(Intent intent) {
         LOG.debug(getClass() + " starting external activity " + intent.toString());
         setBackgroundActive();
-        startActivity(intent);
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG);
+            e.printStackTrace();
+        }
     }
 
     public void startExternalActivityForResult(Intent intent, int requestCode) {
         LOG.debug(getClass() + " starting external activity " +  intent.toString() + " for request code: " + requestCode);
         setBackgroundActive();
-        startActivityForResult(intent, requestCode);
+        try {
+            startActivityForResult(intent, requestCode);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG);
+            e.printStackTrace();
+        }
     }
 
     @Override

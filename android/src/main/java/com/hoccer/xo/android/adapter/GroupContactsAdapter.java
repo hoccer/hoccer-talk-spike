@@ -92,16 +92,22 @@ public class GroupContactsAdapter extends ContactsAdapter {
             }
             for (TalkClientMembership groupMembership : group.getGroupMemberships()) {
                 TalkGroupMember groupMember = groupMembership.getMember();
-                if (groupMember.getClientId().equals(contact.getClientId())) {
-                    if (groupMember.getRole().equals(TalkGroupMember.ROLE_ADMIN)) {
-                        return true;
-                    }
+                if (groupMember == null) {
+                    continue;
+                }
+                String groupMemberClientId = groupMember.getClientId();
+                String contactClientId = contact.getClientId();
+                if (groupMemberClientId == null || contactClientId == null) {
+                    continue;
+                }
+                if (groupMemberClientId.equals(contactClientId)) {
+                    return groupMember.isAdmin();
                 }
             }
         } else if (contact.isSelf()) {
             TalkGroupMember member = mGroup.getGroupMember();
-            if (member != null && member.getRole().equals(TalkGroupMember.ROLE_ADMIN)) {
-                return true;
+            if (member != null) {
+                return member.isAdmin();
             }
         }
         return false;

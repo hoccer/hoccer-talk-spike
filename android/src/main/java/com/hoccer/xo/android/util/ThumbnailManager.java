@@ -289,7 +289,9 @@ public class ThumbnailManager {
                 mImageToLoad.mImageView.setImageDrawable(mStubDrawable);
             }
             synchronized (mRunningRenderJobs) {
-                mRunningRenderJobs.remove(mThumbnailUri);
+                if (mRunningRenderJobs.containsKey(mThumbnailUri)) {
+                    mRunningRenderJobs.remove(mThumbnailUri);
+                }
             }
         }
     }
@@ -328,7 +330,9 @@ public class ThumbnailManager {
             }
 
             synchronized (mRunningRenderJobs) {
-                mRunningRenderJobs.remove(mThumbnailUri);
+                if (mRunningRenderJobs.containsKey(mThumbnailUri)) {
+                    mRunningRenderJobs.remove(mThumbnailUri);
+                }
             }
         }
     }
