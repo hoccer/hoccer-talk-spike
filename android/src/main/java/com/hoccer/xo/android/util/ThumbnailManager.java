@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -37,7 +38,7 @@ public class ThumbnailManager {
     private static Logger LOG = Logger.getLogger(ThumbnailManager.class);
     private static int DEFAULT_HEIGHT_DP = 300;
     private static ThumbnailManager mInstance;
-    private Map<String, AsyncTask> mRunningRenderJobs;
+    private final Map<String, AsyncTask> mRunningRenderJobs;
     private LruCache mMemoryLruCache;
 
     private Context mContext;
@@ -46,6 +47,7 @@ public class ThumbnailManager {
 
     private ThumbnailManager(Context context) {
         mContext = context;
+        mRunningRenderJobs = new ConcurrentHashMap<String, AsyncTask>();
         init(context);
     }
 
@@ -62,7 +64,6 @@ public class ThumbnailManager {
         final int cacheSize = 1024 * 1024 * memClass / 8;
         mMemoryLruCache = new LruCache(cacheSize);
         mStubDrawable = new ColorDrawable(Color.LTGRAY);
-        mRunningRenderJobs = Collections.synchronizedMap(new HashMap<String, AsyncTask>());
     }
 
     /**
@@ -102,6 +103,7 @@ public class ThumbnailManager {
         return XoApplication.getThumbnailDirectory() + File.separator + taggedFilename;
     }
 
+    // TODO: use DiskLruCache instead
     private Bitmap loadThumbnailForUri(String uri, String tag) {
         String thumbnailUri = taggedThumbnailUri(uri, tag);
         File thumbnail = new File(thumbnailUri);
@@ -115,6 +117,7 @@ public class ThumbnailManager {
         return bitmap;
     }
 
+    // TODO: use DiskLruCache instead
     private void saveToThumbnailDirectory(Bitmap bitmap, String uri, String tag) {
         File destination = new File(taggedThumbnailUri(uri, tag));
         try {
@@ -212,6 +215,7 @@ public class ThumbnailManager {
         return null;
     }
 
+    // TODO: use ThumbnailUtils methods for all this.
     private Bitmap renderImageThumbnail(File file, int maskResource) {
         // Dry-loading of bitmap to calculate sample size
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -306,8 +310,8 @@ public class ThumbnailManager {
 
             Bitmap result = createVideoThumbnail(mUri, mMaskResource, mTag);
             if (result != null) {
-                String thumbnailUri = taggedThumbnailUri(mUri, mTag);
-                mMemoryLruCache.put(thumbnailUri, result);
+                mThumbnailUri = taggedThumbnailUri(mUri, mTag);
+                mMemoryLruCache.put(mThumbnailUri, result);
             }
             return result;
         }
@@ -367,7 +371,14 @@ public class ThumbnailManager {
     private Bitmap createVideoThumbnail(String uri, int maskResource, String tag) {
         String path = getRealPathFromURI(Uri.parse(uri), mContext);
         Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Images.Thumbnails.MINI_KIND);
-        Bitmap result = renderThumbnailForVideo(bitmap, maskResource);
+        Bitmap result;
+        // scale up if necessary
+        if (bitmap.getHeight() < DEFAULT_HEIGHT_DP) {
+            Bitmap scaled = scaleBitmap(bitmap, mContext);
+            result = renderThumbnailForVideo(scaled, maskResource);
+        } else {
+            result = renderThumbnailForVideo(bitmap, maskResource);
+        }
         if (result != null) {
             saveToThumbnailDirectory(result, uri, tag);
         }
