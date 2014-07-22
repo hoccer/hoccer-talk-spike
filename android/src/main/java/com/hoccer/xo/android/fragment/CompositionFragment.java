@@ -240,10 +240,11 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         if (isBlocked()) {
             Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
             isAborted = true;
-        } else if (isEmptyGroup()) {
-            //Toast.makeText(getXoActivity(), R.string.error_send_message_empty_group, Toast.LENGTH_LONG).show();
-            showAlertSendMessageNotPossible();
-            return;
+        } else if (mContact.isGroup()) {
+            if (isEmptyGroup()) {
+                showAlertSendMessageNotPossible();
+                return;
+            }
         }
 
         String messageText = mTextEdit.getText().toString();
