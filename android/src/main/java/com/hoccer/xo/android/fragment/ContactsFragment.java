@@ -132,6 +132,9 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
 
     private void clearNearbyHistory() {
         try {
+            if (mDatabase == null) {
+                return;
+            }
             List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
             for(TalkClientMessage message : messages) {
                 message.markAsDeleted();
