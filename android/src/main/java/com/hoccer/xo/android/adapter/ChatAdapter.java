@@ -61,10 +61,10 @@ public class
         mListView = listView;
         mContact = contact;
 
-        initialize2();
+        initializeFull();
     }
 
-    protected void initialize2() {
+    protected void initializeFull() {
         int totalMessageCount = 0;
         try {
             final List<TalkClientMessage> messages = mDatabase.findMessagesByContactId(mContact.getClientContactId(), -1, -1);
