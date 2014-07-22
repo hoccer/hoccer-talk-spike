@@ -314,7 +314,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
             try {
                 TalkClientDownload download = (TalkClientDownload) item.getContentObject();
 
-                XoApplication.getXoClient().getDatabase().deleteTalkClientDownload(download);
+                XoApplication.getXoClient().getDatabase().deleteClientDownload(download);
 
                 int messageId = XoApplication.getXoClient().getDatabase().findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
                 XoApplication.getXoClient().getDatabase().deleteMessageById(messageId);

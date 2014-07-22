@@ -31,10 +31,6 @@ public interface IXoMediaCollectionDatabase {
 
     void unregisterListener(IXoMediaCollectionListener listener);
 
-    void registerDownloadListener(IXoDownloadListener listener);
-
-    void unregisterDownloadListener(IXoDownloadListener listener);
-
     Dao<TalkClientMediaCollection, Integer> getMediaCollectionDao();
 
     Dao<TalkClientMediaCollectionRelation, Integer> getMediaCollectionRelationDao();

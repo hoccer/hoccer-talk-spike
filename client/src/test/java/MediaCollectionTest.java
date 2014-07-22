@@ -8,7 +8,6 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
-import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -45,7 +44,9 @@ public class MediaCollectionTest {
 
             @Override
             public <D extends Dao<T, ?>, T> D getDao(Class<T> clazz) throws SQLException {
-                return DaoManager.createDao(mConnectionSource, clazz);
+                D dao = DaoManager.createDao(mConnectionSource, clazz);
+                dao.setObjectCache(true);
+                return dao;
             }
         });
 
@@ -1038,7 +1039,7 @@ public class MediaCollectionTest {
         collection.registerListener(listener);
 
         try {
-            mDatabase.deleteTalkClientDownload(expectedItemRemoved);
+            mDatabase.deleteClientDownload(expectedItemRemoved);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -1046,7 +1047,7 @@ public class MediaCollectionTest {
 
         assertFalse(onNameChangedCalled.value);
         assertFalse(onItemOrderChangedCalled.value);
-        assertTrue(onItemRemovedCalled.value);
+        assertTrue(onItemRemovedCalled.value);  // callback is only invoked if MediaCollection instances are cached
         assertFalse(onItemAddedCalled.value);
         assertFalse(onCollectionClearedCalled.value);
     }

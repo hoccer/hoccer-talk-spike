@@ -792,13 +792,21 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         deleteBuilder.delete();
     }
 
-    public void deleteTalkClientDownload(TalkClientDownload download) throws SQLException {
+    public void deleteClientDownload(TalkClientDownload download) throws SQLException {
 
         DeleteBuilder<TalkClientDownload, Integer> deleteBuilder = mClientDownloads.deleteBuilder();
         deleteBuilder.where()
                 .eq("clientDownloadId", download.getClientDownloadId());
         int deletedRowsCount = deleteBuilder.delete();
         if (deletedRowsCount > 0) {
+
+            // remove download from all collections
+            List<TalkClientMediaCollection> collections = findAllMediaCollectionsContainingItem(download);
+            for (TalkClientMediaCollection collection : collections) {
+                collection.removeItem(download);
+            }
+
+
             for (IXoDownloadListener listener : mDownloadListeners) {
                 listener.onDownloadRemoved(download);
             }
@@ -872,6 +880,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
                 break;
         }
+    }
+
+    public void registerDownloadListener(IXoDownloadListener listener) {
+        mDownloadListeners.registerListener(listener);
+    }
+
+    public void unregisterDownloadListener(IXoDownloadListener listener) {
+        mDownloadListeners.unregisterListener(listener);
     }
 
     //////// MediaCollection Management ////////
@@ -960,16 +976,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     @Override
     public void unregisterListener(IXoMediaCollectionListener listener) {
         mMediaCollectionListeners.unregisterListener(listener);
-    }
-
-    @Override
-    public void registerDownloadListener(IXoDownloadListener listener) {
-        mDownloadListeners.registerListener(listener);
-    }
-
-    @Override
-    public void unregisterDownloadListener(IXoDownloadListener listener) {
-        mDownloadListeners.unregisterListener(listener);
     }
 
     // The returned Dao should not be used directly to alter the database, use TalkClientMediaCollection instead
