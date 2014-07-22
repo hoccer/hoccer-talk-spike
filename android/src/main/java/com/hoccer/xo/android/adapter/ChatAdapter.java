@@ -17,6 +17,7 @@ import com.hoccer.xo.android.view.chat.attachments.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -60,7 +61,20 @@ public class
         mListView = listView;
         mContact = contact;
 
-        initialize();
+        initialize2();
+    }
+
+    protected void initialize2() {
+        int totalMessageCount = 0;
+        try {
+            final List<TalkClientMessage> messages = mDatabase.findMessagesByContactId(mContact.getClientContactId(), -1, -1);
+            mChatMessageItems = Collections.synchronizedList(new ArrayList<ChatMessageItem>(totalMessageCount));
+            for (int i = 0; i < messages.size(); i++) {
+                mChatMessageItems.add(getItemForMessage(messages.get(i)));
+            }
+        } catch (SQLException e) {
+            LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
+        }
     }
 
     protected void initialize() {
@@ -70,7 +84,8 @@ public class
         } catch (SQLException e) {
             LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
         }
-        mChatMessageItems = new ArrayList<ChatMessageItem>(totalMessageCount);
+
+        mChatMessageItems = Collections.synchronizedList(new ArrayList<ChatMessageItem>(totalMessageCount));
         for (int i = 0; i < totalMessageCount; i++) {
             mChatMessageItems.add(null);
         }
@@ -86,12 +101,16 @@ public class
      * @param offset Index of the first TalkClientMessage object
      */
     public synchronized void loadNextMessages(int offset) {
+        if(true) {
+            return;
+        }
         try {
             long batchSize = BATCH_SIZE;
             if(offset < 0) {
                 batchSize = batchSize + offset;
                 offset = 0;
             }
+            LOG.debug("loading Messages " + offset + "-" + Math.max((offset - batchSize -1), 0));
             final List<TalkClientMessage> messagesBatch = mDatabase.findMessagesByContactId(mContact.getClientContactId(), batchSize, offset);
             for (int i = 0; i < messagesBatch.size(); i++) {
                 ChatMessageItem messageItem = getItemForMessage(messagesBatch.get(i));
@@ -265,6 +284,17 @@ public class
     public void onMessageAdded(final TalkClientMessage message) {
         LOG.debug("onMessageAdded()");
         if (message.getConversationContact() == mContact && isValidMessage(message)) {
+            for (int i = 0; i < mChatMessageItems.size(); i++) {
+                ChatMessageItem chatMessageItem = mChatMessageItems.get(i);
+                if(chatMessageItem == null) {
+                    continue;
+                }
+                if(message.getClientMessageId() == chatMessageItem.getMessage().getClientMessageId()) {
+                    LOG.warn("tried to add a \"new\" message which was already added!");
+                    return;
+                }
+            }
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

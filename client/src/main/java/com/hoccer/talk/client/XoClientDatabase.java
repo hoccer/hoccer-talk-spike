@@ -465,9 +465,13 @@ public class XoClientDatabase {
 
     public List<TalkClientMessage> findMessagesByContactId(int contactId, long count, long offset) throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
-        builder.limit(count);
+        if(count >= 0) {
+            builder.limit(count);
+        }
         builder.orderBy("timestamp", true);
-        builder.offset(offset);
+        if(offset >= 0) {
+            builder.offset(offset);
+        }
         Where<TalkClientMessage, Integer> where = builder.where()
                 .eq("conversationContact_id", contactId)
                 .eq("deleted", false)
