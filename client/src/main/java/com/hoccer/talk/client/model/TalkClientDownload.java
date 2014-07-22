@@ -266,7 +266,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
         saveToDatabase();
 
-        for (IXoTransferListener listener : mTransferListeners) {
+        for(int i = 0; i < mTransferListeners.size(); i++) {
+            IXoTransferListener listener = mTransferListeners.get(i);
             listener.onStateChanged(state);
         }
     }
@@ -378,7 +379,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 bytesToGo -= bytesRead;
                 for(int i = 0; i < mTransferListeners.size(); i++) {
                     IXoTransferListener listener = mTransferListeners.get(i);
-                    listener.onProgress(downloadProgress);
+                    listener.onProgressUpdated(downloadProgress, getTransferLength());
                 }
             }
         } catch (IOException e) {

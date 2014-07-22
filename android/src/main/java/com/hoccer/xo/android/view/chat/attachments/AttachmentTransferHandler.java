@@ -92,29 +92,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
         }
     }
 
-    private ContentState getTransferState(IContentObject object) {
-        XoTransferAgent agent = XoApplication.getXoClient().getTransferAgent();
-        ContentState state = object.getContentState();
-        if (object instanceof TalkClientDownload) {
-            TalkClientDownload download = (TalkClientDownload) object;
-            if (agent.isDownloadActive(download)) {
-                return state;
-            } else {
-                return ContentState.DOWNLOAD_PAUSED;
-            }
-        }
-        if (object instanceof TalkClientUpload) {
-            TalkClientUpload upload = (TalkClientUpload) object;
-            if (agent.isUploadActive(upload)) {
-                return state;
-            } else {
-                return ContentState.UPLOAD_PAUSED;
-            }
-        }
-
-        return state;
-    }
-
     private void setTransferAction(ContentState state) {
         mTransferControl.setEnabled(true);
         mTransferAction = TransferAction.NONE;
@@ -199,7 +176,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         progress = mContent.getTransferProgress();
                         if (length == 0 || progress == 0) {
                             length = 360;
-                            progress = 18;
+//                            progress = 18;
                         }
                         mTransferControl.prepareToDownload();
                         mTransferControl.setText(res.getString(R.string.transfer_state_downloading));

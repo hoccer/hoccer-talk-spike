@@ -11,7 +11,12 @@ import android.util.AttributeSet;
 import android.view.View;
 import com.hoccer.xo.release.R;
 
+import org.apache.log4j.Logger;
+
 public class AttachmentTransferControlView extends View {
+
+    private static final Logger LOG = Logger.getLogger(AttachmentTransferControlView.class);
+
     private final float SPINNER_LENGTH = 50;
     private final float SPINNER_STEP = 1.5f;
 

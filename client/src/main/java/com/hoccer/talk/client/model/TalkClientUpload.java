@@ -452,7 +452,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
      */
     @Override
     public void onProgress(int progress) {
-        LOG.info("upload (" + getClientUploadId() + ") progress: " + progress + " of " + getContentLength());
+        LOG.trace("upload (" + getClientUploadId() + ") progress: " + progress + " of " + getContentLength());
         this.progress = progress;
         for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);
