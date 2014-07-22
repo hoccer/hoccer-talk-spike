@@ -92,13 +92,13 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
         View artworkContainer = attachmentView.findViewById(R.id.fl_artwork);
         artworkContainer.setVisibility(View.VISIBLE);
 
-        ImageView artworkView = (ImageView) attachmentView.findViewById(R.id.iv_artwork);
-        if (attachment.getMetaData().getArtwork() == null) {
-            AsyncLoadImageTask loadImageTask = new AsyncLoadImageTask(context, artworkView, attachment);
-            loadImageTask.execute();
-        } else {
-            artworkView.setImageDrawable(attachment.getMetaData().getArtwork());
-        }
+        final ImageView artworkView = (ImageView) attachmentView.findViewById(R.id.iv_artwork);
+        attachment.getMetaData().getArtwork(context.getResources(), new MediaMetaData.ArtworkRetrieverListener() {
+            @Override
+            public void onFinished(Drawable artwork) {
+                artworkView.setImageDrawable(artwork);
+            }
+        });
 
         return attachmentView;
     }
@@ -119,37 +119,5 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
         }
 
         return result;
-    }
-
-    private class AsyncLoadImageTask extends AsyncTask<Void, Void, Drawable> {
-
-        private Resources mResources;
-        private ImageView mImageView;
-        private AudioAttachmentItem mAttachment;
-
-        public AsyncLoadImageTask(Context context, ImageView imageView, AudioAttachmentItem attachment) {
-            mResources = context.getResources();
-            mImageView = imageView;
-            mAttachment = attachment;
-        }
-
-        protected Drawable doInBackground(Void... params) {
-            byte[] artworkRaw = MediaMetaData.retrieveArtwork(mAttachment.getFilePath());
-            if (artworkRaw != null) {
-                return new BitmapDrawable(mResources, BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
-            } else {
-                return null;
-            }
-        }
-
-        protected void onPostExecute(Drawable artwork) {
-            super.onPostExecute(artwork);
-
-            mAttachment.getMetaData().setArtwork(artwork);
-
-            if (mImageView.isShown() && !this.isCancelled()) {
-                mImageView.setImageDrawable(artwork);
-            }
-        }
     }
 }
