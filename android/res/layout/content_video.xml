@@ -40,7 +40,8 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
-                android:layout_centerInParent="true"
+                android:layout_alignParentBottom="true"
+                android:adjustViewBounds="true"
                 android:visibility="gone"/>
 
         <ImageButton
