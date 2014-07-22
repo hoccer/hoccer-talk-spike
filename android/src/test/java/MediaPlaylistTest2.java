@@ -1,9 +1,9 @@
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
-import com.hoccer.talk.client.IXoMediaCollectionListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
-import com.hoccer.talk.client.model.TalkClientMediaCollectionRelation;
+import com.hoccer.xo.android.content.MediaCollectionPlaylist;
+import com.hoccer.xo.android.content.audio.MediaPlaylist;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -14,9 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import static junit.framework. TestCase.assertTrue;
 import static junit.framework. TestCase.assertFalse;
@@ -70,6 +67,7 @@ public class MediaPlaylistTest2 {
         TalkClientDownload item0 = new TalkClientDownload();
         TalkClientDownload item1 = new TalkClientDownload();
         TalkClientDownload item2 = new TalkClientDownload();
+        TalkClientDownload item3 = new TalkClientDownload();
         try {
             collection = mDatabase.createMediaCollection(collectionName);
 
@@ -77,6 +75,8 @@ public class MediaPlaylistTest2 {
             mDatabase.saveClientDownload(item0);
             mDatabase.saveClientDownload(item1);
             mDatabase.saveClientDownload(item2);
+            mDatabase.saveClientDownload(item3);
+
             collection.addItem(item0);
             collection.addItem(item1);
             collection.addItem(item2);
@@ -86,12 +86,122 @@ public class MediaPlaylistTest2 {
         }
 
         // create MediaCollectionPlaylist
+        MediaCollectionPlaylist playlist = new MediaCollectionPlaylist(collection);
 
-        // add item
+        assertEquals(collection.size(), playlist.size());
+        for(int i = 0; i < collection.size(); i++) {
+            assertEquals(collection.getItem(i), playlist.getItem(i));
+        }
+
+        // set listener
+        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onPlaylistClearedCalled = new ValueContainer<Boolean>(false);
+
+        final TalkClientDownload expectedItemAdded = item3;
+        final int expectedItemAddedIndex = 0;
+
+        final TalkClientDownload expectedItemRemoved = item1;
+        final int expectedItemRemovedIndex = 1;
+
+        final int expectedFromIndex = 0;
+        final int expectedToIndex = 1;
+
+        // register Playlist listener
+        com.hoccer.xo.android.content.MediaPlaylist.Listener listener = new com.hoccer.xo.android.content.MediaPlaylist.Listener() {
+            @Override
+            public void onItemOrderChanged(com.hoccer.xo.android.content.MediaPlaylist playlist, int fromIndex, int toIndex) {
+                assertEquals(expectedFromIndex, fromIndex);
+                assertEquals(expectedToIndex, toIndex);
+                onItemOrderChangedCalled.value = true;
+            }
+
+            @Override
+            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, int indexRemoved, TalkClientDownload itemRemoved) {
+                assertEquals(expectedItemRemovedIndex, indexRemoved);
+                assertEquals(expectedItemRemoved, itemRemoved);
+                onItemRemovedCalled.value = true;
+            }
+
+            @Override
+            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, int indexAdded, TalkClientDownload itemAdded) {
+                assertEquals(expectedItemAddedIndex, indexAdded);
+                assertEquals(expectedItemAdded, itemAdded);
+                onItemAddedCalled.value = true;
+            }
+
+            @Override
+            public void onPlaylistCleared(com.hoccer.xo.android.content.MediaPlaylist playlist) {
+                onPlaylistClearedCalled.value = true;
+            }
+        };
+        playlist.registerListener(listener);
 
         // remove item
+        collection.removeItem(1);
 
-        // delete MediaCollection
+        assertFalse(onItemOrderChangedCalled.value);
+        assertTrue(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertFalse(onPlaylistClearedCalled.value);
+
+        onItemOrderChangedCalled.value = false;
+        onItemRemovedCalled.value = false;
+        onItemAddedCalled.value = false;
+        onPlaylistClearedCalled.value = false;
+
+        // change item order
+        collection.reorderItemIndex(expectedFromIndex, expectedToIndex);
+
+        assertTrue(onItemOrderChangedCalled.value);
+        assertFalse(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertFalse(onPlaylistClearedCalled.value);
+
+        onItemOrderChangedCalled.value = false;
+        onItemRemovedCalled.value = false;
+        onItemAddedCalled.value = false;
+        onPlaylistClearedCalled.value = false;
+
+        // clear collection
+        collection.clear();
+
+        assertFalse(onItemOrderChangedCalled.value);
+        assertFalse(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertTrue(onPlaylistClearedCalled.value);
+
+        onItemOrderChangedCalled.value = false;
+        onItemRemovedCalled.value = false;
+        onItemAddedCalled.value = false;
+        onPlaylistClearedCalled.value = false;
+
+        // add item
+        collection.addItem(expectedItemAddedIndex, expectedItemAdded);
+
+        assertFalse(onItemOrderChangedCalled.value);
+        assertFalse(onItemRemovedCalled.value);
+        assertTrue(onItemAddedCalled.value);
+        assertFalse(onPlaylistClearedCalled.value);
+
+        onItemOrderChangedCalled.value = false;
+        onItemRemovedCalled.value = false;
+        onItemAddedCalled.value = false;
+        onPlaylistClearedCalled.value = false;
+
+        // delete collection
+        try {
+            mDatabase.deleteMediaCollection(collection);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        assertFalse(onItemOrderChangedCalled.value);
+        assertFalse(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertTrue(onPlaylistClearedCalled.value);
     }
 
     @Test
@@ -114,5 +224,12 @@ public class MediaPlaylistTest2 {
         // add item
 
         // remove item
+    }
+
+    private class ValueContainer<T> {
+        public T value;
+        public ValueContainer(T initValue) {
+            value = initValue;
+        }
     }
 }
