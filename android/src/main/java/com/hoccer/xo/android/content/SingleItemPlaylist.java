@@ -1,25 +1,26 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.IXoDownloadListener;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientDownload;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
  * Playlist instance wrapping a single media items.
  */
-public class SingleItemPlaylist extends MediaPlaylist {
+public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadListener {
 
     private TalkClientDownload mItem;
 
     /*
      * Constructs a playlist containing only the given item.
      */
-    public SingleItemPlaylist(TalkClientDownload item) {
+    public SingleItemPlaylist(XoClientDatabase database, TalkClientDownload item) {
         mItem = item;
+        database.registerDownloadListener(this);
+
     }
 
     @Override
@@ -70,5 +71,17 @@ public class SingleItemPlaylist extends MediaPlaylist {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    @Override
+    public void onDownloadSaved(TalkClientDownload download, boolean isCreated) {
+    }
+
+    @Override
+    public void onDownloadRemoved(TalkClientDownload download) {
+        if(mItem != null && mItem.equals(download)) {
+            mItem = null;
+            invokeItemRemoved(download);
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.model.TalkClient;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
+import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -304,14 +305,93 @@ public class MediaPlaylistTest {
     }
 
     @Test
-    public void testSingleTrackPlaylist() {
-        LOG.info("testSingleTrackPlaylist");
+    public void testSingleItemPlaylist() {
+        LOG.info("testSingleItemPlaylist");
 
-        // create single track playlist
+        TalkClientDownload item = new TalkClientDownload();
+        TalkClientDownload other_item = new TalkClientDownload();
 
-        // add item
+        try {
+            mDatabase.saveClientDownload(item);
+            mDatabase.saveClientDownload(other_item);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        // create single item playlist
+        SingleItemPlaylist playlist = new SingleItemPlaylist(mDatabase, item);
+
+        assertEquals(1, playlist.size());
+
+        TalkClientDownload expectedItem = item;
+        TalkClientDownload actualItem = playlist.getItem(0);
+        assertTrue(expectedItem.equals(actualItem));
+
+        // test iterator
+        int expectedItemCount = 1;
+        int actualItemCount = 0;
+        for(TalkClientDownload download : playlist) {
+            actualItemCount++;
+            assertTrue(expectedItem.equals(download));
+        }
+        assertEquals(expectedItemCount, actualItemCount);
+
+        // set listener
+        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onPlaylistClearedCalled = new ValueContainer<Boolean>(false);
+
+        // register Playlist listener
+        com.hoccer.xo.android.content.MediaPlaylist.Listener listener = new com.hoccer.xo.android.content.MediaPlaylist.Listener() {
+            @Override
+            public void onItemOrderChanged(com.hoccer.xo.android.content.MediaPlaylist playlist) {
+                onItemOrderChangedCalled.value = true;
+            }
+
+            @Override
+            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, TalkClientDownload itemRemoved) {
+                onItemRemovedCalled.value = true;
+            }
+
+            @Override
+            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, TalkClientDownload itemAdded) {
+                onItemAddedCalled.value = true;
+            }
+
+            @Override
+            public void onPlaylistCleared(com.hoccer.xo.android.content.MediaPlaylist playlist) {
+                onPlaylistClearedCalled.value = true;
+            }
+        };
+        playlist.registerListener(listener);
+
+        // remove other item (should not bother playlist)
+        try {
+            mDatabase.deleteClientDownload(other_item);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        assertFalse(onItemOrderChangedCalled.value);
+        assertFalse(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertFalse(onPlaylistClearedCalled.value);
 
         // remove item
+        try {
+            mDatabase.deleteClientDownload(item);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        assertFalse(onItemOrderChangedCalled.value);
+        assertTrue(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertFalse(onPlaylistClearedCalled.value);
     }
 
     //////// Helpers ////////
