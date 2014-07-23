@@ -22,7 +22,7 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
-import com.hoccer.xo.android.content.audio.MediaPlaylist;
+import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -59,7 +59,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private LocalBroadcastManager mLocalBroadcastManager;
     private BroadcastReceiver mReceiver;
     private BroadcastReceiver mHeadsetStateBroadcastReceiver;
-    private MediaPlaylist mPlaylist = new MediaPlaylist();
+    private MediaPlaylistController mPlaylist = new MediaPlaylistController();
 
     public class MediaPlayerBinder extends Binder {
         public MediaPlayerService getService() {
@@ -510,11 +510,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mPlaylist.setCurrentTrackNumber(pos);
     }
 
-    public MediaPlaylist.RepeatMode getRepeatMode() {
+    public MediaPlaylistController.RepeatMode getRepeatMode() {
         return mPlaylist.getRepeatMode();
     }
 
-    public void setRepeatMode(MediaPlaylist.RepeatMode mode) {
+    public void setRepeatMode(MediaPlaylistController.RepeatMode mode) {
         mPlaylist.setRepeatMode(mode);
     }
 

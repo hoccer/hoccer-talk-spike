@@ -25,7 +25,7 @@ import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SearchResultsAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
-import com.hoccer.xo.android.content.audio.MediaPlaylist;
+import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -301,7 +301,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
         AudioAttachmentItem item = mAttachmentListAdapter.getItem(pos);
 
         if (isPlaying(item)) {
-            if (mMediaPlayerService.getRepeatMode() == MediaPlaylist.RepeatMode.REPEAT_TITLE) {
+            if (mMediaPlayerService.getRepeatMode() == MediaPlaylistController.RepeatMode.REPEAT_TITLE) {
                 mMediaPlayerService.stop();
             } else {
                 mMediaPlayerService.playNextByRepeatMode();

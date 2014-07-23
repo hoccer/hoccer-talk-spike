@@ -23,7 +23,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.content.MediaMetaData;
-import com.hoccer.xo.android.content.audio.MediaPlaylist;
+import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.view.ArtworkImageView;
 import com.hoccer.xo.release.R;
@@ -284,20 +284,20 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     private void updateRepeatMode() {
         switch (mMediaPlayerService.getRepeatMode()) {
             case NO_REPEAT:
-                mMediaPlayerService.setRepeatMode(MediaPlaylist.RepeatMode.REPEAT_ALL);
+                mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ALL);
                 break;
             case REPEAT_ALL:
-                mMediaPlayerService.setRepeatMode(MediaPlaylist.RepeatMode.REPEAT_TITLE);
+                mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_TITLE);
                 break;
             case REPEAT_TITLE:
-                mMediaPlayerService.setRepeatMode(MediaPlaylist.RepeatMode.NO_REPEAT);
+                mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.NO_REPEAT);
                 break;
         }
         updateRepeatButton();
     }
 
     private void updateRepeatButton() {
-        MediaPlaylist.RepeatMode repeatMode = mMediaPlayerService.getRepeatMode();
+        MediaPlaylistController.RepeatMode repeatMode = mMediaPlayerService.getRepeatMode();
         final Drawable buttonStateDrawable;
         switch (repeatMode) {
             case NO_REPEAT:

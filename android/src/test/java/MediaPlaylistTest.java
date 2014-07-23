@@ -1,180 +1,290 @@
+import com.hoccer.talk.client.*;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
-import com.hoccer.xo.android.content.audio.MediaPlaylist;
+import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.xo.android.content.MediaCollectionPlaylist;
+import com.hoccer.xo.android.content.UserPlaylist;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
-import com.j256.ormlite.table.TableUtils;
+import com.j256.ormlite.support.ConnectionSource;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
+import static junit.framework. TestCase.assertTrue;
+import static junit.framework. TestCase.assertFalse;
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.fail;
 
 public class MediaPlaylistTest {
 
     private static final Logger LOG = Logger.getLogger(MediaPlaylistTest.class);
 
-    private MediaPlaylist mp;
-    List<AudioAttachmentItem> items = new ArrayList<AudioAttachmentItem>();
-    private String databaseUrl = "jdbc:h2:mem:account";
+    private XoClientDatabase mDatabase;
+
+    private JdbcConnectionSource mConnectionSource;
 
     @Before
     public void testSetup() throws Exception {
+        mConnectionSource = new JdbcConnectionSource("jdbc:h2:mem:account");
+        mDatabase = new XoClientDatabase(new IXoClientDatabaseBackend() {
 
-        JdbcConnectionSource connectionSource = new JdbcConnectionSource(databaseUrl);
-        Dao<TalkClientDownload, Integer> clientDownloadsDao = DaoManager.createDao(connectionSource, TalkClientDownload.class);
-        TableUtils.createTable(connectionSource, TalkClientDownload.class);
+            @Override
+            public ConnectionSource getConnectionSource() {
+                return mConnectionSource;
+            }
 
-        mp = new MediaPlaylist();
-        items = new ArrayList<AudioAttachmentItem>();
-        for (int i = 0; i < 4; i++) {
-            TalkClientDownload tcd = new TalkClientDownload();
-            clientDownloadsDao.create(tcd);
-            AudioAttachmentItem item = AudioAttachmentItem.create("test_dummy_path", tcd, false);
-            items.add(item);
-        }
-        mp.setTrackList(items);
+            @Override
+            public <D extends Dao<T, ?>, T> D getDao(Class<T> clazz) throws SQLException {
+                D dao = DaoManager.createDao(mConnectionSource, clazz);
+                dao.setObjectCache(true);
+                return dao;
+            }
+        });
 
-        connectionSource.close();
+        mDatabase.createTables(mConnectionSource);
+        mDatabase.initialize();
     }
 
     @After
     public void testCleanup() throws SQLException {
-        mp = null;
-
-        JdbcConnectionSource connectionSource = new JdbcConnectionSource(databaseUrl);
-        TableUtils.dropTable(connectionSource, TalkClientDownload.class, true);
-        connectionSource.close();
+        mConnectionSource.close();
     }
 
     @Test
-    public void testRemoveAfterCurrent() {
+    public void testMediaCollectionPlaylist() {
+        LOG.info("testMediaCollectionPlaylist");
 
-        mp.setCurrentIndex(1);
-        mp.remove(items.get(2));
+        // create MediaCollection
+        String collectionName = "testMediaCollectionPlaylist_collection";
 
-        List<Integer> expectedOrder = new ArrayList<Integer>() {
-            {
-                add(0);
-                add(1);
-                add(2);
+        TalkClientMediaCollection collection = null;
+        TalkClientDownload item0 = new TalkClientDownload();
+        TalkClientDownload item1 = new TalkClientDownload();
+        TalkClientDownload item2 = new TalkClientDownload();
+        TalkClientDownload item3 = new TalkClientDownload();
+        try {
+            collection = mDatabase.createMediaCollection(collectionName);
+
+            // create some items and addItem to collection
+            mDatabase.saveClientDownload(item0);
+            mDatabase.saveClientDownload(item1);
+            mDatabase.saveClientDownload(item2);
+            mDatabase.saveClientDownload(item3);
+
+            collection.addItem(item0);
+            collection.addItem(item1);
+            collection.addItem(item2);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        // create MediaCollectionPlaylist
+        MediaCollectionPlaylist playlist = new MediaCollectionPlaylist(collection);
+
+        assertEquals(collection.size(), playlist.size());
+        for(int i = 0; i < collection.size(); i++) {
+            assertEquals(collection.getItem(i), playlist.getItem(i));
+        }
+
+        // set listener
+        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
+        final ValueContainer<Boolean> onPlaylistClearedCalled = new ValueContainer<Boolean>(false);
+
+        final TalkClientDownload expectedItemAdded = item3;
+        final int expectedItemAddedIndex = 0;
+
+        final TalkClientDownload expectedItemRemoved = item1;
+        final int expectedItemRemovedIndex = 1;
+
+        final int expectedFromIndex = 0;
+        final int expectedToIndex = 1;
+
+        // register Playlist listener
+        com.hoccer.xo.android.content.MediaPlaylist.Listener listener = new com.hoccer.xo.android.content.MediaPlaylist.Listener() {
+            @Override
+            public void onItemOrderChanged(com.hoccer.xo.android.content.MediaPlaylist playlist, int fromIndex, int toIndex) {
+                assertEquals(expectedFromIndex, fromIndex);
+                assertEquals(expectedToIndex, toIndex);
+                onItemOrderChangedCalled.value = true;
+            }
+
+            @Override
+            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, int indexRemoved, TalkClientDownload itemRemoved) {
+                assertEquals(expectedItemRemovedIndex, indexRemoved);
+                assertEquals(expectedItemRemoved, itemRemoved);
+                onItemRemovedCalled.value = true;
+            }
+
+            @Override
+            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, int indexAdded, TalkClientDownload itemAdded) {
+                assertEquals(expectedItemAddedIndex, indexAdded);
+                assertEquals(expectedItemAdded, itemAdded);
+                onItemAddedCalled.value = true;
+            }
+
+            @Override
+            public void onPlaylistCleared(com.hoccer.xo.android.content.MediaPlaylist playlist) {
+                onPlaylistClearedCalled.value = true;
             }
         };
+        playlist.registerListener(listener);
 
-        items.remove(2);
+        // remove item
+        collection.removeItem(1);
 
-        assertEquals(items, mp.getAudioAttachmentItems());
-        assertEquals(1, mp.getCurrentIndex());
-        assertEquals(expectedOrder, mp.getPlaylistOrder());
+        assertFalse(onItemOrderChangedCalled.value);
+        assertTrue(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertFalse(onPlaylistClearedCalled.value);
+
+        onItemOrderChangedCalled.value = false;
+        onItemRemovedCalled.value = false;
+        onItemAddedCalled.value = false;
+        onPlaylistClearedCalled.value = false;
+
+        // change item order
+        collection.reorderItemIndex(expectedFromIndex, expectedToIndex);
+
+        assertTrue(onItemOrderChangedCalled.value);
+        assertFalse(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertFalse(onPlaylistClearedCalled.value);
+
+        onItemOrderChangedCalled.value = false;
+        onItemRemovedCalled.value = false;
+        onItemAddedCalled.value = false;
+        onPlaylistClearedCalled.value = false;
+
+        // clear collection
+        collection.clear();
+
+        assertFalse(onItemOrderChangedCalled.value);
+        assertFalse(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertTrue(onPlaylistClearedCalled.value);
+
+        onItemOrderChangedCalled.value = false;
+        onItemRemovedCalled.value = false;
+        onItemAddedCalled.value = false;
+        onPlaylistClearedCalled.value = false;
+
+        // add item
+        collection.addItem(expectedItemAddedIndex, expectedItemAdded);
+
+        assertFalse(onItemOrderChangedCalled.value);
+        assertFalse(onItemRemovedCalled.value);
+        assertTrue(onItemAddedCalled.value);
+        assertFalse(onPlaylistClearedCalled.value);
+
+        onItemOrderChangedCalled.value = false;
+        onItemRemovedCalled.value = false;
+        onItemAddedCalled.value = false;
+        onPlaylistClearedCalled.value = false;
+
+        // delete collection
+        try {
+            mDatabase.deleteMediaCollection(collection);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        assertFalse(onItemOrderChangedCalled.value);
+        assertFalse(onItemRemovedCalled.value);
+        assertFalse(onItemAddedCalled.value);
+        assertTrue(onPlaylistClearedCalled.value);
     }
 
     @Test
-    public void testRemoveBeforeCurrent() {
+    public void testUserPlaylist() throws SQLException {
+        LOG.info("testUserPlaylist");
 
-        mp.setCurrentIndex(2);
-        mp.remove(items.get(1));
+        TalkClientContact user = new TalkClientContact();
+        try {
+            mDatabase.saveContact(user);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
 
-        List<Integer> expectedOrder = new ArrayList<Integer>() {
-            {
-                add(0);
-                add(1);
-                add(2);
-            }
-        };
+        int expectedItemCount = 3;
+        for(int i = 0; i < expectedItemCount; i++) {
+            createAudioDownloadWithUser(user);
+        }
 
-        items.remove(1);
+        // create user playlist
+        UserPlaylist playlist = new UserPlaylist(mDatabase, null);
 
-        assertEquals(items, mp.getAudioAttachmentItems());
-        assertEquals(1, mp.getCurrentIndex());
-        assertEquals(expectedOrder, mp.getPlaylistOrder());
-    }
+        assertEquals(expectedItemCount, playlist.size());
 
-    @Test(expected = IllegalStateException.class)
-    public void testRemoveCurrent() {
+        // add item
 
-        mp.setCurrentIndex(0);
-        mp.remove(items.get(0));
-    }
-
-    @Test
-    public void testRemoveBeforeCurrentFromShuffledList() {
-
-        mp.setShuffleActive(true);
-        mp.setPlaylistOrder(new ArrayList<Integer>() {
-            {
-                add(3);
-                add(2);
-                add(0);
-                add(1);
-            }
-        });
-        mp.setCurrentIndex(2);
-        mp.remove(items.get(2));
-
-        List<Integer> expectedOrder = new ArrayList<Integer>() {
-            {
-                add(2);
-                add(0);
-                add(1);
-            }
-        };
-
-        items.remove(2);
-
-        assertEquals(items, mp.getAudioAttachmentItems());
-        assertEquals(1, mp.getCurrentIndex());
-        assertEquals(expectedOrder, mp.getPlaylistOrder());
+        // remove item
     }
 
     @Test
-    public void testRemoveAfterCurrentFromShuffledList() {
+    public void testSingleTrackPlaylist() {
+        LOG.info("testSingleTrackPlaylist");
 
-        mp.setShuffleActive(true);
-        mp.setPlaylistOrder(new ArrayList<Integer>() {
-            {
-                add(3);
-                add(2);
-                add(0);
-                add(1);
-            }
-        });
-        mp.setCurrentIndex(0);
-        mp.remove(items.get(0));
+        // create single track playlist
 
-        List<Integer> expectedOrder = new ArrayList<Integer>() {
-            {
-                add(2);
-                add(1);
-                add(0);
-            }
-        };
+        // add item
 
-        items.remove(0);
-
-        assertEquals(items, mp.getAudioAttachmentItems());
-        assertEquals(0, mp.getCurrentIndex());
-        assertEquals(expectedOrder, mp.getPlaylistOrder());
+        // remove item
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testRemoveCurrentFromShuffledList() {
+    //////// Helpers ////////
 
-        mp.setShuffleActive(true);
-        mp.setPlaylistOrder(new ArrayList<Integer>() {
-            {
-                add(3);
-                add(2);
-                add(0);
-                add(1);
-            }
-        });
-        mp.setCurrentIndex(2);
-        mp.remove(items.get(0));
+    private TalkClientDownload createAudioDownloadWithUser(TalkClientContact user) {
+        // create download
+        TalkClientDownload result = new TalkClientDownload();
+
+        // set private fields via reflection two avoid a dozen of objects which usually make up the download
+        try {
+            Class<?> downloadClass = result.getClass();
+            Field mediaTypeField = downloadClass.getDeclaredField("mediaType");
+            mediaTypeField.setAccessible(true);
+            mediaTypeField.set(result, ContentMediaType.AUDIO);
+
+            Field stateField = downloadClass.getDeclaredField("state");
+            stateField.setAccessible(true);
+            stateField.set(result, TalkClientDownload.State.COMPLETE);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        // create message for user and link download
+        TalkClientMessage message = new TalkClientMessage();
+        message.setAttachmentDownload(result);
+        message.setConversationContact(user);
+
+        try {
+            mDatabase.saveClientDownload(result);
+            mDatabase.saveClientMessage(message);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        return result;
+    }
+
+    private class ValueContainer<T> {
+        public T value;
+        public ValueContainer(T initValue) {
+            value = initValue;
+        }
     }
 }

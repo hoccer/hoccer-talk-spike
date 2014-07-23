@@ -5,13 +5,13 @@ import org.apache.log4j.Logger;
 
 import java.util.*;
 
-public class MediaPlaylist implements ListIterator<AudioAttachmentItem> {
+public class MediaPlaylistController implements ListIterator<AudioAttachmentItem> {
 
     public static enum RepeatMode {
         REPEAT_TITLE, REPEAT_ALL, NO_REPEAT;
     }
 
-    private static final Logger LOG = Logger.getLogger(MediaPlaylist.class);
+    private static final Logger LOG = Logger.getLogger(MediaPlaylistController.class);
 
     private List<AudioAttachmentItem> mAudioAttachmentItems = new ArrayList<AudioAttachmentItem>();
     private List<Integer> mPlaylistOrder = new ArrayList<Integer>();
