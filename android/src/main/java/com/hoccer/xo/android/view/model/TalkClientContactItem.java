@@ -21,8 +21,6 @@ public class TalkClientContactItem extends BaseContactItem {
 
     private static final Logger LOG = Logger.getLogger(TalkClientContactItem.class);
 
-    private BetterContactsAdapter mBetterContactsAdapter;
-
     private TalkClientContact mContact;
 
     private String mLastMessageText = "";
@@ -76,15 +74,30 @@ public class TalkClientContactItem extends BaseContactItem {
         TextView lastMessageTimeView = (TextView) view.findViewById(R.id.contact_time);
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
-        avatarView.setContact(mContact);
         nameView.setText(mContact.getNickname());
         setClientType(typeView);
         setLastMessageTime(lastMessageTimeView);
         lastMessageTextView.setText(mLastMessageText);
-        unseenView.setText(Long.toString(mUnseenMessageCount));
-        unseenView.setVisibility(View.VISIBLE);
+        setUnseenMessages(unseenView);
+
+        avatarView.setContact(mContact);
+        avatarView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mXoActivity.showContactProfile(mContact);
+            }
+        });
 
         return view;
+    }
+
+    private void setUnseenMessages(TextView unseenView) {
+        if(mUnseenMessageCount <= 0) {
+            unseenView.setVisibility(View.GONE);
+        } else {
+            unseenView.setText(Long.toString(mUnseenMessageCount));
+            unseenView.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

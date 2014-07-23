@@ -39,9 +39,9 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
             if(o1.getTimeStamp() == o2.getTimeStamp()) {
                 return 0;
             } else if(o1.getTimeStamp() > o2.getTimeStamp()) {
-                return 1;
+                return -1;
             }
-            return -1;
+            return 1;
         }
     };
 
@@ -63,6 +63,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     private void initialize() {
+        LOG.debug("initialize()");
         int oldItemCount = 0;
         if(mContactItems != null) {
             oldItemCount = mContactItems.size();
@@ -85,9 +86,28 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
                 mOnItemCountChangedListener.onItemCountChanged(getCount());
             }
             notifyDataSetChanged();
+            reloadFinished();
         } catch (SQLException e) {
             LOG.error("sql error", e);
         }
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        getXoClient().registerContactListener(this);
+        getXoClient().registerTokenListener(this);
+        getXoClient().registerTransferListener(this);
+        getXoClient().registerMessageListener(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getXoClient().unregisterContactListener(this);
+        getXoClient().unregisterTokenListener(this);
+        getXoClient().unregisterTransferListener(this);
+        getXoClient().unregisterMessageListener(this);
     }
 
     @Override
@@ -107,6 +127,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void notifyDataSetChanged() {
+        LOG.debug("notifyDataSetChanged()");
         Collections.sort(mContactItems, LATEST_MESSAGE_COMPARATOR);
         super.notifyDataSetChanged();
     }
@@ -127,8 +148,8 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     @Override
-    public View getView(int i, View convertView, ViewGroup viewGroup) {
-        View view = mContactItems.get(i).getView(convertView);
+    public View getView(int position, View convertView, ViewGroup viewGroup) {
+        View view = mContactItems.get(position).getView(convertView);
         return view;
     }
 
@@ -149,6 +170,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
+        LOG.debug("onClientPresenceChanged()");
         BaseContactItem item = findContactItemForContent(contact);
         if(item == null) {
             return;
@@ -192,20 +214,24 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onMessageAdded(TalkClientMessage message) {
+        LOG.debug("onMessageAdded()");
         try {
             if(message.isIncoming()) {
                 TalkDelivery incomingDelivery = message.getIncomingDelivery();
-                TalkClientContact contact = mDatabase.findContactByClientId(incomingDelivery.getReceiverId(), false);
+                TalkClientContact contact = mDatabase.findContactByClientId(incomingDelivery.getSenderId(), false);
                 if(contact == null) {
                     return;
                 }
                 TalkClientContactItem item = (TalkClientContactItem) findContactItemForContent(contact);
+                if(item == null) { // the contact is not in our list so we won't update anything
+                    return;
+                }
                 item.update();
+                notifyDataSetChanged();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        updateAll();
     }
 
     @Override

@@ -167,6 +167,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
                 }
             };
             mAdapter = new BetterContactsAdapter(getXoActivity(), filter);
+            mAdapter.onCreate();
 
             mContactList.setAdapter(mAdapter);
             onItemCountChanged(mAdapter.getCount());
