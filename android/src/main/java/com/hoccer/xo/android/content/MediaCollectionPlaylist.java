@@ -20,17 +20,17 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
 
         @Override
         public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
-            invokeItemOrderChanged(fromIndex, toIndex);
+            invokeItemOrderChanged();
         }
 
         @Override
         public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
-            invokeItemRemoved(indexRemoved, itemRemoved);
+            invokeItemRemoved(itemRemoved);
         }
 
         @Override
         public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
-            invokeItemAdded(indexAdded, itemAdded);
+            invokeItemAdded(itemAdded);
         }
 
         @Override

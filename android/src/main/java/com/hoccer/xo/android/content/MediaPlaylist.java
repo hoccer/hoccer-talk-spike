@@ -13,11 +13,11 @@ public abstract class MediaPlaylist implements Iterable<TalkClientDownload> {
 
     // playlist update/change listener
     public interface Listener {
-        void onItemOrderChanged(MediaPlaylist playlist, int fromIndex, int toIndex);
+        void onItemOrderChanged(MediaPlaylist playlist);
 
-        void onItemRemoved(MediaPlaylist playlist, int indexRemoved, TalkClientDownload itemRemoved);
+        void onItemRemoved(MediaPlaylist playlist, TalkClientDownload itemRemoved);
 
-        void onItemAdded(MediaPlaylist playlist, int indexAdded, TalkClientDownload itemAdded);
+        void onItemAdded(MediaPlaylist playlist, TalkClientDownload itemAdded);
 
         void onPlaylistCleared(MediaPlaylist playlist);
     }
@@ -38,21 +38,21 @@ public abstract class MediaPlaylist implements Iterable<TalkClientDownload> {
         mListenerArray.unregisterListener(listener);
     }
 
-    protected void invokeItemOrderChanged(int fromIndex, int toIndex) {
+    protected void invokeItemOrderChanged() {
         for(Listener listener : mListenerArray) {
-            listener.onItemOrderChanged(this, fromIndex, toIndex);
+            listener.onItemOrderChanged(this);
         }
     }
 
-    protected void invokeItemRemoved(int indexRemoved, TalkClientDownload itemRemoved) {
+    protected void invokeItemRemoved(TalkClientDownload itemRemoved) {
         for(Listener listener : mListenerArray) {
-            listener.onItemRemoved(this, indexRemoved, itemRemoved);
+            listener.onItemRemoved(this, itemRemoved);
         }
     }
 
-    protected void invokeItemAdded(int indexAdded, TalkClientDownload itemAdded) {
+    protected void invokeItemAdded(TalkClientDownload itemAdded) {
         for(Listener listener : mListenerArray) {
-            listener.onItemAdded(this, indexAdded, itemAdded);
+            listener.onItemAdded(this, itemAdded);
         }
     }
 
