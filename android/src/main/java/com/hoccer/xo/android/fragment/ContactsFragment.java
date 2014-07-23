@@ -5,6 +5,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.activity.NearbyHistoryMessagingActivity;
+import com.hoccer.xo.android.adapter.BetterContactsAdapter;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
 import com.hoccer.xo.android.adapter.RichContactsAdapter;
@@ -41,7 +42,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     private static final Logger LOG = Logger.getLogger(ContactsFragment.class);
 
     private XoClientDatabase mDatabase;
-    private ContactsAdapter mAdapter;
+    private BetterContactsAdapter mAdapter;
 
     private ListView mContactList;
 
@@ -83,8 +84,10 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     public void onResume() {
         LOG.debug("onResume()");
         super.onResume();
-        initContactListAdapter();
+//        initContactListAdapter();
+        initBetterContactListAdapter();
     }
+
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -146,12 +149,9 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         }
     }
 
-    private void initContactListAdapter() {
-        if (mAdapter == null) {
-            mAdapter = new RichContactsAdapter(getXoActivity(), true);
-            mAdapter.onCreate();
-            // filter out never-related contacts (which we know only via groups)
-            mAdapter.setFilter(new ContactsAdapter.Filter() {
+    private void initBetterContactListAdapter() {
+        if(mAdapter == null) {
+            BetterContactsAdapter.Filter filter = new BetterContactsAdapter.Filter() {
                 @Override
                 public boolean shouldShow(TalkClientContact contact) {
                     if (contact.isGroup()) {
@@ -159,7 +159,8 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
                             return true;
                         }
                     } else if (contact.isClient()) {
-                        if (contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked())) {
+                        if (contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship()
+                                .isBlocked())) {
                             return true;
                         }
                     } else if (contact.isEverRelated()) {
@@ -167,16 +168,51 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
                     }
                     return false;
                 }
-            });
+            };
+            mAdapter = new BetterContactsAdapter(getXoActivity(), filter);
+            mAdapter.onCreate();
 
-            mAdapter.setOnItemCountChangedListener(this);
-            mAdapter.requestReload();
             mContactList.setAdapter(mAdapter);
             onItemCountChanged(mAdapter.getCount());
         }
+
+        mAdapter.setOnItemCountChangedListener(this);
         mAdapter.requestReload();
         mAdapter.onResume();
+        onItemCountChanged(mAdapter.getCount());
     }
+
+//    private void initContactListAdapter() {
+//        if (mAdapter == null) {
+//            mAdapter = new RichContactsAdapter(getXoActivity(), true);
+//            mAdapter.onCreate();
+//            // filter out never-related contacts (which we know only via groups)
+//            mAdapter.setFilter(new ContactsAdapter.Filter() {
+//                @Override
+//                public boolean shouldShow(TalkClientContact contact) {
+//                    if (contact.isGroup()) {
+//                        if (contact.isGroupInvolved() && contact.isGroupExisting() && !contact.getGroupPresence().isTypeNearby()) {
+//                            return true;
+//                        }
+//                    } else if (contact.isClient()) {
+//                        if (contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked())) {
+//                            return true;
+//                        }
+//                    } else if (contact.isEverRelated()) {
+//                        return true;
+//                    }
+//                    return false;
+//                }
+//            });
+//
+//            mAdapter.setOnItemCountChangedListener(this);
+//            mAdapter.requestReload();
+//            mContactList.setAdapter(mAdapter);
+//            onItemCountChanged(mAdapter.getCount());
+//        }
+//        mAdapter.requestReload();
+//        mAdapter.onResume();
+//    }
 
     public void onGroupCreationSucceeded(int contactId) {
         LOG.debug("onGroupCreationSucceeded(" + contactId + ")");
