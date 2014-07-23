@@ -21,39 +21,72 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 
 /**
  * TODO:
- * - add SMS Token Support
  * - add filtering
- * - add sort by unseen messages
  */
 public class BetterContactsAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
 
-    private List<BaseContactItem> mContactItems;
 
+    private static final Comparator<BaseContactItem> LATEST_MESSAGE_COMPARATOR = new Comparator<BaseContactItem>() {
+        @Override
+        public int compare(BaseContactItem o1, BaseContactItem o2) {
+            if(o1.getTimeStamp() == o2.getTimeStamp()) {
+                return 0;
+            } else if(o1.getTimeStamp() > o2.getTimeStamp()) {
+                return 1;
+            }
+            return -1;
+        }
+    };
+
+    private List<BaseContactItem> mContactItems;
+    private Filter mFilter = null;
 
     public BetterContactsAdapter(XoActivity activity) {
         super(activity);
         initialize();
     }
 
+    public BetterContactsAdapter(XoActivity activity, Filter filter) {
+        super(activity);
+        mFilter = filter;
+        initialize();
+    }
+
     private void initialize() {
-        Comparator<BaseContactItem> comparator = new Comparator<BaseContactItem>() {
-            @Override
-            public int compare(BaseContactItem o1, BaseContactItem o2) {
-                if(o1.getTimeStamp() == o2.getTimeStamp()) {
-                    return 0;
-                } else if(o1.getTimeStamp() > o2.getTimeStamp()) {
-                    return 1;
-                }
-                return -1;
+        mContactItems = new SortedList<BaseContactItem>(LATEST_MESSAGE_COMPARATOR);
+        try {
+            List<TalkClientContact> allClientContacts = mActivity.getXoDatabase().findAllClientContacts();
+            List<TalkClientContact> filteredContacts = filter(allClientContacts);
+            for (int i = 0; i < filteredContacts.size(); i++) {
+                TalkClientContact contact = filteredContacts.get(i);
+                mContactItems.add(new TalkClientContactItem(mActivity, contact));
             }
-        };
-        mContactItems = new SortedList<BaseContactItem>(comparator);
+
+            List<TalkClientSmsToken> allSmsTokens = mActivity.getXoDatabase().findAllSmsTokens();
+            for (int i = 0; i < allSmsTokens.size(); i++) {
+                TalkClientSmsToken smsToken = allSmsTokens.get(i);
+                mContactItems.add(new SmsContactItem(mActivity, smsToken));
+            }
+            notifyDataSetChanged();
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        }
+    }
+
+    public Filter getFilter() {
+        return mFilter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.mFilter = filter;
+        initialize();
     }
 
     @Override
@@ -237,4 +270,20 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         updateAll();
     }
 
+    private List<TalkClientContact> filter(List<TalkClientContact> in) {
+        if(mFilter == null) {
+            return in;
+        }
+        ArrayList<TalkClientContact> res = new ArrayList<TalkClientContact>();
+        for(TalkClientContact contact: in) {
+            if(mFilter.shouldShow(contact)) {
+                res.add(contact);
+            }
+        }
+        return res;
+    }
+
+    public interface Filter {
+        public boolean shouldShow(TalkClientContact contact);
+    }
 }
