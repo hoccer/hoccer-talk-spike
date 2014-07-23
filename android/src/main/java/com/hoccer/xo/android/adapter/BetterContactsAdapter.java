@@ -12,24 +12,24 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
+import com.hoccer.xo.android.fragment.ContactsFragment;
 import com.hoccer.xo.android.util.SortedList;
 import com.hoccer.xo.android.view.model.BaseContactItem;
 import com.hoccer.xo.android.view.model.SmsContactItem;
 import com.hoccer.xo.android.view.model.TalkClientContactItem;
+
+import org.jetbrains.annotations.Nullable;
 
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 
-/**
- * TODO:
- * - add filtering
- */
 public class BetterContactsAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
 
 
@@ -48,6 +48,9 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     private List<BaseContactItem> mContactItems;
     private Filter mFilter = null;
 
+    @Nullable
+    private OnItemCountChangedListener mOnItemCountChangedListener;
+
     public BetterContactsAdapter(XoActivity activity) {
         super(activity);
         initialize();
@@ -60,7 +63,11 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     private void initialize() {
-        mContactItems = new SortedList<BaseContactItem>(LATEST_MESSAGE_COMPARATOR);
+        int oldItemCount = 0;
+        if(mContactItems != null) {
+            oldItemCount = mContactItems.size();
+        }
+        mContactItems = new ArrayList<BaseContactItem>();
         try {
             List<TalkClientContact> allClientContacts = mActivity.getXoDatabase().findAllClientContacts();
             List<TalkClientContact> filteredContacts = filter(allClientContacts);
@@ -74,10 +81,19 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
                 TalkClientSmsToken smsToken = allSmsTokens.get(i);
                 mContactItems.add(new SmsContactItem(mActivity, smsToken));
             }
+            if(mOnItemCountChangedListener != null && oldItemCount != getCount()) {
+                mOnItemCountChangedListener.onItemCountChanged(getCount());
+            }
             notifyDataSetChanged();
         } catch (SQLException e) {
             LOG.error("sql error", e);
         }
+    }
+
+    @Override
+    public void onReloadRequest() {
+        initialize();
+        super.onReloadRequest();
     }
 
     public Filter getFilter() {
@@ -87,6 +103,12 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     public void setFilter(Filter filter) {
         this.mFilter = filter;
         initialize();
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        Collections.sort(mContactItems, LATEST_MESSAGE_COMPARATOR);
+        super.notifyDataSetChanged();
     }
 
     @Override
@@ -281,6 +303,10 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
             }
         }
         return res;
+    }
+
+    public void setOnItemCountChangedListener(OnItemCountChangedListener onItemCountChangedListener) {
+        mOnItemCountChangedListener = onItemCountChangedListener;
     }
 
     public interface Filter {

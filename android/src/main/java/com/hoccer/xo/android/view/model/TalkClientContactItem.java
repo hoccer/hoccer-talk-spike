@@ -8,6 +8,7 @@ import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import android.view.View;
 import android.widget.TextView;
@@ -24,9 +25,10 @@ public class TalkClientContactItem extends BaseContactItem {
 
     private TalkClientContact mContact;
 
-    private String mLastMessageText;
-    private Date mLastMessageTimeStamp;
-    private long mUnseenMessageCount;
+    private String mLastMessageText = "";
+    @Nullable
+    private Date mLastMessageTimeStamp = null;
+    private long mUnseenMessageCount = 0;
 
     public TalkClientContactItem(XoActivity activity, TalkClientContact contact) {
         super(activity);
@@ -45,16 +47,21 @@ public class TalkClientContactItem extends BaseContactItem {
     }
 
     private void setLastMessageTime(TextView lastMessageTime) {
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE HH:mm");
-        lastMessageTime.setText(sdf.format(mLastMessageTimeStamp));
+        String text = "";
+        if (mLastMessageTimeStamp != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE HH:mm");
+            lastMessageTime.setText(sdf.format(mLastMessageTimeStamp));
+        }
     }
 
     public void update() {
         try { // TODO: add proper exception handling
             mUnseenMessageCount = mXoActivity.getXoDatabase().findUnseenMessageCountByContactId(mContact.getClientContactId());
             TalkClientMessage message = mXoActivity.getXoDatabase().findLatestMessageByContactId(mContact.getClientContactId());
-            mLastMessageText = message.getText();
-            mLastMessageTimeStamp = message.getTimestamp();
+            if(message != null) {
+                mLastMessageText = message.getText();
+                mLastMessageTimeStamp = message.getTimestamp();
+            }
         } catch (SQLException e) {
             LOG.error("sql error", e);
         }
@@ -87,6 +94,9 @@ public class TalkClientContactItem extends BaseContactItem {
 
     @Override
     public long getTimeStamp() {
+        if(mLastMessageTimeStamp == null) {
+            return 0;
+        }
         return mLastMessageTimeStamp.getTime();
     }
 
