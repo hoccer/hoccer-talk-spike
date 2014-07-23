@@ -16,9 +16,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
-* Created by jacob on 22.07.14.
-*/
 public class TalkClientContactItem extends BaseContactItem {
 
     private static final Logger LOG = Logger.getLogger(TalkClientContactItem.class);
@@ -84,8 +81,13 @@ public class TalkClientContactItem extends BaseContactItem {
     }
 
     @Override
-    protected TalkClientContact getContent() {
+    public TalkClientContact getContent() {
         return mContact;
+    }
+
+    @Override
+    public long getTimeStamp() {
+        return mLastMessageTimeStamp.getTime();
     }
 
 }

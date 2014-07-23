@@ -29,4 +29,6 @@ public abstract class BaseContactItem<T> {
     protected abstract View configure(View view);
 
     public abstract T getContent();
+
+    public abstract long getTimeStamp();
 }

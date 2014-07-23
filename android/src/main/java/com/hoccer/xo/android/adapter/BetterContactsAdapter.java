@@ -12,14 +12,16 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
+import com.hoccer.xo.android.util.SortedList;
 import com.hoccer.xo.android.view.model.BaseContactItem;
+import com.hoccer.xo.android.view.model.SmsContactItem;
 import com.hoccer.xo.android.view.model.TalkClientContactItem;
 
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -40,7 +42,18 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     private void initialize() {
-        mContactItems = new ArrayList<BaseContactItem>();
+        Comparator<BaseContactItem> comparator = new Comparator<BaseContactItem>() {
+            @Override
+            public int compare(BaseContactItem o1, BaseContactItem o2) {
+                if(o1.getTimeStamp() == o2.getTimeStamp()) {
+                    return 0;
+                } else if(o1.getTimeStamp() > o2.getTimeStamp()) {
+                    return 1;
+                }
+                return -1;
+            }
+        };
+        mContactItems = new SortedList<BaseContactItem>(comparator);
     }
 
     @Override
@@ -74,14 +87,14 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-        BaseContactItem item = findContactItemForContact(contact);
+        BaseContactItem item = findContactItemForContent(contact);
         mContactItems.remove(item);
         notifyDataSetChanged();
     }
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        BaseContactItem item = findContactItemForContact(contact);
+        BaseContactItem item = findContactItemForContent(contact);
         if(item == null) {
             return;
         }
@@ -97,11 +110,11 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         notifyDataSetChanged();
     }
 
-    private TalkClientContactItem findContactItemForContact(TalkClientContact contact) {
+    private BaseContactItem findContactItemForContent(Object content) {
         for (int i = 0; i < mContactItems.size(); i++) {
             BaseContactItem item = mContactItems.get(i);
-            if(contact.equals(item.getContent())) {
-                return (TalkClientContactItem) item;
+            if(content.equals(item.getContent())) {
+                return item;
             }
         }
         return null;
@@ -131,7 +144,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
                 if(contact == null) {
                     return;
                 }
-                TalkClientContactItem item = findContactItemForContact(contact);
+                TalkClientContactItem item = (TalkClientContactItem) findContactItemForContent(contact);
                 item.update();
             }
         } catch (SQLException e) {
@@ -152,6 +165,20 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onTokensChanged(List<TalkClientSmsToken> tokens, boolean newTokens) {
+        for (int i = 0; i < tokens.size(); i++) {
+            TalkClientSmsToken token = tokens.get(i);
+            SmsContactItem item = (SmsContactItem) findContactItemForContent(token);
+            int index = mContactItems.indexOf(item);
+            item = null;
+                item = new SmsContactItem(mActivity, token);
+            if(index > -1) {
+                mContactItems.set(index, item);
+            } else {
+                mContactItems.add(item);
+            }
+
+        }
+
         updateAll();
     }
 

@@ -78,8 +78,13 @@ public class SmsContactItem extends BaseContactItem {
     }
 
     @Override
-    protected TalkClientSmsToken getContent() {
+    public TalkClientSmsToken getContent() {
         return mSmsToken;
+    }
+
+    @Override
+    public long getTimeStamp() {
+        return 0;
     }
 
 
