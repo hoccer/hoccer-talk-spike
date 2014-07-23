@@ -5,6 +5,7 @@ import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.model.TalkClient;
+import com.hoccer.xo.android.content.EmptyPlaylist;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
@@ -400,6 +401,21 @@ public class MediaPlaylistTest {
         assertTrue(onItemRemovedCalled.value);
         assertFalse(onItemAddedCalled.value);
         assertFalse(onPlaylistClearedCalled.value);
+    }
+
+    @Test
+    public void testEmptyPlaylist() {
+        LOG.info("testEmptyPlaylist");
+
+        // create empty playlist
+        EmptyPlaylist playlist = new EmptyPlaylist();
+
+        assertEquals(0, playlist.size());
+
+        // test iterator
+        for(TalkClientDownload download : playlist) {
+            fail();
+        }
     }
 
     //////// Helpers ////////
