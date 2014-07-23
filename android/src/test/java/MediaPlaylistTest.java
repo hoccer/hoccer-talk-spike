@@ -337,6 +337,14 @@ public class MediaPlaylistTest {
         }
         assertEquals(expectedItemCount, actualItemCount);
 
+        // test indexOf
+        assertEquals(0, playlist.indexOf(item));
+        assertEquals(-1, playlist.indexOf(other_item));
+
+        // test hasItem
+        assertTrue(playlist.hasItem(item));
+        assertFalse(playlist.hasItem(other_item));
+
         // set listener
         final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
