@@ -3,13 +3,12 @@ package com.hoccer.xo.android.view.model;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.release.R;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.TextView;
 
-public abstract class BaseContactItem {
+
+public abstract class BaseContactItem<T> {
 
     protected final XoActivity mXoActivity;
 
@@ -29,4 +28,5 @@ public abstract class BaseContactItem {
 
     protected abstract View configure(View view);
 
+    public abstract T getContent();
 }

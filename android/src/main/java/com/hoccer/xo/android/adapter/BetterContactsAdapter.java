@@ -12,7 +12,8 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.view.model.ContactItem;
+import com.hoccer.xo.android.view.model.BaseContactItem;
+import com.hoccer.xo.android.view.model.TalkClientContactItem;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,7 @@ import java.util.List;
  */
 public class BetterContactsAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
 
-    private List<ContactItem> mContactItems;
+    private List<BaseContactItem> mContactItems;
 
 
     public BetterContactsAdapter(XoActivity activity) {
@@ -39,7 +40,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     private void initialize() {
-        mContactItems = new ArrayList<ContactItem>();
+        mContactItems = new ArrayList<BaseContactItem>();
     }
 
     @Override
@@ -49,12 +50,12 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public Object getItem(int i) {
-        return mContactItems.get(i).getTalkClientContact();
+        return mContactItems.get(i).getContent();
     }
 
     @Override
     public long getItemId(int i) {
-        return mContactItems.get(i).getTalkClientContact().getClientContactId();
+        return -1;
     }
 
     @Override
@@ -66,43 +67,41 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onContactAdded(TalkClientContact contact) {
-        ContactItem item = new ContactItem(this, contact);
+        TalkClientContactItem item = new TalkClientContactItem(mActivity, contact);
         mContactItems.add(item);
         notifyDataSetChanged();
     }
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-        ContactItem item = findContactItemForContact(contact);
+        BaseContactItem item = findContactItemForContact(contact);
         mContactItems.remove(item);
         notifyDataSetChanged();
     }
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        ContactItem contactItem = findContactItemForContact(contact);
-        if(contactItem == null) {
+        BaseContactItem item = findContactItemForContact(contact);
+        if(item == null) {
             return;
         }
-
-        contactItem.update();
+        item.update();
         notifyDataSetChanged();
     }
 
     private void updateAll() {
         for (int i = 0; i < mContactItems.size(); i++) {
-            ContactItem contactItem = mContactItems.get(i);
-            contactItem.update();
+            BaseContactItem item = mContactItems.get(i);
+            item.update();
         }
-
         notifyDataSetChanged();
     }
 
-    private ContactItem findContactItemForContact(TalkClientContact contact) {
+    private TalkClientContactItem findContactItemForContact(TalkClientContact contact) {
         for (int i = 0; i < mContactItems.size(); i++) {
-            ContactItem contactItem = mContactItems.get(i);
-            if(contact.equals(contactItem.getTalkClientContact())) {
-                return contactItem;
+            BaseContactItem item = mContactItems.get(i);
+            if(contact.equals(item.getContent())) {
+                return (TalkClientContactItem) item;
             }
         }
         return null;
@@ -132,7 +131,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
                 if(contact == null) {
                     return;
                 }
-                ContactItem item = findContactItemForContact(contact);
+                TalkClientContactItem item = findContactItemForContact(contact);
                 item.update();
             }
         } catch (SQLException e) {

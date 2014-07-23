@@ -9,8 +9,6 @@ import com.hoccer.xo.release.R;
 
 import org.apache.log4j.Logger;
 
-import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,9 +19,9 @@ import java.util.Date;
 /**
 * Created by jacob on 22.07.14.
 */
-public class ContactItem extends BaseContactItem {
+public class TalkClientContactItem extends BaseContactItem {
 
-    private static final Logger LOG = Logger.getLogger(ContactItem.class);
+    private static final Logger LOG = Logger.getLogger(TalkClientContactItem.class);
 
     private BetterContactsAdapter mBetterContactsAdapter;
 
@@ -33,15 +31,10 @@ public class ContactItem extends BaseContactItem {
     private Date mLastMessageTimeStamp;
     private long mUnseenMessageCount;
 
-    public ContactItem(XoActivity activity, BetterContactsAdapter betterContactsAdapter, TalkClientContact contact) {
+    public TalkClientContactItem(XoActivity activity, TalkClientContact contact) {
         super(activity);
-        mBetterContactsAdapter = betterContactsAdapter;
         mContact = contact;
         update();
-    }
-
-    public TalkClientContact getTalkClientContact() {
-        return mContact;
     }
 
     private void setClientType(TextView typeView) {
@@ -85,8 +78,14 @@ public class ContactItem extends BaseContactItem {
         setLastMessageTime(lastMessageTimeView);
         lastMessageTextView.setText(mLastMessageText);
         unseenView.setText(Long.toString(mUnseenMessageCount));
+        unseenView.setVisibility(View.VISIBLE);
 
         return view;
+    }
+
+    @Override
+    protected TalkClientContact getContent() {
+        return mContact;
     }
 
 }
