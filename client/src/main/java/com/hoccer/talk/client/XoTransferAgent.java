@@ -4,7 +4,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 
+import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -55,7 +60,12 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     }
 
     private void initializeHttpClient() {
-        mHttpClient = new HttpClientWithKeyStore();
+        // FYI: http://stackoverflow.com/questions/12451687/http-requests-with-httpclient-too-slow
+        // && http://stackoverflow.com/questions/3046424/http-post-requests-using-httpclient-take-2-seconds-why
+        HttpParams httpParams = new BasicHttpParams();
+        HttpConnectionParams.setTcpNoDelay(httpParams, true);
+        httpParams.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+        mHttpClient = new HttpClientWithKeyStore(httpParams);
     }
 
     public XoClient getClient() {
