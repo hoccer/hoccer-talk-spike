@@ -49,7 +49,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         REGISTERING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(UPLOADING, FAILED);
+                return EnumSet.of(UPLOADING, NEW);
             }
         },
         UPLOADING {
@@ -61,7 +61,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         PAUSED {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(UPLOADING, FAILED);
+                return EnumSet.of(UPLOADING);
             }
         },
         COMPLETE, FAILED;
@@ -251,29 +251,34 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private void doRegisteringAction() {
         LOG.info("performRegistration(), state: ‘" + state + "'");
-        XoClient talkClient = mTransferAgent.getClient();
-        if (this.state == State.NEW || state == State.REGISTERING) {
-            LOG.info("[uploadId: '" + clientUploadId + "'] performing registration");
-            try {
-                ITalkRpcServer.FileHandles handles;
-                if (isAvatar()) {
-                    this.uploadLength = dataLength;
-                    handles = talkClient.getServerRpc().createFileForStorage(this.uploadLength);
-                } else {
-                    this.encryptedLength = AESCryptor.calcEncryptedSize(getContentLength(), AESCryptor.NULL_SALT, AESCryptor.NULL_SALT);
-                    this.uploadLength = encryptedLength;
-                    handles = talkClient.getServerRpc().createFileForTransfer(this.encryptedLength);
-                }
-                fileId = handles.fileId;
-                uploadUrl = handles.uploadUrl;
-                downloadUrl = handles.downloadUrl;
-                LOG.info("[uploadId: '" + clientUploadId + "'] registered as fileId: '" + handles.fileId + "'");
+        if(fileId != null) {
+            LOG.debug("we already have a fileId. no need to registering.");
+            switchState(State.UPLOADING);
+            return;
+        }
 
-                switchState(State.UPLOADING);
-            } catch (Exception e) {
-                setState(State.NEW);
-                LOG.error("error registering", e);
+        XoClient talkClient = mTransferAgent.getClient();
+        LOG.info("[uploadId: '" + clientUploadId + "'] performing registration");
+        try {
+            ITalkRpcServer.FileHandles handles;
+            if (isAvatar()) {
+                this.uploadLength = dataLength;
+                handles = talkClient.getServerRpc().createFileForStorage(this.uploadLength);
+            } else {
+                this.encryptedLength = AESCryptor.calcEncryptedSize(getContentLength(), AESCryptor.NULL_SALT, AESCryptor.NULL_SALT);
+                this.uploadLength = encryptedLength;
+                handles = talkClient.getServerRpc().createFileForTransfer(this.encryptedLength);
             }
+            fileId = handles.fileId;
+            uploadUrl = handles.uploadUrl;
+            downloadUrl = handles.downloadUrl;
+            LOG.info("[uploadId: '" + clientUploadId + "'] registered as fileId: '" + handles.fileId + "'");
+
+            switchState(State.UPLOADING);
+        } catch (Exception e) {
+            switchState(State.NEW);
+            mTransferAgent.deactivateUpload(this);
+            LOG.error("error registering", e);
         }
     }
 
