@@ -15,6 +15,7 @@ import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
@@ -157,7 +158,7 @@ public class ChatAudioItem extends ChatMessageItem {
 
     private void initializeMediaPlayerService(){
         mMediaPlayerServiceConnector.connect(mContext,
-                MediaPlayerService.PLAYSTATE_CHANGED_ACTION,
+                IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override
                     public void onConnected(MediaPlayerService service) {

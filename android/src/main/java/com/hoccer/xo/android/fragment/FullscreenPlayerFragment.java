@@ -26,6 +26,7 @@ import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ArtworkImageView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -422,17 +423,17 @@ public class FullscreenPlayerFragment extends Fragment {
                     return;
                 }
 
-                if (intent.getAction().equals(MediaPlayerService.PLAYSTATE_CHANGED_ACTION)) {
+                if (intent.getAction().equals(IntentHelper.ACTION_PLAYER_STATE_CHANGED)) {
                     updatePlayState();
-                } else if (intent.getAction().equals(MediaPlayerService.TRACK_CHANGED_ACTION)) {
+                } else if (intent.getAction().equals(IntentHelper.ACTION_PLAYER_TRACK_CHANGED)) {
                     updateTrackData();
                     updateConversationName();
                 }
             }
         };
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(MediaPlayerService.PLAYSTATE_CHANGED_ACTION);
-        intentFilter.addAction(MediaPlayerService.TRACK_CHANGED_ACTION);
+        intentFilter.addAction(IntentHelper.ACTION_PLAYER_STATE_CHANGED);
+        intentFilter.addAction(IntentHelper.ACTION_PLAYER_TRACK_CHANGED);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver, intentFilter);
     }
 

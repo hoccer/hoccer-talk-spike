@@ -52,6 +52,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         } else {
             mFoundContacts.clear();
         }
+
     }
 
     @Override

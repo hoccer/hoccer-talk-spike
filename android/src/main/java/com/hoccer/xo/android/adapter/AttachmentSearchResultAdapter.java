@@ -2,12 +2,8 @@ package com.hoccer.xo.android.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -31,10 +27,6 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
     List<AudioAttachmentItem> mFoundAttachments = new ArrayList<AudioAttachmentItem>();
     private String mLastQuery = "";
 
-    public AttachmentSearchResultAdapter(Activity activity) {
-        super(activity);
-    }
-
     @Override
     public AudioAttachmentItem getItem(int position) {
         return mFoundAttachments.get(position);
@@ -54,7 +46,7 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
         mLastQuery = query.toLowerCase();
         mFoundAttachments.clear();
         if (!mLastQuery.isEmpty()) {
-            for (AudioAttachmentItem attachment : getAttachmentList()) {
+            for (AudioAttachmentItem attachment : getAttachmentItems()) {
                 String title = attachment.getMetaData().getTitle();
                 String artist = attachment.getMetaData().getArtist();
 
@@ -64,6 +56,7 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
                 }
             }
         }
+        notifyDataSetChanged();
     }
 
     private View createAttachmentView(Context context, AudioAttachmentItem attachment) {

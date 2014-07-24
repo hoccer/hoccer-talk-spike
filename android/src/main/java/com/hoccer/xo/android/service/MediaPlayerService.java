@@ -23,6 +23,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.audio.MediaPlaylist;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -34,8 +35,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     public static final int UNDEFINED_CONTACT_ID = -1;
 
     public static final int MUSIC_PLAYER_NOTIFICATION_ID = 1;
-    public static final String PLAYSTATE_CHANGED_ACTION = "com.hoccer.xo.android.content.audio.PLAYSTATE_CHANGED_ACTION";
-    public static final String TRACK_CHANGED_ACTION = "com.hoccer.xo.android.content.audio.TRACK_CHANGED_ACTION";
 
     private static final String UPDATE_PLAYSTATE_ACTION = "com.hoccer.xo.android.content.audio.UPDATE_PLAYSTATE_ACTION";
     private static final Logger LOG = Logger.getLogger(MediaPlayerService.class);
@@ -532,12 +531,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     private void broadcastPlayStateChanged() {
-        Intent intent = new Intent(PLAYSTATE_CHANGED_ACTION);
+        Intent intent = new Intent(IntentHelper.ACTION_PLAYER_STATE_CHANGED);
         mLocalBroadcastManager.sendBroadcast(intent);
     }
 
     private void broadcastTrackChanged() {
-        Intent intent = new Intent(TRACK_CHANGED_ACTION);
+        Intent intent = new Intent(IntentHelper.ACTION_PLAYER_TRACK_CHANGED);
         mLocalBroadcastManager.sendBroadcast(intent);
     }
 

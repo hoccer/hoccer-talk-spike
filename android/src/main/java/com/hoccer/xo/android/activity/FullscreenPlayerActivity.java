@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentActivity;
 import com.hoccer.xo.android.fragment.FullscreenPlayerFragment;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -27,7 +28,7 @@ public class FullscreenPlayerActivity extends FragmentActivity {
         super.onStart();
         mPlayerFragment = (FullscreenPlayerFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_fullscreen_player);
         mMediaPlayerServiceConnector.connect(this,
-                MediaPlayerService.PLAYSTATE_CHANGED_ACTION,
+                IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override
                     public void onConnected(MediaPlayerService service) {

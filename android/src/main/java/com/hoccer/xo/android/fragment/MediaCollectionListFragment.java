@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.*;
 import android.widget.AdapterView;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.xo.android.util.AttachmentOperationHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -30,19 +31,19 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Integer mediaCollectionId = ((TalkClientMediaCollection) mMediaCollectionListAdapter.getItem(position)).getId();
-            showAudioAttachmentListFragment(mediaCollectionId);
+            showCollectionListFragment(mediaCollectionId);
         }
     }
 
-    private void showAudioAttachmentListFragment(Integer mediaCollectionId) {
+    private void showCollectionListFragment(Integer mediaCollectionId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(AudioAttachmentListFragment.ARG_MEDIA_COLLECTION_ID, mediaCollectionId);
+        bundle.putInt(AttachmentOperationHelper.ARG_MEDIA_COLLECTION_ID, mediaCollectionId);
 
-        AudioAttachmentListFragment audioAttachmentListFragment = new AudioAttachmentListFragment();
-        audioAttachmentListFragment.setArguments(bundle);
+        CollectionListFragment fragment = new CollectionListFragment();
+        fragment.setArguments(bundle);
 
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_fragment_container, audioAttachmentListFragment);
+        ft.replace(R.id.fl_fragment_container, fragment);
         ft.addToBackStack(null);
         ft.commit();
     }

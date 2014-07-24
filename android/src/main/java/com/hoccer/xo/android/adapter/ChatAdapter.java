@@ -18,6 +18,7 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.fragment.AudioAttachmentListFragment;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
 
@@ -293,15 +294,15 @@ public class
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(AudioAttachmentListFragment.AUDIO_ATTACHMENT_REMOVED_ACTION)) {
-                    int messageId = intent.getIntExtra(AudioAttachmentListFragment.TALK_CLIENT_MESSAGE_ID_EXTRA, -1);
+                if (intent.getAction().equals(IntentHelper.ACTION_AUDIO_ATTACHMENT_REMOVED)) {
+                    int messageId = intent.getIntExtra(IntentHelper.EXTRA_TALK_CLIENT_MESSAGE_ID, -1);
                     if (messageId != -1) {
                         removeMessageById(messageId);
                     }
                 }
             }
         };
-        IntentFilter filter = new IntentFilter(AudioAttachmentListFragment.AUDIO_ATTACHMENT_REMOVED_ACTION);
+        IntentFilter filter = new IntentFilter(IntentHelper.ACTION_AUDIO_ATTACHMENT_REMOVED);
         LocalBroadcastManager.getInstance(mActivity).registerReceiver(mReceiver, filter);
     }
 

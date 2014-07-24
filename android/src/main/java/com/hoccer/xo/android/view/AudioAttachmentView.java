@@ -11,6 +11,7 @@ import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -24,7 +25,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     private TextView mArtistTextView;
     private ImageView mArtworkImageView;
     private View mPlayStatusView;
-    private ImageButton mDragHandleView;
+    private ImageView mDragHandleView;
 
     private static final Logger LOG = Logger.getLogger(AudioAttachmentView.class);
 
@@ -38,7 +39,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
         mArtistTextView = ((TextView) findViewById(R.id.tv_artist_name));
         mArtworkImageView = ((ImageView) findViewById(R.id.iv_artcover));
         mPlayStatusView = findViewById(R.id.iv_playing_status);
-        mDragHandleView = (ImageButton) findViewById(R.id.ib_list_drag_handle);
+        mDragHandleView = (ImageView) findViewById(R.id.list_drag_handle);
     }
 
     public void setMediaItem(AudioAttachmentItem audioAttachmentItem) {
@@ -70,8 +71,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mMediaPlayerServiceConnector.connect(mContext,
-                MediaPlayerService.PLAYSTATE_CHANGED_ACTION,
+        mMediaPlayerServiceConnector.connect(mContext, IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override
                     public void onConnected(MediaPlayerService service) {

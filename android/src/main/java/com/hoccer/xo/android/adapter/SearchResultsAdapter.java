@@ -24,10 +24,12 @@ public class SearchResultsAdapter extends BaseAdapter {
 
     public void addSection(String caption, Adapter adapter) {
         mSections.add(new Section(caption, adapter));
+        notifyDataSetChanged();
     }
 
     public void clear() {
         mSections.clear();
+        notifyDataSetChanged();
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.XoImportExportUtils;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.release.R;
@@ -58,7 +59,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         getListView().setBackgroundColor(Color.WHITE);
         mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
         mMediaPlayerServiceConnector.connect(this,
-                MediaPlayerService.PLAYSTATE_CHANGED_ACTION,
+                IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override
                     public void onConnected(MediaPlayerService service) {
