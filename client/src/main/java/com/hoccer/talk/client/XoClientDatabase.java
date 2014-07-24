@@ -159,10 +159,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public void saveClientDownload(TalkClientDownload download) throws SQLException {
-        mClientDownloads.createOrUpdate(download);
+        boolean isCreated = mClientDownloads.createOrUpdate(download).isCreated();
 
         for (IXoDownloadListener listener : mDownloadListeners) {
-            listener.onDownloadSaved(download);
+            listener.onDownloadSaved(download, isCreated);
         }
     }
 

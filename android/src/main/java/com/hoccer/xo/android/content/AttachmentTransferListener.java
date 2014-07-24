@@ -97,7 +97,7 @@ public class AttachmentTransferListener implements IXoTransferListener, IXoDownl
     }
 
     @Override
-    public void onDownloadSaved(TalkClientDownload download) {
+    public void onDownloadSaved(TalkClientDownload download, boolean isCreated) {
 
     }
 

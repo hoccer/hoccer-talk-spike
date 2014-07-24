@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
-import android.widget.Toast;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -14,10 +13,9 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
-import com.hoccer.xo.android.content.audio.MediaPlaylist;
+import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
-import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -114,7 +112,7 @@ public class AttachmentOperationHelper {
         }
 
         if (isPlaying) {
-            if (service.getRepeatMode() == MediaPlaylist.RepeatMode.REPEAT_TITLE) {
+            if (service.getRepeatMode() == MediaPlaylistController.RepeatMode.REPEAT_TITLE) {
                 service.stop();
             } else {
                 service.playNextByRepeatMode();

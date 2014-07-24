@@ -22,7 +22,7 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
-import com.hoccer.xo.android.content.audio.MediaPlaylist;
+import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -58,7 +58,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private LocalBroadcastManager mLocalBroadcastManager;
     private BroadcastReceiver mReceiver;
     private BroadcastReceiver mHeadsetStateBroadcastReceiver;
-    private MediaPlaylist mPlaylist = new MediaPlaylist();
+    private MediaPlaylistController mPlaylistController = new MediaPlaylistController();
 
     public class MediaPlayerBinder extends Binder {
         public MediaPlayerService getService() {
@@ -291,19 +291,19 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public int getMediaListSize() {
-        return mPlaylist.size();
+        return mPlaylistController.size();
     }
 
     public void play(int position) {
-        mPlaylist.setCurrentTrackNumber(position);
-        playNewTrack(mPlaylist.current());
+        mPlaylistController.setCurrentTrackNumber(position);
+        playNewTrack(mPlaylistController.current());
     }
 
     public void play() {
         if (isStopped()) {
-            mPlaylist.setCurrentTrackNumber(0);
+            mPlaylistController.setCurrentTrackNumber(0);
         }
-        play(mPlaylist.current());
+        play(mPlaylistController.current());
     }
 
     public void play(final AudioAttachmentItem audioAttachmentItem) {
@@ -357,7 +357,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void playNextByRepeatMode() {
-        AudioAttachmentItem audioAttachmentItem = mPlaylist.nextByRepeatMode();
+        AudioAttachmentItem audioAttachmentItem = mPlaylistController.nextByRepeatMode();
         if (audioAttachmentItem != null) {
             playNewTrack(audioAttachmentItem);
         } else {
@@ -366,14 +366,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void playNext() {
-        if (mPlaylist.size() > 0) {
-            playNewTrack(mPlaylist.next());
+        if (mPlaylistController.size() > 0) {
+            playNewTrack(mPlaylistController.next());
         }
     }
 
     public void playPrevious() {
-        if (mPlaylist.size() > 0) {
-            playNewTrack(mPlaylist.previous());
+        if (mPlaylistController.size() > 0) {
+            playNewTrack(mPlaylistController.previous());
         }
     }
 
@@ -396,7 +396,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mAudioManager.abandonAudioFocus(mAudioFocusChangeListener);
         setPaused(false);
         setStopped(true);
-        mPlaylist.clear();
+        mPlaylistController.clear();
         if (isNotificationActive()) {
             removeNotification();
         }
@@ -450,11 +450,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public int getCurrentPosition() {
-        return (isStopped()) ? 0 : mPlaylist.getCurrentTrackNumber();
+        return (isStopped()) ? 0 : mPlaylistController.getCurrentTrackNumber();
     }
 
     public int getCurrentTrackNumber() {
-        return mPlaylist.getCurrentTrackNumber();
+        return mPlaylistController.getCurrentTrackNumber();
     }
 
     public int getCurrentProgress() {
@@ -492,37 +492,37 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void setMedia(AudioAttachmentItem item) {
-        mPlaylist.setTrack(item);
+        mPlaylistController.setTrack(item);
     }
 
     public void setMediaList(List<AudioAttachmentItem> itemList) {
-        mPlaylist.setTrackList(itemList);
+        mPlaylistController.setTrackList(itemList);
     }
 
     public void removeMedia(AudioAttachmentItem item) {
-        if (mPlaylist.size() > 0) {
-            mPlaylist.remove(item);
+        if (mPlaylistController.size() > 0) {
+            mPlaylistController.remove(item);
         }
     }
 
     public void updatePosition(int pos) {
-        mPlaylist.setCurrentTrackNumber(pos);
+        mPlaylistController.setCurrentTrackNumber(pos);
     }
 
-    public MediaPlaylist.RepeatMode getRepeatMode() {
-        return mPlaylist.getRepeatMode();
+    public MediaPlaylistController.RepeatMode getRepeatMode() {
+        return mPlaylistController.getRepeatMode();
     }
 
-    public void setRepeatMode(MediaPlaylist.RepeatMode mode) {
-        mPlaylist.setRepeatMode(mode);
+    public void setRepeatMode(MediaPlaylistController.RepeatMode mode) {
+        mPlaylistController.setRepeatMode(mode);
     }
 
     public boolean isShuffleActive() {
-        return mPlaylist.isShuffleActive();
+        return mPlaylistController.isShuffleActive();
     }
 
     public void setShuffleActive(boolean isActive) {
-        mPlaylist.setShuffleActive(isActive);
+        mPlaylistController.setShuffleActive(isActive);
     }
 
     @Override

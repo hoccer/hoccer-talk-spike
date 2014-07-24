@@ -216,7 +216,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     @Override
     public Iterator<TalkClientDownload> iterator() {
         return new Iterator<TalkClientDownload>() {
-            int mCurrentIndex = 0;
+            private int mCurrentIndex = 0;
 
             @Override
             public boolean hasNext() {
@@ -225,7 +225,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
             @Override
             public TalkClientDownload next() {
-                if (mCurrentIndex < mItemList.size()) {
+                if (hasNext()) {
                     return mItemList.get(mCurrentIndex++);
                 } else {
                     throw new NoSuchElementException("There is no next item in media collection.");
