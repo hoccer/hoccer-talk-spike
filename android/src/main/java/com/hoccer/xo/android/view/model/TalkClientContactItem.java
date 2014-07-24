@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.view.model;
 
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.adapter.BetterContactsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
@@ -10,6 +11,7 @@ import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
 
@@ -56,12 +58,28 @@ public class TalkClientContactItem extends BaseContactItem {
         try { // TODO: add proper exception handling
             mUnseenMessageCount = mXoActivity.getXoDatabase().findUnseenMessageCountByContactId(mContact.getClientContactId());
             TalkClientMessage message = mXoActivity.getXoDatabase().findLatestMessageByContactId(mContact.getClientContactId());
-            if(message != null) {
-                mLastMessageText = message.getText();
+            if (message != null) {
                 mLastMessageTimeStamp = message.getTimestamp();
+                updateLastMessageText(message);
+
+                mLastMessageText = message.getText();
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
+        }
+    }
+
+    private void updateLastMessageText(TalkClientMessage message) {
+        if (message != null) {
+            if (message.getAttachmentDownload() != null) {
+                TalkClientDownload attachment = message.getAttachmentDownload();
+                String text = mXoActivity.getResources().getString(R.string.contact_item_receive_attachment);
+                mLastMessageText = String.format(text, attachment.getMediaType());
+            } else {
+                mLastMessageText = message.getText();
+            }
+        } else {
+            mLastMessageText = new String();
         }
     }
 
