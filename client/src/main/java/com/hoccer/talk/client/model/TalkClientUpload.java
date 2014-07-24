@@ -182,11 +182,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     @Override
     public void start(XoTransferAgent agent) {
         mTransferAgent = agent;
-        if (state == State.NEW) {
-            switchState(State.REGISTERING);
-        } else {
-            switchState(State.UPLOADING);
-        }
+        switchState(State.REGISTERING);
     }
 
     @Override
@@ -252,7 +248,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private void doRegisteringAction() {
         LOG.info("performRegistration(), state: ‘" + state + "'");
         if(fileId != null) {
-            LOG.debug("we already have a fileId. no need to registering.");
+            LOG.debug("we already have a fileId. no need to register.");
             switchState(State.UPLOADING);
             return;
         }

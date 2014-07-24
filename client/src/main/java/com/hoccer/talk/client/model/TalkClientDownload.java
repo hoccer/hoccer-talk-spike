@@ -466,6 +466,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             mTransferAgent.scheduleNextDownloadAttempt(this);
             isFailed = false;
             saveToDatabase();
+        } else {
+            switchState(State.FAILED);
         }
     }
 
