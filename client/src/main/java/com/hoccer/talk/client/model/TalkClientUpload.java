@@ -378,7 +378,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         if (uploadedRange.hasTotal()) {
             if (uploadedRange.getTotal() != uploadLength) {
                 LOG.error("server returned wrong upload length");
-                switchState(State.FAILED);
                 return false;
             }
         }
@@ -386,7 +385,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         if (uploadedRange.hasStart()) {
             if (uploadedRange.getStart() != 0) {
                 LOG.error("server returned non-zero start");
-                switchState(State.FAILED);
                 return false;
             }
         }
