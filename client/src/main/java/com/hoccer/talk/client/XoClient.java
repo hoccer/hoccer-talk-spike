@@ -3002,23 +3002,24 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         try {
             // remove all group members
-            ForeignCollection<TalkClientMembership> groupMemberships = groupContact
-                    .getGroupMemberships();
-            for (TalkClientMembership membership : groupMemberships) {
+            ForeignCollection<TalkClientMembership> groupMemberships = groupContact.getGroupMemberships();
+            if (groupMemberships != null){
+                for (TalkClientMembership membership : groupMemberships) {
 
-                // reset nearby status of group member contact
-                TalkClientContact groupMemberContact = membership.getClientContact();
-                groupMemberContact.setNearby(false);
-                mDatabase.saveContact(groupMemberContact);
+                    // reset nearby status of group member contact
+                    TalkClientContact groupMemberContact = membership.getClientContact();
+                    groupMemberContact.setNearby(false);
+                    mDatabase.saveContact(groupMemberContact);
 
-                // reset group membership state
-                TalkGroupMember member = membership.getMember();
-                member.setState(TalkGroupMember.STATE_NONE);
-                mDatabase.saveGroupMember(member);
+                    // reset group membership state
+                    TalkGroupMember member = membership.getMember();
+                    member.setState(TalkGroupMember.STATE_NONE);
+                    mDatabase.saveGroupMember(member);
+                }
+
+                mDatabase.saveContact(groupContact);
+                mDatabase.saveGroup(groupPresence);
             }
-
-            mDatabase.saveContact(groupContact);
-            mDatabase.saveGroup(groupPresence);
         } catch (SQLException e) {
             LOG.error("Error while destroying nearby group " + groupContact.getGroupId());
         }

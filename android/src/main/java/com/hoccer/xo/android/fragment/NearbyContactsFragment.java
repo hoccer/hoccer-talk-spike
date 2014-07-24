@@ -94,7 +94,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     private void deactivateNearbyChat() {
         showPlaceholder();
-//        destroyAdapter();
+        destroyAdapter();
         mCurrentNearbyGroup = null;
     }
 
@@ -110,18 +110,18 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         });
     }
 
-//    private void destroyAdapter() {
-//        if (mNearbyAdapter != null) {
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    setListAdapter(null);
-//                }
-//            });
-//            mNearbyAdapter.unregisterListeners();
-//            mNearbyAdapter = null;
-//        }
-//    }
+    private void destroyAdapter() {
+        if (mNearbyAdapter != null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setListAdapter(null);
+                }
+            });
+            mNearbyAdapter.unregisterListeners();
+            mNearbyAdapter = null;
+        }
+    }
 
     private void updateContactList() {
         if (mNearbyAdapter != null) {
@@ -140,9 +140,9 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                mContactList.setVisibility(View.GONE);
                 mPlaceholderImage.setVisibility(View.VISIBLE);
                 mPlaceholderText.setVisibility(View.VISIBLE);
-                mContactList.setVisibility(View.GONE);
             }
         });
     }
@@ -192,7 +192,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
     }
 
     @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) { // enter first
+    public void onGroupPresenceChanged(TalkClientContact contact) {
         if (contact.isGroup()) {
             if (isNearbyConversationPossible()) {
                 activateNearbyChat();
@@ -202,7 +202,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
     }
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) { // enter - second
+    public void onGroupMembershipChanged(TalkClientContact contact) {
         if (isNearbyConversationPossible()) {
             if (mCurrentNearbyGroup == null || contact != mCurrentNearbyGroup) {
                 activateNearbyChat();
