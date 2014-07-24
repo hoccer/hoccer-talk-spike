@@ -310,5 +310,6 @@
     <string name="message_privat_text">zugestellt</string>
     <string name="attachment_failed">Beim Herunterladen ist ein Fehler aufgetreten.</string>
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
+    <string name="message_failed_text">Fehler</string>
 
 </resources>
