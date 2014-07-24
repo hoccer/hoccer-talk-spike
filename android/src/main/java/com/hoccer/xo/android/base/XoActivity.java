@@ -192,7 +192,7 @@ public abstract class XoActivity extends FragmentActivity {
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG);
+            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
     }
@@ -203,7 +203,7 @@ public abstract class XoActivity extends FragmentActivity {
         try {
             startActivityForResult(intent, requestCode);
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG);
+            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
     }
