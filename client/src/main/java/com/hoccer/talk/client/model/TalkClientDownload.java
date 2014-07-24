@@ -148,8 +148,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     @DatabaseField(width = 128)
     private String contentHmac;
 
-    private boolean isFailed = false;
-
     private HttpGet mDownloadRequest = null;
 
     public TalkClientDownload() {
@@ -306,8 +304,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
                 LOG.debug("switching to state PAUSED - reason: http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" + HttpStatus.SC_PARTIAL_CONTENT + ")");
-                isFailed = true;
-                switchState(State.PAUSED);
+                checkTransferFailure(getTransferFailures() + 1);
+                checkTransferFailure(transferFailures + 1);
                 return;
             }
 
@@ -319,8 +317,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             int bytesToGo = contentLengthValue;
             if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
                 LOG.debug("switching to state PAUSED - reason: invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
-                isFailed = true;
-                switchState(State.PAUSED);
+                checkTransferFailure(transferFailures + 1);
                 return;
             }
 
@@ -337,8 +334,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
                 LOG.debug("switching to state PAUSED - reason: copyData returned 'false'");
-                isFailed = true;
-                switchState(State.PAUSED);
+                checkTransferFailure(transferFailures + 1);
+                return;
             }
         } catch (Exception e) {
             LOG.error("download exception -> switching to state FAILED", e);
@@ -353,9 +350,18 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     switchState(State.DETECTING);
                 }
             } else {
-                isFailed = true;
-                switchState(State.PAUSED);
+                checkTransferFailure(transferFailures + 1);
             }
+        }
+    }
+
+    private void checkTransferFailure(int failures) {
+        transferFailures = failures;
+        if(transferFailures <= MAX_FAILURES) {
+            mTransferAgent.scheduleNextDownloadAttempt(this);
+            switchState(State.PAUSED);
+        } else {
+            switchState(State.FAILED);
         }
     }
 
@@ -461,14 +467,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
         mTransferAgent.pauseDownload(this);
         mTransferAgent.onDownloadStateChanged(this);
-        if(isFailed && transferFailures <= MAX_FAILURES) {
-            transferFailures++;
-            mTransferAgent.scheduleNextDownloadAttempt(this);
-            isFailed = false;
-            saveToDatabase();
-        } else {
-            switchState(State.FAILED);
-        }
     }
 
     private void doDecryptingAction() {

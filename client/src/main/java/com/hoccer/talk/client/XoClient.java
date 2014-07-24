@@ -1975,31 +1975,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             final TalkClientMessage clientMessage = clientMessages.get(i);
             final TalkClientUpload upload = clientMessage.getAttachmentUpload();
             if (upload != null) {
-                upload.registerTransferListener(new IXoTransferListener() {
-                    @Override
-                    public void onStateChanged(IXoTransferState state) {
-                        if (TalkClientUpload.State.UPLOADING.equals(state)) {
-                            upload.unregisterTransferListener(this);
-                            performDelivery(clientMessage);
-                        }
-                    }
-
-                    @Override
-                    public void onProgressUpdated(int progress, int contentLength) {
-
-                    }
-
-                    @Override
-                    public void onProgress(int progress) {
-                        // Noop
-                    }
-                });
-
-                // start the attachment upload
-                mTransferAgent.startOrRestartUpload(upload);
-            } else {
-                performDelivery(clientMessage);
+                upload.register(mTransferAgent);
             }
+            performDelivery(clientMessage);
         }
     }
 
@@ -2026,6 +2004,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 clientMessage.setProgressState(true);
                 mDatabase.saveClientMessage(clientMessage);
                 resultingDeliveries = mServerRpc.outDeliveryRequest(message, deliveries);
+                TalkClientUpload upload = clientMessage.getAttachmentUpload();
+                if(upload != null) {
+                    mTransferAgent.startOrRestartUpload(upload);
+                }
             } catch (Exception e) {
                 LOG.error("error while performing delivery request for message " + clientMessage.getClientMessageId(), e);
 
@@ -3461,7 +3443,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     @Override
     public void onUploadStateChanged(TalkClientUpload upload) {
         if(upload.getTransferType() == XoTransfer.Type.ATTACHMENT &&
-            upload.getState() == TalkClientUpload.State.PAUSED) {
+            upload.getState() == TalkClientUpload.State.PAUSED &&
+            upload.isEncryptionKeySet()) {
+            // if encryption key is not set we have not sent the delivery so the server does not know about the delivery yet.
             String nextState = getServerRpc().pausedFileUpload(upload.getFileId());
             updateUploadDelivery(upload, nextState);
         }

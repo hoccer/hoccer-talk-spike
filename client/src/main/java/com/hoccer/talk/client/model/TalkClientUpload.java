@@ -18,6 +18,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.log4j.Logger;
 import org.bouncycastle.util.encoders.Hex;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         REGISTERING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(UPLOADING, NEW);
+                return EnumSet.of(PAUSED, NEW);
             }
         },
         UPLOADING {
@@ -105,6 +106,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private int encryptedLength = -1;
 
     @DatabaseField
+    @Nullable
     private String encryptionKey;
 
     /**
@@ -182,6 +184,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     @Override
     public void start(XoTransferAgent agent) {
         mTransferAgent = agent;
+        switchState(State.UPLOADING);
+    }
+
+    public void register(XoTransferAgent agent) {
+        mTransferAgent = agent;
         switchState(State.REGISTERING);
     }
 
@@ -249,7 +256,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         LOG.info("performRegistration(), state: ‘" + state + "'");
         if(fileId != null) {
             LOG.debug("we already have a fileId. no need to register.");
-            switchState(State.UPLOADING);
+            switchState(State.PAUSED);
             return;
         }
 
@@ -270,7 +277,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             downloadUrl = handles.downloadUrl;
             LOG.info("[uploadId: '" + clientUploadId + "'] registered as fileId: '" + handles.fileId + "'");
 
-            switchState(State.UPLOADING);
+            switchState(State.PAUSED);
         } catch (Exception e) {
             switchState(State.NEW);
             mTransferAgent.deactivateUpload(this);
@@ -652,5 +659,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         if (mTransferListeners.contains(listener)) {
             mTransferListeners.remove(listener);
         }
+    }
+
+    public boolean isEncryptionKeySet() {
+        return encryptionKey != null;
     }
 }
