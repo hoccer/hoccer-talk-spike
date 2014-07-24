@@ -319,4 +319,9 @@ public class XoTransferAgent implements IXoTransferListenerOld {
             listener.onUploadStateChanged(upload);
         }
     }
+
+    public void deactivateUpload(TalkClientUpload upload) {
+        LOG.info("deactivateUpload(" + upload.getClientUploadId() + ")");
+        mUploadsById.remove(upload.getClientUploadId());
+    }
 }
