@@ -96,9 +96,9 @@ public class MediaMetaData {
         return mTitle;
     }
 
-    public String getTitleOrFilename(String pFilePath) {
+    public String getTitleOrFilename() {
         if (mTitle == null || mTitle.isEmpty()) {
-            File file = new File(pFilePath);
+            File file = new File(mFilePath);
             return file.getName();
         }
         return mTitle;
