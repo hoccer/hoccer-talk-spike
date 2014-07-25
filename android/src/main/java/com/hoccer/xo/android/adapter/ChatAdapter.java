@@ -60,11 +60,10 @@ public class
         super(activity);
         mListView = listView;
         mContact = contact;
-
-        initializeFull();
+        initialize();
     }
 
-    protected void initializeFull() {
+    protected void initialize() {
         int totalMessageCount = 0;
         try {
             final List<TalkClientMessage> messages = mDatabase.findMessagesByContactId(mContact.getClientContactId(), -1, -1);
@@ -77,6 +76,8 @@ public class
         }
     }
 
+    // TODO: get back to this implementation soon. Please.
+    /*
     protected void initialize() {
         int totalMessageCount = 0;
         try {
@@ -91,6 +92,7 @@ public class
         }
         loadNextMessages(mChatMessageItems.size() - (int) BATCH_SIZE);
     }
+    */
 
     /**
      * Loads a range of TalkClientMessage objects from database starting at a given offset.

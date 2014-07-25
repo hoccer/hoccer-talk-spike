@@ -1,19 +1,15 @@
 package com.hoccer.xo.android.view.model;
 
+import android.view.View;
+import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.xo.android.adapter.BetterContactsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
-
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
-
-import android.content.Context;
-import android.view.View;
-import android.widget.TextView;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -25,9 +21,9 @@ public class TalkClientContactItem extends BaseContactItem {
 
     private TalkClientContact mContact;
 
-    private String mLastMessageText = "";
     @Nullable
     private Date mLastMessageTimeStamp = null;
+    private String mLastMessageText = "";
     private long mUnseenMessageCount = 0;
 
     public TalkClientContactItem(XoActivity activity, TalkClientContact contact) {
@@ -47,7 +43,6 @@ public class TalkClientContactItem extends BaseContactItem {
     }
 
     private void setLastMessageTime(TextView lastMessageTime) {
-        String text = "";
         if (mLastMessageTimeStamp != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("EEE HH:mm");
             lastMessageTime.setText(sdf.format(mLastMessageTimeStamp));
@@ -61,8 +56,6 @@ public class TalkClientContactItem extends BaseContactItem {
             if (message != null) {
                 mLastMessageTimeStamp = message.getTimestamp();
                 updateLastMessageText(message);
-
-                mLastMessageText = message.getText();
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
@@ -110,7 +103,7 @@ public class TalkClientContactItem extends BaseContactItem {
     }
 
     private void setUnseenMessages(TextView unseenView) {
-        if(mUnseenMessageCount <= 0) {
+        if (mUnseenMessageCount <= 0) {
             unseenView.setVisibility(View.GONE);
         } else {
             unseenView.setText(Long.toString(mUnseenMessageCount));
@@ -125,7 +118,7 @@ public class TalkClientContactItem extends BaseContactItem {
 
     @Override
     public long getTimeStamp() {
-        if(mLastMessageTimeStamp == null) {
+        if (mLastMessageTimeStamp == null) {
             return 0;
         }
         return mLastMessageTimeStamp.getTime();
