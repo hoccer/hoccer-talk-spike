@@ -4,6 +4,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkClient;
 import com.hoccer.xo.android.content.EmptyPlaylist;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
@@ -120,13 +121,13 @@ public class MediaPlaylistTest {
             }
 
             @Override
-            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, TalkClientDownload itemRemoved) {
+            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemRemoved) {
                 assertEquals(expectedItemRemoved, itemRemoved);
                 onItemRemovedCalled.value = true;
             }
 
             @Override
-            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, TalkClientDownload itemAdded) {
+            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemAdded) {
                 assertEquals(expectedItemAdded, itemAdded);
                 onItemAddedCalled.value = true;
             }
@@ -256,12 +257,12 @@ public class MediaPlaylistTest {
             }
 
             @Override
-            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, TalkClientDownload itemRemoved) {
+            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemRemoved) {
                 onItemRemovedCalled.value = true;
             }
 
             @Override
-            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, TalkClientDownload itemAdded) {
+            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemAdded) {
                 onItemAddedCalled.value = true;
             }
 
@@ -326,15 +327,15 @@ public class MediaPlaylistTest {
         assertEquals(1, playlist.size());
 
         TalkClientDownload expectedItem = item;
-        TalkClientDownload actualItem = playlist.getItem(0);
+        IContentObject actualItem = playlist.getItem(0);
         assertTrue(expectedItem.equals(actualItem));
 
         // test iterator
         int expectedItemCount = 1;
         int actualItemCount = 0;
-        for(TalkClientDownload download : playlist) {
+        for(IContentObject playlistItem : playlist) {
             actualItemCount++;
-            assertTrue(expectedItem.equals(download));
+            assertTrue(expectedItem.equals(playlistItem));
         }
         assertEquals(expectedItemCount, actualItemCount);
 
@@ -360,12 +361,12 @@ public class MediaPlaylistTest {
             }
 
             @Override
-            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, TalkClientDownload itemRemoved) {
+            public void onItemRemoved(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemRemoved) {
                 onItemRemovedCalled.value = true;
             }
 
             @Override
-            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, TalkClientDownload itemAdded) {
+            public void onItemAdded(com.hoccer.xo.android.content.MediaPlaylist playlist, IContentObject itemAdded) {
                 onItemAddedCalled.value = true;
             }
 
@@ -413,7 +414,7 @@ public class MediaPlaylistTest {
         assertEquals(0, playlist.size());
 
         // test iterator
-        for(TalkClientDownload download : playlist) {
+        for(IContentObject item : playlist) {
             fail();
         }
     }

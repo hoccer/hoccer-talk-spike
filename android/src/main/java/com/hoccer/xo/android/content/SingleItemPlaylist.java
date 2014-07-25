@@ -3,6 +3,7 @@ package com.hoccer.xo.android.content;
 import com.hoccer.talk.client.IXoDownloadListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.content.IContentObject;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -12,7 +13,7 @@ import java.util.NoSuchElementException;
  */
 public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadListener {
 
-    private TalkClientDownload mItem;
+    private IContentObject mItem;
 
     /*
      * Constructs a playlist containing only the given item.
@@ -24,7 +25,7 @@ public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadList
     }
 
     @Override
-    public TalkClientDownload getItem(int index) {
+    public IContentObject getItem(int index) {
         if(index != 0 || mItem == null) {
             throw new IndexOutOfBoundsException();
         }
@@ -37,18 +38,18 @@ public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadList
     }
 
     @Override
-    public boolean hasItem(TalkClientDownload item) {
+    public boolean hasItem(IContentObject item) {
         return item.equals(mItem);
     }
 
     @Override
-    public int indexOf(TalkClientDownload item) {
+    public int indexOf(IContentObject item) {
         return item.equals(mItem) ? 0 : -1;
     }
 
     @Override
-    public Iterator<TalkClientDownload> iterator() {
-        return new Iterator<TalkClientDownload>() {
+    public Iterator<IContentObject> iterator() {
+        return new Iterator<IContentObject>() {
             private int mCurrentIndex = 0;
 
             @Override
@@ -57,7 +58,7 @@ public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadList
             }
 
             @Override
-            public TalkClientDownload next() {
+            public IContentObject next() {
                 if (hasNext()) {
                     mCurrentIndex++;
                     return mItem;
