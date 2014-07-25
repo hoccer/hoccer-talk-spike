@@ -226,7 +226,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     private void switchState(State newState) {
         if (!state.possibleFollowUps().contains(newState)) {
             LOG.warn("State " + newState + " is no possible followup to " + state);
-            mTransferAgent.deactivateDownload(this);
             return;
         }
         setState(newState);
@@ -341,7 +340,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             }
         } catch (Exception e) {
             LOG.error("download exception -> switching to state FAILED", e);
-            switchState(State.FAILED);
+            checkTransferFailure(transferFailures + 1);
+            switchState(State.PAUSED);
         } finally {
             LOG.debug("doDownloadingAction - ensuring file handles are closed...");
             if (downloadProgress == contentLength) {
@@ -518,7 +518,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             switchState(State.DETECTING);
         } catch (Exception e) {
             LOG.error("decryption error", e);
-            switchState(State.FAILED);
+            checkTransferFailure(transferFailures + 1);
+            switchState(State.PAUSED);
         }
     }
 
@@ -576,7 +577,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             switchState(State.COMPLETE);
         } catch (Exception e) {
             LOG.error("detection error", e);
-            switchState(State.FAILED);
+            checkTransferFailure( transferFailures + 1);
+            switchState(State.PAUSED);
         }
     }
 
@@ -675,7 +677,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void saveToDatabase() {
-        LOG.debug("save TalkClientUpload (" + getClientDownloadId() + ") to database");
+        LOG.debug("save TalkClientDownload (" + getClientDownloadId() + ") to database");
         try {
             mTransferAgent.getDatabase().saveClientDownload(this);
         } catch (SQLException e) {
