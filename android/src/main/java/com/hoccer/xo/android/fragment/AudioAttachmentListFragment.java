@@ -25,13 +25,11 @@ import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SearchResultsAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
-import com.sun.deploy.util.IconEncoder;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -303,17 +301,6 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
     private void deleteAudioAttachment(int pos) {
         IContentObject item = mAttachmentListAdapter.getItem(pos);
-
-        if (isPlaying(item)) {
-            if (mMediaPlayerService.getRepeatMode() == MediaPlaylistController.RepeatMode.REPEAT_TITLE) {
-                mMediaPlayerService.stop();
-            } else {
-                mMediaPlayerService.playNextByRepeatMode();
-            }
-        } else if (isPaused(item)) {
-            mMediaPlayerService.stop();
-        }
-
         if (deleteFile(item.getContentDataUrl())) {
             try {
                 TalkClientDownload download = (TalkClientDownload) item;
@@ -611,9 +598,9 @@ public class AudioAttachmentListFragment extends XoListFragment {
                 }
 
                 if (isPlaying(selectedItem)) {
-                    mMediaPlayerService.updatePosition(position);
+                    mMediaPlayerService.setCurrentIndex(position);
                 } else if (isPaused(selectedItem)) {
-                    mMediaPlayerService.updatePosition(position);
+                    mMediaPlayerService.setCurrentIndex(position);
                     mMediaPlayerService.play();
                 } else {
                     mMediaPlayerService.play(position);

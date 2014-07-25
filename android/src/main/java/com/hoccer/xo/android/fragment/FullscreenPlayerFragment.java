@@ -207,7 +207,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
                 mTrackProgressBar.setMax(totalDuration);
 
                 mTotalDurationLabel.setText(getStringFromTimeStamp(totalDuration));
-                mPlaylistIndexLabel.setText(Integer.toString(mMediaPlayerService.getCurrentTrackNumber() + 1));
+                mPlaylistIndexLabel.setText(Integer.toString(mMediaPlayerService.getCurrentIndex() + 1));
                 mPlaylistSizeLabel.setText(Integer.toString(mMediaPlayerService.getMediaListSize()));
 
                 mCurrentMetaData.getArtwork(getResources(), FullscreenPlayerFragment.this);
@@ -287,9 +287,9 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
                 mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ALL);
                 break;
             case REPEAT_ALL:
-                mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_TITLE);
+                mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ITEM);
                 break;
-            case REPEAT_TITLE:
+            case REPEAT_ITEM:
                 mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.NO_REPEAT);
                 break;
         }
@@ -306,7 +306,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
             case REPEAT_ALL:
                 buttonStateDrawable = getResources().getDrawable(R.drawable.btn_player_repeat_all);
                 break;
-            case REPEAT_TITLE:
+            case REPEAT_ITEM:
                 buttonStateDrawable = getResources().getDrawable(R.drawable.btn_player_repeat_title);
                 break;
             default:

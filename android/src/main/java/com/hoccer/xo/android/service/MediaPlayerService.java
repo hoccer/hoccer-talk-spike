@@ -298,15 +298,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void play(int position) {
-        mPlaylistController.setCurrentTrackNumber(position);
-        playNewTrack(mPlaylistController.current());
+        mPlaylistController.setCurrentIndex(position);
+        playNewTrack(mPlaylistController.getCurrentItem());
     }
 
     public void play() {
         if (isStopped()) {
-            mPlaylistController.setCurrentTrackNumber(0);
+            mPlaylistController.setCurrentIndex(0);
         }
-        play(mPlaylistController.current());
+        play(mPlaylistController.getCurrentItem());
     }
 
     public void play(final IContentObject item) {
@@ -359,24 +359,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         play(item);
     }
 
-    public void playNextByRepeatMode() {
-        IContentObject item = mPlaylistController.nextByRepeatMode();
-        if (item != null) {
-            playNewTrack(item);
-        } else {
-            stop();
-        }
-    }
-
     public void playNext() {
-        if (mPlaylistController.size() > 0) {
-            playNewTrack(mPlaylistController.next());
+        if (mPlaylistController.canForward()) {
+            playNewTrack(mPlaylistController.forward());
         }
     }
 
     public void playPrevious() {
-        if (mPlaylistController.size() > 0) {
-            playNewTrack(mPlaylistController.previous());
+        if (mPlaylistController.canBackward()) {
+            playNewTrack(mPlaylistController.backward());
         }
     }
 
@@ -437,7 +428,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        playNextByRepeatMode();
+        if(mPlaylistController.canForward()) {
+            playNext();
+        } else {
+            stop();
+        }
     }
 
     public boolean isPaused() {
@@ -452,12 +447,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return (isStopped()) ? 0 : mMediaPlayer.getDuration();
     }
 
-    public int getCurrentPosition() {
-        return (isStopped()) ? 0 : mPlaylistController.getCurrentTrackNumber();
-    }
-
-    public int getCurrentTrackNumber() {
-        return mPlaylistController.getCurrentTrackNumber();
+    public int getCurrentIndex() {
+        return mPlaylistController.getCurrentIndex();
     }
 
     public int getCurrentProgress() {
@@ -498,8 +489,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mPlaylistController.setPlaylist(playlist);
     }
 
-    public void updatePosition(int pos) {
-        mPlaylistController.setCurrentTrackNumber(pos);
+    public void setCurrentIndex(int pos) {
+        mPlaylistController.setCurrentIndex(pos);
     }
 
     public MediaPlaylistController.RepeatMode getRepeatMode() {
@@ -511,7 +502,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public boolean isShuffleActive() {
-        return mPlaylistController.isShuffleActive();
+        return mPlaylistController.getShuffleActive();
     }
 
     public void setShuffleActive(boolean isActive) {
