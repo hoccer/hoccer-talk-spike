@@ -159,7 +159,6 @@ public class MediaPlaylistControllerTest {
         assertEquals(expectedCurrentItem, mPlaylistController.getCurrentItem());
     }
 
-
     @Test
     public void testClear() {
         mCollection.clear();
