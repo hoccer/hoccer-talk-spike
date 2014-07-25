@@ -4,28 +4,32 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
     <fragment
-        android:id="@+id/maps_location_map"
-        android:layout_weight="1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        class="com.google.android.gms.maps.SupportMapFragment"/>
+            android:id="@+id/maps_location_map"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            class="com.google.android.gms.maps.SupportMapFragment"/>
+
     <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/maps_location_ok"
-            android:text="@string/common_ok"
-            android:layout_weight="1"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
+
         <Button
-            android:id="@+id/maps_location_cancel"
-            android:text="@string/common_cancel"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+                android:id="@+id/maps_location_ok"
+                android:text="@string/common_ok"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        <Button
+                android:id="@+id/maps_location_cancel"
+                android:text="@string/common_cancel"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
     </LinearLayout>
 </LinearLayout>
 

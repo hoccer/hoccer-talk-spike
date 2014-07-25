@@ -11,6 +11,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.widget.TextView;
 
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
@@ -188,6 +189,9 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void startExternalActivity(Intent intent) {
         LOG.debug(getClass() + " starting external activity " + intent.toString());
+        if (!canStartActivity(intent)) {
+            return;
+        }
         setBackgroundActive();
         try {
             startActivity(intent);
@@ -199,6 +203,9 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void startExternalActivityForResult(Intent intent, int requestCode) {
         LOG.debug(getClass() + " starting external activity " +  intent.toString() + " for request code: " + requestCode);
+        if (!canStartActivity(intent)) {
+            return;
+        }
         setBackgroundActive();
         try {
             startActivityForResult(intent, requestCode);
@@ -206,6 +213,24 @@ public abstract class XoActivity extends FragmentActivity {
             Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
+    }
+
+    private boolean canStartActivity(Intent intent) {
+        String activityName = intent.resolveActivity (getPackageManager()).getClassName();
+        if (activityName.equals(MapsLocationActivity.class.getName())) {
+            int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+            if (result > 0) {
+                LOG.warn(getClass() + " aborting start of external activity " + intent.toString() + " because Google Play Services returned code " + result);
+                showGooglePlayServicesErrorDialog(result);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void showGooglePlayServicesErrorDialog(int result) {
+        Dialog googlePlayServicesErrorDialog =  GooglePlayServicesUtil.getErrorDialog(result, this, 0);
+        googlePlayServicesErrorDialog.show();
     }
 
     @Override
