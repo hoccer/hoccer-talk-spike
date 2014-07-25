@@ -16,6 +16,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
@@ -25,9 +26,12 @@ import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SearchResultsAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
+import com.hoccer.xo.android.content.SingleItemPlaylist;
+import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.release.R;
+import com.sun.deploy.util.IconEncoder;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -290,7 +294,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
         for (int index = 0; index < mSelectedItems.size(); ++index) {
             int pos = mSelectedItems.keyAt(index);
             if (mSelectedItems.get(pos)) {
-                TalkClientDownload item = (TalkClientDownload) mAttachmentListAdapter.getItem(pos).getContentObject();
+                TalkClientDownload item = (TalkClientDownload) mAttachmentListAdapter.getItem(pos);
                 mCurrentCollection.removeItem(item);
                 mAttachmentListAdapter.removeItem(pos);
             }
@@ -298,7 +302,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
     }
 
     private void deleteAudioAttachment(int pos) {
-        AudioAttachmentItem item = mAttachmentListAdapter.getItem(pos);
+        IContentObject item = mAttachmentListAdapter.getItem(pos);
 
         if (isPlaying(item)) {
             if (mMediaPlayerService.getRepeatMode() == MediaPlaylistController.RepeatMode.REPEAT_TITLE) {
@@ -310,28 +314,26 @@ public class AudioAttachmentListFragment extends XoListFragment {
             mMediaPlayerService.stop();
         }
 
-        if (deleteFile(item.getFilePath())) {
+        if (deleteFile(item.getContentDataUrl())) {
             try {
-                TalkClientDownload download = (TalkClientDownload) item.getContentObject();
+                TalkClientDownload download = (TalkClientDownload) item;
 
                 XoApplication.getXoClient().getDatabase().deleteClientDownload(download);
 
                 int messageId = XoApplication.getXoClient().getDatabase().findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
                 XoApplication.getXoClient().getDatabase().deleteMessageById(messageId);
 
-                mMediaPlayerService.removeMedia(item);
-
                 Intent intent = new Intent(AUDIO_ATTACHMENT_REMOVED_ACTION);
                 intent.putExtra(TALK_CLIENT_MESSAGE_ID_EXTRA, messageId);
                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
             } catch (SQLException e) {
-                LOG.error("Error deleting message with client download id of " + ((TalkClientDownload) item.getContentObject()).getClientDownloadId());
+                LOG.error("Error deleting message with client download id of " + ((TalkClientDownload) item).getClientDownloadId());
                 e.printStackTrace();
             }
         }
     }
 
-    private boolean isPaused(AudioAttachmentItem item) {
+    private boolean isPaused(IContentObject item) {
         if (mMediaPlayerService != null && mMediaPlayerService.isPaused()) {
             if (item.equals(mMediaPlayerService.getCurrentMediaItem())) {
                 return true;
@@ -341,7 +343,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
         return false;
     }
 
-    private boolean isPlaying(AudioAttachmentItem item) {
+    private boolean isPlaying(IContentObject item) {
         if (mMediaPlayerService != null && !mMediaPlayerService.isStopped() && !mMediaPlayerService.isPaused()) {
             if (item.equals(mMediaPlayerService.getCurrentMediaItem())) {
                 return true;
@@ -587,7 +589,7 @@ public class AudioAttachmentListFragment extends XoListFragment {
         for (int index = 0; index < mSelectedItems.size(); ++index) {
             int pos = mSelectedItems.keyAt(index);
             if (mSelectedItems.get(pos)) {
-                TalkClientDownload download = (TalkClientDownload) mAttachmentListAdapter.getItem(pos).getContentObject();
+                TalkClientDownload download = (TalkClientDownload) mAttachmentListAdapter.getItem(pos);
                 downloads.add(download);
             }
         }
@@ -598,22 +600,19 @@ public class AudioAttachmentListFragment extends XoListFragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Object selectedItem = getListAdapter().getItem(position);
+            IContentObject selectedItem = (IContentObject)getListAdapter().getItem(position);
 
-            if (selectedItem instanceof AudioAttachmentItem) {
-                AudioAttachmentItem selectedAudioItem = (AudioAttachmentItem) selectedItem;
+            if (selectedItem != null) {
                 if (mInSearchMode) {
-                    List<AudioAttachmentItem> itemList = new ArrayList<AudioAttachmentItem>();
-                    itemList.add(selectedAudioItem);
                     position = 0;
-                    mMediaPlayerService.setMediaList(itemList);
+                    mMediaPlayerService.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), selectedItem));
                 } else {
                     setMediaList();
                 }
 
-                if (isPlaying(selectedAudioItem)) {
+                if (isPlaying(selectedItem)) {
                     mMediaPlayerService.updatePosition(position);
-                } else if (isPaused(selectedAudioItem)) {
+                } else if (isPaused(selectedItem)) {
                     mMediaPlayerService.updatePosition(position);
                     mMediaPlayerService.play();
                 } else {
@@ -679,11 +678,15 @@ public class AudioAttachmentListFragment extends XoListFragment {
         }
 
         private void setMediaList() {
-            List<AudioAttachmentItem> itemList = new ArrayList<AudioAttachmentItem>();
-            for (AudioAttachmentItem audioAttachmentItem : mAttachmentListAdapter.getAttachmentList()) {
-                itemList.add(audioAttachmentItem);
+            int contactId = mAttachmentListAdapter.getConversationContactId();
+            TalkClientContact contact;
+            try {
+                contact = getXoDatabase().findContactById(contactId);
+            } catch (SQLException e) {
+                LOG.error("Could not retrieve contact from database", e);
+                return;
             }
-            mMediaPlayerService.setMediaList(itemList);
+            mMediaPlayerService.setPlaylist(new UserPlaylist(getXoDatabase(), contact));
         }
     }
 

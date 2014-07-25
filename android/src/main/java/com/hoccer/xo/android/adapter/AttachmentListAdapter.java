@@ -12,8 +12,8 @@ import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.view.AudioAttachmentView;
 import org.apache.log4j.Logger;
@@ -27,7 +27,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
     private final Activity mActivity;
-    private List<AudioAttachmentItem> mAttachmentItems = new ArrayList<AudioAttachmentItem>();
+    private List<IContentObject> mAttachmentItems = new ArrayList<IContentObject>();
 
     private String mContentMediaType;
     private int mConversationContactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
@@ -59,11 +59,11 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         return adapter;
     }
 
-    public List<AudioAttachmentItem> getAttachmentList() {
+    public List<IContentObject> getAttachmentList() {
         return mAttachmentItems;
     }
 
-    public void setAttachmentItems(List<AudioAttachmentItem> items) {
+    public void setAttachmentItems(List<IContentObject> items) {
         mAttachmentItems.clear();
         mAttachmentItems.addAll(items);
         mActivity.runOnUiThread(new Runnable() {
@@ -80,7 +80,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     @Override
-    public AudioAttachmentItem getItem(int position) {
+    public IContentObject getItem(int position) {
         return mAttachmentItems.get(position);
     }
 
@@ -157,7 +157,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
         if (download.getContentMediaType().equals(this.mContentMediaType)) {
             if ((mConversationContactId == MediaPlayerService.UNDEFINED_CONTACT_ID) || (mConversationContactId == contactId)) {
-                mAttachmentItems.add(0, AudioAttachmentItem.create(download.getContentDataUrl(), download, true));
+                mAttachmentItems.add(0, download);
 
                 mActivity.runOnUiThread(new Runnable() {
                     @Override
@@ -218,9 +218,8 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         });
     }
 
-    public boolean removeItem(AudioAttachmentItem item) {
-        boolean isRemovable = mAttachmentItems.contains(item);
-        if (isRemovable) {
+    public boolean removeItem(IContentObject item) {
+        if (mAttachmentItems.contains(item)) {
             mAttachmentItems.remove(mAttachmentItems.indexOf(item));
             mActivity.runOnUiThread(new Runnable() {
                 @Override
@@ -228,11 +227,12 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
                     notifyDataSetChanged();
                 }
             });
+            return true;
         }
-        return isRemovable;
+        return false;
     }
 
-    public void addItem(AudioAttachmentItem item) {
+    public void addItem(IContentObject item) {
         mAttachmentItems.add(item);
         mActivity.runOnUiThread(new Runnable() {
             @Override
@@ -287,11 +287,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         if (downloads != null) {
             for (TalkClientDownload download : downloads) {
                 if (!isRecordedAudio(download.getFileName())) {
-                    // TODO: differentiate between generic and special attachment types
-                    AudioAttachmentItem newItem = AudioAttachmentItem.create(download.getContentDataUrl(), download, true);
-                    if (newItem != null) {
-                        mAttachmentItems.add(newItem);
-                    }
+                    mAttachmentItems.add(download);
                 }
             }
         }
@@ -328,6 +324,6 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
     @Override
     public void onDownloadRemoved(TalkClientDownload download) {
-        removeItem(AudioAttachmentItem.create(download.getContentDataUrl(), download, false));
+        removeItem(download);
     }
 }

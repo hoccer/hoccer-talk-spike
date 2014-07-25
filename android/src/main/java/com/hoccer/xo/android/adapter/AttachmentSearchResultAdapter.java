@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.release.R;
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
 
-    List<AudioAttachmentItem> mFoundAttachments = new ArrayList<AudioAttachmentItem>();
+    List<IContentObject> mFoundAttachments = new ArrayList<IContentObject>();
     private String mLastQuery = "";
 
     public AttachmentSearchResultAdapter(Activity activity) {
@@ -32,7 +33,7 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
     }
 
     @Override
-    public AudioAttachmentItem getItem(int position) {
+    public IContentObject getItem(int position) {
         return mFoundAttachments.get(position);
     }
 
@@ -50,9 +51,10 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
         mLastQuery = query.toLowerCase();
         mFoundAttachments.clear();
         if (!mLastQuery.isEmpty()) {
-            for (AudioAttachmentItem attachment : getAttachmentList()) {
-                String title = attachment.getMetaData().getTitle();
-                String artist = attachment.getMetaData().getArtist();
+            for (IContentObject attachment : getAttachmentList()) {
+                MediaMetaData metaData = MediaMetaData.retrieveMetaData(attachment.getContentDataUrl());
+                String title = metaData.getTitle();
+                String artist = metaData.getArtist();
 
                 if ((title != null && title.toLowerCase().contains(query.toLowerCase())) ||
                         (artist != null && artist.toLowerCase().contains(query.toLowerCase()))) {
@@ -62,22 +64,23 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
         }
     }
 
-    private View createAttachmentView(Context context, AudioAttachmentItem attachment) {
+    private View createAttachmentView(Context context, IContentObject attachment) {
         View attachmentView = View.inflate(context, R.layout.item_attachment_search_result, null);
-        String type = attachment.getContentObject().getContentMediaType();
+        String type = attachment.getContentMediaType();
         if (type.equals(ContentMediaType.AUDIO)) {
             attachmentView = setupAudioAttachmentView(context, attachmentView, attachment);
         }
         return attachmentView;
     }
 
-    private View setupAudioAttachmentView(Context context, View attachmentView, AudioAttachmentItem attachment) {
+    private View setupAudioAttachmentView(Context context, View attachmentView, IContentObject attachment) {
         TextView titleTv = (TextView) attachmentView.findViewById(R.id.tv_title);
-        String title = attachment.getMetaData().getTitleOrFilename(attachment.getFilePath());
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(attachment.getContentDataUrl());
+        String title = metaData.getTitleOrFilename();
         titleTv.setText(getHighlightedSearchResult(title, mLastQuery));
 
         TextView subtitleTv = (TextView) attachmentView.findViewById(R.id.tv_subtitle);
-        String artist = attachment.getMetaData().getArtist();
+        String artist = metaData.getArtist();
         if (artist == null || artist.isEmpty()) {
             artist = context.getResources().getString(R.string.media_meta_data_unknown_artist);
             subtitleTv.setText(artist);
@@ -89,7 +92,7 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
         artworkContainer.setVisibility(View.VISIBLE);
 
         final ImageView artworkView = (ImageView) attachmentView.findViewById(R.id.iv_artwork);
-        attachment.getMetaData().getArtwork(context.getResources(), new MediaMetaData.ArtworkRetrieverListener() {
+        metaData.getArtwork(context.getResources(), new MediaMetaData.ArtworkRetrieverListener() {
             @Override
             public void onArtworkRetrieveFinished(Drawable artwork) {
                 artworkView.setImageDrawable(artwork);

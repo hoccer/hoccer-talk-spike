@@ -188,7 +188,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mCurrentMetaData = mMediaPlayerService.getCurrentMediaItem().getMetaData();
+                mCurrentMetaData = MediaMetaData.retrieveMetaData(mMediaPlayerService.getCurrentMediaItem().getContentDataUrl());
                 String trackArtist = mCurrentMetaData.getArtist();
                 String trackTitle = mCurrentMetaData.getTitle();
                 int totalDuration = mMediaPlayerService.getTotalDuration();
