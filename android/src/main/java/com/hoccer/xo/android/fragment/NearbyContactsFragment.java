@@ -57,6 +57,9 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
             }
         }
         getXoActivity().getXoClient().registerContactListener(this);
+        if(mNearbyAdapter != null) {
+            mNearbyAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
