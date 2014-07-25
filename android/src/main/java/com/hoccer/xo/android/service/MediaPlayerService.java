@@ -19,9 +19,11 @@ import android.widget.RemoteViews;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
+import com.hoccer.xo.android.content.MediaMetaData;
+import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -47,8 +49,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private boolean mPaused = false;
     private boolean mStopped = true;
 
-    private AudioAttachmentItem mCurrentAudioAttachmentItem;
-    private AudioAttachmentItem mTempAudioAttachmentItem;
+    private IContentObject mCurrentItem;
+    private IContentObject mTempItem;
 
     private PendingIntent mResultPendingIntent;
 
@@ -171,7 +173,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(UPDATE_PLAYSTATE_ACTION)) {
                     if (isPaused()) {
-                        play(mCurrentAudioAttachmentItem);
+                        play(mCurrentItem);
                     } else {
                         pause();
                     }
@@ -256,9 +258,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private void updateMetaDataView(RemoteViews views) {
         String title = getString(R.string.media_meta_data_unknown_title);
         String artist = getString(R.string.media_meta_data_unknown_artist);
-        AudioAttachmentItem item = mCurrentAudioAttachmentItem;
-        String metaDataTitle = item.getMetaData().getTitle();
-        String metaDataArtist = item.getMetaData().getArtist();
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(mCurrentItem.getContentUrl());
+        String metaDataTitle = metaData.getTitle();
+        String metaDataArtist = metaData.getArtist();
         boolean metaDataAvailable = false;
         if (metaDataTitle != null && !metaDataTitle.isEmpty()) {
             title = metaDataTitle;
@@ -276,15 +278,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         } else {
             views.setViewVisibility(R.id.filename_text, View.VISIBLE);
             views.setViewVisibility(R.id.media_metadata_layout, View.GONE);
-            views.setTextViewText(R.id.filename_text, item.getFileName());
+            views.setTextViewText(R.id.filename_text, mCurrentItem.getContentUrl());
         }
     }
 
-    private void resetAndPrepareMediaPlayer(AudioAttachmentItem audioAttachmentItem) {
-        mTempAudioAttachmentItem = audioAttachmentItem;
+    private void resetAndPrepareMediaPlayer(IContentObject item) {
+        mTempItem = item;
         try {
             mMediaPlayer.reset();
-            mMediaPlayer.setDataSource(audioAttachmentItem.getFilePath().replace("file:///", "/"));
+            mMediaPlayer.setDataSource(item.getContentDataUrl().replace("file:///", "/"));
             mMediaPlayer.prepareAsync();
         } catch (Exception e) {
             LOG.error("setFile: exception setting data source", e);
@@ -307,23 +309,23 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         play(mPlaylistController.current());
     }
 
-    public void play(final AudioAttachmentItem audioAttachmentItem) {
+    public void play(final IContentObject item) {
         if (mMediaPlayer == null) {
-            createMediaPlayerAndPlay(audioAttachmentItem);
+            createMediaPlayerAndPlay(item);
         } else {
             startPlaying();
         }
     }
 
-    private void createMediaPlayerAndPlay(final AudioAttachmentItem audioAttachmentItem) {
+    private void createMediaPlayerAndPlay(final IContentObject item) {
         createMediaPlayer();
         mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                play(audioAttachmentItem);
+                play(item);
             }
         });
-        resetAndPrepareMediaPlayer(audioAttachmentItem);
+        resetAndPrepareMediaPlayer(item);
     }
 
     private void startPlaying() {
@@ -333,7 +335,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
             setPaused(false);
             setStopped(false);
             if (!canResume()) {
-                mCurrentAudioAttachmentItem = mTempAudioAttachmentItem;
+                mCurrentItem = mTempItem;
                 broadcastTrackChanged();
             }
             if (isNotificationActive()) {
@@ -349,18 +351,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return isPaused();
     }
 
-    private void playNewTrack(AudioAttachmentItem audioAttachmentItem) {
+    private void playNewTrack(IContentObject item) {
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
-        play(audioAttachmentItem);
+        play(item);
     }
 
     public void playNextByRepeatMode() {
-        AudioAttachmentItem audioAttachmentItem = mPlaylistController.nextByRepeatMode();
-        if (audioAttachmentItem != null) {
-            playNewTrack(audioAttachmentItem);
+        IContentObject item = mPlaylistController.nextByRepeatMode();
+        if (item != null) {
+            playNewTrack(item);
         } else {
             stop();
         }
@@ -397,7 +399,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mAudioManager.abandonAudioFocus(mAudioFocusChangeListener);
         setPaused(false);
         setStopped(true);
-        mPlaylistController.clear();
+        mPlaylistController.reset();
         if (isNotificationActive()) {
             removeNotification();
         }
@@ -421,7 +423,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                     mMediaPlayer.seekTo(position);
                 }
             });
-            resetAndPrepareMediaPlayer(mCurrentAudioAttachmentItem);
+            resetAndPrepareMediaPlayer(mCurrentItem);
         } else {
             mMediaPlayer.seekTo(position);
         }
@@ -462,8 +464,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return mMediaPlayer.getCurrentPosition();
     }
 
-    public AudioAttachmentItem getCurrentMediaItem() {
-        return mCurrentAudioAttachmentItem;
+    public IContentObject getCurrentMediaItem() {
+        return mCurrentItem;
     }
 
     public int getCurrentConversationContactId() {
@@ -471,14 +473,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
         try {
             TalkClientMessage message;
-            if (getCurrentMediaItem().getContentObject() instanceof TalkClientDownload) {
-                int attachmentId = ((TalkClientDownload) getCurrentMediaItem().getContentObject()).getClientDownloadId();
+            if (getCurrentMediaItem() instanceof TalkClientDownload) {
+                int attachmentId = ((TalkClientDownload) getCurrentMediaItem()).getClientDownloadId();
                 message = XoApplication.getXoClient().getDatabase().findClientMessageByTalkClientDownloadId(attachmentId);
                 if (message != null) {
                     conversationContactId = message.getSenderContact().getClientContactId();
                 }
-            } else if (getCurrentMediaItem().getContentObject() instanceof TalkClientUpload) {
-                int attachmentId = ((TalkClientUpload) getCurrentMediaItem().getContentObject()).getClientUploadId();
+            } else if (getCurrentMediaItem() instanceof TalkClientUpload) {
+                int attachmentId = ((TalkClientUpload) getCurrentMediaItem()).getClientUploadId();
                 message = XoApplication.getXoClient().getDatabase().findClientMessageByTalkClientUploadId(attachmentId);
                 if (message != null) {
                     conversationContactId = message.getSenderContact().getClientContactId();
@@ -492,18 +494,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return conversationContactId;
     }
 
-    public void setMedia(AudioAttachmentItem item) {
-        mPlaylistController.setTrack(item);
-    }
-
-    public void setMediaList(List<AudioAttachmentItem> itemList) {
-        mPlaylistController.setTrackList(itemList);
-    }
-
-    public void removeMedia(AudioAttachmentItem item) {
-        if (mPlaylistController.size() > 0) {
-            mPlaylistController.remove(item);
-        }
+    public void setPlaylist(MediaPlaylist playlist) {
+        mPlaylistController.setPlaylist(playlist);
     }
 
     public void updatePosition(int pos) {

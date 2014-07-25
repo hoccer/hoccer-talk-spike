@@ -18,7 +18,7 @@ public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadList
     /*
      * Constructs a playlist containing only the given item.
      */
-    public SingleItemPlaylist(XoClientDatabase database, TalkClientDownload item) {
+    public SingleItemPlaylist(XoClientDatabase database, IContentObject item) {
         mItem = item;
         database.registerDownloadListener(this);
 

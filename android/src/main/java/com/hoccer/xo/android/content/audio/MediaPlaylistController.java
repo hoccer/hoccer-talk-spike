@@ -1,11 +1,14 @@
 package com.hoccer.xo.android.content.audio;
 
-import com.hoccer.xo.android.content.AudioAttachmentItem;
+import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.content.EmptyPlaylist;
+import com.hoccer.xo.android.content.MediaPlaylist;
 import org.apache.log4j.Logger;
 
 import java.util.*;
 
-public class MediaPlaylistController implements ListIterator<AudioAttachmentItem> {
+public class MediaPlaylistController implements ListIterator<IContentObject>,MediaPlaylist.Listener {
 
     public static enum RepeatMode {
         REPEAT_TITLE, REPEAT_ALL, NO_REPEAT;
@@ -13,7 +16,7 @@ public class MediaPlaylistController implements ListIterator<AudioAttachmentItem
 
     private static final Logger LOG = Logger.getLogger(MediaPlaylistController.class);
 
-    private List<AudioAttachmentItem> mAudioAttachmentItems = new ArrayList<AudioAttachmentItem>();
+    private MediaPlaylist mPlaylist = new EmptyPlaylist();
     private List<Integer> mPlaylistOrder = new ArrayList<Integer>();
     private RepeatMode mRepeatMode = RepeatMode.NO_REPEAT;
 
@@ -41,17 +44,13 @@ public class MediaPlaylistController implements ListIterator<AudioAttachmentItem
         }
     }
 
-    public List<AudioAttachmentItem> getAudioAttachmentItems() {
-        return mAudioAttachmentItems;
-    }
-
     public int size() {
-        return mAudioAttachmentItems.size();
+        return mPlaylist.size();
     }
 
     @Override
     public boolean hasPrevious() {
-        if (!mAudioAttachmentItems.isEmpty()) {
+        if (mPlaylist.size() > 0) {
             if (previousIndex() >= 0) {
                 return true;
             }
@@ -70,28 +69,28 @@ public class MediaPlaylistController implements ListIterator<AudioAttachmentItem
     }
 
     @Override
-    public AudioAttachmentItem previous() {
+    public IContentObject previous() {
         --mCurrentIndex;
         if (mCurrentIndex < 0) {
             mCurrentIndex = mPlaylistOrder.size() - 1;
         }
-        return mAudioAttachmentItems.get(mPlaylistOrder.get(mCurrentIndex));
+        return mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex));
     }
 
     @Override
-    public AudioAttachmentItem next() {
+    public IContentObject next() {
         ++mCurrentIndex;
         if (mCurrentIndex >= mPlaylistOrder.size()) {
             mCurrentIndex = 0;
         }
-        return mAudioAttachmentItems.get(mPlaylistOrder.get(mCurrentIndex));
+        return mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex));
     }
 
-    public AudioAttachmentItem nextByRepeatMode() {
+    public IContentObject nextByRepeatMode() {
         switch (mRepeatMode) {
             case NO_REPEAT:
                 if (hasNext()) {
-                    return mAudioAttachmentItems.get(mPlaylistOrder.get(++mCurrentIndex));
+                    return mPlaylist.getItem(mPlaylistOrder.get(++mCurrentIndex));
                 }
                 break;
             case REPEAT_ALL:
@@ -100,12 +99,6 @@ public class MediaPlaylistController implements ListIterator<AudioAttachmentItem
                 return current();
         }
         return null;
-    }
-
-    public void clear() {
-        mAudioAttachmentItems.clear();
-        mPlaylistOrder.clear();
-        mCurrentIndex = -1;
     }
 
     @Override
@@ -124,17 +117,13 @@ public class MediaPlaylistController implements ListIterator<AudioAttachmentItem
     }
 
     @Override
-    public void set(AudioAttachmentItem item) {
+    public void set(IContentObject item) {
         LOG.error("Setting items at current position is not supported.");
     }
 
     @Override
-    public void add(AudioAttachmentItem item) {
+    public void add(IContentObject item) {
         LOG.error("Adding items at current position is not supported.");
-    }
-
-    public void remove(AudioAttachmentItem item) {
-        remove(mAudioAttachmentItems.indexOf(item));
     }
 
     private int getIndexOfPlaylistPosition(int attachmentIndex) {
@@ -165,21 +154,22 @@ public class MediaPlaylistController implements ListIterator<AudioAttachmentItem
         }
     }
 
-    public void setTrack(AudioAttachmentItem item) {
-        clear();
-        mAudioAttachmentItems.add(item);
+    public void setPlaylist(MediaPlaylist playlist) {
+        mPlaylist.unregisterListener(this);
+        mPlaylist = playlist;
+        mPlaylist.registerListener(this);
         resetPlaylistIndexes();
     }
 
-    public void setTrackList(List<AudioAttachmentItem> items) {
-        clear();
-        mAudioAttachmentItems.addAll(items);
+    public void reset() {
+        mPlaylist = new EmptyPlaylist();
+        mCurrentIndex = 0;
         resetPlaylistIndexes();
     }
 
-    public AudioAttachmentItem current() {
-        if ((mCurrentIndex >= 0) && (mCurrentIndex < mAudioAttachmentItems.size())) {
-            return mAudioAttachmentItems.get(mPlaylistOrder.get(mCurrentIndex));
+    public IContentObject current() {
+        if ((mPlaylist != null) && (mCurrentIndex >= 0) && (mCurrentIndex < mPlaylist.size())) {
+            return mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex));
         } else {
             return null;
         }
@@ -235,13 +225,12 @@ public class MediaPlaylistController implements ListIterator<AudioAttachmentItem
 
     private void createPlaylistIndexes() {
         mPlaylistOrder = new ArrayList<Integer>();
-        for (int i = 0; i < mAudioAttachmentItems.size(); i++) {
+        for (int i = 0; i < mPlaylist.size(); i++) {
             mPlaylistOrder.add(i);
         }
     }
 
     private void remove(int attachmentIndex) {
-
         if (attachmentIndex < 0) {
             throw new IllegalArgumentException("Removing entry with index < 0 is not possible.");
         }
@@ -250,12 +239,31 @@ public class MediaPlaylistController implements ListIterator<AudioAttachmentItem
             throw new IllegalStateException("Removing the current entry (" + getCurrentPlaylistPosition() + ") from playlist not possible.");
         }
 
-        if (attachmentIndex < mAudioAttachmentItems.size()) {
+        if (attachmentIndex < mPlaylist.size()) {
             int indexOfPlaylistPosition = getIndexOfPlaylistPosition(attachmentIndex);
-            mAudioAttachmentItems.remove(attachmentIndex);
+            //mTalkClientDownloads.remove(attachmentIndex);
             mPlaylistOrder.remove(indexOfPlaylistPosition);
             correctPlaylistIndexes(indexOfPlaylistPosition);
         }
     }
 
+    @Override
+    public void onItemOrderChanged(MediaPlaylist playlist) {
+
+    }
+
+    @Override
+    public void onItemRemoved(MediaPlaylist playlist, IContentObject itemRemoved) {
+
+    }
+
+    @Override
+    public void onItemAdded(MediaPlaylist playlist, IContentObject itemAdded) {
+
+    }
+
+    @Override
+    public void onPlaylistCleared(MediaPlaylist playlist) {
+
+    }
 }
