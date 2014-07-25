@@ -344,6 +344,40 @@ public class MediaPlaylistControllerTest {
         assertEquals(expectedCurrentItem, mPlaylistController.getCurrentItem());
     }
 
+    @Test
+    public void testAddShuffled() {
+        mPlaylistController.setCurrentIndex(1);
+        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        mPlaylistController.setShuffleActive(true);
+
+        TalkClientDownload item = null;
+        try {
+            item = new TalkClientDownload();
+            mDatabase.saveClientDownload(item);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+        mCollection.addItem(3, item);
+
+        int expectedCurrentIndex = 1;
+        assertEquals(expectedCurrentIndex, mPlaylistController.getCurrentIndex());
+        assertEquals(expectedCurrentItem, mPlaylistController.getCurrentItem());
+    }
+
+    @Test
+    public void testRemoveShuffled() {
+        mPlaylistController.setCurrentIndex(1);
+        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        mPlaylistController.setShuffleActive(true);
+
+        mCollection.removeItem(2);
+
+        int expectedCurrentIndex = 1;
+        assertEquals(expectedCurrentIndex, mPlaylistController.getCurrentIndex());
+        assertEquals(expectedCurrentItem, mPlaylistController.getCurrentItem());
+    }
+
     //////// Helpers ////////
 
     private TalkClientMediaCollection createMediaCollection() {
