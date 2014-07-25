@@ -214,6 +214,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private void switchState(State newState) {
         if (!state.possibleFollowUps().contains(newState)) {
             LOG.warn("State " + newState.toString() + " is no possible followup to " + state.toString());
+            mTransferAgent.deactivateUpload(this);
             return;
         }
         setState(newState);

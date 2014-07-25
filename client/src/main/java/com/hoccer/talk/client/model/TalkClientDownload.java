@@ -226,6 +226,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     private void switchState(State newState) {
         if (!state.possibleFollowUps().contains(newState)) {
             LOG.warn("State " + newState + " is no possible followup to " + state);
+            mTransferAgent.deactivateDownload(this);
             return;
         }
         setState(newState);
