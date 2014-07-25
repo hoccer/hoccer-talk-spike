@@ -101,7 +101,7 @@ public class
      * @param offset Index of the first TalkClientMessage object
      */
     public synchronized void loadNextMessages(int offset) {
-        if(true) {
+        if (true) {
             return;
         }
         try {

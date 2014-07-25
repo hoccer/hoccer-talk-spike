@@ -329,8 +329,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View attachmentWrapper = inflater.inflate(R.layout.view_attachment_wrapper, null);
             mAttachmentView.addView(attachmentWrapper);
+            mAttachmentView.setVisibility(View.VISIBLE);
         }
-        mAttachmentView.setVisibility(View.VISIBLE);
 
         mContentWrapper = (LinearLayout) mAttachmentView.findViewById(R.id.ll_content_wrapper);
 
@@ -368,9 +368,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
         mAttachmentView.setBackgroundDrawable(bubbleForMessageAttachment(mMessage));
 
         mContentDescription.setText(mContentRegistry.getContentDescription(mContentObject));
-        if (!delivery.isFinished()) {
-            mContentWrapper.setVisibility(View.GONE);
+        if (shouldDisplayTransferControl(getTransferState(mContentObject))) {
             mContentTransferProgress.setVisibility(View.VISIBLE);
+            mContentWrapper.setVisibility(View.GONE);
 
             // create handler for a pending attachment transfer
             if (mAttachmentTransferHandler == null) {
@@ -383,12 +383,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
         } else {
             mContentTransferProgress.setVisibility(View.GONE);
             mContentTransferControl.setOnClickListener(null);
-            if (delivery.isFinished()) {
-                mContentWrapper.setVisibility(View.VISIBLE);
-                displayAttachment(contentObject);
-            } else {
-                mContentWrapper.setVisibility(View.GONE);
-            }
+            mContentWrapper.setVisibility(View.VISIBLE);
+            displayAttachment(contentObject);
         }
 
         // hide message text field when empty - there is still an attachment to display
@@ -425,8 +421,6 @@ public class ChatMessageItem implements AttachmentTransferListener {
      * @param contentObject The IContentObject to display
      */
     protected void displayAttachment(IContentObject contentObject) {
-        mContentTransferProgress.setVisibility(View.GONE);
-        mContentWrapper.setVisibility(View.VISIBLE);
         configureContextMenu();
     }
 

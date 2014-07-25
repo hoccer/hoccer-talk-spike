@@ -146,6 +146,15 @@ public abstract class XoAdapter extends BaseAdapter {
     @Override
     public void notifyDataSetChanged() {
         LOG.trace("notifyDataSetChanged()");
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                XoAdapter.super.notifyDataSetChanged();
+            }
+        });
+
+        /*
         long now = System.currentTimeMillis();
         long delta = now - mNotifyTimestamp;
         if (mNotifyFuture != null) {
@@ -177,6 +186,7 @@ public abstract class XoAdapter extends BaseAdapter {
                 }
             });
         }
+        */
     }
 
     public interface AdapterReloadListener {
