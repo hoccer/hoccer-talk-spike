@@ -244,7 +244,6 @@
     </string>
     <string name="email_invitation_text">Hey!\nich nutze die Gratis-App Hoccer XO zum sicheren Chatten! Jetzt herunterladen:\nhttp://hoccer.com/\nund mich als Kontakt hinzufügen:\n
         &lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;
-        %1$s%2$s
         \nxo %3$s
     </string>
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>

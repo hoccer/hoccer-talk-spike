@@ -123,12 +123,10 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
             case UPLOAD_FAILED:
                 break;
             case UPLOAD_COMPLETE:
-                LOG.debug("Upload complete for " + ((TalkClientUpload) mContent).getUploadUrl());
                 break;
             case DOWNLOAD_FAILED:
                 break;
             case DOWNLOAD_COMPLETE:
-                LOG.debug("Download complete for " + ((TalkClientDownload) mContent).getDownloadUrl());
                 break;
             default:
                 break;

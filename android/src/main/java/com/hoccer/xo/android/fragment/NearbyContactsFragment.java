@@ -86,15 +86,15 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
     }
 
     private void activateNearbyChat() {
+        hidePlaceholder();
         mCurrentNearbyGroup = getXoActivity().getXoClient().getCurrentNearbyGroup();
         createAdapter();
-        hidePlaceholder();
     }
 
     private void deactivateNearbyChat() {
         destroyAdapter();
-        showPlaceholder();
         mCurrentNearbyGroup = null;
+        showPlaceholder();
     }
 
     private void createAdapter() {
@@ -135,7 +135,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         }
     }
 
-    public void showPlaceholder() {
+    private void showPlaceholder() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -196,6 +196,8 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
             if (isNearbyConversationPossible()) {
                 activateNearbyChat();
                 updateContactList();
+            } else {
+                deactivateNearbyChat();
             }
         }
     }

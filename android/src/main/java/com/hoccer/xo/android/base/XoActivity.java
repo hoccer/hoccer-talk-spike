@@ -216,21 +216,30 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     private boolean canStartActivity(Intent intent) {
-        String activityName = intent.resolveActivity (getPackageManager()).getClassName();
-        if (activityName.equals(MapsLocationActivity.class.getName())) {
-            int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-            if (result > 0) {
-                LOG.warn(getClass() + " aborting start of external activity " + intent.toString() + " because Google Play Services returned code " + result);
-                showGooglePlayServicesErrorDialog(result);
-                return false;
+        if (intent != null) {
+            ComponentName componentName = intent.resolveActivity(getPackageManager());
+            if (componentName != null) {
+                String activityName = componentName.getClassName();
+
+                // perform check on specified Activity classes.
+                if (activityName != null && activityName.equals(MapsLocationActivity.class.getName())) {
+                    int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+                    if (result > 0) {
+                        LOG.warn(getClass() + " aborting start of external activity " + intent.toString() + " because Google Play Services returned code " + result);
+                        showGooglePlayServicesErrorDialog(result);
+                        return false;
+                    }
+                }
             }
         }
         return true;
     }
 
     private void showGooglePlayServicesErrorDialog(int result) {
-        Dialog googlePlayServicesErrorDialog =  GooglePlayServicesUtil.getErrorDialog(result, this, 0);
-        googlePlayServicesErrorDialog.show();
+        Dialog googlePlayServicesErrorDialog = GooglePlayServicesUtil.getErrorDialog(result, this, 0);
+        if (googlePlayServicesErrorDialog != null) {
+            googlePlayServicesErrorDialog.show();
+        }
     }
 
     @Override
