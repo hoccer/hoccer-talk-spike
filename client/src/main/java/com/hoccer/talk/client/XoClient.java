@@ -701,26 +701,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void setClientAvatar(final TalkClientUpload upload) {
         LOG.debug("new client avatar as upload " + upload);
         resetIdle();
-        upload.registerTransferListener(new IXoTransferListener() {
-            @Override
-            public void onStateChanged(IXoTransferState state) {
-                TalkClientUpload.State uploadState = (TalkClientUpload.State) state;
-                if (uploadState == TalkClientUpload.State.UPLOADING) {
-                    sendPresenceUpdateWithNewAvatar(upload);
-                }
-            }
-
-            @Override
-            public void onProgressUpdated(int progress, int contentLength) {
-
-            }
-
-            @Override
-            public void onProgress(int progress) {
-                // ignore this
-            }
-        });
         mTransferAgent.startOrRestartUpload(upload);
+        sendPresenceUpdateWithNewAvatar(upload);
     }
 
     private void sendPresenceUpdateWithNewAvatar(final TalkClientUpload upload) {
@@ -778,26 +760,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void setGroupAvatar(final TalkClientContact group, final TalkClientUpload upload) {
         LOG.debug("new group avatar as upload " + upload);
         resetIdle();
-        upload.registerTransferListener(new IXoTransferListener() {
-            @Override
-            public void onStateChanged(IXoTransferState state) {
-                TalkClientUpload.State uploadState = (TalkClientUpload.State) state;
-                if (uploadState == TalkClientUpload.State.UPLOADING) {
-                    sendGroupPresenceUpdateWithNewAvatar(group, upload);
-                }
-            }
-
-            @Override
-            public void onProgressUpdated(int progress, int contentLength) {
-
-            }
-
-            @Override
-            public void onProgress(int progress) {
-                // ignore this
-            }
-        });
         mTransferAgent.startOrRestartUpload(upload);
+        sendGroupPresenceUpdateWithNewAvatar(group, upload);
     }
 
     private void sendGroupPresenceUpdateWithNewAvatar(final TalkClientContact group, final TalkClientUpload upload) {

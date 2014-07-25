@@ -195,6 +195,10 @@ public class XoTransferAgent implements IXoTransferListenerOld {
             return;
         }
 
+        if(upload.getFileId() == null) {
+            upload.register(this);
+        }
+
         synchronized (mUploadsById) {
             final int uploadId = upload.getClientUploadId();
             if(!mUploadsById.containsKey(uploadId)) {
