@@ -5,7 +5,6 @@ import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.talk.model.TalkClient;
 import com.hoccer.xo.android.content.EmptyPlaylist;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
@@ -425,7 +424,7 @@ public class MediaPlaylistTest {
         // create download
         TalkClientDownload result = new TalkClientDownload();
 
-        // set private fields via reflection two avoid a dozen of objects which usually make up the download
+        // set private fields via reflection to avoid a dozen of objects which usually make up the download
         try {
             Class<?> downloadClass = result.getClass();
             Field mediaTypeField = downloadClass.getDeclaredField("mediaType");
