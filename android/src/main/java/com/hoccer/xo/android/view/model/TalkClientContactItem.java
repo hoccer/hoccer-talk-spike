@@ -61,8 +61,6 @@ public class TalkClientContactItem extends BaseContactItem {
             if (message != null) {
                 mLastMessageTimeStamp = message.getTimestamp();
                 updateLastMessageText(message);
-
-                mLastMessageText = message.getText();
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
