@@ -22,7 +22,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
     private int mCurrentIndex;
     private IContentObject mCurrentItem;
 
-    private boolean shuffleActive = false;
+    private boolean mShuffleActive = false;
 
     private RepeatMode mRepeatMode = RepeatMode.NO_REPEAT;
 
@@ -155,7 +155,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
 
         // set initial item
         if(playlist.size() > 0) {
-            if (shuffleActive) {
+            if (mShuffleActive) {
                 Random rnd = new Random(System.nanoTime());
                 mCurrentIndex = rnd.nextInt(playlist.size());
             } else {
@@ -186,11 +186,11 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
     }
 
     public boolean getShuffleActive() {
-        return shuffleActive;
+        return mShuffleActive;
     }
 
-    public void setShuffleActive(boolean shuffleActive) {
-        this.shuffleActive = shuffleActive;
+    public void setShuffleActive(boolean mShuffleActive) {
+        this.mShuffleActive = mShuffleActive;
         createPlaylistIndexes();
     }
 
@@ -200,7 +200,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
             mPlaylistOrder.add(i);
         }
 
-        if(shuffleActive) {
+        if(mShuffleActive) {
             Random rnd = new Random(System.nanoTime());
             Collections.shuffle(mPlaylistOrder, rnd);
 

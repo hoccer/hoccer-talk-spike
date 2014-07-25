@@ -309,11 +309,26 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         play(mPlaylistController.getCurrentItem());
     }
 
-    public void play(final IContentObject item) {
+    private void play(final IContentObject item) {
         if (mMediaPlayer == null) {
             createMediaPlayerAndPlay(item);
         } else {
-            startPlaying();
+            int result = mAudioManager.requestAudioFocus(mAudioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                mMediaPlayer.start();
+                mPaused = false;
+                mStopped = false;
+                if (!canResume()) {
+                    mCurrentItem = mTempItem;
+                    broadcastTrackChanged();
+                }
+                if (isNotificationActive()) {
+                    updateNotification();
+                }
+                broadcastPlayStateChanged();
+            } else {
+                LOG.debug("Audio focus request not granted");
+            }
         }
     }
 
@@ -328,25 +343,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         resetAndPrepareMediaPlayer(item);
     }
 
-    private void startPlaying() {
-        int result = mAudioManager.requestAudioFocus(mAudioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            mMediaPlayer.start();
-            setPaused(false);
-            setStopped(false);
-            if (!canResume()) {
-                mCurrentItem = mTempItem;
-                broadcastTrackChanged();
-            }
-            if (isNotificationActive()) {
-                updateNotification();
-            }
-            broadcastPlayStateChanged();
-        } else {
-            LOG.debug("Audio focus request not granted");
-        }
-    }
-
     private boolean canResume() {
         return isPaused();
     }
@@ -359,13 +355,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         play(item);
     }
 
-    public void playNext() {
+    public void forward() {
         if (mPlaylistController.canForward()) {
             playNewTrack(mPlaylistController.forward());
         }
     }
 
-    public void playPrevious() {
+    public void backward() {
         if (mPlaylistController.canBackward()) {
             playNewTrack(mPlaylistController.backward());
         }
@@ -374,8 +370,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     public void pause() {
         mMediaPlayer.pause();
 
-        setPaused(true);
-        setStopped(false);
+        mPaused = true;
+        mStopped = false;
         if (isNotificationActive()) {
             updateNotification();
         }
@@ -388,8 +384,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
             mMediaPlayer = null;
         }
         mAudioManager.abandonAudioFocus(mAudioFocusChangeListener);
-        setPaused(false);
-        setStopped(true);
+        mPaused = false;
+        mStopped = true;
         mPlaylistController.reset();
         if (isNotificationActive()) {
             removeNotification();
@@ -408,8 +404,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     if (isStopped()) {
-                        setStopped(false);
-                        setPaused(true);
+                        mStopped =false;
+                        mPaused = true;
                     }
                     mMediaPlayer.seekTo(position);
                 }
@@ -429,7 +425,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     @Override
     public void onCompletion(MediaPlayer mp) {
         if(mPlaylistController.canForward()) {
-            playNext();
+            forward();
         } else {
             stop();
         }
@@ -528,13 +524,4 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private void removeNotification() {
         stopForeground(true);
     }
-
-    private void setPaused(boolean paused) {
-        this.mPaused = paused;
-    }
-
-    private void setStopped(boolean stopped) {
-        this.mStopped = stopped;
-    }
-
 }
