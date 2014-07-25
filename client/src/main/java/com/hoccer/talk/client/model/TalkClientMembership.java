@@ -3,6 +3,7 @@ package com.hoccer.talk.client.model;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import org.jetbrains.annotations.Nullable;
 
 @DatabaseTable(tableName = "clientMembership")
 public class TalkClientMembership {
@@ -42,6 +43,7 @@ public class TalkClientMembership {
         this.clientContact = clientContact;
     }
 
+    @Nullable
     public TalkGroupMember getMember() {
         return member;
     }

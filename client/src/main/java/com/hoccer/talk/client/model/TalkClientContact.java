@@ -519,6 +519,9 @@ public class TalkClientContact implements Serializable {
         if (getGroupMemberships() != null) {
             for (TalkClientMembership groupMembership : getGroupMemberships()) {
                 TalkGroupMember groupMember = groupMembership.getMember();
+                if (groupMember == null) {
+                    continue;
+                }
                 if (groupMember.getState().equals(TalkGroupMember.STATE_JOINED)) {
                     activeMemberCount++;
                 }
