@@ -275,10 +275,6 @@ public class MediaPlaylistControllerTest {
         assertEquals(expectedCurrentItem, mPlaylistController.getCurrentItem());
     }
 
-
-
-
-
     @Test
     public void testPreviousWithNoRepeat() {
         mPlaylistController.setCurrentIndex(2);

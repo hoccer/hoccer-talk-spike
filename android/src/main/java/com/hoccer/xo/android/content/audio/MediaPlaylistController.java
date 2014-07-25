@@ -194,10 +194,6 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
         createPlaylistIndexes();
     }
 
-    public Integer[] getPlaylistOrder() {
-        return mPlaylistOrder.toArray(new Integer[mPlaylistOrder.size()]);
-    }
-
     private void createPlaylistIndexes() {
         mPlaylistOrder = new ArrayList<Integer>();
         for (int i = 0; i < mPlaylist.size(); i++) {
