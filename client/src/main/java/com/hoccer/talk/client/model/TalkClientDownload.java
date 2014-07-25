@@ -303,8 +303,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             int sc = status.getStatusCode();
             logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
-                LOG.debug("switching to state PAUSED - reason: http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" + HttpStatus.SC_PARTIAL_CONTENT + ")");
-                checkTransferFailure(getTransferFailures() + 1);
+                LOG.debug("switching to state PAUSED - reason: http status is not OK (" + HttpStatus.SC_OK + ") or partial content ("
+                        + HttpStatus.SC_PARTIAL_CONTENT + ")");
                 checkTransferFailure(transferFailures + 1);
                 return;
             }
@@ -334,7 +334,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
                 LOG.debug("switching to state PAUSED - reason: copyData returned 'false'");
-                checkTransferFailure(transferFailures + 1);
+//                checkTransferFailure(transferFailures + 1);
+                switchState(State.PAUSED);
                 return;
             }
         } catch (Exception e) {
@@ -349,8 +350,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     dataFile = downloadFilename;
                     switchState(State.DETECTING);
                 }
-            } else {
-                checkTransferFailure(transferFailures + 1);
             }
         }
     }
@@ -358,8 +357,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     private void checkTransferFailure(int failures) {
         transferFailures = failures;
         if(transferFailures <= MAX_FAILURES) {
-            mTransferAgent.scheduleNextDownloadAttempt(this);
             switchState(State.PAUSED);
+            mTransferAgent.scheduleDownloadAttempt(this);
         } else {
             switchState(State.FAILED);
         }
@@ -465,7 +464,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             mDownloadRequest = null;
             LOG.debug("aborted current Download request. Download can still resume.");
         }
-        mTransferAgent.pauseDownload(this);
+        mTransferAgent.cancelDownload(this);
         mTransferAgent.onDownloadStateChanged(this);
     }
 

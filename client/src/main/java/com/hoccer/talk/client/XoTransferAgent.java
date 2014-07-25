@@ -108,10 +108,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
             if(!mDownloadsById.containsKey(downloadId)) {
                 LOG.info("requesting download " + downloadId);
                 mDownloadsById.put(downloadId, download);
-                ScheduledFuture future = mDownloadRetryQueue.remove(downloadId);
-                if(future != null) {
-                    future.cancel(true);
-                }
+                unscheduleDownloadAttempt(downloadId);
                 mDownloadExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -146,11 +143,17 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         mDownloadsById.remove(download.getClientDownloadId());
     }
 
-    public void scheduleNextDownloadAttempt(final TalkClientDownload download) {
+    public void deactivateDownload(TalkClientDownload download) {
+        LOG.info("deactivateDownload(" + download.getClientDownloadId() + ")");
+        mDownloadsById.remove(download.getClientDownloadId());
+    }
+
+    public void scheduleDownloadAttempt(final TalkClientDownload download) {
         if(mDownloadRetryQueue.containsKey(download.getClientDownloadId())) {
             LOG.debug("download with id (" + download.getClientDownloadId() + ") is already scheduled for retry");
             return;
         }
+        LOG.debug(String.format("scheduling Download(%1$d) for retry.", download.getClientDownloadId()));
         int transferFailures = download.getTransferFailures();
         long delay = 2 * (transferFailures * transferFailures + 1);
         ScheduledFuture<?> future = mDownloadExecutor.schedule(new Runnable() {
@@ -160,6 +163,13 @@ public class XoTransferAgent implements IXoTransferListenerOld {
             }
         }, delay, TimeUnit.SECONDS);
         mDownloadRetryQueue.put(download.getClientDownloadId(), future);
+    }
+
+    private void unscheduleDownloadAttempt(int downloadId) {
+        ScheduledFuture future = mDownloadRetryQueue.remove(downloadId);
+        if(future != null) {
+            future.cancel(true);
+        }
     }
 
     /**********************************************************************************************/
