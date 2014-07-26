@@ -60,8 +60,8 @@ public class ThumbnailManager {
 
     private void init(Context context) {
         // Use 1/8th of the available memory for this memory cache.
-        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        final int cacheSize = maxMemory / 8;
+        final int maxMemoryInKiloByte = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        final int cacheSize = maxMemoryInKiloByte / 8;
         LOG.debug("Creating LruCache with size of [" + cacheSize + "] kb");
         mMemoryLruCache = new LruCache(cacheSize);
         mStubDrawable = new ColorDrawable(Color.LTGRAY);
