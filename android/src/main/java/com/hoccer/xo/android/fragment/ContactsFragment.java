@@ -127,7 +127,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     private void clearConversationForContact(TalkClientContact contact) {
         try {
             mDatabase.deleteAllMessagesFromContactId(contact.getClientContactId());
-            mAdapter.notifyDataSetChanged();
+            mAdapter.requestReload();
         } catch (SQLException e) {
             LOG.error("SQLException while clearing conversation with contact " + contact.getClientContactId(), e);
         }
