@@ -72,8 +72,6 @@ public class ThumbnailManager {
             }
         };
 
-
-
         mStubDrawable = new ColorDrawable(Color.LTGRAY);
     }
 
