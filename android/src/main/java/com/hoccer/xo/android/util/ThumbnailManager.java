@@ -63,7 +63,17 @@ public class ThumbnailManager {
         final int maxMemoryInKiloByte = (int) (Runtime.getRuntime().maxMemory() / 1024);
         final int cacheSize = maxMemoryInKiloByte / 8;
         LOG.debug("Creating LruCache with size of [" + cacheSize + "] kb");
-        mMemoryLruCache = new LruCache(cacheSize);
+        mMemoryLruCache = new LruCache<String, Bitmap>(cacheSize) {
+            @Override
+            protected int sizeOf(String key, Bitmap bitmap) {
+                // The cache size will be measured in kilobytes rather than
+                // number of items.
+                return bitmap.getByteCount() / 1024;
+            }
+        };
+
+
+
         mStubDrawable = new ColorDrawable(Color.LTGRAY);
     }
 
