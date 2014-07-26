@@ -155,7 +155,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
                 @Override
                 public boolean shouldShow(TalkClientContact contact) {
                     if (contact.isGroup()) {
-                        if (contact.isGroupInvolved() && contact.isGroupExisting() && !contact.getGroupPresence().isTypeNearby()) {
+                        if (contact.isGroupInvolved() && contact.isGroupExisting() && !contact.getGroupPresence().isTypeNearby() && !contact.getGroupPresence().isKept()) {
                             return true;
                         }
                     } else if (contact.isClient()) {
