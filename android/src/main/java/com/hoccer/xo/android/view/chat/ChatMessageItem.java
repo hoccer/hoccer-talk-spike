@@ -193,10 +193,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         if (attachmentState != null && attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED) &&
                 attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED)) {
-            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text));
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
         } else if (currentState.equals(TalkDelivery.STATE_FAILED) ||
                 currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
-            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text));
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
         } else {
             deliveryInfo.setVisibility(View.GONE);
         }
@@ -214,40 +214,44 @@ public class ChatMessageItem implements AttachmentTransferListener {
         String attachmentState = outgoingDelivery.getAttachmentState();
         deliveryInfo.setVisibility(View.VISIBLE);
 
-        if (attachmentState != null && attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED) &&
+        if (currentState.equals(TalkDelivery.STATE_REJECTED) || currentState.equals(TalkDelivery.STATE_REJECTED_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
+        } else if (currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
+        } else if (attachmentState != null && attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED) &&
                 attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED)) {
-            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text));
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
         } else if (attachmentState != null && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_NONE) &&
                 (!attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED)
                         && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED))) {
 
             String text = view.getResources().getString(R.string.attachment_expects_text);
             String mediaType = view.getResources().getString(getMediaTextResource());
-            setMessageStatusText(deliveryInfo, String.format(text, mediaType));
+            setMessageStatusText(deliveryInfo, String.format(text, mediaType), R.color.xo_app_main_color);
         } else if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
                 || currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED))
                 && !outgoingDelivery.isGroupDelivery()) {
 
-            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_seen_text));
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_seen_text), R.color.xo_app_main_color);
         } else if (currentState.equals(TalkDelivery.STATE_DELIVERED_UNSEEN) ||
                 currentState.equals(TalkDelivery.STATE_DELIVERED_UNSEEN_ACKNOWLEDGED)) {
-            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_unseen_text));
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_unseen_text), R.color.xo_app_main_color);
         } else if (currentState.equals(TalkDelivery.STATE_DELIVERED_PRIVATE) ||
                 currentState.equals(TalkDelivery.STATE_DELIVERED_PRIVATE_ACKNOWLEDGED)) {
-            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_privat_text));
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_privat_text), R.color.xo_app_main_color);
         } else if (currentState.equals(TalkDelivery.STATE_FAILED) ||
                 currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
-            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text));
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
 
         } else {
             deliveryInfo.setVisibility(View.GONE);
         }
     }
 
-    private void setMessageStatusText(TextView messageStatusLabel, String text) {
+    private void setMessageStatusText(TextView messageStatusLabel, String text, int colorId) {
         messageStatusLabel.setVisibility(View.VISIBLE);
         messageStatusLabel.setText(text);
-        messageStatusLabel.setTextColor(messageStatusLabel.getResources().getColor(R.color.xo_app_main_color));
+        messageStatusLabel.setTextColor(messageStatusLabel.getResources().getColor(colorId));
     }
 
     public int getOutgoingBackgroundResource() {
@@ -258,6 +262,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
         if (currentState.equals(TalkDelivery.STATE_DELIVERING)) {
             return R.drawable.bubble_light_green;
         } else if (currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
+            return R.drawable.bubble_red_outgoing;
+        } else if (currentState.equals(TalkDelivery.STATE_REJECTED) || currentState.equals(TalkDelivery.STATE_REJECTED_ACKNOWLEDGED)) {
             return R.drawable.bubble_red_outgoing;
         } else if (currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
             return R.drawable.bubble_red_outgoing;
