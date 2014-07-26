@@ -12,14 +12,11 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.fragment.ContactsFragment;
-import com.hoccer.xo.android.util.SortedList;
 import com.hoccer.xo.android.view.model.BaseContactItem;
 import com.hoccer.xo.android.view.model.NearbyGroupContactItem;
 import com.hoccer.xo.android.view.model.SmsContactItem;
 import com.hoccer.xo.android.view.model.TalkClientContactItem;
 
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import android.view.View;
@@ -194,7 +191,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         notifyDataSetChanged();
     }
 
-    private void updateAll() {
+    private void refreshAllEntries() {
         for (int i = 0; i < mContactItems.size(); i++) {
             BaseContactItem item = mContactItems.get(i);
             item.update();
@@ -214,17 +211,36 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        updateAll();
+        BaseContactItem item = findContactItemForContent(contact);
+        if (item != null) {
+            item.update();
+            notifyDataSetChanged();
+        }
     }
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-        updateAll();
+        BaseContactItem item = findContactItemForContent(contact);
+        if (item != null) {
+            item.update();
+            notifyDataSetChanged();
+        }
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        updateAll();
+        BaseContactItem item = findContactItemForContent(contact);
+        if (item == null) {
+            item = new TalkClientContactItem(mActivity, contact);
+            mContactItems.add(item);
+            notifyDataSetChanged();
+        } else {
+            if (!contact.isGroupInvolved()) {
+                LOG.info("group disappeared.");
+                mContactItems.remove(item);
+                notifyDataSetChanged();
+            }
+        }
     }
 
     @Override
@@ -251,12 +267,12 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onMessageRemoved(TalkClientMessage message) {
-        updateAll();
+        refreshAllEntries();
     }
 
     @Override
     public void onMessageStateChanged(TalkClientMessage message) {
-        updateAll();
+        refreshAllEntries();
     }
 
     @Override
@@ -273,18 +289,17 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
             }
 
         }
-
-        updateAll();
+        refreshAllEntries();
     }
 
     @Override
     public void onDownloadRegistered(TalkClientDownload download) {
-        updateAll();
+        refreshAllEntries();
     }
 
     @Override
     public void onDownloadStarted(TalkClientDownload download) {
-        updateAll();
+        refreshAllEntries();
     }
 
     @Override
@@ -293,24 +308,24 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
-        updateAll();
+        refreshAllEntries();
     }
 
     @Override
     public void onDownloadFailed(TalkClientDownload download) {
-        updateAll();
+        refreshAllEntries();
     }
 
     @Override
     public void onDownloadStateChanged(TalkClientDownload download) {
         if(download.isAvatar() && download.getState() == TalkClientDownload.State.COMPLETE) {
-            updateAll();
+            refreshAllEntries();
         }
     }
 
     @Override
     public void onUploadStarted(TalkClientUpload upload) {
-        updateAll();
+        refreshAllEntries();
     }
 
     @Override
@@ -319,17 +334,17 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
-        updateAll();
+        refreshAllEntries();
     }
 
     @Override
     public void onUploadFailed(TalkClientUpload upload) {
-        updateAll();
+        refreshAllEntries();
     }
 
     @Override
     public void onUploadStateChanged(TalkClientUpload upload) {
-        updateAll();
+        refreshAllEntries();
     }
 
     private List<TalkClientContact> filter(List<TalkClientContact> in) {
