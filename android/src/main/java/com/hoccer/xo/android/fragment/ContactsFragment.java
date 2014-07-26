@@ -143,7 +143,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
                 message.markAsDeleted();
                 mDatabase.saveClientMessage(message);
             }
-            mAdapter.notifyDataSetChanged();
+            mAdapter.requestReload();
         } catch (SQLException e) {
             LOG.error("SQLException while clearing nearby history", e);
         }
