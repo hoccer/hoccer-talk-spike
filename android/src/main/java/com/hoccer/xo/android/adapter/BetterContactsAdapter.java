@@ -170,6 +170,9 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     @Override
     public void onContactRemoved(TalkClientContact contact) {
         BaseContactItem item = findContactItemForContent(contact);
+        if (item == null) {
+            return;
+        }
         mContactItems.remove(item);
         notifyDataSetChanged();
     }
@@ -261,12 +264,28 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onMessageRemoved(TalkClientMessage message) {
-        refreshAllEntries();
     }
 
     @Override
     public void onMessageStateChanged(TalkClientMessage message) {
-        refreshAllEntries();
+        LOG.debug("onMessageAdded()");
+        try {
+            if (message.isIncoming()) {
+                TalkDelivery incomingDelivery = message.getIncomingDelivery();
+                TalkClientContact contact = mDatabase.findContactByClientId(incomingDelivery.getSenderId(), false);
+                if (contact == null) {
+                    return;
+                }
+                TalkClientContactItem item = (TalkClientContactItem) findContactItemForContent(contact);
+                if (item == null) { // the contact is not in our list so we won't update anything
+                    return;
+                }
+                item.update();
+                notifyDataSetChanged();
+            }
+        } catch (SQLException e) {
+            LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);
+        }
     }
 
     @Override
