@@ -217,7 +217,7 @@ public class SingleProfileFragment extends XoFragment
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
-                                    getXoActivity().getXoClient().deleteContact(mContact);
+                                    getXoActivity().getXoClient().depairContact(mContact);
                                     getXoActivity().hackReturnedFromDialog();
                                 }
                             },

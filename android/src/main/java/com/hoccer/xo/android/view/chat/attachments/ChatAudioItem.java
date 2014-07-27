@@ -88,7 +88,8 @@ public class ChatAudioItem extends ChatMessageItem {
                         url = contentObject.getContentDataUrl();
                     }
                     if (url != null) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setDataAndType(Uri.parse(url), "audio/*");
                         XoActivity activity = (XoActivity) view.getContext();
                         activity.startExternalActivity(intent);
                     }

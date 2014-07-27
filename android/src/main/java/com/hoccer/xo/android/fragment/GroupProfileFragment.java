@@ -132,8 +132,7 @@ public class GroupProfileFragment extends XoFragment
                 mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
                     @Override
                     public boolean shouldShow(TalkClientContact contact) {
-                        return contact.isClientGroupInvited(mGroup) || contact
-                                .isClientGroupJoined(mGroup) || contact.isSelf();
+                        return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup) || contact.isSelf();
                     }
                 });
             }
@@ -420,8 +419,7 @@ public class GroupProfileFragment extends XoFragment
 
     private void manageGroupMembers() {
         LOG.debug("manageGroupMembers()");
-        new GroupManageDialog(mGroup)
-                .show(getXoActivity().getFragmentManager(), "GroupManageDialog");
+        new GroupManageDialog(mGroup).show(getXoActivity().getFragmentManager(), "GroupManageDialog");
     }
 
     private void joinGroup() {

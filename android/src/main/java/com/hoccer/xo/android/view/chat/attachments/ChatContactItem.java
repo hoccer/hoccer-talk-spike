@@ -18,6 +18,7 @@ import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 import ezvcard.Ezvcard;
 import ezvcard.VCard;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -174,7 +175,10 @@ public class ChatContactItem extends ChatMessageItem {
         }
     }
 
-    private InputStream openStreamForContentUri(String contentUri) {
+    private @Nullable InputStream openStreamForContentUri(String contentUri) {
+        if (contentUri == null) {
+            return null;
+        }
         InputStream inputStream = null;
         ContentResolver resolver = mContext.getContentResolver();
         try {

@@ -508,6 +508,28 @@ public class TalkClientContact implements Serializable {
         return null;
     }
 
+    @GroupMethodOnly
+    public  boolean isEmptyGroup() {
+        return (getActiveGroupMemberCount() <= 1);
+    }
+
+    @GroupMethodOnly
+    public int getActiveGroupMemberCount() {
+        int activeMemberCount = 0;
+        if (getGroupMemberships() != null) {
+            for (TalkClientMembership groupMembership : getGroupMemberships()) {
+                TalkGroupMember groupMember = groupMembership.getMember();
+                if (groupMember == null) {
+                    continue;
+                }
+                if (groupMember.getState().equals(TalkGroupMember.STATE_JOINED)) {
+                    activeMemberCount++;
+                }
+            }
+        }
+        return activeMemberCount;
+    }
+
     public boolean isNearby() {
         return isNearby;
     }
@@ -620,5 +642,28 @@ public class TalkClientContact implements Serializable {
         TalkClientContact groupContact = new TalkClientContact(TYPE_GROUP);
         groupContact.updateGroupTag(groupTag);
         return groupContact;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        TalkClientContact that = (TalkClientContact) o;
+
+        if (clientContactId != that.clientContactId) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return clientContactId;
     }
 }

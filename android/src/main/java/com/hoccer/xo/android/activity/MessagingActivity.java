@@ -176,8 +176,12 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
 
     public void setActionBarText(TalkClientContact contact) {
         String title;
-        if (contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
-            title = getResources().getString(R.string.nearby_text);
+        if (contact.isGroup()) {
+            if (contact.getGroupPresence().isTypeNearby()) {
+                title = getResources().getString(R.string.nearby_text);
+            } else {
+                title = contact.getName();
+            }
         } else {
             title = contact.getNickname();
         }

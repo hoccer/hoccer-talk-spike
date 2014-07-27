@@ -57,9 +57,12 @@ public class SelectedContent implements IContentObject {
 
     public SelectedContent(Intent resultIntent, String contentDataUrl) {
         Uri contentUrl = resultIntent.getData();
-        LOG.debug("new selected content: " + contentUrl);
-        mContentUrl = contentUrl.toString();
-        mContentType = resultIntent.getType();
+
+        if (contentUrl != null) {
+            LOG.debug("new selected content: " + contentUrl);
+            mContentUrl = contentUrl.toString();
+            mContentType = resultIntent.getType();
+        }
         mContentDataUrl = contentDataUrl;
     }
 

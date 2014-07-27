@@ -257,7 +257,8 @@
     <string name="error_avatar_selection">The image you have selected is not suitable as Avatar.</string>
     <string name="error_attachment_selection">The file you have selected cannot be used as an attachment.</string>
     <string name="sms_invitation_text">Hey! I\'m now using the free app Hoccer XO for secure
-        chatting. Download it now: http://hoccer.com/ Then add me as a contact: %1$s%2$s
+        chatting. Download it now: http://hoccer.com/ Then add me as a contact:\n
+        %1$s%2$s
         \nxo %3$s
     </string>
     <string name="email_invitation_text">Hey!\nI\'m now using the free app Hoccer XO for secure
@@ -326,5 +327,9 @@
     <string name="message_state_contact">vcard</string>
     <string name="message_state_location">location</string>
     <string name="message_unseen_text">unread</string>
+    <string name="message_privat_text">delivered</string>
+    <string name="attachment_failed">Error while downloading File.</string>
+    <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
+    <string name="message_failed_text">undeliverable</string>
 
 </resources>

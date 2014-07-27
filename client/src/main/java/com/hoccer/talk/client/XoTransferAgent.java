@@ -3,49 +3,64 @@ package com.hoccer.talk.client;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.model.TalkDelivery;
-import com.j256.ormlite.dao.Dao;
+
+import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.log4j.Logger;
 
-import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
-public class XoTransferAgent implements IXoTransferListener {
+public class XoTransferAgent implements IXoTransferListenerOld {
 
     private static final Logger LOG = Logger.getLogger(XoTransferAgent.class);
 
-    XoClient mClient;
-    XoClientDatabase mDatabase;
-    IXoClientDatabaseBackend mDatabaseBackend; // for fixups
+    private final XoClient mClient;
+    private final XoClientDatabase mDatabase;
 
-    ScheduledExecutorService mExecutor;
+    private final ScheduledExecutorService mUploadExecutor;
+    private final ScheduledExecutorService mDownloadExecutor;
 
-    List<IXoTransferListener> mListeners;
+    private final List<IXoTransferListenerOld> mListeners;
 
-    HttpClient mHttpClient;
+    private HttpClient mHttpClient;
 
-    Map<Integer, TalkClientDownload> mDownloadsById;
-    Map<Integer, TalkClientUpload> mUploadsById;
+    private final Map<Integer, ScheduledFuture> mDownloadRetryQueue;
 
     public XoTransferAgent(XoClient client) {
         mClient = client;
         mDatabase = mClient.getDatabase();
-        mDatabaseBackend = mClient.getHost().getDatabaseBackend();
-        ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
-        tfb.setNameFormat("transfer-%d");
-        tfb.setUncaughtExceptionHandler(client.getHost().getUncaughtExceptionHandler());
-        mExecutor = Executors.newScheduledThreadPool(client.getHost().getTransferThreads(), tfb.build());
-        mListeners = new ArrayList<IXoTransferListener>();
-        mDownloadsById = new HashMap<Integer, TalkClientDownload>();
-        mUploadsById = new HashMap<Integer, TalkClientUpload>();
+
+        mUploadExecutor = createScheduledThreadPool("upload-%d");
+        mDownloadExecutor = createScheduledThreadPool("download-%d");
+
+        mListeners = new ArrayList<IXoTransferListenerOld>();
+        mDownloadRetryQueue = new ConcurrentHashMap<Integer, ScheduledFuture>();
         initializeHttpClient();
     }
 
+    private ScheduledExecutorService createScheduledThreadPool(String name) {
+        ThreadFactoryBuilder tfbUpload = new ThreadFactoryBuilder();
+        tfbUpload.setNameFormat(name);
+        tfbUpload.setUncaughtExceptionHandler(mClient.getHost().getUncaughtExceptionHandler());
+        return Executors.newScheduledThreadPool(mClient.getHost().getTransferThreads(), tfbUpload.build());
+    }
+
     private void initializeHttpClient() {
-        mHttpClient = new HttpClientWithKeyStore();
+        // FYI: http://stackoverflow.com/questions/12451687/http-requests-with-httpclient-too-slow
+        // && http://stackoverflow.com/questions/3046424/http-post-requests-using-httpclient-take-2-seconds-why
+        HttpParams httpParams = new BasicHttpParams();
+        HttpConnectionParams.setTcpNoDelay(httpParams, true);
+        httpParams.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+        mHttpClient = new HttpClientWithKeyStore(httpParams);
     }
 
     public XoClient getClient() {
@@ -60,226 +75,142 @@ public class XoTransferAgent implements IXoTransferListener {
         return mHttpClient;
     }
 
-    public void registerListener(IXoTransferListener listener) {
+    public void registerListener(IXoTransferListenerOld listener) {
         if (!mListeners.contains(listener)) {
             mListeners.add(listener);
         }
     }
 
-    public void unregisterListener(IXoTransferListener listener) {
+    public void unregisterListener(IXoTransferListenerOld listener) {
         mListeners.remove(listener);
     }
 
-    public void runFixups() {
-        LOG.debug("checking for transfers that need db fixups");
-        try {
-            Dao<TalkClientDownload, Integer> downloadDao = mDatabaseBackend.getDao(TalkClientDownload.class);
-            Dao<TalkClientUpload, Integer> uploadDao = mDatabaseBackend.getDao(TalkClientUpload.class);
-
-            List<TalkClientDownload> fixupDownloads = downloadDao.queryBuilder()
-                .where()
-                        .eq("state", TalkClientDownload.State.REQUESTED)
-                        .eq("state", TalkClientDownload.State.STARTED)
-                                .eq("state", TalkClientDownload.State.DETECTING)
-                                .eq("state", TalkClientDownload.State.COMPLETE)
-                            .or(2)
-                                .isNull("dataFile")
-                                .isNull("contentUrl")
-                            .or(2)
-                        .and(2)
-                            .isNull("mediaType")
-                            .eq("type", TalkClientDownload.Type.AVATAR)
-                        .and(2)
-                    .or(4)
-                .query();
-            if(!fixupDownloads.isEmpty()) {
-                LOG.info(fixupDownloads.size() + " downloads need fixing");
-                for(TalkClientDownload download: fixupDownloads) {
-                    LOG.debug("fixing download " + download.getClientDownloadId());
-                    download.fixupVersion7(this);
-                }
-            }
-
-            List<TalkClientUpload> fixupUploads = uploadDao.queryBuilder()
-                .where()
-                        .eq("state", TalkClientUpload.State.REGISTERED)
-                        .eq("state", TalkClientUpload.State.STARTED)
-                        .isNull("dataFile")
-                            .isNull("mediaType")
-                            .eq("type", TalkClientDownload.Type.AVATAR)
-                        .and(2)
-                    .or(5)
-                .query();
-            if(!fixupUploads.isEmpty()) {
-                LOG.info(fixupUploads.size() + " uploads need fixing");
-                for(TalkClientUpload upload: fixupUploads) {
-                    LOG.debug("fixing upload " + upload.getClientUploadId());
-                    upload.fixupVersion7(this);
-                }
-            }
-        } catch (SQLException e) {
-            LOG.error("SQL error in db fixup", e);
-        }
-    }
-
+    /**********************************************************************************************/
+    /**********************************************************************************************/
+    /****************************************** Download*******************************************/
+    /**********************************************************************************************/
+    /**********************************************************************************************/
     public boolean isDownloadActive(TalkClientDownload download) {
-        synchronized (mDownloadsById) {
-            return mDownloadsById.containsKey(download.getClientDownloadId());
-        }
+        return download.getState() == TalkClientDownload.State.DOWNLOADING;
     }
 
-    public void registerDownload(final TalkClientDownload download) {
-        try {
-            mDatabase.saveClientDownload(download);
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
-        if(download.getState() == TalkClientDownload.State.INITIALIZING) {
-            LOG.info("registerDownload(" + download.getClientDownloadId() + ")");
-            download.switchState(this, TalkClientDownload.State.NEW);
-            onDownloadRegistered(download);
-        }
-    }
-
-    public void requestDownload(final TalkClientDownload download) {
-        LOG.info("requestDownload()");
-
-        registerDownload(download);
-
-        synchronized (mDownloadsById) {
-            final int downloadId = download.getClientDownloadId();
-            if(!mDownloadsById.containsKey(downloadId)) {
-                TalkClientDownload.State state = download.getState();
-                if(state == TalkClientDownload.State.COMPLETE) {
-                    LOG.debug("no need to download " + downloadId);
-                    return;
+    public void startOrRestartDownload(final TalkClientDownload download) {
+        LOG.info("startOrRestartDownload()");
+        final int downloadId = download.getClientDownloadId();
+        LOG.info("requesting download " + downloadId);
+        unscheduledDownloadAttempt(downloadId);
+        mDownloadExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                LOG.info("performing download " + downloadId + " in state " + download.getState());
+                try {
+                    download.start(XoTransferAgent.this);
+                } catch (Exception e) {
+                    LOG.error("error performing download", e);
                 }
-
-                LOG.info("requesting download " + downloadId);
-
-                mDownloadsById.put(downloadId, download);
-
-                mExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        LOG.info("performing download " + downloadId + " in state " + download.getState());
-                        onDownloadStarted(download);
-                        try {
-                            download.performDownloadAttempt(XoTransferAgent.this);
-                        } catch (Exception e) {
-                            LOG.error("error performing download", e);
-                        }
-                        synchronized (mDownloadsById) {
-                            mDownloadsById.remove(downloadId);
-                        }
-                        onDownloadFinished(download);
-                    }
-                });
-            } else {
-                LOG.info("download " + download.getClientDownloadId() + " already active");
             }
-        }
+        });
     }
 
     public void pauseDownload(TalkClientDownload download) {
         LOG.info("pauseDownload(" + download.getClientDownloadId() + ")");
-        download.pauseDownload(this);
-        cancelDownload(download);
+        download.pause(this);
     }
 
     public void resumeDownload(TalkClientDownload download) {
         LOG.info("resumeUpload(" + download.getClientDownloadId() + ")");
-        download.resumeDownload(this);
-        synchronized (mUploadsById) {
-            mDownloadsById.put(download.getClientDownloadId(), download);
-        }
+        startOrRestartDownload(download);
     }
 
     public void cancelDownload(TalkClientDownload download) {
         LOG.info("cancelDownload(" + download.getClientDownloadId() + ")");
-        synchronized (mDownloadsById) {
-            mDownloadsById.remove(download.getClientDownloadId());
+        download.pause(this);
+    }
+
+    public void scheduleDownloadAttempt(final TalkClientDownload download) {
+        if(mDownloadRetryQueue.containsKey(download.getClientDownloadId())) {
+            LOG.debug("download with id (" + download.getClientDownloadId() + ") is already scheduled for retry");
+            return;
+        }
+        LOG.debug(String.format("scheduling Download(%1$d) for retry.", download.getClientDownloadId()));
+        int transferFailures = download.getTransferFailures();
+        long delay = 2 * (transferFailures * transferFailures + 1);
+        ScheduledFuture<?> future = mDownloadExecutor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                startOrRestartDownload(download);
+            }
+        }, delay, TimeUnit.SECONDS);
+        mDownloadRetryQueue.put(download.getClientDownloadId(), future);
+    }
+
+    private void unscheduledDownloadAttempt(int downloadId) {
+        ScheduledFuture future = mDownloadRetryQueue.remove(downloadId);
+        if(future != null) {
+            LOG.debug("Unscheduling download " + downloadId);
+            future.cancel(true);
         }
     }
 
+    /**********************************************************************************************/
+    /**********************************************************************************************/
+    /****************************************** Upload ********************************************/
+    /**********************************************************************************************/
+    /**********************************************************************************************/
     public boolean isUploadActive(TalkClientUpload upload) {
-        synchronized (mUploadsById) {
-            return mUploadsById.containsKey(upload.getClientUploadId());
-        }
+        return upload.getState() == TalkClientUpload.State.UPLOADING;
     }
 
-    public void requestUpload(final TalkClientUpload upload) {
-        LOG.info("requestUpload(), dataurl: " + upload.getContentDataUrl() +
+    public void startOrRestartUpload(final TalkClientUpload upload) {
+        LOG.info("startOrRestartUpload(), dataurl: " + upload.getContentDataUrl() +
                                 " | contenturl: " + upload.getContentUrl() +
                                 " | datafile: " + upload.getDataFile() +
                                 " | contenttype: " + upload.getContentType() +
                                 " | clientUploadId: " + upload.getClientUploadId());
 
-        try {
-            mDatabase.saveClientUpload(upload);
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
+        if(upload.getFileId() == null) {
+            upload.register(this);
         }
-
-        synchronized (mUploadsById) {
-            final int uploadId = upload.getClientUploadId();
-            if(!mUploadsById.containsKey(uploadId)) {
-                TalkClientUpload.State state = upload.getState();
-                if(state == TalkClientUpload.State.COMPLETE) {
-                    LOG.debug("no need to upload with id: '" + uploadId + "'");
+        final int uploadId = upload.getClientUploadId();
+        LOG.info("requesting upload with id '" + uploadId + "'");
+        mUploadExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                LOG.info("performing upload with id '" + uploadId + "' in state '" + upload.getState() + "'");
+                try {
+                    upload.start(XoTransferAgent.this);
+                } catch (Exception e) {
+                    LOG.error("error performing upload", e);
                 }
-
-                LOG.info("requesting upload with id '" + uploadId + "'");
-
-                mUploadsById.put(uploadId, upload);
-
-                mExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        LOG.info("performing upload with id '" + uploadId + "' in state '" + upload.getState() + "'");
-                        try {
-                            upload.performUploadAttempt(XoTransferAgent.this);
-                        } catch (Exception e) {
-                            LOG.error("error performing upload", e);
-                        }
-                        synchronized (mUploadsById) {
-                            mUploadsById.remove(uploadId);
-                        }
-                        onUploadFinished(upload);
-                    }
-                });
-            } else {
-                LOG.info("upload " + upload.getClientUploadId() + " already active");
             }
-        }
+        });
     }
 
     public void pauseUpload(TalkClientUpload upload) {
         LOG.info("pauseUpload(" + upload.getClientUploadId() + ")");
-        upload.pauseUpload(this);
-        cancelUpload(upload);
+        upload.pause(this);
     }
 
     public void resumeUpload(TalkClientUpload upload) {
         LOG.info("resumeUpload(" + upload.getClientUploadId() + ")");
-        upload.resumeUpload(this);
-        synchronized (mUploadsById) {
-            mUploadsById.put(upload.getClientUploadId(), upload);
-        }
+        startOrRestartUpload(upload);
     }
 
     public void cancelUpload(TalkClientUpload upload) {
         LOG.info("cancelUpload(" + upload.getClientUploadId() + ")");
-        synchronized (mUploadsById) {
-            mUploadsById.remove(upload.getClientUploadId());
-        }
+        upload.cancel(this);
     }
 
+    /**********************************************************************************************/
+    /**********************************************************************************************/
+    /**************************** XoTransferListenerOld implementation ****************************/
+    /**********************************************************************************************/
+    /**********************************************************************************************/
     @Override
     public void onDownloadRegistered(TalkClientDownload download) {
         LOG.info("onDownloadRegistered(" + download.getClientDownloadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onDownloadRegistered(download);
         }
     }
@@ -288,7 +219,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onDownloadStarted(TalkClientDownload download) {
         LOG.info("onDownloadStarted(" + download.getClientDownloadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onDownloadStarted(download);
         }
     }
@@ -297,7 +228,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onDownloadProgress(TalkClientDownload download) {
         LOG.trace("onDownloadProgress(" + download.getClientDownloadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onDownloadProgress(download);
         }
     }
@@ -305,8 +236,9 @@ public class XoTransferAgent implements IXoTransferListener {
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
         LOG.info("onDownloadFinished(" + download.getClientDownloadId() + ")");
+        LOG.info("removed Download with id (" + download.getClientDownloadId() + ") from HashMap");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onDownloadFinished(download);
         }
     }
@@ -314,7 +246,7 @@ public class XoTransferAgent implements IXoTransferListener {
     @Override
     public void onDownloadFailed(TalkClientDownload download) {
         LOG.info("onDownloadFailed(" + download.getClientDownloadId() + ")");
-        for(IXoTransferListener listener: mListeners) {
+        for(IXoTransferListenerOld listener: mListeners) {
             listener.onDownloadFailed(download);
         }
     }
@@ -323,7 +255,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onDownloadStateChanged(TalkClientDownload download) {
         LOG.info("onDownloadStateChanged(" + download.getClientDownloadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onDownloadStateChanged(download);
         }
     }
@@ -332,7 +264,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onUploadStarted(TalkClientUpload upload) {
         LOG.info("onUploadStarted(id: " + upload.getClientUploadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onUploadStarted(upload);
         }
     }
@@ -341,7 +273,7 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onUploadProgress(TalkClientUpload upload) {
         LOG.trace("onUploadProgress(" + upload.getClientUploadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onUploadProgress(upload);
         }
     }
@@ -349,8 +281,9 @@ public class XoTransferAgent implements IXoTransferListener {
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
         LOG.info("onUploadFinished(" + upload.getClientUploadId() + ")");
+        LOG.info("removed Upload with id (" + upload.getClientUploadId() + ") from HashMap");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onUploadFinished(upload);
         }
     }
@@ -358,7 +291,7 @@ public class XoTransferAgent implements IXoTransferListener {
     @Override
     public void onUploadFailed(TalkClientUpload upload) {
         LOG.info("onUploadFailed(" + upload.getClientUploadId() + ")");
-        for(IXoTransferListener listener: mListeners) {
+        for(IXoTransferListenerOld listener: mListeners) {
             listener.onUploadFailed(upload);
         }
     }
@@ -367,8 +300,9 @@ public class XoTransferAgent implements IXoTransferListener {
     public void onUploadStateChanged(TalkClientUpload upload) {
         LOG.info("onUploadStateChanged(id: " + upload.getClientUploadId() + ")");
         for (int i=0; i < mListeners.size(); i++) {
-            IXoTransferListener listener = mListeners.get(i);
+            IXoTransferListenerOld listener = mListeners.get(i);
             listener.onUploadStateChanged(upload);
         }
     }
+
 }

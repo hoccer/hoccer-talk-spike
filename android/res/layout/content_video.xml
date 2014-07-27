@@ -38,10 +38,10 @@
                 android:id="@+id/iv_video_preview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxHeight="300dp"
                 android:background="@android:color/transparent"
-                android:scaleType="center"
-                android:layout_centerInParent="true"
+                android:scaleType="fitCenter"
+                android:layout_alignParentBottom="true"
+                android:adjustViewBounds="true"
                 android:visibility="gone"/>
 
         <ImageButton

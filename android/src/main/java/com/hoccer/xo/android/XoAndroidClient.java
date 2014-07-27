@@ -30,6 +30,8 @@ public class XoAndroidClient extends XoClient {
         mConnection = new JsonRpcWsClient(uri, protocol, wsClient, rpcMapper, mClientHost.getIncomingBackgroundExecutor());
         mConnection.setMaxIdleTime(mClientHost.getConnectionIdleTimeout());
         mConnection.setSendKeepAlives(mClientHost.getKeepAliveEnabled());
+        // TODO: do we need to set a MaxIdleTime for bad networks (like edge)
+        //mConnection.setMaxIdleTime();
         if(mClientHost.getUseBsonProtocol()) {
             mConnection.setSendBinaryMessages(true);
         }

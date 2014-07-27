@@ -39,7 +39,7 @@ public class SmsReceiver extends BroadcastReceiver {
                         abort |= handleMessage(context, sender, body);
                     }
                 }
-                // abort delivery of this message to other apps
+                // cancel delivery of this message to other apps
                 if(abort) {
                     this.abortBroadcast();
                 }
