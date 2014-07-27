@@ -109,6 +109,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkClient> findAllClients() {
         List<TalkClient> res = new ArrayList<TalkClient>();
         Iterator<TalkClient> it =
@@ -120,14 +121,14 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    @Nullable // null if client for given id does not exist
+    @Nullable // null if client for given id does not exist.
     public TalkClient findClientById(String clientId) {
         return mClients.findOne("{clientId:#}", clientId)
                 .as(TalkClient.class);
     }
 
     @Override
-    @Nullable // null if client for given apns token does not exist
+    @Nullable // null if client for given apns token does not exist.
     public TalkClient findClientByApnsToken(String apnsToken) {
         return mClients.findOne("{apnsToken:#}", apnsToken)
                 .as(TalkClient.class);
@@ -139,6 +140,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable // null if no message with given messageId exists.
     public TalkMessage findMessageById(String messageId) {
         return mMessages.findOne("{messageId:#}", messageId)
                 .as(TalkMessage.class);
@@ -175,6 +177,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesInState(String state) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -187,6 +190,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findAllDeliveries() {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -199,8 +203,8 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesInStates(String[] states) {
-
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
                 mDeliveries.find("{state: { $in: # } }", Arrays.asList(states))
@@ -212,6 +216,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesInStatesAndAttachmentStates(String[] deliveryStates, String[] attachmentStates) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -225,6 +230,7 @@ public class JongoDatabase implements ITalkServerDatabase {
 
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesForClient(String clientId) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -237,6 +243,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesFromClient(String clientId) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -249,6 +256,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesForClientInState(String clientId, String state) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -261,8 +269,8 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
-
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
                 mDeliveries.find("{receiverId:#, state: { $in: # }, attachmentState: {$in: # } }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
@@ -274,6 +282,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesFromClientInState(String clientId, String state) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -286,8 +295,8 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesFromClientInStates(String clientId, String[] deliveryStates) {
-
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
                 mDeliveries.find("{senderId:#, state: { $in: # } }", clientId, Arrays.asList(deliveryStates))
@@ -299,8 +308,8 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
-
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
                 mDeliveries.find("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
@@ -312,6 +321,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesForMessage(String messageId) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -334,6 +344,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkToken> findTokensByClient(String clientId) {
         List<TalkToken> res = new ArrayList<TalkToken>();
         Iterator<TalkToken> it =
@@ -346,6 +357,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable
     public TalkToken findTokenByPurposeAndSecret(String purpose, String secret) {
         TalkToken res = null;
         Iterator<TalkToken> it =
@@ -378,6 +390,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkPresence> findPresencesChangedAfter(String clientId, Date lastKnown) {
         // result array
         List<TalkPresence> res = new ArrayList<TalkPresence>();
@@ -432,12 +445,14 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable
     public TalkKey findKey(String clientId, String keyId) {
         return mKeys.findOne("{clientId:#,keyId:#}", clientId, keyId)
                 .as(TalkKey.class);
     }
 
     @Override
+    @NotNull
     public List<TalkKey> findKeys(String clientId) {
         List<TalkKey> res = new ArrayList<TalkKey>();
         Iterator<TalkKey> it =
@@ -460,6 +475,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkRelationship> findRelationships(String client) {
         List<TalkRelationship> res = new ArrayList<TalkRelationship>();
         Iterator<TalkRelationship> it =
@@ -472,6 +488,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkRelationship> findRelationshipsForClientInState(String clientId, String state) {
         List<TalkRelationship> res = new ArrayList<TalkRelationship>();
         Iterator<TalkRelationship> it =
@@ -484,6 +501,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkRelationship> findRelationshipsForClientInStates(String clientId, String[] states) {
         List<TalkRelationship> res = new ArrayList<TalkRelationship>();
         Iterator<TalkRelationship> it =
@@ -496,6 +514,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkRelationship> findRelationshipsByOtherClient(String other) {
         List<TalkRelationship> res = new ArrayList<TalkRelationship>();
         Iterator<TalkRelationship> it =
@@ -508,6 +527,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable
     public TalkRelationship findRelationshipBetween(String client, String otherClient) {
         return mRelationships.findOne("{clientId:#,otherClientId:#}", client, otherClient)
                 .as(TalkRelationship.class);

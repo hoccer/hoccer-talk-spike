@@ -229,6 +229,9 @@ public class JongoDatabaseTest {
         emptyMessageList = database.findMessagesWithAttachmentFileId("doesnotexist");
         assertNotNull(emptyMessageList);
         assertEquals(0, emptyMessageList.size());
+
+        assertNotNull(database.findMessagesWithAttachmentFileId(null));
+        assertEquals(0, emptyMessageList.size());
     }
 
     @Test
@@ -308,6 +311,29 @@ public class JongoDatabaseTest {
         assertEquals(1, database.findDeliveriesInState(TalkDelivery.STATE_ABORTED).size());
         assertEquals(1, database.findDeliveriesInState(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED).size());
     }
+
+    @Test
+    public void testFindAllDeliveries() throws Exception {
+        final List<TalkDelivery> emptyResult = database.findDeliveriesInState("crocodile_hunting");
+        assertNotNull(emptyResult);
+        assertEquals(0, emptyResult.size());
+
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_SEEN);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_ABORTED);
+        createDeliveryInState(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_PRIVATE);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_PRIVATE_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_REJECTED);
+        createDeliveryInState(TalkDelivery.STATE_REJECTED_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_FAILED);
+        createDeliveryInState(TalkDelivery.STATE_FAILED_ACKNOWLEDGED);
+
+        final List<TalkDelivery> fullResult = database.findAllDeliveries();
+        assertNotNull(fullResult);
+        assertEquals(10, fullResult.size());
+    }
+
 
 
 }
