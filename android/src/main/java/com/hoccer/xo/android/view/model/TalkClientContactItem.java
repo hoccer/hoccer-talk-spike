@@ -2,9 +2,11 @@ package com.hoccer.xo.android.view.model;
 
 import android.view.View;
 import android.widget.TextView;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
@@ -23,7 +25,7 @@ public class TalkClientContactItem extends BaseContactItem {
 
     @Nullable
     private Date mLastMessageTimeStamp = null;
-    private String mLastMessageText = "";
+    private String mLastMessageText;
     private long mUnseenMessageCount = 0;
 
     public TalkClientContactItem(XoActivity activity, TalkClientContact contact) {
@@ -64,15 +66,24 @@ public class TalkClientContactItem extends BaseContactItem {
 
     private void updateLastMessageText(TalkClientMessage message) {
         if (message != null) {
-            if (message.getAttachmentDownload() != null) {
-                TalkClientDownload attachment = message.getAttachmentDownload();
+            String mediaType = null;
+            TalkClientUpload upload = message.getAttachmentUpload();
+            if (upload != null) {
+                mediaType = upload.getMediaType();
+            } else {
+                TalkClientDownload download = message.getAttachmentDownload();
+                if (download != null) {
+                    mediaType = download.getMediaType();
+                }
+            }
+            if (mediaType != null) {
                 String text = mXoActivity.getResources().getString(R.string.contact_item_receive_attachment);
-                mLastMessageText = String.format(text, attachment.getMediaType());
+                mLastMessageText = String.format(text, mediaType);
             } else {
                 mLastMessageText = message.getText();
             }
         } else {
-            mLastMessageText = new String();
+            mLastMessageText = "";
         }
     }
 
