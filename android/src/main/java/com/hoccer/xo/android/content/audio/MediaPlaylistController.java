@@ -186,9 +186,6 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
 
     public void reset() {
         setPlaylist(new EmptyPlaylist());
-        mCurrentIndex = 0;
-        setNewCurrentItem(null);
-        createPlaylistIndexes();
     }
 
     public RepeatMode getRepeatMode() {
