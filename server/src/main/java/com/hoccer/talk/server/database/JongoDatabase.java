@@ -5,6 +5,7 @@ import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.mongodb.*;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
@@ -144,6 +145,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkMessage> findMessagesWithAttachmentFileId(String fileId) {
         List<TalkMessage> res = new ArrayList<TalkMessage>();
         Iterator<TalkMessage> it =
