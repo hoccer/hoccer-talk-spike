@@ -52,7 +52,7 @@ public class TalkClientContactItem extends BaseContactItem {
     }
 
     public void update() {
-        try { // TODO: add proper exception handling
+        try {
             mUnseenMessageCount = mXoActivity.getXoDatabase().findUnseenMessageCountByContactId(mContact.getClientContactId());
             TalkClientMessage message = mXoActivity.getXoDatabase().findLatestMessageByContactId(mContact.getClientContactId());
             if (message != null) {
@@ -61,6 +61,7 @@ public class TalkClientContactItem extends BaseContactItem {
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
+            // TODO: add proper exception handling
         }
     }
 
