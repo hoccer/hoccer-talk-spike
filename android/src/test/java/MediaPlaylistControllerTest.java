@@ -570,7 +570,9 @@ public class MediaPlaylistControllerTest {
         assertEquals(0, listenerTest.shuffleChangedCalled.size());
     }
 
-    //////// Helpers ////////
+    ////////////////////////////////
+    //////// Helper methods ////////
+    ////////////////////////////////
 
     public class Call {
         public Object[] args;
