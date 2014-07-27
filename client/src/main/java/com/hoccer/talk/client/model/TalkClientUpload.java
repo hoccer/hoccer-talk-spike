@@ -340,7 +340,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 switchState(State.PAUSED);
             }
         } catch (IOException e) {
-            LOG.error(e);
+            LOG.error("IOException while performing upload request: ", e);
             switchState(State.PAUSED);
         } catch (Exception e) {
             LOG.error("Exception while performing upload request: ", e);

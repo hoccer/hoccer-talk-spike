@@ -147,6 +147,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     private void unscheduledDownloadAttempt(int downloadId) {
         ScheduledFuture future = mDownloadRetryQueue.remove(downloadId);
         if(future != null) {
+            LOG.debug("Unscheduling download " + downloadId);
             future.cancel(true);
         }
     }
