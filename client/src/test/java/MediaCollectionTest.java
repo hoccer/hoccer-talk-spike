@@ -980,8 +980,9 @@ public class MediaCollectionTest {
         assertEquals(0, listenerTester.onNameChangedCalled.size());
         assertEquals(0, listenerTester.onItemOrderChangedCalled.size());
         assertEquals(1, listenerTester.onItemRemovedCalled.size()); // callback is only invoked if MediaCollection instances are cached
-        assertEquals(expectedItemRemovedIndex, listenerTester.onItemRemovedCalled.get(0).args[0]);
-        assertEquals(expectedItemRemoved, listenerTester.onItemRemovedCalled.get(0).args[1]);
+        assertEquals(collection, listenerTester.onItemRemovedCalled.get(0).args[0]);
+        assertEquals(expectedItemRemovedIndex, listenerTester.onItemRemovedCalled.get(0).args[1]);
+        assertEquals(expectedItemRemoved, listenerTester.onItemRemovedCalled.get(0).args[2]);
         assertEquals(0, listenerTester.onItemAddedCalled.size());
         assertEquals(0, listenerTester.onCollectionClearedCalled.size());
     }
@@ -1117,17 +1118,17 @@ public class MediaCollectionTest {
 
                 @Override
                 public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
-                    onItemOrderChangedCalled.add(new Call(collection));
+                    onItemOrderChangedCalled.add(new Call(collection, fromIndex, toIndex));
                 }
 
                 @Override
                 public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
-                    onItemRemovedCalled.add(new Call(collection));
+                    onItemRemovedCalled.add(new Call(collection, indexRemoved, itemRemoved));
                 }
 
                 @Override
                 public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
-                    onItemAddedCalled.add(new Call(collection));
+                    onItemAddedCalled.add(new Call(collection, indexAdded, itemAdded));
                 }
 
                 @Override
