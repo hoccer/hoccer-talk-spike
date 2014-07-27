@@ -106,50 +106,52 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
 
     public IContentObject backward() {
         if(!canBackward()) {
-            return null;
-        }
-
-        switch (mRepeatMode) {
-            case NO_REPEAT:
-                --mCurrentIndex;
-                setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
-                break;
-            case REPEAT_ALL:
-                mCurrentIndex--;
-                if (mCurrentIndex < 0) {
-                    mCurrentIndex = mPlaylist.size() - 1;
-                }
-                setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
-                break;
-            case REPEAT_ITEM:
-                break; // do nothing
-            default:
-                throw new IllegalArgumentException("Invalid repeat mode encountered");
+            mCurrentIndex = -1;
+            setNewCurrentItem(null);
+        } else {
+            switch (mRepeatMode) {
+                case NO_REPEAT:
+                    --mCurrentIndex;
+                    setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
+                    break;
+                case REPEAT_ALL:
+                    mCurrentIndex--;
+                    if (mCurrentIndex < 0) {
+                        mCurrentIndex = mPlaylist.size() - 1;
+                    }
+                    setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
+                    break;
+                case REPEAT_ITEM:
+                    break; // do nothing
+                default:
+                    throw new IllegalArgumentException("Invalid repeat mode encountered");
+            }
         }
         return mCurrentItem;
     }
 
     public IContentObject forward() {
         if(!canForward()) {
-            return null;
-        }
-
-        switch (mRepeatMode) {
-            case NO_REPEAT:
-                ++mCurrentIndex;
-                setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
-                break;
-            case REPEAT_ALL:
-                ++mCurrentIndex;
-                if (mCurrentIndex >= mPlaylist.size()) {
-                    mCurrentIndex = 0;
-                }
-                setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
-                break;
-            case REPEAT_ITEM:
-                break; // do nothing
-            default:
-                throw new IllegalArgumentException("Invalid repeat mode encountered");
+            mCurrentIndex = -1;
+            setNewCurrentItem(null);
+        } else {
+            switch (mRepeatMode) {
+                case NO_REPEAT:
+                    ++mCurrentIndex;
+                    setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
+                    break;
+                case REPEAT_ALL:
+                    ++mCurrentIndex;
+                    if (mCurrentIndex >= mPlaylist.size()) {
+                        mCurrentIndex = 0;
+                    }
+                    setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
+                    break;
+                case REPEAT_ITEM:
+                    break; // do nothing
+                default:
+                    throw new IllegalArgumentException("Invalid repeat mode encountered");
+            }
         }
         return mCurrentItem;
     }

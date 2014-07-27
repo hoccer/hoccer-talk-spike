@@ -306,19 +306,20 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testNextWithNoRepeatAtEnd() {
         mPlaylistController.setCurrentIndex(3);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        IContentObject expectedCurrentItem = null;
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.NO_REPEAT);
         IContentObject actualCurrentItem = mPlaylistController.forward();
         assertEquals(null, actualCurrentItem);
 
-        int expectedCurrentIndex = 3;
+        int expectedCurrentIndex = -1;
         assertEquals(expectedCurrentIndex, mPlaylistController.getCurrentIndex());
         assertEquals(expectedCurrentItem, mPlaylistController.getCurrentItem());
 
         // listener test
-        assertEquals(0, listenerTest.currentItemChangedCalls.size());
+        assertEquals(1, listenerTest.currentItemChangedCalls.size());
+        assertEquals(expectedCurrentItem, listenerTest.currentItemChangedCalls.get(0).args[0]);
         assertEquals(0, listenerTest.playlistChangedCalled.size());
         assertEquals(0, listenerTest.repeatModeChangedCalled.size());
         assertEquals(0, listenerTest.shuffleChangedCalled.size());
@@ -415,19 +416,20 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testPreviousWithNoRepeatAtBeginning() {
         mPlaylistController.setCurrentIndex(0);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        IContentObject expectedCurrentItem = null;
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.NO_REPEAT);
         IContentObject actualCurrentItem = mPlaylistController.backward();
         assertEquals(null, actualCurrentItem);
 
-        int expectedCurrentIndex = 0;
+        int expectedCurrentIndex = -1;
         assertEquals(expectedCurrentIndex, mPlaylistController.getCurrentIndex());
         assertEquals(expectedCurrentItem, mPlaylistController.getCurrentItem());
 
         // listener test
-        assertEquals(0, listenerTest.currentItemChangedCalls.size());
+        assertEquals(1, listenerTest.currentItemChangedCalls.size());
+        assertEquals(expectedCurrentItem, listenerTest.currentItemChangedCalls.get(0).args[0]);
         assertEquals(0, listenerTest.playlistChangedCalled.size());
         assertEquals(0, listenerTest.repeatModeChangedCalled.size());
         assertEquals(0, listenerTest.shuffleChangedCalled.size());
