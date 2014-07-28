@@ -31,7 +31,7 @@ import org.apache.log4j.Logger;
 import java.sql.SQLException;
 import java.util.List;
 
-public class MediaPlayerService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
+public class MediaPlayerService extends Service implements MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, MediaPlaylistController.Listener {
 
     public static final int UNDEFINED_CONTACT_ID = -1;
 
@@ -62,6 +62,30 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private BroadcastReceiver mReceiver;
     private BroadcastReceiver mHeadsetStateBroadcastReceiver;
     private MediaPlaylistController mPlaylistController = new MediaPlaylistController();
+
+    @Override
+    public void onCurrentItemChanged(IContentObject newItem) {
+        if(newItem != null) {
+            play(mPlaylistController.getCurrentItem());
+        } else {
+            stop();
+        }
+    }
+
+    @Override
+    public void onPlaylistChanged(MediaPlaylist newPlaylist) {
+        broadcastTrackChanged();
+    }
+
+    @Override
+    public void onRepeatModeChanged(MediaPlaylistController.RepeatMode newMode) {
+        // do nothing
+    }
+
+    @Override
+    public void onShuffleChanged(boolean isShuffled) {
+        // do nothing
+    }
 
     public class MediaPlayerBinder extends Binder {
         public MediaPlayerService getService() {
