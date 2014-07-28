@@ -318,6 +318,11 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
     }
 
     private void setNewCurrentItem(IContentObject newItem) {
+        // do nothing if there is no change
+        if(mCurrentItem == newItem) {
+            return;
+        }
+
         mCurrentItem = newItem;
 
         for(Listener listener : mListener) {
