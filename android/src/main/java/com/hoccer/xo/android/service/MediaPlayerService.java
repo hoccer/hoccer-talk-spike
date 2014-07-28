@@ -50,7 +50,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private boolean mStopped = true;
 
     private IContentObject mCurrentItem;
-    private IContentObject mTempItem;
 
     private PendingIntent mResultPendingIntent;
 
@@ -99,7 +98,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         super.onCreate();
 
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
-
+        mPlaylistController.registerListener(this);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         createBroadcastReceiver();
@@ -307,7 +306,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     private void resetAndPrepareMediaPlayer(IContentObject item) {
-        mTempItem = item;
         try {
             mMediaPlayer.reset();
             mMediaPlayer.setDataSource(item.getContentDataUrl().replace("file:///", "/"));
@@ -342,8 +340,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                 mMediaPlayer.start();
                 mPaused = false;
                 mStopped = false;
-                if (!canResume()) {
-                    mCurrentItem = mTempItem;
+                if (item != mCurrentItem) {
+                    mCurrentItem = item;
                     broadcastTrackChanged();
                 }
                 if (isNotificationActive()) {
@@ -365,10 +363,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
             }
         });
         resetAndPrepareMediaPlayer(item);
-    }
-
-    private boolean canResume() {
-        return isPaused();
     }
 
     private void playNewTrack(IContentObject item) {
