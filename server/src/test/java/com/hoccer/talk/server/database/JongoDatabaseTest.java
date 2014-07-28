@@ -201,11 +201,37 @@ public class JongoDatabaseTest {
 
     @Test
     public void testFindMessagesWithAttachmentFileId() throws Exception {
-        final List<TalkMessage> messageList1 = database.findMessagesWithAttachmentFileId("doesnotexist");
-        assertNotNull(messageList1);
-        assertEquals(0, messageList1.size());
+        List<TalkMessage> emptyMessageList = database.findMessagesWithAttachmentFileId("doesnotexist");
+        assertNotNull(emptyMessageList);
+        assertEquals(0, emptyMessageList.size());
 
-        // TODO: complete me...
+        final TalkMessage transientMessage1 = new TalkMessage();
+        transientMessage1.setMessageId("first");
+        transientMessage1.setAttachmentFileId("fileId1");
+        database.saveMessage(transientMessage1);
+
+        final TalkMessage transientMessage2 = new TalkMessage();
+        transientMessage1.setMessageId("second");
+        transientMessage1.setAttachmentFileId("fileId2");
+        database.saveMessage(transientMessage2);
+
+        final List<TalkMessage> MessageListContainingOne = database.findMessagesWithAttachmentFileId("fileId1");
+        assertNotNull(MessageListContainingOne);
+        assertEquals(1, MessageListContainingOne.size());
+
+        transientMessage2.setAttachmentFileId("fileId1");
+        database.saveMessage(transientMessage2);
+
+        final List<TalkMessage> messageListContainingTwo = database.findMessagesWithAttachmentFileId("fileId1");
+        assertNotNull(messageListContainingTwo);
+        assertEquals(2, messageListContainingTwo.size());
+
+        emptyMessageList = database.findMessagesWithAttachmentFileId("doesnotexist");
+        assertNotNull(emptyMessageList);
+        assertEquals(0, emptyMessageList.size());
+
+        assertNotNull(database.findMessagesWithAttachmentFileId(null));
+        assertEquals(0, emptyMessageList.size());
     }
 
     @Test
@@ -227,6 +253,8 @@ public class JongoDatabaseTest {
     public void testDeleteNullMessage() throws Exception {
         database.deleteMessage(null);
     }
+
+
 
     /*
     * TalkDelivery related methods
@@ -283,6 +311,29 @@ public class JongoDatabaseTest {
         assertEquals(1, database.findDeliveriesInState(TalkDelivery.STATE_ABORTED).size());
         assertEquals(1, database.findDeliveriesInState(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED).size());
     }
+
+    @Test
+    public void testFindAllDeliveries() throws Exception {
+        final List<TalkDelivery> emptyResult = database.findDeliveriesInState("crocodile_hunting");
+        assertNotNull(emptyResult);
+        assertEquals(0, emptyResult.size());
+
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_SEEN);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_ABORTED);
+        createDeliveryInState(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_PRIVATE);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_PRIVATE_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_REJECTED);
+        createDeliveryInState(TalkDelivery.STATE_REJECTED_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_FAILED);
+        createDeliveryInState(TalkDelivery.STATE_FAILED_ACKNOWLEDGED);
+
+        final List<TalkDelivery> fullResult = database.findAllDeliveries();
+        assertNotNull(fullResult);
+        assertEquals(10, fullResult.size());
+    }
+
 
 
 }
