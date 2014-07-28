@@ -4,8 +4,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.Contacts;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -20,10 +18,10 @@ import android.widget.TextView;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.AddressBookActivity;
 import com.hoccer.xo.android.activity.QrCodeGeneratingActivity;
 import com.hoccer.xo.android.activity.QrScannerActivity;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.android.dialog.AddressBookDialog;
 import com.hoccer.xo.release.R;
 
 import java.util.concurrent.ScheduledFuture;
@@ -188,15 +186,17 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         }
         if (v == mTokenSendSms) {
             LOG.debug("onClick(smsSend)");
-            AddressBookDialog dialog = new AddressBookDialog(getActivity());
-            dialog.setupDialog(getXoActivity(), mTokenText.getText().toString(), Contacts.HAS_PHONE_NUMBER);
-            dialog.show();
+            Intent addressBook = new Intent(getActivity(), AddressBookActivity.class);
+            addressBook.putExtra("SMS", true);
+            addressBook.putExtra("TOKEN", mTokenText.getText().toString());
+            getActivity().startActivity(addressBook);
         }
         if (v == mTokenSendEmail) {
             LOG.debug("onClick(smsSend)");
-            AddressBookDialog dialog = new AddressBookDialog(getActivity());
-            dialog.setupDialog(getXoActivity(), mTokenText.getText().toString(), ContactsContract.CommonDataKinds.Email.ADDRESS);
-            dialog.show();
+            Intent addressBook = new Intent(getActivity(), AddressBookActivity.class);
+            addressBook.putExtra("SMS", false);
+            addressBook.putExtra("TOKEN", mTokenText.getText().toString());
+            getActivity().startActivity(addressBook);
         }
     }
 

@@ -268,6 +268,7 @@
     <string name="pref_privacy_title">Privatspähre</string>
     <string name="error_send_message_empty_group">Diese Gruppe ist leer.</string>
     <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
+    <string name="dialog_invite">Invite</string>
 
     <string-array name="preference_log_level_names">
         <item>Info</item>

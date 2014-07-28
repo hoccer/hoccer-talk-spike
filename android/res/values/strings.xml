@@ -308,5 +308,6 @@
     <string name="nearby_saved">Nearby saved</string>
     <string name="error_send_message_empty_group">There is nobody in this group.</string>
     <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
+    <string name="invite_several_entries">Has several entries</string>
 
 </resources>
