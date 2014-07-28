@@ -90,7 +90,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
         if (avatarUri == null) {
             if (mContact.isGroup()) {
-                if (mContact.getGroupPresence().isTypeNearby()) {
+                if (mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
                     setAvatarImage(R.drawable.avatar_default_location);
                 } else {
                     setAvatarImage(R.drawable.avatar_default_group);
