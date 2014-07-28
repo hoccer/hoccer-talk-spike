@@ -228,6 +228,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 doPausedAction();
                 break;
             case UPLOADING:
+                doResumeCheckAction();
                 doUploadingAction();
                 break;
             case COMPLETE:
@@ -283,6 +284,91 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         }
     }
 
+    private void doResumeCheckAction() {
+
+        HttpClient client = mTransferAgent.getHttpClient();
+
+        LOG.info("[uploadId: '" + clientUploadId + "'] performing check request");
+
+        int last = uploadLength - 1;
+
+        HttpPut checkRequest = new HttpPut(uploadUrl);
+        String contentRangeValue = "bytes */" + uploadLength;
+        LOG.trace("PUT-check range '" + contentRangeValue + "'");
+        LOG.trace("PUT-check '" + uploadUrl + "' commencing");
+        logRequestHeaders(checkRequest,"PUT-check request header ");
+
+        try {
+            HttpResponse checkResponse = client.execute(checkRequest);
+            StatusLine statusLine = checkResponse.getStatusLine();
+            int statusCode = statusLine.getStatusCode();
+            LOG.trace("PUT-check '" + uploadUrl + "' with status '" + statusCode + "': " + statusLine.getReasonPhrase());
+            if (statusCode != HttpStatus.SC_OK && statusCode != 308 /* resume incomplete */) {
+                if (statusCode >= 400 && statusCode <= 499) {
+                    LOG.warn("[uploadId: '" + clientUploadId + "'] Check request received HTTP error: " + statusCode);
+                }
+                checkResponse.getEntity().consumeContent();
+
+            }
+            logRequestHeaders(checkResponse, "PUT-check response header ");
+
+            // process range header from check request
+            Header checkRangeHeader = checkResponse.getFirstHeader("Range");
+            if (checkRangeHeader != null) {
+                if (!checkCompletion(mTransferAgent, checkRangeHeader)) {
+                    // TODO: pause ? same as below ?
+                }
+            } else {
+                LOG.warn("[uploadId: '" + clientUploadId + "'] no range header in check response");
+                this.progress = 0;
+            }
+            checkResponse.getEntity().consumeContent();
+
+        } catch (IOException e) {
+            LOG.error("IOException while retrieving uploaded range from server ", e);
+        }
+    }
+
+    private boolean checkCompletion(XoTransferAgent agent, Header checkRangeHeader) {
+        int last = uploadLength - 1;
+        int confirmedProgress = 0;
+
+        ByteRange uploadedRange = ByteRange.parseContentRange(checkRangeHeader.getValue());
+
+        LOG.info("probe returned uploaded range '" + uploadedRange.toContentRangeString() + "'");
+
+        if(uploadedRange.hasTotal()) {
+            if(uploadedRange.getTotal() != uploadLength) {
+                LOG.error("server returned wrong upload length");
+                return false;
+            }
+        }
+
+        if(uploadedRange.hasStart()) {
+            if(uploadedRange.getStart() != 0) {
+                LOG.error("server returned non-zero start");
+                return false;
+            }
+        }
+
+        if(uploadedRange.hasEnd()) {
+            confirmedProgress = (int)uploadedRange.getEnd() + 1;
+        }
+
+        LOG.info("progress believed " + progress + " confirmed " + confirmedProgress);
+        this.progress = confirmedProgress;
+        agent.onUploadProgress(this);
+
+        if(uploadedRange.hasStart() && uploadedRange.hasEnd()) {
+            if(uploadedRange.getStart() == 0 && uploadedRange.getEnd() == last) {
+                LOG.info("upload complete");
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void doUploadingAction() {
         String filename = this.dataFile;
         if (filename == null || filename.isEmpty()) {
@@ -299,8 +385,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             LOG.debug("'[uploadId: '" + clientUploadId + "'] bytes to go is 0.");
             switchState(State.COMPLETE);
         }
-
         LOG.debug("'[uploadId: '" + clientUploadId + "'] current progress: " + progress + " | current upload length: " + uploadLength);
+
         HttpClient client = mTransferAgent.getHttpClient();
         try {
             InputStream clearIs = mTransferAgent.getClient().getHost().openInputStreamForUrl(filename);
@@ -314,19 +400,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
             int skipped = (int) encryptingInputStream.skip(this.progress);
             LOG.debug("'[uploadId: '" + clientUploadId + "'] skipped " + skipped + " bytes");
-            if (skipped < 0) {
-                LOG.error("'[uploadId: '" + clientUploadId + "'] skipped nothing " + skipped);
-                skipped = 0;
-            }
-            if (skipped < this.progress) {
-                LOG.error("'[uploadId: '" + clientUploadId + "'] skipped less bytes  " + skipped + " < " + this.progress);
-            }
-            this.progress = skipped;
-
-            if (mUploadRequest != null) {
-                LOG.warn("'[uploadId: '" + clientUploadId + "'] Found running mUploadRequest. Aborting.");
-                mUploadRequest.abort();
-            }
             mUploadRequest = createHttpUploadRequest();
             mUploadRequest.setEntity(new ProgressOutputHttpEntity(encryptingInputStream, bytesToGo, this, this.progress));
 
@@ -347,7 +420,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                     return;
                 }
                 uploadResponse.getEntity().consumeContent();
-                LOG.warn("[uploadId: '" + clientUploadId + "'] Resuming incomplete upload. Status code: " + uploadStatusCode);
+                LOG.error("[uploadId: '" + clientUploadId + "'] Received error from server. Status code: " + uploadStatusCode);
                 switchState(State.PAUSED); // do we want to restart this task anytime again?
                 return;
             }

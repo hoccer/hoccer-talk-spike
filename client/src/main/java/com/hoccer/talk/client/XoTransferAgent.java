@@ -51,12 +51,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     private ScheduledExecutorService createScheduledThreadPool(final String name) {
         ThreadFactoryBuilder threadFactoryBuilder = new ThreadFactoryBuilder();
         threadFactoryBuilder.setNameFormat(name);
-        threadFactoryBuilder.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                LOG.error("[ThreadPool " + name + "] Uncaught exception: ", e);
-            }
-        });
+        threadFactoryBuilder.setUncaughtExceptionHandler(mClient.getHost().getUncaughtExceptionHandler());
         return Executors.newScheduledThreadPool(mClient.getHost().getTransferThreads(), threadFactoryBuilder.build());
     }
 
