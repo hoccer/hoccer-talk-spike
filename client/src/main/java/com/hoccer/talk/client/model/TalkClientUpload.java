@@ -254,7 +254,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private void doRegisteringAction() {
         LOG.info("performRegistration(), state: ‘" + state + "'");
-        if(fileId != null) {
+        if (fileId != null) {
             LOG.debug("we already have a fileId. no need to register.");
             switchState(State.PAUSED);
             return;
@@ -304,15 +304,15 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         HttpClient client = mTransferAgent.getHttpClient();
         try {
             InputStream clearIs = mTransferAgent.getClient().getHost().openInputStreamForUrl(filename);
-            InputStream is;
+            InputStream encryptingInputStream;
             if (isAttachment()) {
                 byte[] key = Hex.decode(encryptionKey);
-                is = AESCryptor.encryptingInputStream(clearIs, key, AESCryptor.NULL_SALT);
+                encryptingInputStream = AESCryptor.encryptingInputStream(clearIs, key, AESCryptor.NULL_SALT);
             } else {
-                is = clearIs;
+                encryptingInputStream = clearIs;
             }
 
-            int skipped = (int)is.skip(this.progress);
+            int skipped = (int) encryptingInputStream.skip(this.progress);
             LOG.debug("'[uploadId: '" + clientUploadId + "'] skipped " + skipped + " bytes");
             if (skipped < 0) {
                 LOG.error("'[uploadId: '" + clientUploadId + "'] skipped nothing " + skipped);
@@ -323,14 +323,12 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             }
             this.progress = skipped;
 
-            //synchronized (mUploadRequest) {
             if (mUploadRequest != null) {
                 LOG.warn("'[uploadId: '" + clientUploadId + "'] Found running mUploadRequest. Aborting.");
                 mUploadRequest.abort();
             }
             mUploadRequest = createHttpUploadRequest();
-            mUploadRequest.setEntity(new ProgressOutputHttpEntity(is, bytesToGo, this, this.progress));
-            //}
+            mUploadRequest.setEntity(new ProgressOutputHttpEntity(encryptingInputStream, bytesToGo, this, this.progress));
 
             LOG.trace("PUT-upload '" + uploadUrl + "' commencing");
             logRequestHeaders(mUploadRequest, "PUT-upload response header ");
@@ -373,13 +371,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private void doPausedAction() {
-//        synchronized (mUploadRequest) {
         if (mUploadRequest != null) {
             mUploadRequest.abort();
             mUploadRequest = null;
             LOG.debug("aborted current Upload request. Upload can still resume.");
         }
-//        }
         mTransferAgent.onUploadStateChanged(this);
     }
 
@@ -441,11 +437,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         }
     }
 
-    private void logRequestHeaders(HttpMessage theMessage, String logPrefix) {
-        Header[] hdrs = theMessage.getAllHeaders();
-        for (int i = 0; i < hdrs.length; i++) {
-            Header h = hdrs[i];
-            LOG.trace(logPrefix + h.getName() + ": " + h.getValue());
+    private void logRequestHeaders(HttpMessage httpMessage, String logPrefix) {
+        Header[] allHeaders = httpMessage.getAllHeaders();
+        for (int i = 0; i < allHeaders.length; i++) {
+            Header header = allHeaders[i];
+            LOG.trace(logPrefix + header.getName() + ": " + header.getValue());
         }
     }
 
