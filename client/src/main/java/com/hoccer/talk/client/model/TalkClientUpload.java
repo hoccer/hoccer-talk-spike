@@ -56,7 +56,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         UPLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(COMPLETE, FAILED, PAUSED, UPLOADING);
+                return EnumSet.of(COMPLETE, FAILED, PAUSED);
             }
         },
         PAUSED {
@@ -276,11 +276,10 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             uploadUrl = handles.uploadUrl;
             downloadUrl = handles.downloadUrl;
             LOG.info("[uploadId: '" + clientUploadId + "'] registered as fileId: '" + handles.fileId + "'");
-
             switchState(State.PAUSED);
         } catch (Exception e) {
-            switchState(State.NEW);
             LOG.error("error registering", e);
+            switchState(State.NEW);
         }
     }
 
@@ -294,9 +293,15 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
         LOG.info("[uploadId: '" + clientUploadId + "'] performing upload request");
         int bytesToGo = uploadLength - this.progress;
-        LOG.debug("bytes to go for Upload (" + getClientUploadId() + "): " + bytesToGo);
-        LOG.debug("current progress: " + progress + " | current upload length: " + uploadLength);
-        HttpClient client = createHttpClientAndSetHeaders();
+        LOG.debug("'[uploadId: '" + clientUploadId + "'] bytes to go " + bytesToGo);
+
+        if (bytesToGo == 0) {
+            LOG.debug("'[uploadId: '" + clientUploadId + "'] bytes to go is 0.");
+            switchState(State.COMPLETE);
+        }
+
+        LOG.debug("'[uploadId: '" + clientUploadId + "'] current progress: " + progress + " | current upload length: " + uploadLength);
+        HttpClient client = mTransferAgent.getHttpClient();
         try {
             InputStream clearIs = mTransferAgent.getClient().getHost().openInputStreamForUrl(filename);
             InputStream is;
@@ -307,9 +312,26 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 is = clearIs;
             }
 
-            long skip = is.skip(this.progress);
-            LOG.debug("skipped " + skip + " bytes");
-            mUploadRequest.setEntity(new ProgressOutputHttpEntity(is, bytesToGo, this, progress));
+            int skipped = (int)is.skip(this.progress);
+            LOG.debug("'[uploadId: '" + clientUploadId + "'] skipped " + skipped + " bytes");
+            if (skipped < 0) {
+                LOG.error("'[uploadId: '" + clientUploadId + "'] skipped nothing " + skipped);
+                skipped = 0;
+            }
+            if (skipped < this.progress) {
+                LOG.error("'[uploadId: '" + clientUploadId + "'] skipped less bytes  " + skipped + " < " + this.progress);
+            }
+            this.progress = skipped;
+
+            //synchronized (mUploadRequest) {
+            if (mUploadRequest != null) {
+                LOG.warn("'[uploadId: '" + clientUploadId + "'] Found running mUploadRequest. Aborting.");
+                mUploadRequest.abort();
+            }
+            mUploadRequest = createHttpUploadRequest();
+            mUploadRequest.setEntity(new ProgressOutputHttpEntity(is, bytesToGo, this, this.progress));
+            //}
+
             LOG.trace("PUT-upload '" + uploadUrl + "' commencing");
             logRequestHeaders(mUploadRequest, "PUT-upload response header ");
             mTransferAgent.onUploadStarted(this);
@@ -317,15 +339,17 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
             saveToDatabase();
             StatusLine uploadStatus = uploadResponse.getStatusLine();
-            int uploadSc = uploadStatus.getStatusCode();
-            LOG.trace("PUT-upload '" + uploadUrl + "' with status '" + uploadSc + "': " + uploadStatus.getReasonPhrase());
-            if (uploadSc != HttpStatus.SC_OK && uploadSc != 308 /* resume incomplete */) {
+            int uploadStatusCode = uploadStatus.getStatusCode();
+            LOG.trace("PUT-upload '" + uploadUrl + "' with status '" + uploadStatusCode + "': " + uploadStatus.getReasonPhrase());
+            if (uploadStatusCode != HttpStatus.SC_OK && uploadStatusCode != 308 /* resume incomplete */) {
                 // client error - mark as failed
-                if (uploadSc >= 400 && uploadSc <= 499) {
+                if (uploadStatusCode >= 400 && uploadStatusCode <= 499) {
+                    LOG.warn("[uploadId: '" + clientUploadId + "'] Upload request received HTTP error: " + uploadStatusCode);
                     switchState(State.PAUSED);
                     return;
                 }
                 uploadResponse.getEntity().consumeContent();
+                LOG.warn("[uploadId: '" + clientUploadId + "'] Resuming incomplete upload. Status code: " + uploadStatusCode);
                 switchState(State.PAUSED); // do we want to restart this task anytime again?
                 return;
             }
@@ -349,11 +373,13 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private void doPausedAction() {
+//        synchronized (mUploadRequest) {
         if (mUploadRequest != null) {
             mUploadRequest.abort();
             mUploadRequest = null;
             LOG.debug("aborted current Upload request. Upload can still resume.");
         }
+//        }
         mTransferAgent.onUploadStateChanged(this);
     }
 
@@ -425,26 +451,25 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private void deleteTemporaryFile() {
         if (encryptedFile != null) {
-            String path = mTransferAgent.getClient().getEncryptedUploadDirectory()
-                    + File.separator + encryptedFile;
+            String path = mTransferAgent.getClient().getEncryptedUploadDirectory() + File.separator + encryptedFile;
             File file = new File(path);
             file.delete();
         }
     }
 
-    private HttpClient createHttpClientAndSetHeaders() {
-        HttpClient client = mTransferAgent.getHttpClient();
+    private HttpPut createHttpUploadRequest() {
         int last = uploadLength - 1;
         int bytesToGo = uploadLength - this.progress;
 
         LOG.trace("PUT-upload '" + uploadUrl + "' '" + bytesToGo + "' bytes to go ");
         String uploadRange = "bytes " + this.progress + "-" + last + "/" + uploadLength;
         LOG.debug("PUT-upload '" + uploadUrl + "' with range '" + uploadRange + "'");
-        mUploadRequest = new HttpPut(uploadUrl);
+
+        HttpPut uploadRequest = new HttpPut(uploadUrl);
         if (this.progress > 0) {
-            mUploadRequest.addHeader("Content-Range", uploadRange);
+            uploadRequest.addHeader("Content-Range", uploadRange);
         }
-        return client;
+        return uploadRequest;
     }
 
 
@@ -457,7 +482,12 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
      */
     @Override
     public void onProgress(int progress) {
-        LOG.trace("upload (" + getClientUploadId() + ") progress: " + progress + " of " + getContentLength());
+        LOG.trace("upload (" + getClientUploadId() + ") progress: " + progress + " of " + uploadLength);
+
+        if (progress > uploadLength) {
+            LOG.error("upload (" + getClientUploadId() + ") progress greater than upload size: " + progress + " > " + uploadLength);
+        }
+
         this.progress = progress;
         for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);

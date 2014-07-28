@@ -58,7 +58,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         DOWNLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, DECRYPTING, DETECTING, FAILED, DOWNLOADING);
+                return EnumSet.of(PAUSED, DECRYPTING, DETECTING, FAILED);
             }
         },
         PAUSED {
@@ -284,16 +284,22 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         try {
             logGetDebug("downloading '" + downloadUrl + "'");
             // create the GET request
-            mDownloadRequest = new HttpGet(downloadUrl);
-            // determine the requested range
-            String range = null;
-            if (contentLength != -1) {
-                long last = contentLength - 1;
-                range = "bytes=" + downloadProgress + "-" + last;
-                logGetDebug("requesting range '" + range + "'");
-                mDownloadRequest.addHeader("Range", range);
-            }
+            //synchronized (mDownloadRequest) {
+                if (mDownloadRequest != null) {
+                    LOG.warn("Found running mDownloadRequest. Aborting.");
+                    mDownloadRequest.abort();
+                }
+                mDownloadRequest = new HttpGet(downloadUrl);
 
+                // determine the requested range
+                String range = null;
+                if (contentLength != -1) {
+                    long last = contentLength - 1;
+                    range = "bytes=" + downloadProgress + "-" + last;
+                    logGetDebug("requesting range '" + range + "'");
+                    mDownloadRequest.addHeader("Range", range);
+                }
+            //}
             mTransferAgent.onDownloadStarted(this);
 
             // start performing the request
@@ -460,11 +466,13 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doPausedAction() {
-        if (mDownloadRequest != null) {
-            mDownloadRequest.abort();
-            mDownloadRequest = null;
-            LOG.debug("aborted current Download request. Download can still resume.");
-        }
+        //synchronized (mDownloadRequest) {
+            if (mDownloadRequest != null) {
+                mDownloadRequest.abort();
+                mDownloadRequest = null;
+                LOG.debug("aborted current Download request. Download can still resume.");
+            }
+        //}
         mTransferAgent.cancelDownload(this);
         mTransferAgent.onDownloadStateChanged(this);
     }
