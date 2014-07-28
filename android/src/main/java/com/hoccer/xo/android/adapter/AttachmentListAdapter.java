@@ -101,7 +101,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
         AudioAttachmentView audioRowView = (AudioAttachmentView) convertView;
         if (audioRowView == null) {
-            audioRowView = new AudioAttachmentView(parent.getContext());
+            audioRowView = new AudioAttachmentView(mActivity);
         }
 
         audioRowView.setMediaItem(mAttachmentItems.get(position));
@@ -281,6 +281,10 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
             downloads.add(collection.getItem(i));
         }
         createAttachmentsFromTalkClientDownloads(downloads);
+    }
+
+    public Activity getActivity() {
+        return mActivity;
     }
 
     private void createAttachmentsFromTalkClientDownloads(Iterable<TalkClientDownload> downloads) {

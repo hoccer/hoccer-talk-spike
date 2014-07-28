@@ -94,8 +94,14 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
         final ImageView artworkView = (ImageView) attachmentView.findViewById(R.id.iv_artwork);
         metaData.getArtwork(context.getResources(), new MediaMetaData.ArtworkRetrieverListener() {
             @Override
-            public void onArtworkRetrieveFinished(Drawable artwork) {
-                artworkView.setImageDrawable(artwork);
+            public void onArtworkRetrieveFinished(final Drawable artwork) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        artworkView.setImageDrawable(artwork);
+                    }
+                });
+
             }
         });
 

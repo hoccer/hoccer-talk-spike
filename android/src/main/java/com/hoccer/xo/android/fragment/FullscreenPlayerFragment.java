@@ -322,8 +322,13 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     }
 
     @Override
-    public void onArtworkRetrieveFinished(Drawable artwork) {
-        mArtworkImageView.setImageDrawable(artwork);
+    public void onArtworkRetrieveFinished(final Drawable artwork) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mArtworkImageView.setImageDrawable(artwork);
+            }
+        });
     }
 
 

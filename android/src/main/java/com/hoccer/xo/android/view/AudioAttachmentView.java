@@ -1,13 +1,12 @@
 package com.hoccer.xo.android.view;
 
-import android.content.*;
+import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
@@ -16,7 +15,7 @@ import org.apache.log4j.Logger;
 
 public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener {
 
-    private Context mContext;
+    private Activity mActivity;
     private IContentObject mItem;
     private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
 
@@ -27,11 +26,11 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
 
     private static final Logger LOG = Logger.getLogger(AudioAttachmentView.class);
 
-    public AudioAttachmentView(Context context) {
-        super(context);
-        mContext = context;
+    public AudioAttachmentView(Activity activity) {
+        super(activity.getApplicationContext());
+        mActivity = activity;
         mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
-        addView(inflate(mContext, R.layout.item_audio_attachment, null));
+        addView(inflate(mActivity, R.layout.item_audio_attachment, null));
 
         mTitleTextView = ((TextView) findViewById(R.id.tv_title_name));
         mArtistTextView = ((TextView) findViewById(R.id.tv_artist_name));
@@ -68,7 +67,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mMediaPlayerServiceConnector.connect(mContext,
+        mMediaPlayerServiceConnector.connect(mActivity,
                 MediaPlayerService.PLAYSTATE_CHANGED_ACTION,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override
@@ -115,7 +114,12 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     }
 
     @Override
-    public void onArtworkRetrieveFinished(Drawable artwork) {
-        mArtworkImageView.setImageDrawable(artwork);
+    public void onArtworkRetrieveFinished(final Drawable artwork) {
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mArtworkImageView.setImageDrawable(artwork);
+            }
+        });
     }
 }
