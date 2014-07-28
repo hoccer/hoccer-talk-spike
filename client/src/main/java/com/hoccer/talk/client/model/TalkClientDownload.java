@@ -58,7 +58,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         DOWNLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, DECRYPTING, DETECTING, FAILED, DOWNLOADING);
+                return EnumSet.of(PAUSED, DECRYPTING, DETECTING, FAILED);
             }
         },
         PAUSED {
@@ -264,7 +264,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
         saveToDatabase();
 
-        for(int i = 0; i < mTransferListeners.size(); i++) {
+        for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);
             listener.onStateChanged(state);
         }
@@ -284,7 +284,13 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         try {
             logGetDebug("downloading '" + downloadUrl + "'");
             // create the GET request
+            //synchronized (mDownloadRequest) {
+            if (mDownloadRequest != null) {
+                LOG.warn("Found running mDownloadRequest. Aborting.");
+                mDownloadRequest.abort();
+            }
             mDownloadRequest = new HttpGet(downloadUrl);
+
             // determine the requested range
             String range = null;
             if (contentLength != -1) {
@@ -293,7 +299,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 logGetDebug("requesting range '" + range + "'");
                 mDownloadRequest.addHeader("Range", range);
             }
-
+            //}
             mTransferAgent.onDownloadStarted(this);
 
             // start performing the request
@@ -339,7 +345,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 return;
             }
         } catch (Exception e) {
-            LOG.error("download exception -> switching to state FAILED", e);
+            LOG.error("download exception -> switching to state PAUSED", e);
             checkTransferFailure(transferFailures + 1);
             switchState(State.PAUSED);
         } finally {
@@ -357,7 +363,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     private void checkTransferFailure(int failures) {
         transferFailures = failures;
-        if(transferFailures <= MAX_FAILURES) {
+        if (transferFailures <= MAX_FAILURES) {
             switchState(State.PAUSED);
             mTransferAgent.scheduleDownloadAttempt(this);
         } else {
@@ -383,7 +389,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 randomAccessFile.write(buffer, 0, bytesRead);
                 downloadProgress += bytesRead;
                 bytesToGo -= bytesRead;
-                for(int i = 0; i < mTransferListeners.size(); i++) {
+                for (int i = 0; i < mTransferListeners.size(); i++) {
                     IXoTransferListener listener = mTransferListeners.get(i);
                     listener.onProgressUpdated(downloadProgress, getTransferLength());
                 }
@@ -485,25 +491,25 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             byte[] key = Hex.decodeHex(decryptionKey.toCharArray());
             int bytesToDecrypt = (int) source.length();
             byte[] buffer = new byte[1 << 16];
-            InputStream is = new FileInputStream(source);
-            OutputStream ofs = new FileOutputStream(destination);
+            InputStream inputStream = new FileInputStream(source);
+            OutputStream fileOutputStream = new FileOutputStream(destination);
             MessageDigest digest = MessageDigest.getInstance("SHA256");
-            OutputStream os = new DigestOutputStream(ofs, digest);
-            OutputStream dos = AESCryptor.decryptingOutputStream(os, key, AESCryptor.NULL_SALT);
+            OutputStream digestOutputStream = new DigestOutputStream(fileOutputStream, digest);
+            OutputStream decryptingOutputStream = AESCryptor.decryptingOutputStream(digestOutputStream, key, AESCryptor.NULL_SALT);
 
             int bytesToGo = bytesToDecrypt;
             while (bytesToGo > 0) {
                 int bytesToCopy = Math.min(buffer.length, bytesToGo);
-                int bytesRead = is.read(buffer, 0, bytesToCopy);
-                dos.write(buffer, 0, bytesRead);
+                int bytesRead = inputStream.read(buffer, 0, bytesToCopy);
+                decryptingOutputStream.write(buffer, 0, bytesRead);
                 bytesToGo -= bytesRead;
             }
 
-            dos.flush();
-            dos.close();
-            os.flush();
-            os.close();
-            is.close();
+            decryptingOutputStream.flush();
+            decryptingOutputStream.close();
+            digestOutputStream.flush();
+            digestOutputStream.close();
+            inputStream.close();
 
             String computedHMac = new String(Base64.encodeBase64(digest.digest()));
             if (this.contentHmac != null) {
@@ -535,8 +541,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         File destination = new File(destinationFilePath);
 
         try {
-            InputStream tis = new FileInputStream(destination);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(tis);
+            InputStream fileInputStream = new FileInputStream(destination);
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
 
             Metadata metadata = new Metadata();
             if (contentType != null && !"application/octet-stream".equals(contentType)) {
@@ -548,7 +554,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
             MediaType detectedMediaType = MIME_DETECTOR.detect(bufferedInputStream, metadata);
 
-            tis.close();
+            fileInputStream.close();
 
             if (detectedMediaType != null) {
                 String detectedMediaTypeName = detectedMediaType.toString();
@@ -577,7 +583,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             switchState(State.COMPLETE);
         } catch (Exception e) {
             LOG.error("detection error", e);
-            checkTransferFailure( transferFailures + 1);
+            checkTransferFailure(transferFailures + 1);
             switchState(State.PAUSED);
         }
     }

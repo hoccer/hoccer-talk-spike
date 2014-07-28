@@ -2325,8 +2325,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             clientMessage.updateIncoming(delivery);
             TalkClientDownload attachmentDownload = clientMessage.getAttachmentDownload();
             mDatabase.updateDelivery(clientMessage.getIncomingDelivery());
-            if(attachmentDownload != null && !mTransferAgent.isDownloadActive(attachmentDownload)
-                    && attachmentDownload.getState() != TalkClientDownload.State.PAUSED) {
+
+            if (attachmentDownload != null && !mTransferAgent.isDownloadActive(attachmentDownload) && attachmentDownload.getState() != TalkClientDownload.State.PAUSED) {
                 mTransferAgent.onDownloadRegistered(attachmentDownload);
             }
             for(IXoMessageListener listener: mMessageListeners) {
@@ -3350,69 +3350,131 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     @Override
-    public void onDownloadRegistered(TalkClientDownload download) {}
-
-    @Override
-    public void onDownloadStarted(TalkClientDownload download) {}
-
-    @Override
-    public void onDownloadProgress(TalkClientDownload download) {}
-
-    @Override
-    public void onDownloadFinished(TalkClientDownload download) {
-        if (download.getTransferType() == XoTransfer.Type.ATTACHMENT) {
-            String nextState = getServerRpc().receivedFile(download.getFileId());
-            updateDownloadDelivery(download, nextState);
-        }
+    public void onDownloadRegistered(TalkClientDownload download) {
     }
 
     @Override
-    public void onDownloadFailed(TalkClientDownload download) {
-        if (download.getTransferType() == XoTransfer.Type.ATTACHMENT) {
-            String nextState = getServerRpc().failedFileDownload(download.getFileId());
-            updateDownloadDelivery(download, nextState);
-        }
+    public void onDownloadStarted(TalkClientDownload download) {
     }
 
     @Override
-    public void onDownloadStateChanged(TalkClientDownload download) {}
-
-    @Override
-    public void onUploadStarted(TalkClientUpload upload) {
-        if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
-            String nextState = getServerRpc().startedFileUpload(upload.getFileId());
-            updateUploadDelivery(upload, nextState);
-        }
+    public void onDownloadProgress(TalkClientDownload download) {
     }
 
     @Override
-    public void onUploadProgress(TalkClientUpload upload) {}
+    public void onDownloadFinished(final TalkClientDownload download) {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
 
-    @Override
-    public void onUploadFinished(TalkClientUpload upload) {
-        if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
-            String nextState = getServerRpc().finishedFileUpload(upload.getFileId());
-            updateUploadDelivery(upload, nextState);
-        }
+
+                    if (download.getTransferType() == XoTransfer.Type.ATTACHMENT) {
+                        String nextState = mServerRpc.receivedFile(download.getFileId());
+                        updateDownloadDelivery(download, nextState);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while updating upload state ", e);
+                }
+            }
+        });
     }
 
     @Override
-    public void onUploadFailed(TalkClientUpload upload) {
-        if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
-            String nextState = getServerRpc().failedFileUpload(upload.getFileId());
-            updateUploadDelivery(upload, nextState);
-        }
+    public void onDownloadFailed(final TalkClientDownload download) {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    if (download.getTransferType() == XoTransfer.Type.ATTACHMENT) {
+                        String nextState = mServerRpc.failedFileDownload(download.getFileId());
+                        updateDownloadDelivery(download, nextState);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while updating upload state ", e);
+                }
+            }
+        });
     }
 
     @Override
-    public void onUploadStateChanged(TalkClientUpload upload) {
-        if(upload.getTransferType() == XoTransfer.Type.ATTACHMENT &&
-            upload.getState() == TalkClientUpload.State.PAUSED &&
-            upload.isEncryptionKeySet()) {
-            // if encryption key is not set we have not sent the delivery so the server does not know about the delivery yet.
-            String nextState = getServerRpc().pausedFileUpload(upload.getFileId());
-            updateUploadDelivery(upload, nextState);
-        }
+    public void onDownloadStateChanged(TalkClientDownload download) {
+    }
+
+    @Override
+    public void onUploadStarted(final TalkClientUpload upload) {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
+                        String nextState = mServerRpc.startedFileUpload(upload.getFileId());
+                        updateUploadDelivery(upload, nextState);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while updating upload state ", e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onUploadProgress(TalkClientUpload upload) {
+    }
+
+    @Override
+    public void onUploadFinished(final TalkClientUpload upload) {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
+                        String nextState = mServerRpc.finishedFileUpload(upload.getFileId());
+                        updateUploadDelivery(upload, nextState);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while updating upload state ", e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onUploadFailed(final TalkClientUpload upload) {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT) {
+                        String nextState = mServerRpc.failedFileUpload(upload.getFileId());
+                        updateUploadDelivery(upload, nextState);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while updating upload state ", e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onUploadStateChanged(final TalkClientUpload upload) {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (upload.getTransferType() == XoTransfer.Type.ATTACHMENT &&
+                            upload.getState() == TalkClientUpload.State.PAUSED &&
+                            upload.isEncryptionKeySet()) {
+                        // if encryption key is not set we have not sent the delivery so the server does not know about the delivery yet.
+                        String nextState = mServerRpc.pausedFileUpload(upload.getFileId());
+                        updateUploadDelivery(upload, nextState);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while updating upload state ", e);
+                }
+            }
+        });
     }
 
 }

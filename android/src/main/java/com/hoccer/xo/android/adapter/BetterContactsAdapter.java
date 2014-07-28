@@ -93,6 +93,10 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         }
     }
 
+    public void setOnItemCountChangedListener(OnItemCountChangedListener onItemCountChangedListener) {
+        mOnItemCountChangedListener = onItemCountChangedListener;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -124,6 +128,37 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     public void setFilter(Filter filter) {
         this.mFilter = filter;
         initialize();
+    }
+
+    private List<TalkClientContact> filter(List<TalkClientContact> in) {
+        if (mFilter == null) {
+            return in;
+        }
+        ArrayList<TalkClientContact> res = new ArrayList<TalkClientContact>();
+        for (TalkClientContact contact : in) {
+            if (mFilter.shouldShow(contact)) {
+                res.add(contact);
+            }
+        }
+        return res;
+    }
+
+    private void refreshAllEntries() {
+        for (int i = 0; i < mContactItems.size(); i++) {
+            BaseContactItem item = mContactItems.get(i);
+            item.update();
+        }
+        notifyDataSetChanged();
+    }
+
+    private BaseContactItem findContactItemForContent(Object content) {
+        for (int i = 0; i < mContactItems.size(); i++) {
+            BaseContactItem item = mContactItems.get(i);
+            if (content.equals(item.getContent())) {
+                return item;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -179,31 +214,12 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        LOG.debug("onClientPresenceChanged()");
         BaseContactItem item = findContactItemForContent(contact);
         if (item == null) {
             return;
         }
         item.update();
         notifyDataSetChanged();
-    }
-
-    private void refreshAllEntries() {
-        for (int i = 0; i < mContactItems.size(); i++) {
-            BaseContactItem item = mContactItems.get(i);
-            item.update();
-        }
-        notifyDataSetChanged();
-    }
-
-    private BaseContactItem findContactItemForContent(Object content) {
-        for (int i = 0; i < mContactItems.size(); i++) {
-            BaseContactItem item = mContactItems.get(i);
-            if (content.equals(item.getContent())) {
-                return item;
-            }
-        }
-        return null;
     }
 
     @Override
@@ -226,6 +242,9 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
+        if (contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept())) {
+            return;
+        }
         BaseContactItem item = findContactItemForContent(contact);
         if (item == null) {
             item = new TalkClientContactItem(mActivity, contact);
@@ -233,7 +252,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
             notifyDataSetChanged();
         } else {
             if (!contact.isGroupInvolved()) {
-                LOG.info("group disappeared.");
                 mContactItems.remove(item);
                 notifyDataSetChanged();
             }
@@ -242,7 +260,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onMessageAdded(TalkClientMessage message) {
-        LOG.debug("onMessageAdded()");
         try {
             if (message.isIncoming()) {
                 TalkDelivery incomingDelivery = message.getIncomingDelivery();
@@ -264,12 +281,10 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onMessageRemoved(TalkClientMessage message) {
-        refreshAllEntries();
     }
 
     @Override
     public void onMessageStateChanged(TalkClientMessage message) {
-        refreshAllEntries();
     }
 
     @Override
@@ -291,12 +306,10 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onDownloadRegistered(TalkClientDownload download) {
-        refreshAllEntries();
     }
 
     @Override
     public void onDownloadStarted(TalkClientDownload download) {
-        refreshAllEntries();
     }
 
     @Override
@@ -305,24 +318,21 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
-        refreshAllEntries();
-    }
-
-    @Override
-    public void onDownloadFailed(TalkClientDownload download) {
-        refreshAllEntries();
-    }
-
-    @Override
-    public void onDownloadStateChanged(TalkClientDownload download) {
-        if (download.isAvatar() && download.getState() == TalkClientDownload.State.COMPLETE) {
-            refreshAllEntries();
+        if (download.isAvatar()) {
+            notifyDataSetChanged();
         }
     }
 
     @Override
+    public void onDownloadFailed(TalkClientDownload download) {
+    }
+
+    @Override
+    public void onDownloadStateChanged(TalkClientDownload download) {
+    }
+
+    @Override
     public void onUploadStarted(TalkClientUpload upload) {
-        refreshAllEntries();
     }
 
     @Override
@@ -331,37 +341,21 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
-        refreshAllEntries();
+        if (upload.isAvatar()) {
+            notifyDataSetChanged();
+        }
     }
 
     @Override
     public void onUploadFailed(TalkClientUpload upload) {
-        refreshAllEntries();
     }
 
     @Override
     public void onUploadStateChanged(TalkClientUpload upload) {
-        refreshAllEntries();
-    }
-
-    private List<TalkClientContact> filter(List<TalkClientContact> in) {
-        if (mFilter == null) {
-            return in;
-        }
-        ArrayList<TalkClientContact> res = new ArrayList<TalkClientContact>();
-        for (TalkClientContact contact : in) {
-            if (mFilter.shouldShow(contact)) {
-                res.add(contact);
-            }
-        }
-        return res;
-    }
-
-    public void setOnItemCountChangedListener(OnItemCountChangedListener onItemCountChangedListener) {
-        mOnItemCountChangedListener = onItemCountChangedListener;
     }
 
     public interface Filter {
         public boolean shouldShow(TalkClientContact contact);
     }
+
 }
