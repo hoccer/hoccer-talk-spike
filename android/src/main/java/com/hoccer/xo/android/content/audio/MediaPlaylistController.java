@@ -115,11 +115,16 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
                     setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
                     break;
                 case REPEAT_ALL:
-                    mCurrentIndex--;
-                    if (mCurrentIndex < 0) {
+                    if (mCurrentIndex - 1 < 0) {
                         mCurrentIndex = mPlaylist.size() - 1;
+                        setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
+                        if(mShuffleActive) {
+                            createPlaylistIndexes();  // reshuffle playlist
+                        }
+                    } else {
+                        mCurrentIndex = mCurrentIndex - 1;
+                        setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
                     }
-                    setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
                     break;
                 case REPEAT_ITEM:
                     break; // do nothing
@@ -141,11 +146,16 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
                     setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
                     break;
                 case REPEAT_ALL:
-                    ++mCurrentIndex;
-                    if (mCurrentIndex >= mPlaylist.size()) {
+                    if (mCurrentIndex + 1 >= mPlaylist.size()) {
                         mCurrentIndex = 0;
+                        setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
+                        if(mShuffleActive) {
+                            createPlaylistIndexes();  // reshuffle playlist
+                        }
+                    } else {
+                        mCurrentIndex = mCurrentIndex + 1;
+                        setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
                     }
-                    setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
                     break;
                 case REPEAT_ITEM:
                     break; // do nothing
