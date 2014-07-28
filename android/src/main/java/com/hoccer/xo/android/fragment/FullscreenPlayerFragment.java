@@ -194,7 +194,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
                 int totalDuration = mMediaPlayerService.getTotalDuration();
 
                 if (trackTitle == null || trackTitle.isEmpty()) {
-                    File file = new File(mCurrentMetaData.getFilePath());
+                    File file = new File(mCurrentMetaData.getFileUri());
                     trackTitle = file.getName();
                 }
 

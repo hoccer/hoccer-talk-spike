@@ -21,21 +21,23 @@ public class MediaMetaData {
     private static Map<String, MediaMetaData> mMetaDataCache = new HashMap<String, MediaMetaData>();
 
     public static MediaMetaData retrieveMetaData(String mediaFilePath) {
+        String mediaFileUri = Uri.parse(mediaFilePath).getPath();
+
         // return cached data if present
-        if(mMetaDataCache.containsKey(mediaFilePath)) {
-            return mMetaDataCache.get(mediaFilePath);
+        if(mMetaDataCache.containsKey(mediaFileUri)) {
+            return mMetaDataCache.get(mediaFileUri);
         }
 
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
-            retriever.setDataSource(mediaFilePath);
+            retriever.setDataSource(mediaFileUri);
         } catch(IllegalArgumentException e) {
-            LOG.error("Could not read meta data for file: " + mediaFilePath, e);
-            mMetaDataCache.put(mediaFilePath, null);
+            LOG.error("Could not read meta data for file: " + mediaFileUri, e);
+            mMetaDataCache.put(mediaFileUri, null);
             return null;
         }
 
-        MediaMetaData metaData = new MediaMetaData(mediaFilePath);
+        MediaMetaData metaData = new MediaMetaData(mediaFileUri);
         String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
         if (album == null) {
             album = retriever.extractMetadata(25); // workaround bug on Galaxy S3 and S4
@@ -64,11 +66,11 @@ public class MediaMetaData {
             metaData.mHasVideo = true;
         }
 
-        mMetaDataCache.put(mediaFilePath, metaData);
+        mMetaDataCache.put(mediaFileUri, metaData);
         return metaData;
     }
 
-    private String mFilePath;
+    private String mFileUri;
     private String mTitle = null;
     private String mArtist = null;
     private String mAlbumTitle = null;
@@ -85,11 +87,11 @@ public class MediaMetaData {
     * Private constructor, use MediaMetaData.retrieveMetaData() to create instances
     */
     private MediaMetaData(String filePath) {
-        mFilePath = filePath;
+        mFileUri = filePath;
     }
 
-    public String getFilePath() {
-        return mFilePath;
+    public String getFileUri() {
+        return mFileUri;
     }
 
     public String getTitle() {
@@ -98,7 +100,7 @@ public class MediaMetaData {
 
     public String getTitleOrFilename() {
         if (mTitle == null || mTitle.isEmpty()) {
-            File file = new File(mFilePath);
+            File file = new File(mFileUri);
             return file.getName();
         }
         return mTitle;
@@ -154,12 +156,11 @@ public class MediaMetaData {
             mArtworkRetrievalTask = new AsyncTask<Void, Void, Drawable>() {
                 @Override
                 protected Drawable doInBackground(Void... params) {
-                    String path = Uri.parse(mFilePath).getPath();
                     MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                     try {
-                        retriever.setDataSource(path);
+                        retriever.setDataSource(mFileUri);
                     } catch (IllegalArgumentException e) {
-                        LOG.error("Could not read meta data for file: " + mFilePath, e);
+                        LOG.error("Could not read meta data for file: " + mFileUri, e);
                         return null;
                     }
 
@@ -168,7 +169,7 @@ public class MediaMetaData {
                         return new BitmapDrawable(resources, BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
                     }
                     else {
-                        LOG.debug("Could not read artwork for file: " + mFilePath);
+                        LOG.debug("Could not read artwork for file: " + mFileUri);
                         return null;
                     }
                 }
