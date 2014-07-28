@@ -19,6 +19,7 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
+import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentListAdapter;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
@@ -43,6 +44,9 @@ public class AudioAttachmentListFragment extends ListFragment {
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
     public static final String ARG_CONTENT_MEDIA_TYPE = "com.hoccer.xo.android.fragment.ARG_CONTENT_MEDIA_TYPE";
+
+    public static final int SELECT_COLLECTION_REQUEST = 1;
+    public static final int SELECT_CONTACT_REQUEST = 2;
 
     public static final int ALL_CONTACTS_ID = -1;
     private SparseBooleanArray mSelectedItems;
@@ -97,15 +101,17 @@ public class AudioAttachmentListFragment extends ListFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        LOG.debug("BAZINGA resultCode" + resultCode);
+        LOG.debug("BAZINGA requestCode" + requestCode);
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
-                case AttachmentOperationHelper.SELECT_COLLECTION_REQUEST:
+                case SELECT_COLLECTION_REQUEST:
                     Integer mediaCollectionId = data.getIntExtra(MediaCollectionSelectionListFragment.MEDIA_COLLECTION_ID_EXTRA, -1);
                     if (mediaCollectionId > -1) {
                         addSelectedAttachmentsToCollection(mediaCollectionId);
                     }
                     break;
-                case AttachmentOperationHelper.SELECT_CONTACT_REQUEST:
+                case SELECT_CONTACT_REQUEST:
                     List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.SELECTED_CONTACT_IDS_EXTRA);
                     // TODO better errorhandling!
                     for (Integer contactId : contactSelections) {
@@ -468,12 +474,12 @@ public class AudioAttachmentListFragment extends ListFragment {
                     mode.finish();
                     return true;
                 case R.id.menu_share:
-                    AttachmentOperationHelper.startContactSelectionActivity(getActivity());
                     mode.finish();
+                    startActivityForResult(new Intent(getActivity(), ContactSelectionActivity.class), SELECT_CONTACT_REQUEST);
                     return false;
                 case R.id.menu_add_to_collection:
                     mode.finish();
-                    AttachmentOperationHelper.startMediaCollectionSelectionActivity(getActivity());
+                    startActivityForResult(new Intent(getActivity(), MediaCollectionSelectionActivity.class), SELECT_COLLECTION_REQUEST);
                     return false;
                 default:
                     return false;

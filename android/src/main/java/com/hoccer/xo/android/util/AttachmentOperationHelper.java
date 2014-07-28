@@ -32,22 +32,9 @@ public class AttachmentOperationHelper {
 
     private static final Logger LOG = Logger.getLogger(AttachmentOperationHelper.class);
 
-    public static final int SELECT_COLLECTION_REQUEST = 1;
-    public static final int SELECT_CONTACT_REQUEST = 2;
-
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.argument.CLIENT_CONTACT_ID";
     public static final String ARG_MEDIA_COLLECTION_ID = "com.hoccer.xo.android.argument.MEDIA_COLLECTION_ID";
     public static final String ARG_CONTENT_MEDIA_TYPE = "com.hoccer.xo.android.argument.CONTENT_MEDIA_TYPE";
-
-    private static final String CONTENT_URL_FILE_PREFIX = "file://";
-
-    public static void startContactSelectionActivity(Activity activity) {
-        activity.startActivityForResult(new Intent(activity, ContactSelectionActivity.class), SELECT_CONTACT_REQUEST);
-    }
-
-    public static void startMediaCollectionSelectionActivity(Activity activity) {
-        activity.startActivityForResult(new Intent(activity, MediaCollectionSelectionActivity.class), SELECT_COLLECTION_REQUEST);
-    }
 
     public static void deleteAttachments(final Context context, final List<AudioAttachmentItem> attachments) {
         final MediaPlayerServiceConnector connector = new MediaPlayerServiceConnector();

@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.*;
@@ -10,6 +11,8 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.xo.android.activity.ContactSelectionActivity;
+import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentListAdapter;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
@@ -31,6 +34,9 @@ import java.util.List;
 public class CollectionListFragment extends SearchableListFragment {
 
     private static final Logger LOG = Logger.getLogger(CollectionListFragment.class);
+
+    public static final int SELECT_COLLECTION_REQUEST = 1;
+    public static final int SELECT_CONTACT_REQUEST = 2;
 
     private DragSortListView mListView;
     private DragSortController mController;
@@ -175,11 +181,11 @@ public class CollectionListFragment extends SearchableListFragment {
                     return true;
                 case R.id.menu_share:
                     mode.finish();
-                    AttachmentOperationHelper.startContactSelectionActivity(getActivity());
+                    startActivityForResult(new Intent(getActivity(), ContactSelectionActivity.class), SELECT_CONTACT_REQUEST);
                     return false;
                 case R.id.menu_add_to_collection:
                     mode.finish();
-                    AttachmentOperationHelper.startMediaCollectionSelectionActivity(getActivity());
+                    startActivityForResult(new Intent(getActivity(), MediaCollectionSelectionActivity.class), SELECT_COLLECTION_REQUEST);
                     return false;
                 default:
                     return false;
