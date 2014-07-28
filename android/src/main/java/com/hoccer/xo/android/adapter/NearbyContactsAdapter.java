@@ -170,7 +170,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     }
 
     private String chooseAttachmentType(Context context, String attachmentType) {
-        String text = context.getResources().getString(R.string.contact_item_receive_attachment);
+        String text = context.getResources().getString(R.string.contact_item_received_attachment);
         return String.format(text, attachmentType);
     }
 
