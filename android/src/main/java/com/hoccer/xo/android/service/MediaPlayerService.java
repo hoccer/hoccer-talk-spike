@@ -67,7 +67,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         if(newItem != null) {
             play(mPlaylistController.getCurrentItem());
         } else {
-            stop();
+            reset();
         }
     }
 
@@ -94,7 +94,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     @Override
     public void onCreate() {
-
         super.onCreate();
 
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
@@ -135,7 +134,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     @Override
     public void onDestroy() {
         super.onDestroy();
-        stop();
+        reset();
     }
 
     private void createAppFocusTracker() {
@@ -396,7 +395,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         broadcastPlayStateChanged();
     }
 
-    public void stop() {
+    public void reset() {
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
             mMediaPlayer = null;
@@ -445,7 +444,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         if(mPlaylistController.canForward()) {
             forward();
         } else {
-            stop();
+            reset();
         }
     }
 
