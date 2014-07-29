@@ -55,14 +55,14 @@ public abstract class BaseMediaCollectionListFragment extends ListFragment {
     }
 
     protected void showCreateMediaCollectionDialog() {
-        XoDialogs.showCreateDialog("", R.string.new_media_collection, R.string.enter_new_collection_name, getActivity(),
-                new XoDialogs.OnOkClickListener() {
+        XoDialogs.showInputTextDialog("", R.string.new_media_collection, R.string.enter_new_collection_name, getActivity(),
+                new XoDialogs.OnTextClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which, String input) {
                         addNewMediaCollection(input);
                     }
                 },
-                new XoDialogs.OnCancelClickListener() {
+                new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                     }

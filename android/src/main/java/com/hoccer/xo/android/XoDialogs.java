@@ -53,12 +53,12 @@ public class XoDialogs {
         dialogFragment.show(activity.getFragmentManager(), tag);
     }
 
-    // extended onClick listener providing the password field content
-    public interface OnPasswordClickListener {
+    // extended onClick listener providing the name field content
+    public interface OnTextClickListener {
         public void onClick(DialogInterface dialog, int id, String password);
     }
 
-    public static void showPasswordDialog(final String tag, final int titleId, final Activity activity, final XoDialogs.OnPasswordClickListener okListener, final DialogInterface.OnClickListener cancelListener) {
+    public static void showInputPasswordDialog(final String tag, final int titleId, final Activity activity, final OnTextClickListener okListener, final DialogInterface.OnClickListener cancelListener) {
         final LinearLayout passwordInputView = (LinearLayout)activity.getLayoutInflater().inflate(R.layout.view_password_input, null);
         final EditText passwordInput = (EditText) passwordInputView.findViewById(R.id.password_input);
         DialogFragment dialogFragment = new DialogFragment() {
@@ -83,17 +83,9 @@ public class XoDialogs {
         dialogFragment.show(activity.getFragmentManager(), tag);
     }
 
-    public interface OnOkClickListener {
-        public void onClick(DialogInterface dialog, int which, String input);
-    }
-    public interface OnCancelClickListener {
-        public void onClick(DialogInterface dialog, int which);
-    }
-
-    public static void showCreateDialog(final String tag, final int titleId, final int messageId, final Activity activity, final XoDialogs.OnOkClickListener okListener, final OnCancelClickListener cancelListener) {
-        final View dialogView = (LinearLayout)activity.getLayoutInflater().inflate(R.layout.dialog_create_new_item, null);
-        final EditText input = (EditText) dialogView.findViewById(R.id.et_input_name);
-        final InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+    public static void showInputTextDialog(final String tag, final int titleId, final int messageId, final Activity activity, final XoDialogs.OnTextClickListener okListener, final DialogInterface.OnClickListener cancelListener) {
+        final View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_create_new_item, null);
+        final EditText textInput = (EditText) dialogView.findViewById(R.id.et_input_name);
         DialogFragment dialogFragment = new DialogFragment() {
             @Override
             public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -103,18 +95,11 @@ public class XoDialogs {
                 builder.setMessage(messageId);
                 builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        inputMethodManager.hideSoftInputFromWindow(input.getWindowToken(), 0);
-                        okListener.onClick(dialog, which, input.getText().toString());
+                    public void onClick(DialogInterface dialog, int id) {
+                        okListener.onClick(dialog, id, textInput.getText().toString());
                     }
                 });
-                builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        inputMethodManager.hideSoftInputFromWindow(input.getWindowToken(), 0);
-                        cancelListener.onClick(dialog, which);
-                    }
-                });
+                builder.setNegativeButton(R.string.common_cancel, cancelListener);
                 builder.setView(dialogView);
                 Dialog dialog = builder.create();
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
