@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.util;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.*;
@@ -24,8 +23,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,7 +36,7 @@ public class ThumbnailManager {
     private static int DEFAULT_HEIGHT_DP = 300;
     private static ThumbnailManager mInstance;
     private final Map<String, AsyncTask> mRunningRenderJobs;
-    private LruCache mMemoryLruCache;
+    private LruCache<String, Bitmap> mMemoryLruCache;
 
     private Context mContext;
     private Drawable mStubDrawable;
@@ -56,6 +53,17 @@ public class ThumbnailManager {
             mInstance = new ThumbnailManager(context);
         }
         return mInstance;
+    }
+
+    /**
+     * Clears the cache and removes memory.
+     */
+    public void clearCache() {
+        if (mMemoryLruCache != null) {
+            LOG.info("Will evict thumbnail cache with size: " + mMemoryLruCache.size());
+            mMemoryLruCache.evictAll();
+            LOG.info("New cache size: " + mMemoryLruCache.size());
+        }
     }
 
     private void init(Context context) {
@@ -75,6 +83,16 @@ public class ThumbnailManager {
         mStubDrawable = new ColorDrawable(Color.LTGRAY);
     }
 
+    private void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+        if (getBitmapFromMemCache(key) == null) {
+            mMemoryLruCache.put(key, bitmap);
+        }
+    }
+
+    private Bitmap getBitmapFromMemCache(String key) {
+        return mMemoryLruCache.get(key);
+    }
+
     /**
      * Retrieves a thumbnail representation of an image at a specified URI + specified tag and adds it to a given ImageView.
      *
@@ -89,7 +107,7 @@ public class ThumbnailManager {
 
         Bitmap bitmap = null;
         if (uri != null) {
-            bitmap = (Bitmap) mMemoryLruCache.get(thumbnailUri);
+            bitmap = (Bitmap) getBitmapFromMemCache(thumbnailUri);
         }
         if (bitmap == null) {
             bitmap = loadThumbnailForUri(uri, tag);
@@ -120,7 +138,7 @@ public class ThumbnailManager {
         if (thumbnail.exists()) {
             bitmap = BitmapFactory.decodeFile(thumbnail.getAbsolutePath());
             if (bitmap != null) {
-                mMemoryLruCache.put(thumbnailUri, bitmap);
+                addBitmapToMemoryCache(thumbnailUri, bitmap);
             }
         }
         return bitmap;
@@ -358,7 +376,7 @@ public class ThumbnailManager {
      */
     public void displayThumbnailForVideo(String uri, ImageView imageView, int maskResource, String tag) {
         String taggedUri = taggedThumbnailUri(uri, tag);
-        Bitmap bitmap = (Bitmap) mMemoryLruCache.get(taggedUri);
+        Bitmap bitmap = (Bitmap) getBitmapFromMemCache(taggedUri);
 
         if (bitmap == null) {
             bitmap = loadThumbnailForUri(uri, tag);
