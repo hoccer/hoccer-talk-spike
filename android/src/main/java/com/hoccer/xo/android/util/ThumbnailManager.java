@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ThumbnailManager {
     private static Logger LOG = Logger.getLogger(ThumbnailManager.class);
-    private static int DEFAULT_HEIGHT_DP = 300;
+    private static int DEFAULT_HEIGHT_DP = 200;
     private static ThumbnailManager mInstance;
     private final Map<String, AsyncTask> mRunningRenderJobs;
     private LruCache<String, Bitmap> mMemoryLruCache;
