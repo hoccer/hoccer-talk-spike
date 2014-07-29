@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 
@@ -12,6 +13,8 @@ import java.util.List;
  * Created by nico on 22/07/2014.
  */
 public class AttachmentRemovalDialogBuilder extends AlertDialog.Builder {
+
+    private static final Logger LOG = Logger.getLogger(AttachmentRemovalDialogBuilder.class);
 
     private boolean mIsCollection = false;
     private int mCollectionId;
@@ -52,6 +55,10 @@ public class AttachmentRemovalDialogBuilder extends AlertDialog.Builder {
         mRemoveFromCollectionCallback = callbackHandler;
     }
 
+    public void setRemoveFromCollection(boolean removeFromCollection) {
+        mRemoveFromCollection = removeFromCollection;
+    }
+
     private AttachmentRemovalDialogBuilder setupRemoveFromCollectionDialog() {
 
         setSingleChoiceItems(R.array.delete_options, 0, new DialogInterface.OnClickListener() {
@@ -64,15 +71,20 @@ public class AttachmentRemovalDialogBuilder extends AlertDialog.Builder {
                 }
             }
         });
+
         setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                if (mRemoveFromCollection && mRemoveFromCollectionCallback != null) {
-                    mRemoveFromCollectionCallback.removeAttachmentsFromCollection(mAttachments, mCollectionId);
+                AttachmentRemovalDialogBuilder builder = new AttachmentRemovalDialogBuilder(getContext(), mAttachments);
+
+                if (mRemoveFromCollection) {
+                    builder.mRemoveFromCollectionCallback = mRemoveFromCollectionCallback;
+                    builder.mRemoveFromCollection = true;
+                    builder.mCollectionId = mCollectionId;
                 } else {
-                    AttachmentRemovalDialogBuilder builder = new AttachmentRemovalDialogBuilder(getContext(),mAttachments, true, mCollectionId);
-                    AlertDialog alertDialog = builder.create();
-                    alertDialog.show();
+                    builder.mDeleteCallback = mDeleteCallback;
                 }
+
+                builder.create().show();
             }
         });
 
@@ -83,10 +95,14 @@ public class AttachmentRemovalDialogBuilder extends AlertDialog.Builder {
         setMessage(R.string.attachment_confirm_delete_dialog_message);
         setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                if (mRemoveFromCollection && mRemoveFromCollectionCallback != null) {
-                    mRemoveFromCollectionCallback.removeAttachmentsFromCollection(mAttachments, mCollectionId);
-                } else if (mDeleteCallback != null) {
-                    mDeleteCallback.deleteAttachments(mAttachments);
+                if (mRemoveFromCollection) {
+                    if (mRemoveFromCollectionCallback != null) {
+                        mRemoveFromCollectionCallback.removeAttachmentsFromCollection(mAttachments, mCollectionId);
+                    }
+                } else {
+                    if (mDeleteCallback != null) {
+                        mDeleteCallback.deleteAttachments(mAttachments);
+                    }
                 }
             }
         });
@@ -106,4 +122,5 @@ public class AttachmentRemovalDialogBuilder extends AlertDialog.Builder {
     public interface RemoveFromCollectionCallback {
         public void removeAttachmentsFromCollection(List<AudioAttachmentItem> attachments, int collectionId);
     }
+
 }

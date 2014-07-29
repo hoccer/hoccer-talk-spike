@@ -2,6 +2,7 @@ package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
@@ -48,6 +49,7 @@ public class CollectionListFragment extends SearchableListFragment {
     private AttachmentSearchResultAdapter mSearchResultAdapter;
     private TalkClientMediaCollection mCollection;
     private XoClientDatabase mDatabase;
+    private boolean mRemoveFromCollection = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -176,14 +178,19 @@ public class CollectionListFragment extends SearchableListFragment {
 
     // XXX: duplicate to the one in AudioAttachmentFragment
     private List<AudioAttachmentItem> getSelectedItems(SparseBooleanArray checkedItemPositions) {
-        List<AudioAttachmentItem> selectedItems = new ArrayList<AudioAttachmentItem>();
+        SparseBooleanArray selectedItemIds = new SparseBooleanArray();
         for (int i = 0; i < checkedItemPositions.size(); ++i) {
-            if (checkedItemPositions.get(i)) {
-                selectedItems.add(((AudioAttachmentItem)getListAdapter().getItem(i)));
+            selectedItemIds.append(checkedItemPositions.keyAt(i), checkedItemPositions.valueAt(i));
+        }
+        List<AudioAttachmentItem> attachments = new ArrayList<AudioAttachmentItem>();
+        for (int index = 0; index < selectedItemIds.size(); ++index) {
+            int pos = selectedItemIds.keyAt(index);
+            if (selectedItemIds.get(pos)) {
+                attachments.add(mAttachmentAdapter.getItem(pos));
             }
         }
 
-        return selectedItems;
+        return attachments;
     }
 
     private void addSelectedAttachmentsToCollection(Integer mediaCollectionId) {
@@ -228,8 +235,14 @@ public class CollectionListFragment extends SearchableListFragment {
     private void removeItemsFromAdapter(List<AudioAttachmentItem> items) {
         for (AudioAttachmentItem item : items) {
             mAttachmentAdapter.removeItem(item, true);
-            mAttachmentAdapter.notifyDataSetChanged();
         }
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAttachmentAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener, DragSortListView.DragListener {
@@ -263,15 +276,14 @@ public class CollectionListFragment extends SearchableListFragment {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            List<AudioAttachmentItem> selectedItems = getSelectedItems(getListView().getCheckedItemPositions());
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
-                    AttachmentRemovalDialogBuilder builder = new AttachmentRemovalDialogBuilder(getActivity(), selectedItems, true, mCollection.getId());
+                    AttachmentRemovalDialogBuilder builder = new AttachmentRemovalDialogBuilder(getActivity(),
+                            getSelectedItems(getListView().getCheckedItemPositions()), true, mCollection.getId() );
                     DialogCallbackHandler handler = new DialogCallbackHandler();
                     builder.setRemoveFromCollectionCallbackHandler(handler);
                     builder.setDeleteCallbackHandler(handler);
-                    AlertDialog removeDialog = builder.create();
-                    removeDialog.show();
+                    builder.create().show();
                     mode.finish();
                     return true;
                 case R.id.menu_share:
@@ -292,7 +304,6 @@ public class CollectionListFragment extends SearchableListFragment {
             mListView.setDragEnabled(false);
             mController.setSortEnabled(false);
             mAttachmentAdapter.setSortEnabled(false);
-
         }
 
         @Override
@@ -315,4 +326,5 @@ public class CollectionListFragment extends SearchableListFragment {
             removeItemsFromAdapter(attachments);
         }
     }
+
 }
