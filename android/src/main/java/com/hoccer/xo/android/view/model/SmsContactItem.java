@@ -1,18 +1,16 @@
 package com.hoccer.xo.android.view.model;
 
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
-
-import org.apache.log4j.Logger;
-
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.TextView;
+import com.hoccer.talk.client.model.TalkClientSmsToken;
+import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 public class SmsContactItem extends BaseContactItem {
 
@@ -27,13 +25,13 @@ public class SmsContactItem extends BaseContactItem {
     public SmsContactItem(XoActivity activity, TalkClientSmsToken smsToken) {
         super(activity);
         mSmsToken = smsToken;
+        update();
     }
 
     @Override
     public void update() {
         ContentResolver resolver = mXoActivity.getContentResolver();
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-                Uri.encode(mSmsToken.getSender()));
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(mSmsToken.getSender()));
 
         mName = mSmsToken.getSender();
         mPhoto = "drawable://" + R.drawable.avatar_default_contact;
@@ -86,6 +84,5 @@ public class SmsContactItem extends BaseContactItem {
     public long getTimeStamp() {
         return 0;
     }
-
 
 }

@@ -199,6 +199,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     public void onContactAdded(TalkClientContact contact) {
         TalkClientContactItem item = new TalkClientContactItem(mActivity, contact);
         mContactItems.add(item);
+        refreshTokens(null, false);
         notifyDataSetChanged();
     }
 
@@ -289,19 +290,40 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onTokensChanged(List<TalkClientSmsToken> tokens, boolean newTokens) {
-        for (int i = 0; i < tokens.size(); i++) {
-            TalkClientSmsToken token = tokens.get(i);
+        refreshTokens(tokens, newTokens);
+        requestReload();
+    }
+
+    private void refreshTokens(List<TalkClientSmsToken> tokens, boolean newTokens) {
+        if (tokens == null) {
+            try {
+                tokens = mDatabase.findAllSmsTokens();
+            } catch (SQLException e) {
+                LOG.error("SQLError while retrieving SMS tokens ", e);
+            }
+        }
+        if (tokens == null) {
+            return;
+        }
+
+        for (TalkClientSmsToken token : tokens) {
             SmsContactItem item = (SmsContactItem) findContactItemForContent(token);
+            if (item != null) {
+                mContactItems.remove(item);
+            }
+        }
+        for (TalkClientSmsToken token : tokens) {
+            SmsContactItem item = (SmsContactItem) findContactItemForContent(token);
+            if (item == null) {
+                item = new SmsContactItem(mActivity, token);
+            }
             int index = mContactItems.indexOf(item);
-            item = new SmsContactItem(mActivity, token);
             if (index > -1) {
                 mContactItems.set(index, item);
             } else {
                 mContactItems.add(item);
             }
-
         }
-        refreshAllEntries();
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.hoccer.xo.android.view.model;
 
 import android.view.View;
 import android.widget.TextView;
-import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
