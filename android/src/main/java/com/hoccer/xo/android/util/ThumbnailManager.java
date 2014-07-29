@@ -284,7 +284,8 @@ public class ThumbnailManager {
                 return null;
             }
             mThumbnailUri = taggedThumbnailUri(uri, mTag);
-            mMemoryLruCache.put(mThumbnailUri, thumbnail);
+            // defer caching until requested
+            //mMemoryLruCache.put(mThumbnailUri, thumbnail);
 
             return thumbnail;
         }
@@ -322,7 +323,8 @@ public class ThumbnailManager {
             Bitmap result = createVideoThumbnail(mUri, mMaskResource, mTag);
             if (result != null) {
                 mThumbnailUri = taggedThumbnailUri(mUri, mTag);
-                mMemoryLruCache.put(mThumbnailUri, result);
+                // defer caching until requested
+                //mMemoryLruCache.put(mThumbnailUri, result);
             }
             return result;
         }
