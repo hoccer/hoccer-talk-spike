@@ -4,12 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import com.hoccer.xo.release.R;
@@ -104,6 +102,41 @@ public class XoDialogs {
                 Dialog dialog = builder.create();
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
                 return dialog;
+            }
+        };
+        dialogFragment.show(activity.getFragmentManager(), tag);
+    }
+
+    // Used to set an integer value from within an anonymous method.
+    private static class IntegerBox {
+        public IntegerBox(int value) {
+            this.value = value;
+        }
+        public int value;
+    }
+
+    public static void showSingleChoiceDialog(final String tag, final int titleId, final Activity activity, final int items, final DialogInterface.OnClickListener okListener) {
+        DialogFragment dialogFragment = new DialogFragment() {
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                LOG.debug("Creating dialog: " + tag);
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setTitle(titleId);
+                final IntegerBox selectedIndex = new IntegerBox(0);
+                builder.setSingleChoiceItems(items, selectedIndex.value, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        selectedIndex.value = id;
+                    }
+                });
+
+                builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        okListener.onClick(dialog, selectedIndex.value);
+                    }
+                });
+                return builder.create();
             }
         };
         dialogFragment.show(activity.getFragmentManager(), tag);
