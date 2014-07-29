@@ -302,8 +302,6 @@ public class ThumbnailManager {
                 return null;
             }
             mThumbnailUri = taggedThumbnailUri(uri, mTag);
-            // defer caching until requested
-            //mMemoryLruCache.put(mThumbnailUri, thumbnail);
 
             return thumbnail;
         }
@@ -311,6 +309,7 @@ public class ThumbnailManager {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             if (bitmap != null) {
+                addBitmapToMemoryCache(mThumbnailUri, bitmap);
                 mImageToLoad.mImageView.setImageBitmap(bitmap);
                 mImageToLoad.mImageView.setVisibility(View.VISIBLE);
             } else {
@@ -341,8 +340,6 @@ public class ThumbnailManager {
             Bitmap result = createVideoThumbnail(mUri, mMaskResource, mTag);
             if (result != null) {
                 mThumbnailUri = taggedThumbnailUri(mUri, mTag);
-                // defer caching until requested
-                //mMemoryLruCache.put(mThumbnailUri, result);
             }
             return result;
         }
@@ -352,6 +349,7 @@ public class ThumbnailManager {
             super.onPostExecute(bitmap);
 
             if (bitmap != null) {
+                addBitmapToMemoryCache(mThumbnailUri, bitmap);
                 mThumbnailView.setImageBitmap(bitmap);
                 mThumbnailView.setVisibility(View.VISIBLE);
             } else {
