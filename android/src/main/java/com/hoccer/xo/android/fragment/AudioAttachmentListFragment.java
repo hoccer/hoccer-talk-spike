@@ -101,8 +101,6 @@ public class AudioAttachmentListFragment extends ListFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        LOG.debug("BAZINGA resultCode" + resultCode);
-        LOG.debug("BAZINGA requestCode" + requestCode);
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case SELECT_COLLECTION_REQUEST:

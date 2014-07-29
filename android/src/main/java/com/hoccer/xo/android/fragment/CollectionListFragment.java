@@ -1,16 +1,18 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.*;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
+import android.widget.*;
 import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentListAdapter;
@@ -24,6 +26,8 @@ import com.hoccer.xo.release.R;
 import com.mobeta.android.dslv.DragSortListView;
 import org.apache.log4j.Logger;
 
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,10 +47,19 @@ public class CollectionListFragment extends SearchableListFragment {
     private AttachmentListAdapter mAttachmentAdapter;
     private AttachmentSearchResultAdapter mSearchResultAdapter;
     private TalkClientMediaCollection mCollection;
+    private XoClientDatabase mDatabase;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mDatabase = new XoClientDatabase(
+                AndroidTalkDatabase.getInstance(getActivity().getApplicationContext()));
+        try {
+            mDatabase.initialize();
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
+        }
 
         mAttachmentAdapter = new AttachmentListAdapter();
 
@@ -93,8 +106,49 @@ public class CollectionListFragment extends SearchableListFragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        ListInteractionHandler listHandler = new ListInteractionHandler();
+        getListView().setOnItemClickListener(listHandler);
+        getListView().setMultiChoiceModeListener(listHandler);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case SELECT_COLLECTION_REQUEST:
+                    Integer mediaCollectionId = data.getIntExtra(MediaCollectionSelectionListFragment.MEDIA_COLLECTION_ID_EXTRA, -1);
+                    if (mediaCollectionId > -1) {
+                        addSelectedAttachmentsToCollection(mediaCollectionId);
+                    }
+                    break;
+                case SELECT_CONTACT_REQUEST:
+                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.SELECTED_CONTACT_IDS_EXTRA);
+                    // TODO better errorhandling!
+                    for (Integer contactId : contactSelections) {
+                        try {
+                            TalkClientContact contact = retrieveContactById(contactId);
+                            AttachmentOperationHelper.sendAttachmentsToContact(getSelectedItems(getListView().getCheckedItemPositions()), contact);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    break;
+            }
+        }
     }
 
     @Override
@@ -132,6 +186,45 @@ public class CollectionListFragment extends SearchableListFragment {
         return selectedItems;
     }
 
+    private void addSelectedAttachmentsToCollection(Integer mediaCollectionId) {
+        try {
+            retrieveCollectionAndAddSelectedAttachments(mediaCollectionId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) throws SQLException {
+        TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
+        List<String> addedFilenames = new ArrayList<String>();
+        for (AudioAttachmentItem item: getSelectedItems(getListView().getCheckedItemPositions())) {
+            if (addAttachmentToCollection(mediaCollection, item.getContentObject())) {
+                addedFilenames.add(item.getFileName());
+            }
+        }
+        if (!addedFilenames.isEmpty()) {
+            Toast.makeText(getActivity(), String.format(getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private TalkClientContact retrieveContactById(Integer contactId) {
+        TalkClientContact contact = null;
+        try {
+            contact = mDatabase.findClientContactById(contactId);
+        } catch (SQLException e) {
+            LOG.error("Contact not found for id: " + contactId, e);
+        }
+        return contact;
+    }
+
+    private boolean addAttachmentToCollection(TalkClientMediaCollection mediaCollection, IContentObject item) {
+        if (!mediaCollection.hasItem((TalkClientDownload) item)) {
+            mediaCollection.addItem((TalkClientDownload) item);
+            return true;
+        }
+        return false;
+    }
+
     private void removeItemsFromAdapter(List<AudioAttachmentItem> items) {
         for (AudioAttachmentItem item : items) {
             mAttachmentAdapter.removeItem(item, true);
@@ -157,6 +250,8 @@ public class CollectionListFragment extends SearchableListFragment {
             mListView.setDragEnabled(true);
             mController.setSortEnabled(true);
             mAttachmentAdapter.setSortEnabled(true);
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.context_menu_fragment_messaging, menu);
 
             return true;
         }
@@ -171,7 +266,7 @@ public class CollectionListFragment extends SearchableListFragment {
             List<AudioAttachmentItem> selectedItems = getSelectedItems(getListView().getCheckedItemPositions());
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
-                    AttachmentRemovalDialogBuilder builder = new AttachmentRemovalDialogBuilder(getActivity(), selectedItems);
+                    AttachmentRemovalDialogBuilder builder = new AttachmentRemovalDialogBuilder(getActivity(), selectedItems, true, mCollection.getId());
                     DialogCallbackHandler handler = new DialogCallbackHandler();
                     builder.setRemoveFromCollectionCallbackHandler(handler);
                     builder.setDeleteCallbackHandler(handler);
