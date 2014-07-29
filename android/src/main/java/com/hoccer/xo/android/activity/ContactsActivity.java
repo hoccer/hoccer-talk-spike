@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -19,7 +20,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.NearbyContactsFragment;
 import com.hoccer.xo.release.R;
 
-public class ContactsActivity extends XoActivity {
+public class ContactsActivity extends XoActivity implements IXoStateListener {
 
     private ViewPager mViewPager;
     private ActionBar mActionBar;
@@ -72,7 +73,21 @@ public class ContactsActivity extends XoActivity {
             };
             mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesListener);
             mEnvironmentUpdatesEnabled = mPreferences.getBoolean("preference_environment_update", true);
+
+            getXoClient().registerStateListener(this);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getXoClient().unregisterStateListener(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getXoClient().unregisterStateListener(this);
     }
 
     @Override
@@ -83,7 +98,7 @@ public class ContactsActivity extends XoActivity {
         } else {
             refreshEnvironmentUpdater();
         }
-
+        getXoClient().registerStateListener(this);
     }
 
     private void refreshEnvironmentUpdater() {
@@ -96,10 +111,14 @@ public class ContactsActivity extends XoActivity {
                 }
             }
         } else {
-            XoApplication.stopNearbySession();
-            NearbyContactsFragment nearbyContactsFragment = (NearbyContactsFragment) mAdapter.getItem(2);
-            nearbyContactsFragment.shutdownNearbyChat();
+            shutDownNearbySession();
         }
+    }
+
+    private void shutDownNearbySession() {
+        XoApplication.stopNearbySession();
+        NearbyContactsFragment nearbyContactsFragment = (NearbyContactsFragment) mAdapter.getItem(2);
+        nearbyContactsFragment.shutdownNearbyChat();
     }
 
     private boolean isLocationServiceEnabled() {
@@ -167,4 +186,12 @@ public class ContactsActivity extends XoActivity {
 
         }
     }
+
+    @Override
+    public void onClientStateChange(XoClient client, int state) {
+        if (!client.isAwake()) {
+            shutDownNearbySession();
+        }
+    }
+
 }
