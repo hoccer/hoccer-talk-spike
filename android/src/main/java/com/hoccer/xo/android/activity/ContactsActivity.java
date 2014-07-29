@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsPageAdapter;
@@ -96,12 +97,14 @@ public class ContactsActivity extends XoActivity {
             }
         } else {
             XoApplication.stopNearbySession();
+            NearbyContactsFragment nearbyContactsFragment = (NearbyContactsFragment) mAdapter.getItem(2);
+            nearbyContactsFragment.shutdownNearbyChat();
         }
     }
 
     private boolean isLocationServiceEnabled() {
-        final LocationManager manager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !manager.isProviderEnabled( LocationManager.NETWORK_PROVIDER)) {
+        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
                     R.string.dialog_enable_location_service_title,
                     R.string.dialog_enable_location_service_message,
@@ -151,6 +154,7 @@ public class ContactsActivity extends XoActivity {
             if (!mNoUserInput) {
                 mViewPager.setCurrentItem(tab.getPosition());
             }
+            getXoClient().wake();
         }
 
         @Override

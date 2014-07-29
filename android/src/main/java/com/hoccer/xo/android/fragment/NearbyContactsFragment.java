@@ -94,6 +94,12 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         createAdapter();
     }
 
+    public void shutdownNearbyChat() {
+        if (mActivity != null) {
+            deactivateNearbyChat();
+        }
+    }
+
     private void deactivateNearbyChat() {
         destroyAdapter();
         mCurrentNearbyGroup = null;
