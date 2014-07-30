@@ -816,6 +816,12 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
     }
 
+    public void deleteClientDownloadAndMessage(TalkClientDownload download) throws SQLException {
+        deleteClientDownload(download);
+        int messageId = findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
+        deleteMessageById(messageId);
+    }
+
     /* delivered -> deliveredPrivate
      * confirmed -> deliveredPrivateAcknowledged
      * aborted -> abortedAcknowledged
