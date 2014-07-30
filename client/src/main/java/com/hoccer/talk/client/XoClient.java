@@ -1267,7 +1267,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     @Override
     public void onOpen(JsonRpcConnection connection) {
         LOG.debug("onOpen()");
-        scheduleIdle();
         if(isRegistered()) {
             switchState(STATE_LOGIN, "connected");
         } else {
