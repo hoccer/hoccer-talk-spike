@@ -11,7 +11,6 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.view.AudioAttachmentView;
 import com.mobeta.android.dslv.DragSortListView;
@@ -26,7 +25,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     private static final long INVALID_ID = -1;
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
-    private List<AudioAttachmentItem> mAttachmentItems = new ArrayList<AudioAttachmentItem>();
+    private List<IContentObject> mAttachmentItems = new ArrayList<IContentObject>();
 
     private String mContentMediaType;
     private int mConversationContactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
@@ -53,11 +52,11 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         setContactIdFilter(pConversationContactId);
     }
 
-    public List<AudioAttachmentItem> getAttachmentItems() {
+    public List<IContentObject> getAttachmentItems() {
         return mAttachmentItems;
     }
 
-    public void setAttachmentItems(List<AudioAttachmentItem> items) {
+    public void setAttachmentItems(List<IContentObject> items) {
         mAttachmentItems.clear();
         mAttachmentItems.addAll(items);
         notifyDataSetChanged();
@@ -69,7 +68,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     @Override
-    public AudioAttachmentItem getItem(int position) {
+    public IContentObject getItem(int position) {
         return mAttachmentItems.get(position);
     }
 
@@ -78,7 +77,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         long itemId = INVALID_ID;
 
         if (position >= 0 || position < mAttachmentItems.size()) {
-            IContentObject contentObject = getItem(position).getContentObject();
+            IContentObject contentObject = getItem(position);
 
             if (contentObject instanceof TalkClientDownload) {
                 itemId = ((TalkClientDownload) contentObject).getClientDownloadId();
@@ -155,7 +154,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     @Override
     public void drop(int from, int to) {
         if (from != to) {
-            AudioAttachmentItem item = mAttachmentItems.get(from);
+            IContentObject item = mAttachmentItems.get(from);
             mAttachmentItems.remove(from);
             mAttachmentItems.add(to, item);
 
@@ -168,11 +167,11 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         // TODO: update mSelections
     }
 
-    public boolean removeItem(AudioAttachmentItem item) {
+    public boolean removeItem(IContentObject item) {
         return removeItem(item, false);
     }
 
-    public boolean removeItem(AudioAttachmentItem item, boolean removeFromCollection) {
+    public boolean removeItem(IContentObject item, boolean removeFromCollection) {
         if (removeFromCollection) {
             removeItemFromCollection(item);
         }
@@ -199,12 +198,12 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         updateCheckedItems();
     }
 
-    public void addItem(AudioAttachmentItem item) {
+    public void addItem(IContentObject item) {
         mAttachmentItems.add(item);
         updateCheckedItems();
     }
 
-    public void addItemAt(AudioAttachmentItem item, int pos) throws IndexOutOfBoundsException{
+    public void addItemAt(IContentObject item, int pos) throws IndexOutOfBoundsException{
             mAttachmentItems.add(pos, item);
             updateCheckedItems();
             notifyDataSetChanged();
@@ -252,9 +251,9 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         mShallDragHandlesShow = shallShow;
     }
 
-    private void removeItemFromCollection(AudioAttachmentItem item) {
+    private void removeItemFromCollection(IContentObject item) {
         if (isItemPartOfCollection(item)) {
-            mCollection.removeItem((TalkClientDownload) item.getContentObject());
+            mCollection.removeItem((TalkClientDownload) item);
         }
     }
 
@@ -262,11 +261,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         if (downloads != null) {
             for (TalkClientDownload download : downloads) {
                 if (!isRecordedAudio(download.getFileName())) {
-                    // TODO: differentiate between generic and special attachment types
-                    AudioAttachmentItem newItem = AudioAttachmentItem.create(download.getContentDataUrl(), download, true);
-                    if (newItem != null) {
-                        mAttachmentItems.add(newItem);
-                    }
+                    mAttachmentItems.add(download);
                 }
             }
         }
@@ -298,10 +293,11 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         return false;
     }
 
-    private boolean isItemPartOfCollection(AudioAttachmentItem item) {
+    private boolean isItemPartOfCollection(IContentObject item) {
         boolean isItemPartOfCollection = false;
+
         try {
-            TalkClientDownload contentObject = (TalkClientDownload) item.getContentObject();
+            TalkClientDownload contentObject = (TalkClientDownload) item;
             if (mCollection != null && contentObject != null && mCollection.hasItem(contentObject)) {
                 isItemPartOfCollection = true;
             }

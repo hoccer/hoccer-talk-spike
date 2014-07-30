@@ -230,7 +230,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             preference.setEnabled(false);
             exportData();
             return true;
-        } 
+        }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
@@ -297,10 +297,10 @@ public class XoPreferenceActivity extends PreferenceActivity
             return;
         }
 
-        XoDialogs.showPasswordDialog("ImportCredentialsDialog",
+        XoDialogs.showInputPasswordDialog("ImportCredentialsDialog",
                 R.string.dialog_import_credentials_title,
                 this,
-                new XoDialogs.OnPasswordClickListener() {
+                new XoDialogs.OnTextClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
                         if (password != null && password.length() > 0) {
@@ -343,10 +343,10 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void doExportCredentials() {
-        XoDialogs.showPasswordDialog("ExportCredentialsDialog",
+        XoDialogs.showInputPasswordDialog("ExportCredentialsDialog",
                 R.string.dialog_export_credentials_title,
                 this,
-                new XoDialogs.OnPasswordClickListener() {
+                new XoDialogs.OnTextClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
                         if (password != null && password.length() > 0) {

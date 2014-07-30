@@ -11,7 +11,9 @@ import android.widget.TextView;
 
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
+import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
@@ -24,7 +26,7 @@ public class ChatAudioItem extends ChatMessageItem {
 
     private ImageButton mPlayPauseButton;
     private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
-    private AudioAttachmentItem mAudioContentObject;
+    private IContentObject mAudioContentObject;
     private boolean mIsPlayable = false;
 
     public ChatAudioItem(Context context, TalkClientMessage message) {
@@ -103,7 +105,7 @@ public class ChatAudioItem extends ChatMessageItem {
             }
         });
 
-        mAudioContentObject = AudioAttachmentItem.create(contentObject.getContentDataUrl(), contentObject, true);
+        mAudioContentObject = contentObject;
         mIsPlayable = mAudioContentObject != null;
         updatePlayPauseView();
     }
@@ -120,7 +122,7 @@ public class ChatAudioItem extends ChatMessageItem {
             if (service.isPaused() && service.getCurrentMediaItem() != null && mAudioContentObject.equals(service.getCurrentMediaItem())) {
                 service.play();
             } else {
-                service.setMedia(mAudioContentObject);
+                service.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAudioContentObject));
                 service.play(0);
             }
         }

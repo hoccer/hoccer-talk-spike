@@ -6,6 +6,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.IContentObject;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -61,18 +62,18 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
     }
 
     @Override
-    public boolean hasItem(TalkClientDownload item) {
+    public boolean hasItem(IContentObject item) {
         return mList.contains(item);
     }
 
     @Override
-    public int indexOf(TalkClientDownload item) {
+    public int indexOf(IContentObject item) {
         return mList.indexOf(item);
     }
 
     @Override
-    public Iterator<TalkClientDownload> iterator() {
-        return new Iterator<TalkClientDownload>() {
+    public Iterator<IContentObject> iterator() {
+        return new Iterator<IContentObject>() {
             private Iterator<TalkClientDownload> mIterator = mList.iterator();
 
             @Override
@@ -81,7 +82,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
             }
 
             @Override
-            public TalkClientDownload next() {
+            public IContentObject next() {
                 return mIterator.next();
             }
 

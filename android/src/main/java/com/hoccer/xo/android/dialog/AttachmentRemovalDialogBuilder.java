@@ -3,6 +3,7 @@ package com.hoccer.xo.android.dialog;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -19,16 +20,16 @@ public class AttachmentRemovalDialogBuilder extends AlertDialog.Builder {
     private boolean mIsCollection = false;
     private int mCollectionId;
     private boolean mRemoveFromCollection = false;
-    private List<AudioAttachmentItem> mAttachments;
+    private List<IContentObject> mAttachments;
 
     private DeleteCallback mDeleteCallback;
     private RemoveFromCollectionCallback mRemoveFromCollectionCallback;
 
-    public AttachmentRemovalDialogBuilder(Context context, List<AudioAttachmentItem> attachments) {
+    public AttachmentRemovalDialogBuilder(Context context, List<IContentObject> attachments) {
         this(context, attachments, false, -1);
     }
 
-    public AttachmentRemovalDialogBuilder(Context context, List<AudioAttachmentItem> attachments, boolean isCollection, int collectionId) {
+    public AttachmentRemovalDialogBuilder(Context context, List<IContentObject> attachments, boolean isCollection, int collectionId) {
         super(context);
         mIsCollection = isCollection;
         mCollectionId = collectionId;
@@ -116,11 +117,11 @@ public class AttachmentRemovalDialogBuilder extends AlertDialog.Builder {
     }
 
     public interface DeleteCallback {
-        public void deleteAttachments(List<AudioAttachmentItem> attachments);
+        public void deleteAttachments(List<IContentObject> attachments);
     }
 
     public interface RemoveFromCollectionCallback {
-        public void removeAttachmentsFromCollection(List<AudioAttachmentItem> attachments, int collectionId);
+        public void removeAttachmentsFromCollection(List<IContentObject> attachments, int collectionId);
     }
 
 }

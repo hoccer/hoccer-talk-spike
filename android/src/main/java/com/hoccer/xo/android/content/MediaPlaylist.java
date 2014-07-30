@@ -1,13 +1,12 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.util.WeakListenerArray;
 
 /**
  * Base class for Playlist implementations.
  */
-public abstract class MediaPlaylist implements Iterable<TalkClientDownload> {
+public abstract class MediaPlaylist implements Iterable<IContentObject> {
 
     private WeakListenerArray<Listener> mListenerArray = new WeakListenerArray<Listener>();
 
@@ -15,20 +14,20 @@ public abstract class MediaPlaylist implements Iterable<TalkClientDownload> {
     public interface Listener {
         void onItemOrderChanged(MediaPlaylist playlist);
 
-        void onItemRemoved(MediaPlaylist playlist, TalkClientDownload itemRemoved);
+        void onItemRemoved(MediaPlaylist playlist, IContentObject itemRemoved);
 
-        void onItemAdded(MediaPlaylist playlist, TalkClientDownload itemAdded);
+        void onItemAdded(MediaPlaylist playlist, IContentObject itemAdded);
 
         void onPlaylistCleared(MediaPlaylist playlist);
     }
 
-    public abstract TalkClientDownload getItem(int index);
+    public abstract IContentObject getItem(int index);
 
     public abstract int size();
 
-    public abstract boolean hasItem(TalkClientDownload item);
+    public abstract boolean hasItem(IContentObject item);
 
-    public abstract int indexOf(TalkClientDownload item);
+    public abstract int indexOf(IContentObject item);
 
     public void registerListener(Listener listener) {
         mListenerArray.registerListener(listener);
@@ -44,13 +43,13 @@ public abstract class MediaPlaylist implements Iterable<TalkClientDownload> {
         }
     }
 
-    protected void invokeItemRemoved(TalkClientDownload itemRemoved) {
+    protected void invokeItemRemoved(IContentObject itemRemoved) {
         for(Listener listener : mListenerArray) {
             listener.onItemRemoved(this, itemRemoved);
         }
     }
 
-    protected void invokeItemAdded(TalkClientDownload itemAdded) {
+    protected void invokeItemAdded(IContentObject itemAdded) {
         for(Listener listener : mListenerArray) {
             listener.onItemAdded(this, itemAdded);
         }

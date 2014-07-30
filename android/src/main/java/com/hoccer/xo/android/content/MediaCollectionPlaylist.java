@@ -2,6 +2,7 @@ package com.hoccer.xo.android.content;
 
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
+import com.hoccer.talk.content.IContentObject;
 
 import java.util.Iterator;
 
@@ -49,7 +50,7 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
     }
 
     @Override
-    public TalkClientDownload getItem(int index) {
+    public IContentObject getItem(int index) {
         return mCollection.getItem(index);
     }
 
@@ -59,18 +60,28 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
     }
 
     @Override
-    public boolean hasItem(TalkClientDownload item) {
-        return mCollection.hasItem(item);
+    public boolean hasItem(IContentObject item) {
+        TalkClientDownload download = (TalkClientDownload)item;
+        if(download != null) {
+            return mCollection.hasItem(download);
+        } else {
+            return false;
+        }
     }
 
     @Override
-    public int indexOf(TalkClientDownload item) {
-        return mCollection.indexOf(item);
+    public int indexOf(IContentObject item) {
+        TalkClientDownload download = (TalkClientDownload)item;
+        if(download != null) {
+            return mCollection.indexOf(download);
+        } else {
+            return -1;
+        }
     }
 
     @Override
-    public Iterator<TalkClientDownload> iterator() {
-        return new Iterator<TalkClientDownload>() {
+    public Iterator<IContentObject> iterator() {
+        return new Iterator<IContentObject>() {
             private Iterator<TalkClientDownload> mIterator = mCollection.iterator();
 
             @Override
@@ -79,7 +90,7 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
             }
 
             @Override
-            public TalkClientDownload next() {
+            public IContentObject next() {
                 return mIterator.next();
             }
 

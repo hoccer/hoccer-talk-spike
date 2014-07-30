@@ -16,6 +16,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
@@ -25,9 +26,10 @@ import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SearchResultsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.content.AttachmentTransferListener;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
+import com.hoccer.xo.android.content.AttachmentAdapterDownloadHandler;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
+import com.hoccer.xo.android.content.SingleItemPlaylist;
+import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.dialog.AttachmentRemovalDialogBuilder;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.AttachmentOperationHelper;
@@ -58,7 +60,7 @@ public class AudioAttachmentListFragment extends ListFragment {
     private ServiceConnection mConnection;
 
     private AttachmentListAdapter mAttachmentListAdapter;
-    private AttachmentTransferListener mTransferListener;
+    private AttachmentAdapterDownloadHandler mTransferListener;
     private SearchResultsAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
@@ -86,7 +88,7 @@ public class AudioAttachmentListFragment extends ListFragment {
         mAttachmentListAdapter.setContentMediaTypeFilter(mContentMediaTypeFilter);
         loadAttachments();
 
-        mTransferListener = new AttachmentTransferListener(getActivity(), mAttachmentListAdapter);
+        mTransferListener = new AttachmentAdapterDownloadHandler(getActivity(), mAttachmentListAdapter);
         XoApplication.getXoClient().getDatabase().registerDownloadListener(mTransferListener);
 
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
@@ -215,7 +217,7 @@ public class AudioAttachmentListFragment extends ListFragment {
         mAttachmentListAdapter.loadAttachments();
     }
 
-    private boolean isPaused(AudioAttachmentItem item) {
+    private boolean isPaused(IContentObject item) {
         if (mMediaPlayerService != null && mMediaPlayerService.isPaused()) {
             if (item.equals(mMediaPlayerService.getCurrentMediaItem())) {
                 return true;
@@ -225,7 +227,7 @@ public class AudioAttachmentListFragment extends ListFragment {
         return false;
     }
 
-    private boolean isPlaying(AudioAttachmentItem item) {
+    private boolean isPlaying(IContentObject item) {
         if (mMediaPlayerService != null && !mMediaPlayerService.isStopped() && !mMediaPlayerService.isPaused()) {
             if (item.equals(mMediaPlayerService.getCurrentMediaItem())) {
                 return true;
@@ -371,8 +373,8 @@ public class AudioAttachmentListFragment extends ListFragment {
         return contact;
     }
 
-    private List<AudioAttachmentItem> getSelectedAttachments() {
-        List<AudioAttachmentItem> attachments = new ArrayList<AudioAttachmentItem>();
+    private List<IContentObject> getSelectedAttachments() {
+        List<IContentObject> attachments = new ArrayList<IContentObject>();
         for (int index = 0; index < mSelectedItems.size(); ++index) {
             int pos = mSelectedItems.keyAt(index);
             if (mSelectedItems.get(pos)) {
@@ -387,7 +389,7 @@ public class AudioAttachmentListFragment extends ListFragment {
         for (int index = 0; index < mSelectedItems.size(); ++index) {
             int pos = mSelectedItems.keyAt(index);
             if (mSelectedItems.get(pos)) {
-                TalkClientDownload download = (TalkClientDownload) mAttachmentListAdapter.getItem(pos).getContentObject();
+                TalkClientDownload download = (TalkClientDownload) mAttachmentListAdapter.getItem(pos);
                 downloads.add(download);
             }
         }
@@ -407,23 +409,20 @@ public class AudioAttachmentListFragment extends ListFragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Object selectedItem = getListAdapter().getItem(position);
+            IContentObject selectedItem = (IContentObject)getListAdapter().getItem(position);
 
-            if (selectedItem instanceof AudioAttachmentItem) {
-                AudioAttachmentItem selectedAudioItem = (AudioAttachmentItem) selectedItem;
+            if (selectedItem != null) {
                 if (mInSearchMode) {
-                    List<AudioAttachmentItem> itemList = new ArrayList<AudioAttachmentItem>();
-                    itemList.add(selectedAudioItem);
                     position = 0;
-                    mMediaPlayerService.setMediaList(itemList);
+                    mMediaPlayerService.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), selectedItem));
                 } else {
                     setMediaList();
                 }
 
-                if (isPlaying(selectedAudioItem)) {
-                    mMediaPlayerService.updatePosition(position);
-                } else if (isPaused(selectedAudioItem)) {
-                    mMediaPlayerService.updatePosition(position);
+                if (isPlaying(selectedItem)) {
+                    mMediaPlayerService.setCurrentIndex(position);
+                } else if (isPaused(selectedItem)) {
+                    mMediaPlayerService.setCurrentIndex(position);
                     mMediaPlayerService.play();
                 } else {
                     mMediaPlayerService.play(position);
@@ -489,11 +488,15 @@ public class AudioAttachmentListFragment extends ListFragment {
         }
 
         private void setMediaList() {
-            List<AudioAttachmentItem> itemList = new ArrayList<AudioAttachmentItem>();
-            for (AudioAttachmentItem audioAttachmentItem : mAttachmentListAdapter.getAttachmentItems()) {
-                itemList.add(audioAttachmentItem);
+            int contactId = mAttachmentListAdapter.getConversationContactId();
+            TalkClientContact contact;
+            try {
+                contact = mDatabase.findContactById(contactId);
+            } catch (SQLException e) {
+                LOG.error("Could not retrieve contact from database", e);
+                return;
             }
-            mMediaPlayerService.setMediaList(itemList);
+            mMediaPlayerService.setPlaylist(new UserPlaylist(mDatabase, contact));
         }
     }
 
@@ -540,10 +543,10 @@ public class AudioAttachmentListFragment extends ListFragment {
     private class DialogCallbackHandler implements AttachmentRemovalDialogBuilder.DeleteCallback {
 
         @Override
-        public void deleteAttachments(List<AudioAttachmentItem> attachments) {
+        public void deleteAttachments(List<IContentObject> attachments) {
             AttachmentOperationHelper.deleteAttachments(getActivity(), attachments);
 
-            for (AudioAttachmentItem attachment : attachments) {
+            for (IContentObject attachment : attachments) {
                 mAttachmentListAdapter.removeItem(attachment);
             }
 

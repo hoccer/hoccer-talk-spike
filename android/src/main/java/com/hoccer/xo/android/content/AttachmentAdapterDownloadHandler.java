@@ -15,12 +15,12 @@ import java.sql.SQLException;
 /**
  * Created by nico on 23/07/2014.
  */
-public class AttachmentTransferListener implements IXoTransferListener, IXoDownloadListener {
+public class AttachmentAdapterDownloadHandler implements IXoTransferListener, IXoDownloadListener {
 
     private Activity mActivity;
     private AttachmentListAdapter mAdapter;
 
-    public AttachmentTransferListener(Activity activity, AttachmentListAdapter adapter) {
+    public AttachmentAdapterDownloadHandler(Activity activity, AttachmentListAdapter adapter) {
         mActivity = activity;
         mAdapter = adapter;
     }
@@ -42,7 +42,6 @@ public class AttachmentTransferListener implements IXoTransferListener, IXoDownl
 
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
-
         int contactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
 
         try {
@@ -55,7 +54,7 @@ public class AttachmentTransferListener implements IXoTransferListener, IXoDownl
         if (download.getContentMediaType().equals(mAdapter.getContentMediaType())) {
             if ((mAdapter.getConversationContactId() == MediaPlayerService.UNDEFINED_CONTACT_ID) ||
                     (mAdapter.getConversationContactId() == contactId)) {
-                mAdapter.addItemAt(AudioAttachmentItem.create(download.getContentDataUrl(), download, true), 0);
+                mAdapter.addItemAt(download, 0);
                 notifyDataSetChanged();
             }
         }
@@ -103,7 +102,7 @@ public class AttachmentTransferListener implements IXoTransferListener, IXoDownl
 
     @Override
     public void onDownloadRemoved(TalkClientDownload download) {
-        mAdapter.removeItem(AudioAttachmentItem.create(download.getContentDataUrl(), download, false));
+        mAdapter.removeItem(download);
         notifyDataSetChanged();
     }
 

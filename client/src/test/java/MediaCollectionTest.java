@@ -808,39 +808,7 @@ public class MediaCollectionTest {
         final int expectedItemOrderFrom = 2;
         final int expectedItemOrderTo = 4;
 
-        final ValueContainer<Boolean> onNameChangedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
-
-        // register MediaCollection listener
-        TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
-            public void onCollectionNameChanged(TalkClientMediaCollection collection) {
-                assertEquals(expectedCollectionName, collection.getName());
-                onNameChangedCalled.value = true;
-            }
-            public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
-                assertEquals(expectedItemOrderFrom, fromIndex);
-                assertEquals(expectedItemOrderTo, toIndex);
-                onItemOrderChangedCalled.value = true;
-            }
-            public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
-                assertEquals(expectedItemRemovedIndex, indexRemoved);
-                assertEquals(expectedItemRemoved, itemRemoved);
-                onItemRemovedCalled.value = true;
-            }
-            public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
-                assertEquals(expectedItemAddedIndex, indexAdded);
-                assertEquals(expectedItemAdded, itemAdded);
-                onItemAddedCalled.value = true;
-            }
-            @Override
-            public void onCollectionCleared(TalkClientMediaCollection collection) {
-                onCollectionClearedCalled.value = true;
-            }
-        };
-        collection.registerListener(listener);
+        ListenerTester listenerTester = new ListenerTester(collection);
 
         collection.setName(expectedCollectionName);
         collection.addItem(3, expectedItemAdded);
@@ -848,11 +816,27 @@ public class MediaCollectionTest {
         collection.reorderItemIndex(2, 4);
         collection.clear();
 
-        assertTrue(onNameChangedCalled.value);
-        assertTrue(onItemOrderChangedCalled.value);
-        assertTrue(onItemRemovedCalled.value);
-        assertTrue(onItemAddedCalled.value);
-        assertTrue(onCollectionClearedCalled.value);
+        assertEquals(1, listenerTester.onNameChangedCalled.size());
+        assertEquals(collection, listenerTester.onNameChangedCalled.get(0).args[0]);
+        assertEquals(expectedCollectionName, ((TalkClientMediaCollection)listenerTester.onNameChangedCalled.get(0).args[0]).getName());
+
+        assertEquals(1, listenerTester.onItemOrderChangedCalled.size());
+        assertEquals(collection, listenerTester.onItemOrderChangedCalled.get(0).args[0]);
+        assertEquals(expectedItemOrderFrom, listenerTester.onItemOrderChangedCalled.get(0).args[1]);
+        assertEquals(expectedItemOrderTo, listenerTester.onItemOrderChangedCalled.get(0).args[2]);
+
+        assertEquals(1, listenerTester.onItemRemovedCalled.size()); // callback is only invoked if MediaCollection instances are cached
+        assertEquals(collection, listenerTester.onItemRemovedCalled.get(0).args[0]);
+        assertEquals(expectedItemRemovedIndex, listenerTester.onItemRemovedCalled.get(0).args[1]);
+        assertEquals(expectedItemRemoved, listenerTester.onItemRemovedCalled.get(0).args[2]);
+
+        assertEquals(1, listenerTester.onItemAddedCalled.size());
+        assertEquals(collection, listenerTester.onItemAddedCalled.get(0).args[0]);
+        assertEquals(expectedItemAddedIndex, listenerTester.onItemAddedCalled.get(0).args[1]);
+        assertEquals(expectedItemAdded, listenerTester.onItemAddedCalled.get(0).args[2]);
+
+        assertEquals(1, listenerTester.onCollectionClearedCalled.size());
+        assertEquals(collection, listenerTester.onItemAddedCalled.get(0).args[0]);
     }
 
     @Test
@@ -887,33 +871,8 @@ public class MediaCollectionTest {
             fail();
         }
 
-        final ValueContainer<Boolean> onNameChangedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
-
-        // register MediaCollection listener
-        TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
-            public void onCollectionNameChanged(TalkClientMediaCollection collection) {
-                onNameChangedCalled.value = true;
-            }
-            public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
-                onItemOrderChangedCalled.value = true;
-            }
-            public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
-                onItemRemovedCalled.value = true;
-            }
-            public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
-                onItemAddedCalled.value = true;
-            }
-            @Override
-            public void onCollectionCleared(TalkClientMediaCollection collection) {
-                onCollectionClearedCalled.value = true;
-            }
-        };
-        collection.registerListener(listener);
-        collection.unregisterListener(listener);
+        ListenerTester listenerTester = new ListenerTester(collection);
+        listenerTester.unregister();
 
         collection.setName("newName");
         collection.addItem(3, item5);
@@ -921,11 +880,11 @@ public class MediaCollectionTest {
         collection.reorderItemIndex(2, 4);
         collection.clear();
 
-        assertFalse(onNameChangedCalled.value);
-        assertFalse(onItemOrderChangedCalled.value);
-        assertFalse(onItemRemovedCalled.value);
-        assertFalse(onItemAddedCalled.value);
-        assertFalse(onCollectionClearedCalled.value);
+        assertEquals(0, listenerTester.onNameChangedCalled.size());
+        assertEquals(0, listenerTester.onItemOrderChangedCalled.size());
+        assertEquals(0, listenerTester.onItemRemovedCalled.size()); // callback is only invoked if MediaCollection instances are cached
+        assertEquals(0, listenerTester.onItemAddedCalled.size());
+        assertEquals(0, listenerTester.onCollectionClearedCalled.size());
     }
 
     @Test
@@ -1006,37 +965,10 @@ public class MediaCollectionTest {
             fail();
         }
 
-        final ValueContainer<Boolean> onNameChangedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
+        ListenerTester listenerTester = new ListenerTester(collection);
 
         final TalkClientDownload expectedItemRemoved = item1;
         final int expectedItemRemovedIndex = 1;
-
-        // register MediaCollection listener
-        TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
-            public void onCollectionNameChanged(TalkClientMediaCollection collection) {
-                onNameChangedCalled.value = true;
-            }
-            public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
-                onItemOrderChangedCalled.value = true;
-            }
-            public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
-                assertEquals(expectedItemRemovedIndex, indexRemoved);
-                assertEquals(expectedItemRemoved, itemRemoved);
-                onItemRemovedCalled.value = true;
-            }
-            public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
-                onItemAddedCalled.value = true;
-            }
-            @Override
-            public void onCollectionCleared(TalkClientMediaCollection collection) {
-                onCollectionClearedCalled.value = true;
-            }
-        };
-        collection.registerListener(listener);
 
         try {
             mDatabase.deleteClientDownload(expectedItemRemoved);
@@ -1045,11 +977,14 @@ public class MediaCollectionTest {
             fail();
         }
 
-        assertFalse(onNameChangedCalled.value);
-        assertFalse(onItemOrderChangedCalled.value);
-        assertTrue(onItemRemovedCalled.value);  // callback is only invoked if MediaCollection instances are cached
-        assertFalse(onItemAddedCalled.value);
-        assertFalse(onCollectionClearedCalled.value);
+        assertEquals(0, listenerTester.onNameChangedCalled.size());
+        assertEquals(0, listenerTester.onItemOrderChangedCalled.size());
+        assertEquals(1, listenerTester.onItemRemovedCalled.size()); // callback is only invoked if MediaCollection instances are cached
+        assertEquals(collection, listenerTester.onItemRemovedCalled.get(0).args[0]);
+        assertEquals(expectedItemRemovedIndex, listenerTester.onItemRemovedCalled.get(0).args[1]);
+        assertEquals(expectedItemRemoved, listenerTester.onItemRemovedCalled.get(0).args[2]);
+        assertEquals(0, listenerTester.onItemAddedCalled.size());
+        assertEquals(0, listenerTester.onCollectionClearedCalled.size());
     }
 
     @Test
@@ -1152,5 +1087,60 @@ public class MediaCollectionTest {
         }
 
         return relations;
+    }
+
+    public class Call {
+        public Object[] args;
+
+        public Call(Object... args) {
+            this.args = args;
+        }
+    }
+
+    // logs listener calls
+    private class ListenerTester {
+        private TalkClientMediaCollection mCollection;
+        private TalkClientMediaCollection.Listener mListener;
+
+        public ArrayList<Call> onNameChangedCalled = new ArrayList<Call>();
+        public ArrayList<Call> onItemOrderChangedCalled = new ArrayList<Call>();
+        public ArrayList<Call> onItemRemovedCalled = new ArrayList<Call>();
+        public ArrayList<Call> onItemAddedCalled = new ArrayList<Call>();
+        public ArrayList<Call> onCollectionClearedCalled = new ArrayList<Call>();
+
+        public ListenerTester(TalkClientMediaCollection collection) {
+            mCollection = collection;
+            mListener = new TalkClientMediaCollection.Listener() {
+                @Override
+                public void onCollectionNameChanged(TalkClientMediaCollection collection) {
+                    onNameChangedCalled.add(new Call(collection));
+                }
+
+                @Override
+                public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
+                    onItemOrderChangedCalled.add(new Call(collection, fromIndex, toIndex));
+                }
+
+                @Override
+                public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
+                    onItemRemovedCalled.add(new Call(collection, indexRemoved, itemRemoved));
+                }
+
+                @Override
+                public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
+                    onItemAddedCalled.add(new Call(collection, indexAdded, itemAdded));
+                }
+
+                @Override
+                public void onCollectionCleared(TalkClientMediaCollection collection) {
+                    onCollectionClearedCalled.add(new Call(collection));
+                }
+            };
+            collection.registerListener(mListener);
+        }
+
+        public void unregister() {
+            mCollection.unregisterListener(mListener);
+        }
     }
 }

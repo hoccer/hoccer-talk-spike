@@ -126,6 +126,9 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
     @DatabaseField(width = 128)
     private String contentHmac;
 
+    @DatabaseField
+    private ApprovalState approvalState;
+
     private transient long progressRateLimit;
 
     private Timer mTimer;
@@ -135,6 +138,7 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
     public TalkClientDownload() {
         super(Direction.DOWNLOAD);
         this.state = State.INITIALIZING;
+        this.approvalState = ApprovalState.PENDING;
         this.aspectRatio = 1.0;
         this.downloadProgress = 0;
         this.contentLength = -1;
@@ -422,6 +426,14 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
 
     public boolean isAttachment() {
         return type == Type.ATTACHMENT;
+    }
+
+    public TalkClientDownload.ApprovalState getApprovalState() {
+        return approvalState;
+    }
+
+    public void setApprovalState(TalkClientDownload.ApprovalState approvalState) {
+        this.approvalState = approvalState;
     }
 
     private String computeDecryptionDirectory(XoTransferAgent agent) {
@@ -928,6 +940,10 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
         INITIALIZING, NEW, DOWNLOADING, PAUSED, DECRYPTING, DETECTING, COMPLETE, FAILED,
         /* old states from before db version 7 */
         REQUESTED, STARTED
+    }
+
+    public enum ApprovalState {
+        APPROVED, DECLINED, PENDING
     }
 
     private class DownloadTask extends TimerTask {

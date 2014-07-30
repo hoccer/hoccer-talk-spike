@@ -189,13 +189,13 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mCurrentMetaData = mMediaPlayerService.getCurrentMediaItem().getMetaData();
+                mCurrentMetaData = MediaMetaData.retrieveMetaData(mMediaPlayerService.getCurrentMediaItem().getContentDataUrl());
                 String trackArtist = mCurrentMetaData.getArtist();
                 String trackTitle = mCurrentMetaData.getTitle();
                 int totalDuration = mMediaPlayerService.getTotalDuration();
 
                 if (trackTitle == null || trackTitle.isEmpty()) {
-                    File file = new File(mCurrentMetaData.getFilePath());
+                    File file = new File(mCurrentMetaData.getFileUri());
                     trackTitle = file.getName();
                 }
 
@@ -208,7 +208,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
                 mTrackProgressBar.setMax(totalDuration);
 
                 mTotalDurationLabel.setText(getStringFromTimeStamp(totalDuration));
-                mPlaylistIndexLabel.setText(Integer.toString(mMediaPlayerService.getCurrentTrackNumber() + 1));
+                mPlaylistIndexLabel.setText(Integer.toString(mMediaPlayerService.getCurrentIndex() + 1));
                 mPlaylistSizeLabel.setText(Integer.toString(mMediaPlayerService.getMediaListSize()));
 
                 mCurrentMetaData.getArtwork(getResources(), FullscreenPlayerFragment.this);
@@ -288,9 +288,9 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
                 mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ALL);
                 break;
             case REPEAT_ALL:
-                mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_TITLE);
+                mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ITEM);
                 break;
-            case REPEAT_TITLE:
+            case REPEAT_ITEM:
                 mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.NO_REPEAT);
                 break;
         }
@@ -307,7 +307,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
             case REPEAT_ALL:
                 buttonStateDrawable = getResources().getDrawable(R.drawable.btn_player_repeat_all);
                 break;
-            case REPEAT_TITLE:
+            case REPEAT_ITEM:
                 buttonStateDrawable = getResources().getDrawable(R.drawable.btn_player_repeat_title);
                 break;
             default:
@@ -323,8 +323,13 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     }
 
     @Override
-    public void onArtworkRetrieveFinished(Drawable artwork) {
-        mArtworkImageView.setImageDrawable(artwork);
+    public void onArtworkRetrieveFinished(final Drawable artwork) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mArtworkImageView.setImageDrawable(artwork);
+            }
+        });
     }
 
 
@@ -337,11 +342,11 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
                 switch (v.getId()) {
                     case R.id.bt_player_skip_back:
                         mTrackProgressBar.setProgress(0);
-                        mMediaPlayerService.playPrevious();
+                        mMediaPlayerService.backward();
                         break;
                     case R.id.bt_player_skip_forward:
                         mTrackProgressBar.setProgress(0);
-                        mMediaPlayerService.playNext();
+                        mMediaPlayerService.forward();
                         break;
                     case R.id.bt_player_repeat:
                         updateRepeatMode();

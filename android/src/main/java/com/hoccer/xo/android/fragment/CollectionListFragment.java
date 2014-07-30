@@ -177,12 +177,12 @@ public class CollectionListFragment extends SearchableListFragment {
     }
 
     // XXX: duplicate to the one in AudioAttachmentFragment
-    private List<AudioAttachmentItem> getSelectedItems(SparseBooleanArray checkedItemPositions) {
+    private List<IContentObject> getSelectedItems(SparseBooleanArray checkedItemPositions) {
         SparseBooleanArray selectedItemIds = new SparseBooleanArray();
         for (int i = 0; i < checkedItemPositions.size(); ++i) {
             selectedItemIds.append(checkedItemPositions.keyAt(i), checkedItemPositions.valueAt(i));
         }
-        List<AudioAttachmentItem> attachments = new ArrayList<AudioAttachmentItem>();
+        List<IContentObject> attachments = new ArrayList<IContentObject>();
         for (int index = 0; index < selectedItemIds.size(); ++index) {
             int pos = selectedItemIds.keyAt(index);
             if (selectedItemIds.get(pos)) {
@@ -204,8 +204,8 @@ public class CollectionListFragment extends SearchableListFragment {
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) throws SQLException {
         TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
         List<String> addedFilenames = new ArrayList<String>();
-        for (AudioAttachmentItem item: getSelectedItems(getListView().getCheckedItemPositions())) {
-            if (addAttachmentToCollection(mediaCollection, item.getContentObject())) {
+        for (IContentObject item: getSelectedItems(getListView().getCheckedItemPositions())) {
+            if (addAttachmentToCollection(mediaCollection, item)) {
                 addedFilenames.add(item.getFileName());
             }
         }
@@ -232,8 +232,8 @@ public class CollectionListFragment extends SearchableListFragment {
         return false;
     }
 
-    private void removeItemsFromAdapter(List<AudioAttachmentItem> items) {
-        for (AudioAttachmentItem item : items) {
+    private void removeItemsFromAdapter(List<IContentObject> items) {
+        for (IContentObject item : items) {
             mAttachmentAdapter.removeItem(item, true);
         }
 
@@ -316,13 +316,13 @@ public class CollectionListFragment extends SearchableListFragment {
             AttachmentRemovalDialogBuilder.RemoveFromCollectionCallback {
 
         @Override
-        public void deleteAttachments(List<AudioAttachmentItem> attachments) {
+        public void deleteAttachments(List<IContentObject> attachments) {
             AttachmentOperationHelper.deleteAttachments(getActivity(), attachments);
             removeItemsFromAdapter(attachments);
         }
 
         @Override
-        public void removeAttachmentsFromCollection(List<AudioAttachmentItem> attachments, int collectionId) {
+        public void removeAttachmentsFromCollection(List<IContentObject> attachments, int collectionId) {
             removeItemsFromAdapter(attachments);
         }
     }

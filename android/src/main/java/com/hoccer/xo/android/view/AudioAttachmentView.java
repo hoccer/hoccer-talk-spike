@@ -1,25 +1,26 @@
 package com.hoccer.xo.android.view;
 
-import android.content.*;
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.cms.MetaData;
 
 public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener {
 
     private Context mContext;
-    private AudioAttachmentItem mAudioAttachmentItem;
+    private IContentObject mItem;
     private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
 
     private TextView mTitleTextView;
@@ -32,7 +33,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     private static final Logger LOG = Logger.getLogger(AudioAttachmentView.class);
 
     public AudioAttachmentView(Context context) {
-        super(context);
+        super(context.getApplicationContext());
         mContext = context;
         mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
         addView(inflate(mContext, R.layout.item_audio_attachment, null));
@@ -44,9 +45,9 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
         mDragHandleView = (ImageView) findViewById(R.id.list_drag_handle);
     }
 
-    public void setMediaItem(AudioAttachmentItem audioAttachmentItem) {
-        if (mAudioAttachmentItem == null || !mAudioAttachmentItem.equals(audioAttachmentItem)) {
-            mAudioAttachmentItem = audioAttachmentItem;
+    public void setMediaItem(IContentObject audioAttachmentItem) {
+        if (mItem == null || !mItem.equals(audioAttachmentItem)) {
+            mItem = audioAttachmentItem;
             updateAudioView();
         }
     }
@@ -54,8 +55,8 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     public boolean isActive() {
         if (mMediaPlayerServiceConnector.isConnected()) {
             MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            AudioAttachmentItem currentItem = service.getCurrentMediaItem();
-            return !service.isPaused() && !service.isStopped() && (mAudioAttachmentItem.equals(currentItem));
+            IContentObject currentItem = service.getCurrentMediaItem();
+            return !service.isPaused() && !service.isStopped() && (mItem.equals(currentItem));
         } else {
             return false;
         }
@@ -121,8 +122,8 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
             mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
 
-        mCurrentMetaData = mAudioAttachmentItem.getMetaData();
-        mTitleTextView.setText(mCurrentMetaData.getTitleOrFilename(mAudioAttachmentItem.getFilePath()).trim());
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(mItem.getContentDataUrl());
+        mTitleTextView.setText(mCurrentMetaData.getTitleOrFilename().trim());
 
         String artist = mCurrentMetaData.getArtist();
         if (artist == null || artist.isEmpty()) {
@@ -135,7 +136,12 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     }
 
     @Override
-    public void onArtworkRetrieveFinished(Drawable artwork) {
-        mArtworkImageView.setImageDrawable(artwork);
+    public void onArtworkRetrieveFinished(final Drawable artwork) {
+        new Handler(mContext.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                mArtworkImageView.setImageDrawable(artwork);
+            }
+        });
     }
 }

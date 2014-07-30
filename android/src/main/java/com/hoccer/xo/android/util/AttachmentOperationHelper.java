@@ -36,116 +36,49 @@ public class AttachmentOperationHelper {
     public static final String ARG_MEDIA_COLLECTION_ID = "com.hoccer.xo.android.argument.MEDIA_COLLECTION_ID";
     public static final String ARG_CONTENT_MEDIA_TYPE = "com.hoccer.xo.android.argument.CONTENT_MEDIA_TYPE";
 
-    public static void deleteAttachments(final Context context, final List<AudioAttachmentItem> attachments) {
-        final MediaPlayerServiceConnector connector = new MediaPlayerServiceConnector();
-        connector.connect(context, IntentHelper.ACTION_PLAYER_TRACK_CHANGED, new MediaPlayerServiceConnector.Listener() {
 
-            @Override
-            public void onConnected(MediaPlayerService service) {
-                deleteAttachments(context, attachments, service);
-                connector.disconnect();
-            }
-
-            @Override
-            public void onDisconnected() {
-            }
-
-            @Override
-            public void onAction(String action, MediaPlayerService service) {
-            }
-        });
-    }
-
-    public static void deleteAttachments(Context context, List<AudioAttachmentItem> attachments, MediaPlayerService service) {
-        for (AudioAttachmentItem attachment : attachments) {
-            deleteAttachment(context, attachment, service);
+    public static void deleteAttachments(Context context, List<IContentObject> items) {
+        for (IContentObject item : items) {
+            deleteAttachment(context, item);
         }
     }
 
-    public static void deleteAttachment(final Context context, final AudioAttachmentItem attachment) {
-
-        final MediaPlayerServiceConnector connector = new MediaPlayerServiceConnector();
-        connector.connect(context, IntentHelper.ACTION_PLAYER_TRACK_CHANGED, new MediaPlayerServiceConnector.Listener() {
-
-            @Override
-            public void onConnected(MediaPlayerService service) {
-                deleteAttachment(context,attachment,service);
-                connector.disconnect();
-            }
-
-            @Override
-            public void onDisconnected() {
-            }
-
-            @Override
-            public void onAction(String action, MediaPlayerService service) {
-            }
-        });
-    }
-
-    public static void deleteAttachment(Context context, final AudioAttachmentItem attachment, MediaPlayerService service) {
-        boolean isPlaying = false;
-        boolean isPaused = false;
-        if (service != null && !service.isStopped() && !service.isPaused()) {
-            if (attachment.equals(service.getCurrentMediaItem())) {
-                isPlaying = true;
-            }
-        }
-
-        if (service != null && service.isPaused()) {
-            if (attachment.equals(service.getCurrentMediaItem())) {
-                isPaused = true;
-            }
-        }
-
-        if (isPlaying) {
-            if (service.getRepeatMode() == MediaPlaylistController.RepeatMode.REPEAT_TITLE) {
-                service.stop();
-            } else {
-                service.playNextByRepeatMode();
-            }
-        } else if (isPaused) {
-            service.stop();
-        }
-
-        String path = Uri.parse(attachment.getFilePath()).getPath();
+    public static void deleteAttachment(Context context, IContentObject item) {
+        String path = Uri.parse(item.getContentDataUrl()).getPath();
         File file = new File(path);
-
         if (file.delete()) {
             try {
-                TalkClientDownload download = (TalkClientDownload) attachment.getContentObject();
+                TalkClientDownload download = (TalkClientDownload) item;
 
                 XoApplication.getXoClient().getDatabase().deleteClientDownload(download);
 
                 int messageId = XoApplication.getXoClient().getDatabase().findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
                 XoApplication.getXoClient().getDatabase().deleteMessageById(messageId);
 
-                service.removeMedia(attachment);
-
                 Intent intent = new Intent(IntentHelper.ACTION_AUDIO_ATTACHMENT_REMOVED);
                 intent.putExtra(IntentHelper.EXTRA_TALK_CLIENT_MESSAGE_ID, messageId);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } catch (SQLException e) {
-                LOG.error("Error deleting message with client download id of " + ((TalkClientDownload) attachment.getContentObject()).getClientDownloadId());
+                LOG.error("Error deleting message with client download id of " + ((TalkClientDownload) item).getClientDownloadId());
                 e.printStackTrace();
             }
         }
     }
 
-    public static void sendAttachmentsToContacts(List<AudioAttachmentItem> attachments, List<TalkClientContact> contacts) throws FileNotFoundException, URISyntaxException {
+    public static void sendAttachmentsToContacts(List<IContentObject> attachments, List<TalkClientContact> contacts) throws FileNotFoundException, URISyntaxException {
         for (TalkClientContact contact : contacts) {
             sendAttachmentsToContact(attachments, contact);
         }
     }
 
-    public static void sendAttachmentsToContact(List<AudioAttachmentItem> attachments, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
-        for (AudioAttachmentItem attachment : attachments) {
+    public static void sendAttachmentsToContact(List<IContentObject> attachments, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
+        for (IContentObject attachment : attachments) {
             sendAttachmentToContact(attachment, contact);
         }
     }
 
-    public static void sendAttachmentToContact(AudioAttachmentItem attachment, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
-        TalkClientUpload upload = createAttachmentUpload(attachment.getContentObject());
+    public static void sendAttachmentToContact(IContentObject attachment, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
+        TalkClientUpload upload = createAttachmentUpload(attachment);
         String messageTag = XoApplication.getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
         LOG.debug("Sending Attachment " + attachment + " to contact " + contact);
         XoApplication.getXoClient().sendMessage(messageTag);

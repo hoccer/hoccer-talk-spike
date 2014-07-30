@@ -309,6 +309,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contact;
     }
 
+    public TalkClientContact findContactById(int contactId) throws SQLException {
+        return mClientContacts.queryForId(contactId);
+    }
+
     public synchronized TalkClientContact findContactByClientId(String clientId, boolean create) throws SQLException {
         TalkClientContact contact = null;
 
@@ -793,7 +797,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public void deleteClientDownload(TalkClientDownload download) throws SQLException {
-
         DeleteBuilder<TalkClientDownload, Integer> deleteBuilder = mClientDownloads.deleteBuilder();
         deleteBuilder.where()
                 .eq("clientDownloadId", download.getClientDownloadId());
