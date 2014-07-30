@@ -1107,7 +1107,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 requestDelivery(message);
             }
         } catch (SQLException e) {
-            LOG.error(e);
+            LOG.error("SQL Error while retrieving message by message tag ", e);
         }
     }
 
@@ -1539,7 +1539,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 } catch (InterruptedException e) {
                     LOG.error("Error while asserting future", e);
                 } catch (ExecutionException e) {
-                    e.printStackTrace();
+                    LOG.error("ExecutionException ", e);
                 }
             }
         });
@@ -2128,12 +2128,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public TalkClientContact getCurrentNearbyGroup() {
+        TalkClientContact currentNearbyGroup = null;
         try {
-            return mDatabase.findContactByGroupId(mEnvironmentGroupId, false);
+            if (mEnvironmentGroupId != null) {
+                currentNearbyGroup = mDatabase.findContactByGroupId(mEnvironmentGroupId, false);
+            }
         } catch (SQLException e) {
-            LOG.error(e);
+            LOG.error("SQL Error while retrieving current nearby group ", e);
         }
-        return null;
+        return currentNearbyGroup;
     }
 
 
