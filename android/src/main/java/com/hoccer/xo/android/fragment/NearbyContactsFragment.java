@@ -80,8 +80,10 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     private boolean isNearbyConversationPossible() {
         try {
-            final List<TalkClientContact> allNearbyContacts = getXoDatabase().findAllNearbyContacts();
-            return (allNearbyContacts.size() > 1);
+            if (mCurrentNearbyGroup != null) {
+                int groupMembershipCount = getXoDatabase().findGroupMemberCountForGroup(mCurrentNearbyGroup);
+                return (groupMembershipCount > 1);
+            }
         } catch (SQLException e) {
             LOG.error("SQL Exception while retrieving current nearby group: ", e);
         }
@@ -108,7 +110,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     private void createAdapter() {
         mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity());
-        mNearbyAdapter.retrieveDataFromDb();
+        mNearbyAdapter.retrieveDataFromDb(mCurrentNearbyGroup);
         mNearbyAdapter.registerListeners();
         runOnUiThread(new Runnable() {
             @Override
@@ -213,6 +215,9 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
+        if (contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
+            mCurrentNearbyGroup = contact;
+        }
         if (isNearbyConversationPossible()) {
             if (mCurrentNearbyGroup == null || contact != mCurrentNearbyGroup) {
                 activateNearbyChat();

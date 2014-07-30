@@ -223,20 +223,27 @@ public class XoClientDatabase {
                 .query();
     }
 
-    public List<TalkClientContact> findAllNearbyContacts() throws SQLException {
-        List<TalkClientContact> allGroupContacts = this.findAllGroupContacts();
-        List<TalkClientContact> allNearbyGroupContacts = new ArrayList<TalkClientContact>();
-        // add all nearby groups
-        for (TalkClientContact groupContact : allGroupContacts) {
-            if (groupContact.isGroupInvolved() && groupContact.isGroupExisting() && groupContact.getGroupPresence().isTypeNearby()) {
-                allNearbyGroupContacts.add(groupContact);
-            }
+    public int findGroupMemberCountForGroup(TalkClientContact groupContact) throws SQLException {
+        TalkClientContact contact = mClientContacts.queryBuilder()
+                .where()
+                .eq("clientContactId", groupContact.getClientContactId())
+                .queryForFirst();
+        if (contact != null && contact.isGroup() && contact.getGroupMemberships() != null) {
+            return contact.getGroupMemberships().size();
         }
-        allNearbyGroupContacts.addAll(findAllNerabyContactsOrderedByRecentMessage());
+        return 0;
+    }
+
+    public List<TalkClientContact> findAllNearbyContactsInGroup(TalkClientContact groupContact) throws SQLException {
+        List<TalkClientContact> allNearbyGroupContacts = new ArrayList<TalkClientContact>();
+        if (groupContact.isGroupExisting() && groupContact.getGroupPresence().isTypeNearby()) {
+            allNearbyGroupContacts.add(groupContact);
+        }
+        allNearbyGroupContacts.addAll(findAllNearbyContactsOrderedByRecentMessageInGroup(groupContact));
         return allNearbyGroupContacts;
     }
 
-    private List<TalkClientContact> findAllNerabyContactsOrderedByRecentMessage() throws SQLException {
+    private List<TalkClientContact> findAllNearbyContactsOrderedByRecentMessageInGroup(TalkClientContact groupContact) throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> recentUnreadMessages = mClientMessages.queryBuilder();
         QueryBuilder<TalkClientContact, Integer> recentSenders = mClientContacts.queryBuilder();
         recentUnreadMessages.orderBy("timestamp", false);
@@ -253,31 +260,19 @@ public class XoClientDatabase {
                 .eq("isNearby", true)
                 .query();
         ArrayList<TalkClientContact> orderedListOfDistinctSenders = new ArrayList<TalkClientContact>();
-        for (int i = 0; i < orderedListOfSenders.size(); i++) {
-            if (!orderedListOfDistinctSenders.contains(orderedListOfSenders.get(i))) {
-                orderedListOfDistinctSenders.add(orderedListOfSenders.get(i));
+        for (TalkClientContact orderedListOfSender : orderedListOfSenders) {
+            if (!orderedListOfDistinctSenders.contains(orderedListOfSender)) {
+                orderedListOfDistinctSenders.add(orderedListOfSender);
             }
         }
-        for (int i = 0; i < allContacts.size(); i++) {
-            if (!orderedListOfDistinctSenders.contains(allContacts.get(i))) {
-                orderedListOfDistinctSenders.add(allContacts.get(i));
+        for (TalkClientContact contact : allContacts) {
+            if (contact.isClientGroupJoined(groupContact)) {
+                if (!orderedListOfDistinctSenders.contains(contact)) {
+                    orderedListOfDistinctSenders.add(contact);
+                }
             }
         }
         return orderedListOfDistinctSenders;
-    }
-
-    public List<TalkClientContact> findAllNearbyGroups() throws SQLException {
-        List<TalkClientContact> allGroupContacts = this.findAllGroupContacts();
-        List<TalkClientContact> allNearbyGroupContacts = new ArrayList<TalkClientContact>();
-
-        // add all nearby groups
-        for (TalkClientContact groupContact : allGroupContacts) {
-            if (groupContact.isGroupInvolved() && groupContact.isGroupExisting() && groupContact.getGroupPresence().isTypeNearby()) {
-                allNearbyGroupContacts.add(groupContact);
-            }
-        }
-
-        return allNearbyGroupContacts;
     }
 
     public List<TalkClientSmsToken> findAllSmsTokens() throws SQLException {
