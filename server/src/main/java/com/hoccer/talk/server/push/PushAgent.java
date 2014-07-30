@@ -113,7 +113,7 @@ public class PushAgent {
     }
 
     public void submitRequest(TalkClient client) {
-        LOG.debug("submitRequest for client: "+client.getClientId()+", timeLastPush="+client.getTimeLastPush().getTime()+", lastPushMessage="+client.getLastPushMessage());
+        LOG.debug("submitRequest for client: " + client.getClientId() + ", lastPushMessage=" + client.getLastPushMessage());
         long now = System.currentTimeMillis();
 
         mPushRequests.incrementAndGet();
