@@ -19,8 +19,11 @@ import com.hoccer.xo.android.adapter.ContactsPageAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.NearbyContactsFragment;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 public class ContactsActivity extends XoActivity implements IXoStateListener {
+
+    private final static Logger LOG = Logger.getLogger(ContactsActivity.class);
 
     private ViewPager mViewPager;
     private ActionBar mActionBar;
@@ -62,12 +65,14 @@ public class ContactsActivity extends XoActivity implements IXoStateListener {
             }
 
             SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+            // TODO: remove, was only for debug purposes to manually active environment updates before there was a UI for that
             SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
                 @Override
                 public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                     if (key.equals("preference_environment_update")) {
                         mEnvironmentUpdatesEnabled = sharedPreferences.getBoolean("preference_environment_update", true);
-                        refreshEnvironmentUpdater();
+                        refreshEnvironmentUpdater(false);
                     }
                 }
             };
@@ -96,18 +101,20 @@ public class ContactsActivity extends XoActivity implements IXoStateListener {
         if (!getXoClient().isRegistered()) {
             finish();
         } else {
-            refreshEnvironmentUpdater();
+            refreshEnvironmentUpdater(false);
         }
         getXoClient().registerStateListener(this);
     }
 
-    private void refreshEnvironmentUpdater() {
+    private void refreshEnvironmentUpdater(boolean force) {
+        LOG.debug("refreshEnvironmentUpdater");
         int position = mViewPager.getCurrentItem();
         Fragment fragment = mAdapter.getItem(position);
         if (fragment instanceof NearbyContactsFragment) {
             if (mEnvironmentUpdatesEnabled) {
                 if (isLocationServiceEnabled()) {
-                    XoApplication.startNearbySession();
+                    LOG.debug("refreshEnvironmentUpdater:startNearbySession");
+                    XoApplication.startNearbySession(force);
                 }
             }
         } else {
@@ -116,6 +123,7 @@ public class ContactsActivity extends XoActivity implements IXoStateListener {
     }
 
     private void shutDownNearbySession() {
+        LOG.debug("shutDownNearbySession");
         XoApplication.stopNearbySession();
         NearbyContactsFragment nearbyContactsFragment = (NearbyContactsFragment) mAdapter.getItem(2);
         nearbyContactsFragment.shutdownNearbyChat();
@@ -153,7 +161,7 @@ public class ContactsActivity extends XoActivity implements IXoStateListener {
 
         @Override
         public void onPageSelected(int position) {
-            refreshEnvironmentUpdater();
+            refreshEnvironmentUpdater(false);
         }
 
         @Override
@@ -189,10 +197,11 @@ public class ContactsActivity extends XoActivity implements IXoStateListener {
 
     @Override
     public void onClientStateChange(XoClient client, int state) {
+        LOG.debug("onClientStateChange:"+state);
         if (!client.isAwake()) {
             shutDownNearbySession();
         } else if (client.isActive()) {
-            refreshEnvironmentUpdater();
+            refreshEnvironmentUpdater(true);
         }
     }
 

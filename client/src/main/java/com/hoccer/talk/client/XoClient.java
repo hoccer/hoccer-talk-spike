@@ -1541,6 +1541,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
+
+                if (!isActive()) {
+                    LOG.warn("sync failed, scheduling new sync");
+                    scheduleSync();
+                }
             }
         });
     }
