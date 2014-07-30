@@ -191,6 +191,8 @@ public class ContactsActivity extends XoActivity implements IXoStateListener {
     public void onClientStateChange(XoClient client, int state) {
         if (!client.isAwake()) {
             shutDownNearbySession();
+        } else if (client.isActive()) {
+            refreshEnvironmentUpdater();
         }
     }
 
