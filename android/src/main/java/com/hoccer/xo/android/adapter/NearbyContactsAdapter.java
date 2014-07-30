@@ -196,6 +196,15 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         });
     }
 
+    private void refreshList() {
+        mXoActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
+    }
+
     public interface Filter {
         public boolean shouldShow(TalkClientContact contact);
     }
@@ -221,7 +230,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        notifyDataSetChanged();
+        refreshList();
     }
 
     @Override
@@ -244,17 +253,17 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
 
     @Override
     public void onMessageAdded(TalkClientMessage message) {
-        notifyDataSetChanged();
+        refreshList();
     }
 
     @Override
     public void onMessageRemoved(TalkClientMessage message) {
-        notifyDataSetChanged();
+        refreshList();
     }
 
     @Override
     public void onMessageStateChanged(TalkClientMessage message) {
-        notifyDataSetChanged();
+        refreshList();
     }
 
     @Override
@@ -275,7 +284,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
         if (download.isAvatar()) {
-            notifyDataSetChanged();
+            refreshList();
         }
     }
 
@@ -292,7 +301,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     @Override
     public void onUploadStarted(TalkClientUpload upload) {
         if (upload.isAvatar()) {
-            notifyDataSetChanged();
+            refreshList();
         }
     }
 
