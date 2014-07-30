@@ -13,6 +13,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.AudioAttachmentItem;
+import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.ColorSchemeManager;
@@ -20,6 +21,10 @@ import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
+
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 
 public class ChatAudioItem extends ChatMessageItem {
@@ -71,17 +76,25 @@ public class ChatAudioItem extends ChatMessageItem {
             fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
         }
 
-		String extension = "";
-        String dataUrl = contentObject.getContentDataUrl();
-        if (dataUrl != null) {
-        	extension = dataUrl.substring(dataUrl.lastIndexOf("."), dataUrl.length());
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(contentObject.getContentDataUrl());
+        String displayName;
+        if (metaData.getTitle() != null) {
+            displayName = metaData.getTitle().trim();
+
+            if (metaData.getArtist() != null) {
+                displayName = metaData.getArtist().trim() + " - " + displayName;
+            }
+        } else {
+            try {
+                URI fileUri = new URI(contentObject.getContentDataUrl());
+                File contentFile = new File(fileUri);
+                displayName = contentFile.getName();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+                displayName = contentObject.getFileName();
+            }
         }
 
-        String displayName = "";
-        String filename = contentObject.getFileName();
-        if (filename != null) {
-            displayName = filename + extension;
-        }
         fileNameTextView.setText(displayName);
 
         mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
