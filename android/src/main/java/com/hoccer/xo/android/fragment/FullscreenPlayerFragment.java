@@ -146,19 +146,29 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
 
     public void updatePlayState() {
         if (mMediaPlayerService != null) {
+            final boolean isPlaying;
+
+            if ((mMediaPlayerService.isPaused()) || mMediaPlayerService.isStopped()) {
+                isPlaying = true;
+            } else if (!mMediaPlayerService.isPaused() && !mMediaPlayerService.isStopped()) {
+                isPlaying = false;
+            } else {
+                isPlaying = !mPlayButton.isChecked();
+            }
+
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if ((mMediaPlayerService.isPaused()) || mMediaPlayerService.isStopped()) {
-                        mPlayButton.setChecked(false);
+                    if (isPlaying) {
+                        mPlayButton.setChecked(!isPlaying);
                         mBlinkAnimation.start();
-                    } else if (!mMediaPlayerService.isPaused() && !mMediaPlayerService.isStopped()) {
+                    } else {
                         if (mBlinkAnimation.isRunning()) {
                             mBlinkAnimation.cancel();
                         }
 
                         mCurrentTimeLabel.setTextColor(getResources().getColor(R.color.xo_media_player_secondary_text));
-                        mPlayButton.setChecked(true);
+                        mPlayButton.setChecked(!isPlaying);
                     }
                 }
             });
@@ -186,32 +196,42 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
             mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
 
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(mMediaPlayerService.getCurrentMediaItem().getContentDataUrl());
+        final String trackArtist;
+        final String trackTitle;
+        final int totalDuration = mMediaPlayerService.getTotalDuration();
+        final String durationLabel = getStringFromTimeStamp(totalDuration);
+        final String playlistIndex = Integer.toString(mMediaPlayerService.getCurrentIndex() + 1);
+        final String playlistSize = Integer.toString(mMediaPlayerService.getMediaListSize());
+
+        if (mCurrentMetaData.getTitle() == null || mCurrentMetaData.getTitle().isEmpty()) {
+            File file = new File(mCurrentMetaData.getFileUri());
+            trackTitle = file.getName();
+        } else {
+            trackTitle = mCurrentMetaData.getTitle().trim();
+        }
+
+        if (mCurrentMetaData.getArtist() == null || mCurrentMetaData.getArtist().isEmpty()) {
+            trackArtist = getActivity().getResources().getString(R.string.media_meta_data_unknown_artist);
+        } else {
+            trackArtist = mCurrentMetaData.getArtist().trim();
+        }
+
+        mCurrentMetaData.getArtwork(getResources(), FullscreenPlayerFragment.this);
+
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mCurrentMetaData = MediaMetaData.retrieveMetaData(mMediaPlayerService.getCurrentMediaItem().getContentDataUrl());
-                String trackArtist = mCurrentMetaData.getArtist();
-                String trackTitle = mCurrentMetaData.getTitle();
-                int totalDuration = mMediaPlayerService.getTotalDuration();
 
-                if (trackTitle == null || trackTitle.isEmpty()) {
-                    File file = new File(mCurrentMetaData.getFileUri());
-                    trackTitle = file.getName();
-                }
-
-                mTrackTitleLabel.setText(trackTitle.trim());
-                if (trackArtist == null || trackArtist.isEmpty()) {
-                    trackArtist = getActivity().getResources().getString(R.string.media_meta_data_unknown_artist);
-                }
-
-                mTrackArtistLabel.setText(trackArtist.trim());
+                mTrackTitleLabel.setText(trackTitle);
+                mTrackArtistLabel.setText(trackArtist);
                 mTrackProgressBar.setMax(totalDuration);
 
-                mTotalDurationLabel.setText(getStringFromTimeStamp(totalDuration));
-                mPlaylistIndexLabel.setText(Integer.toString(mMediaPlayerService.getCurrentIndex() + 1));
-                mPlaylistSizeLabel.setText(Integer.toString(mMediaPlayerService.getMediaListSize()));
+                mTotalDurationLabel.setText(durationLabel);
+                mPlaylistIndexLabel.setText(playlistIndex);
+                mPlaylistSizeLabel.setText(playlistSize);
 
-                mCurrentMetaData.getArtwork(getResources(), FullscreenPlayerFragment.this);
+
 
                 updatePlayState();
 
