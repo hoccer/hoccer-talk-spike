@@ -224,14 +224,20 @@ public class XoClientDatabase {
     }
 
     public int findGroupMemberCountForGroup(TalkClientContact groupContact) throws SQLException {
+        int count = 0;
         TalkClientContact contact = mClientContacts.queryBuilder()
                 .where()
                 .eq("clientContactId", groupContact.getClientContactId())
                 .queryForFirst();
         if (contact != null && contact.isGroup() && contact.getGroupMemberships() != null) {
-            return contact.getGroupMemberships().size();
+            for (TalkClientMembership memberShip : contact.getGroupMemberships()) {
+                TalkGroupMember groupMember = memberShip.getMember();
+                if (groupMember != null && groupMember.isNearby()) {
+                    count++;
+                }
+            }
         }
-        return 0;
+        return count;
     }
 
     public List<TalkClientContact> findAllNearbyContactsInGroup(TalkClientContact groupContact) throws SQLException {

@@ -18,14 +18,11 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class NearbyContactsAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
     private XoClientDatabase mDatabase;
@@ -77,19 +74,21 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     }
 
     public void retrieveDataFromDb(final TalkClientContact group) {
+        if (group == null || mDatabase == null) {
+            return;
+        }
+//        if (mDatabase == null) {
+//            Timer timer = new Timer();
+//            TimerTask task = new TimerTask() {
+//                @Override
+//                public void run() {
+//                    updateAdapter(group);
+//                }
+//            };
+//            timer.schedule(task, 1000);
+//            return;
+//        }
         try {
-            if(mDatabase == null) {
-                Timer timer = new Timer();
-                TimerTask task = new TimerTask() {
-                    @Override
-                    public void run() {
-                        updateAdapter(group);
-                    }
-                };
-                timer.schedule(task, 1000);
-                return;
-            }
-
             mNearbyContacts.clear();
             List<TalkClientContact> allClientContacts = mDatabase.findAllNearbyContactsInGroup(group);
             for (TalkClientContact contact : allClientContacts) {
@@ -123,7 +122,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         TextView lastMessageText = (TextView) view.findViewById(R.id.contact_last_message);
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
-        if(contact.isGroup()) {
+        if (contact.isGroup()) {
             nameView.setText(contact.getNickname() + " (" + (mNearbyContacts.size() - 1) + ")");
         } else {
             nameView.setText(contact.getNickname());
@@ -219,6 +218,15 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         return res;
     }
 
+    private
+    @Nullable
+    TalkClientContact getCurrentNearbyGroup() {
+        if (mXoActivity != null) {
+            return mXoActivity.getXoClient().getCurrentNearbyGroup();
+        }
+        return null;
+    }
+
     @Override
     public void onContactAdded(TalkClientContact contact) {
 
@@ -239,14 +247,16 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-        if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
+        TalkClientContact currentNearbyGroup = getCurrentNearbyGroup();
+        if (currentNearbyGroup != null && contact.getGroupId().equals(currentNearbyGroup.getGroupId())) {
             updateAdapter(contact);
         }
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
+        TalkClientContact currentNearbyGroup = getCurrentNearbyGroup();
+        if (currentNearbyGroup != null && contact.getGroupId().equals(currentNearbyGroup.getGroupId())) {
             updateAdapter(contact);
         }
     }
