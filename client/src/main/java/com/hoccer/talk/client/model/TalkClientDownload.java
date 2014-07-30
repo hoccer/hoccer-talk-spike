@@ -429,7 +429,11 @@ public class TalkClientDownload extends XoTransfer implements IContentObject {
     }
 
     public TalkClientDownload.ApprovalState getApprovalState() {
-        return approvalState;
+        if (approvalState == null) {
+            return ApprovalState.PENDING;
+        } else {
+            return approvalState;
+        }
     }
 
     public void setApprovalState(TalkClientDownload.ApprovalState approvalState) {
