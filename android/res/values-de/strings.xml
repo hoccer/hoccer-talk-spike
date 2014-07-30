@@ -43,7 +43,8 @@
     </string>
 
     <!-- Deleting attachments -->
-    <string name="attachment_confirm_delete_dialog_message">Willst du die ausgewählten Anhänge wirklich löschen?</string>
+    <string name="dialog_attachment_delete_title">Anhang Löschen</string>
+    <string name="dialog_attachment_delete_message">Willst du die ausgewählten Anhänge wirklich löschen?</string>
 
     <!-- AudioAttachmentList Fragment -->
     <string name="audio_attachment_list_all">Alle</string>

@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -93,7 +92,7 @@ public class AttachmentRemovalDialogBuilder extends AlertDialog.Builder {
     }
 
     private AttachmentRemovalDialogBuilder setupConfirmDeletionDialog() {
-        setMessage(R.string.attachment_confirm_delete_dialog_message);
+        setMessage(R.string.dialog_attachment_delete_message);
         setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 if (mRemoveFromCollection) {
