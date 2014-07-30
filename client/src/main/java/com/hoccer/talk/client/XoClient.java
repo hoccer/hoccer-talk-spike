@@ -1161,7 +1161,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         // log about it
-        LOG.info("[connection #" + mConnection.getConnectionId() + "] state " + STATE_NAMES[mState] + " -> " + STATE_NAMES[newState] + " (" + message + ")");
+        LOG.info("[switchState: connection #" + mConnection.getConnectionId() + "] state " + STATE_NAMES[mState] + " -> " + STATE_NAMES[newState] + " (" + message + ")");
 
         // perform transition
         int previousState = mState;
@@ -1540,6 +1540,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     LOG.error("Error while asserting future", e);
                 } catch (ExecutionException e) {
                     LOG.error("ExecutionException ", e);
+                }
+
+                if (!isActive()) {
+                    LOG.warn("sync failed, scheduling new sync");
+                    scheduleSync();
                 }
             }
         });

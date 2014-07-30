@@ -52,8 +52,8 @@
     <!--Connection timeout (seconds)-->
     <integer name="connect_timeout">15</integer>
 
-    <!--Idle timeout for client activity (seconds)-->
-    <integer name="idle_timeout">300</integer>
+    <!--Time until idle activity in background disconnects (seconds)-->
+    <integer name="idle_timeout">120</integer>
 
     <!--Send K-A keepalives-->
     <bool name="keep_alive_enabled">true</bool>
