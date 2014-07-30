@@ -681,6 +681,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     presence.setConnectionStatus(newStatus);
                     mSelfContact.updatePresence(presence);
                     mDatabase.savePresence(presence);
+                    if (TalkPresence.CONN_STATUS_ONLINE.equals(newStatus)) {
+                        LOG.debug("entering foreground -> idle timer deactivated");
+                        shutdownIdle();
+                    } else if (TalkPresence.CONN_STATUS_BACKGROUND.equals(newStatus)) {
+                        LOG.debug("entering background -> idle timer activated");
+                        scheduleIdle();
+                    }
+
                     for (int i = 0; i < mContactListeners.size(); i++) {
                         IXoContactListener listener = mContactListeners.get(i);
                         listener.onClientPresenceChanged(mSelfContact);
@@ -1293,7 +1301,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void shutdownIdle() {
-        if(mAutoDisconnectFuture != null) {
+        if (mAutoDisconnectFuture != null) {
             mAutoDisconnectFuture.cancel(false);
             mAutoDisconnectFuture = null;
         }
@@ -1314,8 +1322,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void resetIdle() {
         LOG.debug("resetIdle()");
-        mLastActivity = System.currentTimeMillis();
-        scheduleIdle();
+        if (mAutoDisconnectFuture != null) {
+            mLastActivity = System.currentTimeMillis();
+            scheduleIdle();
+        }
     }
 
     private void shutdownKeepAlive() {
