@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import com.hoccer.xo.release.R;
@@ -59,6 +61,7 @@ public class XoDialogs {
     public static void showInputPasswordDialog(final String tag, final int titleId, final Activity activity, final OnTextClickListener okListener, final DialogInterface.OnClickListener cancelListener) {
         final LinearLayout passwordInputView = (LinearLayout)activity.getLayoutInflater().inflate(R.layout.view_password_input, null);
         final EditText passwordInput = (EditText) passwordInputView.findViewById(R.id.password_input);
+        final InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         DialogFragment dialogFragment = new DialogFragment() {
             @Override
             public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -68,10 +71,17 @@ public class XoDialogs {
                 builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
+                        inputMethodManager.hideSoftInputFromWindow(passwordInput.getWindowToken(), 0);
                         okListener.onClick(dialog, id, passwordInput.getText().toString());
                     }
                 });
-                builder.setNegativeButton(R.string.common_cancel, cancelListener);
+                builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        inputMethodManager.hideSoftInputFromWindow(passwordInput.getWindowToken(), 0);
+                        cancelListener.onClick(dialog, id);
+                    }
+                });
                 builder.setView(passwordInputView);
                 Dialog dialog = builder.create();
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
@@ -82,8 +92,9 @@ public class XoDialogs {
     }
 
     public static void showInputTextDialog(final String tag, final int titleId, final int messageId, final Activity activity, final XoDialogs.OnTextClickListener okListener, final DialogInterface.OnClickListener cancelListener) {
-        final View dialogView = activity.getLayoutInflater().inflate(R.layout.dialog_create_new_item, null);
-        final EditText textInput = (EditText) dialogView.findViewById(R.id.et_input_name);
+        final View textInputView = activity.getLayoutInflater().inflate(R.layout.dialog_create_new_item, null);
+        final EditText textInput = (EditText) textInputView.findViewById(R.id.et_input_name);
+        final InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         DialogFragment dialogFragment = new DialogFragment() {
             @Override
             public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -94,11 +105,19 @@ public class XoDialogs {
                 builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
+                        inputMethodManager.hideSoftInputFromWindow(textInput.getWindowToken(), 0);
                         okListener.onClick(dialog, id, textInput.getText().toString());
+
                     }
                 });
-                builder.setNegativeButton(R.string.common_cancel, cancelListener);
-                builder.setView(dialogView);
+                builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        inputMethodManager.hideSoftInputFromWindow(textInput.getWindowToken(), 0);
+                        cancelListener.onClick(dialog, id);
+                    }
+                });
+                builder.setView(textInputView);
                 Dialog dialog = builder.create();
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
                 return dialog;
