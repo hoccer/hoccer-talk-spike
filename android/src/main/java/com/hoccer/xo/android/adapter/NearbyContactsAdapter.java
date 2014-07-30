@@ -30,6 +30,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     private Logger LOG = Logger.getLogger(NearbyContactsAdapter.class);
 
     private List<TalkClientContact> mNearbyContacts = new ArrayList<TalkClientContact>();
+    private TalkClientContact mCurrentNearbyGroup;
 
     public NearbyContactsAdapter(XoClientDatabase db, XoActivity xoActivity) {
         super();
@@ -220,7 +221,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
 
     private
     @Nullable
-    TalkClientContact getCurrentNearbyGroup() {
+    TalkClientContact getActiveNearbyGroup() {
         if (mXoActivity != null) {
             return mXoActivity.getXoClient().getCurrentNearbyGroup();
         }
@@ -247,16 +248,18 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-        TalkClientContact currentNearbyGroup = getCurrentNearbyGroup();
-        if (currentNearbyGroup != null && contact.getGroupId().equals(currentNearbyGroup.getGroupId())) {
+        if (mCurrentNearbyGroup != null && contact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
             updateAdapter(contact);
         }
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        TalkClientContact currentNearbyGroup = getCurrentNearbyGroup();
-        if (currentNearbyGroup != null && contact.getGroupId().equals(currentNearbyGroup.getGroupId())) {
+        TalkClientContact currentNearbyGroup = getActiveNearbyGroup();
+        if (currentNearbyGroup != null) {
+            mCurrentNearbyGroup = currentNearbyGroup;
+        }
+        if (mCurrentNearbyGroup != null && contact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
             updateAdapter(contact);
         }
     }
