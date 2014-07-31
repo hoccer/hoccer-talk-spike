@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,14 +12,12 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentListAdapter;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
-import com.hoccer.xo.android.dialog.AttachmentRemovalDialogBuilder;
 import com.hoccer.xo.android.util.AttachmentOperationHelper;
 import com.hoccer.xo.android.util.DragSortController;
 import com.hoccer.xo.release.R;
@@ -33,12 +30,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by nico on 22/07/2014.
- */
-public class CollectionListFragment extends SearchableListFragment {
+public class MediaCollectionItemListFragment extends SearchableListFragment {
 
-    private static final Logger LOG = Logger.getLogger(CollectionListFragment.class);
+    private static final Logger LOG = Logger.getLogger(MediaCollectionItemListFragment.class);
 
     public static final int SELECT_COLLECTION_REQUEST = 1;
     public static final int SELECT_CONTACT_REQUEST = 2;
@@ -47,9 +41,8 @@ public class CollectionListFragment extends SearchableListFragment {
     private DragSortController mController;
     private AttachmentListAdapter mAttachmentAdapter;
     private AttachmentSearchResultAdapter mSearchResultAdapter;
-    private TalkClientMediaCollection mCollection;
     private XoClientDatabase mDatabase;
-    private boolean mRemoveFromCollection = true;
+    private TalkClientMediaCollection mCollection;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -123,37 +116,6 @@ public class CollectionListFragment extends SearchableListFragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == Activity.RESULT_OK) {
-            switch (requestCode) {
-                case SELECT_COLLECTION_REQUEST:
-                    Integer mediaCollectionId = data.getIntExtra(MediaCollectionSelectionListFragment.MEDIA_COLLECTION_ID_EXTRA, -1);
-                    if (mediaCollectionId > -1) {
-                        addSelectedAttachmentsToCollection(mediaCollectionId);
-                    }
-                    break;
-                case SELECT_CONTACT_REQUEST:
-                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.SELECTED_CONTACT_IDS_EXTRA);
-                    // TODO better errorhandling!
-                    for (Integer contactId : contactSelections) {
-                        try {
-                            TalkClientContact contact = retrieveContactById(contactId);
-                            AttachmentOperationHelper.sendAttachmentsToContact(getSelectedItems(getListView().getCheckedItemPositions()), contact);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (URISyntaxException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    break;
-            }
-        }
-    }
-
-    @Override
     protected ListAdapter searchInAdapter(String query) {
         mSearchResultAdapter.searchForAttachments(query);
 
@@ -193,24 +155,20 @@ public class CollectionListFragment extends SearchableListFragment {
         return attachments;
     }
 
-    private void addSelectedAttachmentsToCollection(Integer mediaCollectionId) {
-        try {
-            retrieveCollectionAndAddSelectedAttachments(mediaCollectionId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) throws SQLException {
-        TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
-        List<String> addedFilenames = new ArrayList<String>();
-        for (IContentObject item: getSelectedItems(getListView().getCheckedItemPositions())) {
-            if (addAttachmentToCollection(mediaCollection, item)) {
-                addedFilenames.add(item.getFileName());
+    private void addSelectedItemsToCollection(Integer mediaCollectionId) {
+        List<IContentObject> selectedItems = getSelectedItems(getListView().getCheckedItemPositions());
+        if(selectedItems.size() > 0) {
+            try {
+                TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
+                List<String> addedFilenames = new ArrayList<String>();
+                for (IContentObject item : selectedItems) {
+                    mediaCollection.addItem((TalkClientDownload) item);
+                    addedFilenames.add(item.getFileName());
+                }
+                Toast.makeText(getActivity(), String.format(getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
+            } catch (SQLException e) {
+                LOG.error("Could not find MediaCollection with id: " + String.valueOf(mediaCollectionId), e);
             }
-        }
-        if (!addedFilenames.isEmpty()) {
-            Toast.makeText(getActivity(), String.format(getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -224,25 +182,35 @@ public class CollectionListFragment extends SearchableListFragment {
         return contact;
     }
 
-    private boolean addAttachmentToCollection(TalkClientMediaCollection mediaCollection, IContentObject item) {
-        if (!mediaCollection.hasItem((TalkClientDownload) item)) {
-            mediaCollection.addItem((TalkClientDownload) item);
-            return true;
-        }
-        return false;
-    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-    private void removeItemsFromAdapter(List<IContentObject> items) {
-        for (IContentObject item : items) {
-            mAttachmentAdapter.removeItem(item, true);
-        }
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case SELECT_COLLECTION_REQUEST:
+                    Integer mediaCollectionId = data.getIntExtra(MediaCollectionSelectionListFragment.MEDIA_COLLECTION_ID_EXTRA, -1);
+                    if (mediaCollectionId > -1) {
+                        addSelectedItemsToCollection(mediaCollectionId);
+                    }
+                    break;
+                case SELECT_CONTACT_REQUEST:
+                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.SELECTED_CONTACT_IDS_EXTRA);
+                    // TODO better errorhandling!
+                    for (Integer contactId : contactSelections) {
+                        try {
+                            TalkClientContact contact = retrieveContactById(contactId);
+                            AttachmentOperationHelper.sendAttachmentsToContact(getSelectedItems(getListView().getCheckedItemPositions()), contact);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+                    }
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mAttachmentAdapter.notifyDataSetChanged();
+                    break;
             }
-        });
+        }
     }
 
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener, DragSortListView.DragListener {
@@ -278,12 +246,25 @@ public class CollectionListFragment extends SearchableListFragment {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
-                    AttachmentRemovalDialogBuilder builder = new AttachmentRemovalDialogBuilder(getActivity(),
-                            getSelectedItems(getListView().getCheckedItemPositions()), true, mCollection.getId() );
-                    DialogCallbackHandler handler = new DialogCallbackHandler();
-                    builder.setRemoveFromCollectionCallbackHandler(handler);
-                    builder.setDeleteCallbackHandler(handler);
-                    builder.create().show();
+                    XoDialogs.showSingleChoiceDialog("RemoveAttachment",
+                            R.string.dialog_attachment_delete_title,
+                            R.array.delete_options,
+                            getActivity(),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    switch(id) {
+                                        case 0:
+                                            removeCheckedItemsFromCollection();
+                                            break;
+                                        case 1:
+                                            deleteCheckedItems();
+                                            break;
+                                        default:
+                                            throw new IllegalArgumentException("Invalid array index selected.");
+                                    }
+                                }
+                            });
                     mode.finish();
                     return true;
                 case R.id.menu_share:
@@ -306,25 +287,30 @@ public class CollectionListFragment extends SearchableListFragment {
             mAttachmentAdapter.setSortEnabled(false);
         }
 
+        private void deleteCheckedItems() {
+            List<IContentObject> items = getSelectedItems(getListView().getCheckedItemPositions());
+            for (IContentObject item : items) {
+                try{
+                    mDatabase.deleteClientDownloadAndMessage((TalkClientDownload)item);
+                } catch(SQLException e) {
+                    LOG.error("Could not delete download", e);
+                }
+            }
+        }
+
+        private void removeCheckedItemsFromCollection() {
+            SparseBooleanArray checkedItemPositions = getListView().getCheckedItemPositions();
+            for (int i= 0; i < checkedItemPositions.size(); i++) {
+                int listIndex = checkedItemPositions.keyAt(i);
+                if(checkedItemPositions.valueAt(i)) {
+                    mCollection.removeItem(listIndex);
+                }
+            }
+        }
+
         @Override
         public void drag(int from, int to) {
             getListView().dispatchSetSelected(false);
         }
     }
-
-    private class DialogCallbackHandler implements AttachmentRemovalDialogBuilder.DeleteCallback,
-            AttachmentRemovalDialogBuilder.RemoveFromCollectionCallback {
-
-        @Override
-        public void deleteAttachments(List<IContentObject> attachments) {
-            AttachmentOperationHelper.deleteAttachments(getActivity(), attachments);
-            removeItemsFromAdapter(attachments);
-        }
-
-        @Override
-        public void removeAttachmentsFromCollection(List<IContentObject> attachments, int collectionId) {
-            removeItemsFromAdapter(attachments);
-        }
-    }
-
 }

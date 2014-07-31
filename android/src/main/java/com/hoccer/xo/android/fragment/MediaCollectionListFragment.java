@@ -9,7 +9,6 @@ import android.widget.ListView;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.xo.android.util.AttachmentOperationHelper;
 import com.hoccer.xo.release.R;
-import com.mobeta.android.dslv.DragSortListView;
 import org.apache.log4j.Logger;
 
 public class MediaCollectionListFragment extends BaseMediaCollectionListFragment {
@@ -46,7 +45,7 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
             Bundle bundle = new Bundle();
             bundle.putInt(AttachmentOperationHelper.ARG_MEDIA_COLLECTION_ID, mediaCollectionId);
 
-            CollectionListFragment fragment = new CollectionListFragment();
+            MediaCollectionItemListFragment fragment = new MediaCollectionItemListFragment();
             fragment.setArguments(bundle);
 
             FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();

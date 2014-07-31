@@ -36,13 +36,6 @@ public class AttachmentOperationHelper {
     public static final String ARG_MEDIA_COLLECTION_ID = "com.hoccer.xo.android.argument.MEDIA_COLLECTION_ID";
     public static final String ARG_CONTENT_MEDIA_TYPE = "com.hoccer.xo.android.argument.CONTENT_MEDIA_TYPE";
 
-
-    public static void deleteAttachments(Context context, List<IContentObject> items) {
-        for (IContentObject item : items) {
-            deleteAttachment(context, item);
-        }
-    }
-
     public static void deleteAttachment(Context context, IContentObject item) {
         String path = Uri.parse(item.getContentDataUrl()).getPath();
         File file = new File(path);
