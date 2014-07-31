@@ -1,6 +1,6 @@
 package com.hoccer.xo.android.adapter;
 
-import android.content.Context;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +18,11 @@ import java.util.List;
 
 public class MediaCollectionListAdapter extends BaseAdapter {
 
-    private Context mContext;
     private List<TalkClientMediaCollection> mMediaCollections = new ArrayList<TalkClientMediaCollection>();
-
+    private SparseBooleanArray mSelectedItems = new SparseBooleanArray();
     private Logger LOG = Logger.getLogger(MediaCollectionListAdapter.class);
-    private boolean mSelectionModeActivated = false;
 
-    public MediaCollectionListAdapter(Context context) {
-        this.mContext = context;
+    public MediaCollectionListAdapter() {
         try {
             loadMediaCollections();
         } catch (SQLException e) {
@@ -53,7 +50,7 @@ public class MediaCollectionListAdapter extends BaseAdapter {
         ViewHolder viewHolder;
 
         if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.item_media_collection, parent, false);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_media_collection, null);
 
             viewHolder = new ViewHolder();
             viewHolder.titleName = (TextView) (convertView.findViewById(R.id.tv_title_name));
@@ -65,22 +62,32 @@ public class MediaCollectionListAdapter extends BaseAdapter {
 
         TalkClientMediaCollection mediaCollection = mMediaCollections.get(position);
         viewHolder.titleName.setText(mediaCollection.getName());
-        if (mSelectionModeActivated) {
+
+        if (mSelectedItems.size() > 0) {
             viewHolder.goToImageView.setVisibility(View.GONE);
+            convertView.setSelected(mSelectedItems.get(position));
         }
+
         return convertView;
     }
 
     public void add(TalkClientMediaCollection mediaCollection) {
         mMediaCollections.add(mediaCollection);
-        update();
+        notifyDataSetChanged();
     }
 
-    public void setSelectionModeActivated(boolean activated) {
-        mSelectionModeActivated = activated;
+    public void selectItem(int position, boolean selected) {
+        if(selected) {
+            mSelectedItems.put(position, selected);
+        } else {
+            mSelectedItems.delete(position);
+        }
+
+        notifyDataSetChanged();
     }
 
-    private void update() {
+    public void clearSelection() {
+        mSelectedItems.clear();
         notifyDataSetChanged();
     }
 

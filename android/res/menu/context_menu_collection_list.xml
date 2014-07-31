@@ -9,12 +9,4 @@
             android:visible="true"
             android:showAsAction="always"/>
 
-    <item
-            android:id="@+id/menu_rename_collection"
-            android:title="@string/rename_collection"
-            android:icon="@drawable/ic_edit"
-            android:visible="true"
-            android:showAsAction="always"/>
-
-
 </menu>

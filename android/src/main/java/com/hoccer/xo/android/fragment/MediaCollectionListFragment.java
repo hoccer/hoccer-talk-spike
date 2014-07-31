@@ -32,7 +32,7 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
     @Override
     public void onStart() {
         super.onStart();
-        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         ListInteractionHandler handler = new ListInteractionHandler();
         getListView().setMultiChoiceModeListener(handler);
         getListView().setOnItemClickListener(handler);
@@ -40,10 +40,14 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
 
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
 
+        private ActionMode mActionMode;
+
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Integer mediaCollectionId = ((TalkClientMediaCollection) mMediaCollectionListAdapter.getItem(position)).getId();
-            showCollectionListFragment(mediaCollectionId);
+            if (mActionMode == null) {
+                Integer mediaCollectionId = ((TalkClientMediaCollection) mMediaCollectionListAdapter.getItem(position)).getId();
+                showCollectionListFragment(mediaCollectionId);
+            }
         }
 
         private void showCollectionListFragment(Integer mediaCollectionId) {
@@ -60,12 +64,8 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
         }
 
         @Override
-        public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
-
-        }
-
-        @Override
         public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            mActionMode = actionMode;
             MenuInflater inflater = actionMode.getMenuInflater();
             inflater.inflate(R.menu.context_menu_collection_list, menu);
 
@@ -81,20 +81,20 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
             boolean eventHandled = false;
             TalkClientMediaCollection selectedCollection = (TalkClientMediaCollection) getListView().getSelectedItem();
-            switch (menuItem.getItemId()) {
-                case R.id.menu_delete_collection:
-                    DeleteCollectionCallbackHandler deleteHandler = new DeleteCollectionCallbackHandler(selectedCollection);
-                    XoDialogs.showYesNoDialog("delete_collection", R.string.dialog_delete_collection_title,
-                            R.string.dialog_delete_collection_message, getActivity(), deleteHandler, new CancelDialogCallbackHandler());
-                    eventHandled = true;
-                    break;
-                case R.id.menu_rename_collection:
-                    RenameCollectionCallbackHandler renameHandler = new RenameCollectionCallbackHandler(selectedCollection);
-                    XoDialogs.showInputTextDialog("rename_collection", R.string.rename_collection, 0, getActivity(),
-                            renameHandler, new CancelDialogCallbackHandler());
-                    eventHandled = true;
-                    break;
-                default:
+            if (selectedCollection != null) {
+                switch (menuItem.getItemId()) {
+                    case R.id.menu_delete_collection:
+                        DeleteCollectionCallbackHandler deleteHandler = new DeleteCollectionCallbackHandler(selectedCollection);
+                        XoDialogs.showYesNoDialog("delete_collection", R.string.dialog_delete_collection_title,
+                                R.string.dialog_delete_collection_message, getActivity(), deleteHandler, new CancelDialogCallbackHandler());
+                        eventHandled = true;
+                        break;
+                    default:
+                }
+            } else {
+                XoDialogs.showOkDialog("select_collection", R.string.dialog_select_collection_title,
+                        R.string.dialog_select_collection_message, getActivity(), null);
+                eventHandled = true;
             }
 
             return eventHandled;
@@ -102,7 +102,13 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
 
         @Override
         public void onDestroyActionMode(ActionMode actionMode) {
+            mActionMode = null;
+            mMediaCollectionListAdapter.clearSelection();
+        }
 
+        @Override
+        public void onItemCheckedStateChanged(ActionMode actionMode, int position, long id, boolean checked) {
+            mMediaCollectionListAdapter.selectItem(position, checked);
         }
 
         private class DeleteCollectionCallbackHandler implements DialogInterface.OnClickListener {
