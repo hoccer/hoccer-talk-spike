@@ -546,15 +546,18 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doDetectingAction() {
-        String destinationFilePath;
+        String tempDestinationFilePath;
+        String destinationDirectory;
         if (this.decryptedFile != null) {
-            destinationFilePath = computeDecryptionFile(mTransferAgent);
+            tempDestinationFilePath = computeDecryptionFile(mTransferAgent);
+            destinationDirectory = computeDecryptionDirectory(mTransferAgent);
         } else {
-            destinationFilePath = computeDownloadFile(mTransferAgent);
+            tempDestinationFilePath = computeDownloadFile(mTransferAgent);
+            destinationDirectory = computeDownloadDirectory(mTransferAgent);
         }
 
-        LOG.debug("performDetection(downloadId: '" + clientDownloadId + "', destinationFile: '" + destinationFilePath + "')");
-        File destination = new File(destinationFilePath);
+        LOG.debug("performDetection(downloadId: '" + clientDownloadId + "', destinationFile: '" + tempDestinationFilePath + "')");
+        File destination = new File(tempDestinationFilePath);
 
         try {
             InputStream fileInputStream = new FileInputStream(destination);
@@ -582,9 +585,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     if (extension != null) {
                         LOG.info("[downloadId: '" + clientDownloadId + "'] renaming to extension '" + detectedMimeType.getExtension() + "'");
 
-                        String destinationDirectory = computeDecryptionDirectory(mTransferAgent);
                         String destinationFileName = createUniqueFileNameInDirectory(this.fileName, extension, destinationDirectory);
-                        String destinationPath = destinationDirectory + File.separator + destinationFileName;
+                        String destinationPath = tempDestinationFilePath + File.separator + destinationFileName;
 
                         File newName = new File(destinationPath);
                         if (destination.renameTo(newName)) {
