@@ -59,10 +59,10 @@ public class ChatLocationItem extends ChatMessageItem {
         int textColor = -1;
         int iconId = -1;
         if (mMessage.isIncoming()) {
-            textColor = Color.WHITE;
+            textColor = Color.BLACK;
             iconId = R.drawable.ic_dark_location;
         } else {
-            textColor = Color.BLACK;
+            textColor = Color.WHITE;
             iconId = R.drawable.ic_light_location;
         }
 
