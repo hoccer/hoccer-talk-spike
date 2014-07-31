@@ -82,24 +82,19 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
     // Appends the given item to the collection
     public void addItem(TalkClientDownload item) {
-        if (createRelation(item, mItemList.size())) {
-            mItemList.add(item);
-            for (Listener listener : mListenerArray) {
-                listener.onItemAdded(this, mItemList.size() - 1, item);
-            }
-        }
+        addItem(mItemList.size(), item);
     }
 
     // Inserts the given item into the collection
     public void addItem(int index, TalkClientDownload item) {
-        if (index >= mItemList.size()) {
-            addItem(item); // simply append
-        } else {
-            if (createRelation(item, index)) {
-                mItemList.add(index, item);
-                for (Listener listener : mListenerArray) {
-                    listener.onItemAdded(this, index, item);
-                }
+        if(hasItem(item)) {
+            return;
+        }
+
+        if (createRelation(item, index)) {
+            mItemList.add(index, item);
+            for (Listener listener : mListenerArray) {
+                listener.onItemAdded(this, index, item);
             }
         }
     }
