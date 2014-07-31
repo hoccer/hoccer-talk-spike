@@ -1108,7 +1108,7 @@ public class XoClient implements JsonRpcConnection.Listener {
         try {
             TalkClientMessage message = mDatabase.findMessageByMessageTag(talkMessageTag, false);
             for(IXoMessageListener listener: mMessageListeners) {
-                listener.onMessageAdded(message);
+                listener.onMessageCreated(message);
             }
             if(TalkDelivery.STATE_NEW.equals(message.getOutgoingDelivery().getState())) {
                 requestDelivery(message);
@@ -1537,7 +1537,7 @@ public class XoClient implements JsonRpcConnection.Listener {
                     sendPresenceFuture.get();
 
                     switchState(STATE_ACTIVE, "Synchronization successfull");
-                    
+
                 } catch (SQLException e) {
                     LOG.error("SQL Error while syncing: ", e);
                 } catch (JsonRpcClientException e) {
@@ -2081,7 +2081,7 @@ public class XoClient implements JsonRpcConnection.Listener {
         return mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-        
+
                 try {
                     TalkClientContact contact = mSelfContact;
                     ensureSelfPresence(contact);
@@ -2212,7 +2212,7 @@ public class XoClient implements JsonRpcConnection.Listener {
         sendDeliveryConfirmation(delivery);
 
         for(IXoMessageListener listener: mMessageListeners) {
-            listener.onMessageStateChanged(clientMessage);
+            listener.onMessageUpdated(clientMessage);
         }
     }
 
@@ -2270,7 +2270,7 @@ public class XoClient implements JsonRpcConnection.Listener {
 
             for(IXoMessageListener listener: mMessageListeners) {
 
-                listener.onMessageStateChanged(clientMessage);
+                listener.onMessageUpdated(clientMessage);
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
@@ -2337,9 +2337,9 @@ public class XoClient implements JsonRpcConnection.Listener {
 
             for(IXoMessageListener listener: mMessageListeners) {
                 if(newMessage) {
-                    listener.onMessageAdded(clientMessage);
+                    listener.onMessageCreated(clientMessage);
                 } else {
-                    listener.onMessageStateChanged(clientMessage);
+                    listener.onMessageUpdated(clientMessage);
                 }
             }
 
@@ -3092,7 +3092,7 @@ public class XoClient implements JsonRpcConnection.Listener {
     }
 
     private String[] updateableClients(TalkClientContact group, String[] onlyWithClientIds) {
-        
+
         ArrayList<String> clientIds = new ArrayList<String>();
         HashSet<String> clientIdSet = new HashSet<String>(Arrays.asList(onlyWithClientIds));
         ForeignCollection<TalkClientMembership> memberships = group.getGroupMemberships();
@@ -3262,7 +3262,7 @@ public class XoClient implements JsonRpcConnection.Listener {
 
         int length = mMessageListeners.size();
         for(int i = 0; i < length; i++) {
-            mMessageListeners.get(i).onMessageStateChanged(message);
+            mMessageListeners.get(i).onMessageUpdated(message);
         }
     }
 }

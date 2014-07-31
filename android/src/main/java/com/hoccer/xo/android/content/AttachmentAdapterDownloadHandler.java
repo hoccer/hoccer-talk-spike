@@ -96,12 +96,17 @@ public class AttachmentAdapterDownloadHandler implements IXoTransferListener, IX
     }
 
     @Override
-    public void onDownloadSaved(TalkClientDownload download, boolean isCreated) {
+    public void onDownloadCreated(TalkClientDownload download, boolean isCreated) {
 
     }
 
     @Override
-    public void onDownloadRemoved(TalkClientDownload download) {
+    public void onDownloadUpdated(TalkClientDownload download) {
+
+    }
+
+    @Override
+    public void onDownloadDeleted(TalkClientDownload download) {
         mAdapter.removeItem(download);
         notifyDataSetChanged();
     }

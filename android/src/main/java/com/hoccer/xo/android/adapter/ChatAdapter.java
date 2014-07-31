@@ -339,8 +339,8 @@ public class
     }
 
     @Override
-    public void onMessageAdded(final TalkClientMessage message) {
-        LOG.debug("onMessageAdded()");
+    public void onMessageCreated(final TalkClientMessage message) {
+        LOG.debug("onMessageCreated()");
         if (message.getConversationContact() == mContact) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -354,8 +354,8 @@ public class
     }
 
     @Override
-    public void onMessageRemoved(final TalkClientMessage message) {
-        LOG.debug("onMessageRemoved()");
+    public void onMessageDeleted(final TalkClientMessage message) {
+        LOG.debug("onMessageDeleted()");
         if (message.getConversationContact() == mContact) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -369,8 +369,8 @@ public class
     }
 
     @Override
-    public void onMessageStateChanged(final TalkClientMessage message) {
-        LOG.debug("onMessageStateChanged()");
+    public void onMessageUpdated(final TalkClientMessage message) {
+        LOG.debug("onMessageUpdated()");
         if (message.getConversationContact() == mContact) {
             runOnUiThread(new Runnable() {
                 @Override

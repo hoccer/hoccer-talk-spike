@@ -226,17 +226,17 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     }
 
     @Override
-    public void onMessageAdded(TalkClientMessage message) {
+    public void onMessageCreated(TalkClientMessage message) {
         updateAdapter();
     }
 
     @Override
-    public void onMessageRemoved(TalkClientMessage message) {
+    public void onMessageDeleted(TalkClientMessage message) {
 
     }
 
     @Override
-    public void onMessageStateChanged(TalkClientMessage message) {
+    public void onMessageUpdated(TalkClientMessage message) {
 
     }
 

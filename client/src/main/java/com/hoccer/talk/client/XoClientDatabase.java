@@ -15,7 +15,6 @@ import com.j256.ormlite.table.TableUtils;
 
 import org.apache.log4j.Logger;
 
-import java.lang.ref.WeakReference;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -50,6 +49,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
 
     private WeakListenerArray<IXoDownloadListener> mDownloadListeners = new WeakListenerArray<IXoDownloadListener>();
+    private WeakListenerArray<IXoMessageListener> mMessageListeners = new WeakListenerArray<IXoMessageListener>();
     private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListeners = new WeakListenerArray<IXoMediaCollectionListener>();
 
 
@@ -139,7 +139,17 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
         // message.setProgressState(false); // TODO: WTF is this? is it ever saved with TRUE?
-        mClientMessages.createOrUpdate(message);
+        Dao.CreateOrUpdateStatus result = mClientMessages.createOrUpdate(message);
+
+        if(result.isCreated()) {
+            for (IXoMessageListener listener : mMessageListeners) {
+                listener.onMessageCreated(message);
+            }
+        } else {
+            for (IXoMessageListener listener : mMessageListeners) {
+                listener.onMessageUpdated(message);
+            }
+        }
     }
 
     public void saveMessage(TalkMessage message) throws SQLException {
@@ -162,7 +172,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         boolean isCreated = mClientDownloads.createOrUpdate(download).isCreated();
 
         for (IXoDownloadListener listener : mDownloadListeners) {
-            listener.onDownloadSaved(download, isCreated);
+            listener.onDownloadCreated(download, isCreated);
         }
     }
 
@@ -811,7 +821,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
 
             for (IXoDownloadListener listener : mDownloadListeners) {
-                listener.onDownloadRemoved(download);
+                listener.onDownloadDeleted(download);
             }
         }
     }

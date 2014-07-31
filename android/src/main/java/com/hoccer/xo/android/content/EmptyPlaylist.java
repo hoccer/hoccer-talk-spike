@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
 /**
  * Playlist instance acts as dummy without items.
  */
-public class EmptyPlaylist extends MediaPlaylist implements IXoDownloadListener {
+public class EmptyPlaylist extends MediaPlaylist {
 
     @Override
     public TalkClientDownload getItem(int index) {
@@ -50,13 +50,5 @@ public class EmptyPlaylist extends MediaPlaylist implements IXoDownloadListener 
                 throw new UnsupportedOperationException();
             }
         };
-    }
-
-    @Override
-    public void onDownloadSaved(TalkClientDownload download, boolean isCreated) {
-    }
-
-    @Override
-    public void onDownloadRemoved(TalkClientDownload download) {
     }
 }
