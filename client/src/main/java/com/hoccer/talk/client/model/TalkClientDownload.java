@@ -313,7 +313,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
                 LOG.debug("http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
                         HttpStatus.SC_PARTIAL_CONTENT + ")");
-                checkTransferFailure(transferFailures + 1);
+                checkTransferFailure(transferFailures + 1, "http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
+                        HttpStatus.SC_PARTIAL_CONTENT + ")");
                 return;
             }
 
@@ -325,7 +326,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             int bytesToGo = contentLengthValue;
             if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
                 LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
-                checkTransferFailure(transferFailures + 1);
+                checkTransferFailure(transferFailures + 1, "invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 return;
             }
 
@@ -347,10 +348,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 return;
             }
         } catch (Exception e) {
-            LOG.error("download exception -> switching to state PAUSED", e);
-            checkTransferFailure(transferFailures + 1);
-            // TODO: checkTransferFailure already performs switchState -> remove the following switchState to PAUSED?!
-            switchState(State.PAUSED, "download exception!");
+            LOG.error("download exception", e);
+            checkTransferFailure(transferFailures + 1, "download exception!");
         } finally {
             LOG.debug("doDownloadingAction - ensuring file handles are closed...");
             if (downloadProgress == contentLength) {
@@ -364,13 +363,13 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-    private void checkTransferFailure(int failures) {
+    private void checkTransferFailure(int failures, String failureDescription) {
         transferFailures = failures;
         if (transferFailures <= MAX_FAILURES) {
-            switchState(State.PAUSED, "pausing because transfer failures still allow resuming");
+            switchState(State.PAUSED, "pausing because transfer failures still allow resuming (" + transferFailures + "/" + MAX_FAILURES + " transferFailures), cause: '" + failureDescription + "'");
             mTransferAgent.scheduleDownloadAttempt(this);
         } else {
-            switchState(State.FAILED, "failing because transfer failures reached may count '" + MAX_FAILURES + "'");
+            switchState(State.FAILED, "failing because transfer failures reached max count (" + transferFailures + "/" + MAX_FAILURES + " transferFailures), cause: '" + failureDescription + "'");
         }
     }
 
@@ -528,9 +527,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             switchState(State.DETECTING, "decryption finished successfully");
         } catch (Exception e) {
             LOG.error("decryption error", e);
-            checkTransferFailure(transferFailures + 1);
-            // TODO: checkTransferFailure already performs switchState -> remove the following switchState to PAUSED?!
-            switchState(State.PAUSED, "failure during decryption");
+            checkTransferFailure(transferFailures + 1, "failure during decryption");
         }
     }
 
@@ -588,9 +585,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             switchState(State.COMPLETE, "detection successful");
         } catch (Exception e) {
             LOG.error("detection error", e);
-            checkTransferFailure(transferFailures + 1);
-            // TODO: checkTransferFailure already performs switchState -> remove the following switchState to PAUSED?!
-            switchState(State.PAUSED, "detection failed");
+            checkTransferFailure(transferFailures + 1, "detection failed");
         }
     }
 
