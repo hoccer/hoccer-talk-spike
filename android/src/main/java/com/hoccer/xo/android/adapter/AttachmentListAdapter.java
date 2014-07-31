@@ -52,8 +52,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         setContactIdFilter(pConversationContactId);
     }
 
-    public List<IContentObject> getAttachmentItems() {
-        return mAttachmentItems;
+    public IContentObject[] getAttachmentItems() {
+        return mAttachmentItems.toArray(new IContentObject[mAttachmentItems.size()]);
     }
 
     public void setItems(IContentObject[] items) {
@@ -245,8 +245,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         createAttachmentsFromTalkClientDownloads(downloads);
     }
 
-    public void setSortEnabled(boolean shallShow) {
-        mShowDragHandle = shallShow;
+    public void showDragHandle(boolean show) {
+        mShowDragHandle = show;
     }
 
     private void removeItemFromCollection(IContentObject item) {

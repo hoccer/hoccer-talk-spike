@@ -317,7 +317,7 @@ public class AudioAttachmentListFragment extends ListFragment {
                 mSearchAttachmentAdapter = new AttachmentSearchResultAdapter();
             }
 
-            mSearchAttachmentAdapter.setAttachmentItems(mAttachmentListAdapter.getAttachmentItems());
+            mSearchAttachmentAdapter.setItems(mAttachmentListAdapter.getAttachmentItems());
 
         } else {
             mInSearchMode = false;

@@ -158,8 +158,21 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
         return mItemList.size();
     }
 
+    // Returns the item at the given index
     public TalkClientDownload getItem(int index) {
         return mItemList.get(index);
+    }
+
+    // Returns the item with the given id or null if not found
+    public TalkClientDownload getItemFromId(int itemId) {
+        TalkClientDownload result = null;
+        for(TalkClientDownload item : mItemList) {
+            if(item.getClientDownloadId() == itemId) {
+                result = item;
+                break;
+            }
+        }
+        return result;
     }
 
     // Remove all items from collection

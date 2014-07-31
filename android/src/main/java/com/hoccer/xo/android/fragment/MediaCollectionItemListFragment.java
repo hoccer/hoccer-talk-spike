@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.SparseBooleanArray;
 import android.view.*;
 import android.widget.*;
 import com.hoccer.talk.client.XoClientDatabase;
@@ -12,12 +11,12 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
-import com.hoccer.xo.android.adapter.AttachmentListAdapter;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
-import com.hoccer.xo.android.database.AndroidTalkDatabase;
+import com.hoccer.xo.android.adapter.MediaCollectionItemAdapter;
 import com.hoccer.xo.android.util.AttachmentOperationHelper;
 import com.hoccer.xo.android.util.DragSortController;
 import com.hoccer.xo.release.R;
@@ -39,7 +38,7 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
 
     private DragSortListView mListView;
     private DragSortController mController;
-    private AttachmentListAdapter mAttachmentAdapter;
+    private MediaCollectionItemAdapter mCollectionAdapter;
     private AttachmentSearchResultAdapter mSearchResultAdapter;
     private XoClientDatabase mDatabase;
     private TalkClientMediaCollection mCollection;
@@ -48,36 +47,19 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mDatabase = new XoClientDatabase(
-                AndroidTalkDatabase.getInstance(getActivity().getApplicationContext()));
-        try {
-            mDatabase.initialize();
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
-
-        mAttachmentAdapter = new AttachmentListAdapter();
-
-        int collectionId = -1;
         if (getArguments() != null) {
-            collectionId= getArguments().getInt(AttachmentOperationHelper.ARG_MEDIA_COLLECTION_ID);
-        }
-
-        if (collectionId > 0) {
             try {
-                XoClientDatabase database = new XoClientDatabase(AndroidTalkDatabase.getInstance(getActivity().getApplicationContext()));
-                database.initialize();
-                mCollection = database.findMediaCollectionById(collectionId);
-                mAttachmentAdapter.loadAttachmentsFromCollection(mCollection);
+                mDatabase = XoApplication.getXoClient().getDatabase();
+                int collectionId = getArguments().getInt(AttachmentOperationHelper.ARG_MEDIA_COLLECTION_ID);
+                mCollection = mDatabase.findMediaCollectionById(collectionId);
+                mCollectionAdapter = new MediaCollectionItemAdapter(mCollection);
+                setListAdapter(mCollectionAdapter);
             } catch (SQLException e) {
-                // TODO display error message?
                 LOG.error(e);
             }
         } else {
-            LOG.warn("No Media Collection ID transmitted");
+            LOG.error("No Media Collection ID transmitted");
         }
-
-        setListAdapter(mAttachmentAdapter);
     }
 
     @Override
@@ -128,47 +110,12 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
         } else {
             mSearchResultAdapter.clear();
         }
-
-        mSearchResultAdapter.setAttachmentItems(mAttachmentAdapter.getAttachmentItems());
+        mSearchResultAdapter.setItems(mCollectionAdapter.getItems());
     }
 
     @Override
     protected void onSearchModeDisabled() {
-
-    }
-
-    // XXX: duplicate to the one in AudioAttachmentFragment
-    private List<IContentObject> getSelectedItems(SparseBooleanArray checkedItemPositions) {
-        SparseBooleanArray selectedItemIds = new SparseBooleanArray();
-        for (int i = 0; i < checkedItemPositions.size(); ++i) {
-            selectedItemIds.append(checkedItemPositions.keyAt(i), checkedItemPositions.valueAt(i));
-        }
-        List<IContentObject> attachments = new ArrayList<IContentObject>();
-        for (int index = 0; index < selectedItemIds.size(); ++index) {
-            int pos = selectedItemIds.keyAt(index);
-            if (selectedItemIds.get(pos)) {
-                attachments.add(mAttachmentAdapter.getItem(pos));
-            }
-        }
-
-        return attachments;
-    }
-
-    private void addSelectedItemsToCollection(Integer mediaCollectionId) {
-        List<IContentObject> selectedItems = getSelectedItems(getListView().getCheckedItemPositions());
-        if(selectedItems.size() > 0) {
-            try {
-                TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
-                List<String> addedFilenames = new ArrayList<String>();
-                for (IContentObject item : selectedItems) {
-                    mediaCollection.addItem((TalkClientDownload) item);
-                    addedFilenames.add(item.getFileName());
-                }
-                Toast.makeText(getActivity(), String.format(getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
-            } catch (SQLException e) {
-                LOG.error("Could not find MediaCollection with id: " + String.valueOf(mediaCollectionId), e);
-            }
-        }
+        // do nothing
     }
 
     private TalkClientContact retrieveContactById(Integer contactId) {
@@ -199,7 +146,7 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = retrieveContactById(contactId);
-                            AttachmentOperationHelper.sendAttachmentsToContact(getSelectedItems(getListView().getCheckedItemPositions()), contact);
+                            AttachmentOperationHelper.sendAttachmentsToContact(mCollectionAdapter.getAllSelectedItems(), contact);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (URISyntaxException e) {
@@ -212,18 +159,39 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
         }
     }
 
+    private void addSelectedItemsToCollection(Integer mediaCollectionId) {
+        List<IContentObject> selectedItems = mCollectionAdapter.getAllSelectedItems();
+        if(selectedItems.size() > 0) {
+            try {
+                TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
+                List<String> addedFilenames = new ArrayList<String>();
+                for (IContentObject item : selectedItems) {
+                    mediaCollection.addItem((TalkClientDownload) item);
+                    addedFilenames.add(item.getFileName());
+                }
+                Toast.makeText(getActivity(), String.format(getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
+            } catch (SQLException e) {
+                LOG.error("Could not find MediaCollection with id: " + String.valueOf(mediaCollectionId), e);
+            }
+        }
+    }
+
     private class ListInteractionHandler implements AbsListView.MultiChoiceModeListener, DragSortListView.DragListener {
 
         @Override
         public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-            mAttachmentAdapter.setCheckedItemsPositions(getListView().getCheckedItemPositions());
+            if(checked) {
+                mCollectionAdapter.selectItem((int)id);
+            } else {
+                mCollectionAdapter.deselectItem((int) id);
+            }
         }
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mListView.setDragEnabled(true);
             mController.setSortEnabled(true);
-            mAttachmentAdapter.setSortEnabled(true);
+            mCollectionAdapter.showDragHandle(true);
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.context_menu_fragment_messaging, menu);
             return true;
@@ -276,7 +244,7 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
         public void onDestroyActionMode(ActionMode mode) {
             mListView.setDragEnabled(false);
             mController.setSortEnabled(false);
-            mAttachmentAdapter.setSortEnabled(false);
+            mCollectionAdapter.showDragHandle(false);
         }
 
 
@@ -286,17 +254,14 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
         }
 
         private void removeCheckedItemsFromCollection() {
-            SparseBooleanArray checkedItemPositions = getListView().getCheckedItemPositions();
-            for (int i= 0; i < checkedItemPositions.size(); i++) {
-                int listIndex = checkedItemPositions.keyAt(i);
-                if(checkedItemPositions.valueAt(i)) {
-                    mCollection.removeItem(listIndex);
-                }
+            List<IContentObject> items = mCollectionAdapter.getAllSelectedItems();
+            for (IContentObject item : items) {
+                mCollection.removeItem((TalkClientDownload)item);
             }
         }
 
         private void deleteCheckedItems() {
-            List<IContentObject> items = getSelectedItems(getListView().getCheckedItemPositions());
+            List<IContentObject> items = mCollectionAdapter.getAllSelectedItems();
             for (IContentObject item : items) {
                 try{
                     mDatabase.deleteClientDownloadAndMessage((TalkClientDownload)item);
