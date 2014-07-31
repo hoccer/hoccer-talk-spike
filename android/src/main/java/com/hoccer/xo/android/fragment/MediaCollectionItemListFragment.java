@@ -106,7 +106,6 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
 
         getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         ListInteractionHandler listHandler = new ListInteractionHandler();
-        getListView().setOnItemClickListener(listHandler);
         getListView().setMultiChoiceModeListener(listHandler);
     }
 
@@ -213,12 +212,7 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
         }
     }
 
-    private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener, DragSortListView.DragListener {
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        }
+    private class ListInteractionHandler implements AbsListView.MultiChoiceModeListener, DragSortListView.DragListener {
 
         @Override
         public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
