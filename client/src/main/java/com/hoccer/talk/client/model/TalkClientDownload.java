@@ -341,10 +341,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             randomAccessFile.seek(bytesStart);
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
-                if (copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
-                    checkTransferFailure(transferFailures + 1, "download exception!");
-                    return;
-                }
+                checkTransferFailure(transferFailures + 1, "copyData returned null.");
             }
 
             LOG.debug("doDownloadingAction - ensuring file handles are closed...");
