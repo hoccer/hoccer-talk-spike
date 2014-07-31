@@ -124,7 +124,7 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
             }
         }
 
-        private class RenameCollectionCallbackHandler implements XoDialogs.OnTextClickListener {
+        private class RenameCollectionCallbackHandler implements XoDialogs.OnTextSubmittedListener {
 
             private TalkClientMediaCollection mCollection;
 
