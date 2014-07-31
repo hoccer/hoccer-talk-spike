@@ -260,7 +260,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void setState(State newState) {
-        LOG.info("[download " + clientDownloadId + "] switching to state '" + newState + "'");
+        LOG.info("[download " + clientDownloadId + "] switching to new state '" + newState + "'");
         state = newState;
 
         saveToDatabase();
@@ -318,12 +318,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 return;
             }
 
-            int contentLengthValue = getContentLengthFromResponse(response);
+            int bytesToGo = getContentLengthFromResponse(response);
             ByteRange contentRange = getContentRange(response);
             setContentTypeByResponse(response);
 
             int bytesStart = downloadProgress;
-            int bytesToGo = contentLengthValue;
             if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
                 LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 checkTransferFailure(transferFailures + 1, "invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
@@ -342,15 +341,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             randomAccessFile.seek(bytesStart);
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
-                LOG.debug("switching to state PAUSED - reason: copyData returned 'false'");
-//                checkTransferFailure(transferFailures + 1);
-                switchState(State.PAUSED, "copydata failed");
-                return;
+                if (copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
+                    checkTransferFailure(transferFailures + 1, "download exception!");
+                    return;
+                }
             }
-        } catch (Exception e) {
-            LOG.error("download exception", e);
-            checkTransferFailure(transferFailures + 1, "download exception!");
-        } finally {
+
             LOG.debug("doDownloadingAction - ensuring file handles are closed...");
             if (downloadProgress == contentLength) {
                 if (decryptionKey != null) {
@@ -360,6 +356,13 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     switchState(State.DETECTING, "downloading of unencrypted file finished");
                 }
             }
+
+        } catch(IOException e){
+            LOG.error("IOException in copyData while reading ", e);
+            checkTransferFailure(transferFailures + 1, "download exception!");
+        } catch (Exception e) {
+            LOG.error("download exception", e);
+            checkTransferFailure(transferFailures + 1, "download exception!");
         }
     }
 
@@ -373,40 +376,43 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-    private boolean copyData(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) {
+    private boolean copyData(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
+        boolean success = false;
         try {
-            byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
-            while (bytesToGo > 0) {
-                logGetTrace("bytesToGo: '" + bytesToGo + "'");
-                logGetTrace("downloadProgress: '" + downloadProgress + "'");
-                // determine how much to copy
-                int bytesToRead = Math.min(buffer.length, bytesToGo);
-                // perform the copy
-                int bytesRead = inputStream.read(buffer, 0, bytesToRead);
-                logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");
-                if (bytesRead == -1) {
-                    logGetWarning("eof with '" + bytesToGo + "' bytes to go");
-                    return false;
-                }
-                randomAccessFile.write(buffer, 0, bytesRead);
-                downloadProgress += bytesRead;
-                bytesToGo -= bytesRead;
-                for (int i = 0; i < mTransferListeners.size(); i++) {
-                    IXoTransferListener listener = mTransferListeners.get(i);
-                    // TODO: try/catch here? What happens if a listener call produces exception?
-                    listener.onProgressUpdated(downloadProgress, getTransferLength());
-                }
-            }
-        } catch (IOException e) {
-            LOG.error(e);
-            return false;
+            success = copyDataImpl(bytesToGo, randomAccessFile, fileDescriptor, inputStream);
         } finally {
             try {
                 fileDescriptor.sync();
                 randomAccessFile.close();
                 inputStream.close();
-            } catch (IOException e) {
-                LOG.error(e);
+            } catch (Exception e) {
+                LOG.error("IOException in copyDataImpl while closing streams ", e);
+            }
+        }
+        return success;
+    }
+
+    private boolean copyDataImpl(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
+        byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
+        while (bytesToGo > 0) {
+            logGetTrace("bytesToGo: '" + bytesToGo + "'");
+            logGetTrace("downloadProgress: '" + downloadProgress + "'");
+            // determine how much to copy
+            int bytesToRead = Math.min(buffer.length, bytesToGo);
+            // perform the copy
+            int bytesRead = inputStream.read(buffer, 0, bytesToRead);
+            logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");
+            if (bytesRead == -1) {
+                logGetWarning("eof with '" + bytesToGo + "' bytes to go");
+                return false;
+            }
+            randomAccessFile.write(buffer, 0, bytesRead);
+            downloadProgress += bytesRead;
+            bytesToGo -= bytesRead;
+            for (int i = 0; i < mTransferListeners.size(); i++) {
+                IXoTransferListener listener = mTransferListeners.get(i);
+                // TODO: try/catch here? What happens if a listener call produces exception?
+                listener.onProgressUpdated(downloadProgress, getTransferLength());
             }
         }
         return true;
@@ -474,7 +480,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             mDownloadRequest = null;
             LOG.debug("aborted current Download request. Download can still resume.");
         }
-        mTransferAgent.cancelDownload(this);
+        mTransferAgent.deactivateDownload(this);
         mTransferAgent.onDownloadStateChanged(this);
     }
 
