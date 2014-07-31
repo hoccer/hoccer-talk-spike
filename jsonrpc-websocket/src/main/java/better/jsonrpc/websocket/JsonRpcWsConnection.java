@@ -139,6 +139,7 @@ public class JsonRpcWsConnection extends JsonRpcConnection
         return mConnection != null && mConnection.isOpen();
     }
 
+    @Override
     public void disconnect() {
         if (mConnection != null && mConnection.isOpen()) {
             mConnection.close();

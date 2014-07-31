@@ -71,6 +71,14 @@ public class JsonRpcLocalConnection extends JsonRpcConnection {
         return mOtherConnection != null;
     }
 
+    @Override
+    public void disconnect() {
+        if (mOtherConnection != null) {
+            mOtherConnection.disconnect();
+            mOtherConnection = null;
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void sendRequest(ObjectNode request) throws Exception {
