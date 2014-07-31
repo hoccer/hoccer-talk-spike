@@ -30,7 +30,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     private String mContentMediaType;
     private int mConversationContactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
 
-    private SparseBooleanArray mCheckedItems;
+    private SparseBooleanArray mCheckedItemPositions;
 
     private TalkClientMediaCollection mCollection = null;
     private boolean mShallDragHandlesShow = false;
@@ -107,8 +107,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         audioRowView.setMediaItem(mAttachmentItems.get(position));
         audioRowView.updatePlayPauseView();
 
-        if (mCheckedItems != null) {
-            audioRowView.getChildAt(0).setSelected(mCheckedItems.get(position));
+        if (mCheckedItemPositions != null) {
+            audioRowView.getChildAt(0).setSelected(mCheckedItemPositions.get(position));
         }
 
         audioRowView.showDragHandle(mShallDragHandlesShow);
@@ -164,7 +164,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
             notifyDataSetChanged();
         }
-        // TODO: update mCheckedItems
+        // TODO: update mCheckedItemPositions
     }
 
     public boolean removeItem(IContentObject item) {
@@ -214,9 +214,13 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         notifyDataSetChanged();
     }
 
-    public void setCheckedItems(SparseBooleanArray items) {
-        this.mCheckedItems = items;
+    public void setCheckedItemsPositions(SparseBooleanArray itemPositions) {
+        mCheckedItemPositions = itemPositions;
         notifyDataSetChanged();
+    }
+
+    public SparseBooleanArray getCheckedItemPositions() {
+        return mCheckedItemPositions;
     }
 
     public void loadAttachments() {
@@ -269,20 +273,20 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     private void updateCheckedItems() {
-        if (mCheckedItems != null && mCheckedItems.size() > 0) {
-            SparseBooleanArray updatedSelection = new SparseBooleanArray(mCheckedItems.size());
+        if (mCheckedItemPositions != null && mCheckedItemPositions.size() > 0) {
+            SparseBooleanArray updatedSelection = new SparseBooleanArray(mCheckedItemPositions.size());
 
-            for (int i = 0; i < mCheckedItems.size(); ++i) {
-                boolean b = mCheckedItems.valueAt(i);
-                int k = mCheckedItems.keyAt(i);
+            for (int i = 0; i < mCheckedItemPositions.size(); ++i) {
+                boolean b = mCheckedItemPositions.valueAt(i);
+                int k = mCheckedItemPositions.keyAt(i);
                 updatedSelection.put(k + 1, b);
             }
 
-            mCheckedItems.clear();
+            mCheckedItemPositions.clear();
 
             //@Info Setting mSelection to updatedSelection won't work since the reference changes, which is not allowed
             for (int i = 0; i < updatedSelection.size(); ++i) {
-                mCheckedItems.append(updatedSelection.keyAt(i), updatedSelection.valueAt(i));
+                mCheckedItemPositions.append(updatedSelection.keyAt(i), updatedSelection.valueAt(i));
             }
         }
     }

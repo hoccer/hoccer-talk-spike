@@ -216,7 +216,7 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
 
         @Override
         public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-            mAttachmentAdapter.setCheckedItems(getListView().getCheckedItemPositions());
+            mAttachmentAdapter.setCheckedItemsPositions(getListView().getCheckedItemPositions());
         }
 
         @Override
