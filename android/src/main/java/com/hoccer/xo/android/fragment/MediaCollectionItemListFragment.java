@@ -226,7 +226,6 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
             mAttachmentAdapter.setSortEnabled(true);
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.context_menu_fragment_messaging, menu);
-
             return true;
         }
 
@@ -280,15 +279,10 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
             mAttachmentAdapter.setSortEnabled(false);
         }
 
-        private void deleteCheckedItems() {
-            List<IContentObject> items = getSelectedItems(getListView().getCheckedItemPositions());
-            for (IContentObject item : items) {
-                try{
-                    mDatabase.deleteClientDownloadAndMessage((TalkClientDownload)item);
-                } catch(SQLException e) {
-                    LOG.error("Could not delete download", e);
-                }
-            }
+
+        @Override
+        public void drag(int from, int to) {
+            getListView().dispatchSetSelected(false);
         }
 
         private void removeCheckedItemsFromCollection() {
@@ -301,9 +295,15 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
             }
         }
 
-        @Override
-        public void drag(int from, int to) {
-            getListView().dispatchSetSelected(false);
+        private void deleteCheckedItems() {
+            List<IContentObject> items = getSelectedItems(getListView().getCheckedItemPositions());
+            for (IContentObject item : items) {
+                try{
+                    mDatabase.deleteClientDownloadAndMessage((TalkClientDownload)item);
+                } catch(SQLException e) {
+                    LOG.error("Could not delete download", e);
+                }
+            }
         }
     }
 }
