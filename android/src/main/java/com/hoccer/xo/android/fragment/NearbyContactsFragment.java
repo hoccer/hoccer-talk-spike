@@ -51,6 +51,9 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
     @Override
     public void onResume() {
         super.onResume();
+
+        createAdapter();
+
         if (isNearbyConversationPossible(mCurrentNearbyGroup)) {
             activateNearbyChat();
         } else {
@@ -68,6 +71,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         if (mNearbyAdapter != null) {
             mNearbyAdapter.unregisterListeners();
         }
+        destroyAdapter();
         super.onDestroy();
     }
 
@@ -104,7 +108,11 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     private void activateNearbyChat() {
         hidePlaceholder();
-        createAdapter();
+    }
+
+    private void deactivateNearbyChat() {
+        mCurrentNearbyGroup = null;
+        showPlaceholder();
     }
 
     public void shutdownNearbyChat() {
@@ -113,21 +121,18 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         }
     }
 
-    private void deactivateNearbyChat() {
-        destroyAdapter();
-        showPlaceholder();
-    }
-
     private void createAdapter() {
-        mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity());
-        mNearbyAdapter.retrieveDataFromDb(mCurrentNearbyGroup);
-        mNearbyAdapter.registerListeners();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                setListAdapter(mNearbyAdapter);
-            }
-        });
+        if (mNearbyAdapter == null) {
+            mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity());
+            mNearbyAdapter.retrieveDataFromDb(mCurrentNearbyGroup);
+            mNearbyAdapter.registerListeners();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setListAdapter(mNearbyAdapter);
+                }
+            });
+        }
     }
 
     private void destroyAdapter() {
@@ -140,19 +145,6 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
             });
             mNearbyAdapter.unregisterListeners();
             mNearbyAdapter = null;
-        }
-    }
-
-    private void updateContactList() {
-        if (mNearbyAdapter != null) {
-            mContactList.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mNearbyAdapter != null) {
-                        mNearbyAdapter.notifyDataSetChanged();
-                    }
-                }
-            });
         }
     }
 
@@ -216,7 +208,6 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         if (mCurrentNearbyGroup != null && contact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
             if (isNearbyConversationPossible(contact)) {
                 activateNearbyChat();
-                updateContactList();
             } else {
                 deactivateNearbyChat();
             }
@@ -232,7 +223,6 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         if (mCurrentNearbyGroup != null && contact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
             if (isNearbyConversationPossible(contact)) {
                 activateNearbyChat();
-                updateContactList();
             } else {
                 deactivateNearbyChat();
             }

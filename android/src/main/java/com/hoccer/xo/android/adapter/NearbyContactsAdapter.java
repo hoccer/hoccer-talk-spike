@@ -22,12 +22,23 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class NearbyContactsAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
+
+    private static final Logger LOG = Logger.getLogger(NearbyContactsAdapter.class);
+    private static final long RATE_LIMIT_MSECS = 1000;
+
     private XoClientDatabase mDatabase;
     private XoActivity mXoActivity;
-    private Logger LOG = Logger.getLogger(NearbyContactsAdapter.class);
+    private final ScheduledExecutorService mExecutor;
+    private ScheduledFuture<?> mNotifyFuture;
+    private long mNotifyTimestamp;
 
     private List<TalkClientContact> mNearbyContacts = new ArrayList<TalkClientContact>();
     private TalkClientContact mCurrentNearbyGroup;
@@ -36,6 +47,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         super();
         mDatabase = db;
         mXoActivity = xoActivity;
+        mExecutor = mXoActivity.getBackgroundExecutor();
     }
 
     @Override
@@ -78,17 +90,6 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         if (group == null || mDatabase == null) {
             return;
         }
-//        if (mDatabase == null) {
-//            Timer timer = new Timer();
-//            TimerTask task = new TimerTask() {
-//                @Override
-//                public void run() {
-//                    updateAdapter(group);
-//                }
-//            };
-//            timer.schedule(task, 1000);
-//            return;
-//        }
         try {
             mNearbyContacts.clear();
             List<TalkClientContact> allClientContacts = mDatabase.findAllNearbyContactsInGroup(group);
@@ -100,12 +101,8 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
                         mNearbyContacts.add(contact);
                     }
                 } else {
-                    if (contact.isClientGroupJoined(group) && !contact.isSelf()) {
+                    if (!contact.isSelf()) {
                         mNearbyContacts.add(contact);
-                    }
-                    TalkClientDownload avatarDownload = contact.getAvatarDownload();
-                    if (avatarDownload != null) {
-                        mDatabase.refreshClientDownload(avatarDownload);
                     }
                 }
             }
@@ -113,7 +110,6 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
             LOG.error("SQL Error while retrieving nearby group contacts.");
         }
     }
-
 
     private void updateContact(final View view, final TalkClientContact contact) {
         TextView nameView = ViewHolderForAdapters.get(view, R.id.contact_name);
@@ -149,7 +145,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
             message = mDatabase.findLatestMessageByContactId(contact.getClientContactId());
             unseenMessages = mDatabase.findUnseenMessageCountByContactId(contact.getClientContactId());
         } catch (SQLException e) {
-            LOG.error("NearbyContactsAdapter: SQL error", e);
+            LOG.error("SQL error while retrieving nearby message data ", e);
         }
         if (message != null) {
             Date messageTime = message.getTimestamp();
@@ -194,6 +190,34 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
                 notifyDataSetChanged();
             }
         });
+    }
+
+    private void scheduleUpdateAdapter(final TalkClientContact group) {
+        long now = System.currentTimeMillis();
+        long delta = now - mNotifyTimestamp;
+        if (mNotifyFuture != null) {
+            mNotifyFuture.cancel(false);
+            mNotifyFuture = null;
+        }
+        if (delta < RATE_LIMIT_MSECS) {
+            long delay = RATE_LIMIT_MSECS - delta;
+
+            LOG.debug("Scheduling update of NearbyContactsAdapter with delay " + delay);
+            mNotifyFuture = mExecutor.schedule(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            mNotifyTimestamp = System.currentTimeMillis();
+                            LOG.debug("Executing scheduled update of NearbyContactsAdapter.");
+                            updateAdapter(group);
+                        }
+                    }
+                    , delay, TimeUnit.MILLISECONDS);
+        } else {
+            mNotifyTimestamp = System.currentTimeMillis();
+            LOG.debug("Updating NearbyContactsAdapter right away.");
+            updateAdapter(group);
+        }
     }
 
     private void refreshList() {
@@ -249,7 +273,8 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
         if (mCurrentNearbyGroup != null && contact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
-            updateAdapter(contact);
+            LOG.debug("onGroupPresenceChanged()");
+            scheduleUpdateAdapter(contact);
         }
     }
 
@@ -260,7 +285,8 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
             mCurrentNearbyGroup = currentNearbyGroup;
         }
         if (mCurrentNearbyGroup != null && contact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
-            updateAdapter(contact);
+            LOG.debug("onGroupMembershipChanged()");
+            scheduleUpdateAdapter(contact);
         }
     }
 
