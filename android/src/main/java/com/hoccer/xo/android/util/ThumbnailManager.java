@@ -230,6 +230,9 @@ public class ThumbnailManager {
     }
 
     private Bitmap createImageThumbnail(String uri, int maskResource, String tag) {
+        if (uri == null) {
+            return null;
+        }
         Bitmap thumbnail;
         File imageFile = new File(getRealPathFromURI(Uri.parse(uri), mContext));
         if (imageFile.exists()) {
@@ -402,6 +405,9 @@ public class ThumbnailManager {
     private Bitmap createVideoThumbnail(String uri, int maskResource, String tag) {
         String path = getRealPathFromURI(Uri.parse(uri), mContext);
         Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Images.Thumbnails.MINI_KIND);
+        if (bitmap == null) {
+            return null;
+        }
         Bitmap result;
         // scale up if necessary
         if (bitmap.getHeight() < DEFAULT_HEIGHT_DP) {
