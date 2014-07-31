@@ -138,7 +138,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
-        // message.setProgressState(false); // TODO: WTF is this? is it ever saved with TRUE?
         Dao.CreateOrUpdateStatus result = mClientMessages.createOrUpdate(message);
 
         if(result.isCreated()) {
@@ -805,18 +804,16 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public void deleteMessageById(int clientMessageId) throws SQLException {
+        TalkClientMessage message = mClientMessages.queryForId(clientMessageId);
+        mClientMessages.deleteById(clientMessageId);
 
-        DeleteBuilder<TalkClientMessage, Integer> deleteBuilder = mClientMessages.deleteBuilder();
-        deleteBuilder.where()
-                .eq("clientMessageId", clientMessageId);
-        deleteBuilder.delete();
+        for (IXoMessageListener listener : mMessageListeners) {
+            listener.onMessageDeleted(message);
+        }
     }
 
     public void deleteClientDownload(TalkClientDownload download) throws SQLException {
-        DeleteBuilder<TalkClientDownload, Integer> deleteBuilder = mClientDownloads.deleteBuilder();
-        deleteBuilder.where()
-                .eq("clientDownloadId", download.getClientDownloadId());
-        int deletedRowsCount = deleteBuilder.delete();
+        int deletedRowsCount = mClientDownloads.delete(download);
         if (deletedRowsCount > 0) {
 
             // remove download from all collections
