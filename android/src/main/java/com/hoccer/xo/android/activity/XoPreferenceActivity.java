@@ -300,7 +300,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         XoDialogs.showInputPasswordDialog("ImportCredentialsDialog",
                 R.string.dialog_import_credentials_title,
                 this,
-                new XoDialogs.OnTextClickListener() {
+                new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
                         if (password != null && password.length() > 0) {
@@ -346,7 +346,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         XoDialogs.showInputPasswordDialog("ExportCredentialsDialog",
                 R.string.dialog_export_credentials_title,
                 this,
-                new XoDialogs.OnTextClickListener() {
+                new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
                         if (password != null && password.length() > 0) {

@@ -50,7 +50,7 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
             Bundle bundle = new Bundle();
             bundle.putInt(AttachmentOperationHelper.ARG_MEDIA_COLLECTION_ID, mediaCollectionId);
 
-            CollectionListFragment fragment = new CollectionListFragment();
+            MediaCollectionItemListFragment fragment = new MediaCollectionItemListFragment();
             fragment.setArguments(bundle);
 
             FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();

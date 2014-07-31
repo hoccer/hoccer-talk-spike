@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.*;
 import android.os.Bundle;
@@ -18,6 +17,7 @@ import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
@@ -30,7 +30,6 @@ import com.hoccer.xo.android.content.AttachmentAdapterDownloadHandler;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
-import com.hoccer.xo.android.dialog.AttachmentRemovalDialogBuilder;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.AttachmentOperationHelper;
 import com.hoccer.xo.release.R;
@@ -463,11 +462,17 @@ public class AudioAttachmentListFragment extends ListFragment {
 
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
-                    AttachmentRemovalDialogBuilder builder = new AttachmentRemovalDialogBuilder(getActivity(),
-                            getSelectedAttachments());
-                    builder.setDeleteCallbackHandler(new DialogCallbackHandler());
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
+                    XoDialogs.showYesNoDialog("RemoveAttachment", R.string.dialog_attachment_delete_title, R.string.dialog_attachment_delete_message, getActivity(),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    deleteSelectedAttachments();
+                                }
+                            }, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            });
                     mode.finish();
                     return true;
                 case R.id.menu_share:
@@ -540,18 +545,17 @@ public class AudioAttachmentListFragment extends ListFragment {
         }
     }
 
-    private class DialogCallbackHandler implements AttachmentRemovalDialogBuilder.DeleteCallback {
-
-        @Override
-        public void deleteAttachments(List<IContentObject> attachments) {
-            AttachmentOperationHelper.deleteAttachments(getActivity(), attachments);
-
-            for (IContentObject attachment : attachments) {
-                mAttachmentListAdapter.removeItem(attachment);
+    private void deleteSelectedAttachments() {
+        List<IContentObject> selectedObjects = getSelectedAttachments();
+        for(IContentObject item : selectedObjects) {
+            TalkClientDownload download = (TalkClientDownload)item;
+            try {
+                XoApplication.getXoClient().getDatabase().deleteClientDownloadAndMessage(download);
+            } catch (SQLException e) {
+                LOG.error(e);
             }
-
-            updateListView(mAttachmentListAdapter);
+            mAttachmentListAdapter.removeItem(item);
         }
+        updateListView(mAttachmentListAdapter);
     }
-
 }

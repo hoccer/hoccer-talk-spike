@@ -94,8 +94,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
     }
 
     @Override
-    public void onDownloadSaved(TalkClientDownload download, boolean isCreated) {
-
+    public void onDownloadCreated(TalkClientDownload download) {
         // do nothing if the download is incomplete or already contained
         if(download.getState() != TalkClientDownload.State.COMPLETE || mList.contains(download))
             return;
@@ -121,7 +120,12 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
     }
 
     @Override
-    public void onDownloadRemoved(TalkClientDownload download) {
+    public void onDownloadUpdated(TalkClientDownload download) {
+        // do nothing
+    }
+
+    @Override
+    public void onDownloadDeleted(TalkClientDownload download) {
         if(mContact != null) {
             try {
                 TalkClientMessage message = mDatabase.findClientMessageByTalkClientDownloadId(download.getClientDownloadId());

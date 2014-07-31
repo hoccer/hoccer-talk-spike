@@ -180,14 +180,14 @@ public abstract class ContactsAdapter extends XoAdapter
     }
 
     @Override
-    public void onMessageAdded(TalkClientMessage message) {
+    public void onMessageCreated(TalkClientMessage message) {
         requestReload();
     }
     @Override
-    public void onMessageRemoved(TalkClientMessage message) {
+    public void onMessageDeleted(TalkClientMessage message) {
     }
     @Override
-    public void onMessageStateChanged(TalkClientMessage message) {
+    public void onMessageUpdated(TalkClientMessage message) {
     }
 
     @Override

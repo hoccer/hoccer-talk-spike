@@ -15,7 +15,6 @@ import com.j256.ormlite.table.TableUtils;
 
 import org.apache.log4j.Logger;
 
-import java.lang.ref.WeakReference;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -50,6 +49,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
 
     private WeakListenerArray<IXoDownloadListener> mDownloadListeners = new WeakListenerArray<IXoDownloadListener>();
+    private WeakListenerArray<IXoMessageListener> mMessageListeners = new WeakListenerArray<IXoMessageListener>();
     private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListeners = new WeakListenerArray<IXoMediaCollectionListener>();
 
 
@@ -138,8 +138,17 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
-        // message.setProgressState(false); // TODO: WTF is this? is it ever saved with TRUE?
-        mClientMessages.createOrUpdate(message);
+        Dao.CreateOrUpdateStatus result = mClientMessages.createOrUpdate(message);
+
+        if(result.isCreated()) {
+            for (IXoMessageListener listener : mMessageListeners) {
+                listener.onMessageCreated(message);
+            }
+        } else {
+            for (IXoMessageListener listener : mMessageListeners) {
+                listener.onMessageUpdated(message);
+            }
+        }
     }
 
     public void saveMessage(TalkMessage message) throws SQLException {
@@ -159,10 +168,16 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public void saveClientDownload(TalkClientDownload download) throws SQLException {
-        boolean isCreated = mClientDownloads.createOrUpdate(download).isCreated();
+        Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
 
-        for (IXoDownloadListener listener : mDownloadListeners) {
-            listener.onDownloadSaved(download, isCreated);
+        if(result.isCreated()) {
+            for (IXoDownloadListener listener : mDownloadListeners) {
+                listener.onDownloadCreated(download);
+            }
+        } else {
+            for (IXoDownloadListener listener : mDownloadListeners) {
+                listener.onDownloadUpdated(download);
+            }
         }
     }
 
@@ -789,18 +804,16 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public void deleteMessageById(int clientMessageId) throws SQLException {
+        TalkClientMessage message = mClientMessages.queryForId(clientMessageId);
+        mClientMessages.deleteById(clientMessageId);
 
-        DeleteBuilder<TalkClientMessage, Integer> deleteBuilder = mClientMessages.deleteBuilder();
-        deleteBuilder.where()
-                .eq("clientMessageId", clientMessageId);
-        deleteBuilder.delete();
+        for (IXoMessageListener listener : mMessageListeners) {
+            listener.onMessageDeleted(message);
+        }
     }
 
     public void deleteClientDownload(TalkClientDownload download) throws SQLException {
-        DeleteBuilder<TalkClientDownload, Integer> deleteBuilder = mClientDownloads.deleteBuilder();
-        deleteBuilder.where()
-                .eq("clientDownloadId", download.getClientDownloadId());
-        int deletedRowsCount = deleteBuilder.delete();
+        int deletedRowsCount = mClientDownloads.delete(download);
         if (deletedRowsCount > 0) {
 
             // remove download from all collections
@@ -809,11 +822,16 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 collection.removeItem(download);
             }
 
-
             for (IXoDownloadListener listener : mDownloadListeners) {
-                listener.onDownloadRemoved(download);
+                listener.onDownloadDeleted(download);
             }
         }
+    }
+
+    public void deleteClientDownloadAndMessage(TalkClientDownload download) throws SQLException {
+        deleteClientDownload(download);
+        int messageId = findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
+        deleteMessageById(messageId);
     }
 
     /* delivered -> deliveredPrivate

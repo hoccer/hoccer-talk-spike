@@ -43,8 +43,9 @@
     </string>
 
     <!-- Deleting attachments -->
-    <string name="attachment_confirm_delete_dialog_message">Delete selected attachments and related chat messages?
-    </string>
+
+    <string name="dialog_attachment_delete_title">Delete Attachment</string>
+    <string name="dialog_attachment_delete_message">Delete selected attachments and related chat messages?</string>
 
     <!-- AudioAttachmentList Fragment -->
     <string name="audio_attachment_list_all">All</string>
