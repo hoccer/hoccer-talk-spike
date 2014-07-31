@@ -11,14 +11,19 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import com.hoccer.talk.client.IXoStateListener;
+import com.hoccer.talk.client.XoClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsPageAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.NearbyContactsFragment;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
-public class ContactsActivity extends XoActivity {
+public class ContactsActivity extends XoActivity implements IXoStateListener {
+
+    private final static Logger LOG = Logger.getLogger(ContactsActivity.class);
 
     private ViewPager mViewPager;
     private ActionBar mActionBar;
@@ -60,18 +65,34 @@ public class ContactsActivity extends XoActivity {
             }
 
             SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+            // TODO: remove, was only for debug purposes to manually active environment updates before there was a UI for that
             SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
                 @Override
                 public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                     if (key.equals("preference_environment_update")) {
                         mEnvironmentUpdatesEnabled = sharedPreferences.getBoolean("preference_environment_update", true);
-                        refreshEnvironmentUpdater();
+                        refreshEnvironmentUpdater(false);
                     }
                 }
             };
             mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesListener);
             mEnvironmentUpdatesEnabled = mPreferences.getBoolean("preference_environment_update", true);
+
+            getXoClient().registerStateListener(this);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getXoClient().unregisterStateListener(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getXoClient().unregisterStateListener(this);
     }
 
     @Override
@@ -80,28 +101,37 @@ public class ContactsActivity extends XoActivity {
         if (!getXoClient().isRegistered()) {
             finish();
         } else {
-            refreshEnvironmentUpdater();
+            refreshEnvironmentUpdater(false);
         }
-
+        getXoClient().registerStateListener(this);
     }
 
-    private void refreshEnvironmentUpdater() {
+    private void refreshEnvironmentUpdater(boolean force) {
+        LOG.debug("refreshEnvironmentUpdater");
         int position = mViewPager.getCurrentItem();
         Fragment fragment = mAdapter.getItem(position);
         if (fragment instanceof NearbyContactsFragment) {
             if (mEnvironmentUpdatesEnabled) {
                 if (isLocationServiceEnabled()) {
-                    XoApplication.startNearbySession();
+                    LOG.debug("refreshEnvironmentUpdater:startNearbySession");
+                    XoApplication.startNearbySession(force);
                 }
             }
         } else {
-            XoApplication.stopNearbySession();
+            shutDownNearbySession();
         }
     }
 
+    private void shutDownNearbySession() {
+        LOG.debug("shutDownNearbySession");
+        XoApplication.stopNearbySession();
+        NearbyContactsFragment nearbyContactsFragment = (NearbyContactsFragment) mAdapter.getItem(2);
+        nearbyContactsFragment.shutdownNearbyChat();
+    }
+
     private boolean isLocationServiceEnabled() {
-        final LocationManager manager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !manager.isProviderEnabled( LocationManager.NETWORK_PROVIDER)) {
+        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
                     R.string.dialog_enable_location_service_title,
                     R.string.dialog_enable_location_service_message,
@@ -131,7 +161,7 @@ public class ContactsActivity extends XoActivity {
 
         @Override
         public void onPageSelected(int position) {
-            refreshEnvironmentUpdater();
+            refreshEnvironmentUpdater(false);
         }
 
         @Override
@@ -151,6 +181,7 @@ public class ContactsActivity extends XoActivity {
             if (!mNoUserInput) {
                 mViewPager.setCurrentItem(tab.getPosition());
             }
+            getXoClient().wake();
         }
 
         @Override
@@ -163,4 +194,15 @@ public class ContactsActivity extends XoActivity {
 
         }
     }
+
+    @Override
+    public void onClientStateChange(XoClient client, int state) {
+        LOG.debug("onClientStateChange:"+state);
+        if (!client.isAwake()) {
+            shutDownNearbySession();
+        } else if (client.isActive()) {
+            refreshEnvironmentUpdater(true);
+        }
+    }
+
 }

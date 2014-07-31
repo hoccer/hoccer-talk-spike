@@ -58,13 +58,19 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         DOWNLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, DECRYPTING, DETECTING, FAILED);
+                return EnumSet.of(PAUSED, RETRYING, DECRYPTING, DETECTING, FAILED);
             }
         },
         PAUSED {
             @Override
             public Set<State> possibleFollowUps() {
                 return EnumSet.of(DOWNLOADING);
+            }
+        },
+        RETRYING {
+            @Override
+            public Set<State> possibleFollowUps() {
+                return EnumSet.of(DOWNLOADING, PAUSED);
             }
         },
         DECRYPTING {
@@ -173,7 +179,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 //        url = checkFilecacheUrl(url); // TODO: ToBeDeleted
         this.downloadUrl = url;
         this.downloadFile = id + "-" + timestamp.getTime();
-        switchState(State.NEW);
+        switchState(State.NEW, "new avatar");
     }
 
     public void initializeAsAttachment(XoTransferAgent agent, TalkAttachment attachment, String id, byte[] key) {
@@ -195,25 +201,25 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.decryptionKey = new String(Hex.encodeHex(key));
         this.contentHmac = attachment.getHmac();
         this.fileId = attachment.getFileId();
-        switchState(State.NEW);
+        switchState(State.NEW, "new attachment");
     }
 
     @Override
     public void start(XoTransferAgent agent) {
         mTransferAgent = agent;
-        switchState(State.DOWNLOADING);
+        switchState(State.DOWNLOADING, "starting");
     }
 
     @Override
     public void pause(XoTransferAgent agent) {
         mTransferAgent = agent;
-        switchState(State.PAUSED);
+        switchState(State.PAUSED, "pausing");
     }
 
     @Override
     public void cancel(XoTransferAgent agent) {
         mTransferAgent = agent;
-        switchState(State.PAUSED);
+        switchState(State.PAUSED, "cancelling");
     }
 
     /**********************************************************************************************/
@@ -223,16 +229,17 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     /**
      * ******************************************************************************************
      */
-    private void switchState(State newState) {
+    private void switchState(State newState, String reason) {
         if (!state.possibleFollowUps().contains(newState)) {
             LOG.warn("State " + newState + " is no possible followup to " + state);
             return;
         }
+        LOG.info("switching to state '" + newState + "' - supplied reason: '" + reason + "'");
         setState(newState);
 
         switch (state) {
             case INITIALIZING:
-                switchState(State.NEW);
+                switchState(State.NEW, "initializing done");
                 break;
             case NEW:
                 // DO NOTHING
@@ -242,6 +249,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 break;
             case PAUSED:
                 doPausedAction();
+                break;
+            case RETRYING:
+                doRetryingAction();
                 break;
             case DECRYPTING:
                 doDecryptingAction();
@@ -259,13 +269,14 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void setState(State newState) {
-        LOG.info("[download " + clientDownloadId + "] switching to state " + newState);
+        LOG.info("[download " + clientDownloadId + "] switching to new state '" + newState + "'");
         state = newState;
 
         saveToDatabase();
 
         for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);
+            // TODO: try/catch here? What happens if a listener call produces exception?
             listener.onStateChanged(state);
         }
     }
@@ -309,21 +320,21 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             int sc = status.getStatusCode();
             logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
-                LOG.debug("switching to state PAUSED - reason: http status is not OK (" + HttpStatus.SC_OK + ") or partial content ("
-                        + HttpStatus.SC_PARTIAL_CONTENT + ")");
-                checkTransferFailure(transferFailures + 1);
+                LOG.debug("http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
+                        HttpStatus.SC_PARTIAL_CONTENT + ")");
+                checkTransferFailure(transferFailures + 1, "http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
+                        HttpStatus.SC_PARTIAL_CONTENT + ")");
                 return;
             }
 
-            int contentLengthValue = getContentLengthFromResponse(response);
+            int bytesToGo = getContentLengthFromResponse(response);
             ByteRange contentRange = getContentRange(response);
             setContentTypeByResponse(response);
 
             int bytesStart = downloadProgress;
-            int bytesToGo = contentLengthValue;
             if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
-                LOG.debug("switching to state PAUSED - reason: invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
-                checkTransferFailure(transferFailures + 1);
+                LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
+                checkTransferFailure(transferFailures + 1, "invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 return;
             }
 
@@ -339,71 +350,74 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             randomAccessFile.seek(bytesStart);
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
-                LOG.debug("switching to state PAUSED - reason: copyData returned 'false'");
-//                checkTransferFailure(transferFailures + 1);
-                switchState(State.PAUSED);
-                return;
+                checkTransferFailure(transferFailures + 1, "copyData returned null.");
             }
-        } catch (Exception e) {
-            LOG.error("download exception -> switching to state PAUSED", e);
-            checkTransferFailure(transferFailures + 1);
-            switchState(State.PAUSED);
-        } finally {
+
             LOG.debug("doDownloadingAction - ensuring file handles are closed...");
             if (downloadProgress == contentLength) {
                 if (decryptionKey != null) {
-                    switchState(State.DECRYPTING);
+                    switchState(State.DECRYPTING, "downloading of encrypted file finished");
                 } else {
                     dataFile = downloadFilename;
-                    switchState(State.DETECTING);
+                    switchState(State.DETECTING, "downloading of unencrypted file finished");
                 }
             }
+
+        } catch (IOException e) {
+            LOG.error("IOException in copyData while reading ", e);
+            checkTransferFailure(transferFailures + 1, "download exception!");
+        } catch (Exception e) {
+            LOG.error("download exception", e);
+            checkTransferFailure(transferFailures + 1, "download exception!");
         }
     }
 
-    private void checkTransferFailure(int failures) {
+    private void checkTransferFailure(int failures, String failureDescription) {
         transferFailures = failures;
         if (transferFailures <= MAX_FAILURES) {
-            switchState(State.PAUSED);
-            mTransferAgent.scheduleDownloadAttempt(this);
+            switchState(State.RETRYING, "pausing because transfer failures still allow resuming (" + transferFailures + "/" + MAX_FAILURES + " transferFailures), cause: '" + failureDescription + "'");
         } else {
-            switchState(State.FAILED);
+            switchState(State.FAILED, "failing because transfer failures reached max count (" + transferFailures + "/" + MAX_FAILURES + " transferFailures), cause: '" + failureDescription + "'");
         }
     }
 
-    private boolean copyData(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) {
+    private boolean copyData(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
+        boolean success = false;
         try {
-            byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
-            while (bytesToGo > 0) {
-                logGetTrace("bytesToGo: '" + bytesToGo + "'");
-                logGetTrace("downloadProgress: '" + downloadProgress + "'");
-                // determine how much to copy
-                int bytesToRead = Math.min(buffer.length, bytesToGo);
-                // perform the copy
-                int bytesRead = inputStream.read(buffer, 0, bytesToRead);
-                logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");
-                if (bytesRead == -1) {
-                    logGetWarning("eof with '" + bytesToGo + "' bytes to go");
-                    return false;
-                }
-                randomAccessFile.write(buffer, 0, bytesRead);
-                downloadProgress += bytesRead;
-                bytesToGo -= bytesRead;
-                for (int i = 0; i < mTransferListeners.size(); i++) {
-                    IXoTransferListener listener = mTransferListeners.get(i);
-                    listener.onProgressUpdated(downloadProgress, getTransferLength());
-                }
-            }
-        } catch (IOException e) {
-            LOG.error(e);
-            return false;
+            success = copyDataImpl(bytesToGo, randomAccessFile, fileDescriptor, inputStream);
         } finally {
             try {
                 fileDescriptor.sync();
                 randomAccessFile.close();
                 inputStream.close();
-            } catch (IOException e) {
-                LOG.error(e);
+            } catch (Exception e) {
+                LOG.error("IOException in copyDataImpl while closing streams ", e);
+            }
+        }
+        return success;
+    }
+
+    private boolean copyDataImpl(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
+        byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
+        while (bytesToGo > 0) {
+            logGetTrace("bytesToGo: '" + bytesToGo + "'");
+            logGetTrace("downloadProgress: '" + downloadProgress + "'");
+            // determine how much to copy
+            int bytesToRead = Math.min(buffer.length, bytesToGo);
+            // perform the copy
+            int bytesRead = inputStream.read(buffer, 0, bytesToRead);
+            logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");
+            if (bytesRead == -1) {
+                logGetWarning("eof with '" + bytesToGo + "' bytes to go");
+                return false;
+            }
+            randomAccessFile.write(buffer, 0, bytesRead);
+            downloadProgress += bytesRead;
+            bytesToGo -= bytesRead;
+            for (int i = 0; i < mTransferListeners.size(); i++) {
+                IXoTransferListener listener = mTransferListeners.get(i);
+                // TODO: try/catch here? What happens if a listener call produces exception?
+                listener.onProgressUpdated(downloadProgress, getTransferLength());
             }
         }
         return true;
@@ -471,8 +485,19 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             mDownloadRequest = null;
             LOG.debug("aborted current Download request. Download can still resume.");
         }
-        mTransferAgent.cancelDownload(this);
+        mTransferAgent.deactivateDownload(this);
         mTransferAgent.onDownloadStateChanged(this);
+    }
+
+    private void doRetryingAction() {
+        if (mDownloadRequest != null) {
+            mDownloadRequest.abort();
+            mDownloadRequest = null;
+            LOG.debug("aborted current Download request. Download can still resume.");
+        }
+        mTransferAgent.deactivateDownload(this);
+        mTransferAgent.onDownloadStateChanged(this);
+        mTransferAgent.scheduleDownloadAttempt(this);
     }
 
     private void doDecryptingAction() {
@@ -521,24 +546,26 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             }
 
             dataFile = destinationFile;
-            switchState(State.DETECTING);
+            switchState(State.DETECTING, "decryption finished successfully");
         } catch (Exception e) {
             LOG.error("decryption error", e);
-            checkTransferFailure(transferFailures + 1);
-            switchState(State.PAUSED);
+            checkTransferFailure(transferFailures + 1, "failure during decryption");
         }
     }
 
     private void doDetectingAction() {
-        String destinationFilePath;
+        String tempDestinationFilePath;
+        String destinationDirectory;
         if (this.decryptedFile != null) {
-            destinationFilePath = computeDecryptionFile(mTransferAgent);
+            tempDestinationFilePath = computeDecryptionFile(mTransferAgent);
+            destinationDirectory = computeDecryptionDirectory(mTransferAgent);
         } else {
-            destinationFilePath = computeDownloadFile(mTransferAgent);
+            tempDestinationFilePath = computeDownloadFile(mTransferAgent);
+            destinationDirectory = computeDownloadDirectory(mTransferAgent);
         }
 
-        LOG.debug("performDetection(downloadId: '" + clientDownloadId + "', destinationFile: '" + destinationFilePath + "')");
-        File destination = new File(destinationFilePath);
+        LOG.debug("performDetection(downloadId: '" + clientDownloadId + "', destinationFile: '" + tempDestinationFilePath + "')");
+        File destination = new File(tempDestinationFilePath);
 
         try {
             InputStream fileInputStream = new FileInputStream(destination);
@@ -566,7 +593,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     if (extension != null) {
                         LOG.info("[downloadId: '" + clientDownloadId + "'] renaming to extension '" + detectedMimeType.getExtension() + "'");
 
-                        String destinationDirectory = computeDecryptionDirectory(mTransferAgent);
                         String destinationFileName = createUniqueFileNameInDirectory(this.fileName, extension, destinationDirectory);
                         String destinationPath = destinationDirectory + File.separator + destinationFileName;
 
@@ -580,11 +606,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     }
                 }
             }
-            switchState(State.COMPLETE);
+            switchState(State.COMPLETE, "detection successful");
         } catch (Exception e) {
             LOG.error("detection error", e);
-            checkTransferFailure(transferFailures + 1);
-            switchState(State.PAUSED);
+            checkTransferFailure(transferFailures + 1, "detection failed");
         }
     }
 
@@ -637,7 +662,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return file;
     }
 
-
     private void logGetDebug(String message) {
         LOG.debug("[downloadId: '" + clientDownloadId + "'] GET " + message);
     }
@@ -665,6 +689,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
      * @return The file name including running number and extension (foo_1.bar)
      */
     private String createUniqueFileNameInDirectory(String file, String extension, String directory) {
+        if (file == null) {
+            file = "unknown_file";
+        }
         String newFileName = file;
         String path;
         File f;
@@ -722,6 +749,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             case NEW:
                 return ContentState.DOWNLOAD_NEW;
             case DOWNLOADING:
+            case RETRYING:
                 return ContentState.DOWNLOAD_DOWNLOADING;
             case PAUSED:
                 return ContentState.DOWNLOAD_PAUSED;

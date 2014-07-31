@@ -2,7 +2,6 @@ package com.hoccer.xo.android.view.model;
 
 import android.view.View;
 import android.widget.TextView;
-import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -68,17 +67,19 @@ public class TalkClientContactItem extends BaseContactItem {
     private void updateLastMessageText(TalkClientMessage message) {
         if (message != null) {
             String mediaType = null;
+            String text = null;
             TalkClientUpload upload = message.getAttachmentUpload();
             if (upload != null) {
                 mediaType = upload.getMediaType();
+                text = mXoActivity.getResources().getString(R.string.contact_item_sent_attachment);
             } else {
                 TalkClientDownload download = message.getAttachmentDownload();
                 if (download != null) {
                     mediaType = download.getMediaType();
+                    text = mXoActivity.getResources().getString(R.string.contact_item_received_attachment);
                 }
             }
-            if (mediaType != null) {
-                String text = mXoActivity.getResources().getString(R.string.contact_item_receive_attachment);
+            if (text != null) {
                 mLastMessageText = String.format(text, mediaType);
             } else {
                 mLastMessageText = message.getText();

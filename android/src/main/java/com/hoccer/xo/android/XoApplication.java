@@ -350,8 +350,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
      * Starts a nearby session if not yet started.
      * Sets hasCurrentRunningNearbySession = true.
      */
-    public static void startNearbySession() {
-        if (!ENVIRONMENT_UPDATER.isEnabled()) {
+    public static void startNearbySession(boolean force) {
+        if (!ENVIRONMENT_UPDATER.isEnabled() || force) {
             try {
                 ENVIRONMENT_UPDATER.startEnvironmentTracking();
                 hasCurrentRunningNearbySession = true;
@@ -399,7 +399,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // wake up suspended nearby session
         if (hasCurrentRunningNearbySession) {
-            startNearbySession();
+            startNearbySession(false);
         }
 
         LOG.info("Entered foreground mode");

@@ -681,6 +681,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     presence.setConnectionStatus(newStatus);
                     mSelfContact.updatePresence(presence);
                     mDatabase.savePresence(presence);
+                    if (TalkPresence.CONN_STATUS_ONLINE.equals(newStatus)) {
+                        LOG.debug("entering foreground -> idle timer deactivated");
+                        shutdownIdle();
+                    } else if (TalkPresence.CONN_STATUS_BACKGROUND.equals(newStatus)) {
+                        LOG.debug("entering background -> idle timer activated");
+                        scheduleIdle();
+                    }
+
                     for (int i = 0; i < mContactListeners.size(); i++) {
                         IXoContactListener listener = mContactListeners.get(i);
                         listener.onClientPresenceChanged(mSelfContact);
@@ -1099,7 +1107,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 requestDelivery(message);
             }
         } catch (SQLException e) {
-            LOG.error(e);
+            LOG.error("SQL Error while retrieving message by message tag ", e);
         }
     }
 
@@ -1153,7 +1161,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         // log about it
-        LOG.info("[connection #" + mConnection.getConnectionId() + "] state " + STATE_NAMES[mState] + " -> " + STATE_NAMES[newState] + " (" + message + ")");
+        LOG.info("[switchState: connection #" + mConnection.getConnectionId() + "] state " + STATE_NAMES[mState] + " -> " + STATE_NAMES[newState] + " (" + message + ")");
 
         // perform transition
         int previousState = mState;
@@ -1259,7 +1267,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     @Override
     public void onOpen(JsonRpcConnection connection) {
         LOG.debug("onOpen()");
-        scheduleIdle();
         if(isRegistered()) {
             switchState(STATE_LOGIN, "connected");
         } else {
@@ -1293,7 +1300,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void shutdownIdle() {
-        if(mAutoDisconnectFuture != null) {
+        if (mAutoDisconnectFuture != null) {
             mAutoDisconnectFuture.cancel(false);
             mAutoDisconnectFuture = null;
         }
@@ -1314,8 +1321,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void resetIdle() {
         LOG.debug("resetIdle()");
-        mLastActivity = System.currentTimeMillis();
-        scheduleIdle();
+        if (mAutoDisconnectFuture != null) {
+            mLastActivity = System.currentTimeMillis();
+            scheduleIdle();
+        }
     }
 
     private void shutdownKeepAlive() {
@@ -1530,7 +1539,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 } catch (InterruptedException e) {
                     LOG.error("Error while asserting future", e);
                 } catch (ExecutionException e) {
-                    e.printStackTrace();
+                    LOG.error("ExecutionException ", e);
+                }
+
+                if (!isActive()) {
+                    LOG.warn("sync failed, scheduling new sync");
+                    scheduleSync();
                 }
             }
         });
@@ -2119,12 +2133,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public TalkClientContact getCurrentNearbyGroup() {
+        TalkClientContact currentNearbyGroup = null;
         try {
-            return mDatabase.findContactByGroupId(mEnvironmentGroupId, false);
+            if (mEnvironmentGroupId != null) {
+                currentNearbyGroup = mDatabase.findContactByGroupId(mEnvironmentGroupId, false);
+            }
         } catch (SQLException e) {
-            LOG.error(e);
+            LOG.error("SQL Error while retrieving current nearby group ", e);
         }
-        return null;
+        return currentNearbyGroup;
     }
 
 
