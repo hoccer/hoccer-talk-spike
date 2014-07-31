@@ -94,8 +94,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
     }
 
     @Override
-    public void onDownloadCreated(TalkClientDownload download, boolean isCreated) {
-
+    public void onDownloadCreated(TalkClientDownload download) {
         // do nothing if the download is incomplete or already contained
         if(download.getState() != TalkClientDownload.State.COMPLETE || mList.contains(download))
             return;

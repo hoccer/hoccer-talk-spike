@@ -75,7 +75,7 @@ public class SingleItemPlaylist extends MediaPlaylist implements IXoDownloadList
     }
 
     @Override
-    public void onDownloadCreated(TalkClientDownload download, boolean isCreated) {
+    public void onDownloadCreated(TalkClientDownload download) {
         // do nothing
     }
 
