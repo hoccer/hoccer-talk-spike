@@ -438,7 +438,7 @@ public class AudioAttachmentListFragment extends ListFragment {
 
         @Override
         public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-            mAttachmentListAdapter.setSelections(getListView().getCheckedItemPositions());
+            mAttachmentListAdapter.setCheckedItems(getListView().getCheckedItemPositions());
             updateListView(mAttachmentListAdapter);
         }
 
