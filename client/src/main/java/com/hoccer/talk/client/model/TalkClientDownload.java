@@ -173,7 +173,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 //        url = checkFilecacheUrl(url); // TODO: ToBeDeleted
         this.downloadUrl = url;
         this.downloadFile = id + "-" + timestamp.getTime();
-        switchState(State.NEW);
+        switchState(State.NEW, "new avatar");
     }
 
     public void initializeAsAttachment(XoTransferAgent agent, TalkAttachment attachment, String id, byte[] key) {
@@ -195,25 +195,25 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.decryptionKey = new String(Hex.encodeHex(key));
         this.contentHmac = attachment.getHmac();
         this.fileId = attachment.getFileId();
-        switchState(State.NEW);
+        switchState(State.NEW, "new attachment");
     }
 
     @Override
     public void start(XoTransferAgent agent) {
         mTransferAgent = agent;
-        switchState(State.DOWNLOADING);
+        switchState(State.DOWNLOADING, "starting");
     }
 
     @Override
     public void pause(XoTransferAgent agent) {
         mTransferAgent = agent;
-        switchState(State.PAUSED);
+        switchState(State.PAUSED, "pausing");
     }
 
     @Override
     public void cancel(XoTransferAgent agent) {
         mTransferAgent = agent;
-        switchState(State.PAUSED);
+        switchState(State.PAUSED, "cancelling");
     }
 
     /**********************************************************************************************/
@@ -223,16 +223,17 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     /**
      * ******************************************************************************************
      */
-    private void switchState(State newState) {
+    private void switchState(State newState, String reason) {
         if (!state.possibleFollowUps().contains(newState)) {
             LOG.warn("State " + newState + " is no possible followup to " + state);
             return;
         }
+        LOG.info("switching to state '" + newState + "' - supplied reason: '" + reason + "'");
         setState(newState);
 
         switch (state) {
             case INITIALIZING:
-                switchState(State.NEW);
+                switchState(State.NEW, "initializing done");
                 break;
             case NEW:
                 // DO NOTHING
@@ -259,13 +260,14 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void setState(State newState) {
-        LOG.info("[download " + clientDownloadId + "] switching to state " + newState);
+        LOG.info("[download " + clientDownloadId + "] switching to state '" + newState + "'");
         state = newState;
 
         saveToDatabase();
 
         for (int i = 0; i < mTransferListeners.size(); i++) {
             IXoTransferListener listener = mTransferListeners.get(i);
+            // TODO: try/catch here? What happens if a listener call produces exception?
             listener.onStateChanged(state);
         }
     }
@@ -309,8 +311,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             int sc = status.getStatusCode();
             logGetDebug("got status '" + sc + "': " + status.getReasonPhrase());
             if (sc != HttpStatus.SC_OK && sc != HttpStatus.SC_PARTIAL_CONTENT) {
-                LOG.debug("switching to state PAUSED - reason: http status is not OK (" + HttpStatus.SC_OK + ") or partial content ("
-                        + HttpStatus.SC_PARTIAL_CONTENT + ")");
+                LOG.debug("http status is not OK (" + HttpStatus.SC_OK + ") or partial content (" +
+                        HttpStatus.SC_PARTIAL_CONTENT + ")");
                 checkTransferFailure(transferFailures + 1);
                 return;
             }
@@ -322,7 +324,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             int bytesStart = downloadProgress;
             int bytesToGo = contentLengthValue;
             if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
-                LOG.debug("switching to state PAUSED - reason: invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
+                LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 checkTransferFailure(transferFailures + 1);
                 return;
             }
@@ -341,21 +343,22 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
                 LOG.debug("switching to state PAUSED - reason: copyData returned 'false'");
 //                checkTransferFailure(transferFailures + 1);
-                switchState(State.PAUSED);
+                switchState(State.PAUSED, "copydata failed");
                 return;
             }
         } catch (Exception e) {
             LOG.error("download exception -> switching to state PAUSED", e);
             checkTransferFailure(transferFailures + 1);
-            switchState(State.PAUSED);
+            // TODO: checkTransferFailure already performs switchState -> remove the following switchState to PAUSED?!
+            switchState(State.PAUSED, "download exception!");
         } finally {
             LOG.debug("doDownloadingAction - ensuring file handles are closed...");
             if (downloadProgress == contentLength) {
                 if (decryptionKey != null) {
-                    switchState(State.DECRYPTING);
+                    switchState(State.DECRYPTING, "downloading of encrypted file finished");
                 } else {
                     dataFile = downloadFilename;
-                    switchState(State.DETECTING);
+                    switchState(State.DETECTING, "downloading of unencrypted file finished");
                 }
             }
         }
@@ -364,10 +367,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     private void checkTransferFailure(int failures) {
         transferFailures = failures;
         if (transferFailures <= MAX_FAILURES) {
-            switchState(State.PAUSED);
+            switchState(State.PAUSED, "pausing because transfer failures still allow resuming");
             mTransferAgent.scheduleDownloadAttempt(this);
         } else {
-            switchState(State.FAILED);
+            switchState(State.FAILED, "failing because transfer failures reached may count '" + MAX_FAILURES + "'");
         }
     }
 
@@ -391,6 +394,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 bytesToGo -= bytesRead;
                 for (int i = 0; i < mTransferListeners.size(); i++) {
                     IXoTransferListener listener = mTransferListeners.get(i);
+                    // TODO: try/catch here? What happens if a listener call produces exception?
                     listener.onProgressUpdated(downloadProgress, getTransferLength());
                 }
             }
@@ -521,11 +525,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             }
 
             dataFile = destinationFile;
-            switchState(State.DETECTING);
+            switchState(State.DETECTING, "decryption finished successfully");
         } catch (Exception e) {
             LOG.error("decryption error", e);
             checkTransferFailure(transferFailures + 1);
-            switchState(State.PAUSED);
+            // TODO: checkTransferFailure already performs switchState -> remove the following switchState to PAUSED?!
+            switchState(State.PAUSED, "failure during decryption");
         }
     }
 
@@ -580,11 +585,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     }
                 }
             }
-            switchState(State.COMPLETE);
+            switchState(State.COMPLETE, "detection successful");
         } catch (Exception e) {
             LOG.error("detection error", e);
             checkTransferFailure(transferFailures + 1);
-            switchState(State.PAUSED);
+            // TODO: checkTransferFailure already performs switchState -> remove the following switchState to PAUSED?!
+            switchState(State.PAUSED, "detection failed");
         }
     }
 
