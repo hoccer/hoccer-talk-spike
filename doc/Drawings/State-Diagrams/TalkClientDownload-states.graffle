@@ -53,6 +53,66 @@
 	<array>
 		<dict>
 			<key>Bounds</key>
+			<string>{{156.29758712832904, 169.49998402595526}, {63, 24}}</string>
+			<key>Class</key>
+			<string>ShapedGraphic</string>
+			<key>FitText</key>
+			<string>YES</string>
+			<key>Flow</key>
+			<string>Resize</string>
+			<key>FontInfo</key>
+			<dict>
+				<key>Color</key>
+				<dict>
+					<key>w</key>
+					<string>0</string>
+				</dict>
+				<key>Font</key>
+				<string>Helvetica</string>
+				<key>Size</key>
+				<real>12</real>
+			</dict>
+			<key>ID</key>
+			<integer>60</integer>
+			<key>Line</key>
+			<dict>
+				<key>ID</key>
+				<integer>51</integer>
+				<key>Position</key>
+				<real>0.46051061153411865</real>
+				<key>RotationType</key>
+				<integer>0</integer>
+			</dict>
+			<key>Shape</key>
+			<string>Rectangle</string>
+			<key>Style</key>
+			<dict>
+				<key>shadow</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>stroke</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+			</dict>
+			<key>Text</key>
+			<dict>
+				<key>Text</key>
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
+
+\f0\fs24 \cf0 timer fires}</string>
+			</dict>
+			<key>Wrap</key>
+			<string>NO</string>
+		</dict>
+		<dict>
+			<key>Bounds</key>
 			<string>{{140.64235210418701, 412}, {45, 38}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
@@ -160,7 +220,7 @@ pause}</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{104.42675051823144, 169.49998402595526}, {114, 24}}</string>
+			<string>{{16.500000001945409, 128.50000000000011}, {121, 52}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -181,15 +241,6 @@ pause}</string>
 			</dict>
 			<key>ID</key>
 			<integer>56</integer>
-			<key>Line</key>
-			<dict>
-				<key>ID</key>
-				<integer>51</integer>
-				<key>Position</key>
-				<real>0.41574776172637939</real>
-				<key>RotationType</key>
-				<integer>0</integer>
-			</dict>
 			<key>Shape</key>
 			<string>Rectangle</string>
 			<key>Style</key>
@@ -213,67 +264,9 @@ pause}</string>
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 retry attempt &lt; max}</string>
-			</dict>
-			<key>Wrap</key>
-			<string>NO</string>
-		</dict>
-		<dict>
-			<key>Bounds</key>
-			<string>{{26.37785967278154, 152.75000000000006}, {59, 24}}</string>
-			<key>Class</key>
-			<string>ShapedGraphic</string>
-			<key>FitText</key>
-			<string>YES</string>
-			<key>Flow</key>
-			<string>Resize</string>
-			<key>FontInfo</key>
-			<dict>
-				<key>Color</key>
-				<dict>
-					<key>w</key>
-					<string>0</string>
-				</dict>
-				<key>Font</key>
-				<string>Helvetica</string>
-				<key>Size</key>
-				<real>12</real>
-			</dict>
-			<key>ID</key>
-			<integer>55</integer>
-			<key>Line</key>
-			<dict>
-				<key>ID</key>
-				<integer>53</integer>
-				<key>Position</key>
-				<real>0.70507019758224487</real>
-				<key>RotationType</key>
-				<integer>0</integer>
-			</dict>
-			<key>Shape</key>
-			<string>Rectangle</string>
-			<key>Style</key>
-			<dict>
-				<key>shadow</key>
-				<dict>
-					<key>Draws</key>
-					<string>NO</string>
-				</dict>
-				<key>stroke</key>
-				<dict>
-					<key>Draws</key>
-					<string>NO</string>
-				</dict>
-			</dict>
-			<key>Text</key>
-			<dict>
-				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
-\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
-
-\f0\fs24 \cf0 http error}</string>
+\f0\fs24 \cf0 http error\
+&amp;&amp;\
+[retry attempt &lt; max]}</string>
 			</dict>
 			<key>Wrap</key>
 			<string>NO</string>
@@ -2211,7 +2204,7 @@ pause}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-07-31 18:11:13 +0000</string>
+	<string>2014-07-31 18:13:44 +0000</string>
 	<key>Modifier</key>
 	<string>Julian Krumow</string>
 	<key>NotesVisible</key>
