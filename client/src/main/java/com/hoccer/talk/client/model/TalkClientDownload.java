@@ -586,7 +586,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                         LOG.info("[downloadId: '" + clientDownloadId + "'] renaming to extension '" + detectedMimeType.getExtension() + "'");
 
                         String destinationFileName = createUniqueFileNameInDirectory(this.fileName, extension, destinationDirectory);
-                        String destinationPath = tempDestinationFilePath + File.separator + destinationFileName;
+                        String destinationPath = destinationDirectory + File.separator + destinationFileName;
 
                         File newName = new File(destinationPath);
                         if (destination.renameTo(newName)) {
@@ -682,6 +682,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
      * @return The file name including running number and extension (foo_1.bar)
      */
     private String createUniqueFileNameInDirectory(String file, String extension, String directory) {
+        if (file == null) {
+            file = "unknown_file";
+        }
         String newFileName = file;
         String path;
         File f;
