@@ -30,10 +30,10 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     private String mContentMediaType;
     private int mConversationContactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
 
-    private SparseBooleanArray mCheckedItemPositions;
+    private SparseBooleanArray mCheckedItemPositions = new SparseBooleanArray();
 
     private TalkClientMediaCollection mCollection = null;
-    private boolean mShallDragHandlesShow = false;
+    private boolean mShowDragHandle = false;
 
     public AttachmentListAdapter() {
         this(null, MediaPlayerService.UNDEFINED_CONTACT_ID);
@@ -56,9 +56,11 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         return mAttachmentItems;
     }
 
-    public void setAttachmentItems(List<IContentObject> items) {
+    public void setItems(IContentObject[] items) {
         mAttachmentItems.clear();
-        mAttachmentItems.addAll(items);
+        for(int i = 0; i < items.length; i++) {
+            mAttachmentItems.add(items[i]);
+        }
         notifyDataSetChanged();
     }
 
@@ -106,12 +108,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
         audioRowView.setMediaItem(mAttachmentItems.get(position));
         audioRowView.updatePlayPauseView();
-
-        if (mCheckedItemPositions != null) {
-            audioRowView.getChildAt(0).setSelected(mCheckedItemPositions.get(position));
-        }
-
-        audioRowView.showDragHandle(mShallDragHandlesShow);
+        audioRowView.getChildAt(0).setSelected(mCheckedItemPositions.get(position));
+        audioRowView.showDragHandle(mShowDragHandle);
 
         return audioRowView;
     }
@@ -198,11 +196,6 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         updateCheckedItems();
     }
 
-    public void addItem(IContentObject item) {
-        mAttachmentItems.add(item);
-        updateCheckedItems();
-    }
-
     public void addItemAt(IContentObject item, int pos) throws IndexOutOfBoundsException{
             mAttachmentItems.add(pos, item);
             updateCheckedItems();
@@ -253,7 +246,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     public void setSortEnabled(boolean shallShow) {
-        mShallDragHandlesShow = shallShow;
+        mShowDragHandle = shallShow;
     }
 
     private void removeItemFromCollection(IContentObject item) {
@@ -273,7 +266,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     private void updateCheckedItems() {
-        if (mCheckedItemPositions != null && mCheckedItemPositions.size() > 0) {
+        if (mCheckedItemPositions.size() > 0) {
             SparseBooleanArray updatedSelection = new SparseBooleanArray(mCheckedItemPositions.size());
 
             for (int i = 0; i < mCheckedItemPositions.size(); ++i) {
