@@ -361,7 +361,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 }
             }
 
-        } catch(IOException e){
+        } catch (IOException e) {
             LOG.error("IOException in copyData while reading ", e);
             if (!mPausedByUser) {
                 checkTransferFailure(transferFailures + 1, "download exception!");
