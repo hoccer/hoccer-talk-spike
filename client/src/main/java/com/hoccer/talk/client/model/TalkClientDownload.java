@@ -42,6 +42,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     private List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
 
+    // TODO: this is just a workaround. Basically this class needs additional states.
+    private boolean mPausedByUser = false;
+
     public enum State implements IXoTransferState {
         INITIALIZING {
             @Override
@@ -201,12 +204,14 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     @Override
     public void start(XoTransferAgent agent) {
         mTransferAgent = agent;
+        mPausedByUser = false;
         switchState(State.DOWNLOADING, "starting");
     }
 
     @Override
     public void pause(XoTransferAgent agent) {
         mTransferAgent = agent;
+        mPausedByUser = true;
         switchState(State.PAUSED, "pausing");
     }
 
@@ -341,7 +346,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             randomAccessFile.seek(bytesStart);
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
-                checkTransferFailure(transferFailures + 1, "copyData returned null.");
+                if (!mPausedByUser) {
+                    checkTransferFailure(transferFailures + 1, "copyData returned null.");
+                }
             }
 
             LOG.debug("doDownloadingAction - ensuring file handles are closed...");
@@ -356,10 +363,14 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
         } catch(IOException e){
             LOG.error("IOException in copyData while reading ", e);
-            checkTransferFailure(transferFailures + 1, "download exception!");
+            if (!mPausedByUser) {
+                checkTransferFailure(transferFailures + 1, "download exception!");
+            }
         } catch (Exception e) {
             LOG.error("download exception", e);
-            checkTransferFailure(transferFailures + 1, "download exception!");
+            if (!mPausedByUser) {
+                checkTransferFailure(transferFailures + 1, "download exception!");
+            }
         }
     }
 
