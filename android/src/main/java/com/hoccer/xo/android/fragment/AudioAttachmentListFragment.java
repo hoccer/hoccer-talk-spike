@@ -317,7 +317,7 @@ public class AudioAttachmentListFragment extends ListFragment {
                 mSearchAttachmentAdapter = new AttachmentSearchResultAdapter();
             }
 
-            mSearchAttachmentAdapter.setAttachmentItems(mAttachmentListAdapter.getAttachmentItems());
+            mSearchAttachmentAdapter.setItems(mAttachmentListAdapter.getAttachmentItems());
 
         } else {
             mInSearchMode = false;
@@ -438,7 +438,7 @@ public class AudioAttachmentListFragment extends ListFragment {
 
         @Override
         public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-            mAttachmentListAdapter.setSelections(getListView().getCheckedItemPositions());
+            mAttachmentListAdapter.setCheckedItemsPositions(getListView().getCheckedItemPositions());
             updateListView(mAttachmentListAdapter);
         }
 

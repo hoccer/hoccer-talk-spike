@@ -30,10 +30,10 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     private String mContentMediaType;
     private int mConversationContactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
 
-    private SparseBooleanArray mSelections;
+    private SparseBooleanArray mCheckedItemPositions = new SparseBooleanArray();
 
     private TalkClientMediaCollection mCollection = null;
-    private boolean mShallDragHandlesShow = false;
+    private boolean mShowDragHandle = false;
 
     public AttachmentListAdapter() {
         this(null, MediaPlayerService.UNDEFINED_CONTACT_ID);
@@ -52,13 +52,15 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         setContactIdFilter(pConversationContactId);
     }
 
-    public List<IContentObject> getAttachmentItems() {
-        return mAttachmentItems;
+    public IContentObject[] getAttachmentItems() {
+        return mAttachmentItems.toArray(new IContentObject[mAttachmentItems.size()]);
     }
 
-    public void setAttachmentItems(List<IContentObject> items) {
+    public void setItems(IContentObject[] items) {
         mAttachmentItems.clear();
-        mAttachmentItems.addAll(items);
+        for(int i = 0; i < items.length; i++) {
+            mAttachmentItems.add(items[i]);
+        }
         notifyDataSetChanged();
     }
 
@@ -106,12 +108,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
         audioRowView.setMediaItem(mAttachmentItems.get(position));
         audioRowView.updatePlayPauseView();
-
-        if (mSelections != null) {
-            audioRowView.getChildAt(0).setSelected(mSelections.get(position));
-        }
-
-        audioRowView.showDragHandle(mShallDragHandlesShow);
+        audioRowView.getChildAt(0).setSelected(mCheckedItemPositions.get(position));
+        audioRowView.showDragHandle(mShowDragHandle);
 
         return audioRowView;
     }
@@ -164,7 +162,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
             notifyDataSetChanged();
         }
-        // TODO: update mSelections
+        // TODO: update mCheckedItemPositions
     }
 
     public boolean removeItem(IContentObject item) {
@@ -198,11 +196,6 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         updateCheckedItems();
     }
 
-    public void addItem(IContentObject item) {
-        mAttachmentItems.add(item);
-        updateCheckedItems();
-    }
-
     public void addItemAt(IContentObject item, int pos) throws IndexOutOfBoundsException{
             mAttachmentItems.add(pos, item);
             updateCheckedItems();
@@ -214,8 +207,13 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         notifyDataSetChanged();
     }
 
-    public void setSelections(SparseBooleanArray selections) {
-        this.mSelections = selections;
+    public void setCheckedItemsPositions(SparseBooleanArray itemPositions) {
+        mCheckedItemPositions = itemPositions;
+        notifyDataSetChanged();
+    }
+
+    public SparseBooleanArray getCheckedItemPositions() {
+        return mCheckedItemPositions;
     }
 
     public void loadAttachments() {
@@ -247,8 +245,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         createAttachmentsFromTalkClientDownloads(downloads);
     }
 
-    public void setSortEnabled(boolean shallShow) {
-        mShallDragHandlesShow = shallShow;
+    public void showDragHandle(boolean show) {
+        mShowDragHandle = show;
     }
 
     private void removeItemFromCollection(IContentObject item) {
@@ -268,20 +266,20 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     private void updateCheckedItems() {
-        if (mSelections != null && mSelections.size() > 0) {
-            SparseBooleanArray updatedSelection = new SparseBooleanArray(mSelections.size());
+        if (mCheckedItemPositions.size() > 0) {
+            SparseBooleanArray updatedSelection = new SparseBooleanArray(mCheckedItemPositions.size());
 
-            for (int i = 0; i < mSelections.size(); ++i) {
-                boolean b = mSelections.valueAt(i);
-                int k = mSelections.keyAt(i);
+            for (int i = 0; i < mCheckedItemPositions.size(); ++i) {
+                boolean b = mCheckedItemPositions.valueAt(i);
+                int k = mCheckedItemPositions.keyAt(i);
                 updatedSelection.put(k + 1, b);
             }
 
-            mSelections.clear();
+            mCheckedItemPositions.clear();
 
             //@Info Setting mSelection to updatedSelection won't work since the reference changes, which is not allowed
             for (int i = 0; i < updatedSelection.size(); ++i) {
-                mSelections.append(updatedSelection.keyAt(i), updatedSelection.valueAt(i));
+                mCheckedItemPositions.append(updatedSelection.keyAt(i), updatedSelection.valueAt(i));
             }
         }
     }

@@ -316,7 +316,7 @@ public class MediaCollectionTest {
             mDatabase.saveClientDownload(item3);
 
             // insert items at "random" positions
-            collection.addItem(5, item0); // order: 0
+            collection.addItem(0, item0); // order: 0
             collection.addItem(1, item1); // order: 0 1
             collection.addItem(0, item2); // order: 2 0 1
             collection.addItem(1, item3); // order: 2 3 0 1
