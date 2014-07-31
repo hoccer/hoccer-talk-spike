@@ -53,7 +53,8 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
         IContentObject item = mCollection.getItem(position);
         audioRowView.setMediaItem(item);
         audioRowView.updatePlayPauseView();
-        audioRowView.getChildAt(0).setSelected(mSelectedItemIds.contains(getItemId(position)));
+        Integer itemId = (int)getItemId(position);
+        audioRowView.getChildAt(0).setSelected(mSelectedItemIds.contains(itemId));
         audioRowView.showDragHandle(mShowDragHandle);
 
         return audioRowView;
@@ -76,7 +77,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
 
     public void deselectItem(int itemId) {
         if(mSelectedItemIds.contains(itemId)) {
-            mSelectedItemIds.remove(itemId);
+            mSelectedItemIds.remove((Integer)itemId);
             notifyDataSetChanged();
         }
     }
@@ -106,9 +107,8 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     }
 
     /*
-    This needed to be overridden because 3rd party ListViews
-    may override their setAdapter(); method and do not handle
-    the IllegalStateException
+     * This needed to be overridden because 3rd party ListViews may override their setAdapter(); method and do not handle
+     * the IllegalStateException.
      */
     @Override
     public void registerDataSetObserver(DataSetObserver observer) {
