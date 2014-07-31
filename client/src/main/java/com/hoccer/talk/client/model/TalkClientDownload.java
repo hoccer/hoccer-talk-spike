@@ -42,9 +42,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     private List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
 
-    // TODO: this is just a workaround. Basically this class needs additional states.
-    private boolean mPausedByUser = false;
-
     public enum State implements IXoTransferState {
         INITIALIZING {
             @Override
@@ -61,13 +58,19 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         DOWNLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, DECRYPTING, DETECTING, FAILED);
+                return EnumSet.of(PAUSED, RETRYING, DECRYPTING, DETECTING, FAILED);
             }
         },
         PAUSED {
             @Override
             public Set<State> possibleFollowUps() {
                 return EnumSet.of(DOWNLOADING);
+            }
+        },
+        RETRYING {
+            @Override
+            public Set<State> possibleFollowUps() {
+                return EnumSet.of(DOWNLOADING, PAUSED);
             }
         },
         DECRYPTING {
@@ -204,14 +207,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     @Override
     public void start(XoTransferAgent agent) {
         mTransferAgent = agent;
-        mPausedByUser = false;
         switchState(State.DOWNLOADING, "starting");
     }
 
     @Override
     public void pause(XoTransferAgent agent) {
         mTransferAgent = agent;
-        mPausedByUser = true;
         switchState(State.PAUSED, "pausing");
     }
 
@@ -248,6 +249,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 break;
             case PAUSED:
                 doPausedAction();
+                break;
+            case RETRYING:
+                doRetryingAction();
                 break;
             case DECRYPTING:
                 doDecryptingAction();
@@ -346,9 +350,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             randomAccessFile.seek(bytesStart);
 
             if (!copyData(bytesToGo, randomAccessFile, fileDescriptor, inputStream)) {
-                if (!mPausedByUser) {
-                    checkTransferFailure(transferFailures + 1, "copyData returned null.");
-                }
+                checkTransferFailure(transferFailures + 1, "copyData returned null.");
             }
 
             LOG.debug("doDownloadingAction - ensuring file handles are closed...");
@@ -361,24 +363,19 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 }
             }
 
-        } catch(IOException e){
+        } catch (IOException e) {
             LOG.error("IOException in copyData while reading ", e);
-            if (!mPausedByUser) {
-                checkTransferFailure(transferFailures + 1, "download exception!");
-            }
+            checkTransferFailure(transferFailures + 1, "download exception!");
         } catch (Exception e) {
             LOG.error("download exception", e);
-            if (!mPausedByUser) {
-                checkTransferFailure(transferFailures + 1, "download exception!");
-            }
+            checkTransferFailure(transferFailures + 1, "download exception!");
         }
     }
 
     private void checkTransferFailure(int failures, String failureDescription) {
         transferFailures = failures;
         if (transferFailures <= MAX_FAILURES) {
-            switchState(State.PAUSED, "pausing because transfer failures still allow resuming (" + transferFailures + "/" + MAX_FAILURES + " transferFailures), cause: '" + failureDescription + "'");
-            mTransferAgent.scheduleDownloadAttempt(this);
+            switchState(State.RETRYING, "pausing because transfer failures still allow resuming (" + transferFailures + "/" + MAX_FAILURES + " transferFailures), cause: '" + failureDescription + "'");
         } else {
             switchState(State.FAILED, "failing because transfer failures reached max count (" + transferFailures + "/" + MAX_FAILURES + " transferFailures), cause: '" + failureDescription + "'");
         }
@@ -492,6 +489,17 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         mTransferAgent.onDownloadStateChanged(this);
     }
 
+    private void doRetryingAction() {
+        if (mDownloadRequest != null) {
+            mDownloadRequest.abort();
+            mDownloadRequest = null;
+            LOG.debug("aborted current Download request. Download can still resume.");
+        }
+        mTransferAgent.deactivateDownload(this);
+        mTransferAgent.onDownloadStateChanged(this);
+        mTransferAgent.scheduleDownloadAttempt(this);
+    }
+
     private void doDecryptingAction() {
         String sourceFile = computeDownloadFile(mTransferAgent);
         String destinationFile = computeDecryptionFile(mTransferAgent);
@@ -546,15 +554,18 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doDetectingAction() {
-        String destinationFilePath;
+        String tempDestinationFilePath;
+        String destinationDirectory;
         if (this.decryptedFile != null) {
-            destinationFilePath = computeDecryptionFile(mTransferAgent);
+            tempDestinationFilePath = computeDecryptionFile(mTransferAgent);
+            destinationDirectory = computeDecryptionDirectory(mTransferAgent);
         } else {
-            destinationFilePath = computeDownloadFile(mTransferAgent);
+            tempDestinationFilePath = computeDownloadFile(mTransferAgent);
+            destinationDirectory = computeDownloadDirectory(mTransferAgent);
         }
 
-        LOG.debug("performDetection(downloadId: '" + clientDownloadId + "', destinationFile: '" + destinationFilePath + "')");
-        File destination = new File(destinationFilePath);
+        LOG.debug("performDetection(downloadId: '" + clientDownloadId + "', destinationFile: '" + tempDestinationFilePath + "')");
+        File destination = new File(tempDestinationFilePath);
 
         try {
             InputStream fileInputStream = new FileInputStream(destination);
@@ -582,7 +593,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                     if (extension != null) {
                         LOG.info("[downloadId: '" + clientDownloadId + "'] renaming to extension '" + detectedMimeType.getExtension() + "'");
 
-                        String destinationDirectory = computeDecryptionDirectory(mTransferAgent);
                         String destinationFileName = createUniqueFileNameInDirectory(this.fileName, extension, destinationDirectory);
                         String destinationPath = destinationDirectory + File.separator + destinationFileName;
 
@@ -652,7 +662,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return file;
     }
 
-
     private void logGetDebug(String message) {
         LOG.debug("[downloadId: '" + clientDownloadId + "'] GET " + message);
     }
@@ -680,6 +689,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
      * @return The file name including running number and extension (foo_1.bar)
      */
     private String createUniqueFileNameInDirectory(String file, String extension, String directory) {
+        if (file == null) {
+            file = "unknown_file";
+        }
         String newFileName = file;
         String path;
         File f;
@@ -737,6 +749,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             case NEW:
                 return ContentState.DOWNLOAD_NEW;
             case DOWNLOADING:
+            case RETRYING:
                 return ContentState.DOWNLOAD_DOWNLOADING;
             case PAUSED:
                 return ContentState.DOWNLOAD_PAUSED;

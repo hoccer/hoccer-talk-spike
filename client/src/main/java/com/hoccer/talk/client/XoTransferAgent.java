@@ -300,7 +300,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     public void onDownloadStateChanged(TalkClientDownload download) {
         LOG.info("onDownloadStateChanged(" + download.getClientDownloadId() + ")");
 
-        if (download.getState() == TalkClientDownload.State.PAUSED) {
+        if (download.getState() == TalkClientDownload.State.PAUSED || download.getState() == TalkClientDownload.State.RETRYING) {
             LOG.debug("Download paused. " + download.getClientDownloadId() + " Removing from queue.");
             deactivateDownload(download);
         }

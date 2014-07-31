@@ -224,7 +224,7 @@ public class ThumbnailManager {
             if (!mRunningRenderJobs.containsKey(key)) {
                 ImageThumbnailRenderer imageThumbnailRenderer = new ImageThumbnailRenderer();
                 mRunningRenderJobs.put(key, imageThumbnailRenderer);
-                imageThumbnailRenderer.execute(uri, imageView, maskResource, tag);
+                imageThumbnailRenderer.execute(uri, imageView, maskResource, tag, key);
             }
         }
     }
@@ -300,11 +300,12 @@ public class ThumbnailManager {
             mImageToLoad = new ImageToLoad(uri, (ImageView) params[1]);
             mMaskResource = (Integer) params[2];
             mTag = (String) params[3];
+            mThumbnailUri = (String) params[4];
+
             Bitmap thumbnail = createImageThumbnail(mImageToLoad.mUrl, mMaskResource, mTag);
             if (thumbnail == null) {
                 return null;
             }
-            mThumbnailUri = taggedThumbnailUri(uri, mTag);
 
             return thumbnail;
         }
@@ -339,12 +340,9 @@ public class ThumbnailManager {
             mThumbnailView = (ImageView) params[1];
             mMaskResource = (Integer) params[2];
             mTag = (String) params[3];
+            mThumbnailUri = (String) params[4];
 
-            Bitmap result = createVideoThumbnail(mUri, mMaskResource, mTag);
-            if (result != null) {
-                mThumbnailUri = taggedThumbnailUri(mUri, mTag);
-            }
-            return result;
+            return createVideoThumbnail(mUri, mMaskResource, mTag);
         }
 
         @Override
@@ -397,7 +395,7 @@ public class ThumbnailManager {
                 imageView.setImageDrawable(mStubDrawable);
                 VideoThumbnailRenderer videoThumbnailRenderer = new VideoThumbnailRenderer();
                 mRunningRenderJobs.put(taggedUri, videoThumbnailRenderer);
-                videoThumbnailRenderer.execute(uri, imageView, maskResource, tag);
+                videoThumbnailRenderer.execute(uri, imageView, maskResource, tag, taggedUri);
             }
         }
     }

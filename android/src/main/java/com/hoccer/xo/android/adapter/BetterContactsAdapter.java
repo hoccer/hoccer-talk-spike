@@ -190,8 +190,11 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public View getView(int position, View convertView, ViewGroup viewGroup) {
-        View view = mContactItems.get(position).getView(convertView);
-        return view;
+        if (position >= mContactItems.size()) {
+            return convertView;
+        }
+        
+        return mContactItems.get(position).getView(convertView);
     }
 
 
