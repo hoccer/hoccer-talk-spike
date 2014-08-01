@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="xo_main_background">#ffffff</color>
+    <color name="xo_selected_background">#ffc8c8c8</color>
     <color name="xo_app_incoming_message_color">#ffc8c8c8</color>
     <color name="xo_incoming_message_background">#e3e3e3</color>
     <color name="xo_incoming_message_textColor">#000000</color>

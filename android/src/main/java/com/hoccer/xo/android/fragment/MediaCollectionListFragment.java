@@ -16,6 +16,8 @@ import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MediaCollectionListFragment extends BaseMediaCollectionListFragment {
 
@@ -80,21 +82,16 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
         @Override
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
             boolean eventHandled = false;
-            TalkClientMediaCollection selectedCollection = (TalkClientMediaCollection) getListView().getSelectedItem();
-            if (selectedCollection != null) {
-                switch (menuItem.getItemId()) {
-                    case R.id.menu_delete_collection:
-                        DeleteCollectionCallbackHandler deleteHandler = new DeleteCollectionCallbackHandler(selectedCollection);
-                        XoDialogs.showYesNoDialog("delete_collection", R.string.dialog_delete_collection_title,
-                                R.string.dialog_delete_collection_message, getActivity(), deleteHandler, new CancelDialogCallbackHandler());
-                        eventHandled = true;
-                        break;
-                    default:
-                }
-            } else {
-                XoDialogs.showOkDialog("select_collection", R.string.dialog_select_collection_title,
-                        R.string.dialog_select_collection_message, getActivity(), null);
-                eventHandled = true;
+
+            switch (menuItem.getItemId()) {
+                case R.id.menu_delete_collection:
+                    XoDialogs.showYesNoDialog("delete_collection", R.string.dialog_delete_collection_title,
+                            R.string.dialog_delete_collection_message, getActivity(),
+                            new DeleteCollectionCallbackHandler(), new CancelDialogCallbackHandler());
+                    eventHandled = true;
+                    break;
+                default:
+
             }
 
             return eventHandled;
@@ -107,25 +104,27 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
         }
 
         @Override
-        public void onItemCheckedStateChanged(ActionMode actionMode, int position, long id, boolean checked) {
-            mMediaCollectionListAdapter.selectItem(position, checked);
+        public void onItemCheckedStateChanged(ActionMode actionMode, final int position, long id, final boolean checked) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mMediaCollectionListAdapter.selectItem(position, checked);
+                }
+            });
         }
 
         private class DeleteCollectionCallbackHandler implements DialogInterface.OnClickListener {
 
-            private TalkClientMediaCollection mCollection;
-
-            DeleteCollectionCallbackHandler(TalkClientMediaCollection collection) {
-                mCollection = collection;
-            }
-
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 try {
-                    mCollection.clear();
-                    XoApplication.getXoClient().getDatabase().deleteMediaCollection(mCollection);
+                    for (TalkClientMediaCollection collection : mMediaCollectionListAdapter.getSelecteddItems()) {
+                        XoApplication.getXoClient().getDatabase().deleteMediaCollection(collection);
+                    }
                 } catch (SQLException e) {
                     LOG.error(e.getMessage());
+                } finally {
+                    mActionMode.finish();
                 }
             }
         }
