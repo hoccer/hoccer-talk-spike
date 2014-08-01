@@ -276,8 +276,13 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     public void onMessageAdded(TalkClientMessage message) {
         try {
             if (message.isIncoming()) {
-                TalkDelivery incomingDelivery = message.getIncomingDelivery();
-                TalkClientContact contact = mDatabase.findContactByClientId(incomingDelivery.getSenderId(), false);
+                TalkClientContact conversationContact = message.getConversationContact();
+                TalkClientContact contact;
+                if (conversationContact.isGroup()) {
+                    contact = mDatabase.findContactByGroupId(conversationContact.getGroupId(), false);
+                } else {
+                    contact = mDatabase.findContactByClientId(conversationContact.getClientId(), false);
+                }
                 if (contact == null) {
                     return;
                 }
