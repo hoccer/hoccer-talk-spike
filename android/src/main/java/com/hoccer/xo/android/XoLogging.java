@@ -85,6 +85,16 @@ public class XoLogging {
         configureLogLevel();
         configureLogLogcat();
         configureLogSd();
+        configureClassLogLevels();
+    }
+
+    private static void configureClassLogLevels() {
+        Logger.getLogger(com.j256.ormlite.stmt.mapped.BaseMappedStatement.class).setLevel(Level.WARN);
+        Logger.getLogger(com.j256.ormlite.stmt.SelectIterator.class).setLevel(Level.WARN);
+        Logger.getLogger(com.j256.ormlite.stmt.StatementBuilder.class).setLevel(Level.WARN);
+        Logger.getLogger(com.j256.ormlite.stmt.StatementExecutor.class).setLevel(Level.WARN);
+        Logger.getLogger("org.eclipse.jetty.io.nio.ssl").setLevel(Level.WARN);
+        Logger.getLogger(org.eclipse.jetty.http.HttpParser.class).setLevel(Level.WARN);
     }
 
     /**
