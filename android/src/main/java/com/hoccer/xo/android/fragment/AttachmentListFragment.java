@@ -41,7 +41,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AudioAttachmentListFragment extends ListFragment {
+public class AttachmentListFragment extends ListFragment {
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
     public static final String ARG_CONTENT_MEDIA_TYPE = "com.hoccer.xo.android.fragment.ARG_CONTENT_MEDIA_TYPE";
@@ -54,7 +54,7 @@ public class AudioAttachmentListFragment extends ListFragment {
 
     private MediaPlayerService mMediaPlayerService;
 
-    private final static Logger LOG = Logger.getLogger(AudioAttachmentListFragment.class);
+    private final static Logger LOG = Logger.getLogger(AttachmentListFragment.class);
 
     private ServiceConnection mConnection;
 

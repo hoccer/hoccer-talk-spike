@@ -19,7 +19,7 @@ import java.sql.SQLException;
 
 public class MediaCollectionListFragment extends BaseMediaCollectionListFragment {
 
-    private final static Logger LOG = Logger.getLogger(AudioAttachmentListFragment.class);
+    private final static Logger LOG = Logger.getLogger(MediaCollectionListFragment.class);
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
