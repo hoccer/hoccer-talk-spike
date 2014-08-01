@@ -59,6 +59,9 @@ public class JsonRpcClientRequest {
 
     /** Constructs a client request */
     public JsonRpcClientRequest(String id, ObjectNode request, JsonRpcConnection connection) {
+        if (connection == null) {
+            throw new RuntimeException("request without connection");
+        }
         mLock = new ReentrantLock();
         mCondition = mLock.newCondition();
         mId = id;

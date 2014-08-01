@@ -198,7 +198,7 @@ public abstract class JsonRpcConnection {
      */
     abstract public boolean isConnected();
 
-    abstract public void disconnect();
+    abstract public boolean disconnect();
 
         /**
          * Sends a request through the connection

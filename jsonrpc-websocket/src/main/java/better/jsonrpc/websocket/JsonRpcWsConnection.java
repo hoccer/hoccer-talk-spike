@@ -140,21 +140,35 @@ public class JsonRpcWsConnection extends JsonRpcConnection
     }
 
     @Override
-    public void disconnect() {
+    public boolean disconnect() {
         if (mConnection != null && mConnection.isOpen()) {
             mConnection.close();
+            return true;
         }
+        return false;
     }
 
     public void transmit(String data) throws IOException {
-        if (mConnection != null && mConnection.isOpen()) {
-            mConnection.sendMessage(data);
+        if (mConnection != null) {
+            if ( mConnection.isOpen()) {
+                mConnection.sendMessage(data);
+            } else {
+                throw new IOException("Websocket not open");
+            }
+        } else {
+            throw new IOException("No Websocket");
         }
     }
 
     public void transmit(byte[] data, int offset, int length) throws IOException {
-        if (mConnection != null && mConnection.isOpen()) {
-            mConnection.sendMessage(data, offset, length);
+        if (mConnection != null) {
+            if ( mConnection.isOpen()) {
+                mConnection.sendMessage(data, offset, length);
+            } else {
+                throw new IOException("Websocket not open");
+            }
+        } else {
+            throw new IOException("No Websocket");
         }
     }
 
