@@ -3093,13 +3093,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
 
                 /* Mark as nearby contact and save to database. */
-                if (groupContact.getGroupPresence().isTypeNearby() && member.isJoined()) {
-                    clientContact.setNearby(true);
-                    mDatabase.saveContact(clientContact);
-                } else {
-                    clientContact.setNearby(false);
-                    mDatabase.saveContact(clientContact);
-                }
+                boolean isJoinedInNearbyGroup = groupContact.getGroupPresence() != null && groupContact.getGroupPresence().isTypeNearby() && member.isJoined();
+                clientContact.setNearby(isJoinedInNearbyGroup);
+                mDatabase.saveContact(clientContact);
 
                 membership.updateGroupMember(member);
                 mDatabase.saveGroupMember(membership.getMember());
