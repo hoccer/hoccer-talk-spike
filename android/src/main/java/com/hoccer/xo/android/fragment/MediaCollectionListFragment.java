@@ -6,7 +6,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.*;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.xo.android.XoApplication;
@@ -16,8 +15,6 @@ import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MediaCollectionListFragment extends BaseMediaCollectionListFragment {
 
@@ -87,7 +84,7 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
                 case R.id.menu_delete_collection:
                     XoDialogs.showYesNoDialog("delete_collection", R.string.dialog_delete_collection_title,
                             R.string.dialog_delete_collection_message, getActivity(),
-                            new DeleteCollectionCallbackHandler(), new CancelDialogCallbackHandler());
+                            new DeleteCollectionCallbackHandler());
                     eventHandled = true;
                     break;
                 default:
@@ -126,35 +123,6 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
                 } finally {
                     mActionMode.finish();
                 }
-            }
-        }
-
-        private class RenameCollectionCallbackHandler implements XoDialogs.OnTextSubmittedListener {
-
-            private TalkClientMediaCollection mCollection;
-
-            RenameCollectionCallbackHandler(TalkClientMediaCollection collection) {
-                mCollection = collection;
-            }
-
-            @Override
-            public void onClick(DialogInterface dialog, int id, String password) {
-                if (password != null && !password.isEmpty()) {
-                    mCollection.setName(password);
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ((BaseAdapter) getListAdapter()).notifyDataSetChanged();
-                        }
-                    });
-                }
-            }
-        }
-
-        private class CancelDialogCallbackHandler implements DialogInterface.OnClickListener {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
             }
         }
     }

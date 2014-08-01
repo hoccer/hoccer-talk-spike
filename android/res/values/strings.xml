@@ -272,8 +272,6 @@
     <string name="dialog_delete_collection_message">Are you sure you want to delete the selected collection(s)? The attachments
         will not be deleted.
     </string>
-    <string name="dialog_select_collection_title">No collections selected</string>
-    <string name="dialog_select_collection_message">Please select a collection first.</string>
 
     <!-- Preferences -->
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>

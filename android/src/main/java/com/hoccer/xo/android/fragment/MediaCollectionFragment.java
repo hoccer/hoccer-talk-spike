@@ -39,6 +39,8 @@ public class MediaCollectionFragment extends SearchableListFragment {
     public static final int SELECT_COLLECTION_REQUEST = 1;
     public static final int SELECT_CONTACT_REQUEST = 2;
 
+    private int mRenameMenuId = 0;
+
     private DragSortListView mListView;
     private DragSortController mController;
     private XoClientDatabase mDatabase;
@@ -100,6 +102,17 @@ public class MediaCollectionFragment extends SearchableListFragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        mRenameMenuId = R.id.menu_search + 1;
+        MenuItem renameItem = menu.add(Menu.NONE, mRenameMenuId, Menu.NONE, R.string.rename_collection);
+        renameItem.setIcon(R.drawable.ic_edit);
+        renameItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        renameItem.setOnMenuItemClickListener(mRenameCollectionClickListener);
+        updateActionBarTitle();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
     }
@@ -108,32 +121,6 @@ public class MediaCollectionFragment extends SearchableListFragment {
     public void onDestroy() {
         super.onDestroy();
         mMediaPlayerServiceConnector.disconnect();
-    }
-
-    @Override
-    protected ListAdapter searchInAdapter(String query) {
-        mSearchResultAdapter.query(query);
-        return mSearchResultAdapter;
-    }
-
-    @Override
-    protected void onSearchModeEnabled() {
-        mSearchResultAdapter = new AttachmentSearchResultAdapter(mCollection.toArray());
-    }
-
-    @Override
-    protected void onSearchModeDisabled() {
-        // do nothing
-    }
-
-    private TalkClientContact retrieveContactById(Integer contactId) {
-        TalkClientContact contact = null;
-        try {
-            contact = mDatabase.findClientContactById(contactId);
-        } catch (SQLException e) {
-            LOG.error("Contact not found for id: " + contactId, e);
-        }
-        return contact;
     }
 
     @Override
@@ -165,6 +152,55 @@ public class MediaCollectionFragment extends SearchableListFragment {
                     break;
             }
         }
+    }
+
+    @Override
+    protected ListAdapter searchInAdapter(String query) {
+        mSearchResultAdapter.query(query);
+        return mSearchResultAdapter;
+    }
+
+    @Override
+    protected void onSearchModeEnabled() {
+        mSearchResultAdapter = new AttachmentSearchResultAdapter(mCollection.toArray());
+    }
+
+    @Override
+    protected void onSearchModeDisabled() {
+        // do nothing
+    }
+
+    private MenuItem.OnMenuItemClickListener mRenameCollectionClickListener = new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem menuItem) {
+            XoDialogs.showInputTextDialog("rename_collection", R.string.rename_collection, getActivity(),
+                    mTextSubmittedListener);
+            return false;
+        }
+
+        private XoDialogs.OnTextSubmittedListener mTextSubmittedListener = new XoDialogs.OnTextSubmittedListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id, String text) {
+                if (text != null && !text.isEmpty()) {
+                    mCollection.setName(text);
+                    updateActionBarTitle();
+                }
+            }
+        };
+    };
+
+    private void updateActionBarTitle() {
+        getActivity().getActionBar().setTitle(mCollection.getName());
+    }
+
+    private TalkClientContact retrieveContactById(Integer contactId) {
+        TalkClientContact contact = null;
+        try {
+            contact = mDatabase.findClientContactById(contactId);
+        } catch (SQLException e) {
+            LOG.error("Contact not found for id: " + contactId, e);
+        }
+        return contact;
     }
 
     private void addSelectedItemsToCollection(Integer mediaCollectionId) {
