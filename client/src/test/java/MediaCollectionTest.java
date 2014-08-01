@@ -66,7 +66,7 @@ public class MediaCollectionTest {
         // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
-        mDatabase.registerListener(new IXoMediaCollectionListener() {
+        mDatabase.registerMediaCollectionListener(new IXoMediaCollectionListener() {
             @Override
             public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
                 onMediaCollectionCreatedCalled.value = true;
@@ -137,7 +137,7 @@ public class MediaCollectionTest {
         // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
-        mDatabase.registerListener(new IXoMediaCollectionListener() {
+        mDatabase.registerMediaCollectionListener(new IXoMediaCollectionListener() {
             @Override
             public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
                 onMediaCollectionCreatedCalled.value = true;
@@ -194,7 +194,7 @@ public class MediaCollectionTest {
         // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
-        mDatabase.registerListener(new IXoMediaCollectionListener() {
+        mDatabase.registerMediaCollectionListener(new IXoMediaCollectionListener() {
             @Override
             public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
                 onMediaCollectionCreatedCalled.value = true;
