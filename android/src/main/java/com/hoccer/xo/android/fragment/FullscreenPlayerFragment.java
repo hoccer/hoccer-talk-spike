@@ -354,8 +354,6 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
 
 
     private class OnPlayerInteractionListener implements SeekBar.OnSeekBarChangeListener, View.OnClickListener, ToggleButton.OnCheckedChangeListener {
-
-
         @Override
         public void onClick(View v) {
             if (mMediaPlayerService != null) {
@@ -428,20 +426,15 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
 
         @Override
         public void run() {
-            try {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int currentProgress = mMediaPlayerService.getCurrentProgress();
-                        mCurrentTimeLabel.setText(getStringFromTimeStamp(currentProgress));
-                        mTrackProgressBar.setProgress(currentProgress);
-                    }
-                });
-
-                mTimeProgressHandler.postDelayed(this, 1000);
-            } catch (Exception e) {
-                LOG.error(e);
-            }
+            final int currentProgress = mMediaPlayerService.getCurrentProgress();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mCurrentTimeLabel.setText(getStringFromTimeStamp(currentProgress));
+                    mTrackProgressBar.setProgress(currentProgress);
+                }
+            });
+            mTimeProgressHandler.postDelayed(this, 1000);
         }
     }
 
