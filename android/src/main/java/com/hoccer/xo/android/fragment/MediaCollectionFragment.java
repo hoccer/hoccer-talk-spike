@@ -29,9 +29,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaCollectionItemListFragment extends SearchableListFragment {
+public class MediaCollectionFragment extends SearchableListFragment {
 
-    private static final Logger LOG = Logger.getLogger(MediaCollectionItemListFragment.class);
+    private static final Logger LOG = Logger.getLogger(MediaCollectionFragment.class);
 
     public static final int SELECT_COLLECTION_REQUEST = 1;
     public static final int SELECT_CONTACT_REQUEST = 2;
