@@ -161,9 +161,9 @@ public class AttachmentListFragment extends ListFragment {
 
         if (mSearchMenuItem != null && mSearchMenuItem.isActionViewExpanded()) {
             toggleSearchMode(true);
-            getListView().setAdapter(mResultsAdapter);
+            setListAdapter(mResultsAdapter);
         } else {
-            getListView().setAdapter(mAttachmentListAdapter);
+            setListAdapter(mAttachmentListAdapter);
         }
 
         getActivity().getActionBar().setTitle(R.string.menu_music_viewer);
