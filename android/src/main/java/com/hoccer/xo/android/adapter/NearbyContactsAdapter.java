@@ -92,7 +92,8 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         }
         try {
             mNearbyContacts.clear();
-            List<TalkClientContact> allClientContacts = mDatabase.findAllNearbyContactsInGroup(group);
+            List<TalkClientContact> allClientContacts = mDatabase.findClientsInGroup(group);
+            allClientContacts.add(0, group);
             for (TalkClientContact contact : allClientContacts) {
 
                 if (contact.isGroup()) {
@@ -107,7 +108,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
                 }
             }
         } catch (SQLException e) {
-            LOG.error("SQL Error while retrieving nearby group contacts.");
+            LOG.error("SQL Error while retrieving nearby group contacts.", e);
         }
     }
 
@@ -292,6 +293,15 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
 
     @Override
     public void onMessageAdded(TalkClientMessage message) {
+        TalkClientContact conversationContact = message.getConversationContact();
+        if (mNearbyContacts.contains(conversationContact)) {
+            mNearbyContacts.remove(conversationContact);
+            int position = 0;
+            if (conversationContact.isClient()) {
+                position = 1;
+            }
+            mNearbyContacts.add(position, conversationContact);
+        }
         refreshList();
     }
 
