@@ -161,9 +161,9 @@ public class AttachmentListFragment extends ListFragment {
 
         if (mSearchMenuItem != null && mSearchMenuItem.isActionViewExpanded()) {
             toggleSearchMode(true);
-            getListView().setAdapter(mResultsAdapter);
+            setListAdapter(mResultsAdapter);
         } else {
-            getListView().setAdapter(mAttachmentListAdapter);
+            setListAdapter(mAttachmentListAdapter);
         }
 
         getActivity().getActionBar().setTitle(R.string.menu_music_viewer);
@@ -278,7 +278,7 @@ public class AttachmentListFragment extends ListFragment {
                             mSearchContactsAdapter);
                 }
 
-            mSearchAttachmentAdapter.searchForAttachments(query);
+            mSearchAttachmentAdapter.query(query);
             if (mSearchAttachmentAdapter.getCount() > 0) {
                 mResultsAdapter.addSection(getString(R.string.search_section_caption_audio_files),
                         mSearchAttachmentAdapter);
@@ -313,11 +313,7 @@ public class AttachmentListFragment extends ListFragment {
 
             setListAdapter(mResultsAdapter);
 
-            if (mSearchAttachmentAdapter == null) {
-                mSearchAttachmentAdapter = new AttachmentSearchResultAdapter();
-            }
-
-            mSearchAttachmentAdapter.setItems(mAttachmentListAdapter.getAttachmentItems());
+            mSearchAttachmentAdapter = new AttachmentSearchResultAdapter(mAttachmentListAdapter.getAttachmentItems());
 
         } else {
             mInSearchMode = false;
@@ -372,8 +368,8 @@ public class AttachmentListFragment extends ListFragment {
         return contact;
     }
 
-    private List<IContentObject> getSelectedAttachments() {
-        List<IContentObject> attachments = new ArrayList<IContentObject>();
+    private List<TalkClientDownload> getSelectedAttachments() {
+        List<TalkClientDownload> attachments = new ArrayList<TalkClientDownload>();
         for (int index = 0; index < mSelectedItems.size(); ++index) {
             int pos = mSelectedItems.keyAt(index);
             if (mSelectedItems.get(pos)) {
@@ -388,7 +384,7 @@ public class AttachmentListFragment extends ListFragment {
         for (int index = 0; index < mSelectedItems.size(); ++index) {
             int pos = mSelectedItems.keyAt(index);
             if (mSelectedItems.get(pos)) {
-                TalkClientDownload download = (TalkClientDownload) mAttachmentListAdapter.getItem(pos);
+                TalkClientDownload download = mAttachmentListAdapter.getItem(pos);
                 downloads.add(download);
             }
         }
@@ -408,19 +404,20 @@ public class AttachmentListFragment extends ListFragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            IContentObject selectedItem = (IContentObject)getListAdapter().getItem(position);
+            Object selectedItem = getListAdapter().getItem(position);
 
-            if (selectedItem != null) {
+            if (selectedItem instanceof TalkClientDownload) {
+                TalkClientDownload download = (TalkClientDownload)selectedItem;
                 if (mInSearchMode) {
                     position = 0;
-                    mMediaPlayerService.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), selectedItem));
+                    mMediaPlayerService.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), download));
                 } else {
                     setMediaList();
                 }
 
-                if (isPlaying(selectedItem)) {
+                if (isPlaying(download)) {
                     mMediaPlayerService.setCurrentIndex(position);
-                } else if (isPaused(selectedItem)) {
+                } else if (isPaused(download)) {
                     mMediaPlayerService.setCurrentIndex(position);
                     mMediaPlayerService.play();
                 } else {
@@ -546,11 +543,10 @@ public class AttachmentListFragment extends ListFragment {
     }
 
     private void deleteSelectedAttachments() {
-        List<IContentObject> selectedObjects = getSelectedAttachments();
-        for(IContentObject item : selectedObjects) {
-            TalkClientDownload download = (TalkClientDownload)item;
+        List<TalkClientDownload> selectedObjects = getSelectedAttachments();
+        for(TalkClientDownload item : selectedObjects) {
             try {
-                XoApplication.getXoClient().getDatabase().deleteClientDownloadAndMessage(download);
+                XoApplication.getXoClient().getDatabase().deleteClientDownloadAndMessage(item);
             } catch (SQLException e) {
                 LOG.error(e);
             }

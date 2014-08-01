@@ -26,7 +26,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Created by nico on 23/07/2014.
+ * Helper class.
  */
 public class AttachmentOperationHelper {
 
@@ -58,26 +58,26 @@ public class AttachmentOperationHelper {
         }
     }
 
-    public static void sendAttachmentsToContacts(List<IContentObject> attachments, List<TalkClientContact> contacts) throws FileNotFoundException, URISyntaxException {
+    public static void sendAttachmentsToContacts(List<TalkClientDownload> attachments, List<TalkClientContact> contacts) throws FileNotFoundException, URISyntaxException {
         for (TalkClientContact contact : contacts) {
             sendAttachmentsToContact(attachments, contact);
         }
     }
 
-    public static void sendAttachmentsToContact(List<IContentObject> attachments, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
-        for (IContentObject attachment : attachments) {
+    public static void sendAttachmentsToContact(List<TalkClientDownload> attachments, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
+        for (TalkClientDownload attachment : attachments) {
             sendAttachmentToContact(attachment, contact);
         }
     }
 
-    public static void sendAttachmentToContact(IContentObject attachment, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
+    public static void sendAttachmentToContact(TalkClientDownload attachment, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
         TalkClientUpload upload = createAttachmentUpload(attachment);
         String messageTag = XoApplication.getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
         LOG.debug("Sending Attachment " + attachment + " to contact " + contact);
         XoApplication.getXoClient().sendMessage(messageTag);
     }
 
-    public static TalkClientUpload createAttachmentUpload(IContentObject object) throws FileNotFoundException, URISyntaxException {
+    public static TalkClientUpload createAttachmentUpload(TalkClientDownload object) throws FileNotFoundException, URISyntaxException {
         URI fileUri = new URI(object.getContentDataUrl());
         File fileToUpload = new File(fileUri);
 

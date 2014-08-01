@@ -10,8 +10,8 @@ import android.support.v4.content.LocalBroadcastManager;
 public class MediaPlayerServiceConnector {
 
     private Context mContext;
-    private String mIntent;
-    private Listener mListener;
+    private String mIntent = null;
+    private Listener mListener = null;
 
     private boolean mIsConnected = false;
 
@@ -23,6 +23,15 @@ public class MediaPlayerServiceConnector {
         void onConnected(MediaPlayerService service);
         void onDisconnected();
         void onAction(String action, MediaPlayerService service);
+    }
+
+    public void connect(Context context) {
+        disconnect();
+        mContext = context;
+
+        Intent serviceIntent = new Intent(context, MediaPlayerService.class);
+        context.startService(serviceIntent);
+        bindMediaPlayerService(serviceIntent);
     }
 
     public void connect(Context context, String intent, Listener listener) {
@@ -68,12 +77,17 @@ public class MediaPlayerServiceConnector {
                 MediaPlayerService.MediaPlayerBinder binder = (MediaPlayerService.MediaPlayerBinder) service;
                 mMediaPlayerService = binder.getService();
                 mIsConnected = true;
-                mListener.onConnected(mMediaPlayerService);
+
+                if(mListener != null) {
+                    mListener.onConnected(mMediaPlayerService);
+                }
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                mListener.onDisconnected();
+                if(mListener != null) {
+                    mListener.onDisconnected();
+                }
             }
         };
 

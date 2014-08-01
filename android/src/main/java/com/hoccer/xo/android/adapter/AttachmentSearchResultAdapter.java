@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -10,59 +9,72 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.release.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by nico on 04/07/2014.
+ * Adapter of attachment search results.
  */
-public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
+public class AttachmentSearchResultAdapter extends BaseAdapter {
 
-    List<IContentObject> mFoundAttachments = new ArrayList<IContentObject>();
+    List<TalkClientDownload> mItems;
+    List<TalkClientDownload> mMatchedItems;
+
     private String mLastQuery = "";
 
+    public AttachmentSearchResultAdapter(TalkClientDownload[] items) {
+        mItems = Arrays.asList(items);
+        mMatchedItems = new ArrayList<TalkClientDownload>();
+    }
+
     @Override
-    public IContentObject getItem(int position) {
-        return mFoundAttachments.get(position);
+    public TalkClientDownload getItem(int position) {
+        return mMatchedItems.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return mItems.get(position).getClientDownloadId();
     }
 
     @Override
     public int getCount() {
-        return mFoundAttachments.size();
+        return mMatchedItems.size();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return createAttachmentView(parent.getContext(), mFoundAttachments.get(position));
+        return createAttachmentView(parent.getContext(), mMatchedItems.get(position));
     }
 
-    public void searchForAttachments(String query) {
+    public void query(String query) {
         mLastQuery = query.toLowerCase();
-        mFoundAttachments.clear();
+        mMatchedItems.clear();
         if (!mLastQuery.isEmpty()) {
-            for (IContentObject attachment : getAttachmentItems()) {
+            for (TalkClientDownload attachment : mItems) {
                 MediaMetaData metaData = MediaMetaData.retrieveMetaData(attachment.getContentDataUrl());
                 String title = metaData.getTitle();
                 String artist = metaData.getArtist();
 
                 if ((title != null && title.toLowerCase().contains(query.toLowerCase())) ||
                         (artist != null && artist.toLowerCase().contains(query.toLowerCase()))) {
-                    mFoundAttachments.add(attachment);
+                    mMatchedItems.add(attachment);
                 }
             }
         }
         notifyDataSetChanged();
     }
 
-    private View createAttachmentView(Context context, IContentObject attachment) {
+    private View createAttachmentView(Context context, TalkClientDownload attachment) {
         View attachmentView = View.inflate(context, R.layout.item_attachment_search_result, null);
         String type = attachment.getContentMediaType();
         if (type.equals(ContentMediaType.AUDIO)) {
@@ -71,7 +83,7 @@ public class AttachmentSearchResultAdapter extends AttachmentListAdapter{
         return attachmentView;
     }
 
-    private View setupAudioAttachmentView(final Context context, View attachmentView, IContentObject attachment) {
+    private View setupAudioAttachmentView(final Context context, View attachmentView, TalkClientDownload attachment) {
         TextView titleTv = (TextView) attachmentView.findViewById(R.id.tv_title);
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(attachment.getContentDataUrl());
         String title = metaData.getTitleOrFilename();
