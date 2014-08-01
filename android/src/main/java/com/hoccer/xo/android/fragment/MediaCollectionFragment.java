@@ -29,9 +29,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaCollectionItemListFragment extends SearchableListFragment {
+public class MediaCollectionFragment extends SearchableListFragment {
 
-    private static final Logger LOG = Logger.getLogger(MediaCollectionItemListFragment.class);
+    private static final Logger LOG = Logger.getLogger(MediaCollectionFragment.class);
 
     public static final int SELECT_COLLECTION_REQUEST = 1;
     public static final int SELECT_CONTACT_REQUEST = 2;
@@ -203,7 +203,8 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
         }
 
         @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
+            final List<IContentObject> selectedItems = mCollectionAdapter.getAllSelectedItems();
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
                     XoDialogs.showSingleChoiceDialog("RemoveAttachment",
@@ -215,10 +216,10 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
                                 public void onClick(DialogInterface dialog, int id) {
                                     switch(id) {
                                         case 0:
-                                            removeCheckedItemsFromCollection();
+                                            removeItemsFromCollection(selectedItems);
                                             break;
                                         case 1:
-                                            deleteCheckedItems();
+                                            deleteItems(selectedItems);
                                             break;
                                         default:
                                             throw new IllegalArgumentException("Invalid array index selected.");
@@ -245,23 +246,21 @@ public class MediaCollectionItemListFragment extends SearchableListFragment {
             mListView.setDragEnabled(false);
             mController.setSortEnabled(false);
             mCollectionAdapter.showDragHandle(false);
+            mCollectionAdapter.deselectAllItems();
         }
-
 
         @Override
         public void drag(int from, int to) {
             getListView().dispatchSetSelected(false);
         }
 
-        private void removeCheckedItemsFromCollection() {
-            List<IContentObject> items = mCollectionAdapter.getAllSelectedItems();
+        private void removeItemsFromCollection(List<IContentObject> items) {
             for (IContentObject item : items) {
                 mCollection.removeItem((TalkClientDownload)item);
             }
         }
 
-        private void deleteCheckedItems() {
-            List<IContentObject> items = mCollectionAdapter.getAllSelectedItems();
+        private void deleteItems(List<IContentObject> items) {
             for (IContentObject item : items) {
                 try{
                     mDatabase.deleteClientDownloadAndMessage((TalkClientDownload)item);
