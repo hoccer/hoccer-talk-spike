@@ -289,7 +289,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         long minutes = TimeUnit.MILLISECONDS.toMinutes(timeInMillis) - TimeUnit.HOURS.toMinutes(hours);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(timeInMillis) - TimeUnit.MINUTES.toSeconds(minutes);
         if (hours > 0) {
-            return String.format("%d:%02d:%02d", minutes, seconds);
+            return String.format("%d:%02d:%02d", hours, minutes, seconds);
         }
 
         return String.format("%2d:%02d", minutes, seconds);
