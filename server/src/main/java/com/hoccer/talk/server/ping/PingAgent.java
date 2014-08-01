@@ -53,7 +53,7 @@ public class PingAgent {
         );
         initializeMetrics(mServer.getMetrics());
 
-        if (TalkServerConfiguration.PERFORM_PING_AT_INTERVALS) {
+        if (mConfig.getPerformPingAtInterval()) {
             schedulePingAllReadyClients();
         } else {
             LOG.info("Not scheduling regular ping since it is deactivated by configuration.");
@@ -61,7 +61,7 @@ public class PingAgent {
     }
 
     private void schedulePingAllReadyClients() {
-        LOG.info("Scheduling pinging of all ready clients to occur in '" + TalkServerConfiguration.PING_INTERVAL + "' seconds.");
+        LOG.info("Scheduling pinging of all ready clients to occur in '" + mConfig.getPingInterval() + "' seconds.");
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
@@ -72,7 +72,7 @@ public class PingAgent {
                     LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
-        }, TalkServerConfiguration.PING_INTERVAL, TimeUnit.SECONDS);
+        }, mConfig.getPingInterval(), TimeUnit.SECONDS);
     }
 
     private void initializeMetrics(MetricRegistry metrics) {
