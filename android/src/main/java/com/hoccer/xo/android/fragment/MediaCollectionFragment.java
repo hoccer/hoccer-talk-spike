@@ -195,6 +195,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
                 } else {
                     MediaCollectionPlaylist playlist = new MediaCollectionPlaylist(mCollection);
                     mMediaPlayerServiceConnector.getService().setPlaylist(playlist);
+                    mMediaPlayerServiceConnector.getService().play(position);
                 }
                 getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else {
