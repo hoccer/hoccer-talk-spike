@@ -8,6 +8,7 @@ import com.hoccer.talk.client.IXoTokenListener;
 import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.model.TalkDelivery;
+import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.BaseContactItem;
@@ -44,7 +45,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Nullable
     private OnItemCountChangedListener mOnItemCountChangedListener;
-    private long mNearbyMessagesCount = 0;
 
     public BetterContactsAdapter(XoActivity activity) {
         super(activity);
@@ -170,11 +170,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public int getCount() {
-        try {
-            mNearbyMessagesCount = mDatabase.getNearbyMessageCount();
-        } catch (SQLException e) {
-            LOG.error("SQL error while retrieving nearby message count.", e);
-        }
         return mContactItems.size();
     }
 
@@ -228,11 +223,26 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        BaseContactItem item = findContactItemForContent(contact);
-        if (item != null) {
-            item.update();
-            notifyDataSetChanged();
+        TalkRelationship relationship = contact.getClientRelationship();
+        if (relationship == null) {
+            return;
         }
+
+        if (relationship.isNone()) {
+            BaseContactItem item = findContactItemForContent(contact);
+            if (item != null) {
+                mContactItems.remove(item);
+
+            }
+        } else {
+            BaseContactItem item = findContactItemForContent(contact);
+            if (item == null) {
+                item = new TalkClientContactItem(mActivity, contact);
+                mContactItems.add(item);
+            }
+            item.update();
+        }
+        notifyDataSetChanged();
     }
 
     @Override
