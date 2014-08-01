@@ -51,7 +51,7 @@ public abstract class BaseMediaCollectionListFragment extends ListFragment {
     }
 
     protected void initAndFillMediaCollectionListAdapter() {
-        mMediaCollectionListAdapter = new MediaCollectionListAdapter(getActivity());
+        mMediaCollectionListAdapter = new MediaCollectionListAdapter();
     }
 
     protected void showCreateMediaCollectionDialog() {

@@ -15,7 +15,7 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.fragment.AudioAttachmentListFragment;
+import com.hoccer.xo.android.fragment.AttachmentListFragment;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
@@ -29,7 +29,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     ActionBar mActionBar;
 
     MessagingFragment mMessagingFragment;
-    AudioAttachmentListFragment mAudioAttachmentListFragment;
+    AttachmentListFragment mAttachmentListFragment;
     SingleProfileFragment mSingleProfileFragment;
     GroupProfileFragment mGroupProfileFragment;
 

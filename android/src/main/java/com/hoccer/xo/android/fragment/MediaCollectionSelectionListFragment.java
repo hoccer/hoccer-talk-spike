@@ -19,7 +19,6 @@ public class MediaCollectionSelectionListFragment extends BaseMediaCollectionLis
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMediaCollectionListAdapter.setSelectionModeActivated(true);
     }
 
     @Override
