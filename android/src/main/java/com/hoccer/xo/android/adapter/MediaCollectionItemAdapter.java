@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.view.AudioAttachmentView;
 import com.mobeta.android.dslv.DragSortListView;
 import org.apache.log4j.Logger;
@@ -34,7 +33,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     }
 
     @Override
-    public IContentObject getItem(int position) {
+    public TalkClientDownload getItem(int position) {
         return mCollection.getItem(position);
     }
 
@@ -50,7 +49,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
             audioRowView = new AudioAttachmentView(parent.getContext());
         }
 
-        IContentObject item = mCollection.getItem(position);
+        TalkClientDownload item = mCollection.getItem(position);
         audioRowView.setMediaItem(item);
         audioRowView.updatePlayPauseView();
         Integer itemId = (int)getItemId(position);
@@ -64,7 +63,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
         mShowDragHandle = show;
     }
 
-    public IContentObject[] getItems() {
+    public TalkClientDownload[] getItems() {
         return mCollection.toArray();
     }
 
@@ -92,8 +91,8 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
         mSelectedItemIds.clear();
     }
 
-    public List<IContentObject> getAllSelectedItems() {
-        List<IContentObject> result = new ArrayList<IContentObject>();
+    public List<TalkClientDownload> getAllSelectedItems() {
+        List<TalkClientDownload> result = new ArrayList<TalkClientDownload>();
         for(int itemId : mSelectedItemIds) {
             result.add(mCollection.getItemFromId(itemId));
         }

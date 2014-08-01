@@ -10,13 +10,16 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
+import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.MediaCollectionItemAdapter;
+import com.hoccer.xo.android.content.MediaCollectionPlaylist;
+import com.hoccer.xo.android.content.SingleItemPlaylist;
+import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.AttachmentOperationHelper;
 import com.hoccer.xo.android.util.DragSortController;
 import com.hoccer.xo.release.R;
@@ -38,10 +41,12 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
     private DragSortListView mListView;
     private DragSortController mController;
-    private MediaCollectionItemAdapter mCollectionAdapter;
-    private AttachmentSearchResultAdapter mSearchResultAdapter;
     private XoClientDatabase mDatabase;
     private TalkClientMediaCollection mCollection;
+    private MediaCollectionItemAdapter mCollectionAdapter;
+    private AttachmentSearchResultAdapter mSearchResultAdapter;
+
+    private MediaPlayerServiceConnector mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +62,8 @@ public class MediaCollectionFragment extends SearchableListFragment {
             } catch (SQLException e) {
                 LOG.error(e);
             }
+
+            mMediaPlayerServiceConnector.connect(getActivity());
         } else {
             LOG.error("No Media Collection ID transmitted");
         }
@@ -88,6 +95,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
         getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         ListInteractionHandler listHandler = new ListInteractionHandler();
+        getListView().setOnItemClickListener(listHandler);
         getListView().setMultiChoiceModeListener(listHandler);
     }
 
@@ -97,20 +105,20 @@ public class MediaCollectionFragment extends SearchableListFragment {
     }
 
     @Override
-    protected ListAdapter searchInAdapter(String query) {
-        mSearchResultAdapter.searchForAttachments(query);
+    public void onDestroy() {
+        super.onDestroy();
+        mMediaPlayerServiceConnector.disconnect();
+    }
 
+    @Override
+    protected ListAdapter searchInAdapter(String query) {
+        mSearchResultAdapter.query(query);
         return mSearchResultAdapter;
     }
 
     @Override
     protected void onSearchModeEnabled() {
-        if (mSearchResultAdapter == null) {
-            mSearchResultAdapter = new AttachmentSearchResultAdapter();
-        } else {
-            mSearchResultAdapter.clear();
-        }
-        mSearchResultAdapter.setItems(mCollectionAdapter.getItems());
+        mSearchResultAdapter = new AttachmentSearchResultAdapter(mCollection.toArray());
     }
 
     @Override
@@ -160,12 +168,12 @@ public class MediaCollectionFragment extends SearchableListFragment {
     }
 
     private void addSelectedItemsToCollection(Integer mediaCollectionId) {
-        List<IContentObject> selectedItems = mCollectionAdapter.getAllSelectedItems();
+        List<TalkClientDownload> selectedItems = mCollectionAdapter.getAllSelectedItems();
         if(selectedItems.size() > 0) {
             try {
                 TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
                 List<String> addedFilenames = new ArrayList<String>();
-                for (IContentObject item : selectedItems) {
+                for (TalkClientDownload item : selectedItems) {
                     mediaCollection.addItem((TalkClientDownload) item);
                     addedFilenames.add(item.getFileName());
                 }
@@ -176,7 +184,23 @@ public class MediaCollectionFragment extends SearchableListFragment {
         }
     }
 
-    private class ListInteractionHandler implements AbsListView.MultiChoiceModeListener, DragSortListView.DragListener {
+    private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener, DragSortListView.DragListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            TalkClientDownload clickedItem = (TalkClientDownload)getListAdapter().getItem(position);
+            if (mMediaPlayerServiceConnector.isConnected()) {
+                if (isSearchModeEnabled()) {
+                    mMediaPlayerServiceConnector.getService().setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem));
+                } else {
+                    MediaCollectionPlaylist playlist = new MediaCollectionPlaylist(mCollection);
+                    mMediaPlayerServiceConnector.getService().setPlaylist(playlist);
+                }
+                getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
+            } else {
+                LOG.error("MediaPlayerService is not connected");
+            }
+        }
 
         @Override
         public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
@@ -204,7 +228,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
         @Override
         public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
-            final List<IContentObject> selectedItems = mCollectionAdapter.getAllSelectedItems();
+            final List<TalkClientDownload> selectedItems = mCollectionAdapter.getAllSelectedItems();
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
                     XoDialogs.showSingleChoiceDialog("RemoveAttachment",
@@ -254,16 +278,16 @@ public class MediaCollectionFragment extends SearchableListFragment {
             getListView().dispatchSetSelected(false);
         }
 
-        private void removeItemsFromCollection(List<IContentObject> items) {
-            for (IContentObject item : items) {
-                mCollection.removeItem((TalkClientDownload)item);
+        private void removeItemsFromCollection(List<TalkClientDownload> items) {
+            for (TalkClientDownload item : items) {
+                mCollection.removeItem(item);
             }
         }
 
-        private void deleteItems(List<IContentObject> items) {
-            for (IContentObject item : items) {
+        private void deleteItems(List<TalkClientDownload> items) {
+            for (TalkClientDownload item : items) {
                 try{
-                    mDatabase.deleteClientDownloadAndMessage((TalkClientDownload)item);
+                    mDatabase.deleteClientDownloadAndMessage(item);
                 } catch(SQLException e) {
                     LOG.error("Could not delete download", e);
                 }

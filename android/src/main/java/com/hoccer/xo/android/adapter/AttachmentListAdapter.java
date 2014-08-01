@@ -25,7 +25,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     private static final long INVALID_ID = -1;
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
-    private List<IContentObject> mAttachmentItems = new ArrayList<IContentObject>();
+    private List<TalkClientDownload> mAttachmentItems = new ArrayList<TalkClientDownload>();
 
     private String mContentMediaType;
     private int mConversationContactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
@@ -52,11 +52,11 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         setContactIdFilter(pConversationContactId);
     }
 
-    public IContentObject[] getAttachmentItems() {
-        return mAttachmentItems.toArray(new IContentObject[mAttachmentItems.size()]);
+    public TalkClientDownload[] getAttachmentItems() {
+        return mAttachmentItems.toArray(new TalkClientDownload[mAttachmentItems.size()]);
     }
 
-    public void setItems(IContentObject[] items) {
+    public void setItems(TalkClientDownload[] items) {
         mAttachmentItems.clear();
         for(int i = 0; i < items.length; i++) {
             mAttachmentItems.add(items[i]);
@@ -70,7 +70,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     @Override
-    public IContentObject getItem(int position) {
+    public TalkClientDownload getItem(int position) {
         return mAttachmentItems.get(position);
     }
 
@@ -79,13 +79,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         long itemId = INVALID_ID;
 
         if (position >= 0 || position < mAttachmentItems.size()) {
-            IContentObject contentObject = getItem(position);
-
-            if (contentObject instanceof TalkClientDownload) {
-                itemId = ((TalkClientDownload) contentObject).getClientDownloadId();
-            } else if (contentObject instanceof TalkClientUpload) {
-                itemId = ((TalkClientUpload) contentObject).getClientUploadId();
-            }
+            TalkClientDownload item = getItem(position);
+            itemId = item.getClientDownloadId();
         }
 
         return itemId;
@@ -152,7 +147,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     @Override
     public void drop(int from, int to) {
         if (from != to) {
-            IContentObject item = mAttachmentItems.get(from);
+            TalkClientDownload item = mAttachmentItems.get(from);
             mAttachmentItems.remove(from);
             mAttachmentItems.add(to, item);
 
@@ -165,11 +160,11 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         // TODO: update mCheckedItemPositions
     }
 
-    public boolean removeItem(IContentObject item) {
+    public boolean removeItem(TalkClientDownload item) {
         return removeItem(item, false);
     }
 
-    public boolean removeItem(IContentObject item, boolean removeFromCollection) {
+    public boolean removeItem(TalkClientDownload item, boolean removeFromCollection) {
         if (removeFromCollection) {
             removeItemFromCollection(item);
         }
@@ -196,7 +191,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         updateCheckedItems();
     }
 
-    public void addItemAt(IContentObject item, int pos) throws IndexOutOfBoundsException{
+    public void addItemAt(TalkClientDownload item, int pos) throws IndexOutOfBoundsException{
             mAttachmentItems.add(pos, item);
             updateCheckedItems();
             notifyDataSetChanged();
@@ -249,7 +244,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         mShowDragHandle = show;
     }
 
-    private void removeItemFromCollection(IContentObject item) {
+    private void removeItemFromCollection(TalkClientDownload item) {
         if (isItemPartOfCollection(item)) {
             mCollection.removeItem((TalkClientDownload) item);
         }
@@ -291,7 +286,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         return false;
     }
 
-    private boolean isItemPartOfCollection(IContentObject item) {
+    private boolean isItemPartOfCollection(TalkClientDownload item) {
         boolean isItemPartOfCollection = false;
 
         try {
