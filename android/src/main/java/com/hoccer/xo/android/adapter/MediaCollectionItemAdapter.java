@@ -95,7 +95,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     public List<IContentObject> getAllSelectedItems() {
         List<IContentObject> result = new ArrayList<IContentObject>();
         for(int itemId : mSelectedItemIds) {
-            mCollection.getItemFromId(itemId);
+            result.add(mCollection.getItemFromId(itemId));
         }
 
         return result;
