@@ -95,33 +95,13 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
 
     @Override
     public void onDownloadCreated(TalkClientDownload download) {
-        // do nothing if the download is incomplete or already contained
-        if(download.getState() != TalkClientDownload.State.COMPLETE || mList.contains(download))
-            return;
+        addItem(download);
 
-        if(mContact != null) {
-            try {
-                TalkClientMessage message = mDatabase.findClientMessageByTalkClientDownloadId(download.getClientDownloadId());
-                if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
-                    mList = mDatabase.findClientDownloadByMediaTypeAndConversationContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
-                    invokeItemAdded(download);
-                }
-            } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        } else {
-            try {
-                mList = mDatabase.findClientDownloadByMediaType(ContentMediaType.AUDIO);
-                invokeItemAdded(download);
-            } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
     }
 
     @Override
     public void onDownloadUpdated(TalkClientDownload download) {
-        // do nothing
+        addItem(download);
     }
 
     @Override
@@ -140,6 +120,32 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
             try {
                 mList = mDatabase.findClientDownloadByMediaType(ContentMediaType.AUDIO);
                 invokeItemRemoved(download);
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    private void addItem(TalkClientDownload download) {
+        // do nothing if the download is incomplete or already contained
+        if(download.getState() != TalkClientDownload.State.COMPLETE || mList.contains(download))
+            return;
+
+        if(mContact != null) {
+            // check if contact matches
+            try {
+                TalkClientMessage message = mDatabase.findClientMessageByTalkClientDownloadId(download.getClientDownloadId());
+                if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
+                    mList = mDatabase.findClientDownloadByMediaTypeAndConversationContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
+                    invokeItemAdded(download);
+                }
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        } else {
+            try {
+                mList = mDatabase.findClientDownloadByMediaType(ContentMediaType.AUDIO);
+                invokeItemAdded(download);
             } catch (SQLException e) {
                 LOG.error(e.getMessage(), e);
             }
