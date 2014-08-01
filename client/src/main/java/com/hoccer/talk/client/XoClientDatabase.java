@@ -1,12 +1,6 @@
 package com.hoccer.talk.client;
 
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMembership;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSelf;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
@@ -15,7 +9,6 @@ import com.j256.ormlite.stmt.UpdateBuilder;
 import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -144,7 +137,7 @@ public class XoClientDatabase {
 
     public synchronized void updateDelivery(TalkDelivery delivery) throws SQLException {
         int updatedRows = mDeliveries.update(delivery);
-        if(updatedRows < 1) {
+        if (updatedRows < 1) {
             throw new SQLException("cant find record for Delivery: " + delivery.getId().toString());
         }
     }
@@ -240,45 +233,17 @@ public class XoClientDatabase {
         return count;
     }
 
-    public List<TalkClientContact> findAllNearbyContactsInGroup(TalkClientContact groupContact) throws SQLException {
-        List<TalkClientContact> allNearbyGroupContacts = new ArrayList<TalkClientContact>();
-        if (groupContact.isGroupExisting() && groupContact.getGroupPresence().isTypeNearby()) {
-            allNearbyGroupContacts.add(groupContact);
-        }
-        allNearbyGroupContacts.addAll(findAllNearbyContactsOrderedByRecentMessageInGroup(groupContact));
-        return allNearbyGroupContacts;
-    }
-
-    private List<TalkClientContact> findAllNearbyContactsOrderedByRecentMessageInGroup(TalkClientContact groupContact) throws SQLException {
-        QueryBuilder<TalkClientMessage, Integer> recentUnreadMessages = mClientMessages.queryBuilder();
-        QueryBuilder<TalkClientContact, Integer> recentSenders = mClientContacts.queryBuilder();
-        recentUnreadMessages.orderBy("timestamp", false);
-        List<TalkClientContact> orderedListOfSenders = recentSenders.join(recentUnreadMessages).where()
-                .eq("deleted", false)
-                .and()
-                .eq("isNearby", true)
-                .query();
-        List<TalkClientContact> allContacts = mClientContacts.queryBuilder().where()
-                .eq("deleted", false)
-                .and()
-                .eq("contactType", TalkClientContact.TYPE_CLIENT)
-                .and()
-                .eq("isNearby", true)
-                .query();
-        ArrayList<TalkClientContact> orderedListOfDistinctSenders = new ArrayList<TalkClientContact>();
-        for (TalkClientContact orderedListOfSender : orderedListOfSenders) {
-            if (!orderedListOfDistinctSenders.contains(orderedListOfSender)) {
-                orderedListOfDistinctSenders.add(orderedListOfSender);
-            }
-        }
-        for (TalkClientContact contact : allContacts) {
-            if (contact.isClientGroupJoined(groupContact)) {
-                if (!orderedListOfDistinctSenders.contains(contact)) {
-                    orderedListOfDistinctSenders.add(contact);
+    public List<TalkClientContact> findClientsInGroup(TalkClientContact groupContact) throws SQLException {
+        List<TalkClientContact> allGroupContacts = new ArrayList<TalkClientContact>();
+        if (groupContact != null && groupContact.isGroup() && groupContact.getGroupMemberships() != null) {
+            for (TalkClientMembership memberShip : groupContact.getGroupMemberships()) {
+                TalkGroupMember groupMember = memberShip.getMember();
+                if (groupMember != null && groupMember.isJoined()) {
+                    allGroupContacts.add(memberShip.getClientContact());
                 }
             }
         }
-        return orderedListOfDistinctSenders;
+        return allGroupContacts;
     }
 
     public List<TalkClientSmsToken> findAllSmsTokens() throws SQLException {
@@ -447,30 +412,30 @@ public class XoClientDatabase {
             }
         }
         ArrayList<TalkClientContact> allNearbyGroupsOrdered = new ArrayList<TalkClientContact>();
-        for (TalkClientMessage m: nearbyMessages) {
+        for (TalkClientMessage m : nearbyMessages) {
             if (!allNearbyGroupsOrdered.contains(m.getConversationContact())) {
                 allNearbyGroupsOrdered.add(m.getConversationContact());
             }
         }
         ArrayList<TalkClientMessage> orderedMessages = new ArrayList<TalkClientMessage>();
-        for (TalkClientContact c: allNearbyGroupsOrdered) {
+        for (TalkClientContact c : allNearbyGroupsOrdered) {
             TalkClientMessage separator = new TalkClientMessage();
             separator.setConversationContact(c);
             separator.setText("Nearby: " + c.getNickname());
             separator.setMessageId("SEPARATOR");
             orderedMessages.add(separator);
-            orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(),nearbyMessages.size(), 0));
+            orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(), nearbyMessages.size(), 0));
         }
         return orderedMessages;
     }
 
     public List<TalkClientMessage> findMessagesByContactId(int contactId, long count, long offset) throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
-        if(count >= 0) {
+        if (count >= 0) {
             builder.limit(count);
         }
         builder.orderBy("timestamp", true);
-        if(offset >= 0) {
+        if (offset >= 0) {
             builder.offset(offset);
         }
         Where<TalkClientMessage, Integer> where = builder.where()
@@ -620,10 +585,10 @@ public class XoClientDatabase {
     public TalkClientMessage getClientMessageForDelivery(TalkDelivery delivery) throws SQLException {
         TalkClientMessage messageForDelivery = mClientMessages.queryBuilder()
                 .where()
-                        .eq("messageTag", delivery.getMessageTag())
-                        .eq("messageId", delivery.getMessageId())
-                    .or(2)
-                    .eq("deleted", false)
+                .eq("messageTag", delivery.getMessageTag())
+                .eq("messageId", delivery.getMessageId())
+                .or(2)
+                .eq("deleted", false)
                 .and(2)
                 .queryForFirst();
         return messageForDelivery;
@@ -657,7 +622,7 @@ public class XoClientDatabase {
         return null;
     }
 
-    public TalkClientDownload getClientDownloadForDelivery(TalkDelivery delivery) throws SQLException  {
+    public TalkClientDownload getClientDownloadForDelivery(TalkDelivery delivery) throws SQLException {
         TalkClientMessage message = getClientMessageForDelivery(delivery);
         if (message != null) {
             return message.getAttachmentDownload();
@@ -771,28 +736,28 @@ public class XoClientDatabase {
      * failed -> failedAcknowledged */
     public void migrateDeliveryStates() throws SQLException {
         List<TalkDelivery> talkDeliveries = mDeliveries.queryForAll();
-        for(TalkDelivery delivery : talkDeliveries) {
+        for (TalkDelivery delivery : talkDeliveries) {
             if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_OLD)) {
                 delivery.setState(TalkDelivery.STATE_DELIVERED_PRIVATE);
             } else if (delivery.getState().equals(TalkDelivery.STATE_CONFIRMED_OLD)) {
                 delivery.setState(TalkDelivery.STATE_DELIVERED_PRIVATE_ACKNOWLEDGED);
-            } else if(delivery.getState().equals(TalkDelivery.STATE_ABORTED_OLD)) {
+            } else if (delivery.getState().equals(TalkDelivery.STATE_ABORTED_OLD)) {
                 delivery.setState(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED);
-            } else if(delivery.getState().equals(TalkDelivery.STATE_FAILED_OLD)) {
+            } else if (delivery.getState().equals(TalkDelivery.STATE_FAILED_OLD)) {
                 delivery.setState(TalkDelivery.STATE_FAILED_ACKNOWLEDGED);
             }
 
-            if(delivery.getMessageId() == null) {
+            if (delivery.getMessageId() == null) {
                 saveDelivery(delivery);
                 continue;
             }
             TalkClientMessage message = findMessageByMessageId(delivery.getMessageId(), false);
-            if(message != null) {
+            if (message != null) {
                 TalkClientUpload upload = message.getAttachmentUpload();
                 TalkClientDownload download;
-                if(upload == null) {
+                if (upload == null) {
                     download = message.getAttachmentDownload();
-                    if(download != null) {
+                    if (download != null) {
                         migrateTalkClientDownload(delivery, download);
                     } else { // there is no Attachment in this delivery
                         delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
@@ -807,23 +772,29 @@ public class XoClientDatabase {
     }
 
     private void migrateTalkClientUpload(TalkDelivery delivery, TalkClientUpload upload) {
-        switch(upload.getState()) {
-            case COMPLETE: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
+        switch (upload.getState()) {
+            case COMPLETE:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
                 break;
-            case FAILED: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED);
+            case FAILED:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED);
                 break;
-            default: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
+            default:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
                 break;
         }
     }
 
     private void migrateTalkClientDownload(TalkDelivery delivery, TalkClientDownload download) {
-        switch(download.getState()) {
-            case COMPLETE: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
+        switch (download.getState()) {
+            case COMPLETE:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
                 break;
-            case FAILED: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED);
+            case FAILED:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED);
                 break;
-            default: delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
+            default:
+                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
                 break;
         }
     }
