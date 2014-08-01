@@ -464,7 +464,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public int getCurrentProgress() {
-        return mMediaPlayer.getCurrentPosition();
+        int result = 0;
+        if(mMediaPlayer != null) {
+            result = mMediaPlayer.getCurrentPosition();
+        }
+        return result;
     }
 
     public IContentObject getCurrentMediaItem() {
