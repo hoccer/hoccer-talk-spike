@@ -87,11 +87,26 @@ public class JsonRpcClient {
     private Hashtable<String, JsonRpcClientRequest> mOutstandingRequests =
             new Hashtable<String, JsonRpcClientRequest>();
 
+    private void resetTimersAndCounters() {
+        mRequestSuccessCount = 0;
+        mRequestFailureCount = 0;
+        mRequestTimeoutCount = 0;
+        mRequestTimeoutCountSinceLastSuccess = 0;
+        mLastRequestFailureOccurred = 0;
+        mLastRequestTimeoutOccurred = 0;
+        mLastResponseOccurred = 0;
+        mLastResponseTime = 0;
+        mLastFailureTime = 0;
+        mAverageResponseTime = 0;
+        mAverageFailureTime = 0;
+    }
+
     /** Listener for connection state changes */
     private JsonRpcConnection.Listener mConnectionListener =
             new JsonRpcConnection.Listener() {
                 @Override
                 public void onOpen(JsonRpcConnection connection) {
+                    resetTimersAndCounters();
                     handleConnectionChange(connection);
                 }
                 @Override
@@ -177,6 +192,12 @@ public class JsonRpcClient {
         mRequestSuccessCount++;
         LOG.debug("responseReceived: responseTime:"+mLastResponseTime+", averageResponseTime:"+mAverageResponseTime+
                 ", successes:"+mRequestSuccessCount+", failures:"+mRequestFailureCount+", timeouts:" +mRequestTimeoutCount);
+        /*
+        if (!isResponsive()) {
+            LOG.warn("Client purposely not responsive, disconnecting");
+            request.getConnection().disconnect();
+        }
+        */
     }
 
     private synchronized void responseFailed(JsonRpcClientRequest request) {
@@ -194,13 +215,16 @@ public class JsonRpcClient {
 
         if (!isResponsive()) {
             LOG.warn("Client not responsive, disconnecting");
-            request.getConnection().disconnect();
+            if (!request.getConnection().disconnect()) {
+                // we are not disconnected
+                LOG.warn("Can not disconnect, no connection");
+            };
         }
     }
 
     public synchronized boolean isResponsive() {
         long lastSuccessAgo = System.currentTimeMillis() - mLastResponseOccurred;
-        if (mRequestTimeoutCountSinceLastSuccess > 3 &&  lastSuccessAgo > 60 * 1000) {
+        if (mRequestTimeoutCountSinceLastSuccess > 3 &&  lastSuccessAgo > 60 * 1000/* || mRequestSuccessCount > 20*/) {
             LOG.warn("Client not responsive, request timeouts since last success:"+mRequestTimeoutCountSinceLastSuccess+", last success "+lastSuccessAgo/1000+" secs ago");
             return false;
         }
