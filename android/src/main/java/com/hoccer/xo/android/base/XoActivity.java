@@ -763,14 +763,25 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void showBarcode() {
         LOG.debug("scanBarcode()");
-        String qrString = getBarcodeString();
-        Intent qr = new Intent(this, QrCodeGeneratingActivity.class);
-        qr.putExtra("QR", qrString);
-        startActivity(qr);
-    }
 
-    public String getBarcodeString() {
-        return getXoClient().getHost().getUrlScheme() + getXoClient().generatePairingToken();
+        XoApplication.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                final String qrString = getXoClient().getHost().getUrlScheme() + getXoClient().generatePairingToken();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        Intent qr = new Intent(XoActivity.this, QrCodeGeneratingActivity.class);
+                        qr.putExtra("QR", qrString);
+                        startActivity(qr);
+
+                    }
+                });
+
+            }
+        });
     }
 
     public void composeInviteSms(String token) {
