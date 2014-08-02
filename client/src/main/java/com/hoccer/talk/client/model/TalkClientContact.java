@@ -14,6 +14,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.commons.codec.binary.Base64;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
@@ -447,6 +448,7 @@ public class TalkClientContact implements Serializable {
     }
 
     @GroupMethodOnly
+    @Nullable
     public TalkGroup getGroupPresence() {
         ensureGroup();
         return groupPresence;

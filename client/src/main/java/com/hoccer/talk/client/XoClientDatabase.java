@@ -403,9 +403,11 @@ public class XoClientDatabase {
 
         ArrayList<TalkClientMessage> nearbyMessages = new ArrayList<TalkClientMessage>();
         for (TalkClientMessage message : messages) {
-            if (message.getConversationContact() != null && message.getConversationContact().getContactType() != null) {
-                if (message.getConversationContact().getContactType().equals("group")) {
-                    if (message.getConversationContact().getGroupPresence().isTypeNearby()) {
+            TalkClientContact conversationContact = message.getConversationContact();
+            if (conversationContact != null && conversationContact.getContactType() != null) {
+                if (conversationContact.getContactType().equals("group")) {
+                    TalkGroup groupPresence = conversationContact.getGroupPresence();
+                    if (groupPresence != null && groupPresence.isTypeNearby()) {
                         nearbyMessages.add(message);
                     }
                 }
