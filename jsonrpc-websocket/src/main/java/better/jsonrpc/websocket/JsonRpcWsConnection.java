@@ -144,6 +144,9 @@ public class JsonRpcWsConnection extends JsonRpcConnection
         if (mConnection != null && mConnection.isOpen()) {
             mConnection.close();
             return true;
+        } else {
+            // call listeners again to notify them of connection closure
+            onClose();
         }
         return false;
     }
