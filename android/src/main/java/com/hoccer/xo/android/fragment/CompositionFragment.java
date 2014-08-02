@@ -210,7 +210,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     private void configureMotionInterpreterForContact(TalkClientContact contact) {
         // react on gestures only when contact is nearby
-        if (contact != null && (contact.isNearby() || (contact.isGroup() && contact.getGroupPresence().isTypeNearby()))) {
+        if (contact != null && (contact.isNearby() || (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()))) {
             mMotionInterpreter.activate();
         } else {
             mMotionInterpreter.deactivate();

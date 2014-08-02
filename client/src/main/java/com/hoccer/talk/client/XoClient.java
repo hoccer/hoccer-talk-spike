@@ -972,6 +972,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public void createGroup(final TalkClientContact groupContact) {
         LOG.debug("createGroup()");
+
+        TalkGroup groupPresence = groupContact.getGroupPresence();
+        if (groupPresence == null) {
+            LOG.error("Can not create group since groupPresence is null.");
+            return;
+        }
+
         resetIdle();
         mExecutor.execute(new Runnable() {
             @Override
@@ -1506,8 +1513,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                                     // TODO: properly handle group deletion, the following code just marks the group and members as deleted
                                     LOG.info("Removing members and group with name="+ groupContact.getNickname());
                                     TalkGroup groupPresence = groupContact.getGroupPresence();
-                                    groupPresence.setState(TalkGroup.STATE_NONE);
-                                    mDatabase.saveGroup(groupPresence);
+                                    if (groupPresence != null) {
+                                        groupPresence.setState(TalkGroup.STATE_NONE);
+                                        mDatabase.saveGroup(groupPresence);
+                                    }
                                     ForeignCollection<TalkClientMembership> memberships = groupContact.getGroupMemberships();
                                     for (TalkClientMembership tcm : memberships) {
                                         TalkGroupMember member = tcm.getMember();
@@ -2991,6 +3000,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         // reset group state
         TalkGroup groupPresence = groupContact.getGroupPresence();
+        if (groupPresence == null) {
+            LOG.error("Can not destroy nearby group since groupPresence is null");
+            return;
+        }
+
         groupPresence.setState(TalkGroup.STATE_KEPT);
 
         try {
@@ -3006,8 +3020,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
                     // reset group membership state
                     TalkGroupMember member = membership.getMember();
-                    member.setState(TalkGroupMember.STATE_NONE);
-                    mDatabase.saveGroupMember(member);
+                    if (member != null) {
+                        member.setState(TalkGroupMember.STATE_NONE);
+                        mDatabase.saveGroupMember(member);
+                    }
                 }
 
                 mDatabase.saveContact(groupContact);
@@ -3102,7 +3118,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
                 // quietly destroy nearby group
                 if (!member.isInvolved()) {
-                    if (groupContact.getGroupPresence().isTypeNearby()) {
+                    TalkGroup groupPresence = groupContact.getGroupPresence();
+                    if (groupPresence != null && groupPresence.isTypeNearby()) {
                         destroyNearbyGroup(groupContact);
                     }
                 }

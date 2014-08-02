@@ -177,7 +177,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
     public void setActionBarText(TalkClientContact contact) {
         String title;
         if (contact.isGroup()) {
-            if (contact.getGroupPresence().isTypeNearby()) {
+            if (contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
                 title = getResources().getString(R.string.nearby_text);
             } else {
                 title = contact.getName();
@@ -209,7 +209,7 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
     @Override
     protected void applicationWillEnterBackground() {
         super.applicationWillEnterBackground();
-        if (mContact.isGroup() && mContact.getGroupPresence().isTypeNearby()) {
+        if (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
             finish();
         } else if (mContact.isClient() && mContact.isNearby()) {
             finish();
