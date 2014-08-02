@@ -1246,16 +1246,20 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         switch(mState) {
             case STATE_INACTIVE:
             case STATE_IDLE:
-                LOG.debug("supposed to be disconnected");
+                LOG.debug("supposed to be disconnected, state="+stateToString(mState));
                 // we are supposed to be disconnected, things are fine
                 break;
             case STATE_CONNECTING:
             case STATE_RECONNECTING:
             case STATE_REGISTERING:
             case STATE_LOGIN:
+            case STATE_SYNCING:
             case STATE_ACTIVE:
-                LOG.debug("supposed to be connected - scheduling connect");
+                LOG.debug("supposed to be connected - scheduling connect, state="+stateToString(mState));
                 switchState(STATE_CONNECTING, "disconnected while active");
+                break;
+            default:
+                LOG.error("illegal state="+stateToString(mState));
                 break;
         }
     }
