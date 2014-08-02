@@ -97,7 +97,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
             for (TalkClientContact contact : allClientContacts) {
 
                 if (contact.isGroup()) {
-                    if (contact.getGroupPresence().isTypeNearby()) {
+                    if (contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
                         contact.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
                         mNearbyContacts.add(contact);
                     }

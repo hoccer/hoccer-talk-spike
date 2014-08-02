@@ -118,6 +118,15 @@ public class TalkDelivery {
     };
     public static final Set<String> SENDER_CALL_STATES_SET = new HashSet<String>(Arrays.asList(SENDER_CALL_STATES));
 
+    public static final String[] SENDER_SHOULD_ACKNOWLEDGE_STATES = {
+            STATE_DELIVERED_PRIVATE,
+            STATE_DELIVERED_UNSEEN,
+            STATE_DELIVERED_SEEN,
+            STATE_FAILED,
+            STATE_REJECTED
+    };
+    public static final Set<String> SENDER_SHOULD_ACKNOWLEDGE_STATES_SET = new HashSet<String>(Arrays.asList(SENDER_SHOULD_ACKNOWLEDGE_STATES));
+
     public static final String[] RECIPIENT_CALL_STATES = {
             STATE_DELIVERED_PRIVATE,
             STATE_DELIVERED_UNSEEN,

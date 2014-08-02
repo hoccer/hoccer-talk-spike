@@ -1246,16 +1246,20 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         switch(mState) {
             case STATE_INACTIVE:
             case STATE_IDLE:
-                LOG.debug("supposed to be disconnected");
+                LOG.debug("supposed to be disconnected, state="+stateToString(mState));
                 // we are supposed to be disconnected, things are fine
                 break;
             case STATE_CONNECTING:
             case STATE_RECONNECTING:
             case STATE_REGISTERING:
             case STATE_LOGIN:
+            case STATE_SYNCING:
             case STATE_ACTIVE:
-                LOG.debug("supposed to be connected - scheduling connect");
+                LOG.debug("supposed to be connected - scheduling connect, state="+stateToString(mState));
                 switchState(STATE_CONNECTING, "disconnected while active");
+                break;
+            default:
+                LOG.error("illegal state=" + stateToString(mState));
                 break;
         }
     }
@@ -2196,7 +2200,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 clientMessage = mDatabase.findMessageByMessageId(messageId, false);
             }
             if(clientMessage == null) {
-                LOG.warn("outgoing delivery notification for unknown message " + delivery.getMessageId());
+                LOG.warn("outgoing delivery notification for unknown message id " + messageId + " tag "+messageTag +
+                        ", delivery state = "+delivery.getState() + ", group "+groupId+", receiver "+receiverId);
+                if (TalkDelivery.SENDER_SHOULD_ACKNOWLEDGE_STATES_SET.contains(delivery.getState())) {
+                    LOG.warn("acknowledging outgoing delivery for unknown message id " + messageId + " tag " + messageTag +
+                            ", delivery state = " + delivery.getState() + ", group " + groupId + ", receiver " + receiverId);
+                    sendDeliveryConfirmation(delivery, false);
+                } else {
+                    // weird delivery, abort it
+                }
                 return;
             }
         } catch (SQLException e) {
@@ -2213,7 +2225,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("SQL error", e);
         }
 
-        sendDeliveryConfirmation(delivery);
+        sendDeliveryConfirmation(delivery, true);
         sendUploadDeliveryConfirmation(delivery);
 
         for(IXoMessageListener listener: mMessageListeners) {
@@ -2298,7 +2310,25 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         });
     }
 
-    private void sendDeliveryConfirmation(final TalkDelivery delivery) {
+    // caution: this is only for unknown deliveries not stored in the database
+    private void sendDeliveryAbort(final TalkDelivery delivery) {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TalkDelivery result =  mServerRpc.outDeliveryAbort(delivery.getMessageId(), delivery.getReceiverId());
+                     if (result != null) {
+                         LOG.warn("aborted strange delivery for message id "+ delivery.getMessageId()+" receiver "+ delivery.getReceiverId());
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while sending delivery abort: ", e);
+                }
+            }
+        });
+    }
+
+
+    private void sendDeliveryConfirmation(final TalkDelivery delivery, final boolean saveResult) {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -2315,7 +2345,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     } else if (delivery.getState().equals(TalkDelivery.STATE_REJECTED)) {
                         result = mServerRpc.outDeliveryAcknowledgeRejected(delivery.getMessageId(), delivery.getReceiverId());
                     }
-                    if (result != null) {
+                    if (result != null && saveResult) {
                         mDatabase.saveDelivery(result);
                     }
                 } catch (Exception e) {

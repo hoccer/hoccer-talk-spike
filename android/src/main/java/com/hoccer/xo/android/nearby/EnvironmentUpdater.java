@@ -80,6 +80,10 @@ public class EnvironmentUpdater implements LocationListener {
         isEnabled = false;
     }
 
+    public void sendEnvironmentUpdate() {
+        mClient.sendEnvironmentUpdate(getEnvironment());
+    }
+
     public TalkEnvironment getEnvironment() {
         LOG.trace("getEnvironment()");
         TalkEnvironment theEnvironment = new TalkEnvironment();
