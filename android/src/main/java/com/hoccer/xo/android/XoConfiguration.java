@@ -26,17 +26,17 @@ public class XoConfiguration {
     public static final String INTERNAL_THUMBNAILS = "thumbnails";
 
     /* Enable or disable development settings in preferences */
-    public static final boolean DEVELOPMENT_MODE_ENABLED = true;
+    public static final boolean DEVELOPMENT_MODE_ENABLED = false;
 
     /* true: log level = debug, log to sdcard activated */
-    public static final boolean TESTING_MODE_ENABLED = true;
+    public static final boolean TESTING_MODE_ENABLED = false;
 
     /**
      * Background executor thread count
      *
      * AFAIK this must be at least 3 for RPC to work.
      */
-    public static final int CLIENT_THREADS = 10;
+    public static final int CLIENT_THREADS = 100;
 
     /** Notification alarm back-off (msecs) */
     public static final long NOTIFICATION_ALARM_BACKOFF = 5000;
@@ -104,17 +104,22 @@ public class XoConfiguration {
             editor.commit();
         }
 
+
+        SharedPreferences.Editor editor = sPreferences.edit();
         if(TESTING_MODE_ENABLED) {
-            SharedPreferences.Editor editor = sPreferences.edit();
             editor.putString("preference_log_level", "DEBUG");
             editor.putBoolean("preference_log_sd", true);
-            editor.commit();
+        } else {
+            editor.putString("preference_log_level", "WARN");
+            editor.putBoolean("preference_log_sd", false);
         }
+
         if(DEVELOPMENT_MODE_ENABLED) {
-            SharedPreferences.Editor editor = sPreferences.edit();
             editor.putString("preference_log_level", "DEBUG");
-            editor.commit();
+        } else {
+            editor.putString("preference_log_level", "WARN");
         }
+        editor.commit();
     }
 
     public static final void shutdown() {

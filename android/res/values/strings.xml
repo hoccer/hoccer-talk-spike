@@ -282,12 +282,18 @@
     <string name="cant_find_credentials">Can\'t find "credentials.json" on your device.</string>
 
     <string-array name="preference_log_level_names">
+        <item>Fatal</item>
+        <item>Error</item>
+        <item>Warn</item>
         <item>Info</item>
         <item>Debug</item>
         <item>Trace</item>
     </string-array>
 
     <string-array name="preference_log_level_values">
+        <item>FATAL</item>
+        <item>ERROR</item>
+        <item>WARN</item>
         <item>INFO</item>
         <item>DEBUG</item>
         <item>TRACE</item>

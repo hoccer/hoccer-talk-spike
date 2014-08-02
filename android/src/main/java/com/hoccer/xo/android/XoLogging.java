@@ -89,12 +89,20 @@ public class XoLogging {
     }
 
     private static void configureClassLogLevels() {
+        // This noisy stuff we mostly dont't want
         Logger.getLogger(com.j256.ormlite.stmt.mapped.BaseMappedStatement.class).setLevel(Level.WARN);
         Logger.getLogger(com.j256.ormlite.stmt.SelectIterator.class).setLevel(Level.WARN);
         Logger.getLogger(com.j256.ormlite.stmt.StatementBuilder.class).setLevel(Level.WARN);
         Logger.getLogger(com.j256.ormlite.stmt.StatementExecutor.class).setLevel(Level.WARN);
         Logger.getLogger("org.eclipse.jetty.io.nio.ssl").setLevel(Level.WARN);
+        Logger.getLogger("org.eclipse.jetty.io.nio").setLevel(Level.WARN);
+        Logger.getLogger(org.eclipse.jetty.io.nio.ChannelEndPoint.class).setLevel(Level.WARN);
         Logger.getLogger(org.eclipse.jetty.http.HttpParser.class).setLevel(Level.WARN);
+
+        if (XoConfiguration.TESTING_MODE_ENABLED) {
+            // This will display RPC-traffic when on DEBUG
+            Logger.getLogger(better.jsonrpc.client.JsonRpcClient.class).setLevel(Level.DEBUG);
+        }
     }
 
     /**
