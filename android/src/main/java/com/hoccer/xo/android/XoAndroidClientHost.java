@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -52,13 +53,18 @@ public class XoAndroidClientHost implements IXoClientHost {
     }
 
     @Override
-    public ScheduledExecutorService getBackgroundExecutor() {
+    public ExecutorService getExecutor() {
         return XoApplication.getExecutor();
     }
 
     @Override
-    public ScheduledExecutorService getIncomingBackgroundExecutor() {
+    public ExecutorService getIncomingExecutor() {
         return XoApplication.getIncomingExecutor();
+    }
+
+    @Override
+    public ScheduledExecutorService getScheduledExecutor() {
+        return XoApplication.getScheduledExecutor();
     }
 
     @Override

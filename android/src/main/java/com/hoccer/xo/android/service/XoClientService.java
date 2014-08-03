@@ -44,6 +44,7 @@ import android.preference.PreferenceManager;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -70,7 +71,8 @@ public class XoClientService extends Service {
     private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
 
     /** Executor for ourselves and the client */
-    ScheduledExecutorService mExecutor;
+    ExecutorService mExecutor;
+    ScheduledExecutorService mScheduledExecutor;
 
     /** Hoccer client that we serve */
     XoClient mClient;
@@ -121,6 +123,7 @@ public class XoClientService extends Service {
         super.onCreate();
 
         mExecutor = XoApplication.getExecutor();
+        mScheduledExecutor = XoApplication.getScheduledExecutor();
 
         mConnections = new ArrayList<Connection>();
 
@@ -336,7 +339,7 @@ public class XoClientService extends Service {
 
     private void scheduleShutdown() {
         shutdownShutdown();
-        mShutdownFuture = mExecutor.schedule(
+        mShutdownFuture = mScheduledExecutor.schedule(
                 new Runnable() {
                     @Override
                     public void run() {
@@ -636,7 +639,7 @@ public class XoClientService extends Service {
         long now = System.currentTimeMillis();
         long cancelTime = mNotificationTimestamp + XoConfiguration.NOTIFICATION_CANCEL_BACKOFF;
         long delay = Math.max(0, cancelTime - now);
-        mExecutor.schedule(new Runnable() {
+        mScheduledExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);

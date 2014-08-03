@@ -195,7 +195,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         mTokenMessage.setVisibility(View.VISIBLE);
         mTokenSendSms.setEnabled(false);
         mTokenSendEmail.setEnabled(false);
-        XoApplication.getExecutor().schedule(new Runnable() {
+        XoApplication.getScheduledExecutor().schedule(new Runnable() {
             @Override
             public void run() {
                 final String token = getXoClient().generatePairingToken();
@@ -223,7 +223,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         mActiveToken = token;
         mTokenEdit.setEnabled(false);
         mTokenPairButton.setEnabled(false);
-        getBackgroundExecutor().execute(new Runnable() {
+        getExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 getXoClient().performTokenPairing(token);

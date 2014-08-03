@@ -247,7 +247,7 @@ public class
     }
 
     protected void markMessageAsSeen(final TalkClientMessage message) {
-        mActivity.getBackgroundExecutor().execute(new Runnable() {
+        mActivity.getExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 getXoClient().markAsSeen(message);

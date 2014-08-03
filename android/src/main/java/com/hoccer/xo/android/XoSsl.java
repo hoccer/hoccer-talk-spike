@@ -35,7 +35,7 @@ public class XoSsl {
         if (WS_CLIENT_FACTORY == null) {
             LOG.info("Creating WebSocketClientFactory");
 
-            ExecutorThreadPool pool = new ExecutorThreadPool(XoApplication.getExecutor());
+            ExecutorThreadPool pool = new ExecutorThreadPool(XoApplication.getIncomingExecutor());
             WebSocketClientFactory webSocketClientFactory = new WebSocketClientFactory(pool);
             SslContextFactory sslContextFactory = webSocketClientFactory.getSslContextFactory();
             sslContextFactory.setTrustAll(false);

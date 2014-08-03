@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +74,8 @@ public abstract class XoActivity extends FragmentActivity {
     /**
      * Executor for background tasks
      */
-    ScheduledExecutorService mBackgroundExecutor;
+    ExecutorService mExecutor;
+    ScheduledExecutorService mScheduledExecutor;
 
     /**
      * RPC interface to service (null when not connected)
@@ -140,8 +142,11 @@ public abstract class XoActivity extends FragmentActivity {
         return XoApplication.getXoSoundPool();
     }
 
-    public ScheduledExecutorService getBackgroundExecutor() {
-        return mBackgroundExecutor;
+    public ExecutorService getExecutor() {
+        return mExecutor;
+    }
+    public ScheduledExecutorService getScheduledExecutor() {
+        return mScheduledExecutor;
     }
 
     public IXoClientService getService() {
@@ -328,8 +333,9 @@ public abstract class XoActivity extends FragmentActivity {
         super.onResume();
         checkForCrashesIfEnabled();
 
-        // get the background executor
-        mBackgroundExecutor = XoApplication.getExecutor();
+        // get the background executors
+        mExecutor = XoApplication.getExecutor();
+        mScheduledExecutor = XoApplication.getScheduledExecutor();
 
         // start the backend service and bind to it
         Intent serviceIntent = new Intent(getApplicationContext(), XoClientService.class);
@@ -652,7 +658,7 @@ public abstract class XoActivity extends FragmentActivity {
      */
     private void scheduleKeepAlive() {
         shutdownKeepAlive();
-        mKeepAliveTimer = mBackgroundExecutor.scheduleAtFixedRate(new Runnable() {
+        mKeepAliveTimer = mScheduledExecutor.scheduleAtFixedRate(new Runnable() {
                                                                       @Override
                                                                       public void run() {
                                                                           if (mService != null) {

@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.widget.BaseAdapter;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +44,8 @@ public abstract class XoAdapter extends BaseAdapter {
 
     protected final LayoutInflater mInflater;
 
-    private final ScheduledExecutorService mExecutor;
+    private final ExecutorService mExecutor;
+    private final ScheduledExecutorService mScheduledExecutor;
 
     protected Logger LOG = null;
 
@@ -63,7 +65,8 @@ public abstract class XoAdapter extends BaseAdapter {
         mDatabase = mActivity.getXoDatabase();
         mInflater = mActivity.getLayoutInflater();
         mResources = mActivity.getResources();
-        mExecutor = mActivity.getBackgroundExecutor();
+        mExecutor = mActivity.getExecutor();
+        mScheduledExecutor = mActivity.getScheduledExecutor();
     }
 
     public void runOnUiThread(Runnable runnable) {
@@ -154,7 +157,7 @@ public abstract class XoAdapter extends BaseAdapter {
         }
         if (delta < RATE_LIMIT_MSECS) {
             long delay = RATE_LIMIT_MSECS - delta;
-            mNotifyFuture = mExecutor.schedule(
+            mNotifyFuture = mScheduledExecutor.schedule(
                     new Runnable() {
                         @Override
                         public void run() {

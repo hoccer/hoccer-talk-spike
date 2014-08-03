@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +37,9 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
 
     private XoClientDatabase mDatabase;
     private XoActivity mXoActivity;
-    private final ScheduledExecutorService mExecutor;
+    private final ExecutorService mExecutor;
+    private final ScheduledExecutorService mScheduledExecutor;
+
     private ScheduledFuture<?> mNotifyFuture;
     private long mNotifyTimestamp;
 
@@ -47,7 +50,8 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         super();
         mDatabase = db;
         mXoActivity = xoActivity;
-        mExecutor = mXoActivity.getBackgroundExecutor();
+        mExecutor = mXoActivity.getExecutor();
+        mScheduledExecutor = mXoActivity.getScheduledExecutor();
     }
 
     @Override
@@ -204,7 +208,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
             long delay = RATE_LIMIT_MSECS - delta;
 
             LOG.debug("Scheduling update of NearbyContactsAdapter with delay " + delay);
-            mNotifyFuture = mExecutor.schedule(
+            mNotifyFuture = mScheduledExecutor.schedule(
                     new Runnable() {
                         @Override
                         public void run() {

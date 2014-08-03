@@ -13,6 +13,7 @@ import android.app.Activity;
 import android.support.v4.app.Fragment;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -43,8 +44,12 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
         return new File(mActivity.getFilesDir(), "avatars");
     }
 
-    public ScheduledExecutorService getBackgroundExecutor() {
-        return mActivity.getBackgroundExecutor();
+    public ExecutorService getExecutor() {
+        return mActivity.getExecutor();
+    }
+
+    public ScheduledExecutorService getScheduledExecutor() {
+        return mActivity.getScheduledExecutor();
     }
 
     public XoActivity getXoActivity() {

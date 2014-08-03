@@ -16,7 +16,7 @@ import java.util.concurrent.TimeoutException;
 public class JsonRpcWsClient extends JsonRpcWsConnection
         implements WebSocket, WebSocket.OnTextMessage, WebSocket.OnBinaryMessage {
 
-    private Executor mExecutor;
+    //private Executor mExecutor;
 
     /** URI for the service used */
 	private URI mServiceUri;
@@ -30,14 +30,6 @@ public class JsonRpcWsClient extends JsonRpcWsConnection
         mServiceUri = serviceUri;
         mServiceProtocol = protocol;
         mClient = client;
-    }
-
-    public JsonRpcWsClient(URI serviceUri, String protocol, WebSocketClient client, ObjectMapper mapper, Executor executor) {
-        super(mapper);
-        mServiceUri = serviceUri;
-        mServiceProtocol = protocol;
-        mClient = client;
-        mExecutor = executor;
     }
 
 	public JsonRpcWsClient(URI serviceUri, String protocol, WebSocketClient client) {
@@ -95,68 +87,6 @@ public class JsonRpcWsClient extends JsonRpcWsConnection
         LOG.info("[connection #" + mConnectionId + "] connecting to '" + mServiceUri + "'");
         mClient.setProtocol(mServiceProtocol);
         mClient.open(mServiceUri, this, maxWait, maxWaitUnit);
-    }
-
-    /** @return the executor used to decouple this connection */
-    public Executor getExecutor() {
-        return mExecutor;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void sendRequest(final ObjectNode request) throws IOException {
-        if (mExecutor == null) {
-            super.sendRequest(request);
-            return;
-        }
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    JsonRpcWsClient.super.sendRequest(request);
-                } catch (Throwable t) {
-                    LOG.error("caught and swallowed exception escaping runnable", t);
-                }
-            }
-        });
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void sendResponse(final ObjectNode response) throws IOException {
-        if (mExecutor == null) {
-            super.sendResponse(response);
-            return;
-        }
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    JsonRpcWsClient.super.sendResponse(response);
-                } catch (Throwable t) {
-                    LOG.error("caught and swallowed exception escaping runnable", t);
-                }
-            }
-        });
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void sendNotification(final ObjectNode notification) throws IOException {
-        if (mExecutor == null) {
-            super.sendNotification(notification);
-            return;
-        }
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    JsonRpcWsClient.super.sendNotification(notification);
-                } catch (Throwable t) {
-                    LOG.error("caught and swallowed exception escaping runnable", t);
-                }
-            }
-        });
     }
 
 }

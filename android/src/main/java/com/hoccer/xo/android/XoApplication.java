@@ -20,8 +20,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
 
 /**
  * Application class
@@ -37,9 +36,11 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static Logger LOG = null;
 
     /** global executor for client background activity (initialized in onCreate) */
-    private static ScheduledExecutorService EXECUTOR = null;
+    private static ExecutorService EXECUTOR = null;
+    /** global executor for client background activity (initialized in onCreate) */
+    private static ScheduledExecutorService SCHEDULED_EXECUTOR = null;
     /** global executor for incoming connections */
-    private static ScheduledExecutorService INCOMING_EXECUTOR = null;
+    private static ExecutorService INCOMING_EXECUTOR = null;
     /** global xo host */
     private static IXoClientHost CLIENT_HOST = null;
     /** global xo client (initialized in onCreate) */
@@ -56,10 +57,19 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     /** uncaught exception handler for the client and us */
     private static Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER = null;
     private static DisplayImageOptions CONTENT_IMAGE_OPTIONS = null;
+
     /** @return common executor for background tasks */
-    public static ScheduledExecutorService getExecutor() {
+    public static ExecutorService getExecutor() {
         return EXECUTOR;
     }
+    /** @return executor for incoming rpc-processing */
+    public static ExecutorService getIncomingExecutor() {
+        return INCOMING_EXECUTOR;
+    }
+    public static ScheduledExecutorService getScheduledExecutor() {
+        return SCHEDULED_EXECUTOR;
+    }
+
     /** @return the xo client */
     public static XoClient getXoClient() {
         return CLIENT;
@@ -241,18 +251,29 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ensureNoMedia(getEncryptedDownloadDirectory());
 
         // create executor
-        LOG.info("creating background executor");
+        LOG.info("creating background executors");
         ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
         tfb.setNameFormat("client-%d");
         tfb.setUncaughtExceptionHandler(this);
-        EXECUTOR = Executors.newScheduledThreadPool(
-                        XoConfiguration.CLIENT_THREADS,
-                        tfb.build());
+
+        EXECUTOR = new ThreadPoolExecutor(0, XoConfiguration.CLIENT_THREADS,
+                60L, TimeUnit.SECONDS,
+                new SynchronousQueue<Runnable>(),
+                tfb.build());
+
         ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
-        tfb2.setNameFormat("receiving client-%d");
+        tfb2.setNameFormat("incoming-%d");
         tfb2.setUncaughtExceptionHandler(this);
-        INCOMING_EXECUTOR = Executors
-                .newScheduledThreadPool(XoConfiguration.CLIENT_THREADS, tfb2.build());
+        INCOMING_EXECUTOR = new ThreadPoolExecutor(0, XoConfiguration.CLIENT_INCOMING_THREADS,
+                60L, TimeUnit.SECONDS,
+                new SynchronousQueue<Runnable>(),
+                tfb2.build());
+
+        ThreadFactoryBuilder tfb3 = new ThreadFactoryBuilder();
+        tfb3.setNameFormat("scheduled-%d");
+        tfb3.setUncaughtExceptionHandler(this);
+        SCHEDULED_EXECUTOR = Executors
+                .newScheduledThreadPool(XoConfiguration.CLIENT_SCHEDULED_THREADS, tfb2.build());
 
         // create client instance
         LOG.info("creating client");
@@ -332,9 +353,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         }
     }
 
-    public static ScheduledExecutorService getIncomingExecutor() {
-        return INCOMING_EXECUTOR;
-    }
 
     public static void reinitializeXoClient() {
         if(CLIENT != null) {

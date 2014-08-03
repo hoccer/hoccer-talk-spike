@@ -42,10 +42,7 @@ import java.nio.charset.Charset;
 import java.security.*;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class XoClient implements JsonRpcConnection.Listener, IXoTransferListenerOld {
@@ -120,7 +117,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     ITalkRpcServer mServerRpc;
 
     /** Executor doing all the heavy network and database work */
-    ScheduledExecutorService mExecutor;
+    ExecutorService mExecutor;
+
+    /** Executor doing all the heavy network and database work */
+    ScheduledExecutorService mScheduledExecutor;
 
     /* Futures keeping track of singleton background operations */
     ScheduledFuture<?> mLoginFuture;
@@ -175,7 +175,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mIdleTimeout = mClientHost.getIdleTimeout();
 
         // fetch executor and db immediately
-        mExecutor = host.getBackgroundExecutor();
+        mExecutor = host.getExecutor();
+        mScheduledExecutor = host.getScheduledExecutor();
 
         // create and initialize the database
         mDatabase = new XoClientDatabase(mClientHost.getDatabaseBackend());
@@ -1320,7 +1321,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void scheduleIdle() {
         shutdownIdle();
         if(mState > STATE_CONNECTING && mIdleTimeout > 0) {
-            mAutoDisconnectFuture = mExecutor.schedule(new Runnable() {
+            mAutoDisconnectFuture = mScheduledExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
                     switchState(STATE_IDLE, "activity timeout");
@@ -1348,7 +1349,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void scheduleKeepAlive() {
         shutdownKeepAlive();
         if(mClientHost.getKeepAliveEnabled()) {
-            mKeepAliveFuture = mExecutor.scheduleAtFixedRate(new Runnable() {
+            mKeepAliveFuture = mScheduledExecutor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
                     LOG.debug("performing keep-alive");
@@ -1398,7 +1399,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         // schedule the attempt
-        mConnectFuture = mExecutor.schedule(new Runnable() {
+        mConnectFuture = mScheduledExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 doConnect();
@@ -1417,7 +1418,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void scheduleLogin() {
         LOG.debug("scheduleLogin()");
         shutdownLogin();
-        mLoginFuture = mExecutor.schedule(new Runnable() {
+        mLoginFuture = mScheduledExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 performLogin(mSelfContact);
@@ -1442,7 +1443,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             //return;
             mSelfContact.updateSelfConfirmed();
         }
-        mRegistrationFuture = mExecutor.schedule(new Runnable() {
+        mRegistrationFuture = mScheduledExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -1573,7 +1574,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void scheduleDisconnect() {
         LOG.debug("scheduleDisconnect()");
         shutdownDisconnect();
-        mDisconnectFuture = mExecutor.schedule(new Runnable() {
+        mDisconnectFuture = mScheduledExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -2092,7 +2093,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private ScheduledFuture sendPresence() {
         LOG.info("sendPresence()");
-        return mExecutor.schedule(new Runnable() {
+        return mScheduledExecutor.schedule(new Runnable() {
             @Override
             public void run() {
         

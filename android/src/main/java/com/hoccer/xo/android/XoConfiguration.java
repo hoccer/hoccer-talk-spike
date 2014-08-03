@@ -37,6 +37,8 @@ public class XoConfiguration {
      * AFAIK this must be at least 3 for RPC to work.
      */
     public static final int CLIENT_THREADS = 100;
+    public static final int CLIENT_INCOMING_THREADS = 100;
+    public static final int CLIENT_SCHEDULED_THREADS = 20;
 
     /** Notification alarm back-off (msecs) */
     public static final long NOTIFICATION_ALARM_BACKOFF = 5000;

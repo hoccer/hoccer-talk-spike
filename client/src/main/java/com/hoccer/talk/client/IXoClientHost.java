@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -13,8 +14,10 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public interface IXoClientHost {
 
-    public ScheduledExecutorService getBackgroundExecutor();
-    public ScheduledExecutorService getIncomingBackgroundExecutor();
+    public ExecutorService getExecutor();
+    public ExecutorService getIncomingExecutor();
+    public ScheduledExecutorService getScheduledExecutor();
+
     public IXoClientDatabaseBackend getDatabaseBackend();
     public WebSocketClientFactory   getWebSocketFactory();
     public Thread.UncaughtExceptionHandler getUncaughtExceptionHandler();
