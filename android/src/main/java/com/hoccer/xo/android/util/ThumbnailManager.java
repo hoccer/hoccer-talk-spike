@@ -60,9 +60,8 @@ public class ThumbnailManager {
      */
     public void clearCache() {
         if (mMemoryLruCache != null) {
-            LOG.info("Will evict thumbnail cache with size: " + mMemoryLruCache.size());
+            LOG.debug("Will evict thumbnail cache with size: " + mMemoryLruCache.size());
             mMemoryLruCache.evictAll();
-            LOG.info("New cache size: " + mMemoryLruCache.size());
         }
     }
 
@@ -78,6 +77,12 @@ public class ThumbnailManager {
                 // number of items.
                 return bitmap.getByteCount() / 1024;
             }
+
+            @Override
+            protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
+                super.entryRemoved(evicted, key, oldValue, newValue);
+                LOG.trace("entryRemoved(...) " + key + " New cache size: " + mMemoryLruCache.size());
+            }
         };
 
         mStubDrawable = new ColorDrawable(Color.LTGRAY);
@@ -86,6 +91,7 @@ public class ThumbnailManager {
     private void addBitmapToMemoryCache(String key, Bitmap bitmap) {
         if (getBitmapFromMemCache(key) == null) {
             mMemoryLruCache.put(key, bitmap);
+            LOG.trace("addBitmapToMemoryCache(...) New cache size: " + mMemoryLruCache.size());
         }
     }
 
@@ -222,6 +228,7 @@ public class ThumbnailManager {
         String key = taggedThumbnailUri(uri, tag);
         synchronized (mRunningRenderJobs) {
             if (!mRunningRenderJobs.containsKey(key)) {
+                LOG.trace("Adding image render job to queue: " + key);
                 ImageThumbnailRenderer imageThumbnailRenderer = new ImageThumbnailRenderer();
                 mRunningRenderJobs.put(key, imageThumbnailRenderer);
                 imageThumbnailRenderer.execute(uri, imageView, maskResource, tag, key);
@@ -361,6 +368,7 @@ public class ThumbnailManager {
     public void unregisterRenderJob(String key) {
         synchronized (mRunningRenderJobs) {
             if (mRunningRenderJobs.containsKey(key)) {
+                LOG.trace("Removing render job from queue: " + key);
                 mRunningRenderJobs.remove(key);
             }
         }
@@ -382,6 +390,7 @@ public class ThumbnailManager {
             bitmap = loadThumbnailForUri(uri, tag);
         }
         if (bitmap == null) {
+            imageView.setImageDrawable(mStubDrawable);
             queueVideoThumbnailCreation(uri, imageView, maskResource, tag);
         } else {
             imageView.setImageBitmap(bitmap);
@@ -393,7 +402,7 @@ public class ThumbnailManager {
         String taggedUri = taggedThumbnailUri(uri, tag);
         synchronized (mRunningRenderJobs) {
             if (!mRunningRenderJobs.containsKey(taggedUri)) {
-                imageView.setImageDrawable(mStubDrawable);
+                LOG.trace("adding video job to queue: " + taggedUri);
                 VideoThumbnailRenderer videoThumbnailRenderer = new VideoThumbnailRenderer();
                 mRunningRenderJobs.put(taggedUri, videoThumbnailRenderer);
                 videoThumbnailRenderer.execute(uri, imageView, maskResource, tag, taggedUri);
