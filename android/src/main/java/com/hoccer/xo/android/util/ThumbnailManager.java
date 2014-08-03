@@ -107,7 +107,7 @@ public class ThumbnailManager {
 
         Bitmap bitmap = null;
         if (uri != null) {
-            bitmap = (Bitmap) getBitmapFromMemCache(thumbnailUri);
+            bitmap = getBitmapFromMemCache(thumbnailUri);
         }
         if (bitmap == null) {
             bitmap = loadThumbnailForUri(uri, tag);
@@ -319,11 +319,8 @@ public class ThumbnailManager {
             } else {
                 mImageToLoad.mImageView.setImageDrawable(mStubDrawable);
             }
-            synchronized (mRunningRenderJobs) {
-                if (mRunningRenderJobs.containsKey(mThumbnailUri)) {
-                    mRunningRenderJobs.remove(mThumbnailUri);
-                }
-            }
+
+            unregisterRenderJob(mThumbnailUri);
         }
     }
 
@@ -357,10 +354,14 @@ public class ThumbnailManager {
                 mThumbnailView.setImageDrawable(mStubDrawable);
             }
 
-            synchronized (mRunningRenderJobs) {
-                if (mRunningRenderJobs.containsKey(mThumbnailUri)) {
-                    mRunningRenderJobs.remove(mThumbnailUri);
-                }
+            unregisterRenderJob(mThumbnailUri);
+        }
+    }
+
+    public void unregisterRenderJob(String key) {
+        synchronized (mRunningRenderJobs) {
+            if (mRunningRenderJobs.containsKey(key)) {
+                mRunningRenderJobs.remove(key);
             }
         }
     }
@@ -375,7 +376,7 @@ public class ThumbnailManager {
      */
     public void displayThumbnailForVideo(String uri, ImageView imageView, int maskResource, String tag) {
         String taggedUri = taggedThumbnailUri(uri, tag);
-        Bitmap bitmap = (Bitmap) getBitmapFromMemCache(taggedUri);
+        Bitmap bitmap = getBitmapFromMemCache(taggedUri);
 
         if (bitmap == null) {
             bitmap = loadThumbnailForUri(uri, tag);
