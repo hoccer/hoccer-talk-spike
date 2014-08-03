@@ -77,12 +77,6 @@ public class ThumbnailManager {
                 // number of items.
                 return bitmap.getByteCount() / 1024;
             }
-
-            @Override
-            protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
-                super.entryRemoved(evicted, key, oldValue, newValue);
-                LOG.trace("entryRemoved(...) " + key + " New cache size: " + mMemoryLruCache.size());
-            }
         };
 
         mStubDrawable = new ColorDrawable(Color.LTGRAY);
@@ -327,7 +321,12 @@ public class ThumbnailManager {
                 mImageToLoad.mImageView.setImageDrawable(mStubDrawable);
             }
 
-            unregisterRenderJob(mThumbnailUri);
+            synchronized (mRunningRenderJobs) {
+                if (mRunningRenderJobs.containsKey(mThumbnailUri)) {
+                    LOG.trace("Removing render job from queue: " + mThumbnailUri);
+                    mRunningRenderJobs.remove(mThumbnailUri);
+                }
+            }
         }
     }
 
@@ -361,15 +360,11 @@ public class ThumbnailManager {
                 mThumbnailView.setImageDrawable(mStubDrawable);
             }
 
-            unregisterRenderJob(mThumbnailUri);
-        }
-    }
-
-    public void unregisterRenderJob(String key) {
-        synchronized (mRunningRenderJobs) {
-            if (mRunningRenderJobs.containsKey(key)) {
-                LOG.trace("Removing render job from queue: " + key);
-                mRunningRenderJobs.remove(key);
+            synchronized (mRunningRenderJobs) {
+                if (mRunningRenderJobs.containsKey(mThumbnailUri)) {
+                    LOG.trace("Removing render job from queue: " + mThumbnailUri);
+                    mRunningRenderJobs.remove(mThumbnailUri);
+                }
             }
         }
     }
