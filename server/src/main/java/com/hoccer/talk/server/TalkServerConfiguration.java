@@ -115,12 +115,12 @@ public class TalkServerConfiguration {
         // UPDATE AGENT
         UPDATE_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".update.threadPoolSize",
                 PropertyTypes.INTEGER,
-                20), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+                250), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
 
         // DELIVERY AGENT
         DELIVERY_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".delivery.threadPoolSize",
                 PropertyTypes.INTEGER,
-                20), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+                50), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
 
         // PING AGENT
         PING_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".ping.threadPoolSize",
