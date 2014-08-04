@@ -648,18 +648,18 @@ public class UpdateAgent extends NotificationDeferrer {
                     }
                 } else {
                     LOG.error("requestGroupKeys, bad number of keys returned for group " + forGroupId);
-                    connection.penalizePriorization(100L); // penalize this client in selection
-                    sleepForMillis(1000); // TODO: schedule with delay instead of sleep
+                    connection.penalizePriorization(300L); // penalize this client in selection
+                    sleepForMillis(2000); // TODO: schedule with delay instead of sleep
                     checkAndRequestGroupMemberKeys(forGroupId); // try again
                 }
             } else {
                 LOG.error("requestGroupKeys, no keys returned for group " + forGroupId);
-                connection.penalizePriorization(100L); // penalize this client in selection
-                sleepForMillis(1000);  // TODO: schedule with delay instead of sleep
+                connection.penalizePriorization(300L); // penalize this client in selection
+                sleepForMillis(2000);  // TODO: schedule with delay instead of sleep
                 checkAndRequestGroupMemberKeys(forGroupId); // try again
             }
         } else {
-            sleepForMillis(1000); // TODO: schedule with delay instead of sleep
+            sleepForMillis(2000); // TODO: schedule with delay instead of sleep
             LOG.error("requestGroupKeys, no presence for any outdated member of group " + forGroupId);
             checkAndRequestGroupMemberKeys(forGroupId); // try again
         }
