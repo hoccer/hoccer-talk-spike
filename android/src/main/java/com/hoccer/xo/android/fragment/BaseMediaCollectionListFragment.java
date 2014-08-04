@@ -71,12 +71,10 @@ public abstract class BaseMediaCollectionListFragment extends ListFragment {
     }
 
     private void addNewMediaCollection(String name) {
-        TalkClientMediaCollection collection = null;
         try {
-            collection = XoApplication.getXoClient().getDatabase().createMediaCollection(name);
+            XoApplication.getXoClient().getDatabase().createMediaCollection(name);
         } catch (SQLException e) {
             LOG.error("Creating new media collection failed.", e);
         }
-        mMediaCollectionListAdapter.add(collection);
     }
 }

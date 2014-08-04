@@ -105,6 +105,10 @@ public class XoDialogs {
         dialogFragment.show(activity.getFragmentManager(), tag);
     }
 
+    public static void showInputTextDialog(final String tag, final int titleId, final Activity activity, final OnTextSubmittedListener okListener) {
+        showInputTextDialog(tag, titleId, -1, activity, okListener, null);
+    }
+
     public static void showInputTextDialog(final String tag, final int titleId, final int messageId, final Activity activity, final OnTextSubmittedListener okListener) {
         showInputTextDialog(tag, titleId, messageId, activity, okListener, null);
     }
@@ -119,7 +123,9 @@ public class XoDialogs {
                 LOG.debug("Creating dialog: " + tag);
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder.setTitle(titleId);
-                builder.setMessage(messageId);
+                if (messageId > 0) {
+                    builder.setMessage(messageId);
+                }
                 builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {

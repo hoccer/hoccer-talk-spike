@@ -990,12 +990,12 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     @Override
-    public void registerListener(IXoMediaCollectionListener listener) {
+    public void registerMediaCollectionListener(IXoMediaCollectionListener listener) {
         mMediaCollectionListeners.registerListener(listener);
     }
 
     @Override
-    public void unregisterListener(IXoMediaCollectionListener listener) {
+    public void unregisterMediaCollectionListener(IXoMediaCollectionListener listener) {
         mMediaCollectionListeners.unregisterListener(listener);
     }
 

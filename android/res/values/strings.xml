@@ -268,12 +268,10 @@
     <string name="select_recipients">Select recipients</string>
     <string name="error_could_not_find_file_for_sending">Couldn\'t find and send file \'%1$s\'</string>
     <string name="rename_collection">Rename Collection</string>
-    <string name="dialog_delete_collection_title">Delete collection</string>
-    <string name="dialog_delete_collection_message">Are you sure you want to delete this collection? The attachments
+    <string name="dialog_delete_collection_title">Delete collections</string>
+    <string name="dialog_delete_collection_message">Are you sure you want to delete the selected collection(s)? The attachments
         will not be deleted.
     </string>
-    <string name="dialog_select_collection_title">No collection selected</string>
-    <string name="dialog_select_collection_message">Please select a collection first.</string>
 
     <!-- Preferences -->
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>

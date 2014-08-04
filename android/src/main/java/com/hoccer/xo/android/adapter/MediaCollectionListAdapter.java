@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.hoccer.talk.client.IXoMediaCollectionListener;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.release.R;
@@ -16,7 +17,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaCollectionListAdapter extends BaseAdapter {
+public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaCollectionListener {
 
     private List<TalkClientMediaCollection> mMediaCollections = new ArrayList<TalkClientMediaCollection>();
     private SparseBooleanArray mSelectedItems = new SparseBooleanArray();
@@ -24,6 +25,7 @@ public class MediaCollectionListAdapter extends BaseAdapter {
 
     public MediaCollectionListAdapter() {
         try {
+            XoApplication.getXoClient().getDatabase().registerMediaCollectionListener(this);
             loadMediaCollections();
         } catch (SQLException e) {
             LOG.error("Loading media collections failed.", e);
@@ -63,17 +65,25 @@ public class MediaCollectionListAdapter extends BaseAdapter {
         TalkClientMediaCollection mediaCollection = mMediaCollections.get(position);
         viewHolder.titleName.setText(mediaCollection.getName());
 
+
+
+        // TODO find out why the f**k this doesn't work but setting the BG colour manually does
+//        convertView.setSelected(mSelectedItems.get(position));
+
+        if (mSelectedItems.get(position)) {
+            convertView.setBackgroundColor(parent.getResources().getColor(R.color.xo_selected_background));
+        } else {
+            convertView.setBackgroundColor(parent.getResources().getColor(R.color.xo_main_background));
+        }
+
         if (mSelectedItems.size() > 0) {
-            viewHolder.goToImageView.setVisibility(View.GONE);
-            convertView.setSelected(mSelectedItems.get(position));
+            // if mSelectedItems.size() > 0 we can assume the contextual action mode is active
+            viewHolder.goToImageView.setVisibility(View.INVISIBLE);
+        } else {
+            viewHolder.goToImageView.setVisibility(View.VISIBLE);
         }
 
         return convertView;
-    }
-
-    public void add(TalkClientMediaCollection mediaCollection) {
-        mMediaCollections.add(mediaCollection);
-        notifyDataSetChanged();
     }
 
     public void selectItem(int position, boolean selected) {
@@ -86,6 +96,17 @@ public class MediaCollectionListAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public List<TalkClientMediaCollection> getSelecteddItems() {
+        List<TalkClientMediaCollection> collections = new ArrayList<TalkClientMediaCollection>();
+        for (int i = 0; i < mMediaCollections.size(); ++i) {
+            if (mSelectedItems.get(i)) {
+                collections.add(mMediaCollections.get(i));
+            }
+        }
+
+        return collections;
+    }
+
     public void clearSelection() {
         mSelectedItems.clear();
         notifyDataSetChanged();
@@ -93,6 +114,29 @@ public class MediaCollectionListAdapter extends BaseAdapter {
 
     private void loadMediaCollections() throws SQLException {
         mMediaCollections = XoApplication.getXoClient().getDatabase().findAllMediaCollections();
+    }
+
+    @Override
+    public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
+        mMediaCollections.add(collectionCreated);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public void onMediaCollectionDeleted(TalkClientMediaCollection collectionDeleted) {
+        TalkClientMediaCollection collectionToRemove = null;
+        for (TalkClientMediaCollection collection : mMediaCollections) {
+            if (collection.getId() == collectionDeleted.getId()) {
+                collectionToRemove = collection;
+                break;
+            }
+        }
+
+        if (collectionToRemove != null) {
+            mMediaCollections.remove(collectionToRemove);
+        }
+
+        notifyDataSetChanged();
     }
 
     private class ViewHolder {
