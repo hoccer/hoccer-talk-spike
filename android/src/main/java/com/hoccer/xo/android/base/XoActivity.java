@@ -252,13 +252,7 @@ public abstract class XoActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         // set up database connection
-        mDatabase = new XoClientDatabase(
-                AndroidTalkDatabase.getInstance(this.getApplicationContext()));
-        try {
-            mDatabase.initialize();
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
+        mDatabase = XoApplication.getXoClient().getDatabase();
 
         // set layout
         setContentView(getLayoutResource());

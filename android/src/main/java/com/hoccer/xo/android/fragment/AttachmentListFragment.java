@@ -73,13 +73,7 @@ public class AttachmentListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mDatabase = new XoClientDatabase(
-                AndroidTalkDatabase.getInstance(getActivity().getApplicationContext()));
-        try {
-            mDatabase.initialize();
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
+        mDatabase = XoApplication.getXoClient().getDatabase();
 
         setHasOptionsMenu(true);
         mAttachmentListAdapter = new AttachmentListAdapter();

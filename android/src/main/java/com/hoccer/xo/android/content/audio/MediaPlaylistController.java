@@ -313,7 +313,11 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
                 mCurrentIndex = -1;
                 setNewCurrentItem(null);
             }
-            createPlaylistIndexes();
+        }
+
+        createPlaylistIndexes();
+        for(Listener listener : mListener) {
+            listener.onPlaylistChanged(mPlaylist);
         }
     }
 
@@ -333,6 +337,10 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
     @Override
     public void onItemAdded(MediaPlaylist playlist, IContentObject itemAdded) {
         createPlaylistIndexes();
+
+        for(Listener listener : mListener) {
+            listener.onPlaylistChanged(mPlaylist);
+        }
     }
 
     @Override

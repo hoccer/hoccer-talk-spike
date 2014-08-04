@@ -128,8 +128,9 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
 
     private void addItem(TalkClientDownload download) {
         // do nothing if the download is incomplete or already contained
-        if(download.getState() != TalkClientDownload.State.COMPLETE || mList.contains(download))
+        if(download.getState() != TalkClientDownload.State.COMPLETE || mList.contains(download)) {
             return;
+        }
 
         if(mContact != null) {
             // check if contact matches
