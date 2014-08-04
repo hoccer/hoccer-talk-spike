@@ -256,7 +256,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         tfb.setNameFormat("client-%d");
         tfb.setUncaughtExceptionHandler(this);
 
-        EXECUTOR = new ThreadPoolExecutor(0, XoConfiguration.CLIENT_THREADS,
+        EXECUTOR = new ThreadPoolExecutor(XoConfiguration.CLIENT_CORE_THREADS, XoConfiguration.CLIENT_THREADS,
                 60L, TimeUnit.SECONDS,
                 new SynchronousQueue<Runnable>(),
                 tfb.build());
@@ -264,7 +264,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
         tfb2.setNameFormat("incoming-%d");
         tfb2.setUncaughtExceptionHandler(this);
-        INCOMING_EXECUTOR = new ThreadPoolExecutor(0, XoConfiguration.CLIENT_INCOMING_THREADS,
+        INCOMING_EXECUTOR = new ThreadPoolExecutor(XoConfiguration.CLIENT_CORE_THREADS, XoConfiguration.CLIENT_INCOMING_THREADS,
                 60L, TimeUnit.SECONDS,
                 new SynchronousQueue<Runnable>(),
                 tfb2.build());
@@ -273,7 +273,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         tfb3.setNameFormat("scheduled-%d");
         tfb3.setUncaughtExceptionHandler(this);
         SCHEDULED_EXECUTOR = Executors
-                .newScheduledThreadPool(XoConfiguration.CLIENT_SCHEDULED_THREADS, tfb2.build());
+                .newScheduledThreadPool(XoConfiguration.CLIENT_SCHEDULED_THREADS, tfb3.build());
 
         // create client instance
         LOG.info("creating client");

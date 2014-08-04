@@ -31,14 +31,18 @@ public class XoConfiguration {
     /* true: log level = debug, log to sdcard activated */
     public static final boolean TESTING_MODE_ENABLED = false;
 
-    /**
-     * Background executor thread count
-     *
-     * AFAIK this must be at least 3 for RPC to work.
-     */
-    public static final int CLIENT_THREADS = 100;
-    public static final int CLIENT_INCOMING_THREADS = 100;
+
+    // maximum thread count for the EXECUTOR
+    public static final int CLIENT_THREADS = 500;
+
+    // maximum thread count for the INCOMING_EXECUTOR
+    public static final int CLIENT_INCOMING_THREADS = 200;
+
+    // actual thread count for the SCHEDULED_EXECUTOR
     public static final int CLIENT_SCHEDULED_THREADS = 20;
+
+    // minimum thread count for EXECUTOR and INCOMING_EXECUTOR
+    public static final int CLIENT_CORE_THREADS = 5;
 
     /** Notification alarm back-off (msecs) */
     public static final long NOTIFICATION_ALARM_BACKOFF = 5000;
