@@ -2108,6 +2108,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
         requireIdentification(true);
 
+        if (!environment.isValid()) {
+            throw new RuntimeException("environment " + environment + " is not valid!");
+        }
+
         if (environment.getType() == null) {
             LOG.warn("updateEnvironment: no environment type, defaulting to nearby. Please fix client");
             environment.setType(TalkEnvironment.TYPE_NEARBY);
