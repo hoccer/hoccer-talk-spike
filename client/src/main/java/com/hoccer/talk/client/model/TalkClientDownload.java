@@ -176,7 +176,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         LOG.info("[new] initializeAsAvatar(url: '" + url + "')");
         mTransferAgent = agent;
         this.type = Type.AVATAR;
-//        url = checkFilecacheUrl(url); // TODO: ToBeDeleted
+        url = checkFilecacheUrl(url); // TODO: ToBeDeleted
         this.downloadUrl = url;
         this.downloadFile = id + "-" + timestamp.getTime();
         switchState(State.NEW, "new avatar");
@@ -189,8 +189,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.contentType = attachment.getMimeType();
         this.mediaType = attachment.getMediaType();
         this.aspectRatio = attachment.getAspectRatio();
-//        String filecacheUrl = checkFilecacheUrl(attachment.getUrl()); // TODO: ToBeDeleted
-//        attachment.setUrl(filecacheUrl);
+        String filecacheUrl = checkFilecacheUrl(attachment.getUrl()); // TODO: ToBeDeleted
+        attachment.setUrl(filecacheUrl);
         this.downloadUrl = attachment.getUrl();
         this.downloadFile = id;
         this.decryptedFile = UUID.randomUUID().toString();
