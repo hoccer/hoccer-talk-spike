@@ -23,9 +23,6 @@ public class TalkServerConfiguration {
     // Note: A ScheduledThreadPoolExecutor does not spawn more threads than defined as core pool size
     // see http://stackoverflow.com/questions/11678021/why-doesnt-scheduledexecutorservice-spawn-threads-as-needed
 
-    public static final int PING_INTERVAL = 300; // in seconds
-    public static final boolean PERFORM_PING_AT_INTERVALS = false;
-
     public final static int GCM_WAKE_TTL = 1 * 7 * 24 * 3600; // 1 week
 
     // top level property prefix for all talk related properties, e.g. 'talk.foo.bar'
@@ -129,6 +126,12 @@ public class TalkServerConfiguration {
         PING_THREAD_POOL_SIZE(PROPERTY_PREFIX + ".ping.threadPoolSize",
                 PropertyTypes.INTEGER,
                 10), // ScheduledThreadPoolExecutor, number is also maximum Number of threads used
+        PING_PERFORM_AT_INTERVAL(PROPERTY_PREFIX + ".ping.performAtInterval",
+                PropertyTypes.BOOLEAN,
+                false),
+        PING_INTERVAL(PROPERTY_PREFIX + ".ping.interval",
+                PropertyTypes.INTEGER,
+                300), // in seconds (every 5 minutes)
 
         // FILECACHE
         FILECACHE_CONTROL_URL(PROPERTY_PREFIX + ".filecache.controlUrl",
@@ -255,8 +258,8 @@ public class TalkServerConfiguration {
                         MessageFormat.format("\n   * PingAgent     Threads Poolsize:     {0}", this.getPingAgentThreadPoolSize()) +
                         MessageFormat.format("\n   * UpdateAgent   Threads Poolsize:     {0}", this.getUpdateAgentThreadPoolSize()) +
                         "\n - Ping:" +
-                        MessageFormat.format("\n   * Ping interval (in s):               {0}", PING_INTERVAL) +
-                        MessageFormat.format("\n   * perform ping at intervals:          {0}", PERFORM_PING_AT_INTERVALS) +
+                        MessageFormat.format("\n   * Ping interval (in s):               {0}", this.getPingInterval()) +
+                        MessageFormat.format("\n   * perform ping at intervals:          {0}", this.getPerformPingAtInterval()) +
                         "\n - Debugging:" +
                         MessageFormat.format("\n   * LogAllCalls:                        {0}", this.getLogAllCalls())
         );
@@ -427,5 +430,13 @@ public class TalkServerConfiguration {
 
     public int getPushAgentThreadPoolSize() {
         return (Integer) ConfigurableProperties.PUSH_THREAD_POOL_SIZE.value;
+    }
+
+    public boolean getPerformPingAtInterval() {
+        return (Boolean) ConfigurableProperties.PING_PERFORM_AT_INTERVAL.value;
+    }
+
+    public int getPingInterval() {
+        return (Integer) ConfigurableProperties.PING_INTERVAL.value;
     }
 }

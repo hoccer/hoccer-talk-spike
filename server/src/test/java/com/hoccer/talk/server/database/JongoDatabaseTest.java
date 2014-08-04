@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(JUnit4.class)
 public class JongoDatabaseTest {
@@ -48,13 +47,14 @@ public class JongoDatabaseTest {
     }
 
     private static void configureLogging() {
+        //noinspection LoggerInitializedWithForeignClass
         org.apache.log4j.Logger.getLogger(JongoDatabase.class).setLevel(Level.DEBUG);
     }
 
 
     @BeforeClass
     public static void setupClass() throws IOException {
-        IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
+        final IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
                 .defaults(Command.MongoD)
                 .processOutput(ProcessOutput.getDefaultInstanceSilent())
                 .build();
@@ -64,18 +64,14 @@ public class JongoDatabaseTest {
                 .build();
     }
 
-    @AfterClass
-    public static void teardownClass() {
-    }
-
     @Before
     public void setUp() throws Exception {
         mongodExecutable = mongodStarter.prepare(mongodConfig);
         mongod = mongodExecutable.start();
 
-        TalkServerConfiguration config = new TalkServerConfiguration();
+        final TalkServerConfiguration config = new TalkServerConfiguration();
         LOG.debug(mongodConfig.net().getServerAddress() + " " + mongodConfig.net().getPort());
-        MongoClient mongo = new MongoClient(new ServerAddress(mongodConfig.net().getServerAddress(), mongodConfig.net().getPort()));
+        final MongoClient mongo = new MongoClient(new ServerAddress(mongodConfig.net().getServerAddress(), mongodConfig.net().getPort()));
         database = new JongoDatabase(config, mongo);
     }
 
@@ -111,7 +107,7 @@ public class JongoDatabaseTest {
 
         clients = database.findAllClients();
         assertEquals(1, clients.size());
-        TalkClient persistedClient = clients.get(0);
+        final TalkClient persistedClient = clients.get(0);
         assertEquals("foo", persistedClient.getClientId());
 
         final TalkClient anotherTransientClient = new TalkClient();
@@ -137,14 +133,14 @@ public class JongoDatabaseTest {
         // TODO: This is actually something that should not be possible
         database.saveClient(transientClient2);
 
-        TalkClient client = database.findClientById(transientClient1.getClientId());
+        final TalkClient client = database.findClientById(transientClient1.getClientId());
         assertNotNull(client);
         assertEquals("foo", client.getClientId());
         // We expect to get only the first entity...
         assertEquals("1", client.getApnsToken());
 
         // ...although two are in the database
-        List<TalkClient> clients = database.findAllClients();
+        final List<TalkClient> clients = database.findAllClients();
         assertEquals(2, clients.size());
     }
 
@@ -162,14 +158,14 @@ public class JongoDatabaseTest {
         transientClient2.setApnsToken("foo");
         database.saveClient(transientClient2);
 
-        TalkClient client = database.findClientByApnsToken(transientClient1.getApnsToken());
+        final TalkClient client = database.findClientByApnsToken(transientClient1.getApnsToken());
         assertNotNull(client);
         assertEquals("foo", client.getApnsToken());
         // We expect to get only the first entity...
         assertEquals("1", client.getClientId());
 
         // ...although two are in the database
-        List<TalkClient> clients = database.findAllClients();
+        final List<TalkClient> clients = database.findAllClients();
         assertEquals(2, clients.size());
     }
 
@@ -190,7 +186,7 @@ public class JongoDatabaseTest {
         transientMessage2.setMessageTag("2");
         database.saveMessage(transientMessage2);
 
-        TalkMessage message = database.findMessageById("foo");
+        final TalkMessage message = database.findMessageById("foo");
         assertNotNull(message);
         assertEquals("foo", message.getMessageId());
         // We expect to get only the first entity...
@@ -236,7 +232,7 @@ public class JongoDatabaseTest {
 
     @Test
     public void testDeleteMessage() throws Exception {
-        TalkMessage transientMessage = new TalkMessage();
+        final TalkMessage transientMessage = new TalkMessage();
         transientMessage.setMessageId("foo");
         database.saveMessage(transientMessage);
 
@@ -263,17 +259,17 @@ public class JongoDatabaseTest {
     public void testFindDelivery() throws Exception {
         assertNull(database.findDelivery("unknown_message_id", "unknown_recipient_id"));
 
-        TalkDelivery transientDelivery1 = new TalkDelivery();
+        final TalkDelivery transientDelivery1 = new TalkDelivery();
         transientDelivery1.setMessageId("foo");
         transientDelivery1.setReceiverId("bar");
         database.saveDelivery(transientDelivery1);
 
-        TalkDelivery transientDelivery2 = new TalkDelivery();
+        final TalkDelivery transientDelivery2 = new TalkDelivery();
         transientDelivery2.setMessageId("something_else");
         transientDelivery2.setReceiverId("bar");
         database.saveDelivery(transientDelivery2);
 
-        TalkDelivery transientDelivery3 = new TalkDelivery();
+        final TalkDelivery transientDelivery3 = new TalkDelivery();
         transientDelivery3.setMessageId("foo");
         transientDelivery3.setReceiverId("something_else");
         database.saveDelivery(transientDelivery3);
@@ -290,8 +286,8 @@ public class JongoDatabaseTest {
         assertNotNull(database.findDelivery("foo", "something_else"));
     }
 
-    private void createDeliveryInState(String pState) {
-        TalkDelivery transientDelivery = new TalkDelivery(true);
+    private void createDeliveryInState(final String pState) {
+        final TalkDelivery transientDelivery = new TalkDelivery(true);
         transientDelivery.setState(pState);
         database.saveDelivery(transientDelivery);
     }
