@@ -81,7 +81,7 @@ public class MediaPlaylistControllerTest {
 
         // listener test
         assertEquals(0, listenerTest.currentItemChangedCalls.size());
-        assertEquals(0, listenerTest.playlistChangedCalled.size());
+        assertEquals(1, listenerTest.playlistChangedCalled.size());
         assertEquals(0, listenerTest.repeatModeChangedCalled.size());
         assertEquals(0, listenerTest.shuffleChangedCalled.size());
     }
@@ -101,7 +101,7 @@ public class MediaPlaylistControllerTest {
         // listener test
         assertEquals(1, listenerTest.currentItemChangedCalls.size());
         assertEquals(expectedCurrentItem, listenerTest.currentItemChangedCalls.get(0).args[0]);
-        assertEquals(0, listenerTest.playlistChangedCalled.size());
+        assertEquals(1, listenerTest.playlistChangedCalled.size());
         assertEquals(0, listenerTest.repeatModeChangedCalled.size());
         assertEquals(0, listenerTest.shuffleChangedCalled.size());
     }
@@ -120,7 +120,7 @@ public class MediaPlaylistControllerTest {
 
         // listener test
         assertEquals(0, listenerTest.currentItemChangedCalls.size());
-        assertEquals(0, listenerTest.playlistChangedCalled.size());
+        assertEquals(1, listenerTest.playlistChangedCalled.size());
         assertEquals(0, listenerTest.repeatModeChangedCalled.size());
         assertEquals(0, listenerTest.shuffleChangedCalled.size());
     }
@@ -147,7 +147,7 @@ public class MediaPlaylistControllerTest {
 
         // listener test
         assertEquals(0, listenerTest.currentItemChangedCalls.size());
-        assertEquals(0, listenerTest.playlistChangedCalled.size());
+        assertEquals(1, listenerTest.playlistChangedCalled.size());
         assertEquals(0, listenerTest.repeatModeChangedCalled.size());
         assertEquals(0, listenerTest.shuffleChangedCalled.size());
     }
@@ -174,7 +174,7 @@ public class MediaPlaylistControllerTest {
 
         // listener test
         assertEquals(0, listenerTest.currentItemChangedCalls.size());
-        assertEquals(0, listenerTest.playlistChangedCalled.size());
+        assertEquals(1, listenerTest.playlistChangedCalled.size());
         assertEquals(0, listenerTest.repeatModeChangedCalled.size());
         assertEquals(0, listenerTest.shuffleChangedCalled.size());
     }
@@ -201,7 +201,7 @@ public class MediaPlaylistControllerTest {
 
         // listener test
         assertEquals(0, listenerTest.currentItemChangedCalls.size());
-        assertEquals(0, listenerTest.playlistChangedCalled.size());
+        assertEquals(1, listenerTest.playlistChangedCalled.size());
         assertEquals(0, listenerTest.repeatModeChangedCalled.size());
         assertEquals(0, listenerTest.shuffleChangedCalled.size());
     }
@@ -524,7 +524,7 @@ public class MediaPlaylistControllerTest {
 
         // listener test
         assertEquals(0, listenerTest.currentItemChangedCalls.size());
-        assertEquals(0, listenerTest.playlistChangedCalled.size());
+        assertEquals(1, listenerTest.playlistChangedCalled.size());
         assertEquals(0, listenerTest.repeatModeChangedCalled.size());
         assertEquals(1, listenerTest.shuffleChangedCalled.size());
         assertEquals(true, listenerTest.shuffleChangedCalled.get(0).args[0]);
@@ -546,7 +546,7 @@ public class MediaPlaylistControllerTest {
 
         // listener test
         assertEquals(0, listenerTest.currentItemChangedCalls.size());
-        assertEquals(0, listenerTest.playlistChangedCalled.size());
+        assertEquals(1, listenerTest.playlistChangedCalled.size());
         assertEquals(0, listenerTest.repeatModeChangedCalled.size());
         assertEquals(1, listenerTest.shuffleChangedCalled.size());
         assertEquals(true, listenerTest.shuffleChangedCalled.get(0).args[0]);
