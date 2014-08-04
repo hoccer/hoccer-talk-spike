@@ -277,25 +277,19 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     private void updateMetaDataView(RemoteViews views) {
-        String title = getString(R.string.media_meta_data_unknown_title);
-        String artist = getString(R.string.media_meta_data_unknown_artist);
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(mCurrentItem.getContentUrl());
-        String metaDataTitle = metaData.getTitle();
-        String metaDataArtist = metaData.getArtist();
-        boolean metaDataAvailable = false;
-        if (metaDataTitle != null && !metaDataTitle.isEmpty()) {
-            title = metaDataTitle;
-            metaDataAvailable = true;
-        }
-        if (metaDataArtist != null && !metaDataArtist.isEmpty()) {
-            artist = metaDataArtist;
-            metaDataAvailable = true;
-        }
-        if (metaDataAvailable) {
+        if (metaData != null) {
+            String metaDataTitle = metaData.getTitle();
+            String metaDataArtist = metaData.getArtist();
+            if (metaDataTitle != null && !metaDataTitle.isEmpty()) {
+                views.setViewVisibility(R.id.filename_text, View.GONE);
+                views.setTextViewText(R.id.media_metadata_title_text, metaDataTitle);
+            }
+            if (metaDataArtist != null && !metaDataArtist.isEmpty()) {
+                views.setTextViewText(R.id.media_metadata_artist_text, metaDataArtist);
+            }
+
             views.setViewVisibility(R.id.media_metadata_layout, View.VISIBLE);
-            views.setViewVisibility(R.id.filename_text, View.GONE);
-            views.setTextViewText(R.id.media_metadata_title_text, title);
-            views.setTextViewText(R.id.media_metadata_artist_text, artist);
         } else {
             views.setViewVisibility(R.id.filename_text, View.VISIBLE);
             views.setViewVisibility(R.id.media_metadata_layout, View.GONE);
@@ -307,7 +301,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         try {
             mMediaPlayer.reset();
             mMediaPlayer.setDataSource(item.getContentDataUrl().replace("file:///", "/"));
-            mMediaPlayer.prepareAsync();
+            mMediaPlayer.prepare();
         } catch (Exception e) {
             LOG.error("setFile: exception setting data source", e);
         }

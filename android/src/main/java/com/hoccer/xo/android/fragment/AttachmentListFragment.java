@@ -27,7 +27,6 @@ import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SearchResultsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.AttachmentAdapterDownloadHandler;
-import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;

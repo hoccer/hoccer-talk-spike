@@ -32,7 +32,7 @@ public class MediaMetaData {
         try {
             retriever.setDataSource(mediaFileUri);
         } catch(IllegalArgumentException e) {
-            LOG.error("Could not read meta data for file: " + mediaFileUri, e);
+            LOG.info("Could not read meta data for file: " + mediaFileUri, e);
             mMetaDataCache.put(mediaFileUri, null);
             return null;
         }
