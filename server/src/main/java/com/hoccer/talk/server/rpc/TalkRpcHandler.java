@@ -450,6 +450,14 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (existing == null) {
             existing = new TalkPresence();
         }
+
+        boolean keyIdChanged = false;
+        if (fields == null || fields.contains(TalkPresence.FIELD_KEY_ID)) {
+            if (presence.getKeyId() != null && !presence.getKeyId().equals(existing.getKeyId())) {
+                keyIdChanged = true;
+            }
+        }
+
         // update the presence with what we got
         existing.updateWith(presence, fields);
         existing.setClientId(mConnection.getClientId());
@@ -472,7 +480,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
 
         mDatabase.savePresence(existing);
+
         mServer.getUpdateAgent().requestPresenceUpdate(mConnection.getClientId(), fields);
+        if (keyIdChanged) {
+            checkMembershipKeysForClient(mConnection.getClientId());
+        }
     }
 
     @Override
@@ -552,7 +564,6 @@ public class TalkRpcHandler implements ITalkRpcServer {
             key.setClientId(mConnection.getClientId());
             key.setTimestamp(new Date());
             mDatabase.saveKey(key);
-            checkMembershipKeysForClient(mConnection.getClientId(), key.getKeyId());
         } else {
             throw new RuntimeException("updateKey: keyid "+key.getKey()+" is not the id of "+key.getKey());
         }
