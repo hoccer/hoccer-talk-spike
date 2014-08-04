@@ -126,6 +126,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("ready()");
         requireIdentification(true);
         mConnection.readyClient();
+        // check if all our memberships have the right key and issue rekeying if not
+        checkMembershipKeysForClient(mConnection.getClientId());
     }
 
     @Override
@@ -493,18 +495,67 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return res;
     }
 
+    private void checkMembershipKeysForClient(String clientId) {
+        LOG.debug("checkMembershipKeysForClient id "+clientId);
+        TalkPresence myPresence = mDatabase.findPresenceForClient(clientId);
+        if (myPresence == null) {
+            throw new RuntimeException("no presence for client "+clientId);
+        }
+        if (myPresence.getKeyId() == null || myPresence.getKeyId().length() == 0) {
+            throw new RuntimeException("no keyId in presence for client "+clientId);
+        }
+        checkMembershipKeysForClient(clientId, myPresence.getKeyId());
+    }
+
+
+    private void checkMembershipKeysForClient(String clientId, String keyId) {
+        LOG.debug("checkMembershipKeysForClient id "+clientId+", keyid "+keyId);
+        final List<TalkGroupMember> myMemberships = mDatabase.findGroupMembersForClientWithStates(clientId, TalkGroupMember.ACTIVE_STATES);
+
+        if (myMemberships != null && myMemberships.size()>0) {
+            final TalkKey key = mDatabase.findKey(mConnection.getClientId(), keyId);
+            if (key == null) {
+                throw new RuntimeException("checkMembershipKeyForClient: key with id "+keyId+" not found for client "+clientId);
+            }
+            if (key.getKey() == null || key.getKey().length() == 0) {
+                throw new RuntimeException("checkMembershipKeyForClient: key with id "+keyId+" is empty for client "+clientId);
+            }
+
+            for (TalkGroupMember groupMember : myMemberships) {
+                TalkGroup group = mDatabase.findGroupById(groupMember.getGroupId());
+                boolean outDated = false;
+                if (!keyId.equals(groupMember.getMemberKeyId())) {
+                    outDated = true;
+                } else if (group.getSharedKeyId() == null || group.getSharedKeyId().length() == 0) {
+                    outDated = true;
+                } else if (!group.getSharedKeyId().equals(groupMember.getSharedKeyId())) {
+                    outDated = true;
+                }
+                if (outDated) {
+                    LOG.debug("checkMembershipKeysForClient id "+clientId+", outdated keyid "+keyId+", requesting key update for group "+groupMember.getGroupId());
+                    mServer.getUpdateAgent().checkAndRequestGroupMemberKeys(groupMember.getGroupId());
+                } else {
+                    LOG.debug("checkMembershipKeysForClient id "+clientId+", keyid "+keyId+", key ok for group "+groupMember.getGroupId());
+                }
+            }
+        }
+    }
+
     @Override
     public void updateKey(TalkKey key) {
         requireIdentification(true);
         logCall("updateKey()");
-        if (mDatabase.findKey(mConnection.getClientId(), key.getKeyId()) != null) {
+        if (verifyKey(key.getKeyId())) {
             return;
         }
-
-        key.setClientId(mConnection.getClientId());
-        key.setTimestamp(new Date());
-        // TODO: should check if the content is ok
-        mDatabase.saveKey(key);
+        if (key.getKeyId().equals(key.calcKeyId())) {
+            key.setClientId(mConnection.getClientId());
+            key.setTimestamp(new Date());
+            mDatabase.saveKey(key);
+            checkMembershipKeysForClient(mConnection.getClientId(), key.getKeyId());
+        } else {
+            throw new RuntimeException("updateKey: keyid "+key.getKey()+" is not the id of "+key.getKey());
+        }
     }
 
     @Override
