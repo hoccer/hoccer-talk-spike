@@ -782,7 +782,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
 
             if (rel.isBlocked()) {
-                setRelationship(myId, clientId, rel.getUnblockState(), rel.getUnblockState(), true);
+                String unblockState = rel.getUnblockState();
+                if (!TalkRelationship.isValidState(unblockState)) {
+                    LOG.warn("unblockClient "+clientId+", invalid unblockState '"+unblockState+"', setting to state to 'none'");
+                    unblockState = TalkRelationship.STATE_NONE;
+                }
+                setRelationship(myId, clientId, unblockState, unblockState, true);
                 return;
             } else {
                 throw new RuntimeException("You have not blocked the client with id '" + clientId + "'");
