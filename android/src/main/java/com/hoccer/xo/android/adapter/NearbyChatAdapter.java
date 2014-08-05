@@ -126,4 +126,13 @@ public class NearbyChatAdapter extends ChatAdapter {
         }
         return convertView;
     }
+
+    public void updateAdapter() {
+        mAdapter.requestReload();
+    }
+
+    @Override
+    public void onReloadRequest() {
+        super.onReloadRequest();
+    }
 }
