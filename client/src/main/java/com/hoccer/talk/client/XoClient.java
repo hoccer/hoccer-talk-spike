@@ -1108,7 +1108,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         try {
             TalkClientMessage message = mDatabase.findMessageByMessageTag(talkMessageTag, false);
             for(IXoMessageListener listener: mMessageListeners) {
-                listener.onMessageAdded(message);
+                listener.onMessageCreated(message);
             }
             if(TalkDelivery.STATE_NEW.equals(message.getOutgoingDelivery().getState())) {
                 requestDelivery(message);
