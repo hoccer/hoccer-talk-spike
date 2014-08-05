@@ -1,10 +1,5 @@
 package com.hoccer.xo.android.adapter;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -17,7 +12,6 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
 
@@ -60,8 +54,6 @@ public class
 
     private ListView mListView;
     private List < Integer > mLastVisibleViews = new ArrayList<Integer>();
-    private BroadcastReceiver mReceiver;
-
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
@@ -128,7 +120,6 @@ public class
         super.onCreate();
         getXoClient().registerMessageListener(this);
         getXoClient().registerTransferListener(this);
-        createBroadcastReceiver();
     }
 
     @Override
@@ -136,8 +127,6 @@ public class
         super.onDestroy();
         getXoClient().unregisterMessageListener(this);
         getXoClient().unregisterTransferListener(this);
-        LocalBroadcastManager.getInstance(mActivity).unregisterReceiver(mReceiver);
-        mReceiver = null;
 
         for(int i = 0; i < mLastVisibleViews.size(); ++i){
             int viewIndex = mLastVisibleViews.get(i);
@@ -284,38 +273,6 @@ public class
             @Override
             public void run() {
                 getXoClient().markAsSeen(message);
-            }
-        });
-    }
-
-
-    private void createBroadcastReceiver() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(IntentHelper.ACTION_AUDIO_ATTACHMENT_REMOVED)) {
-                    int messageId = intent.getIntExtra(IntentHelper.EXTRA_TALK_CLIENT_MESSAGE_ID, -1);
-                    if (messageId != -1) {
-                        removeMessageById(messageId);
-                    }
-                }
-            }
-        };
-        IntentFilter filter = new IntentFilter(IntentHelper.ACTION_AUDIO_ATTACHMENT_REMOVED);
-        LocalBroadcastManager.getInstance(mActivity).registerReceiver(mReceiver, filter);
-    }
-
-    private void removeMessageById(final int messageId) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                for (ChatMessageItem messageItem : mChatMessageItems) {
-                    if (messageItem != null && messageItem.getMessage().getClientMessageId() == messageId) {
-                        mChatMessageItems.remove(messageItem);
-                        notifyDataSetChanged();
-                        break;
-                    }
-                }
             }
         });
     }
