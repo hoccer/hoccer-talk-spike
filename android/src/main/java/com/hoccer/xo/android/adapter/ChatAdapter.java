@@ -4,7 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.IXoTransferListener;
+import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -17,6 +17,7 @@ import com.hoccer.xo.android.view.chat.attachments.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ import java.util.List;
  * To configure list items it uses instances of ChatMessageItem and its subtypes.
  */
 public class
-        ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListener {
+        ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListenerOld {
 
     /**
      * Number of TalkClientMessage objects in a batch
@@ -59,10 +60,24 @@ public class
         super(activity);
         mListView = listView;
         mContact = contact;
-
         initialize();
     }
 
+    protected void initialize() {
+        int totalMessageCount = 0;
+        try {
+            final List<TalkClientMessage> messages = mDatabase.findMessagesByContactId(mContact.getClientContactId(), -1, -1);
+            mChatMessageItems = Collections.synchronizedList(new ArrayList<ChatMessageItem>(totalMessageCount));
+            for (int i = 0; i < messages.size(); i++) {
+                mChatMessageItems.add(getItemForMessage(messages.get(i)));
+            }
+        } catch (SQLException e) {
+            LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
+        }
+    }
+
+    // TODO: get back to this implementation soon. Please.
+    /*
     protected void initialize() {
         int totalMessageCount = 0;
         try {
@@ -70,12 +85,14 @@ public class
         } catch (SQLException e) {
             LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
         }
-        mChatMessageItems = new ArrayList<ChatMessageItem>(totalMessageCount);
+
+        mChatMessageItems = Collections.synchronizedList(new ArrayList<ChatMessageItem>(totalMessageCount));
         for (int i = 0; i < totalMessageCount; i++) {
             mChatMessageItems.add(null);
         }
         loadNextMessages(mChatMessageItems.size() - (int) BATCH_SIZE);
     }
+    */
 
     /**
      * Loads a range of TalkClientMessage objects from database starting at a given offset.
@@ -86,12 +103,16 @@ public class
      * @param offset Index of the first TalkClientMessage object
      */
     public synchronized void loadNextMessages(int offset) {
+        if (true) {
+            return;
+        }
         try {
             long batchSize = BATCH_SIZE;
             if(offset < 0) {
                 batchSize = batchSize + offset;
                 offset = 0;
             }
+            LOG.debug("loading Messages " + offset + "-" + Math.max((offset - batchSize -1), 0));
             final List<TalkClientMessage> messagesBatch = mDatabase.findMessagesByContactId(mContact.getClientContactId(), batchSize, offset);
             for (int i = 0; i < messagesBatch.size(); i++) {
                 ChatMessageItem messageItem = getItemForMessage(messagesBatch.get(i));
@@ -277,6 +298,16 @@ public class
         });
     }
 
+    private boolean isValidMessage(TalkClientMessage message) {
+        if(message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
+            return true;
+        }
+        if(!message.getText().isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
@@ -297,7 +328,18 @@ public class
     @Override
     public void onMessageCreated(final TalkClientMessage message) {
         LOG.debug("onMessageCreated()");
-        if (message.getConversationContact() == mContact) {
+        if (message.getConversationContact() == mContact && isValidMessage(message)) {
+            for (int i = 0; i < mChatMessageItems.size(); i++) {
+                ChatMessageItem chatMessageItem = mChatMessageItems.get(i);
+                if(chatMessageItem == null) {
+                    continue;
+                }
+                if(message.getClientMessageId() == chatMessageItem.getMessage().getClientMessageId()) {
+                    LOG.warn("tried to add a \"new\" message which was already added!");
+                    return;
+                }
+            }
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -327,7 +369,7 @@ public class
     @Override
     public void onMessageUpdated(final TalkClientMessage message) {
         LOG.debug("onMessageUpdated()");
-        if (message.getConversationContact() == mContact) {
+        if (message.getConversationContact() == mContact && isValidMessage(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

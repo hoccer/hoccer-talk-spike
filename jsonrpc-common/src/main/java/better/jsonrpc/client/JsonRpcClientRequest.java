@@ -52,8 +52,16 @@ public class JsonRpcClientRequest {
     /** JSON response */
     ObjectNode mResponse;
 
+    long mTimeStarted;
+    long mTimeFinished;
+    long mTimeFailed;
+    boolean mTimeoutOccured;
+
     /** Constructs a client request */
     public JsonRpcClientRequest(String id, ObjectNode request, JsonRpcConnection connection) {
+        if (connection == null) {
+            throw new RuntimeException("request without connection");
+        }
         mLock = new ReentrantLock();
         mCondition = mLock.newCondition();
         mId = id;
@@ -61,6 +69,10 @@ public class JsonRpcClientRequest {
         mResponse = null;
         mConnection = connection;
         mClient = connection.getClient();
+        mTimeStarted = 0;
+        mTimeFinished = 0;
+        mTimeFailed = 0;
+        mTimeoutOccured = false;
     }
 
     /** Returns the request id of this request */
@@ -76,6 +88,22 @@ public class JsonRpcClientRequest {
     /** Returns the client this request is for */
     public JsonRpcClient getClient() {
         return mClient;
+    }
+
+    public long getTimeStarted() {
+        return mTimeStarted;
+    }
+
+    public long getTimeFinished() {
+        return mTimeFinished;
+    }
+
+    public long getTimeFailed() {
+        return mTimeFailed;
+    }
+
+    public boolean timeoutOccured() {
+        return mTimeoutOccured;
     }
 
     /** Returns true if this request is done */
@@ -143,12 +171,14 @@ public class JsonRpcClientRequest {
         mLock.lock();
         try {
             // wait until done or timeout is reached
-            long timeout = System.currentTimeMillis() + mClient.getRequestTimeout();
+            mTimeStarted = System.currentTimeMillis();
+            long timeout =  mTimeStarted + mClient.getRequestTimeout();
             while (!isDone()) {
                 // recompute time left
                 long timeLeft = timeout - System.currentTimeMillis();
                 // throw on timeout
                 if (timeLeft <= 0) {
+                    mTimeoutOccured = true;
                     mException = new JsonRpcClientTimeout();
                     mCondition.signalAll();
                     throw mException;
@@ -174,6 +204,8 @@ public class JsonRpcClientRequest {
                 LOG.trace("waitForResponse type="+returnType+" exception:"+mException+", thread "+Thread.currentThread());
                 throw new RuntimeException("JSON-RPC failure", mException);
             }
+
+            mTimeFinished = System.currentTimeMillis();
 
             // detect errors
             if (mResponse.has("error")
@@ -207,6 +239,9 @@ public class JsonRpcClientRequest {
                 return mapper.readValue(returnJsonParser, returnJavaType);
             }
         } finally {
+            if (mTimeFinished == 0) {
+                mTimeFailed = System.currentTimeMillis();
+            }
             LOG.trace("waitForResponse type="+returnType+" request id='"+mRequest.get("id")+"', unlocking lock "+mLock+" thread "+Thread.currentThread());
             mLock.unlock();
         }

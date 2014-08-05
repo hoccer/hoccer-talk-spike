@@ -91,6 +91,11 @@ public class TalkGroup {
         return (this.state != null) && this.state.equals(STATE_EXISTS);
     }
 
+    @JsonIgnore
+    public boolean isKept() {
+        return (this.state != null) && this.state.equals(STATE_KEPT);
+    }
+
     public String getGroupId() {
         return groupId;
     }

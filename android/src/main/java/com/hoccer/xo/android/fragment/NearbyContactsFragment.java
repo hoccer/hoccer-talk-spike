@@ -1,25 +1,31 @@
 package com.hoccer.xo.android.fragment;
 
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.xo.android.adapter.NearbyContactsAdapter;
-import com.hoccer.xo.android.base.XoListFragment;
-import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.release.R;
-
-import org.apache.log4j.Logger;
-
 import android.os.Bundle;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.adapter.NearbyContactsAdapter;
+import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
+
+import java.sql.SQLException;
 
 
-public class NearbyContactsFragment extends XoListFragment {
+public class NearbyContactsFragment extends XoListFragment implements IXoContactListener {
     private static final Logger LOG = Logger.getLogger(NearbyContactsFragment.class);
     private NearbyContactsAdapter mNearbyAdapter;
+    private TalkClientContact mCurrentNearbyGroup;
+
     private ListView mContactList;
     private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
@@ -34,39 +40,138 @@ public class NearbyContactsFragment extends XoListFragment {
         mPlaceholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
         mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
-        hidePlaceholder();
+        mPlaceholderText.setMovementMethod(LinkMovementMethod.getInstance());
+        setPlaceholderText();
         return view;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity());
-        mNearbyAdapter.retrieveDataFromDb();
-        mNearbyAdapter.registerListeners();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setListAdapter(mNearbyAdapter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        getXoActivity().getXoClient().unregisterContactListener(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        createAdapter();
+
+        if (isNearbyConversationPossible(mCurrentNearbyGroup)) {
+            activateNearbyChat();
+        } else {
+            deactivateNearbyChat();
+        }
+        getXoActivity().getXoClient().registerContactListener(this);
+        if (mNearbyAdapter != null) {
+            mNearbyAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
     public void onDestroy() {
-        mNearbyAdapter.unregisterListeners();
+        getXoActivity().getXoClient().unregisterContactListener(this);
+        if (mNearbyAdapter != null) {
+            mNearbyAdapter.unregisterListeners();
+        }
+        destroyAdapter();
         super.onDestroy();
     }
 
+    private void setPlaceholderText() {
+        String link = "<a href=\"" + getResources().getString(R.string.link_tutorial) + "#nearby\">" + getResources().getString(R.string.placeholder_nearby_link_text) + "</a>";
+        String text = String.format(getString(R.string.placeholder_nearby_text), link);
+        mPlaceholderText.setText(Html.fromHtml(text));
+    }
+
+    private boolean isNearbyConversationPossible(TalkClientContact groupContact) {
+        if (mCurrentNearbyGroup == null || groupContact == null) {
+            return false;
+        }
+        try {
+            if (groupContact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
+                int groupMembershipCount = getXoDatabase().findGroupMemberCountForGroup(groupContact);
+                return (groupMembershipCount > 1);
+            }
+        } catch (SQLException e) {
+            LOG.error("SQL Exception while retrieving current nearby group: ", e);
+        }
+        return false;
+    }
+
+    private
+    @Nullable
+    TalkClientContact getActiveNearbyGroup() {
+        XoActivity activity = getXoActivity();
+        if (activity != null) {
+            return activity.getXoClient().getCurrentNearbyGroup();
+        }
+        return null;
+    }
+
+    private void activateNearbyChat() {
+        hidePlaceholder();
+    }
+
+    private void deactivateNearbyChat() {
+        mCurrentNearbyGroup = null;
+        showPlaceholder();
+    }
+
+    public void shutdownNearbyChat() {
+        if (mActivity != null) {
+            deactivateNearbyChat();
+        }
+    }
+
+    private void createAdapter() {
+        if (mNearbyAdapter == null) {
+            mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity());
+            mNearbyAdapter.retrieveDataFromDb(mCurrentNearbyGroup);
+            mNearbyAdapter.registerListeners();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setListAdapter(mNearbyAdapter);
+                }
+            });
+        }
+    }
+
+    private void destroyAdapter() {
+        if (mNearbyAdapter != null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setListAdapter(null);
+                }
+            });
+            mNearbyAdapter.unregisterListeners();
+            mNearbyAdapter = null;
+        }
+    }
+
+    private void showPlaceholder() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mContactList.setVisibility(View.GONE);
+                mPlaceholderImage.setVisibility(View.VISIBLE);
+                mPlaceholderText.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
     private void hidePlaceholder() {
-        mPlaceholderImageFrame.setVisibility(View.GONE);
-        mPlaceholderImage.setVisibility(View.GONE);
-        mPlaceholderText.setVisibility(View.GONE);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+				mPlaceholderImageFrame.setVisibility(View.GONE);
+                mPlaceholderImage.setVisibility(View.GONE);
+                mPlaceholderText.setVisibility(View.GONE);
+                mContactList.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @Override
@@ -80,5 +185,52 @@ public class NearbyContactsFragment extends XoListFragment {
                 getXoActivity().showContactConversation(contact);
             }
         }
+    }
+
+    @Override
+    public void onContactAdded(TalkClientContact contact) {
+        LOG.info("onContactAdded()" + contact.getClientContactId());
+    }
+
+    @Override
+    public void onContactRemoved(TalkClientContact contact) {
+
+    }
+
+    @Override
+    public void onClientPresenceChanged(TalkClientContact contact) {
+        LOG.info("onClientPresenceChanged()" + contact.getClientContactId());
+    }
+
+    @Override
+    public void onClientRelationshipChanged(TalkClientContact contact) {
+
+    }
+
+    @Override
+    public void onGroupPresenceChanged(TalkClientContact contact) {
+        if (mCurrentNearbyGroup != null && contact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
+            if (isNearbyConversationPossible(contact)) {
+                activateNearbyChat();
+            } else {
+                deactivateNearbyChat();
+            }
+        }
+    }
+
+    @Override
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+        TalkClientContact currentNearbyGroup = getActiveNearbyGroup();
+        if (currentNearbyGroup != null) {
+            mCurrentNearbyGroup = currentNearbyGroup;
+        }
+        if (mCurrentNearbyGroup != null && contact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
+            if (isNearbyConversationPossible(contact)) {
+                activateNearbyChat();
+            } else {
+                deactivateNearbyChat();
+            }
+        }
+
     }
 }

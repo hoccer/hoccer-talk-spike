@@ -57,6 +57,10 @@ public class CacheDownload extends CacheTransfer {
             int absoluteEnd = absolutePosition + totalRequested;
             while (totalTransferred < totalRequested) {
                 // abort on thread interrupt
+                // TODO: this makes no sense. When reading value from interrupted() the thread is already running again.
+                // The interruption refers to an older thread instance which has already terminated.
+                // See CacheFile::uploadFinished() -> aborts a running download for a given file
+                // after uploading the file has finished successfully.
                 if (Thread.interrupted()) {
                     throw new InterruptedException("Transfer thread interrupted");
                 }
@@ -87,10 +91,10 @@ public class CacheDownload extends CacheTransfer {
                 // read data from file
                 int bytesRead = inFile.read(buffer, 0, bytesWanted);
                 if (bytesRead == -1) {
-                    LOG.debug("failed to read from file, bytesread= "+bytesRead);
+                    LOG.debug("failed to read from file, bytesread= " + bytesRead);
                     break; // XXX
                 }
-                LOG.debug("writing "+bytesRead+"to output stream");
+                LOG.debug("writing " + bytesRead + "to output stream");
                 // write to http output stream
                 outStream.write(buffer, 0, bytesRead);
 

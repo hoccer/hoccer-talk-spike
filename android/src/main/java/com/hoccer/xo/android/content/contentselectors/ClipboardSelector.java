@@ -12,6 +12,8 @@ import com.hoccer.xo.android.activity.ClipboardPreviewActivity;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.content.ContentMediaTypes;
+import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -50,28 +52,38 @@ public class ClipboardSelector implements IContentSelector {
         return intent;
     }
 
-    private IContentObject createObjectFromClipboardData(Context context) {
-        IContentObject contentObject = null;
+    private IContentObject createObjectFromClipboardData(Context context, Intent intent) {
         XoActivity activity = (XoActivity) context;
         XoClientDatabase database = activity.getXoDatabase();
 
         String type = mClipboard.getClipboardContentObjectType();
 
+        SelectedContent contentObject = null;
+        IContentObject storedContentObject = null;
         try {
             if (type.equals(TalkClientUpload.class.getName())) {
-                contentObject = database.findClientUploadById(mClipboard.getClipBoardAttachmentId());
+                storedContentObject = database.findClientUploadById(mClipboard.getClipBoardAttachmentId());
             } else if (type.equals(TalkClientDownload.class.getName())) {
-                contentObject = database.findClientDownloadById(mClipboard.getClipBoardAttachmentId());
+                storedContentObject = database.findClientDownloadById(mClipboard.getClipBoardAttachmentId());
             }
         } catch (SQLException e) {
             LOG.error("SQL Exception while retrieving clipboard object", e);
         }
 
+        if (storedContentObject != null) {
+            contentObject = new SelectedContent(intent, "file://" + storedContentObject.getContentDataUrl());
+            contentObject.setFileName(storedContentObject.getFileName());
+            contentObject.setContentType(storedContentObject.getContentType());
+            contentObject.setContentMediaType(storedContentObject.getContentMediaType());
+            contentObject.setContentLength(storedContentObject.getContentLength());
+            contentObject.setContentAspectRatio(storedContentObject.getContentAspectRatio());
+        }
+
         return contentObject;
     }
 
-    public IContentObject selectObjectFromClipboard(Context context) {
-        IContentObject contentObject = createObjectFromClipboardData(context);
+    public IContentObject selectObjectFromClipboard(Context context, Intent intent) {
+        IContentObject contentObject = createObjectFromClipboardData(context, intent);
         mClipboard.clearClipBoard();
         return contentObject;
     }
@@ -81,7 +93,7 @@ public class ClipboardSelector implements IContentSelector {
         IContentObject contentObject = null;
         if (intent != null) {
             if (intent.hasExtra(Clipboard.CLIPBOARD_CONTENT_OBJECT_ID)) {
-                contentObject = createObjectFromClipboardData(context);
+                contentObject = createObjectFromClipboardData(context, intent);
             }
         }
         mClipboard.clearClipBoard();

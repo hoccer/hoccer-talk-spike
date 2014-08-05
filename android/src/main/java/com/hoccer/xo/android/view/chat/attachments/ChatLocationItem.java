@@ -1,7 +1,5 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,9 +8,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.android.gms.maps.model.LatLng;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
@@ -52,9 +50,11 @@ public class ChatLocationItem extends ChatMessageItem {
         if (mContentWrapper.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             RelativeLayout locationLayout = (RelativeLayout) inflater.inflate(R.layout.content_location, null);
-            TextView locationTextView = (TextView) locationLayout.findViewById(R.id.tv_location_description);
-            TextView locationTitleView = (TextView) locationLayout.findViewById(R.id.tv_location_title);
-            ImageButton locationButton = (ImageButton) locationLayout.findViewById(R.id.ib_content_location);
+            mContentWrapper.addView(locationLayout);
+        }
+        TextView locationTextView = (TextView) mContentWrapper.findViewById(R.id.tv_location_description);
+        TextView locationTitleView = (TextView) mContentWrapper.findViewById(R.id.tv_location_title);
+        ImageButton locationButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_content_location);
 
             int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
 
@@ -84,12 +84,8 @@ public class ChatLocationItem extends ChatMessageItem {
                         }
                     }
                 }
-            });
-
-            mContentWrapper.addView(locationLayout);
-        }
-
-
+            }
+        });
     }
 
 

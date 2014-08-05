@@ -6,7 +6,7 @@ import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.IXoTokenListener;
-import com.hoccer.talk.client.IXoTransferListener;
+import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
@@ -24,7 +24,7 @@ import java.util.List;
  *
  */
 public abstract class ContactsAdapter extends XoAdapter
-        implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListener {
+        implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
 
     protected final static long ITEM_ID_UNKNOWN = -1000;
     protected final static long ITEM_ID_CLIENT_HEADER = -1;

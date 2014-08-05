@@ -384,33 +384,4 @@ public class XoPreferenceActivity extends PreferenceActivity
         Toast.makeText(this, R.string.export_credentials_success, Toast.LENGTH_LONG).show();
     }
 
-    private void showAbout() {
-        Intent intent = new Intent(this, LegalImprintActivity.class);
-        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_ABOUT);
-        startActivity(intent);
-    }
-
-    private void showLicense() {
-        Intent intent = new Intent(this, LegalImprintActivity.class);
-        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_LICENSES);
-        startActivity(intent);
-    }
-
-    private void openFullScreenPlayer(){
-        Intent resultIntent = new Intent(this, FullscreenPlayerActivity.class);
-        startActivity(resultIntent);
-    }
-
-    private void updateActionBarIcons() {
-        if (mMediaPlayerServiceConnector.isConnected() && mMenu != null) {
-            MenuItem mediaPlayerItem = mMenu.findItem(R.id.menu_media_player);
-
-            MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            if (service.isStopped() || service.isPaused()) {
-                mediaPlayerItem.setVisible(false);
-            } else {
-                mediaPlayerItem.setVisible(true);
-            }
-        }
-    }
 }

@@ -62,7 +62,6 @@ public class ChatAudioItem extends ChatMessageItem {
             mContentWrapper.addView(v);
         }
         LinearLayout audioLayout = (LinearLayout) mContentWrapper.getChildAt(0);
-
         TextView captionTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_caption);
         TextView fileNameTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_name);
         mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
