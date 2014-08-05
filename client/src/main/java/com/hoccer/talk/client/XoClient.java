@@ -2064,6 +2064,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             encryptMessage(clientMessage, delivery, message);
         } catch (Exception e) {
             LOG.error("error while encrypting message " + clientMessage.getClientMessageId(), e);
+            return;
         }
 
         TalkDelivery[] deliveries = new TalkDelivery[1];
