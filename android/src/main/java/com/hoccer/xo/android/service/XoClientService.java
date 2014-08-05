@@ -1,15 +1,15 @@
 package com.hoccer.xo.android.service;
 
 import android.app.*;
+
 import com.google.android.gcm.GCMRegistrar;
 
 import com.hoccer.talk.android.push.TalkPushService;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.IXoTokenListener;
-import com.hoccer.talk.client.IXoTransferListener;
+import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.IXoUnseenListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -232,7 +232,7 @@ public class XoClientService extends Service {
     private void configureServiceUri() {
         String uriString = mPreferences.getString("preference_service_uri", "");
         if (uriString.isEmpty()) {
-            uriString = XoClientConfiguration.SERVER_URI;
+            uriString = XoApplication.getXoClient().getHost().getServerUri();
         }
         URI uri = URI.create(uriString);
         mClient.setServiceUri(uri);
@@ -398,9 +398,11 @@ public class XoClientService extends Service {
                 }
             }
 
+            // TODO: is this check too early ? Last if-statement above deactivates client when network dead.
             boolean netState = activeNetwork.isConnected();
             int netType = activeNetwork.getType();
 
+            // TODO: will this be executed while the XoClient is still activating / connecting / syncing on other threads ?
             if (XoConfiguration.CONNECTIVITY_RECONNECT_ON_CHANGE) {
                 if (netState && !mClient.isIdle()) {
                     if (!mPreviousConnectionState
@@ -655,7 +657,7 @@ public class XoClientService extends Service {
             IXoStateListener,
             IXoUnseenListener,
             IXoTokenListener,
-            IXoTransferListener,
+            IXoTransferListenerOld,
             MediaScannerConnection.OnScanCompletedListener {
 
         Hashtable<String, TalkClientDownload> mScanningDownloads

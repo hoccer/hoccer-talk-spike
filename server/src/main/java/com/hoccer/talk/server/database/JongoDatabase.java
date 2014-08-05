@@ -5,6 +5,7 @@ import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.mongodb.*;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 
@@ -73,7 +74,7 @@ public class JongoDatabase implements ITalkServerDatabase {
             options.connectionsPerHost = configuration.getJongoConnectionsPerHost();
             return new Mongo(configuration.getJongoHost(), options);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            LOG.error("unknown host: '" + configuration.getJongoHost() + "'", e);
             return null;
         }
     }
@@ -107,15 +108,6 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public Map<String, Long> getStatistics() {
-        HashMap<String, Long> res = new HashMap<String, Long>();
-        for (MongoCollection collection : mCollections) {
-            res.put(collection.getName(), collection.count());
-        }
-        return res;
-    }
-
-    @Override
     public List<TalkClient> findAllClients() {
         List<TalkClient> res = new ArrayList<TalkClient>();
         Iterator<TalkClient> it =
@@ -127,12 +119,14 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable // null if client for given id does not exist
     public TalkClient findClientById(String clientId) {
         return mClients.findOne("{clientId:#}", clientId)
                 .as(TalkClient.class);
     }
 
     @Override
+    @Nullable // null if client for given apns token does not exist
     public TalkClient findClientByApnsToken(String apnsToken) {
         return mClients.findOne("{apnsToken:#}", apnsToken)
                 .as(TalkClient.class);
@@ -162,7 +156,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public void deleteMessage(TalkMessage message) {
+    public void deleteMessage(@Nullable TalkMessage message) {
         mMessages.remove("{messageId:#}", message.getMessageId());
     }
 
@@ -172,6 +166,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable
     public TalkDelivery findDelivery(String messageId, String clientId) {
         return mDeliveries.findOne("{messageId:#,receiverId:#}", messageId, clientId)
                 .as(TalkDelivery.class);
@@ -357,6 +352,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         if (it.hasNext()) {
             res = it.next();
             if (it.hasNext()) {
+                // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
                 throw new RuntimeException("Duplicate token");
             }
         }
@@ -385,12 +381,17 @@ public class JongoDatabase implements ITalkServerDatabase {
         List<TalkPresence> res = new ArrayList<TalkPresence>();
         // set to collect clients into
         Set<String> clients = new HashSet<String>();
+        // set to collect clients which may have been added to the presence set
+        // since the client has received presences the last time
+        Set<String> mustInclude = new HashSet<String>();
         // collect clients known through relationships
         List<TalkRelationship> relationships = findRelationshipsByOtherClient(clientId);
         for (TalkRelationship relationship : relationships) {
-            // if the relation is friendly
-            if (relationship.isFriend()) {
+            if (relationship.isDirectlyRelated()) {
                 clients.add(relationship.getClientId());
+                if (relationship.getLastChanged().after(lastKnown)) {
+                    mustInclude.add(relationship.getClientId());
+                }
             }
         }
         // collect clients known through groups
@@ -402,6 +403,9 @@ public class JongoDatabase implements ITalkServerDatabase {
                 for (TalkGroupMember otherMember : otherMembers) {
                     if (otherMember.isInvited() || otherMember.isJoined()) {
                         clients.add(otherMember.getClientId());
+                        if (otherMember.getLastChanged().after(lastKnown) || ownMember.getLastChanged().after(lastKnown)) {
+                            mustInclude.add(otherMember.getClientId());
+                        }
                     }
                 }
             }
@@ -411,13 +415,12 @@ public class JongoDatabase implements ITalkServerDatabase {
         // collect presences
         for (String client : clients) {
             TalkPresence pres = findPresenceForClient(client);
-            if (pres != null) {
-                if (pres.getTimestamp().after(lastKnown)) {
-                    res.add(pres);
-                }
+            if (pres != null &&
+                    (pres.getTimestamp().after(lastKnown) ||
+                            mustInclude.contains(client))) {
+                res.add(pres);
             }
         }
-        // return them
         return res;
     }
 
@@ -556,6 +559,7 @@ public class JongoDatabase implements ITalkServerDatabase {
             if (member.isMember() || member.isInvited()) {
                 TalkGroup group = findGroupById(member.getGroupId());
                 if (group == null) {
+                    // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
                     throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
                 }
                 if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {
@@ -573,6 +577,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         for (TalkGroupMember member : members) {
                 TalkGroup group = findGroupById(member.getGroupId());
                 if (group == null) {
+                    // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
                     throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
                 }
                 if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {

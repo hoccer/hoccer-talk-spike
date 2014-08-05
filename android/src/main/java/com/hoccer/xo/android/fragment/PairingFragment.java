@@ -144,7 +144,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
             }
         };
         mTokenEdit.addTextChangedListener(mTextWatcher);
-        if (mTokenFromEmail != null || !mTokenSendEmail.equals("")) {
+        if (mTokenFromEmail != null && !mTokenFromEmail.equals("")) {
             performPairing(mTokenFromEmail);
         }
     }
@@ -174,15 +174,11 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onClick(View v) {
         if (v == mQrShowButton) {
             LOG.debug("onClick(qrShow)");
-            String qrString = getXoActivity().getBarcodeString();
-            Intent qr = new Intent(getActivity(), QrCodeGeneratingActivity.class);
-            qr.putExtra("QR", qrString);
-            getActivity().startActivity(qr);
+            getXoActivity().showBarcode();
         }
         if (v == mQrScanButton) {
             LOG.debug("onClick(qrScan)");
-            Intent qrScanner = new Intent(getActivity(), QrScannerActivity.class);
-            getActivity().startActivity(qrScanner);
+            getXoActivity().scanBarcode();
         }
         if (v == mTokenSendSms) {
             LOG.debug("onClick(smsSend)");

@@ -170,7 +170,12 @@ public abstract class XoAdapter extends BaseAdapter {
                     , delay, TimeUnit.MILLISECONDS);
         } else {
             mNotifyTimestamp = System.currentTimeMillis();
-            super.notifyDataSetChanged();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    XoAdapter.super.notifyDataSetChanged();
+                }
+            });
         }
     }
 

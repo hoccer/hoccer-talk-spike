@@ -11,12 +11,10 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoDialogs;
@@ -27,8 +25,6 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.release.R;
-
-import java.sql.SQLException;
 
 public class CompositionFragment extends XoFragment implements View.OnClickListener,
         View.OnLongClickListener, MotionGestureListener {
@@ -75,15 +71,14 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         });
 
         mSendButton = (ImageButton) v.findViewById(R.id.btn_messaging_composer_send);
-        mSendButton.setEnabled(false || XoConfiguration.DEVELOPMENT_MODE_ENABLED);
+        mSendButton.setEnabled(false);
         mSendButton.setOnClickListener(this);
         if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
             mSendButton.setOnLongClickListener(this);
             mSendButton.setLongClickable(true);
         }
 
-        mAddAttachmentButton = (ImageButton) v
-                .findViewById(R.id.btn_messaging_composer_add_attachment);
+        mAddAttachmentButton = (ImageButton) v.findViewById(R.id.btn_messaging_composer_add_attachment);
         mAddAttachmentButton.setOnClickListener(new AddAttachmentOnClickListener());
 
         mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, getXoActivity(), this);
@@ -95,6 +90,16 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_composition, menu);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mTextWatcher != null) {
+            mTextEdit.removeTextChangedListener(mTextWatcher);
+            mTextWatcher = null;
+        }
+        mMotionInterpreter.deactivate();
     }
 
     @Override
@@ -112,23 +117,13 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
             @Override
             public void afterTextChanged(Editable s) {
-                boolean enable = isComposed() || s.toString().length() > 0;
-                mSendButton.setEnabled(enable || XoConfiguration.DEVELOPMENT_MODE_ENABLED);
+                updateSendButton();
             }
         };
         mTextEdit.addTextChangedListener(mTextWatcher);
 
         configureMotionInterpreterForContact(mContact);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mTextWatcher != null) {
-            mTextEdit.removeTextChangedListener(mTextWatcher);
-            mTextWatcher = null;
-        }
-        mMotionInterpreter.deactivate();
+        updateSendButton();
     }
 
     @Override
@@ -139,14 +134,36 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     @Override
     public void onAttachmentSelected(IContentObject contentObject) {
         LOG.debug("onAttachmentSelected(" + contentObject.getContentDataUrl() + ")");
-        showAttachment(contentObject);
+        setAttachment(contentObject);
         mSendButton.setEnabled(isComposed());
     }
 
-    private void showAttachment(IContentObject contentObject) {
-        mAddAttachmentButton.setOnClickListener(new AttachmentOnClickListener());
+    public void setContact(TalkClientContact contact) {
+        LOG.debug("setContact(" + contact.getClientContactId() + ")");
+        mContact = contact;
+        configureMotionInterpreterForContact(mContact);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mTextEdit.setVisibility(View.VISIBLE);
+                mSendButton.setVisibility(View.VISIBLE);
+                mAddAttachmentButton.setVisibility(View.VISIBLE);
+
+                mTextEdit.setEnabled(true);
+                mSendButton.setEnabled(true);
+                mAddAttachmentButton.setEnabled(true);
+            }
+        });
+    }
+
+    private void setAttachment(IContentObject contentObject) {
         mAttachment = contentObject;
-        String mediaType = contentObject.getContentMediaType();
+        updateAttachmentButton();
+    }
+
+    private void updateAttachmentButton() {
+        mAddAttachmentButton.setOnClickListener(new AttachmentOnClickListener());
+        String mediaType = mAttachment.getContentMediaType();
 
         int imageResource = -1;
         if (mediaType != null) {
@@ -169,56 +186,41 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         mAddAttachmentButton.setImageResource(imageResource);
     }
 
-    public void setContact(TalkClientContact contact) {
-        LOG.debug("setContact(" + contact.getClientContactId() + ")");
-        mContact = contact;
-        configureMotionInterpreterForContact(mContact);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mTextEdit.setVisibility(View.VISIBLE);
-                mSendButton.setVisibility(View.VISIBLE);
-                mAddAttachmentButton.setVisibility(View.VISIBLE);
-
-                mTextEdit.setEnabled(true);
-                mSendButton.setEnabled(true);
-                mAddAttachmentButton.setEnabled(true);
-            }
-        });
-    }
-
-    private boolean isComposed() {
-        return mTextEdit.getText().length() > 0 || mAttachment != null;
-    }
-
-    private void clearComposedMessage() {
-        mTextEdit.setText(null);
-        mSendButton.setEnabled(false || XoConfiguration.DEVELOPMENT_MODE_ENABLED);
-        clearAttachment();
-    }
-
     private void clearAttachment() {
         mAddAttachmentButton.setOnClickListener(new AddAttachmentOnClickListener());
         mAddAttachmentButton.setImageResource(R.drawable.ic_light_content_attachment);
         mAttachment = null;
+        updateSendButton();
     }
 
-    private boolean isSendMessagePossible() {
-        boolean isBlocked = isBlocked();
+    private boolean isComposed() {
+        boolean composed = (mTextEdit.getText().length() > 0 || mAttachment != null);
+        return composed;
+    }
 
-        boolean isEmptyGroup = false;
-        if(mContact.isGroup() && mContact.getGroupMemberships().size() == 1) {
-            isEmptyGroup = true;
+    private void clearComposedMessage() {
+        mTextEdit.setText("");
+        clearAttachment();
+    }
+
+    private void updateSendButton() {
+        boolean enabled = (isComposed() || (XoConfiguration.DEVELOPMENT_MODE_ENABLED && mLastMessage != null));
+        mSendButton.setEnabled(enabled);
+    }
+
+    private void configureMotionInterpreterForContact(TalkClientContact contact) {
+        // react on gestures only when contact is nearby
+        if (contact != null && (contact.isNearby() || (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()))) {
+            mMotionInterpreter.activate();
+        } else {
+            mMotionInterpreter.deactivate();
         }
-
-        return !isBlocked && !isEmptyGroup;
     }
 
     private boolean isBlocked() {
-        if(!mContact.isGroup() && !mContact.isNearby()) {
+        if (!mContact.isGroup() && !mContact.isNearby()) {
             TalkRelationship clientRelationship = mContact.getClientRelationship();
-            if (clientRelationship != null && clientRelationship.getState()
-                    .equals(TalkRelationship.STATE_BLOCKED)) {
+            if (clientRelationship != null && clientRelationship.getState() != null && clientRelationship.getState().equals(TalkRelationship.STATE_BLOCKED)) {
                 return true;
             }
         }
@@ -226,10 +228,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private boolean isEmptyGroup() {
-        if(mContact.isGroup() && mContact.getGroupMemberships().size() == 1) {
-            return true;
-        }
-        return false;
+        return (mContact != null && mContact.isGroup() && mContact.isEmptyGroup());
     }
 
     private void sendComposedMessage() {
@@ -242,8 +241,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
             isAborted = true;
         } else if (isEmptyGroup()) {
-            Toast.makeText(getXoActivity(), R.string.error_send_message_empty_group, Toast.LENGTH_LONG).show();
-            return;
+                showAlertSendMessageNotPossible();
+                return;
         }
 
         String messageText = mTextEdit.getText().toString();
@@ -257,24 +256,13 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             upload = SelectedContent.createAttachmentUpload(mAttachment);
         }
 
-        if(isAborted) {
-            TalkClientMessage message = getXoClient()
-                    .composeClientMessage(mContact, messageText, upload);
+        if (isAborted) {
+            TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText, upload);
             getXoClient().markMessagesAsAborted(message);
         } else {
-            getXoClient()
-                    .requestDelivery(getXoClient().composeClientMessage(mContact, messageText, upload));
+            getXoClient().sendMessage(getXoClient().composeClientMessage(mContact, messageText, upload).getMessageTag());
         }
         clearComposedMessage();
-    }
-
-    private void configureMotionInterpreterForContact(TalkClientContact contact) {
-        // react on gestures only when contact is nearby
-        if (contact != null && (contact.isNearby() || (contact.isGroup() && contact.getGroupPresence().isTypeNearby()))) {
-            mMotionInterpreter.activate();
-        } else {
-            mMotionInterpreter.deactivate();
-        }
     }
 
     private void showAlertSendMessageNotPossible() {
@@ -291,16 +279,15 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     @Override
     public boolean onLongClick(View v) {
-        boolean longpressHandled = false;
+        boolean longPressHandled = false;
         if (mLastMessage != null && !mLastMessage.equals("")) {
             for (int i = 0; i < STRESS_TEST_MESSAGE_COUNT; i++) {
-                getXoClient().requestDelivery(getXoClient()
-                        .composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)));
+                getXoClient().sendMessage(getXoClient().composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
             }
-            longpressHandled = true;
+            longPressHandled = true;
             clearComposedMessage();
         }
-        return longpressHandled;
+        return longPressHandled;
     }
 
     @Override
@@ -345,7 +332,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         public void onClick(DialogInterface dialog, int which) {
             switch (which) {
                 case 0:
-                    mAttachment = null;
+                    clearAttachment();
                     getXoActivity().selectAttachment();
                     break;
                 case 1:

@@ -45,34 +45,28 @@ public class ChatVideoItem extends ChatMessageItem {
             mContentWrapper.addView(videoLayout);
         }
 
-        TextView videoTitle = (TextView) mContentWrapper.findViewById(R.id.tv_video_title);
-        TextView videoDescription = (TextView) mContentWrapper.findViewById(R.id.tv_video_description);
         ImageButton playButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_content_open);
         ImageView thumbnailView = (ImageView) mContentWrapper.findViewById(R.id.iv_video_preview);
         RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        RelativeLayout videoContainer = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_container);
 
-        int textColor;
         int mask;
-
         if (mMessage.isIncoming()) {
-            textColor = Color.BLACK;
             rootView.setGravity(Gravity.LEFT);
+            videoContainer.setGravity(Gravity.LEFT);
             mask = R.drawable.bubble_grey;
         } else {
-            textColor = Color.WHITE;
             rootView.setGravity(Gravity.RIGHT);
+            videoContainer.setGravity(Gravity.RIGHT);
             mask = R.drawable.bubble_green;
         }
-
-        videoTitle.setTextColor(textColor);
-        videoDescription.setTextColor(textColor);
 
         String tag = (mMessage.getMessageId() != null) ? mMessage.getMessageId() : mMessage.getMessageTag();
         thumbnailView.setVisibility(View.INVISIBLE);
 
         if (contentObject.getContentDataUrl() != null) {
             mAttachmentView.setBackgroundDrawable(null);
-            ThumbnailManager.getInstance(mContext).displayThumbnailForVideo(contentObject.getContentDataUrl(), rootView, mask, tag);
+            ThumbnailManager.getInstance(mContext).displayThumbnailForVideo(contentObject.getContentDataUrl(), thumbnailView, mask, tag);
         }
 
         playButton.setOnClickListener(new View.OnClickListener() {

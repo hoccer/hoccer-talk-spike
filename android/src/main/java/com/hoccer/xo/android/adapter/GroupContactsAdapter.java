@@ -3,6 +3,7 @@ package com.hoccer.xo.android.adapter;
 import android.view.View;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientMembership;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
@@ -77,18 +78,38 @@ public class GroupContactsAdapter extends ContactsAdapter {
         });
 
         TextView roleView = (TextView) view.findViewById(R.id.contact_role);
-        roleView.setVisibility(View.GONE);
-
-        if (contact.isClient()) {
-            if (contact.isGroupAdmin()) {
-                roleView.setVisibility(View.VISIBLE);
-            }
-        } else if (contact.isSelf()) {
-            TalkGroupMember member = mGroup.getGroupMember();
-            if (member != null && member.getRole().equals(TalkGroupMember.ROLE_ADMIN)) {
-                roleView.setVisibility(View.VISIBLE);
-            }
+        if (isContactAdminInGroup(contact, mGroup)) {
+            roleView.setVisibility(View.VISIBLE);
+        } else {
+            roleView.setVisibility(View.GONE);
         }
     }
 
+    private boolean isContactAdminInGroup(TalkClientContact contact, TalkClientContact group) {
+        if (contact.isClient()) {
+            if (group.getGroupMemberships() == null) {
+                return false;
+            }
+            for (TalkClientMembership groupMembership : group.getGroupMemberships()) {
+                TalkGroupMember groupMember = groupMembership.getMember();
+                if (groupMember == null) {
+                    continue;
+                }
+                String groupMemberClientId = groupMember.getClientId();
+                String contactClientId = contact.getClientId();
+                if (groupMemberClientId == null || contactClientId == null) {
+                    continue;
+                }
+                if (groupMemberClientId.equals(contactClientId)) {
+                    return groupMember.isAdmin();
+                }
+            }
+        } else if (contact.isSelf()) {
+            TalkGroupMember member = mGroup.getGroupMember();
+            if (member != null) {
+                return member.isAdmin();
+            }
+        }
+        return false;
+    }
 }

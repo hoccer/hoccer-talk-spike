@@ -49,4 +49,27 @@ public class TalkClientSmsToken {
         this.body = body;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        TalkClientSmsToken that = (TalkClientSmsToken) o;
+
+        if (smsTokenId != that.smsTokenId) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return smsTokenId;
+    }
 }

@@ -2,8 +2,6 @@ package com.hoccer.talk.server.database.migrations;
 
 import com.hoccer.talk.model.TalkDelivery;
 import org.apache.log4j.Logger;
-
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class DatabaseMigrationDeliveryStates extends BaseDatabaseMigration implements IDatabaseMigration {
@@ -12,8 +10,6 @@ public class DatabaseMigrationDeliveryStates extends BaseDatabaseMigration imple
     private final static String MIGRATION_NAME= "2014_06_30_delivery_states";
 
     private final static Logger LOG = Logger.getLogger(DatabaseMigrationDeliveryStates.class);
-
-
 
     @Override
     public void up() throws Exception {
@@ -39,24 +35,13 @@ public class DatabaseMigrationDeliveryStates extends BaseDatabaseMigration imple
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                mDatabase.changeDeliveryFieldValue("state", startState, targetState);
+                try {
+                    mDatabase.changeDeliveryFieldValue("state", startState, targetState);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         });
         LOG.info("scheduled migrating state for deliveries from: '" + startState + "' to '" + targetState + "'");
     }
-
-    /*private void migrateDeliveriesFromStateToState(final String startState, final String targetState) {
-        final List<TalkDelivery> deliveries = mDatabase.findDeliveriesInState(startState);
-        //LOG.info("    * migrating " + deliveries.size() + " deliveries from state '" + startState + " -> '" + targetState);
-        for (final TalkDelivery delivery : deliveries) {
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    delivery.setState(targetState);
-                    mDatabase.saveDelivery(delivery);
-                }
-            });
-        }
-        LOG.info("scheduled migrating state for " + deliveries.size() + " deliveries from: '" + startState + "' to '" + targetState + "'");
-    }*/
 }

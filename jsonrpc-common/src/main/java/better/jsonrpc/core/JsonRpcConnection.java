@@ -5,6 +5,7 @@ import better.jsonrpc.server.JsonRpcServer;
 import better.jsonrpc.util.ProxyUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.util.Vector;
@@ -26,6 +27,10 @@ public abstract class JsonRpcConnection {
      * Global logger, may be used by subclasses
      */
     protected static final Logger LOG = Logger.getLogger(JsonRpcConnection.class);
+
+    static {
+        // LOG.setLevel(Level.TRACE);
+    }
 
     /**
      * Global counter for connection IDs
@@ -193,9 +198,11 @@ public abstract class JsonRpcConnection {
      */
     abstract public boolean isConnected();
 
-    /**
-     * Sends a request through the connection
-     */
+    abstract public boolean disconnect();
+
+        /**
+         * Sends a request through the connection
+         */
     abstract public void sendRequest(ObjectNode request) throws Exception;
 
     /**
@@ -230,40 +237,52 @@ public abstract class JsonRpcConnection {
      * Dispatch an incoming request (for subclasses to call)
      */
     public void handleRequest(ObjectNode request) {
+        LOG.trace("handleRequest id="+ request.get("id"));
         if (mServer != null) {
             try {
                 for (ConnectionEventListener l : mConnectionEventListeners) {
+                    LOG.trace("handleRequest onPreHandleRequest id="+ request.get("id"));
                     l.onPreHandleRequest(this, request);
                 }
+                LOG.trace("handleRequest serverid="+ request.get("id"));
                 mServer.handleRequest(mServerHandler, request, this);
+                LOG.trace("handleRequest server done id="+ request.get("id"));
             } catch (Throwable throwable) {
                 LOG.error("Exception handling request", throwable);
             } finally {
                 for (ConnectionEventListener l : mConnectionEventListeners) {
+                    LOG.trace("handleRequest onPostHandleRequest id="+ request.get("id"));
                     l.onPostHandleRequest(this, request);
                 }
             }
         }
+        LOG.trace("handleRequest done id="+ request.get("id"));
     }
 
     /**
      * Dispatch an incoming response (for subclasses to call)
      */
     public void handleResponse(ObjectNode response) {
+        LOG.trace("handleResponse id="+ response.get("id"));
         if (mClient != null) {
             try {
                 for (ConnectionEventListener l : mConnectionEventListeners) {
+                    LOG.trace("handleResponse onPreHandleResponse id="+ response.get("id"));
                     l.onPreHandleResponse(this, response);
                 }
+                LOG.trace("handleResponse client id="+ response.get("id"));
                 mClient.handleResponse(response, this);
+                LOG.trace("handleResponse client done id="+ response.get("id"));
             } catch (Throwable throwable) {
                 LOG.error("Exception handling response", throwable);
             } finally {
                 for (ConnectionEventListener l : mConnectionEventListeners) {
+                    LOG.trace("handleResponse onPostHandleResponse id="+ response.get("id"));
                     l.onPostHandleResponse(this, response);
                 }
             }
         }
+        LOG.trace("handleResponse done id="+ response.get("id"));
     }
 
     /**

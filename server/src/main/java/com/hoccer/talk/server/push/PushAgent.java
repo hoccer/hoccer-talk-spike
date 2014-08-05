@@ -27,28 +27,29 @@ public class PushAgent {
 
     private final ScheduledExecutorService mExecutor;
 
-    TalkServer mServer;
-    TalkServerConfiguration mConfig;
-    ITalkServerDatabase mDatabase;
+    private final TalkServer mServer;
+    private final TalkServerConfiguration mConfig;
+    private final ITalkServerDatabase mDatabase;
 
     private Sender mGcmSender;
 
     public enum APNS_SERVICE_TYPE {
         PRODUCTION, SANDBOX
     }
+
     private final HashMap<APNS_SERVICE_TYPE, ApnsService> mApnsServices = new HashMap<APNS_SERVICE_TYPE, ApnsService>();
 
-    Hashtable<String, PushRequest> mOutstanding;
+    private final Hashtable<String, PushRequest> mOutstanding;
 
-    AtomicInteger mPushRequests = new AtomicInteger();
-    AtomicInteger mPushDelayed = new AtomicInteger();
-    AtomicInteger mPushIncapable = new AtomicInteger();
-    AtomicInteger mPushBatched = new AtomicInteger();
+    private final AtomicInteger mPushRequests = new AtomicInteger();
+    private final AtomicInteger mPushDelayed = new AtomicInteger();
+    private final AtomicInteger mPushIncapable = new AtomicInteger();
+    private final AtomicInteger mPushBatched = new AtomicInteger();
 
     public PushAgent(TalkServer server) {
         mExecutor = Executors.newScheduledThreadPool(
-            TalkServerConfiguration.THREADS_PUSH,
-            new NamedThreadFactory("push-agent")
+                server.getConfiguration().getPushAgentThreadPoolSize(),
+                new NamedThreadFactory("push-agent")
         );
         mServer = server;
         mDatabase = mServer.getDatabase();
@@ -100,14 +101,19 @@ public class PushAgent {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                LOG.info(" -> initializing Message Push for clientId: '" + client.getClientId() +"'!");
-                pushMessage.perform();
-                LOG.info(" -> Message Push done for clientId: '" + client.getClientId() +"'!");
+                try {
+                    LOG.info(" -> initializing Message Push for clientId: '" + client.getClientId() +"'!");
+                    pushMessage.perform();
+                    LOG.info(" -> Message Push done for clientId: '" + client.getClientId() +"'!");
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
             }
         }, 0, TimeUnit.MILLISECONDS);
     }
 
     public void submitRequest(TalkClient client) {
+        LOG.debug("submitRequest for client: "+client.getClientId()+", timeLastPush="+client.getTimeLastPush().getTime()+", lastPushMessage="+client.getLastPushMessage());
         long now = System.currentTimeMillis();
 
         mPushRequests.incrementAndGet();
@@ -147,10 +153,16 @@ public class PushAgent {
                 mExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        // no longer outstanding
-                        mOutstanding.remove(clientId);
-                        // perform the request
-                        request.perform();
+                        try {
+                            // no longer outstanding
+                            synchronized (mOutstanding) {
+                                // perform the request
+                                request.perform();
+                                mOutstanding.remove(clientId);
+                            }
+                        } catch (Throwable t) {
+                            LOG.error("caught and swallowed exception escaping runnable", t);
+                        }
                     }
                 }, delay, TimeUnit.MILLISECONDS);
                 mOutstanding.put(clientId, request);
@@ -190,7 +202,7 @@ public class PushAgent {
                 .withProductionDestination()
                 .build());
         LOG.info("  * setting up APNS service (type: '" + APNS_SERVICE_TYPE.SANDBOX + "')");
-        mApnsServices.put(APNS_SERVICE_TYPE.SANDBOX,    APNS.newService()
+        mApnsServices.put(APNS_SERVICE_TYPE.SANDBOX, APNS.newService()
                 .withCert(mConfig.getApnsCertSandboxPath(),
                         mConfig.getApnsCertSandboxPassword())
                 .withSandboxDestination()
@@ -204,7 +216,11 @@ public class PushAgent {
             mExecutor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    invalidateApns();
+                    try {
+                        invalidateApns();
+                    } catch (Throwable t) {
+                        LOG.error("caught and swallowed exception escaping runnable", t);
+                    }
                 }
             }, delay, interval, TimeUnit.SECONDS);
         }
@@ -216,7 +232,7 @@ public class PushAgent {
         while (iterator.hasNext()) {
             Map.Entry pairs = (Map.Entry) iterator.next();
             LOG.info("  * APNS retrieving inactive devices from " + pairs.getKey());
-            final ApnsService service = (ApnsService)pairs.getValue();
+            final ApnsService service = (ApnsService) pairs.getValue();
             final Map<String, Date> inactive = service.getInactiveDevices();
             if (!inactive.isEmpty()) {
                 LOG.info("  * APNS reports " + inactive.size() + " inactive devices");

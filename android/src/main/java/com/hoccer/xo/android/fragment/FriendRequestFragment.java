@@ -124,13 +124,15 @@ public class FriendRequestFragment extends XoListFragment implements OnItemCount
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        if (mAdapter == null) {
+        if (mAdapter == null || mActivity == null) {
             return;
         }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mAdapter.notifyDataSetChanged();
+                if (mAdapter != null) {
+                    mAdapter.notifyDataSetChanged();
+                }
             }
         });
     }

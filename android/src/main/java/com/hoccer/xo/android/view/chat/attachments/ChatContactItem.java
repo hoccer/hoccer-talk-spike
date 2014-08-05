@@ -18,6 +18,7 @@ import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 import ezvcard.Ezvcard;
 import ezvcard.VCard;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -62,15 +63,13 @@ public class ChatContactItem extends ChatMessageItem {
         ImageButton showButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_show_button);
         ImageButton importButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_import_button);
 
-        int textColor = -1;
-        int iconId = -1;
+        int textColor;
+        int iconId;
         if (mMessage.isIncoming()) {
             textColor = Color.BLACK;
-            iconId = R.drawable.ic_dark_music;
             iconId = R.drawable.ic_dark_contact;
         } else {
             textColor = Color.WHITE;
-            iconId = R.drawable.ic_light_music;
             iconId = R.drawable.ic_light_contact;
         }
 
@@ -167,13 +166,19 @@ public class ChatContactItem extends ChatMessageItem {
             LOG.error("Could not open VCard at " + mContent.getContentDataUrl());
         }
         try {
-            mVCard = Ezvcard.parse(inputStream).first();
+            Ezvcard.ParserChainTextReader reader = Ezvcard.parse(inputStream);
+            if (reader != null) {
+                mVCard = reader.first();
+            }
         } catch (IOException e) {
             LOG.error("Could not parse VCard", e);
         }
     }
 
-    private InputStream openStreamForContentUri(String contentUri) {
+    private @Nullable InputStream openStreamForContentUri(String contentUri) {
+        if (contentUri == null) {
+            return null;
+        }
         InputStream inputStream = null;
         ContentResolver resolver = mContext.getContentResolver();
         try {

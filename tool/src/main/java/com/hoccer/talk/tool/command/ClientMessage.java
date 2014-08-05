@@ -21,6 +21,8 @@ import java.nio.file.Files;
 import java.security.Security;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 @CLICommand(name = "cmessage", description = "Send a text message from one client to another, " +
                                              "use: cmessage <sender_id> <recipient_id> " +
@@ -34,6 +36,8 @@ public class ClientMessage extends TalkToolCommand {
     private final String DEFAULT_MESSAGE = "Hello World";
     private final String ATTACHMENT_CLONES_PATH = "files/clones";
 
+    private final Executor mExecutor = Executors.newScheduledThreadPool(16);
+
     @Parameter(description = "<sender-id> <recipient-id>")
     List<String> pClients;
 
@@ -45,6 +49,9 @@ public class ClientMessage extends TalkToolCommand {
 
     @Parameter(description = "Number of messages being send (optional, default is 1)", names = "-n")
     int pNumMessages = 1;
+
+    @Parameter(description = "perform delivery async (default true)", names = "-a")
+    boolean pAsyncFlag = true;
 
     // this is obviously needed for message encryption
     static {
@@ -61,15 +68,31 @@ public class ClientMessage extends TalkToolCommand {
             Console.warn("WARN <ClientMessage::run> No message provided. Using default messageText.");
         }
 
-        TalkToolClient sender = context.getClientBySelector(pClients.get(0));
-        String recipientId = context.getClientIdFromParam(pClients.get(1));
+        final TalkToolClient sender = context.getClientBySelector(pClients.get(0));
+        final String recipientId = context.getClientIdFromParam(pClients.get(1));
 
-        TalkClientUpload attachmentUpload = null;
         for (int i = 0; i < pNumMessages; ++i) {
-            if (!(pAttachmentPath == null || pAttachmentPath.isEmpty())) {
-                attachmentUpload = createAttachment(retrieveFile(i));
+            final int x = i;
+
+            if (pAsyncFlag) {
+                mExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        TalkClientUpload attachmentUpload = null;
+                        if (!(pAttachmentPath == null || pAttachmentPath.isEmpty())) {
+                            attachmentUpload = createAttachment(retrieveFile(x));
+                        }
+                        sendMessage(sender, recipientId, pMessage, attachmentUpload);
+                    }
+                });
+            } else {
+                TalkClientUpload attachmentUpload = null;
+                if (!(pAttachmentPath == null || pAttachmentPath.isEmpty())) {
+                    attachmentUpload = createAttachment(retrieveFile(x));
+                }
+                sendMessage(sender, recipientId, pMessage, attachmentUpload);
             }
-            sendMessage(sender, recipientId, pMessage, attachmentUpload);
+
         }
     }
 
@@ -150,7 +173,7 @@ public class ClientMessage extends TalkToolCommand {
             Console.warn("WARN <ClientMessage::sendMessage> The sender doesn't know the recipient. Doing nothing.");
         } else {
             TalkClientMessage clientMessage = sender.getClient().composeClientMessage(recipientContact, messageText, attachment);
-            sender.getClient().requestDelivery(clientMessage);
+            sender.getClient().sendMessage(clientMessage.getMessageTag());
         }
     }
 }

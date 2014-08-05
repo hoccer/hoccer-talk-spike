@@ -161,6 +161,26 @@
             <artifactId>annotations</artifactId>
             <version>9.0.4</version>
         </dependency>
+
+        <!-- A simple Templating engine - used for message templating-->
+        <dependency>
+            <groupId>com.floreysoft</groupId>
+            <artifactId>jmte</artifactId>
+            <version>3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo</artifactId>
+            <version>${flapdoodle-embed-mongo.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <repositories>
     </repositories>
@@ -172,6 +192,15 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>2.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

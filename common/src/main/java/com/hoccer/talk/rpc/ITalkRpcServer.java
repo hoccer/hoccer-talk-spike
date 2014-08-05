@@ -474,6 +474,7 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      **/
     String createGroup(TalkGroup group);
+    TalkGroup createGroupWithMembers(String groupType, String groupTag, String groupName, String[] members, String[] roles);
 
     /** Retrieve array of groups changed after given date
      * @param lastKnown is the date in milliseconds since start of year 1970

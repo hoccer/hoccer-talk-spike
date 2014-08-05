@@ -114,7 +114,8 @@ public class JsonRpcWsClient extends JsonRpcWsConnection
             public void run() {
                 try {
                     JsonRpcWsClient.super.sendRequest(request);
-                } catch (Exception e) {
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         });
@@ -132,7 +133,8 @@ public class JsonRpcWsClient extends JsonRpcWsConnection
             public void run() {
                 try {
                     JsonRpcWsClient.super.sendResponse(response);
-                } catch (Exception e) {
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         });
@@ -150,7 +152,8 @@ public class JsonRpcWsClient extends JsonRpcWsConnection
             public void run() {
                 try {
                     JsonRpcWsClient.super.sendNotification(notification);
-                } catch (Exception e) {
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
                 }
             }
         });

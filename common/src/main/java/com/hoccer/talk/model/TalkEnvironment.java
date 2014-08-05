@@ -4,8 +4,10 @@
 
 package com.hoccer.talk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 
@@ -138,6 +140,7 @@ public class TalkEnvironment {
         this.accuracy = accuracy;
     }
 
+    @Nullable
     public String[] getBssids() {
         return bssids;
     }
@@ -146,6 +149,7 @@ public class TalkEnvironment {
         this.bssids = bssids;
     }
 
+    @Nullable
     public String[] getIdentifiers() {
         return identifiers;
     }
@@ -154,6 +158,7 @@ public class TalkEnvironment {
         this.identifiers = identifiers;
     }
 
+    @Nullable
     public Double[] getGeoLocation() {
         return geoLocation;
     }
@@ -174,5 +179,22 @@ public class TalkEnvironment {
         this.accuracy = environment.accuracy;
         this.bssids = environment.bssids;
         this.identifiers = environment.identifiers;
+    }
+
+    @JsonIgnore
+    public boolean isValid() {
+        if (bssids != null && bssids.length > 0) {
+            return true;
+        }
+
+        if (geoLocation != null && geoLocation.length == 2) {
+            return true;
+        }
+
+        if (identifiers != null && identifiers.length > 0) {
+            return true;
+        }
+
+        return false;
     }
 }

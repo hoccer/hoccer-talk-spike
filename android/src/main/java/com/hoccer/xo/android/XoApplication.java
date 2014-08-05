@@ -12,6 +12,7 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
+import com.hoccer.xo.android.util.ThumbnailManager;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -251,12 +252,14 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
         tfb2.setNameFormat("receiving client-%d");
         tfb2.setUncaughtExceptionHandler(this);
-        INCOMING_EXECUTOR = Executors.newScheduledThreadPool(XoConfiguration.CLIENT_THREADS, tfb2.build());
+        INCOMING_EXECUTOR = Executors
+                .newScheduledThreadPool(XoConfiguration.CLIENT_THREADS, tfb2.build());
 
         // create client instance
         LOG.info("creating client");
         CLIENT_HOST = new XoAndroidClientHost(this);
-        XoClient client = new XoAndroidClient(CLIENT_HOST);
+        //XoClient client = new XoAndroidClient(CLIENT_HOST);
+        XoClient client = new XoClient(CLIENT_HOST);
         client.setAvatarDirectory(getAvatarDirectory().toString());
         client.setAttachmentDirectory(getAttachmentDirectory().toString());
 //        client.setEncryptedUploadDirectory(getEncryptedUploadDirectory().toString()); //TODO: to be deleted encryption happens on the fly now
@@ -295,6 +298,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         XoLogging.shutdown();
         LOG.info("shutting down configuration");
         XoConfiguration.shutdown();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        LOG.warn("Received onTrimMemory(" + level + "). Will trim ThumbnailManager.");
+        ThumbnailManager.getInstance(this).clearCache();
     }
 
     @Override
@@ -349,11 +359,12 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
      * Starts a nearby session if not yet started.
      * Sets hasCurrentRunningNearbySession = true.
      */
-    public static void startNearbySession() {
-        if (!ENVIRONMENT_UPDATER.isEnabled()) {
+    public static void startNearbySession(boolean force) {
+        if (!ENVIRONMENT_UPDATER.isEnabled() || force) {
             try {
                 ENVIRONMENT_UPDATER.startEnvironmentTracking();
                 hasCurrentRunningNearbySession = true;
+                ENVIRONMENT_UPDATER.sendEnvironmentUpdate();
             } catch (EnvironmentUpdaterException e) {
                 LOG.error("Error when starting EnvironmentUpdater: ", e);
             }
@@ -398,7 +409,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // wake up suspended nearby session
         if (hasCurrentRunningNearbySession) {
-            startNearbySession();
+            startNearbySession(false);
         }
 
         LOG.info("Entered foreground mode");

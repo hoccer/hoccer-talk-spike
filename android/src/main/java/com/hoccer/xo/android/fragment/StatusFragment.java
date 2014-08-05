@@ -1,16 +1,16 @@
 package com.hoccer.xo.android.fragment;
 
-import com.hoccer.talk.client.IXoStateListener;
-import com.hoccer.talk.client.XoClient;
-import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.release.R;
-
-import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import com.hoccer.talk.client.IXoStateListener;
+import com.hoccer.talk.client.XoClient;
+import com.hoccer.xo.android.base.XoFragment;
+import com.hoccer.xo.release.R;
 
 /**
  * Mix-in fragment for showing client status
@@ -25,7 +25,7 @@ public class StatusFragment extends XoFragment implements IXoStateListener {
 
         View v = inflater.inflate(R.layout.fragment_status, container, false);
 
-        mStatusText = (TextView)v.findViewById(R.id.status_text);
+        mStatusText = (TextView) v.findViewById(R.id.status_text);
 
         return v;
     }
@@ -84,7 +84,7 @@ public class StatusFragment extends XoFragment implements IXoStateListener {
 
     private void applyClientState(int state) {
         int statusText;
-        switch(state) {
+        switch (state) {
             case XoClient.STATE_IDLE:
                 statusText = R.string.client_state_idle;
                 break;
@@ -115,14 +115,17 @@ public class StatusFragment extends XoFragment implements IXoStateListener {
         }
         mStatusText.setText(statusText);
 
-        final FragmentTransaction tr = getActivity().getSupportFragmentManager().beginTransaction();
-        if (state == XoClient.STATE_ACTIVE
-                || state == XoClient.STATE_IDLE) {
-            tr.hide(StatusFragment.this);
-        } else {
-            tr.show(StatusFragment.this);
+        FragmentActivity activity = getActivity();
+        if (activity == null) {
+            return;
         }
-        tr.commitAllowingStateLoss();
+        FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
+        if (state == XoClient.STATE_ACTIVE || state == XoClient.STATE_IDLE) {
+            fragmentTransaction.hide(StatusFragment.this);
+        } else {
+            fragmentTransaction.show(StatusFragment.this);
+        }
+        fragmentTransaction.commitAllowingStateLoss();
     }
 
     @Override

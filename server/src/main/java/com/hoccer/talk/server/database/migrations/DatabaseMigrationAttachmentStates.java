@@ -25,26 +25,29 @@ public class DatabaseMigrationAttachmentStates extends BaseDatabaseMigration  im
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    final TalkMessage message = mDatabase.findMessageById(delivery.getMessageId());
-                    if (message == null) {
-                        // Doesn't even have a message associated? Something went wrong with this delivery?
-                        LOG.warn("Delivery " + delivery.getId() + " has no message associated - cannot migrate attachment state");
-                    } else {
-                        if (message.getAttachmentFileId() != null) {
-                            // has attachment
-                            delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
-                            mDatabase.saveDelivery(delivery);
-                            deliveriesWithAttachmentsCounter.incrementAndGet();
+                    try {
+                        final TalkMessage message = mDatabase.findMessageById(delivery.getMessageId());
+                        if (message == null) {
+                            // Doesn't even have a message associated? Something went wrong with this delivery?
+                            LOG.warn("Delivery " + delivery.getId() + " has no message associated - cannot migrate attachment state");
                         } else {
-                            // has no attachment
-                            delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
-                            mDatabase.saveDelivery(delivery);
-                            deliveriesWithoutAttachmentCounter.incrementAndGet();
+                            if (message.getAttachmentFileId() != null) {
+                                // has attachment
+                                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
+                                mDatabase.saveDelivery(delivery);
+                                deliveriesWithAttachmentsCounter.incrementAndGet();
+                            } else {
+                                // has no attachment
+                                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
+                                mDatabase.saveDelivery(delivery);
+                                deliveriesWithoutAttachmentCounter.incrementAndGet();
+                            }
                         }
+                    } catch (Throwable t) {
+                        LOG.error("caught and swallowed exception escaping runnable", t);
                     }
                 }
             });
-
         }
 
         LOG.info("Scheduled setting Attachment state to '" + TalkDelivery.ATTACHMENT_STATE_NONE + "' for " + deliveriesWithoutAttachmentCounter + " deliveries");

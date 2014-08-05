@@ -42,7 +42,18 @@ public class ContactSelector implements IContentSelector {
     }
 
     @Override
+    public boolean isValidIntent(Context context, Intent intent) {
+        return true;
+    }
+
+    @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+
+        boolean isValidIntent = isValidIntent(context, intent);
+        if (!isValidIntent) {
+            return null;
+        }
+
         Uri selectedContent = intent.getData();
         String[] columns = {
                 ContactsContract.Contacts.LOOKUP_KEY
@@ -60,34 +71,31 @@ public class ContactSelector implements IContentSelector {
         String contentUriPath = contentUri.toString();
 
         // XXX what the heck!? the android constant seems broken.
-        if(contentUriPath.startsWith("content:/com.android.contacts")) {
+        if (contentUriPath.startsWith("content:/com.android.contacts")) {
             contentUriPath = contentUriPath.replace("content:/com.android.contacts", "content://com.android.contacts");
         }
 
         cursor.close();
 
-        SelectedContent co = new SelectedContent(intent, contentUriPath);
-        co.setContentType(ContactsContract.Contacts.CONTENT_VCARD_TYPE);
-        co.setContentMediaType(ContentMediaTypes.MediaTypeVCard);
+        SelectedContent contentObject = new SelectedContent(intent, contentUriPath);
+        contentObject.setFileName("Contact");
+        contentObject.setContentType(ContactsContract.Contacts.CONTENT_VCARD_TYPE);
+        contentObject.setContentMediaType(ContentMediaTypes.MediaTypeVCard);
 
 
-        AssetFileDescriptor fd = null;
+        AssetFileDescriptor fileDescriptor = null;
         long fileSize = 0;
 
         try {
-            fd = context.getContentResolver().openAssetFileDescriptor(contentUri, "r");
-
-            //FileInputStream fis = fd.createInputStream();
-            //byte[] buf = new byte[(int) fd.getDeclaredLength()];
-            //fis.read(buf);
-            fileSize = fd.getLength();
+            fileDescriptor = context.getContentResolver().openAssetFileDescriptor(contentUri, "r");
+            fileSize = fileDescriptor.getLength();
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        co.setContentLength((int)fileSize);
+        contentObject.setContentLength((int) fileSize);
 
-        return co;
+        return contentObject;
     }
 
 }

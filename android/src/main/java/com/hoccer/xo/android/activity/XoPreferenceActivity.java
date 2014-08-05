@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.*;
 import com.hoccer.xo.android.XoApplication;
@@ -158,7 +159,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if (preference.getKey().equals("preference_import")) {
             doImport();
             return true;
-        }
+        } 
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
