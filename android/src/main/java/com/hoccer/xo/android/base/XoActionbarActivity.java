@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 
 /**
@@ -24,7 +25,7 @@ public abstract class XoActionbarActivity extends XoActivity {
         super.onCreate(savedInstanceState);
 
         mMediaPlayerServiceConnector.connect(this,
-                MediaPlayerService.PLAYSTATE_CHANGED_ACTION,
+                IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override
                     public void onConnected(MediaPlayerService service) {

@@ -43,7 +43,8 @@
     </string>
 
     <!-- Deleting attachments -->
-    <string name="attachment_confirm_delete_dialog_message">Willst du die ausgewählten Anhänge wirklich löschen?</string>
+    <string name="dialog_attachment_delete_title">Anhang Löschen</string>
+    <string name="dialog_attachment_delete_message">Willst du die ausgewählten Anhänge wirklich löschen?</string>
 
     <!-- AudioAttachmentList Fragment -->
     <string name="audio_attachment_list_all">Alle</string>
@@ -255,6 +256,11 @@
     <string name="added_attachment_to_collection">%1$s zur Sammlung \'%2$s\' hinzugefügt</string>
     <string name="select_recipients">Empfänger auswählen</string>
     <string name="error_could_not_find_file_for_sending">Datei \'%1$s\' konnte nicht gefunden und gesendet werden</string>
+    <string name="rename_collection">Sammlung umbennen</string>
+    <string name="dialog_delete_collection_title">Sammlungen entfernen</string>
+    <string name="dialog_delete_collection_message">Bist du dir sicher, dass du die ausgewählte(n) Sammlung(en) entfernen möchtest? Die
+        Dateien selbst werden dabei nicht gelöscht.
+    </string>
 
     <!-- Preferences -->
     <string name="preference_keysize_summary">RSA Schlüssel mit gewählter Schlüssellänge erneuern</string>

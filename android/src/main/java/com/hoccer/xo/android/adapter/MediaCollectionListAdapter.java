@@ -1,12 +1,13 @@
 package com.hoccer.xo.android.adapter;
 
-import android.content.Context;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.hoccer.talk.client.IXoMediaCollectionListener;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.release.R;
@@ -16,17 +17,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaCollectionListAdapter extends BaseAdapter {
+public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaCollectionListener {
 
-    private Context mContext;
     private List<TalkClientMediaCollection> mMediaCollections = new ArrayList<TalkClientMediaCollection>();
-
+    private SparseBooleanArray mSelectedItems = new SparseBooleanArray();
     private Logger LOG = Logger.getLogger(MediaCollectionListAdapter.class);
-    private boolean mSelectionModeActivated = false;
 
-    public MediaCollectionListAdapter(Context context) {
-        this.mContext = context;
+    public MediaCollectionListAdapter() {
         try {
+            XoApplication.getXoClient().getDatabase().registerMediaCollectionListener(this);
             loadMediaCollections();
         } catch (SQLException e) {
             LOG.error("Loading media collections failed.", e);
@@ -53,7 +52,7 @@ public class MediaCollectionListAdapter extends BaseAdapter {
         ViewHolder viewHolder;
 
         if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.item_media_collection, parent, false);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_media_collection, null);
 
             viewHolder = new ViewHolder();
             viewHolder.titleName = (TextView) (convertView.findViewById(R.id.tv_title_name));
@@ -65,27 +64,79 @@ public class MediaCollectionListAdapter extends BaseAdapter {
 
         TalkClientMediaCollection mediaCollection = mMediaCollections.get(position);
         viewHolder.titleName.setText(mediaCollection.getName());
-        if (mSelectionModeActivated) {
-            viewHolder.goToImageView.setVisibility(View.GONE);
+
+
+
+        // TODO find out why the f**k this doesn't work but setting the BG colour manually does
+//        convertView.setSelected(mSelectedItems.get(position));
+
+        if (mSelectedItems.get(position)) {
+            convertView.setBackgroundColor(parent.getResources().getColor(R.color.xo_selected_background));
+        } else {
+            convertView.setBackgroundColor(parent.getResources().getColor(R.color.xo_main_background));
         }
+
+        if (mSelectedItems.size() > 0) {
+            // if mSelectedItems.size() > 0 we can assume the contextual action mode is active
+            viewHolder.goToImageView.setVisibility(View.INVISIBLE);
+        } else {
+            viewHolder.goToImageView.setVisibility(View.VISIBLE);
+        }
+
         return convertView;
     }
 
-    public void add(TalkClientMediaCollection mediaCollection) {
-        mMediaCollections.add(mediaCollection);
-        update();
+    public void selectItem(int position, boolean selected) {
+        if(selected) {
+            mSelectedItems.put(position, selected);
+        } else {
+            mSelectedItems.delete(position);
+        }
+
+        notifyDataSetChanged();
     }
 
-    public void setSelectionModeActivated(boolean activated) {
-        mSelectionModeActivated = activated;
+    public List<TalkClientMediaCollection> getSelecteddItems() {
+        List<TalkClientMediaCollection> collections = new ArrayList<TalkClientMediaCollection>();
+        for (int i = 0; i < mMediaCollections.size(); ++i) {
+            if (mSelectedItems.get(i)) {
+                collections.add(mMediaCollections.get(i));
+            }
+        }
+
+        return collections;
     }
 
-    private void update() {
+    public void clearSelection() {
+        mSelectedItems.clear();
         notifyDataSetChanged();
     }
 
     private void loadMediaCollections() throws SQLException {
         mMediaCollections = XoApplication.getXoClient().getDatabase().findAllMediaCollections();
+    }
+
+    @Override
+    public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
+        mMediaCollections.add(collectionCreated);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public void onMediaCollectionDeleted(TalkClientMediaCollection collectionDeleted) {
+        TalkClientMediaCollection collectionToRemove = null;
+        for (TalkClientMediaCollection collection : mMediaCollections) {
+            if (collection.getId() == collectionDeleted.getId()) {
+                collectionToRemove = collection;
+                break;
+            }
+        }
+
+        if (collectionToRemove != null) {
+            mMediaCollections.remove(collectionToRemove);
+        }
+
+        notifyDataSetChanged();
     }
 
     private class ViewHolder {

@@ -1,36 +1,37 @@
 package com.hoccer.xo.android.view;
 
-import android.content.*;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
+import android.os.Handler;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-public class AudioAttachmentView extends LinearLayout implements View.OnClickListener {
+public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener {
 
     private Context mContext;
-    private AudioAttachmentItem mAudioAttachmentItem;
+    private IContentObject mItem;
     private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
-    private DownloadArtworkTask mCurrentTask = null;
 
     private TextView mTitleTextView;
     private TextView mArtistTextView;
     private ImageView mArtworkImageView;
+    private View mPlayStatusView;
+    private ImageView mDragHandleView;
+    private MediaMetaData mCurrentMetaData;
 
     private static final Logger LOG = Logger.getLogger(AudioAttachmentView.class);
 
     public AudioAttachmentView(Context context) {
-        super(context);
+        super(context.getApplicationContext());
         mContext = context;
         mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
         addView(inflate(mContext, R.layout.item_audio_attachment, null));
@@ -38,11 +39,13 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
         mTitleTextView = ((TextView) findViewById(R.id.tv_title_name));
         mArtistTextView = ((TextView) findViewById(R.id.tv_artist_name));
         mArtworkImageView = ((ImageView) findViewById(R.id.iv_artcover));
+        mPlayStatusView = findViewById(R.id.iv_playing_status);
+        mDragHandleView = (ImageView) findViewById(R.id.list_drag_handle);
     }
 
-    public void setMediaItem(AudioAttachmentItem audioAttachmentItem) {
-        if (mAudioAttachmentItem == null || !mAudioAttachmentItem.getFilePath().equals(audioAttachmentItem.getFilePath())) {
-            mAudioAttachmentItem = audioAttachmentItem;
+    public void setMediaItem(IContentObject audioAttachmentItem) {
+        if (mItem == null || !mItem.equals(audioAttachmentItem)) {
+            mItem = audioAttachmentItem;
             updateAudioView();
         }
     }
@@ -50,19 +53,18 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     public boolean isActive() {
         if (mMediaPlayerServiceConnector.isConnected()) {
             MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            AudioAttachmentItem currentItem = service.getCurrentMediaItem();
-            return !service.isPaused() && !service.isStopped() && (mAudioAttachmentItem.equals(currentItem));
+            IContentObject currentItem = service.getCurrentMediaItem();
+            return !service.isPaused() && !service.isStopped() && (mItem.equals(currentItem));
         } else {
             return false;
         }
     }
 
     public void updatePlayPauseView() {
-        View view = findViewById(R.id.iv_playing_status);
-        if (isActive()) {
-            view.setVisibility(View.VISIBLE);
+        if (isActive() && !mDragHandleView.isShown()) {
+            mPlayStatusView.setVisibility(View.VISIBLE);
         } else {
-            view.setVisibility(View.GONE);
+            mPlayStatusView.setVisibility(View.GONE);
         }
     }
 
@@ -70,8 +72,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mMediaPlayerServiceConnector.connect(mContext,
-                MediaPlayerService.PLAYSTATE_CHANGED_ACTION,
+        mMediaPlayerServiceConnector.connect(mContext, IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override
                     public void onConnected(MediaPlayerService service) {
@@ -97,44 +98,48 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     public void onClick(View v) {
     }
 
-    private void updateAudioView() {
-        mTitleTextView.setText(mAudioAttachmentItem.getMetaData().getTitleOrFilename(mAudioAttachmentItem.getFilePath()).trim());
+    public void showDragHandle(boolean shallShow) {
+        if (shallShow) {
+            if (mPlayStatusView.isShown()) {
+                mPlayStatusView.setVisibility(GONE);
+            }
 
-        String artist = mAudioAttachmentItem.getMetaData().getArtist();
+            mDragHandleView.setVisibility(VISIBLE);
+        } else {
+            mDragHandleView.setVisibility(GONE);
+
+            if (isActive()) {
+                mPlayStatusView.setVisibility(VISIBLE);
+            }
+        }
+    }
+
+    private void updateAudioView() {
+        // ensure that we are not listening to any previous artwork retrieval tasks
+        if(mCurrentMetaData != null) {
+            mCurrentMetaData.unregisterArtworkRetrievalListener(this);
+        }
+
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(mItem.getContentDataUrl());
+        mTitleTextView.setText(mCurrentMetaData.getTitleOrFilename().trim());
+
+        String artist = mCurrentMetaData.getArtist();
         if (artist == null || artist.isEmpty()) {
             artist = getResources().getString(R.string.media_meta_data_unknown_artist);
         }
 
         mArtistTextView.setText(artist.trim());
 
-        if (mCurrentTask != null && mCurrentTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mCurrentTask.cancel(true);
-        }
-        if (mAudioAttachmentItem.getMetaData().getArtwork() == null) {
-            mCurrentTask = new DownloadArtworkTask();
-            mCurrentTask.execute();
-        } else {
-            AudioAttachmentView.this.mArtworkImageView.setImageDrawable(mAudioAttachmentItem.getMetaData().getArtwork());
-        }
+        mCurrentMetaData.getArtwork(getResources(), this);
     }
 
-    private class DownloadArtworkTask extends AsyncTask<Void, Void, Drawable> {
-
-        protected Drawable doInBackground(Void... params) {
-            byte[] artworkRaw = MediaMetaData.getArtwork(mAudioAttachmentItem.getFilePath());
-            if (artworkRaw != null) {
-                return new BitmapDrawable(getResources(), BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
-            } else {
-                return null;
+    @Override
+    public void onArtworkRetrieveFinished(final Drawable artwork) {
+        new Handler(mContext.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                mArtworkImageView.setImageDrawable(artwork);
             }
-        }
-
-        protected void onPostExecute(Drawable artwork) {
-            super.onPostExecute(artwork);
-            if (!this.isCancelled()) {
-                mAudioAttachmentItem.getMetaData().setArtwork(artwork);
-                AudioAttachmentView.this.mArtworkImageView.setImageDrawable(artwork);
-            }
-        }
+        });
     }
 }

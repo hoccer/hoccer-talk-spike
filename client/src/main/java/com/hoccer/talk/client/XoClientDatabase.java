@@ -15,7 +15,6 @@ import com.j256.ormlite.table.TableUtils;
 
 import org.apache.log4j.Logger;
 
-import java.lang.ref.WeakReference;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -49,7 +48,8 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     Dao<TalkClientMediaCollection, Integer> mMediaCollections;
     Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
 
-    private List<IXoDownloadListener> mDownloadListeners = new ArrayList<IXoDownloadListener>();
+    private WeakListenerArray<IXoDownloadListener> mDownloadListeners = new WeakListenerArray<IXoDownloadListener>();
+    private WeakListenerArray<IXoMessageListener> mMessageListeners = new WeakListenerArray<IXoMessageListener>();
     private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListeners = new WeakListenerArray<IXoMediaCollectionListener>();
 
 
@@ -138,8 +138,17 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
-        // message.setProgressState(false); // TODO: WTF is this? is it ever saved with TRUE?
-        mClientMessages.createOrUpdate(message);
+        Dao.CreateOrUpdateStatus result = mClientMessages.createOrUpdate(message);
+
+        if(result.isCreated()) {
+            for (IXoMessageListener listener : mMessageListeners) {
+                listener.onMessageCreated(message);
+            }
+        } else {
+            for (IXoMessageListener listener : mMessageListeners) {
+                listener.onMessageUpdated(message);
+            }
+        }
     }
 
     public void saveMessage(TalkMessage message) throws SQLException {
@@ -159,10 +168,16 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public void saveClientDownload(TalkClientDownload download) throws SQLException {
-        mClientDownloads.createOrUpdate(download);
+        Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
 
-        for (IXoDownloadListener listener : mDownloadListeners) {
-            listener.onDownloadSaved(download);
+        if(result.isCreated()) {
+            for (IXoDownloadListener listener : mDownloadListeners) {
+                listener.onDownloadCreated(download);
+            }
+        } else {
+            for (IXoDownloadListener listener : mDownloadListeners) {
+                listener.onDownloadUpdated(download);
+            }
         }
     }
 
@@ -307,6 +322,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
 
         return contact;
+    }
+
+    public TalkClientContact findContactById(int contactId) throws SQLException {
+        return mClientContacts.queryForId(contactId);
     }
 
     public synchronized TalkClientContact findContactByClientId(String clientId, boolean create) throws SQLException {
@@ -785,24 +804,34 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public void deleteMessageById(int clientMessageId) throws SQLException {
+        TalkClientMessage message = mClientMessages.queryForId(clientMessageId);
+        mClientMessages.deleteById(clientMessageId);
 
-        DeleteBuilder<TalkClientMessage, Integer> deleteBuilder = mClientMessages.deleteBuilder();
-        deleteBuilder.where()
-                .eq("clientMessageId", clientMessageId);
-        deleteBuilder.delete();
+        for (IXoMessageListener listener : mMessageListeners) {
+            listener.onMessageDeleted(message);
+        }
     }
 
-    public void deleteTalkClientDownload(TalkClientDownload download) throws SQLException {
-
-        DeleteBuilder<TalkClientDownload, Integer> deleteBuilder = mClientDownloads.deleteBuilder();
-        deleteBuilder.where()
-                .eq("clientDownloadId", download.getClientDownloadId());
-        int deletedRowsCount = deleteBuilder.delete();
+    public void deleteClientDownload(TalkClientDownload download) throws SQLException {
+        int deletedRowsCount = mClientDownloads.delete(download);
         if (deletedRowsCount > 0) {
+
+            // remove download from all collections
+            List<TalkClientMediaCollection> collections = findAllMediaCollectionsContainingItem(download);
+            for (TalkClientMediaCollection collection : collections) {
+                collection.removeItem(download);
+            }
+
             for (IXoDownloadListener listener : mDownloadListeners) {
-                listener.onDownloadRemoved(download);
+                listener.onDownloadDeleted(download);
             }
         }
+    }
+
+    public void deleteClientDownloadAndMessage(TalkClientDownload download) throws SQLException {
+        deleteClientDownload(download);
+        int messageId = findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
+        deleteMessageById(messageId);
     }
 
     /* delivered -> deliveredPrivate
@@ -874,13 +903,12 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
     }
 
-
     public void registerDownloadListener(IXoDownloadListener listener) {
-        mDownloadListeners.add(listener);
+        mDownloadListeners.registerListener(listener);
     }
 
     public void unregisterDownloadListener(IXoDownloadListener listener) {
-        mDownloadListeners.remove(listener);
+        mDownloadListeners.unregisterListener(listener);
     }
 
     //////// MediaCollection Management ////////
@@ -962,12 +990,12 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     @Override
-    public void registerListener(IXoMediaCollectionListener listener) {
+    public void registerMediaCollectionListener(IXoMediaCollectionListener listener) {
         mMediaCollectionListeners.registerListener(listener);
     }
 
     @Override
-    public void unregisterListener(IXoMediaCollectionListener listener) {
+    public void unregisterMediaCollectionListener(IXoMediaCollectionListener listener) {
         mMediaCollectionListeners.unregisterListener(listener);
     }
 

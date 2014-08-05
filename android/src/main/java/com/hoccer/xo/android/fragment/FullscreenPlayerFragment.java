@@ -6,10 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,10 +22,10 @@ import android.widget.*;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.MediaMetaData;
-import com.hoccer.xo.android.content.audio.MediaPlaylist;
+import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.service.MediaPlayerService;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ArtworkImageView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -37,7 +34,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
-public class FullscreenPlayerFragment extends Fragment {
+public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.ArtworkRetrieverListener {
 
     static final Logger LOG = Logger.getLogger(FullscreenPlayerFragment.class);
 
@@ -61,7 +58,8 @@ public class FullscreenPlayerFragment extends Fragment {
     private Runnable mUpdateTimeTask;
     private ValueAnimator mBlinkAnimation;
     private MediaPlayerService mMediaPlayerService;
-    private LoadArtworkTask mCurrentLoadArtworkTask;
+
+    MediaMetaData mCurrentMetaData = null;
 
     private BroadcastReceiver mBroadcastReceiver;
 
@@ -148,19 +146,29 @@ public class FullscreenPlayerFragment extends Fragment {
 
     public void updatePlayState() {
         if (mMediaPlayerService != null) {
+            final boolean isPlaying;
+
+            if ((mMediaPlayerService.isPaused()) || mMediaPlayerService.isStopped()) {
+                isPlaying = true;
+            } else if (!mMediaPlayerService.isPaused() && !mMediaPlayerService.isStopped()) {
+                isPlaying = false;
+            } else {
+                isPlaying = !mPlayButton.isChecked();
+            }
+
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if ((mMediaPlayerService.isPaused()) || mMediaPlayerService.isStopped()) {
-                        mPlayButton.setChecked(false);
+                    if (isPlaying) {
+                        mPlayButton.setChecked(!isPlaying);
                         mBlinkAnimation.start();
-                    } else if (!mMediaPlayerService.isPaused() && !mMediaPlayerService.isStopped()) {
+                    } else {
                         if (mBlinkAnimation.isRunning()) {
                             mBlinkAnimation.cancel();
                         }
 
                         mCurrentTimeLabel.setTextColor(getResources().getColor(R.color.xo_media_player_secondary_text));
-                        mPlayButton.setChecked(true);
+                        mPlayButton.setChecked(!isPlaying);
                     }
                 }
             });
@@ -183,41 +191,47 @@ public class FullscreenPlayerFragment extends Fragment {
     }
 
     public void updateTrackData() {
-        if (mCurrentLoadArtworkTask != null && mCurrentLoadArtworkTask.getStatus() != AsyncTask.Status.FINISHED) {
-            mCurrentLoadArtworkTask.cancel(true);
+        // ensure that we are not listening to any previous artwork retrieval tasks
+        if(mCurrentMetaData != null) {
+            mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
+
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(mMediaPlayerService.getCurrentMediaItem().getContentDataUrl());
+        final String trackArtist;
+        final String trackTitle;
+        final int totalDuration = mMediaPlayerService.getTotalDuration();
+        final String durationLabel = getStringFromTimeStamp(totalDuration);
+        final String playlistIndex = Integer.toString(mMediaPlayerService.getCurrentIndex() + 1);
+        final String playlistSize = Integer.toString(mMediaPlayerService.getMediaListSize());
+
+        if (mCurrentMetaData.getTitle() == null || mCurrentMetaData.getTitle().isEmpty()) {
+            File file = new File(mCurrentMetaData.getFileUri());
+            trackTitle = file.getName();
+        } else {
+            trackTitle = mCurrentMetaData.getTitle().trim();
+        }
+
+        if (mCurrentMetaData.getArtist() == null || mCurrentMetaData.getArtist().isEmpty()) {
+            trackArtist = getActivity().getResources().getString(R.string.media_meta_data_unknown_artist);
+        } else {
+            trackArtist = mCurrentMetaData.getArtist().trim();
+        }
+
+        mCurrentMetaData.getArtwork(getResources(), FullscreenPlayerFragment.this);
 
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                AudioAttachmentItem currentItem = mMediaPlayerService.getCurrentMediaItem();
-                String trackArtist = currentItem.getMetaData().getArtist();
-                String trackTitle = currentItem.getMetaData().getTitle();
-                int totalDuration = mMediaPlayerService.getTotalDuration();
 
-                if (trackTitle == null || trackTitle.isEmpty()) {
-                    File file = new File(currentItem.getFilePath());
-                    trackTitle = file.getName();
-                }
-
-                mTrackTitleLabel.setText(trackTitle.trim());
-                if (trackArtist == null || trackArtist.isEmpty()) {
-                    trackArtist = getActivity().getResources().getString(R.string.media_meta_data_unknown_artist);
-                }
-
-                mTrackArtistLabel.setText(trackArtist.trim());
+                mTrackTitleLabel.setText(trackTitle);
+                mTrackArtistLabel.setText(trackArtist);
                 mTrackProgressBar.setMax(totalDuration);
 
-                mTotalDurationLabel.setText(getStringFromTimeStamp(totalDuration));
-                mPlaylistIndexLabel.setText(Integer.toString(mMediaPlayerService.getCurrentTrackNumber() + 1));
-                mPlaylistSizeLabel.setText(Integer.toString(mMediaPlayerService.getMediaListSize()));
+                mTotalDurationLabel.setText(durationLabel);
+                mPlaylistIndexLabel.setText(playlistIndex);
+                mPlaylistSizeLabel.setText(playlistSize);
 
-                if (currentItem.getMetaData().getArtwork() == null) {
-                    mCurrentLoadArtworkTask = new LoadArtworkTask();
-                    mCurrentLoadArtworkTask.execute(currentItem);
-                } else {
-                    mArtworkImageView.setImageDrawable(currentItem.getMetaData().getArtwork());
-                }
+
 
                 updatePlayState();
 
@@ -275,7 +289,7 @@ public class FullscreenPlayerFragment extends Fragment {
         long minutes = TimeUnit.MILLISECONDS.toMinutes(timeInMillis) - TimeUnit.HOURS.toMinutes(hours);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(timeInMillis) - TimeUnit.MINUTES.toSeconds(minutes);
         if (hours > 0) {
-            return String.format("%d:%02d:%02d", minutes, seconds);
+            return String.format("%d:%02d:%02d", hours, minutes, seconds);
         }
 
         return String.format("%2d:%02d", minutes, seconds);
@@ -291,20 +305,20 @@ public class FullscreenPlayerFragment extends Fragment {
     private void updateRepeatMode() {
         switch (mMediaPlayerService.getRepeatMode()) {
             case NO_REPEAT:
-                mMediaPlayerService.setRepeatMode(MediaPlaylist.RepeatMode.REPEAT_ALL);
+                mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ALL);
                 break;
             case REPEAT_ALL:
-                mMediaPlayerService.setRepeatMode(MediaPlaylist.RepeatMode.REPEAT_TITLE);
+                mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ITEM);
                 break;
-            case REPEAT_TITLE:
-                mMediaPlayerService.setRepeatMode(MediaPlaylist.RepeatMode.NO_REPEAT);
+            case REPEAT_ITEM:
+                mMediaPlayerService.setRepeatMode(MediaPlaylistController.RepeatMode.NO_REPEAT);
                 break;
         }
         updateRepeatButton();
     }
 
     private void updateRepeatButton() {
-        MediaPlaylist.RepeatMode repeatMode = mMediaPlayerService.getRepeatMode();
+        MediaPlaylistController.RepeatMode repeatMode = mMediaPlayerService.getRepeatMode();
         final Drawable buttonStateDrawable;
         switch (repeatMode) {
             case NO_REPEAT:
@@ -313,7 +327,7 @@ public class FullscreenPlayerFragment extends Fragment {
             case REPEAT_ALL:
                 buttonStateDrawable = getResources().getDrawable(R.drawable.btn_player_repeat_all);
                 break;
-            case REPEAT_TITLE:
+            case REPEAT_ITEM:
                 buttonStateDrawable = getResources().getDrawable(R.drawable.btn_player_repeat_title);
                 break;
             default:
@@ -328,21 +342,29 @@ public class FullscreenPlayerFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onArtworkRetrieveFinished(final Drawable artwork) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mArtworkImageView.setImageDrawable(artwork);
+            }
+        });
+    }
+
 
     private class OnPlayerInteractionListener implements SeekBar.OnSeekBarChangeListener, View.OnClickListener, ToggleButton.OnCheckedChangeListener {
-
-
         @Override
         public void onClick(View v) {
             if (mMediaPlayerService != null) {
                 switch (v.getId()) {
                     case R.id.bt_player_skip_back:
                         mTrackProgressBar.setProgress(0);
-                        mMediaPlayerService.playPrevious();
+                        mMediaPlayerService.backward();
                         break;
                     case R.id.bt_player_skip_forward:
                         mTrackProgressBar.setProgress(0);
-                        mMediaPlayerService.playNext();
+                        mMediaPlayerService.forward();
                         break;
                     case R.id.bt_player_repeat:
                         updateRepeatMode();
@@ -404,43 +426,15 @@ public class FullscreenPlayerFragment extends Fragment {
 
         @Override
         public void run() {
-            try {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int currentProgress = mMediaPlayerService.getCurrentProgress();
-                        mCurrentTimeLabel.setText(getStringFromTimeStamp(currentProgress));
-                        mTrackProgressBar.setProgress(currentProgress);
-                    }
-                });
-
-                mTimeProgressHandler.postDelayed(this, 1000);
-            } catch (Exception e) {
-                LOG.error(e);
-            }
-        }
-    }
-
-    private class LoadArtworkTask extends AsyncTask<AudioAttachmentItem, Void, Drawable> {
-
-        private AudioAttachmentItem mAudioAttachmentItem;
-
-        protected Drawable doInBackground(AudioAttachmentItem... params) {
-            mAudioAttachmentItem = params[0];
-            byte[] artworkRaw = MediaMetaData.getArtwork(mAudioAttachmentItem.getFilePath());
-            if (artworkRaw != null) {
-                return new BitmapDrawable(getResources(), BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
-            } else {
-                return null;
-            }
-        }
-
-        protected void onPostExecute(Drawable artwork) {
-            super.onPostExecute(artwork);
-            if (!this.isCancelled()) {
-                mAudioAttachmentItem.getMetaData().setArtwork(artwork);
-                mArtworkImageView.setImageDrawable(artwork);
-            }
+            final int currentProgress = mMediaPlayerService.getCurrentProgress();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mCurrentTimeLabel.setText(getStringFromTimeStamp(currentProgress));
+                    mTrackProgressBar.setProgress(currentProgress);
+                }
+            });
+            mTimeProgressHandler.postDelayed(this, 1000);
         }
     }
 
@@ -453,17 +447,17 @@ public class FullscreenPlayerFragment extends Fragment {
                     return;
                 }
 
-                if (intent.getAction().equals(MediaPlayerService.PLAYSTATE_CHANGED_ACTION)) {
+                if (intent.getAction().equals(IntentHelper.ACTION_PLAYER_STATE_CHANGED)) {
                     updatePlayState();
-                } else if (intent.getAction().equals(MediaPlayerService.TRACK_CHANGED_ACTION)) {
+                } else if (intent.getAction().equals(IntentHelper.ACTION_PLAYER_TRACK_CHANGED)) {
                     updateTrackData();
                     updateConversationName();
                 }
             }
         };
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(MediaPlayerService.PLAYSTATE_CHANGED_ACTION);
-        intentFilter.addAction(MediaPlayerService.TRACK_CHANGED_ACTION);
+        intentFilter.addAction(IntentHelper.ACTION_PLAYER_STATE_CHANGED);
+        intentFilter.addAction(IntentHelper.ACTION_PLAYER_TRACK_CHANGED);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver, intentFilter);
     }
 

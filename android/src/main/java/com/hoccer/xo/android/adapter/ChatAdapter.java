@@ -1,10 +1,5 @@
 package com.hoccer.xo.android.adapter;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -17,7 +12,6 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.fragment.AudioAttachmentListFragment;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
 
@@ -60,8 +54,6 @@ public class
 
     private ListView mListView;
     private List < Integer > mLastVisibleViews = new ArrayList<Integer>();
-    private BroadcastReceiver mReceiver;
-
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
@@ -128,7 +120,6 @@ public class
         super.onCreate();
         getXoClient().registerMessageListener(this);
         getXoClient().registerTransferListener(this);
-        createBroadcastReceiver();
     }
 
     @Override
@@ -136,8 +127,6 @@ public class
         super.onDestroy();
         getXoClient().unregisterMessageListener(this);
         getXoClient().unregisterTransferListener(this);
-        LocalBroadcastManager.getInstance(mActivity).unregisterReceiver(mReceiver);
-        mReceiver = null;
 
         for(int i = 0; i < mLastVisibleViews.size(); ++i){
             int viewIndex = mLastVisibleViews.get(i);
@@ -288,38 +277,6 @@ public class
         });
     }
 
-
-    private void createBroadcastReceiver() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(AudioAttachmentListFragment.AUDIO_ATTACHMENT_REMOVED_ACTION)) {
-                    int messageId = intent.getIntExtra(AudioAttachmentListFragment.TALK_CLIENT_MESSAGE_ID_EXTRA, -1);
-                    if (messageId != -1) {
-                        removeMessageById(messageId);
-                    }
-                }
-            }
-        };
-        IntentFilter filter = new IntentFilter(AudioAttachmentListFragment.AUDIO_ATTACHMENT_REMOVED_ACTION);
-        LocalBroadcastManager.getInstance(mActivity).registerReceiver(mReceiver, filter);
-    }
-
-    private void removeMessageById(final int messageId) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                for (ChatMessageItem messageItem : mChatMessageItems) {
-                    if (messageItem != null && messageItem.getMessage().getClientMessageId() == messageId) {
-                        mChatMessageItems.remove(messageItem);
-                        notifyDataSetChanged();
-                        break;
-                    }
-                }
-            }
-        });
-    }
-
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
@@ -338,8 +295,8 @@ public class
     }
 
     @Override
-    public void onMessageAdded(final TalkClientMessage message) {
-        LOG.debug("onMessageAdded()");
+    public void onMessageCreated(final TalkClientMessage message) {
+        LOG.debug("onMessageCreated()");
         if (message.getConversationContact() == mContact) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -353,8 +310,8 @@ public class
     }
 
     @Override
-    public void onMessageRemoved(final TalkClientMessage message) {
-        LOG.debug("onMessageRemoved()");
+    public void onMessageDeleted(final TalkClientMessage message) {
+        LOG.debug("onMessageDeleted()");
         if (message.getConversationContact() == mContact) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -368,8 +325,8 @@ public class
     }
 
     @Override
-    public void onMessageStateChanged(final TalkClientMessage message) {
-        LOG.debug("onMessageStateChanged()");
+    public void onMessageUpdated(final TalkClientMessage message) {
+        LOG.debug("onMessageUpdated()");
         if (message.getConversationContact() == mContact) {
             runOnUiThread(new Runnable() {
                 @Override

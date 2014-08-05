@@ -43,8 +43,9 @@
     </string>
 
     <!-- Deleting attachments -->
-    <string name="attachment_confirm_delete_dialog_message">Delete selected attachments and related chat messages?
-    </string>
+
+    <string name="dialog_attachment_delete_title">Delete Attachment</string>
+    <string name="dialog_attachment_delete_message">Delete selected attachments and related chat messages?</string>
 
     <!-- AudioAttachmentList Fragment -->
     <string name="audio_attachment_list_all">All</string>
@@ -266,6 +267,11 @@
     <string name="added_attachment_to_collection">Added %1$s to \'%2$s\' collection</string>
     <string name="select_recipients">Select recipients</string>
     <string name="error_could_not_find_file_for_sending">Couldn\'t find and send file \'%1$s\'</string>
+    <string name="rename_collection">Rename Collection</string>
+    <string name="dialog_delete_collection_title">Delete collections</string>
+    <string name="dialog_delete_collection_message">Are you sure you want to delete the selected collection(s)? The attachments
+        will not be deleted.
+    </string>
 
     <!-- Preferences -->
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>

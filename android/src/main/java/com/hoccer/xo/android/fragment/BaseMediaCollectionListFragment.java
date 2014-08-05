@@ -51,12 +51,12 @@ public abstract class BaseMediaCollectionListFragment extends ListFragment {
     }
 
     protected void initAndFillMediaCollectionListAdapter() {
-        mMediaCollectionListAdapter = new MediaCollectionListAdapter(getActivity());
+        mMediaCollectionListAdapter = new MediaCollectionListAdapter();
     }
 
     protected void showCreateMediaCollectionDialog() {
         XoDialogs.showInputTextDialog("", R.string.new_media_collection, R.string.enter_new_collection_name, getActivity(),
-                new XoDialogs.OnTextClickListener() {
+                new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which, String input) {
                         addNewMediaCollection(input);
@@ -71,12 +71,10 @@ public abstract class BaseMediaCollectionListFragment extends ListFragment {
     }
 
     private void addNewMediaCollection(String name) {
-        TalkClientMediaCollection collection = null;
         try {
-            collection = XoApplication.getXoClient().getDatabase().createMediaCollection(name);
+            XoApplication.getXoClient().getDatabase().createMediaCollection(name);
         } catch (SQLException e) {
             LOG.error("Creating new media collection failed.", e);
         }
-        mMediaCollectionListAdapter.add(collection);
     }
 }

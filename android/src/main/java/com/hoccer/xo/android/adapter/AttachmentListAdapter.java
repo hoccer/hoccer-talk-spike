@@ -1,77 +1,67 @@
 package com.hoccer.xo.android.adapter;
 
-import android.app.Activity;
+import android.database.DataSetObserver;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import com.hoccer.talk.client.IXoDownloadListener;
-import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
-import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.view.AudioAttachmentView;
+import com.mobeta.android.dslv.DragSortListView;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AttachmentListAdapter extends BaseAdapter implements IXoTransferListener, IXoDownloadListener {
+public class AttachmentListAdapter extends BaseAdapter implements DragSortListView.DropListener {
 
+    private static final long INVALID_ID = -1;
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
-    private final Activity mActivity;
-    private List<AudioAttachmentItem> mAttachmentItems = new ArrayList<AudioAttachmentItem>();
+    private List<TalkClientDownload> mAttachmentItems = new ArrayList<TalkClientDownload>();
 
     private String mContentMediaType;
     private int mConversationContactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
 
-    private SparseBooleanArray mSelections;
+    private SparseBooleanArray mCheckedItemPositions = new SparseBooleanArray();
 
-    public AttachmentListAdapter(Activity activity) {
-        this(activity, null, MediaPlayerService.UNDEFINED_CONTACT_ID);
+    private TalkClientMediaCollection mCollection = null;
+    private boolean mShowDragHandle = false;
+
+    public AttachmentListAdapter() {
+        this(null, MediaPlayerService.UNDEFINED_CONTACT_ID);
     }
 
-    public AttachmentListAdapter(Activity activity, String pContentMediaType) {
-        this(activity, pContentMediaType, MediaPlayerService.UNDEFINED_CONTACT_ID);
+    public AttachmentListAdapter(String pContentMediaType) {
+        this(pContentMediaType, MediaPlayerService.UNDEFINED_CONTACT_ID);
     }
 
-    public AttachmentListAdapter(Activity activity, int pConversationContactId) {
-        this(activity, null, pConversationContactId);
+    public AttachmentListAdapter(int pConversationContactId) {
+        this(null, pConversationContactId);
     }
 
-    public AttachmentListAdapter(Activity activity, String pContentMediaType, int pConversationContactId) {
-        mActivity = activity;
+    public AttachmentListAdapter(String pContentMediaType, int pConversationContactId) {
         setContentMediaTypeFilter(pContentMediaType);
         setContactIdFilter(pConversationContactId);
     }
 
-    public AttachmentListAdapter createDuplicate() {
-        AttachmentListAdapter adapter = new AttachmentListAdapter(mActivity, mContentMediaType, mConversationContactId);
-        adapter.setAttachmentItems(mAttachmentItems);
-
-        return adapter;
+    public TalkClientDownload[] getAttachmentItems() {
+        return mAttachmentItems.toArray(new TalkClientDownload[mAttachmentItems.size()]);
     }
 
-    public List<AudioAttachmentItem> getAttachmentList() {
-        return mAttachmentItems;
-    }
-
-    public void setAttachmentItems(List<AudioAttachmentItem> items) {
+    public void setItems(TalkClientDownload[] items) {
         mAttachmentItems.clear();
-        mAttachmentItems.addAll(items);
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-            }
-        });
+        for(int i = 0; i < items.length; i++) {
+            mAttachmentItems.add(items[i]);
+        }
+        notifyDataSetChanged();
     }
 
     @Override
@@ -80,13 +70,20 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     @Override
-    public AudioAttachmentItem getItem(int position) {
+    public TalkClientDownload getItem(int position) {
         return mAttachmentItems.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        long itemId = INVALID_ID;
+
+        if (position >= 0 || position < mAttachmentItems.size()) {
+            TalkClientDownload item = getItem(position);
+            itemId = item.getClientDownloadId();
+        }
+
+        return itemId;
     }
 
     @Override
@@ -106,11 +103,29 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
 
         audioRowView.setMediaItem(mAttachmentItems.get(position));
         audioRowView.updatePlayPauseView();
+        audioRowView.getChildAt(0).setSelected(mCheckedItemPositions.get(position));
+        audioRowView.showDragHandle(mShowDragHandle);
 
-        if (mSelections != null) {
-            audioRowView.getChildAt(0).setSelected(mSelections.get(position));
-        }
         return audioRowView;
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    /*
+    This needed to be overridden because 3rd party ListViews
+    may override their setAdapter(); method and do not handle
+    the IllegalStateException
+     */
+    @Override
+    public void registerDataSetObserver(DataSetObserver observer) {
+        try {
+            super.registerDataSetObserver(observer);
+        } catch (IllegalStateException e) {
+
+        }
     }
 
     public void setContentMediaTypeFilter(String pContentMediaType) {
@@ -130,133 +145,74 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     @Override
-    public void onDownloadRegistered(TalkClientDownload download) {
+    public void drop(int from, int to) {
+        if (from != to) {
+            TalkClientDownload item = mAttachmentItems.get(from);
+            mAttachmentItems.remove(from);
+            mAttachmentItems.add(to, item);
 
+            if (mCollection != null) {
+                mCollection.reorderItemIndex(from, to);
+            }
+
+            notifyDataSetChanged();
+        }
+        // TODO: update mCheckedItemPositions
     }
 
-    @Override
-    public void onDownloadStarted(TalkClientDownload download) {
-
+    public boolean removeItem(TalkClientDownload item) {
+        return removeItem(item, false);
     }
 
-    @Override
-    public void onDownloadProgress(TalkClientDownload download) {
-
-    }
-
-    @Override
-    public void onDownloadFinished(TalkClientDownload download) {
-        int contactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
-
-        try {
-            TalkClientMessage message = XoApplication.getXoClient().getDatabase().findMessageByDownloadId(download.getClientDownloadId());
-            contactId = message.getConversationContact().getClientContactId();
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public boolean removeItem(TalkClientDownload item, boolean removeFromCollection) {
+        if (removeFromCollection) {
+            removeItemFromCollection(item);
         }
 
-        if (download.getContentMediaType().equals(this.mContentMediaType)) {
-            if ((mConversationContactId == MediaPlayerService.UNDEFINED_CONTACT_ID) || (mConversationContactId == contactId)) {
-                mAttachmentItems.add(0, AudioAttachmentItem.create(download.getContentDataUrl(), download, true));
-
-                mActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mSelections != null && mSelections.size() > 0) {
-                            updateCheckedItems();
-                        }
-
-                        notifyDataSetChanged();
-                    }
-                });
-            }
-        }
-    }
-
-    @Override
-    public void onDownloadFailed(TalkClientDownload download) {
-
-    }
-
-    @Override
-    public void onDownloadStateChanged(TalkClientDownload download) {
-
-    }
-
-    @Override
-    public void onUploadStarted(TalkClientUpload upload) {
-
-    }
-
-    @Override
-    public void onUploadProgress(TalkClientUpload upload) {
-
-    }
-
-    @Override
-    public void onUploadFinished(TalkClientUpload upload) {
-
-    }
-
-    @Override
-    public void onUploadFailed(TalkClientUpload upload) {
-
-    }
-
-    @Override
-    public void onUploadStateChanged(TalkClientUpload upload) {
-
-    }
-
-    public void removeItem(int pos) {
-        mAttachmentItems.remove(pos);
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-            }
-        });
-    }
-
-    public boolean removeItem(AudioAttachmentItem item) {
         boolean isRemovable = mAttachmentItems.contains(item);
         if (isRemovable) {
             mAttachmentItems.remove(mAttachmentItems.indexOf(item));
-            mActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    notifyDataSetChanged();
-                }
-            });
+            notifyDataSetChanged();
         }
+
         return isRemovable;
     }
 
-    public void addItem(AudioAttachmentItem item) {
-        mAttachmentItems.add(item);
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-            }
-        });
+    public void removeItemAt(int which) throws IndexOutOfBoundsException {
+        removeItemAt(which, false);
+    }
+
+    public void removeItemAt(int which, boolean removeFromCollection) throws IndexOutOfBoundsException{
+        if (removeFromCollection) {
+            removeItemFromCollection(getItem(which));
+        }
+
+        mAttachmentItems.remove(which);
+        updateCheckedItems();
+    }
+
+    public void addItemAt(TalkClientDownload item, int pos) throws IndexOutOfBoundsException{
+            mAttachmentItems.add(pos, item);
+            updateCheckedItems();
+            notifyDataSetChanged();
     }
 
     public void clear() {
         mAttachmentItems.clear();
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-            }
-        });
+        notifyDataSetChanged();
     }
 
-    public void setSelections(SparseBooleanArray selections) {
-        this.mSelections = selections;
+    public void setCheckedItemsPositions(SparseBooleanArray itemPositions) {
+        mCheckedItemPositions = itemPositions;
+        notifyDataSetChanged();
+    }
+
+    public SparseBooleanArray getCheckedItemPositions() {
+        return mCheckedItemPositions;
     }
 
     public void loadAttachments() {
+        mCollection = null;
         try {
             List<TalkClientDownload> downloads;
             if (mContentMediaType != null) {
@@ -276,6 +232,7 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
     }
 
     public void loadAttachmentsFromCollection(TalkClientMediaCollection collection) {
+        mCollection = collection;
         List<TalkClientDownload> downloads = new ArrayList<TalkClientDownload>();
         for (int i = 0; i < collection.size(); ++i) {
             downloads.add(collection.getItem(i));
@@ -283,34 +240,42 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         createAttachmentsFromTalkClientDownloads(downloads);
     }
 
+    public void showDragHandle(boolean show) {
+        mShowDragHandle = show;
+    }
+
+    private void removeItemFromCollection(TalkClientDownload item) {
+        if (isItemPartOfCollection(item)) {
+            mCollection.removeItem((TalkClientDownload) item);
+        }
+    }
+
     private void createAttachmentsFromTalkClientDownloads(Iterable<TalkClientDownload> downloads) {
         if (downloads != null) {
             for (TalkClientDownload download : downloads) {
                 if (!isRecordedAudio(download.getFileName())) {
-                    // TODO: differentiate between generic and special attachment types
-                    AudioAttachmentItem newItem = AudioAttachmentItem.create(download.getContentDataUrl(), download, true);
-                    if (newItem != null) {
-                        mAttachmentItems.add(newItem);
-                    }
+                    mAttachmentItems.add(download);
                 }
             }
         }
     }
 
     private void updateCheckedItems() {
-        SparseBooleanArray updatedSelection = new SparseBooleanArray(mSelections.size());
+        if (mCheckedItemPositions.size() > 0) {
+            SparseBooleanArray updatedSelection = new SparseBooleanArray(mCheckedItemPositions.size());
 
-        for (int i = 0; i < mSelections.size(); ++i) {
-            boolean b = mSelections.valueAt(i);
-            int k = mSelections.keyAt(i);
-            updatedSelection.put(k + 1, b);
-        }
+            for (int i = 0; i < mCheckedItemPositions.size(); ++i) {
+                boolean b = mCheckedItemPositions.valueAt(i);
+                int k = mCheckedItemPositions.keyAt(i);
+                updatedSelection.put(k + 1, b);
+            }
 
-        mSelections.clear();
+            mCheckedItemPositions.clear();
 
-        //@Info Setting mSelection to updatedSelection won't work since the reference changes, which is not allowed
-        for (int i = 0; i < updatedSelection.size(); ++i) {
-            mSelections.append(updatedSelection.keyAt(i), updatedSelection.valueAt(i));
+            //@Info Setting mSelection to updatedSelection won't work since the reference changes, which is not allowed
+            for (int i = 0; i < updatedSelection.size(); ++i) {
+                mCheckedItemPositions.append(updatedSelection.keyAt(i), updatedSelection.valueAt(i));
+            }
         }
     }
 
@@ -321,13 +286,19 @@ public class AttachmentListAdapter extends BaseAdapter implements IXoTransferLis
         return false;
     }
 
-    @Override
-    public void onDownloadSaved(TalkClientDownload download) {
+    private boolean isItemPartOfCollection(TalkClientDownload item) {
+        boolean isItemPartOfCollection = false;
 
-    }
+        try {
+            TalkClientDownload contentObject = (TalkClientDownload) item;
+            if (mCollection != null && contentObject != null && mCollection.hasItem(contentObject)) {
+                isItemPartOfCollection = true;
+            }
 
-    @Override
-    public void onDownloadRemoved(TalkClientDownload download) {
-        removeItem(AudioAttachmentItem.create(download.getContentDataUrl(), download, false));
+        } catch (ClassCastException e) {
+
+        }
+
+        return isItemPartOfCollection;
     }
 }

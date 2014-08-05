@@ -22,8 +22,14 @@ public class IntentHelper {
 
     // Constants ---------------------------------------------------------
 
-    public static final String OI_FILE_MANAGER_URI = "content://org.openintents.filemanager/";
-    public static final String OI_PICK_FILE = "org.openintents.action.PICK_FILE";
+    public static final String URI_OI_FILE_MANAGER = "content://org.openintents.filemanager/";
+    public static final String ACTION_OI_PICK_FILE = "org.openintents.action.PICK_FILE";
+
+    public static final String ACTION_AUDIO_ATTACHMENT_REMOVED = "com.hoccer.xo.android.action.AUDIO_ATTACHMENT_REMOVED_ACTION";
+    public static final String EXTRA_TALK_CLIENT_MESSAGE_ID = "com.hoccer.xo.android.extra.TALK_CLIENT_MESSAGE_ID_EXTRA";
+
+    public static final String ACTION_PLAYER_STATE_CHANGED = "com.hoccer.xo.android.action.PLAYER_STATE_CHANGED";
+    public static final String ACTION_PLAYER_TRACK_CHANGED = "com.hoccer.xo.android.action.PLAYER_TRACK_CHANGED";
 
 
     // Static Methods ----------------------------------------------------
@@ -37,11 +43,11 @@ public class IntentHelper {
                 return false;
             }
 
-            if (streamUri.toString().contains(OI_FILE_MANAGER_URI)) {
+            if (streamUri.toString().contains(URI_OI_FILE_MANAGER)) {
                 return true;
             }
 
-        } else if (OI_PICK_FILE.equals(intent.getAction()) && intent.getData() != null) {
+        } else if (ACTION_OI_PICK_FILE.equals(intent.getAction()) && intent.getData() != null) {
             Uri fileSchemeContentUri = intent.getData();
             if (fileSchemeContentUri.toString().startsWith("file://")) {
                 return true;

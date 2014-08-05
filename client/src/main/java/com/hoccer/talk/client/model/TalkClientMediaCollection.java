@@ -82,26 +82,31 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
     // Appends the given item to the collection
     public void addItem(TalkClientDownload item) {
-        if (createRelation(item, mItemList.size())) {
-            mItemList.add(item);
-            for (Listener listener : mListenerArray) {
-                listener.onItemAdded(this, mItemList.size() - 1, item);
-            }
-        }
+        addItem(mItemList.size(), item);
     }
 
     // Inserts the given item into the collection
     public void addItem(int index, TalkClientDownload item) {
-        if (index >= mItemList.size()) {
-            addItem(item); // simply append
-        } else {
-            if (createRelation(item, index)) {
-                mItemList.add(index, item);
-                for (Listener listener : mListenerArray) {
-                    listener.onItemAdded(this, index, item);
-                }
+        if(hasItem(item)) {
+            return;
+        }
+
+        if (createRelation(item, index)) {
+            mItemList.add(index, item);
+            for (Listener listener : mListenerArray) {
+                listener.onItemAdded(this, index, item);
             }
         }
+    }
+
+    // Returns if a given item is contained in this collection or not
+    public boolean hasItem(TalkClientDownload item) {
+        return mItemList.contains(item);
+    }
+
+    // Returns the index of the item if it is contained in this collection or -1
+    public int indexOf(TalkClientDownload item) {
+        return mItemList.indexOf(item);
     }
 
     // Removes the given item from the collection
@@ -153,8 +158,21 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
         return mItemList.size();
     }
 
+    // Returns the item at the given index
     public TalkClientDownload getItem(int index) {
         return mItemList.get(index);
+    }
+
+    // Returns the item with the given id or null if not found
+    public TalkClientDownload getItemFromId(int itemId) {
+        TalkClientDownload result = null;
+        for(TalkClientDownload item : mItemList) {
+            if(item.getClientDownloadId() == itemId) {
+                result = item;
+                break;
+            }
+        }
+        return result;
     }
 
     // Remove all items from collection
@@ -206,7 +224,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     @Override
     public Iterator<TalkClientDownload> iterator() {
         return new Iterator<TalkClientDownload>() {
-            int mCurrentIndex = 0;
+            private int mCurrentIndex = 0;
 
             @Override
             public boolean hasNext() {
@@ -215,7 +233,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
             @Override
             public TalkClientDownload next() {
-                if (mCurrentIndex < mItemList.size()) {
+                if (hasNext()) {
                     return mItemList.get(mCurrentIndex++);
                 } else {
                     throw new NoSuchElementException("There is no next item in media collection.");
@@ -358,12 +376,5 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
             return false;
         }
         return true;
-    }
-
-    public boolean hasItem(TalkClientDownload item) {
-        if (mItemList.contains(item)) {
-            return true;
-        }
-        return false;
     }
 }

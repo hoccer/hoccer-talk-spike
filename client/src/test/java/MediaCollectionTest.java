@@ -8,7 +8,6 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
-import junit.framework.Assert;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -45,7 +44,9 @@ public class MediaCollectionTest {
 
             @Override
             public <D extends Dao<T, ?>, T> D getDao(Class<T> clazz) throws SQLException {
-                return DaoManager.createDao(mConnectionSource, clazz);
+                D dao = DaoManager.createDao(mConnectionSource, clazz);
+                dao.setObjectCache(true);
+                return dao;
             }
         });
 
@@ -65,7 +66,7 @@ public class MediaCollectionTest {
         // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
-        mDatabase.registerListener(new IXoMediaCollectionListener() {
+        mDatabase.registerMediaCollectionListener(new IXoMediaCollectionListener() {
             @Override
             public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
                 onMediaCollectionCreatedCalled.value = true;
@@ -82,7 +83,7 @@ public class MediaCollectionTest {
         try {
             collection = mDatabase.createMediaCollection(collectionName);
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -98,7 +99,7 @@ public class MediaCollectionTest {
         try {
             collectionCopy = mDatabase.findMediaCollectionById(collection.getId());
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -111,7 +112,7 @@ public class MediaCollectionTest {
         try {
         collections = mDatabase.findAllMediaCollections();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -129,14 +130,14 @@ public class MediaCollectionTest {
         try {
             collection = mDatabase.createMediaCollection(collectionName);
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
         // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
-        mDatabase.registerListener(new IXoMediaCollectionListener() {
+        mDatabase.registerMediaCollectionListener(new IXoMediaCollectionListener() {
             @Override
             public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
                 onMediaCollectionCreatedCalled.value = true;
@@ -151,7 +152,7 @@ public class MediaCollectionTest {
         try {
             mDatabase.deleteMediaCollection(collection);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -165,7 +166,7 @@ public class MediaCollectionTest {
             try {
                 collections = mDatabase.findAllMediaCollections();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
                 fail();
             }
 
@@ -186,14 +187,14 @@ public class MediaCollectionTest {
         try {
             collection = mDatabase.createMediaCollection(collectionName);
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
         // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
-        mDatabase.registerListener(new IXoMediaCollectionListener() {
+        mDatabase.registerMediaCollectionListener(new IXoMediaCollectionListener() {
             @Override
             public void onMediaCollectionCreated(TalkClientMediaCollection collectionCreated) {
                 onMediaCollectionCreatedCalled.value = true;
@@ -208,7 +209,7 @@ public class MediaCollectionTest {
         try {
             mDatabase.deleteMediaCollectionById(collection.getId());
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -222,7 +223,7 @@ public class MediaCollectionTest {
             try {
                 collections = mDatabase.findAllMediaCollections();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
                 fail();
             }
 
@@ -246,8 +247,7 @@ public class MediaCollectionTest {
             collection = mDatabase.createMediaCollection(collectionName);
             addItemsToCollection(items, collection);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -259,8 +259,7 @@ public class MediaCollectionTest {
             assertEquals(1, collections.size());
             collectionCopy = collections.get(0);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -280,8 +279,7 @@ public class MediaCollectionTest {
             collection = mDatabase.createMediaCollection(collectionName);
             addItemsToCollection(items, collection);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -318,13 +316,12 @@ public class MediaCollectionTest {
             mDatabase.saveClientDownload(item3);
 
             // insert items at "random" positions
-            collection.addItem(5, item0); // order: 0
+            collection.addItem(0, item0); // order: 0
             collection.addItem(1, item1); // order: 0 1
             collection.addItem(0, item2); // order: 2 0 1
             collection.addItem(1, item3); // order: 2 3 0 1
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -373,8 +370,7 @@ public class MediaCollectionTest {
             collection.addItem(item2);
             collection.addItem(item3);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -476,8 +472,7 @@ public class MediaCollectionTest {
             collection.addItem(item1);
             collection.addItem(item2);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
         collection.clear();
@@ -513,8 +508,7 @@ public class MediaCollectionTest {
             collection.addItem(item3);
             collection.addItem(item4);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -801,8 +795,7 @@ public class MediaCollectionTest {
             collection.addItem(item3);
             collection.addItem(item4);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -815,39 +808,7 @@ public class MediaCollectionTest {
         final int expectedItemOrderFrom = 2;
         final int expectedItemOrderTo = 4;
 
-        final ValueContainer<Boolean> onNameChangedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
-
-        // register MediaCollection listener
-        TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
-            public void onCollectionNameChanged(TalkClientMediaCollection collection) {
-                assertEquals(expectedCollectionName, collection.getName());
-                onNameChangedCalled.value = true;
-            }
-            public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
-                assertEquals(expectedItemOrderFrom, fromIndex);
-                assertEquals(expectedItemOrderTo, toIndex);
-                onItemOrderChangedCalled.value = true;
-            }
-            public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
-                assertEquals(expectedItemRemovedIndex, indexRemoved);
-                assertEquals(expectedItemRemoved, itemRemoved);
-                onItemRemovedCalled.value = true;
-            }
-            public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
-                assertEquals(expectedItemAddedIndex, indexAdded);
-                assertEquals(expectedItemAdded, itemAdded);
-                onItemAddedCalled.value = true;
-            }
-            @Override
-            public void onCollectionCleared(TalkClientMediaCollection collection) {
-                onCollectionClearedCalled.value = true;
-            }
-        };
-        collection.registerListener(listener);
+        ListenerTester listenerTester = new ListenerTester(collection);
 
         collection.setName(expectedCollectionName);
         collection.addItem(3, expectedItemAdded);
@@ -855,11 +816,27 @@ public class MediaCollectionTest {
         collection.reorderItemIndex(2, 4);
         collection.clear();
 
-        assertTrue(onNameChangedCalled.value);
-        assertTrue(onItemOrderChangedCalled.value);
-        assertTrue(onItemRemovedCalled.value);
-        assertTrue(onItemAddedCalled.value);
-        assertTrue(onCollectionClearedCalled.value);
+        assertEquals(1, listenerTester.onNameChangedCalled.size());
+        assertEquals(collection, listenerTester.onNameChangedCalled.get(0).args[0]);
+        assertEquals(expectedCollectionName, ((TalkClientMediaCollection)listenerTester.onNameChangedCalled.get(0).args[0]).getName());
+
+        assertEquals(1, listenerTester.onItemOrderChangedCalled.size());
+        assertEquals(collection, listenerTester.onItemOrderChangedCalled.get(0).args[0]);
+        assertEquals(expectedItemOrderFrom, listenerTester.onItemOrderChangedCalled.get(0).args[1]);
+        assertEquals(expectedItemOrderTo, listenerTester.onItemOrderChangedCalled.get(0).args[2]);
+
+        assertEquals(1, listenerTester.onItemRemovedCalled.size()); // callback is only invoked if MediaCollection instances are cached
+        assertEquals(collection, listenerTester.onItemRemovedCalled.get(0).args[0]);
+        assertEquals(expectedItemRemovedIndex, listenerTester.onItemRemovedCalled.get(0).args[1]);
+        assertEquals(expectedItemRemoved, listenerTester.onItemRemovedCalled.get(0).args[2]);
+
+        assertEquals(1, listenerTester.onItemAddedCalled.size());
+        assertEquals(collection, listenerTester.onItemAddedCalled.get(0).args[0]);
+        assertEquals(expectedItemAddedIndex, listenerTester.onItemAddedCalled.get(0).args[1]);
+        assertEquals(expectedItemAdded, listenerTester.onItemAddedCalled.get(0).args[2]);
+
+        assertEquals(1, listenerTester.onCollectionClearedCalled.size());
+        assertEquals(collection, listenerTester.onItemAddedCalled.get(0).args[0]);
     }
 
     @Test
@@ -890,38 +867,12 @@ public class MediaCollectionTest {
             collection.addItem(item3);
             collection.addItem(item4);
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
-        final ValueContainer<Boolean> onNameChangedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemRemovedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onItemAddedCalled = new ValueContainer<Boolean>(false);
-        final ValueContainer<Boolean> onCollectionClearedCalled = new ValueContainer<Boolean>(false);
-
-        // register MediaCollection listener
-        TalkClientMediaCollection.Listener listener = new TalkClientMediaCollection.Listener() {
-            public void onCollectionNameChanged(TalkClientMediaCollection collection) {
-                onNameChangedCalled.value = true;
-            }
-            public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
-                onItemOrderChangedCalled.value = true;
-            }
-            public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
-                onItemRemovedCalled.value = true;
-            }
-            public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
-                onItemAddedCalled.value = true;
-            }
-            @Override
-            public void onCollectionCleared(TalkClientMediaCollection collection) {
-                onCollectionClearedCalled.value = true;
-            }
-        };
-        collection.registerListener(listener);
-        collection.unregisterListener(listener);
+        ListenerTester listenerTester = new ListenerTester(collection);
+        listenerTester.unregister();
 
         collection.setName("newName");
         collection.addItem(3, item5);
@@ -929,11 +880,11 @@ public class MediaCollectionTest {
         collection.reorderItemIndex(2, 4);
         collection.clear();
 
-        assertFalse(onNameChangedCalled.value);
-        assertFalse(onItemOrderChangedCalled.value);
-        assertFalse(onItemRemovedCalled.value);
-        assertFalse(onItemAddedCalled.value);
-        assertFalse(onCollectionClearedCalled.value);
+        assertEquals(0, listenerTester.onNameChangedCalled.size());
+        assertEquals(0, listenerTester.onItemOrderChangedCalled.size());
+        assertEquals(0, listenerTester.onItemRemovedCalled.size()); // callback is only invoked if MediaCollection instances are cached
+        assertEquals(0, listenerTester.onItemAddedCalled.size());
+        assertEquals(0, listenerTester.onCollectionClearedCalled.size());
     }
 
     @Test
@@ -959,8 +910,7 @@ public class MediaCollectionTest {
                 collection.addItem(expectedItemList.get(i));
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -992,6 +942,52 @@ public class MediaCollectionTest {
     }
 
     @Test
+    public void testDeleteDownload() {
+        LOG.info("testDeleteDownload");
+
+        final String collectionName = "testDeleteDownload_collection";
+        TalkClientMediaCollection collection = null;
+        TalkClientDownload item0 = new TalkClientDownload();
+        TalkClientDownload item1 = new TalkClientDownload();
+        TalkClientDownload item2 = new TalkClientDownload();
+        try {
+            collection = mDatabase.createMediaCollection(collectionName);
+
+            mDatabase.saveClientDownload(item0);
+            mDatabase.saveClientDownload(item1);
+            mDatabase.saveClientDownload(item2);
+
+            collection.addItem(item0);
+            collection.addItem(item1);
+            collection.addItem(item2);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        ListenerTester listenerTester = new ListenerTester(collection);
+
+        final TalkClientDownload expectedItemRemoved = item1;
+        final int expectedItemRemovedIndex = 1;
+
+        try {
+            mDatabase.deleteClientDownload(expectedItemRemoved);
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+
+        assertEquals(0, listenerTester.onNameChangedCalled.size());
+        assertEquals(0, listenerTester.onItemOrderChangedCalled.size());
+        assertEquals(1, listenerTester.onItemRemovedCalled.size()); // callback is only invoked if MediaCollection instances are cached
+        assertEquals(collection, listenerTester.onItemRemovedCalled.get(0).args[0]);
+        assertEquals(expectedItemRemovedIndex, listenerTester.onItemRemovedCalled.get(0).args[1]);
+        assertEquals(expectedItemRemoved, listenerTester.onItemRemovedCalled.get(0).args[2]);
+        assertEquals(0, listenerTester.onItemAddedCalled.size());
+        assertEquals(0, listenerTester.onCollectionClearedCalled.size());
+    }
+
+    @Test
     public void testToArray() {
         LOG.info("testToArray");
 
@@ -1011,8 +1007,7 @@ public class MediaCollectionTest {
                 collection.addItem(item);
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -1043,7 +1038,7 @@ public class MediaCollectionTest {
                 list.add(item);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
 
@@ -1087,9 +1082,65 @@ public class MediaCollectionTest {
                     .eq("collection_id", collectionId)
                     .query();
         } catch(SQLException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
+            fail();
         }
 
         return relations;
+    }
+
+    public class Call {
+        public Object[] args;
+
+        public Call(Object... args) {
+            this.args = args;
+        }
+    }
+
+    // logs listener calls
+    private class ListenerTester {
+        private TalkClientMediaCollection mCollection;
+        private TalkClientMediaCollection.Listener mListener;
+
+        public ArrayList<Call> onNameChangedCalled = new ArrayList<Call>();
+        public ArrayList<Call> onItemOrderChangedCalled = new ArrayList<Call>();
+        public ArrayList<Call> onItemRemovedCalled = new ArrayList<Call>();
+        public ArrayList<Call> onItemAddedCalled = new ArrayList<Call>();
+        public ArrayList<Call> onCollectionClearedCalled = new ArrayList<Call>();
+
+        public ListenerTester(TalkClientMediaCollection collection) {
+            mCollection = collection;
+            mListener = new TalkClientMediaCollection.Listener() {
+                @Override
+                public void onCollectionNameChanged(TalkClientMediaCollection collection) {
+                    onNameChangedCalled.add(new Call(collection));
+                }
+
+                @Override
+                public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
+                    onItemOrderChangedCalled.add(new Call(collection, fromIndex, toIndex));
+                }
+
+                @Override
+                public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
+                    onItemRemovedCalled.add(new Call(collection, indexRemoved, itemRemoved));
+                }
+
+                @Override
+                public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
+                    onItemAddedCalled.add(new Call(collection, indexAdded, itemAdded));
+                }
+
+                @Override
+                public void onCollectionCleared(TalkClientMediaCollection collection) {
+                    onCollectionClearedCalled.add(new Call(collection));
+                }
+            };
+            collection.registerListener(mListener);
+        }
+
+        public void unregister() {
+            mCollection.unregisterListener(mListener);
+        }
     }
 }
