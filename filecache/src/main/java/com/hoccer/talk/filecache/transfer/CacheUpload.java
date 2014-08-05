@@ -55,6 +55,10 @@ public class CacheUpload extends CacheTransfer {
             int absolutePosition = (int) byteRange.getStart();
             while (totalTransferred < totalRequested) {
                 // allow thread interruption
+                // TODO: this makes no sense. When reading value from interrupted() the thread is already running again.
+                // The interruption refers to an older thread instance which has already terminated.
+                // See CacheFile::uploadFinished() -> aborts a running download for a given file
+                // after uploading the file has finished successfully.
                 if (Thread.interrupted()) {
                     throw new InterruptedException("Transfer thread interrupted");
                 }

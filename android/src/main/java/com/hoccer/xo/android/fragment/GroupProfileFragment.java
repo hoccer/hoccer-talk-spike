@@ -121,7 +121,7 @@ public class GroupProfileFragment extends XoFragment
             mGroupMemberAdapter.onCreate();
             mGroupMemberAdapter.onResume();
 
-            if(mGroup.getGroupPresence().isTypeNearby()) {
+            if(mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
                 mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
                     @Override
                     public boolean shouldShow(TalkClientContact contact) {
@@ -132,15 +132,14 @@ public class GroupProfileFragment extends XoFragment
                 mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
                     @Override
                     public boolean shouldShow(TalkClientContact contact) {
-                        return contact.isClientGroupInvited(mGroup) || contact
-                                .isClientGroupJoined(mGroup) || contact.isSelf();
+                        return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup) || contact.isSelf();
                     }
                 });
             }
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
         mGroupMemberAdapter.requestReload();
-        if(mGroup != null && mGroup.getGroupPresence().isTypeNearby()) {
+        if(mGroup != null && mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
             mGroupMembersList.setOnItemClickListener(this);
         } else {
             mGroupMembersList.setOnItemClickListener(null);
@@ -193,7 +192,7 @@ public class GroupProfileFragment extends XoFragment
             editGroup.setVisible(false);
 
         } else {
-            if (!mGroup.getGroupPresence().isTypeNearby()) {
+            if (mGroup.getGroupPresence() != null && !mGroup.getGroupPresence().isTypeNearby()) {
                 if (mGroup.isEditable()) {
                     editGroup.setVisible(true);
                 } else {
@@ -266,9 +265,11 @@ public class GroupProfileFragment extends XoFragment
         mGroupNameText.setText(newGroupName);
 
         if (mGroup != null && !mGroup.isGroupRegistered()) {
-            mGroup.getGroupPresence().setGroupName(newGroupName);
-            getXoClient().createGroup(mGroup);
-            mMode = Mode.EDIT_GROUP;
+            if (mGroup.getGroupPresence() != null) {
+                mGroup.getGroupPresence().setGroupName(newGroupName);
+                getXoClient().createGroup(mGroup);
+                mMode = Mode.EDIT_GROUP;
+            }
         }
     }
 
@@ -337,7 +338,7 @@ public class GroupProfileFragment extends XoFragment
         }
 
 
-        if(mGroup.getGroupPresence().isTypeNearby()) {
+        if(mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
             mGroupNameText.setText(R.string.nearby_text);
         } else {
             mGroupNameText.setText(name);
@@ -420,8 +421,7 @@ public class GroupProfileFragment extends XoFragment
 
     private void manageGroupMembers() {
         LOG.debug("manageGroupMembers()");
-        new GroupManageDialog(mGroup)
-                .show(getXoActivity().getFragmentManager(), "GroupManageDialog");
+        new GroupManageDialog(mGroup).show(getXoActivity().getFragmentManager(), "GroupManageDialog");
     }
 
     private void joinGroup() {

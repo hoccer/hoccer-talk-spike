@@ -76,8 +76,7 @@ public class DownloadServlet extends HttpServlet {
             download.perform();
             LOG.info("GET " + req.getPathInfo() + " --- download finished");
         } catch (InterruptedException e) {
-            LOG.info("GET " + req.getPathInfo() + " --- download interrupted");
-            return;
+            LOG.error("GET " + req.getPathInfo() + " --- download interrupted", e);
         }
     }
 

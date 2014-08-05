@@ -1,5 +1,7 @@
 .project
 .settings
+.idea
+out
 build.log
 build-log.xml
 **/*.iml
