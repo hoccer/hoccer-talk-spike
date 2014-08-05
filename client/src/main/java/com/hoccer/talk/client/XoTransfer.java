@@ -4,6 +4,8 @@ import com.hoccer.talk.content.IContentObject;
 
 public abstract class XoTransfer implements IContentObject {
 
+    public enum State {}
+
     public enum Direction {
         UPLOAD, DOWNLOAD
     }
@@ -12,12 +14,11 @@ public abstract class XoTransfer implements IContentObject {
         AVATAR, ATTACHMENT
     }
 
-    private Direction mDirection;
+    private final Direction mDirection;
 
     protected XoTransfer(Direction direction) {
         mDirection = direction;
     }
-
 
     public Direction getDirection() {
         return mDirection;
@@ -31,7 +32,6 @@ public abstract class XoTransfer implements IContentObject {
         return mDirection == Direction.UPLOAD;
     }
 
-
     public abstract Type getTransferType();
 
     public boolean isAvatar() {
@@ -42,4 +42,7 @@ public abstract class XoTransfer implements IContentObject {
         return getTransferType() == Type.ATTACHMENT;
     }
 
+    public abstract void registerTransferListener(IXoTransferListener listener);
+
+    public abstract void unregisterTransferListener(IXoTransferListener listener);
 }

@@ -6,21 +6,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-//public class ProgressOutputHttpEntity extends InputStreamEntity {
 public class ProgressOutputHttpEntity extends InputStreamEntity {
 
-    IProgressListener mProgressListener;
+    private final IProgressListener mProgressListener;
 
-    ProgressOutputStream mProgressStream = null;
+    private final int mOffset;
 
-    public ProgressOutputHttpEntity(InputStream istream, int length, IProgressListener listener) {
+    private ProgressOutputStream mProgressStream = null;
+
+    public ProgressOutputHttpEntity(InputStream istream, int length, IProgressListener listener, int offset) {
         super(istream, length);
         mProgressListener = listener;
+        mOffset = offset;
     }
 
     @Override
     public void writeTo(OutputStream outstream) throws IOException {
-        mProgressStream = new ProgressOutputStream(outstream, mProgressListener);
+        mProgressStream = new ProgressOutputStream(outstream, mProgressListener, mOffset);
         super.writeTo(mProgressStream);
     }
 

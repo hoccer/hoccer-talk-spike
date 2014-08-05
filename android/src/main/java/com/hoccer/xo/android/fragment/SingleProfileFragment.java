@@ -217,7 +217,7 @@ public class SingleProfileFragment extends XoFragment
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
-                                    getXoActivity().getXoClient().deleteContact(mContact);
+                                    getXoActivity().getXoClient().depairContact(mContact);
                                     getXoActivity().hackReturnedFromDialog();
                                 }
                             },
@@ -368,13 +368,17 @@ public class SingleProfileFragment extends XoFragment
             if (avatarDownload != null) {
                 if (avatarDownload.isContentAvailable()) {
                     avatarUrl = avatarDownload.getDataFile();
-                    Uri uri = Uri.fromFile(new File(avatarUrl));
-                    avatarUrl = uri.toString();
+                    if (avatarUrl != null) {
+                        Uri uri = Uri.fromFile(new File(avatarUrl));
+                        avatarUrl = uri.toString();
+                    }
                 }
             }
         }
-        LOG.debug("avatar is " + avatarUrl);
-        ImageLoader.getInstance().displayImage(avatarUrl, mAvatarImage);
+        if (avatarUrl != null) {
+            LOG.debug("avatar is " + avatarUrl);
+            ImageLoader.getInstance().displayImage(avatarUrl, mAvatarImage);
+        }
 
         // apply data from the contact that needs to recurse
         String name = null;

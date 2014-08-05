@@ -74,6 +74,9 @@ public class ChatImageItem extends ChatMessageItem {
     }
 
     private void displayImage(IContentObject contentObject) {
+        if (contentObject.getContentDataUrl() == null) {
+            return;
+        }
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.parse(contentObject.getContentDataUrl()), "image/*");
         try {

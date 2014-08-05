@@ -1775,14 +1775,14 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 .createFileForTransfer(mConnection.getClientId(), "application/octet-stream", contentLength);
     }
 
-    // should be called by the receiver of an transfer file if the user has aborted the download
+    // should be called by the receiver of an transfer file after download; the server can the delete the file in case
     @Override
     public String receivedFile(String fileId) {
         requireIdentification(true);
         logCall("receivedFile(fileId: '" + fileId + "')");
         return processFileDownloadMessage(fileId, TalkDelivery.ATTACHMENT_STATE_RECEIVED);
     }
-    // should be called by the receiver of an transfer file after download; the server can the delete the file in case
+    // should be called by the receiver of an transfer file if the user has aborted the download
     @Override
     public String abortedFileDownload(String fileId) {
         requireIdentification(true);
@@ -2051,6 +2051,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
     public String updateEnvironment(TalkEnvironment environment) {
         logCall("updateEnvironment(clientId: '" + mConnection.getClientId() + "')");
         requireIdentification(true);
+
+        if (!environment.isValid()) {
+            throw new RuntimeException("environment " + environment + " is not valid!");
+        }
 
         if (environment.getType() == null) {
             LOG.warn("updateEnvironment: no environment type, defaulting to nearby. Please fix client");
