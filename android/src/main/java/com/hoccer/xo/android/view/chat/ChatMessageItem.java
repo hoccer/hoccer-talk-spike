@@ -1,7 +1,7 @@
 package com.hoccer.xo.android.view.chat;
 
-import android.app.ActionBar;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -20,8 +21,8 @@ import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
 import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
@@ -123,8 +124,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
     protected void configureViewForMessage(View view) {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.av_message_avatar);
         TextView messageTime = (TextView) view.findViewById(R.id.tv_message_time);
-        TextView messageInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
         TextView messageText = (TextView) view.findViewById(R.id.tv_message_text);
+        TextView messageContactInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
+        TextView messageDeliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
 
         // Adjust layout for incoming / outgoing message
         setAvatar(avatarView, mMessage.getSenderContact());
@@ -134,11 +136,15 @@ public class ChatMessageItem implements AttachmentTransferListener {
             } else {
                 avatarView.setVisibility(View.GONE);
             }
-            messageInfo.setVisibility(View.VISIBLE);
-            messageInfo.setText(mMessage.getSenderContact().getNickname());
-            messageInfo.setTextColor(messageInfo.getResources().getColor(android.R.color.secondary_text_dark));
+            updateIncomingMessageStatus(view);
 
-            messageText.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.bubble_grey));
+            messageContactInfo.setVisibility(View.VISIBLE);
+            messageContactInfo.setText(mMessage.getSenderContact().getNickname());
+            messageContactInfo.setTextColor(messageContactInfo.getResources().getColor(android.R.color.secondary_text_dark));
+
+            messageDeliveryInfo.setVisibility(View.GONE);
+
+            messageText.setBackgroundDrawable(mContext.getResources().getDrawable(getIncomingBackgroundResource()));
             messageText.setTextColor(mContext.getResources().getColorStateList(android.R.color.black));
             messageText.setLinkTextColor(mContext.getResources().getColorStateList(android.R.color.black));
 
@@ -151,9 +157,11 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         } else {
             avatarView.setVisibility(View.GONE);
-            updateSeenStatus(view);
+            updateOutgoingMessageStatus(view);
 
-            messageText.setBackgroundDrawable(mContext.getResources().getDrawable(getBackgroundResource()));
+            messageContactInfo.setVisibility(View.GONE);
+
+            messageText.setBackgroundDrawable(mContext.getResources().getDrawable(getOutgoingBackgroundResource()));
             messageText.setTextColor(mContext.getResources().getColorStateList(android.R.color.white));
             messageText.setLinkTextColor(mContext.getResources().getColorStateList(android.R.color.white));
 
@@ -172,42 +180,109 @@ public class ChatMessageItem implements AttachmentTransferListener {
         configureContextMenu(messageText);
     }
 
-    private void updateSeenStatus(View view) {
-        TextView messageInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
-        if(mMessage.getConversationContact().isGroup()) {
-            messageInfo.setVisibility(View.GONE);
+    private void updateIncomingMessageStatus(View view) {
+        TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
+        if (mMessage.getConversationContact().isGroup()) {
+            deliveryInfo.setVisibility(View.GONE);
             return;
         }
 
-        String currentState = mMessage.getOutgoingDelivery().getState();
-        if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
-                || currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED))
-                && !mMessage.getOutgoingDelivery().isGroupDelivery()) {
+        TalkDelivery incomingDelivery = mMessage.getIncomingDelivery();
+        String currentState = incomingDelivery.getState();
+        String attachmentState = incomingDelivery.getAttachmentState();
+        deliveryInfo.setVisibility(View.VISIBLE);
 
-            messageInfo.setVisibility(View.VISIBLE);
-            messageInfo.setTextColor(view.getResources().getColor(R.color.xo_app_main_color));
-            messageInfo.setText(R.string.seen_text);
+        if (attachmentState != null && attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED) &&
+                attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
+        } else if (currentState.equals(TalkDelivery.STATE_FAILED) ||
+                currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
         } else {
-            messageInfo.setVisibility(View.GONE);
+            deliveryInfo.setVisibility(View.GONE);
         }
     }
 
+    private void updateOutgoingMessageStatus(View view) {
+        TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
+        if (mMessage.getConversationContact().isGroup()) {
+            deliveryInfo.setVisibility(View.GONE);
+            return;
+        }
 
-    public int getBackgroundResource() {
+        TalkDelivery outgoingDelivery = mMessage.getOutgoingDelivery();
+        String currentState = outgoingDelivery.getState();
+        String attachmentState = outgoingDelivery.getAttachmentState();
+        deliveryInfo.setVisibility(View.VISIBLE);
+
+        if (currentState.equals(TalkDelivery.STATE_REJECTED) || currentState.equals(TalkDelivery.STATE_REJECTED_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
+        } else if (currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
+        } else if (attachmentState != null && attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED) &&
+                attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
+        } else if (attachmentState != null && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_NONE) &&
+                (!attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED)
+                        && !attachmentState.equals(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED))) {
+
+            String text = view.getResources().getString(R.string.attachment_expects_text);
+            String mediaType = view.getResources().getString(getMediaTextResource());
+            setMessageStatusText(deliveryInfo, String.format(text, mediaType), R.color.xo_app_main_color);
+        } else if ((currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN)
+                || currentState.equals(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED))
+                && !outgoingDelivery.isGroupDelivery()) {
+
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_seen_text), R.color.xo_app_main_color);
+        } else if (currentState.equals(TalkDelivery.STATE_DELIVERED_UNSEEN) ||
+                currentState.equals(TalkDelivery.STATE_DELIVERED_UNSEEN_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_unseen_text), R.color.xo_app_main_color);
+        } else if (currentState.equals(TalkDelivery.STATE_DELIVERED_PRIVATE) ||
+                currentState.equals(TalkDelivery.STATE_DELIVERED_PRIVATE_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_privat_text), R.color.xo_app_main_color);
+        } else if (currentState.equals(TalkDelivery.STATE_FAILED) ||
+                currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+            setMessageStatusText(deliveryInfo, view.getResources().getString(R.string.message_failed_text), R.color.xo_message_failed_color);
+
+        } else {
+            deliveryInfo.setVisibility(View.GONE);
+        }
+    }
+
+    private void setMessageStatusText(TextView messageStatusLabel, String text, int colorId) {
+        messageStatusLabel.setVisibility(View.VISIBLE);
+        messageStatusLabel.setText(text);
+        messageStatusLabel.setTextColor(messageStatusLabel.getResources().getColor(colorId));
+    }
+
+    public int getOutgoingBackgroundResource() {
         String currentState = mMessage.getOutgoingDelivery().getState();
-        if(currentState == null) {
+        if (currentState == null) {
             return R.drawable.bubble_light_green;
         }
         if (currentState.equals(TalkDelivery.STATE_DELIVERING)) {
             return R.drawable.bubble_light_green;
-        } else if(currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red;
-        } else if(currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red;
+        } else if (currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
+            return R.drawable.bubble_red_outgoing;
+        } else if (currentState.equals(TalkDelivery.STATE_REJECTED) || currentState.equals(TalkDelivery.STATE_REJECTED_ACKNOWLEDGED)) {
+            return R.drawable.bubble_red_outgoing;
+        } else if (currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+            return R.drawable.bubble_red_outgoing;
         }
-
-
         return R.drawable.bubble_green;
+    }
+
+    public int getIncomingBackgroundResource() {
+        String currentState = mMessage.getIncomingDelivery().getState();
+        if (currentState == null) {
+            return R.drawable.bubble_grey;
+        }
+        if (currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
+            return R.drawable.bubble_red_incoming;
+        } else if (currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+            return R.drawable.bubble_red_incoming;
+        }
+        return R.drawable.bubble_grey;
     }
 
     private String getMessageTimestamp(TalkClientMessage message) {
@@ -261,14 +336,16 @@ public class ChatMessageItem implements AttachmentTransferListener {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View attachmentWrapper = inflater.inflate(R.layout.view_attachment_wrapper, null);
             mAttachmentView.addView(attachmentWrapper);
+            mAttachmentView.setVisibility(View.VISIBLE);
         }
-        mAttachmentView.setVisibility(View.VISIBLE);
 
         mContentWrapper = (LinearLayout) mAttachmentView.findViewById(R.id.ll_content_wrapper);
 
+        TalkDelivery delivery;
+
         // adjust layout for incoming / outgoing attachment
         if (mMessage.isIncoming()) {
-            mAttachmentView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.bubble_grey));
+            delivery = mMessage.getIncomingDelivery();
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentView.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
             float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
@@ -276,7 +353,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             layoutParams.rightMargin = (int) marginRight;
             mAttachmentView.setLayoutParams(layoutParams);
         } else {
-            mAttachmentView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.bubble_green));
+            delivery = mMessage.getOutgoingDelivery();
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentView.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
             float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
@@ -295,18 +372,22 @@ public class ChatMessageItem implements AttachmentTransferListener {
         }
         mContentObject = contentObject;
 
+        mAttachmentView.setBackgroundDrawable(bubbleForMessageAttachment(mMessage));
+
         mContentDescription.setText(mContentRegistry.getContentDescription(mContentObject));
-        if (shouldDisplayTransferControl(getTransferState(contentObject))) {
-            mContentWrapper.setVisibility(View.GONE);
+        if (shouldDisplayTransferControl(getTransferState(mContentObject))) {
             mContentTransferProgress.setVisibility(View.VISIBLE);
+            mContentWrapper.setVisibility(View.GONE);
 
             // create handler for a pending attachment transfer
-            mAttachmentTransferHandler = new AttachmentTransferHandler(mContentTransferControl, contentObject, this);
-            XoApplication.getXoClient().registerTransferListener(mAttachmentTransferHandler);
+            if (mAttachmentTransferHandler == null) {
+                mAttachmentTransferHandler = new AttachmentTransferHandler(mContentTransferControl, contentObject, this);
+            }
+
+            ((XoTransfer) contentObject).registerTransferListener(mAttachmentTransferHandler);
             mContentTransferControl.setOnClickListener(new AttachmentTransferHandler(mContentTransferControl, contentObject, this));
 
         } else {
-            mContentTransferControl.setOnClickListener(null);
             displayAttachment(contentObject);
         }
 
@@ -318,6 +399,24 @@ public class ChatMessageItem implements AttachmentTransferListener {
         }
     }
 
+    private Drawable bubbleForMessageAttachment(TalkClientMessage clientMessage) {
+        Drawable bubbleForMessage;
+        if (clientMessage.isIncoming()) {
+            if (clientMessage.getIncomingDelivery().isFailure()) {
+                bubbleForMessage = mContext.getResources().getDrawable(R.drawable.bubble_red_incoming);
+            } else {
+                bubbleForMessage = mContext.getResources().getDrawable(R.drawable.bubble_grey);
+            }
+        } else {
+            if (clientMessage.getOutgoingDelivery().isFailure()) {
+                bubbleForMessage = mContext.getResources().getDrawable(R.drawable.bubble_red_outgoing);
+            } else {
+                bubbleForMessage = mContext.getResources().getDrawable(R.drawable.bubble_green);
+            }
+        }
+        return bubbleForMessage;
+    }
+
     /**
      * Configures the attachment view for a given message / attachment.
      * <p/>
@@ -326,9 +425,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
      * @param contentObject The IContentObject to display
      */
     protected void displayAttachment(IContentObject contentObject) {
+        configureContextMenu();
         mContentTransferProgress.setVisibility(View.GONE);
+        mContentTransferControl.setOnClickListener(null);
         mContentWrapper.setVisibility(View.VISIBLE);
-        configureContextMenu(mContentWrapper);
     }
 
     /**
@@ -338,7 +438,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
      * @return true if the transfer control should be displayed for a incomplete transfer
      */
     protected boolean shouldDisplayTransferControl(ContentState state) {
-        return !(state == ContentState.SELECTED || state == ContentState.UPLOAD_COMPLETE || state == ContentState.DOWNLOAD_COMPLETE);
+        return !(state == ContentState.SELECTED || state == ContentState.UPLOAD_COMPLETE || state == ContentState.UPLOAD_FAILED || state == ContentState.DOWNLOAD_COMPLETE || state == ContentState.DOWNLOAD_FAILED);
     }
 
     protected ContentState getTransferState(IContentObject object) {
@@ -373,12 +473,12 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return state;
     }
 
-    private void configureContextMenu(View view) {
+    private void configureContextMenu() {
         final ChatMessageItem messageItem = this;
-        view.setOnLongClickListener(new View.OnLongClickListener() {
+        mContentWrapper.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                XoActivity activity = (XoActivity)mContext;
+                XoActivity activity = (XoActivity) mContext;
                 activity.showPopupForMessageItem(messageItem, v);
                 return true;
             }
@@ -393,16 +493,16 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ChatMessageItem)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ChatMessageItem)) {
+            return false;
+        }
 
         ChatMessageItem that = (ChatMessageItem) o;
 
-        if(mMessage != null && that.getMessage() != null) {
-            return mMessage.equals(that.getMessage());
-        }
-
-        return false;
+        return mMessage != null && that.getMessage() != null && mMessage.equals(that.getMessage());
     }
 
     @Override
@@ -411,7 +511,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     public boolean isSeparator() {
-        return mMessage.getMessageId() != null &&  mMessage.getMessageId().equals("SEPARATOR");
+        return "SEPARATOR".equals(mMessage.getMessageId());
     }
 
     public String getText() {
@@ -420,5 +520,35 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     public int getConversationContactId() {
         return mMessage.getConversationContact().getClientContactId();
+    }
+
+    public int getMediaTextResource() {
+        int stringResource = -1;
+        ChatItemType type = getType();
+        switch (type) {
+            case ChatItemWithImage:
+                stringResource = R.string.message_state_image;
+                break;
+            case ChatItemWithVideo:
+                stringResource = R.string.message_state_video;
+                break;
+            case ChatItemWithAudio:
+                stringResource = R.string.message_state_audio;
+                break;
+            case ChatItemWithData:
+                stringResource = R.string.message_state_data;
+                break;
+            case ChatItemWithContact:
+                stringResource = R.string.message_state_contact;
+                break;
+            case ChatItemWithLocation:
+                stringResource = R.string.message_state_location;
+                break;
+            default:
+                LOG.error("No case statement for ChatItemType " + type);
+                stringResource = R.string.message_state_default;
+                break;
+        }
+        return stringResource;
     }
 }

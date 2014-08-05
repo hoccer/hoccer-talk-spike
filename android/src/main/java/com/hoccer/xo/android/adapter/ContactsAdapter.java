@@ -6,12 +6,13 @@ import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.IXoTokenListener;
-import com.hoccer.talk.client.IXoTransferListener;
+import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 
@@ -28,7 +29,7 @@ import java.util.List;
  *
  */
 public abstract class ContactsAdapter extends XoAdapter
-        implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListener {
+        implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
 
     protected final static long ITEM_ID_UNKNOWN = -1000;
     protected final static long ITEM_ID_CLIENT_HEADER = -1;
@@ -407,6 +408,15 @@ public abstract class ContactsAdapter extends XoAdapter
 
     public void setOnItemCountChangedListener(OnItemCountChangedListener onItemCountChangedListener) {
         mOnItemCountChangedListener = onItemCountChangedListener;
+    }
+
+    public String[] getMembersIds() {
+        String[] ids = new String[mClientContacts.size()];
+        int i = 0;
+        for (TalkClientContact c: mClientContacts) {
+            ids[i++] = c.getClientId();
+        }
+        return ids;
     }
 
     public interface Filter {

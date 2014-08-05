@@ -21,6 +21,7 @@ public class GroupProfileActivity extends XoActivity {
     public static final String EXTRA_CLIENT_CREATE_GROUP = "clientCreateGroup";
     /* use this extra to show the given contact */
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
+    public static final String EXTRA_MAKE_FROM_NEARBY = "fromNearby";
 
     private GroupProfileFragment mGroupProfileFragment;
     private StatusFragment mStatusFragment;
@@ -45,7 +46,6 @@ public class GroupProfileActivity extends XoActivity {
 
         enableUpNavigation();
         getActionBar();
-
         FragmentManager fragmentManager = getSupportFragmentManager();
         mGroupProfileFragment = (GroupProfileFragment) fragmentManager.findFragmentById(R.id.activity_group_profile_fragment);
         mStatusFragment = (StatusFragment) fragmentManager.findFragmentById(R.id.activity_profile_status_fragment);
@@ -62,7 +62,11 @@ public class GroupProfileActivity extends XoActivity {
                 } else {
                     showProfile(refreshContact(mContactId));
                 }
+            } else if (intent.hasExtra(EXTRA_MAKE_FROM_NEARBY)) {
+                String[] clientIds = intent.getStringArrayExtra(EXTRA_MAKE_FROM_NEARBY);
+                createGroupFromNearby(clientIds);
             }
+
         }
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -99,6 +103,12 @@ public class GroupProfileActivity extends XoActivity {
         mGroupProfileFragment.createGroup();
     }
 
+    private void createGroupFromNearby(String[] clientIds) {
+        LOG.debug("createGroupFromNearby()");
+        mMode = Mode.EDIT_GROUP;
+        mGroupProfileFragment.createGroupFromNearby(clientIds);
+    }
+
     @Override
     public void hackReturnedFromDialog() {
         LOG.debug("hackReturnedFromDialog()");
@@ -108,7 +118,8 @@ public class GroupProfileActivity extends XoActivity {
 
     public enum Mode {
         PROFILE,
-        CREATE_SELF
+        CREATE_SELF,
+        EDIT_GROUP
     }
 
 }

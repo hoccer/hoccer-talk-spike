@@ -113,6 +113,7 @@ public class PushAgent {
     }
 
     public void submitRequest(TalkClient client) {
+        LOG.debug("submitRequest for client: "+client.getClientId()+", timeLastPush="+client.getTimeLastPush().getTime()+", lastPushMessage="+client.getLastPushMessage());
         long now = System.currentTimeMillis();
 
         mPushRequests.incrementAndGet();
@@ -154,9 +155,11 @@ public class PushAgent {
                     public void run() {
                         try {
                             // no longer outstanding
-                            mOutstanding.remove(clientId);
-                            // perform the request
-                            request.perform();
+                            synchronized (mOutstanding) {
+                                // perform the request
+                                request.perform();
+                                mOutstanding.remove(clientId);
+                            }
                         } catch (Throwable t) {
                             LOG.error("caught and swallowed exception escaping runnable", t);
                         }

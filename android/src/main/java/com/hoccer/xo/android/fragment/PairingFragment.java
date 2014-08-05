@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.AddressBookActivity;
 import com.hoccer.xo.android.activity.QrCodeGeneratingActivity;
 import com.hoccer.xo.android.activity.QrScannerActivity;
 import com.hoccer.xo.android.base.XoFragment;
@@ -173,23 +174,25 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onClick(View v) {
         if (v == mQrShowButton) {
             LOG.debug("onClick(qrShow)");
-            String qrString = getXoActivity().getBarcodeString();
-            Intent qr = new Intent(getActivity(), QrCodeGeneratingActivity.class);
-            qr.putExtra("QR", qrString);
-            getActivity().startActivity(qr);
+            getXoActivity().showBarcode();
         }
         if (v == mQrScanButton) {
             LOG.debug("onClick(qrScan)");
-            Intent qrScanner = new Intent(getActivity(), QrScannerActivity.class);
-            getActivity().startActivity(qrScanner);
+            getXoActivity().scanBarcode();
         }
         if (v == mTokenSendSms) {
             LOG.debug("onClick(smsSend)");
-            getXoActivity().composeInviteSms(mTokenText.getText().toString());
+            Intent addressBook = new Intent(getActivity(), AddressBookActivity.class);
+            addressBook.putExtra("SMS", true);
+            addressBook.putExtra("TOKEN", mTokenText.getText().toString());
+            getActivity().startActivity(addressBook);
         }
         if (v == mTokenSendEmail) {
             LOG.debug("onClick(smsSend)");
-            getXoActivity().composeInviteEmail(mTokenText.getText().toString());
+            Intent addressBook = new Intent(getActivity(), AddressBookActivity.class);
+            addressBook.putExtra("SMS", false);
+            addressBook.putExtra("TOKEN", mTokenText.getText().toString());
+            getActivity().startActivity(addressBook);
         }
     }
 

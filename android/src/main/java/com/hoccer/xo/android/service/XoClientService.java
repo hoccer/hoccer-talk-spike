@@ -1,16 +1,15 @@
 package com.hoccer.xo.android.service;
 
 import android.app.*;
-import android.content.res.AssetManager;
+
 import com.google.android.gcm.GCMRegistrar;
 
 import com.hoccer.talk.android.push.TalkPushService;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.IXoTokenListener;
-import com.hoccer.talk.client.IXoTransferListener;
+import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.IXoUnseenListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -42,8 +41,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
@@ -401,9 +398,11 @@ public class XoClientService extends Service {
                 }
             }
 
+            // TODO: is this check too early ? Last if-statement above deactivates client when network dead.
             boolean netState = activeNetwork.isConnected();
             int netType = activeNetwork.getType();
 
+            // TODO: will this be executed while the XoClient is still activating / connecting / syncing on other threads ?
             if (XoConfiguration.CONNECTIVITY_RECONNECT_ON_CHANGE) {
                 if (netState && !mClient.isIdle()) {
                     if (!mPreviousConnectionState
@@ -658,7 +657,7 @@ public class XoClientService extends Service {
             IXoStateListener,
             IXoUnseenListener,
             IXoTokenListener,
-            IXoTransferListener,
+            IXoTransferListenerOld,
             MediaScannerConnection.OnScanCompletedListener {
 
         Hashtable<String, TalkClientDownload> mScanningDownloads

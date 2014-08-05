@@ -11,6 +11,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.widget.TextView;
 
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
@@ -20,8 +21,6 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
-import com.hoccer.xo.android.adapter.ContactsAdapter;
-import com.hoccer.xo.android.adapter.RichContactsAdapter;
 import com.hoccer.xo.android.content.*;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
@@ -190,14 +189,57 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void startExternalActivity(Intent intent) {
         LOG.debug(getClass() + " starting external activity " + intent.toString());
+        if (!canStartActivity(intent)) {
+            return;
+        }
         setBackgroundActive();
-        startActivity(intent);
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
     }
 
     public void startExternalActivityForResult(Intent intent, int requestCode) {
         LOG.debug(getClass() + " starting external activity " +  intent.toString() + " for request code: " + requestCode);
+        if (!canStartActivity(intent)) {
+            return;
+        }
         setBackgroundActive();
-        startActivityForResult(intent, requestCode);
+        try {
+            startActivityForResult(intent, requestCode);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+    }
+
+    private boolean canStartActivity(Intent intent) {
+        if (intent != null) {
+            ComponentName componentName = intent.resolveActivity(getPackageManager());
+            if (componentName != null) {
+                String activityName = componentName.getClassName();
+
+                // perform check on specified Activity classes.
+                if (activityName != null && activityName.equals(MapsLocationActivity.class.getName())) {
+                    int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+                    if (result > 0) {
+                        LOG.warn(getClass() + " aborting start of external activity " + intent.toString() + " because Google Play Services returned code " + result);
+                        showGooglePlayServicesErrorDialog(result);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private void showGooglePlayServicesErrorDialog(int result) {
+        Dialog googlePlayServicesErrorDialog = GooglePlayServicesUtil.getErrorDialog(result, this, 0);
+        if (googlePlayServicesErrorDialog != null) {
+            googlePlayServicesErrorDialog.show();
+        }
     }
 
     @Override
@@ -721,17 +763,28 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void showBarcode() {
         LOG.debug("scanBarcode()");
-        String qrString = getBarcodeString();
-        Intent qr = new Intent(this, QrCodeGeneratingActivity.class);
-        qr.putExtra("QR", qrString);
-        startActivity(qr);
+
+        XoApplication.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                final String qrString = getXoClient().getHost().getUrlScheme() + getXoClient().generatePairingToken();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        Intent qr = new Intent(XoActivity.this, QrCodeGeneratingActivity.class);
+                        qr.putExtra("QR", qrString);
+                        startActivity(qr);
+
+                    }
+                });
+
+            }
+        });
     }
 
-    public String getBarcodeString() {
-        return getXoClient().getHost().getUrlScheme() + getXoClient().generatePairingToken();
-    }
-
-    public void composeInviteSms(String token) {
+    public void composeInviteSms(String token, String recipients) {
         LOG.debug("composeInviteSms(" + token + ")");
 
         try {
@@ -744,7 +797,8 @@ public abstract class XoActivity extends FragmentActivity {
                 String defaultSmsPackageName = Telephony.Sms
                         .getDefaultSmsPackage(this); //Need to change the build to API 19
 
-                Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
+                sendIntent.setData(Uri.parse("smsto:" + recipients));
                 sendIntent.setType("text/plain");
                 sendIntent.putExtra(Intent.EXTRA_TEXT, message);
 
@@ -754,7 +808,7 @@ public abstract class XoActivity extends FragmentActivity {
                 startActivity(sendIntent);
             } else {
                 Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse("smsto:"));
+                intent.setData(Uri.parse("smsto:" + recipients));
                 intent.putExtra("sms_body", message);
 
                 startActivity(intent);
@@ -764,7 +818,7 @@ public abstract class XoActivity extends FragmentActivity {
         }
     }
 
-    public void composeInviteEmail(String token) {
+    public void composeInviteEmail(String token, String recipients) {
         LOG.debug("composeInviteEmail(" + token + ")");
 
         try {
@@ -773,6 +827,7 @@ public abstract class XoActivity extends FragmentActivity {
                     .format(getString(R.string.email_invitation_text), getXoClient().getHost().getUrlScheme(), token, self.getName());
             Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
             email.putExtra(Intent.EXTRA_SUBJECT,"Join me at Hoccer!");
+            email.putExtra(Intent.EXTRA_BCC, recipients.split(";"));
             email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));
             startActivity(Intent.createChooser(email, "Choose Email Client"));
         } catch (SQLException e) {

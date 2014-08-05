@@ -84,6 +84,7 @@ public class ContentRegistry {
         initializeSelector(new MusicSelector(mContext));
         initializeSelector(new ContactSelector(mContext));
         initializeSelector(new MapsLocationSelector(mContext));
+        initializeSelector(new CaptureSelector(mContext));
 
         mClipboardSelector = new ClipboardSelector(mContext);
     }
@@ -247,14 +248,14 @@ public class ContentRegistry {
                 Map<String, Object> sel = options.get(index);
                 IContentSelector selector = (IContentSelector)sel.get(KEY_SELECTOR);
                 cs.setSelector(selector);
+                Intent intent = (Intent) sel.get(KEY_INTENT);
 
                 // handle ClipboardSelector differently
                 if (selector instanceof ClipboardSelector) {
                     ClipboardSelector clipboardSelector = (ClipboardSelector)selector;
                     XoActivity xoActivity = (XoActivity)activity;
-                    xoActivity.clipBoardItemSelected(clipboardSelector.selectObjectFromClipboard(xoActivity));
+                    xoActivity.clipBoardItemSelected(clipboardSelector.selectObjectFromClipboard(xoActivity, intent));
                 } else {
-                    Intent intent = (Intent) sel.get(KEY_INTENT);
                     XoActivity xoActivity = (XoActivity)activity;
                     xoActivity.startExternalActivityForResult(intent, requestCode);
                 }

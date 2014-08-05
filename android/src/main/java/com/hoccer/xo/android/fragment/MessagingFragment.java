@@ -5,6 +5,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.ChatAdapter;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.android.util.ThumbnailManager;
 import com.hoccer.xo.android.view.OverscrollListView;
 import com.hoccer.xo.release.R;
 
@@ -68,6 +69,8 @@ public class MessagingFragment extends XoListFragment
         if (mAdapter != null) {
             mAdapter.onDestroy();
         }
+
+        ThumbnailManager.getInstance(getXoActivity()).clearCache();
     }
 
     @Override

@@ -1,31 +1,23 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.*;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.activity.NearbyHistoryMessagingActivity;
-import com.hoccer.xo.android.adapter.ContactsAdapter;
+import com.hoccer.xo.android.adapter.BetterContactsAdapter;
 import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
-import com.hoccer.xo.android.adapter.RichContactsAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.dialog.TokenDialog;
 import com.hoccer.xo.release.R;
-
 import org.apache.log4j.Logger;
-
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -41,7 +33,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     private static final Logger LOG = Logger.getLogger(ContactsFragment.class);
 
     private XoClientDatabase mDatabase;
-    private ContactsAdapter mAdapter;
+    private BetterContactsAdapter mAdapter;
 
     private ListView mContactList;
 
@@ -83,7 +75,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     public void onResume() {
         LOG.debug("onResume()");
         super.onResume();
-        initContactListAdapter();
+        initBetterContactListAdapter();
     }
 
     @Override
@@ -94,7 +86,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         if (object instanceof TalkClientContact) {
             MenuInflater inflater = getActivity().getMenuInflater();
             inflater.inflate(R.menu.context_menu_contacts, menu);
-        } else if(object instanceof String) {
+        } else if (object instanceof String) {
             MenuInflater inflater = getActivity().getMenuInflater();
             inflater.inflate(R.menu.context_menu_contacts, menu);
         }
@@ -114,9 +106,9 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
 
     private void deleteChatHistoryAt(int position) {
         Object item = mAdapter.getItem(position);
-        if(item instanceof TalkClientContact) {
+        if (item instanceof TalkClientContact) {
             clearConversationForContact((TalkClientContact) item);
-        } else if(item instanceof String) {
+        } else if (item instanceof String) {
             clearNearbyHistory();
         }
     }
@@ -124,7 +116,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     private void clearConversationForContact(TalkClientContact contact) {
         try {
             mDatabase.deleteAllMessagesFromContactId(contact.getClientContactId());
-            mAdapter.notifyDataSetChanged();
+            mAdapter.requestReload();
         } catch (SQLException e) {
             LOG.error("SQLException while clearing conversation with contact " + contact.getClientContactId(), e);
         }
@@ -132,31 +124,32 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
 
     private void clearNearbyHistory() {
         try {
+            if (mDatabase == null) {
+                return;
+            }
             List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
-            for(TalkClientMessage message : messages) {
+            for (TalkClientMessage message : messages) {
                 message.markAsDeleted();
                 mDatabase.saveClientMessage(message);
             }
-            mAdapter.notifyDataSetChanged();
+            mAdapter.requestReload();
         } catch (SQLException e) {
             LOG.error("SQLException while clearing nearby history", e);
         }
     }
 
-    private void initContactListAdapter() {
+    private void initBetterContactListAdapter() {
         if (mAdapter == null) {
-            mAdapter = new RichContactsAdapter(getXoActivity(), true);
-            mAdapter.onCreate();
-            // filter out never-related contacts (which we know only via groups)
-            mAdapter.setFilter(new ContactsAdapter.Filter() {
+            BetterContactsAdapter.Filter filter = new BetterContactsAdapter.Filter() {
                 @Override
                 public boolean shouldShow(TalkClientContact contact) {
                     if (contact.isGroup()) {
-                        if (contact.isGroupInvolved() && contact.isGroupExisting() && !contact.getGroupPresence().isTypeNearby()) {
+                        if (contact.isGroupInvolved() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()))) {
                             return true;
                         }
                     } else if (contact.isClient()) {
-                        if (contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked())) {
+                        if (contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship()
+                                .isBlocked())) {
                             return true;
                         }
                     } else if (contact.isEverRelated()) {
@@ -164,15 +157,18 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
                     }
                     return false;
                 }
-            });
+            };
+            mAdapter = new BetterContactsAdapter(getXoActivity(), filter);
+            mAdapter.onCreate();
 
-            mAdapter.setOnItemCountChangedListener(this);
-            mAdapter.requestReload();
             mContactList.setAdapter(mAdapter);
             onItemCountChanged(mAdapter.getCount());
         }
+
+        mAdapter.setOnItemCountChangedListener(this);
         mAdapter.requestReload();
         mAdapter.onResume();
+        onItemCountChanged(mAdapter.getCount());
     }
 
     public void onGroupCreationSucceeded(int contactId) {
@@ -219,7 +215,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     public void onItemCountChanged(int count) {
         if (count > 0) {
             hidePlaceholder();
-        } else if (count < 1) {
+        } else {
             showPlaceholder();
         }
     }
