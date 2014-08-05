@@ -5,6 +5,11 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.ThumbnailManager;
 import com.hoccer.xo.release.R;
 
+import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.ListView;
 
 public class NearbyHistoryMessagingActivity extends XoActivity {
@@ -16,7 +21,14 @@ public class NearbyHistoryMessagingActivity extends XoActivity {
 
     @Override
     protected int getMenuResource() {
-        return -1;
+        return R.menu.common;
+    }
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        enableUpNavigation();
     }
 
     @Override
@@ -29,8 +41,8 @@ public class NearbyHistoryMessagingActivity extends XoActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         ThumbnailManager.getInstance(this).clearCache();
     }
+
 }
 
