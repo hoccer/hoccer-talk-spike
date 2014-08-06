@@ -179,7 +179,10 @@ public interface ITalkRpcClient {
      * @talk.preconditions.server group members have been added or removed or changed state
      * @talk.preconditions.client
      * @talk.behavior.client
-     * @talk.statechanges.clientobjects create or delete or update local membership information for contact
+     * @talk.statechanges.clientobjects create or delete or update local membership information for contact;
+     note that when a client leaves a group it will only receive a groupMemberUpdated() notification with state 'none'
+    with its own clientId; there will be no further notification about the group or other group members, so the client
+    is responsible to locally remove or disable the group and all other locally stored members.
      * @talk.ui.client update member information, eventually process member deletion if member state moved to 'none'
      * @talk.errors.client
      */

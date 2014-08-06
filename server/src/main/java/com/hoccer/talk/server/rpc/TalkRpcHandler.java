@@ -2280,6 +2280,30 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return result.toArray(new Boolean[result.size()]);
     }
 
+    @Override
+    public Boolean[] areMembersOfGroup(String groupId, String[] clientIds) {
+        requireIdentification(true);
+        ArrayList<Boolean> result = new ArrayList<Boolean>();
+        logCall("areMembersOfGroup(groupId: '"+groupId+"clientIds '" + Arrays.toString(clientIds) + "'");
+
+        String myClientId = mConnection.getClientId();
+        TalkGroupMember myMembership = mDatabase.findGroupMemberForClient(groupId, myClientId);
+        if (!(myMembership != null && (myMembership.isInvited() || myMembership.isMember()))) {
+            throw new RuntimeException("not allowed, you are not a member of this group");
+        }
+
+        for (String clientId : clientIds) {
+            TalkGroupMember membership = mDatabase.findGroupMemberForClient(groupId, clientId);
+            if (membership != null && (membership.isInvited() || membership.isMember())) {
+                result.add(true);
+            } else {
+                result.add(false);
+            }
+        }
+
+        return result.toArray(new Boolean[result.size()]);
+    }
+
     // return true if for each client the caller is related to by a relationsShip or by an active group membership
     @Override
     public Boolean[] isContactOf(String[] clientIds) {
