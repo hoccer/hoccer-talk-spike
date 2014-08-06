@@ -1399,7 +1399,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 } else {
                     // TODO: remove this fix in 2015 or after next forced update
                     // temporary fix for bug in iOS-Client 2.2.12
-                    if (TalkDelivery.STATE_ABORTED.equals(newState)) {
+                    if (TalkDelivery.STATE_ABORTED_ACKNOWLEDGED.equals(newState)) {
                         return inDeliveryReject(messageId, "no key or private key not found");
                     }
                     // end of fix
