@@ -206,7 +206,7 @@
                 <targetPath>${project.build.directory}/generated-resources</targetPath>
                 <filtering>true</filtering>
                 <includes>
-                    <include>values/clientConfiguration.xml</include>
+                    <include>values/client_configuration.xml</include>
                 </includes>
             </resource>
         </resources>
