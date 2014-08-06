@@ -84,6 +84,7 @@ public class ContentRegistry {
         initializeSelector(new MusicSelector(mContext));
         initializeSelector(new ContactSelector(mContext));
         initializeSelector(new MapsLocationSelector(mContext));
+        initializeSelector(new CaptureSelector(mContext));
 
         mClipboardSelector = new ClipboardSelector(mContext);
     }
@@ -111,7 +112,7 @@ public class ContentRegistry {
         if(mediaType != null) {
             if(mediaType.equals("image")) {
                 mediaTypeString = "Image";
-            } else if (mediaType.equals("audio")) {
+            } else if(mediaType.equals("audio")) {
                 mediaTypeString = "Audio";
             } else if(mediaType.equals("video")) {
                 mediaTypeString = "Video";

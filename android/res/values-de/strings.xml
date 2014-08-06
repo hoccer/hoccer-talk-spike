@@ -13,6 +13,8 @@
     <string name="common_done">Fertig</string>
     <string name="common_decline">Ablehnen</string>
     <string name="common_accept">Annehmen</string>
+    <string name="common_delete">Löschen</string>
+
 
     <!-- Menu entries -->
     <string name="menu_my_profile">Mein Profil</string>
@@ -25,6 +27,7 @@
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
     <string name="menu_about">Über Hoccer XO</string>
+    <string name="menu_music_viewer">Musik</string>
     <string name="menu_reconnect">erneut verbinden</string>
     <string name="menu_quit">schließen</string>
     <string name="menu_clear_conversation">Chat löschen</string>
@@ -42,6 +45,21 @@
     <string name="contacts_sms_invitation_description">hat dir eine SMS-Einladung geschickt.
         Möchtest du die Einladung annehmen?
     </string>
+
+    <!-- Deleting attachments -->
+    <string name="dialog_attachment_delete_title">Anhang Löschen</string>
+    <string name="dialog_attachment_delete_message">Willst du die ausgewählten Anhänge wirklich löschen?</string>
+
+    <!-- AudioAttachmentList Fragment -->
+    <string name="audio_attachment_list_all">Alle</string>
+    <string name="audio_attachment_list_unknown">Unbekannt</string>
+    <string name="menu_search">Suche</string>
+    <string name="search_hint">Suche Attachments</string>
+
+    <string-array name="delete_options">
+        <item>Aus Sammlung entfernen</item>
+        <item>Datei löschen</item>
+    </string-array>
 
     <!-- Nearby location request -->
     <string name="dialog_enable_location_service_title">Ortungsdienste</string>
@@ -136,6 +154,9 @@
     <string name="content_data">Dokument</string>
     <string name="content_clipboard">Aus Zwischenablage</string>
 
+    <string name="content_not_supported_audio_title">Nicht unterstütztes Format</string>
+    <string name="content_not_supported_audio_msg">Dieser Audio-Anhang kann nicht wiedergegeben werden.</string>
+
     <!-- Client states (used in status fragment) -->
     <string name="client_state_idle">Idle</string>
     <string name="client_state_inactive">Inaktiv</string>
@@ -146,6 +167,10 @@
     <string name="client_state_login">Einloggen</string>
     <string name="client_state_connecting">Verbinden</string>
     <string name="client_state_unknown">unbekannt</string>
+
+    <!-- FullscreenPlayer -->
+    <string name="track_number_filler">von</string>
+    <string name="deleted_contact_name">Entfernter Kontakt</string>
 
     <!-- Attachment type selection dialog -->
     <string name="selectattachment_title">Anhang auswählen</string>
@@ -219,6 +244,28 @@
     <string name="dialog_block_user_message">Bist du dir sicher, dass du diesen Kontakt blockieren möchtest? Du wirst keine weiteren Nachrichten von diesem Kontakt erhalten.
     </string>
 
+    <!-- Media Player -->
+    <string name="media_meta_data_unknown_title">Unbekannter Titel</string>
+    <string name="media_meta_data_unknown_artist">Unbekannter Interpret</string>
+    <string name="media_player_playlist_track_divider">von</string>
+    <string name="media_player_default_filter_label">Alle</string>
+
+    <!-- Media Browser -->
+    <string name="collections">Sammlungen</string>
+    <string name="menu_collections">Sammlungen</string>
+    <string name="new_media_collection">Neue Sammlung</string>
+    <string name="enter_new_collection_name">Bitte geben Sie einen Namen für die neue Sammlung ein:</string>
+    <string name="add_to_collection">Einer Sammlung hinzufügen</string>
+    <string name="share_with_contact">Teilen</string>
+    <string name="added_attachment_to_collection">%1$s zur Sammlung \'%2$s\' hinzugefügt</string>
+    <string name="select_recipients">Empfänger auswählen</string>
+    <string name="error_could_not_find_file_for_sending">Datei \'%1$s\' konnte nicht gefunden und gesendet werden</string>
+    <string name="rename_collection">Sammlung umbennen</string>
+    <string name="dialog_delete_collection_title">Sammlungen entfernen</string>
+    <string name="dialog_delete_collection_message">Bist du dir sicher, dass du die ausgewählte(n) Sammlung(en) entfernen möchtest? Die
+        Dateien selbst werden dabei nicht gelöscht.
+    </string>
+
     <!-- Preferences -->
     <string name="preference_keysize_summary">RSA Schlüssel mit gewählter Schlüssellänge erneuern</string>
     <string name="preference_keysize_title">RSA Schlüssellänge</string>
@@ -272,6 +319,7 @@
     <string name="pref_privacy_title">Privatspähre</string>
     <string name="error_send_message_empty_group">Diese Gruppe ist leer.</string>
     <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
+    <string name="dialog_invite">Invite</string>
 
     <string-array name="preference_log_level_names">
         <item>Fatal</item>
@@ -296,6 +344,17 @@
         <item>EINLADUNGEN</item>
         <item>IN DER NÄHE</item>
     </string-array>
+
+    <string-array name="recipient_selection_tab_names">
+        <item>KONTAKTE</item>
+        <item>GRUPPEN</item>
+    </string-array>
+
+    <string name="search_section_caption_contacts">Kontakte</string>
+    <string name="search_section_caption_files">Dateien</string>
+    <string name="search_section_caption_images">Bilddateien</string>
+    <string name="search_section_caption_audio_files">Audiodateien</string>
+    <string name="search_section_caption_video_files">Videodateien</string>
 
     <string name="about_advert_text">Hoccer XO \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Hoccer neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Hoccer XO ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s</string>

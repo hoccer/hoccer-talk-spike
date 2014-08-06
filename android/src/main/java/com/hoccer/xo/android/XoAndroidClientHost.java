@@ -3,6 +3,7 @@ package com.hoccer.xo.android;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.util.TypedValue;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;

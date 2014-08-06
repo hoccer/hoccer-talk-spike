@@ -2,10 +2,16 @@ package com.hoccer.xo.android.activity;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.*;
+import android.preference.*;
 import android.view.*;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
+import com.hoccer.xo.android.service.MediaPlayerService;
+import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.util.XoImportExportUtils;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.release.R;
 
@@ -17,13 +23,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.widget.Toast;
 
 import java.io.*;
@@ -42,6 +41,9 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private Dialog mWaitingDialog;
 
+    private Menu mMenu;
+    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -55,6 +57,54 @@ public class XoPreferenceActivity extends PreferenceActivity
             addPreferencesFromResource(R.xml.preferences);
         }
         getListView().setBackgroundColor(Color.WHITE);
+        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
+        mMediaPlayerServiceConnector.connect(this,
+                IntentHelper.ACTION_PLAYER_STATE_CHANGED,
+                new MediaPlayerServiceConnector.Listener() {
+                    @Override
+                    public void onConnected(MediaPlayerService service) {
+                        updateActionBarIcons();
+                    }
+
+                    @Override
+                    public void onDisconnected() {
+                    }
+
+                    @Override
+                    public void onAction(String action, MediaPlayerService service) {
+                        updateActionBarIcons();
+                    }
+                }
+        );
+        initDataImportPreferences();
+    }
+
+    private void initDataImportPreferences() {
+        final ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
+        if (listPreference != null) {
+            File exportDir = new File(XoApplication.getAttachmentDirectory(), XoImportExportUtils.EXPORT_DIRECTORY);
+            File[] exportFiles = exportDir.listFiles();
+            if (exportFiles != null) {
+                final String[] entries = new String[exportFiles.length];
+                String[] entryValues = new String[exportFiles.length];
+                int index = 0;
+                for (File exportFile : exportDir.listFiles()) {
+                    entries[index] = exportFile.getName();
+                    entryValues[index] = Integer.toString(index);
+                    index++;
+                }
+                listPreference.setEntries(entries);
+                listPreference.setEntryValues(entryValues);
+                listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        listPreference.setEnabled(false);
+                        importData(entries[Integer.parseInt((String) newValue)]);
+                        return true;
+                    }
+                });
+            }
+        }
     }
 
     @Override
@@ -64,16 +114,28 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean result = super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.common, menu);
+
+        mMenu = menu;
+        updateActionBarIcons();
+
+        return result;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
+                return true;
+            case R.id.menu_media_player:
+                openFullScreenPlayer();
+                return true;
         }
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     private void checkForCrashesIfEnabled() {
@@ -148,33 +210,97 @@ public class XoPreferenceActivity extends PreferenceActivity
         if (mSpinner != null) {
             mSpinner.completeAndGone();
         }
+        mMediaPlayerServiceConnector.disconnect();
         super.onDestroy();
     }
 
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         if (preference.getKey().equals("preference_export")) {
-            doExport();
+            doExportCredentials();
             return true;
         } else if (preference.getKey().equals("preference_import")) {
-            doImport();
+            doImportCredentials();
             return true;
-        } 
+        } else if (preference.getKey().equals("preference_about")) {
+            showAbout();
+        } else if (preference.getKey().equals("preference_licenses")) {
+            showLicense();
+        } else if (preference.getKey().equals("preference_data_export")) {
+            preference.setEnabled(false);
+            exportData();
+            return true;
+        }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
 
-    private void doImport() {
+    private void importData(final String importFileName) {
+
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    File exportDir = new File(XoApplication.getAttachmentDirectory(), XoImportExportUtils.EXPORT_DIRECTORY);
+                    File importFile = new File(exportDir, importFileName);
+                    XoImportExportUtils.getInstance().importDatabaseAndAttachments(importFile);
+                } catch (IOException e) {
+                    LOG.error("Data import failed.", e);
+                    return false;
+                }
+                return true;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                super.onPostExecute(success);
+                if (success) {
+                    Toast.makeText(getBaseContext(), "Data imported successfully", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "Data import failed", Toast.LENGTH_LONG).show();
+                }
+                findPreference("preference_data_import").setEnabled(true);
+            }
+        }.execute();
+    }
+
+
+    private void exportData() {
+        new AsyncTask<Void, Void, File>() {
+            @Override
+            protected File doInBackground(Void... params) {
+                try {
+                    return XoImportExportUtils.getInstance().exportDatabaseAndAttachments();
+                } catch (IOException e) {
+                    LOG.error("Data export failed.", e);
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(File file) {
+                super.onPostExecute(file);
+                if (file != null) {
+                    Toast.makeText(getBaseContext(), "Data exported to " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
+                }
+                findPreference("preference_data_export").setEnabled(true);
+            }
+        }.execute();
+    }
+
+    private void doImportCredentials() {
         final File credentialsFile = new File(XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);
         if (credentialsFile == null || !credentialsFile.exists()) {
             Toast.makeText(this, getString(R.string.cant_find_credentials), Toast.LENGTH_LONG).show();
             return;
         }
 
-        XoDialogs.showPasswordDialog("ImportCredentialsDialog",
+        XoDialogs.showInputPasswordDialog("ImportCredentialsDialog",
                 R.string.dialog_import_credentials_title,
                 this,
-                new XoDialogs.OnPasswordClickListener() {
+                new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
                         if (password != null && password.length() > 0) {
@@ -188,7 +314,8 @@ public class XoPreferenceActivity extends PreferenceActivity
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                     }
-                });
+                }
+        );
     }
 
     private void importCredentials(File credentialsFile, String password) {
@@ -215,11 +342,11 @@ public class XoPreferenceActivity extends PreferenceActivity
         }
     }
 
-    private void doExport() {
-        XoDialogs.showPasswordDialog("ExportCredentialsDialog",
+    private void doExportCredentials() {
+        XoDialogs.showInputPasswordDialog("ExportCredentialsDialog",
                 R.string.dialog_export_credentials_title,
                 this,
-                new XoDialogs.OnPasswordClickListener() {
+                new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
                         if (password != null && password.length() > 0) {
@@ -233,7 +360,8 @@ public class XoPreferenceActivity extends PreferenceActivity
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                     }
-                });
+                }
+        );
     }
 
     private void exportCredentials(String password) {
@@ -255,5 +383,36 @@ public class XoPreferenceActivity extends PreferenceActivity
         }
         Toast.makeText(this, R.string.export_credentials_success, Toast.LENGTH_LONG).show();
     }
+
+    private void showAbout() {
+        Intent intent = new Intent(this, LegalImprintActivity.class);
+        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_ABOUT);
+        startActivity(intent);
+    }
+
+    private void showLicense() {
+        Intent intent = new Intent(this, LegalImprintActivity.class);
+        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_LICENSES);
+        startActivity(intent);
+    }
+
+    private void openFullScreenPlayer(){
+        Intent resultIntent = new Intent(this, FullscreenPlayerActivity.class);
+        startActivity(resultIntent);
+    }
+
+    private void updateActionBarIcons() {
+        if (mMediaPlayerServiceConnector.isConnected() && mMenu != null) {
+            MenuItem mediaPlayerItem = mMenu.findItem(R.id.menu_media_player);
+
+            MediaPlayerService service = mMediaPlayerServiceConnector.getService();
+            if (service.isStopped() || service.isPaused()) {
+                mediaPlayerItem.setVisible(false);
+            } else {
+                mediaPlayerItem.setVisible(true);
+            }
+        }
+    }
+
 
 }

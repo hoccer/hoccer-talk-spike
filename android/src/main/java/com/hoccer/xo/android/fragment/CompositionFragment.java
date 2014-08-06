@@ -14,24 +14,27 @@ import android.widget.Toast;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
-import com.hoccer.xo.android.gesture.MotionInterpreter;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
+
+import java.sql.SQLException;
 
 public class CompositionFragment extends XoFragment implements View.OnClickListener,
         View.OnLongClickListener, MotionGestureListener {
 
-    private static final int STRESS_TEST_MESSAGE_COUNT = 15;
+    public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
 
-    private MotionInterpreter mMotionInterpreter;
+    private static final int STRESS_TEST_MESSAGE_COUNT = 15;
 
     private EditText mTextEdit;
 
@@ -46,6 +49,26 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private String mLastMessage = null;
 
     private ImageButton mAddAttachmentButton;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
+            if (clientContactId == -1) {
+                LOG.error("invalid contact id");
+            } else {
+                try {
+                    mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                } catch (SQLException e) {
+                    LOG.error("sql error", e);
+                }
+            }
+        } else {
+            LOG.error("MessagingFragment requires contactId as argument.");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -81,8 +104,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         mAddAttachmentButton = (ImageButton) v.findViewById(R.id.btn_messaging_composer_add_attachment);
         mAddAttachmentButton.setOnClickListener(new AddAttachmentOnClickListener());
 
-        mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, getXoActivity(), this);
-
         return v;
     }
 
@@ -99,7 +120,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             mTextEdit.removeTextChangedListener(mTextWatcher);
             mTextWatcher = null;
         }
-        mMotionInterpreter.deactivate();
     }
 
     @Override
@@ -121,9 +141,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             }
         };
         mTextEdit.addTextChangedListener(mTextWatcher);
-
-        configureMotionInterpreterForContact(mContact);
-        updateSendButton();
+		updateSendButton();
     }
 
     @Override
@@ -166,31 +184,30 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         String mediaType = mAttachment.getContentMediaType();
 
         int imageResource = -1;
-        if (mediaType != null) {
-            if (mediaType.equals(ContentMediaTypes.MediaTypeImage)) {
-                imageResource = R.drawable.ic_dark_image;
-            } else if (mediaType.equals(ContentMediaTypes.MediaTypeVideo)) {
-                imageResource = R.drawable.ic_dark_video;
-            } else if (mediaType.equals(ContentMediaTypes.MediaTypeVCard)) {
-                imageResource = R.drawable.ic_dark_contact;
-            } else if (mediaType.equals(ContentMediaTypes.MediaTypeGeolocation)) {
-                imageResource = R.drawable.ic_dark_location;
-            } else if (mediaType.equals(ContentMediaTypes.MediaTypeData)) {
-                imageResource = R.drawable.ic_dark_data;
-            } else if (mediaType.equals(ContentMediaTypes.MediaTypeAudio)) {
-                imageResource = R.drawable.ic_dark_music;
+        if(mediaType != null) {
+            if(mediaType.equals(ContentMediaType.IMAGE)) {
+                imageResource = R.drawable.ic_light_image;
+            } else if(mediaType.equals(ContentMediaType.VIDEO)) {
+                imageResource = R.drawable.ic_light_video;
+            } else if(mediaType.equals(ContentMediaType.VCARD)) {
+                imageResource = R.drawable.ic_light_contact;
+            } else if(mediaType.equals(ContentMediaType.LOCATION)) {
+                imageResource = R.drawable.ic_light_location;
+            } else if(mediaType.equals(ContentMediaType.DATA)) {
+                imageResource = R.drawable.ic_light_data;
+            } else if(mediaType.equals(ContentMediaType.AUDIO)) {
+                imageResource = R.drawable.ic_light_video;
             }
         } else {
             imageResource = android.R.drawable.stat_notify_error;
         }
-        mAddAttachmentButton.setImageResource(imageResource);
+
+        mAddAttachmentButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(getXoActivity(), imageResource, true));
+        mAddAttachmentButton.setImageResource(android.R.color.transparent);
     }
 
-    private void clearAttachment() {
-        mAddAttachmentButton.setOnClickListener(new AddAttachmentOnClickListener());
-        mAddAttachmentButton.setImageResource(R.drawable.ic_light_content_attachment);
-        mAttachment = null;
-        updateSendButton();
+    public void updateContact(TalkClientContact contact) {
+        mContact = contact;
     }
 
     private boolean isComposed() {
@@ -202,6 +219,14 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         mTextEdit.setText("");
         clearAttachment();
     }
+
+    private void clearAttachment() {
+        mAddAttachmentButton.setOnClickListener(new AddAttachmentOnClickListener());
+        mAddAttachmentButton.setBackgroundDrawable(null);
+        mAddAttachmentButton.setImageResource(R.drawable.ic_light_content_attachment);
+        mAttachment = null;
+		updateSendButton();
+	}
 
     private void updateSendButton() {
         boolean enabled = (isComposed() || (XoConfiguration.DEVELOPMENT_MODE_ENABLED && mLastMessage != null));

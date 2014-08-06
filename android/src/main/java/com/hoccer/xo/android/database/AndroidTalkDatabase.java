@@ -5,13 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMembership;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSelf;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
@@ -35,7 +29,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static String DATABASE_NAME = "hoccer-talk.db";
 
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 18;
 
     private static AndroidTalkDatabase INSTANCE = null;
 
@@ -188,6 +182,13 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
                 talkMessages.executeRaw(addColumn("message", "attachmentUploadStarted", DB_TYPE_STRING));
 
                 migrateDeliveryStates();
+            }
+            if (oldVersion < 17) {
+                TableUtils.createTable(cs, TalkClientMediaCollection.class);
+            }
+            if (oldVersion < 18) {
+                Dao<TalkClientDownload, Integer> talkClientDownloads = getDao(TalkClientDownload.class);
+                talkClientDownloads.executeRaw(addColumn("clientDownload", "approvalState", DB_TYPE_STRING));
             }
         } catch (SQLException e) {
             LOG.error("sql error upgrading database", e);

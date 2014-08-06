@@ -26,13 +26,14 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tv_content_audio_caption"
                 android:layout_toLeftOf="@+id/ib_content_audio_play"
-                android:text="filename.mp3"
+                android:text="[=Artist - ]Title || filename"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:textColor="@android:color/secondary_text_light"
                 tools:ignore="HardcodedText"/>
 
         <ImageButton
                 android:id="@+id/ib_content_audio_play"
-                android:src="@drawable/ic_dark_music"
                 android:layout_width="@dimen/default_attachment_icon_dim"
                 android:layout_height="@dimen/default_attachment_icon_dim"
                 android:layout_alignParentRight="true"

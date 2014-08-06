@@ -26,7 +26,6 @@
 
         <ImageButton
                 android:id="@+id/ib_content_open"
-                android:src="@drawable/ic_dark_video"
                 android:layout_width="@dimen/default_attachment_icon_dim"
                 android:layout_height="@dimen/default_attachment_icon_dim"
                 android:scaleType="fitXY"

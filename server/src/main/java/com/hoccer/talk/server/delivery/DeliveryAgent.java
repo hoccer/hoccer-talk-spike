@@ -28,6 +28,7 @@ public class DeliveryAgent extends NotificationDeferrer {
 
     public void requestDelivery(String clientId, boolean forceAll) {
         if (clientId == null) {
+            // TODO: throw new IllegalArgumentException("no clientId"); // <- do not throw manual Nullpointerexceptions
             throw new NullPointerException("no clientId");
         }
         final DeliveryRequest deliveryRequest = new DeliveryRequest(this, clientId, forceAll);
@@ -70,11 +71,7 @@ public class DeliveryAgent extends NotificationDeferrer {
                         LOG.debug("requestDelivery releasing lock for mClientId: '" + deliveryRequest.mClientId + "' with id "+lock+", hash="+lock.hashCode()+",thread="+Thread.currentThread());
                         lock.unlock();
                     }
-                    try {
-                        deliveryRequest.perform();
-                    } catch (Throwable t) {
-                        t.printStackTrace();
-                    }
+
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
                 }

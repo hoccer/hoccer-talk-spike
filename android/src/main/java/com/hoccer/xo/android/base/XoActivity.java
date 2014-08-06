@@ -1,15 +1,27 @@
 package com.hoccer.xo.android.base;
 
-import android.app.*;
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.TaskStackBuilder;
 import android.content.*;
+import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.*;
+import android.provider.MediaStore;
+import android.provider.Telephony;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.view.*;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.client.IXoAlertListener;
@@ -26,24 +38,11 @@ import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.release.R;
-
 import net.hockeyapp.android.CrashManager;
-
 import org.apache.log4j.Logger;
-
-import android.annotation.SuppressLint;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-
-import android.provider.MediaStore;
-import android.provider.Telephony;
-import android.view.*;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -298,13 +297,7 @@ public abstract class XoActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         // set up database connection
-        mDatabase = new XoClientDatabase(
-                AndroidTalkDatabase.getInstance(this.getApplicationContext()));
-        try {
-            mDatabase.initialize();
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
+        mDatabase = XoApplication.getXoClient().getDatabase();
 
         // set layout
         setContentView(getLayoutResource());
@@ -737,6 +730,11 @@ public abstract class XoActivity extends FragmentActivity {
         startActivity(new Intent(this, PairingActivity.class));
     }
 
+    public void showFullscreenPlayer() {
+        LOG.debug("showFullscreenPlayer()");
+        startActivity(new Intent(this, FullscreenPlayerActivity.class));
+    }
+
     public void showPreferences() {
         LOG.debug("showPreferences()");
         startActivity(new Intent(this, XoPreferenceActivity.class));
@@ -784,7 +782,7 @@ public abstract class XoActivity extends FragmentActivity {
         });
     }
 
-    public void composeInviteSms(String token) {
+    public void composeInviteSms(String token, String recipients) {
         LOG.debug("composeInviteSms(" + token + ")");
 
         try {
@@ -797,7 +795,8 @@ public abstract class XoActivity extends FragmentActivity {
                 String defaultSmsPackageName = Telephony.Sms
                         .getDefaultSmsPackage(this); //Need to change the build to API 19
 
-                Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
+                sendIntent.setData(Uri.parse("smsto:" + recipients));
                 sendIntent.setType("text/plain");
                 sendIntent.putExtra(Intent.EXTRA_TEXT, message);
 
@@ -807,7 +806,7 @@ public abstract class XoActivity extends FragmentActivity {
                 startActivity(sendIntent);
             } else {
                 Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse("smsto:"));
+                intent.setData(Uri.parse("smsto:" + recipients));
                 intent.putExtra("sms_body", message);
 
                 startActivity(intent);
@@ -817,7 +816,7 @@ public abstract class XoActivity extends FragmentActivity {
         }
     }
 
-    public void composeInviteEmail(String token) {
+    public void composeInviteEmail(String token, String recipients) {
         LOG.debug("composeInviteEmail(" + token + ")");
 
         try {
@@ -826,6 +825,7 @@ public abstract class XoActivity extends FragmentActivity {
                     .format(getString(R.string.email_invitation_text), getXoClient().getHost().getUrlScheme(), token, self.getName());
             Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
             email.putExtra(Intent.EXTRA_SUBJECT,"Join me at Hoccer!");
+            email.putExtra(Intent.EXTRA_BCC, recipients.split(";"));
             email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));
             startActivity(Intent.createChooser(email, "Choose Email Client"));
         } catch (SQLException e) {

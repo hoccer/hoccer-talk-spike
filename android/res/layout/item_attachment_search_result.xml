@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:descendantFocusability="blocksDescendants"
+                android:background="@drawable/list_item_attachment_bg"
+                android:padding="@dimen/media_player_layout_margin">
+
+    <FrameLayout
+            android:id="@+id/fl_artwork"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="@dimen/media_player_layout_margin"
+            android:layout_centerVertical="true"
+            android:visibility="gone">
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/media_cover_art_default"
+                />
+        <ImageView
+                android:id="@+id/iv_artwork"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@android:color/transparent"
+                />
+    </FrameLayout>
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:layout_toRightOf="@+id/fl_artwork"
+                  android:layout_toLeftOf="@+id/iv_playing_status"
+                  android:layout_centerVertical="true">
+
+        <TextView
+                android:id="@+id/tv_title"
+                android:text="@string/media_meta_data_unknown_title"
+                android:textColor="@color/common_signin_btn_dark_text_disabled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:singleLine="true"/>
+        <TextView
+                android:id="@+id/tv_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/common_signin_btn_dark_text_disabled"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:singleLine="true"/>
+    </LinearLayout>
+
+</RelativeLayout>

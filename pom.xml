@@ -1,6 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
+  <prerequisites>
+    <maven>3.1.1</maven>
+  </prerequisites>
+
   <groupId>hoccer</groupId>
   <artifactId>hoccer-talk</artifactId>
   <version>0.0.1-SNAPSHOT</version>
@@ -86,7 +90,7 @@
     <universal.image.loader.version>1.9.0</universal.image.loader.version>
 
     <!-- Hoccer Release Versions -->
-    <hoccer-talk-server.version>3.0.7</hoccer-talk-server.version>
+    <hoccer-talk-server.version>3.0.16</hoccer-talk-server.version>
     <hoccer-talk-filecache.version>1.0.1</hoccer-talk-filecache.version>
   </properties>
 
@@ -94,7 +98,7 @@
     <repository>
       <id>hoccer</id>
       <name>Archiva Managed Hoccer Repository</name>
-      <url>https://archiva.hoccer.de/repository/hoccer</url>
+      <url>https://archiva.hoccer.com/repository/hoccer</url>
     </repository>
   </distributionManagement>
 </project>

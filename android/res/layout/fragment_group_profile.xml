@@ -10,11 +10,11 @@
 
     <ImageView
             android:id="@+id/profile_group_profile_image"
-            android:src="@drawable/avatar_default_group_large"
             android:scaleType="centerCrop"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_gravity="center_horizontal"
+            android:src="@drawable/avatar_default_group_large"
             style="@style/AppBaseTheme.Group.ProfilePicture"/>
 
     <TextView
@@ -72,7 +72,8 @@
             android:id="@+id/profile_group_members_container"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
 
         <TextView
                 android:id="@+id/profile_group_members_title"
@@ -91,7 +92,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/AppBaseTheme.Group.List"/>
-
     </LinearLayout>
+
+    <Button
+            android:id="@+id/profile_group_button_make_permanent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:text="@string/profile_group_permanent_button"
+            style="@style/AppBaseTheme.Group.CreateButton"/>
 
 </LinearLayout>

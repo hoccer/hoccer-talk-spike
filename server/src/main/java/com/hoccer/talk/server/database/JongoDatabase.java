@@ -5,6 +5,8 @@ import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.mongodb.*;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 
@@ -73,7 +75,7 @@ public class JongoDatabase implements ITalkServerDatabase {
             options.connectionsPerHost = configuration.getJongoConnectionsPerHost();
             return new Mongo(configuration.getJongoHost(), options);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            LOG.error("unknown host: '" + configuration.getJongoHost() + "'", e);
             return null;
         }
     }
@@ -107,15 +109,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public Map<String, Long> getStatistics() {
-        HashMap<String, Long> res = new HashMap<String, Long>();
-        for (MongoCollection collection : mCollections) {
-            res.put(collection.getName(), collection.count());
-        }
-        return res;
-    }
-
-    @Override
+    @NotNull
     public List<TalkClient> findAllClients() {
         List<TalkClient> res = new ArrayList<TalkClient>();
         Iterator<TalkClient> it =
@@ -127,12 +121,14 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable // null if client for given id does not exist.
     public TalkClient findClientById(String clientId) {
         return mClients.findOne("{clientId:#}", clientId)
                 .as(TalkClient.class);
     }
 
     @Override
+    @Nullable // null if client for given apns token does not exist.
     public TalkClient findClientByApnsToken(String apnsToken) {
         return mClients.findOne("{apnsToken:#}", apnsToken)
                 .as(TalkClient.class);
@@ -144,12 +140,14 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable // null if no message with given messageId exists.
     public TalkMessage findMessageById(String messageId) {
         return mMessages.findOne("{messageId:#}", messageId)
                 .as(TalkMessage.class);
     }
 
     @Override
+    @NotNull
     public List<TalkMessage> findMessagesWithAttachmentFileId(String fileId) {
         List<TalkMessage> res = new ArrayList<TalkMessage>();
         Iterator<TalkMessage> it =
@@ -162,7 +160,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public void deleteMessage(TalkMessage message) {
+    public void deleteMessage(@Nullable TalkMessage message) {
         mMessages.remove("{messageId:#}", message.getMessageId());
     }
 
@@ -172,12 +170,14 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable
     public TalkDelivery findDelivery(String messageId, String clientId) {
         return mDeliveries.findOne("{messageId:#,receiverId:#}", messageId, clientId)
                 .as(TalkDelivery.class);
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesInState(String state) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -190,6 +190,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findAllDeliveries() {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -202,8 +203,8 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesInStates(String[] states) {
-
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
                 mDeliveries.find("{state: { $in: # } }", Arrays.asList(states))
@@ -215,6 +216,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesInStatesAndAttachmentStates(String[] deliveryStates, String[] attachmentStates) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -228,6 +230,7 @@ public class JongoDatabase implements ITalkServerDatabase {
 
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesForClient(String clientId) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -240,6 +243,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesFromClient(String clientId) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -252,6 +256,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesForClientInState(String clientId, String state) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -264,8 +269,8 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
-
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
                 mDeliveries.find("{receiverId:#, state: { $in: # }, attachmentState: {$in: # } }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
@@ -277,6 +282,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesFromClientInState(String clientId, String state) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -289,8 +295,8 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesFromClientInStates(String clientId, String[] deliveryStates) {
-
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
                 mDeliveries.find("{senderId:#, state: { $in: # } }", clientId, Arrays.asList(deliveryStates))
@@ -302,8 +308,8 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
-
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
                 mDeliveries.find("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
@@ -315,6 +321,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkDelivery> findDeliveriesForMessage(String messageId) {
         List<TalkDelivery> res = new ArrayList<TalkDelivery>();
         Iterator<TalkDelivery> it =
@@ -337,6 +344,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkToken> findTokensByClient(String clientId) {
         List<TalkToken> res = new ArrayList<TalkToken>();
         Iterator<TalkToken> it =
@@ -349,6 +357,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable
     public TalkToken findTokenByPurposeAndSecret(String purpose, String secret) {
         TalkToken res = null;
         Iterator<TalkToken> it =
@@ -357,6 +366,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         if (it.hasNext()) {
             res = it.next();
             if (it.hasNext()) {
+                // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
                 throw new RuntimeException("Duplicate token");
             }
         }
@@ -380,6 +390,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkPresence> findPresencesChangedAfter(String clientId, Date lastKnown) {
         // result array
         List<TalkPresence> res = new ArrayList<TalkPresence>();
@@ -419,13 +430,12 @@ public class JongoDatabase implements ITalkServerDatabase {
         // collect presences
         for (String client : clients) {
             TalkPresence pres = findPresenceForClient(client);
-            if (pres != null) {
-                if (pres.getTimestamp().after(lastKnown) || mustInclude.contains(client)) {
-                    res.add(pres);
-                }
+            if (pres != null &&
+                    (pres.getTimestamp().after(lastKnown) ||
+                            mustInclude.contains(client))) {
+                res.add(pres);
             }
         }
-        // return them
         return res;
     }
 
@@ -435,12 +445,14 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable
     public TalkKey findKey(String clientId, String keyId) {
         return mKeys.findOne("{clientId:#,keyId:#}", clientId, keyId)
                 .as(TalkKey.class);
     }
 
     @Override
+    @NotNull
     public List<TalkKey> findKeys(String clientId) {
         List<TalkKey> res = new ArrayList<TalkKey>();
         Iterator<TalkKey> it =
@@ -463,6 +475,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkRelationship> findRelationships(String client) {
         List<TalkRelationship> res = new ArrayList<TalkRelationship>();
         Iterator<TalkRelationship> it =
@@ -475,6 +488,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkRelationship> findRelationshipsForClientInState(String clientId, String state) {
         List<TalkRelationship> res = new ArrayList<TalkRelationship>();
         Iterator<TalkRelationship> it =
@@ -487,6 +501,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkRelationship> findRelationshipsForClientInStates(String clientId, String[] states) {
         List<TalkRelationship> res = new ArrayList<TalkRelationship>();
         Iterator<TalkRelationship> it =
@@ -499,6 +514,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @NotNull
     public List<TalkRelationship> findRelationshipsByOtherClient(String other) {
         List<TalkRelationship> res = new ArrayList<TalkRelationship>();
         Iterator<TalkRelationship> it =
@@ -511,6 +527,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    @Nullable
     public TalkRelationship findRelationshipBetween(String client, String otherClient) {
         return mRelationships.findOne("{clientId:#,otherClientId:#}", client, otherClient)
                 .as(TalkRelationship.class);
@@ -564,6 +581,7 @@ public class JongoDatabase implements ITalkServerDatabase {
             if (member.isMember() || member.isInvited()) {
                 TalkGroup group = findGroupById(member.getGroupId());
                 if (group == null) {
+                    // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
                     throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
                 }
                 if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {
@@ -581,6 +599,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         for (TalkGroupMember member : members) {
                 TalkGroup group = findGroupById(member.getGroupId());
                 if (group == null) {
+                    // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
                     throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
                 }
                 if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {

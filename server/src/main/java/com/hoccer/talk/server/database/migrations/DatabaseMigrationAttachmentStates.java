@@ -50,10 +50,10 @@ public class DatabaseMigrationAttachmentStates extends BaseDatabaseMigration  im
             });
         }
 
-        LOG.info("Scheduled setting Attachment state to '" + TalkDelivery.ATTACHMENT_STATE_NONE + "' for " + deliveriesWithoutAttachmentCounter + " deliveries");
-        LOG.info("Scheduled setting Attachment state to '" + TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED + "' for " + deliveriesWithAttachmentsCounter + " deliveries");
         mExecutor.shutdown();
         mExecutor.awaitTermination(25, TimeUnit.MINUTES);
+        LOG.info("Scheduled setting Attachment state to '" + TalkDelivery.ATTACHMENT_STATE_NONE + "' for " + deliveriesWithoutAttachmentCounter + " deliveries");
+        LOG.info("Scheduled setting Attachment state to '" + TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED + "' for " + deliveriesWithAttachmentsCounter + " deliveries");
     }
 
     @Override

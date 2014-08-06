@@ -148,6 +148,48 @@
                     android:value="com.hoccer.xo.android.activity.MessagingActivity"/>
         </activity>
 
+        <!-- MediaBrowserActivity activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.MediaBrowserActivity"
+                android:label="@string/menu_music_viewer"
+                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
+                android:screenOrientation="portrait"
+                android:windowSoftInputMode="stateHidden"
+                android:exported="true">
+
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
+        </activity>
+
+        <!-- MediaCollectionSelection activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.MediaCollectionSelectionActivity"
+                android:label="@string/collections"
+                android:screenOrientation="portrait">
+        </activity>
+
+        <!-- ContactSelectionActivity activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.ContactSelectionActivity"
+                android:label="@string/select_recipients"
+                android:screenOrientation="portrait">
+        </activity>
+
+        <!-- FullscreenPlayerActivity activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.FullscreenPlayerActivity"
+                android:label="@string/actionbar_default_title"
+                android:screenOrientation="portrait"
+                android:parentActivityName="com.hoccer.xo.android.activity.MediaBrowserActivity"
+                android:windowSoftInputMode="stateHidden"
+                android:theme="@android:style/Theme.Black.NoTitleBar"
+                android:exported="true">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.AudioAttachmentListActivity"/>
+        </activity>
+
         <!-- Single Profile activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.SingleProfileActivity"
@@ -164,6 +206,7 @@
                 android:name="com.hoccer.xo.android.activity.GroupProfileActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait"
+                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:windowSoftInputMode="stateHidden">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
@@ -184,6 +227,13 @@
 
                 <data android:scheme="hxo"/>
             </intent-filter>
+        </activity>
+
+
+        <!-- Invitation activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.AddressBookActivity"
+                android:label="@string/actionbar_default_title">
         </activity>
 
         <!-- Preference activity -->
@@ -269,6 +319,8 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
         </receiver>
+
+        <service android:name="com.hoccer.xo.android.service.MediaPlayerService"/>
 
     </application>
 

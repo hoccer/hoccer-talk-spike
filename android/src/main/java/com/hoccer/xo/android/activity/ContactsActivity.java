@@ -11,17 +11,19 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.view.Menu;
+import android.view.MenuItem;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsPageAdapter;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.fragment.NearbyContactsFragment;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-public class ContactsActivity extends XoActivity implements IXoStateListener {
+public class ContactsActivity extends XoActionbarActivity implements IXoStateListener {
 
     private final static Logger LOG = Logger.getLogger(ContactsActivity.class);
 
@@ -146,10 +148,36 @@ public class ContactsActivity extends XoActivity implements IXoStateListener {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
                         }
-                    });
+                    }
+            );
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.menu_audio_attachment_list:
+                startMediaBrowserActivity();
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void startMediaBrowserActivity() {
+        Intent intent = new Intent(this, MediaBrowserActivity.class);
+        startActivity(intent);
     }
 
     private class ConversationsPageListener implements ViewPager.OnPageChangeListener {

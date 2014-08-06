@@ -154,11 +154,15 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     @DatabaseField(width = 128)
     private String contentHmac;
 
+	@DatabaseField
+    private ApprovalState approvalState;
+
     private HttpGet mDownloadRequest = null;
 
     public TalkClientDownload() {
         super(Direction.DOWNLOAD);
         this.state = State.INITIALIZING;
+        this.approvalState = ApprovalState.PENDING;
         this.aspectRatio = 1.0;
         this.downloadProgress = 0;
         this.contentLength = -1;
@@ -267,6 +271,19 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 break;
         }
     }
+
+	public TalkClientDownload.ApprovalState getApprovalState() {
+        if (approvalState == null) {
+            return ApprovalState.PENDING;
+        } else {
+            return approvalState;
+        }
+    }
+
+    public void setApprovalState(TalkClientDownload.ApprovalState approvalState) {
+        this.approvalState = approvalState;
+    }
+
 
     private void setState(State newState) {
         LOG.info("[download " + clientDownloadId + "] switching to new state '" + newState + "'");
@@ -766,6 +783,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
+	public enum ApprovalState {
+        APPROVED, DECLINED, PENDING
+    }
+
     @Override
     public ContentDisposition getContentDisposition() {
         return ContentDisposition.DOWNLOAD;
@@ -945,6 +966,15 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         if (mTransferListeners.contains(listener)) {
             mTransferListeners.remove(listener);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        TalkClientDownload download = (TalkClientDownload) obj;
+        if (download != null && clientDownloadId == download.getClientDownloadId()) {
+            return true;
+        }
+        return false;
     }
 
 }

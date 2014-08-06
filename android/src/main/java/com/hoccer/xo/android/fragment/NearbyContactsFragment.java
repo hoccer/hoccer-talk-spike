@@ -27,15 +27,18 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
     private TalkClientContact mCurrentNearbyGroup;
 
     private ListView mContactList;
+    private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
     private TextView mPlaceholderText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_contacts, container, false);
+        View view = inflater.inflate(R.layout.fragment_friend_requests, container, false);
         mContactList = (ListView) view.findViewById(android.R.id.list);
+        mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
+        mPlaceholderImageFrame.setImageResource(R.drawable.placeholder_chats);
         mPlaceholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
-        mPlaceholderImage.setImageResource(R.drawable.placeholder_nearby);
+        mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
         mPlaceholderText.setMovementMethod(LinkMovementMethod.getInstance());
         setPlaceholderText();
@@ -163,6 +166,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+				mPlaceholderImageFrame.setVisibility(View.GONE);
                 mPlaceholderImage.setVisibility(View.GONE);
                 mPlaceholderText.setVisibility(View.GONE);
                 mContactList.setVisibility(View.VISIBLE);

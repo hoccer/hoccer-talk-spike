@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
@@ -16,14 +18,14 @@ import java.io.*;
 
 public class ImageSelector implements IContentSelector {
 
-    Logger LOG = Logger.getLogger(getClass());
+    private Logger LOG = Logger.getLogger(ImageSelector.class);
 
     private String mName;
     private Drawable mIcon;
 
     public ImageSelector(Context context) {
         mName = context.getResources().getString(R.string.content_images);
-        mIcon = context.getResources().getDrawable(R.drawable.ic_attachment_select_image);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_image, true);
     }
 
     @Override

@@ -1,5 +1,8 @@
 package com.hoccer.talk.server.database;
 
+import com.hoccer.talk.model.TalkClient;
+import com.hoccer.talk.model.TalkDelivery;
+import com.hoccer.talk.model.TalkMessage;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
@@ -21,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -35,18 +39,22 @@ public class JongoDatabaseTest {
     private MongodProcess mongod;
     private MongodExecutable mongodExecutable;
 
+    // TODO: provide a convenient way to load fixtures into the database as part of a test.
+    // Alternatively we have to setup the state of the database via code, which may be faulty in itself? depends on diligence.
+
     static {
         configureLogging();
     }
 
     private static void configureLogging() {
+        //noinspection LoggerInitializedWithForeignClass
         org.apache.log4j.Logger.getLogger(JongoDatabase.class).setLevel(Level.DEBUG);
     }
 
 
     @BeforeClass
     public static void setupClass() throws IOException {
-        IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
+        final IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
                 .defaults(Command.MongoD)
                 .processOutput(ProcessOutput.getDefaultInstanceSilent())
                 .build();
@@ -56,18 +64,14 @@ public class JongoDatabaseTest {
                 .build();
     }
 
-    @AfterClass
-    public static void teardownClass() {
-    }
-
     @Before
     public void setUp() throws Exception {
         mongodExecutable = mongodStarter.prepare(mongodConfig);
         mongod = mongodExecutable.start();
 
-        TalkServerConfiguration config = new TalkServerConfiguration();
-        LOG.info("----" + mongodConfig.net().getServerAddress() + " " + mongodConfig.net().getPort());
-        MongoClient mongo = new MongoClient(new ServerAddress(mongodConfig.net().getServerAddress(), mongodConfig.net().getPort()));
+        final TalkServerConfiguration config = new TalkServerConfiguration();
+        LOG.debug(mongodConfig.net().getServerAddress() + " " + mongodConfig.net().getPort());
+        final MongoClient mongo = new MongoClient(new ServerAddress(mongodConfig.net().getServerAddress(), mongodConfig.net().getPort()));
         database = new JongoDatabase(config, mongo);
     }
 
@@ -88,5 +92,244 @@ public class JongoDatabaseTest {
         mongodExecutable.stop();
         database.ping();
     }
+
+    /*
+    * TalkClient related methods
+    * */
+    @Test
+    public void testLoadAndSaveClient() throws Exception {
+        final TalkClient transientClient = new TalkClient();
+        transientClient.setClientId("foo");
+
+        database.saveClient(transientClient);
+
+        List<TalkClient> clients;
+
+        clients = database.findAllClients();
+        assertEquals(1, clients.size());
+        final TalkClient persistedClient = clients.get(0);
+        assertEquals("foo", persistedClient.getClientId());
+
+        final TalkClient anotherTransientClient = new TalkClient();
+        transientClient.setClientId("bar");
+
+        database.saveClient(anotherTransientClient);
+        clients = database.findAllClients();
+        assertEquals(2, clients.size());
+    }
+
+    @Test
+    public void testFindClientById() throws Exception {
+        assertNull(database.findClientById("doesnotexist"));
+
+        final TalkClient transientClient1 = new TalkClient();
+        transientClient1.setClientId("foo");
+        transientClient1.setApnsToken("1");
+        database.saveClient(transientClient1);
+
+        final TalkClient transientClient2 = new TalkClient();
+        transientClient2.setClientId("foo");
+        transientClient1.setApnsToken("2");
+        // TODO: This is actually something that should not be possible
+        database.saveClient(transientClient2);
+
+        final TalkClient client = database.findClientById(transientClient1.getClientId());
+        assertNotNull(client);
+        assertEquals("foo", client.getClientId());
+        // We expect to get only the first entity...
+        assertEquals("1", client.getApnsToken());
+
+        // ...although two are in the database
+        final List<TalkClient> clients = database.findAllClients();
+        assertEquals(2, clients.size());
+    }
+
+    @Test
+    public void testFindClientByApnsToken() throws Exception {
+        assertNull(database.findClientByApnsToken("doesnotexist"));
+
+        final TalkClient transientClient1 = new TalkClient();
+        transientClient1.setClientId("1");
+        transientClient1.setApnsToken("foo");
+        database.saveClient(transientClient1);
+
+        final TalkClient transientClient2 = new TalkClient();
+        transientClient2.setClientId("2");
+        transientClient2.setApnsToken("foo");
+        database.saveClient(transientClient2);
+
+        final TalkClient client = database.findClientByApnsToken(transientClient1.getApnsToken());
+        assertNotNull(client);
+        assertEquals("foo", client.getApnsToken());
+        // We expect to get only the first entity...
+        assertEquals("1", client.getClientId());
+
+        // ...although two are in the database
+        final List<TalkClient> clients = database.findAllClients();
+        assertEquals(2, clients.size());
+    }
+
+    /*
+    * TalkMessage related methods
+    * */
+    @Test
+    public void testFindMessageById() throws Exception {
+        assertNull(database.findMessageById("doesnotexist"));
+
+        final TalkMessage transientMessage1 = new TalkMessage();
+        transientMessage1.setMessageId("foo");
+        transientMessage1.setMessageTag("1");
+        database.saveMessage(transientMessage1);
+
+        final TalkMessage transientMessage2 = new TalkMessage();
+        transientMessage2.setMessageId("foo");
+        transientMessage2.setMessageTag("2");
+        database.saveMessage(transientMessage2);
+
+        final TalkMessage message = database.findMessageById("foo");
+        assertNotNull(message);
+        assertEquals("foo", message.getMessageId());
+        // We expect to get only the first entity...
+        assertEquals("1", message.getMessageTag());
+
+        // TODO: also test if there are actually 2 messages in db? No API for that currently
+    }
+
+    @Test
+    public void testFindMessagesWithAttachmentFileId() throws Exception {
+        List<TalkMessage> emptyMessageList = database.findMessagesWithAttachmentFileId("doesnotexist");
+        assertNotNull(emptyMessageList);
+        assertEquals(0, emptyMessageList.size());
+
+        final TalkMessage transientMessage1 = new TalkMessage();
+        transientMessage1.setMessageId("first");
+        transientMessage1.setAttachmentFileId("fileId1");
+        database.saveMessage(transientMessage1);
+
+        final TalkMessage transientMessage2 = new TalkMessage();
+        transientMessage1.setMessageId("second");
+        transientMessage1.setAttachmentFileId("fileId2");
+        database.saveMessage(transientMessage2);
+
+        final List<TalkMessage> MessageListContainingOne = database.findMessagesWithAttachmentFileId("fileId1");
+        assertNotNull(MessageListContainingOne);
+        assertEquals(1, MessageListContainingOne.size());
+
+        transientMessage2.setAttachmentFileId("fileId1");
+        database.saveMessage(transientMessage2);
+
+        final List<TalkMessage> messageListContainingTwo = database.findMessagesWithAttachmentFileId("fileId1");
+        assertNotNull(messageListContainingTwo);
+        assertEquals(2, messageListContainingTwo.size());
+
+        emptyMessageList = database.findMessagesWithAttachmentFileId("doesnotexist");
+        assertNotNull(emptyMessageList);
+        assertEquals(0, emptyMessageList.size());
+
+        assertNotNull(database.findMessagesWithAttachmentFileId(null));
+        assertEquals(0, emptyMessageList.size());
+    }
+
+    @Test
+    public void testDeleteMessage() throws Exception {
+        final TalkMessage transientMessage = new TalkMessage();
+        transientMessage.setMessageId("foo");
+        database.saveMessage(transientMessage);
+
+        final TalkMessage persistedMessage = database.findMessageById("foo");
+        assertNotNull(persistedMessage);
+        database.deleteMessage(persistedMessage);
+        assertNull(database.findMessageById("foo"));
+
+        LOG.info(" + " + database.findMessageById(null));
+    }
+
+    // just pointing out a small hole atm - easily fixed as soon as we agree on the approach...
+    @Test(expected = NullPointerException.class)
+    public void testDeleteNullMessage() throws Exception {
+        database.deleteMessage(null);
+    }
+
+
+
+    /*
+    * TalkDelivery related methods
+    * */
+    @Test
+    public void testFindDelivery() throws Exception {
+        assertNull(database.findDelivery("unknown_message_id", "unknown_recipient_id"));
+
+        final TalkDelivery transientDelivery1 = new TalkDelivery();
+        transientDelivery1.setMessageId("foo");
+        transientDelivery1.setReceiverId("bar");
+        database.saveDelivery(transientDelivery1);
+
+        final TalkDelivery transientDelivery2 = new TalkDelivery();
+        transientDelivery2.setMessageId("something_else");
+        transientDelivery2.setReceiverId("bar");
+        database.saveDelivery(transientDelivery2);
+
+        final TalkDelivery transientDelivery3 = new TalkDelivery();
+        transientDelivery3.setMessageId("foo");
+        transientDelivery3.setReceiverId("something_else");
+        database.saveDelivery(transientDelivery3);
+
+        final TalkDelivery persistedDelivery = database.findDelivery("foo", "bar");
+        assertNotNull(persistedDelivery);
+        assertEquals("foo", persistedDelivery.getMessageId());
+        assertEquals("bar", persistedDelivery.getReceiverId());
+
+        assertNull(database.findDelivery("foo", "unknown_recipient_id"));
+        assertNull(database.findDelivery("unknown_message_id", "bar"));
+
+        assertNotNull(database.findDelivery("something_else", "bar"));
+        assertNotNull(database.findDelivery("foo", "something_else"));
+    }
+
+    private void createDeliveryInState(final String pState) {
+        final TalkDelivery transientDelivery = new TalkDelivery(true);
+        transientDelivery.setState(pState);
+        database.saveDelivery(transientDelivery);
+    }
+
+    @Test
+    public void testFindDeliveriesInState() throws Exception {
+        final List<TalkDelivery> emptyResult = database.findDeliveriesInState("crocodile_hunting");
+        assertNotNull(emptyResult);
+        assertEquals(0, emptyResult.size());
+
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_SEEN);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_SEEN);
+        createDeliveryInState(TalkDelivery.STATE_ABORTED);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED);
+
+        assertEquals(2, database.findDeliveriesInState(TalkDelivery.STATE_DELIVERED_SEEN).size());
+        assertEquals(1, database.findDeliveriesInState(TalkDelivery.STATE_ABORTED).size());
+        assertEquals(1, database.findDeliveriesInState(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED).size());
+    }
+
+    @Test
+    public void testFindAllDeliveries() throws Exception {
+        final List<TalkDelivery> emptyResult = database.findDeliveriesInState("crocodile_hunting");
+        assertNotNull(emptyResult);
+        assertEquals(0, emptyResult.size());
+
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_SEEN);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_SEEN_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_ABORTED);
+        createDeliveryInState(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_PRIVATE);
+        createDeliveryInState(TalkDelivery.STATE_DELIVERED_PRIVATE_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_REJECTED);
+        createDeliveryInState(TalkDelivery.STATE_REJECTED_ACKNOWLEDGED);
+        createDeliveryInState(TalkDelivery.STATE_FAILED);
+        createDeliveryInState(TalkDelivery.STATE_FAILED_ACKNOWLEDGED);
+
+        final List<TalkDelivery> fullResult = database.findAllDeliveries();
+        assertNotNull(fullResult);
+        assertEquals(10, fullResult.size());
+    }
+
+
 
 }
