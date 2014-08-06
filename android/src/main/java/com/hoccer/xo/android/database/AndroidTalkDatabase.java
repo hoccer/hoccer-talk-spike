@@ -25,10 +25,17 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
-    //private static final String DATABASE_NAME = "hoccer-talk.db";
+    private static final String DB_TYPE_STRING = "VARCHAR";
+    private static final String DB_TYPE_DATE = "DATE";
+    private static final String DB_TYPE_BOOLEAN = "BOOLEAN";
+    private static final String DB_TYPE_INTEGER = "INTEGER";
+
+
+
+
     private static String DATABASE_NAME = "hoccer-talk.db";
 
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 16;
 
     private static AndroidTalkDatabase INSTANCE = null;
 
@@ -40,7 +47,6 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
     }
 
     private AndroidTalkDatabase(Context context) {
-        //super(context, DATABASE_NAME, null, DATABASE_VERSION);
         super(context, PreferenceManager.getDefaultSharedPreferences(context).getString("preference_database", "hoccer-talk.db"), null, DATABASE_VERSION);
         DATABASE_NAME = PreferenceManager.getDefaultSharedPreferences(context).getString("preference_database", "hoccer-talk.db");
     }
@@ -64,8 +70,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     @Override
     public void onUpgrade(SQLiteDatabase db, ConnectionSource cs, int oldVersion, int newVersion) {
-        LOG.info("upgrading database from schema version "
-                + oldVersion + " to schema version " + newVersion);
+        LOG.info("upgrading database from schema version " + oldVersion + " to schema version " + newVersion);
         try {
             if (oldVersion < 2) {
                 TableUtils.createTable(cs, TalkGroup.class);
@@ -159,20 +164,57 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
                 talkClientContacts.executeRaw("ALTER TABLE `clientContact` ADD COLUMN `isNearby` BOOLEAN");
             }
             if (oldVersion < 15) {
-                renameFilecacheUris(db);
+                renameFilecacheUris();
+            }
+            if (oldVersion < 16) {
+                Dao<TalkDelivery, Integer> talkDeliveries = getDao(TalkDelivery.class);
+                talkDeliveries.executeRaw(addColumn("delivery", "timeAttachmentReceived", DB_TYPE_DATE));
+                talkDeliveries.executeRaw(addColumn("delivery", "attachmentState", DB_TYPE_STRING));
+                talkDeliveries.executeRaw(addColumn("delivery", "reason", DB_TYPE_STRING));
+
+                Dao<TalkClientUpload, Integer> talkClientUploads = getDao(TalkClientUpload.class);
+                talkClientUploads.executeRaw(addColumn("clientUpload", "fileId", DB_TYPE_STRING));
+                Dao<TalkClientDownload, Integer> talkClientDownloads = getDao(TalkClientDownload.class);
+                talkClientDownloads.executeRaw(addColumn("clientDownload", "fileId", DB_TYPE_STRING));
+
+                Dao<TalkClientContact, Integer> talkClientContacts = getDao(TalkClientContact.class);
+                talkClientContacts.executeRaw(addColumn("clientContact", "nickname", DB_TYPE_STRING));
+
+                Dao<TalkRelationship, Integer> talkRelationships = getDao(TalkRelationship.class);
+                talkRelationships.executeRaw(addColumn("relationship", "unblockState", DB_TYPE_STRING));
+
+                Dao<TalkMessage, Integer> talkMessages = getDao(TalkMessage.class);
+                talkMessages.executeRaw(addColumn("message", "attachmentUploadFinished", DB_TYPE_STRING));
+                talkMessages.executeRaw(addColumn("message", "attachmentUploadStarted", DB_TYPE_STRING));
+
+                migrateDeliveryStates();
             }
         } catch (SQLException e) {
             LOG.error("sql error upgrading database", e);
         }
     }
 
-    private void renameFilecacheUris(SQLiteDatabase db) {
+    private String addColumn(String tableName, String columnName, String type) {
+        return "ALTER TABLE `" + tableName + "` ADD COLUMN `" + columnName + "` " + type;
+    }
+
+    private void migrateDeliveryStates() {
+        try {
+            XoClientDatabase database = new XoClientDatabase(this);
+            database.initialize();
+            database.migrateDeliveryStates();
+        } catch (SQLException e) {
+            LOG.error("error while migrating delivery states from old database!", e);
+        }
+    }
+
+    private void renameFilecacheUris() {
         try {
             XoClientDatabase database = new XoClientDatabase(this);
             database.initialize();
             database.migrateAllFilecacheUris();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("error while migrating old filecache uris from old Database", e);
         }
     }
 

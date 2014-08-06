@@ -1,6 +1,11 @@
 package com.hoccer.xo.android.activity;
 
+import android.app.ActionBar;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.view.Menu;
+import android.view.View;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
@@ -8,12 +13,6 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.android.fragment.StatusFragment;
 import com.hoccer.xo.release.R;
-
-import android.app.ActionBar;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.View;
 
 import java.sql.SQLException;
 
@@ -57,10 +56,8 @@ public class SingleProfileActivity extends XoActivity
         mActionBar = getActionBar();
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        mSingleProfileFragment = (SingleProfileFragment) fragmentManager
-                .findFragmentById(R.id.activity_single_profile_fragment);
-        mStatusFragment = (StatusFragment) fragmentManager
-                .findFragmentById(R.id.activity_profile_status_fragment);
+        mSingleProfileFragment = (SingleProfileFragment) fragmentManager.findFragmentById(R.id.activity_single_profile_fragment);
+        mStatusFragment = (StatusFragment) fragmentManager.findFragmentById(R.id.activity_profile_status_fragment);
         mStatusFragment.getView().setVisibility(View.VISIBLE);
 
         Intent intent = getIntent();
@@ -84,38 +81,50 @@ public class SingleProfileActivity extends XoActivity
         LOG.debug("onCreateOptionsMenu()");
         boolean result = super.onCreateOptionsMenu(menu);
 
-        TalkClientContact contact = mSingleProfileFragment == null ? null
-                : mSingleProfileFragment.getContact();
+        TalkClientContact contact = mSingleProfileFragment == null ? null : mSingleProfileFragment.getContact();
 
         boolean isSelf = mMode == Mode.CREATE_SELF || (contact != null && contact.isSelf());
-
         menu.findItem(R.id.menu_my_profile).setVisible(!isSelf);
-        if(contact.isSelf()) {
+
+        menu.findItem(R.id.menu_profile_edit).setVisible(false);
+        menu.findItem(R.id.menu_profile_delete).setVisible(false);
+        menu.findItem(R.id.menu_profile_block).setVisible(false);
+        menu.findItem(R.id.menu_profile_unblock).setVisible(false);
+
+        if (contact == null) {
+            return result;
+        }
+
+        if (contact.isSelf()) {
             menu.findItem(R.id.menu_profile_edit).setVisible(true);
             menu.findItem(R.id.menu_profile_block).setVisible(false);
             menu.findItem(R.id.menu_profile_unblock).setVisible(false);
             menu.findItem(R.id.menu_profile_delete).setVisible(false);
         } else {
-            if (contact.isNearby()) {
-                menu.findItem(R.id.menu_profile_edit).setVisible(false);
-                menu.findItem(R.id.menu_profile_delete).setVisible(false);
-                menu.findItem(R.id.menu_profile_block).setVisible(false);
-                menu.findItem(R.id.menu_profile_unblock).setVisible(false);
-            } else {
-                TalkRelationship relationship = contact.getClientRelationship();
-                if (relationship == null || relationship.isBlocked()) { // todo != null correct
+            TalkRelationship relationship = contact.getClientRelationship();
+            if (relationship != null) {
+                if (!contact.isNearby()) {
+                    menu.findItem(R.id.menu_profile_delete).setVisible(true);
+                }
+                if (relationship.isBlocked()) {
                     menu.findItem(R.id.menu_profile_block).setVisible(false);
                     menu.findItem(R.id.menu_profile_unblock).setVisible(true);
-                } else {
+                } else if (relationship.isFriend()) {
                     menu.findItem(R.id.menu_profile_block).setVisible(true);
                     menu.findItem(R.id.menu_profile_unblock).setVisible(false);
                 }
             }
         }
-
         return result;
     }
 
+    @Override
+    protected void onPause() {
+        LOG.debug("onPause()");
+        super.onPause();
+
+        getXoClient().unregisterContactListener(this);
+    }
 
     @Override
     protected void onResume() {
@@ -128,14 +137,6 @@ public class SingleProfileActivity extends XoActivity
             mStatusFragment.getView().setVisibility(View.GONE);
             getActionBar().setDisplayHomeAsUpEnabled(false);
         }
-    }
-
-    @Override
-    protected void onPause() {
-        LOG.debug("onPause()");
-        super.onPause();
-
-        getXoClient().unregisterContactListener(this);
     }
 
     private TalkClientContact refreshContact(int contactId) {
@@ -191,7 +192,7 @@ public class SingleProfileActivity extends XoActivity
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mActionBar.setTitle(contact.getName());
+                mActionBar.setTitle(contact.getNickname());
                 if (mMode == Mode.CREATE_SELF) {
                     mActionBar.setTitle(R.string.welcome_to_title);
                 } else {
@@ -234,6 +235,10 @@ public class SingleProfileActivity extends XoActivity
     public void onClientRelationshipChanged(TalkClientContact contact) {
         if (isMyContact(contact)) {
             update(contact);
+
+            if (contact.getClientRelationship().isNone()) {
+                finish();
+            }
         }
     }
 

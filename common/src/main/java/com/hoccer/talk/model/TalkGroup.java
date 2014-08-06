@@ -9,6 +9,7 @@ import java.util.Date;
 @DatabaseTable(tableName = "group")
 public class TalkGroup {
 
+    // TODO: define all field strings
     public static final String FIELD_GROUP_ID         = "groupId";
     public static final String FIELD_GROUP_NAME       = "groupName";
     public static final String FIELD_GROUP_TAG        = "groupTag";
@@ -19,6 +20,7 @@ public class TalkGroup {
 
     public static final String STATE_NONE   = "none";
     public static final String STATE_EXISTS = "exists";
+    public static final String STATE_KEPT = "kept";
 
     public static final String GROUP_TYPE_USER   = "user";
     public static final String GROUP_TYPE_NEARBY = "nearby";
@@ -53,7 +55,7 @@ public class TalkGroup {
     @DatabaseField(columnName = FIELD_LAST_CHANGED)
     Date lastChanged;
 
-    @DatabaseField
+    @DatabaseField(columnName = FIELD_GROUP_TYPE)
     String groupType;
 
     @DatabaseField
@@ -87,6 +89,11 @@ public class TalkGroup {
     @JsonIgnore
     public boolean exists() {
         return (this.state != null) && this.state.equals(STATE_EXISTS);
+    }
+
+    @JsonIgnore
+    public boolean isKept() {
+        return (this.state != null) && this.state.equals(STATE_KEPT);
     }
 
     public String getGroupId() {

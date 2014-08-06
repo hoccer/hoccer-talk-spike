@@ -9,15 +9,18 @@ public class ProgressOutputStream extends OutputStream {
 
     private static final Logger LOG = Logger.getLogger(ProgressOutputStream.class);
 
-    int mProgress;
+    private final int mOffset;
 
-    OutputStream mWrapped;
+    private int mProgress;
 
-    IProgressListener mListener;
+    private final OutputStream mWrapped;
 
-    public ProgressOutputStream(OutputStream wrapped, IProgressListener listener) {
+    private final IProgressListener mListener;
+
+    public ProgressOutputStream(OutputStream wrapped, IProgressListener listener, int offset) {
         mWrapped = wrapped;
         mListener = listener;
+        mOffset = offset;
     }
 
     public int getProgress() {
@@ -46,9 +49,9 @@ public class ProgressOutputStream extends OutputStream {
     }
 
     private void callListener() {
-        LOG.trace("progress " + mProgress);
+        LOG.trace("progress " + (mOffset + mProgress));
         if(mListener != null) {
-            mListener.onProgress(mProgress);
+            mListener.onProgress(mOffset + mProgress);
         }
     }
 

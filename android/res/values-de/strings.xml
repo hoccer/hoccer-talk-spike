@@ -24,22 +24,28 @@
     <string name="menu_add_attachment">Anhang hinzufügen</string>
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
-    <string name="menu_about">Über uns</string>
+    <string name="menu_about">Über Hoccer XO</string>
     <string name="menu_reconnect">erneut verbinden</string>
     <string name="menu_quit">schließen</string>
+    <string name="menu_clear_conversation">Chat löschen</string>
+
+    <!-- Tutorial and FAQ links -->
+    <string name="link_tutorial">http://hoccer.com/hoccer-xo-anleitung/</string>
+    <string name="link_faq">http://hoccer.com/hoccer-xo-fragen-antworten/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_category_friends">Freunde</string>
     <string name="contacts_category_groups">Gruppen</string>
     <string name="contacts_empty_info">Du hast noch keine Kontakte hinzugefügt</string>
     <string name="contacts_empty_pairing">Kontakt hinzufügen</string>
-    <string name="contacts_sms_invitation">Einladung</string>
+    <string name="dialog_token_invitation_title">Einladung</string>
     <string name="contacts_sms_invitation_description">hat dir eine SMS-Einladung geschickt.
         Möchtest du die Einladung annehmen?
     </string>
 
     <!-- Nearby location request -->
-    <string name="nearby_enable_location_service">Um diese Funktion nutzen zu können musst Du Ortungsdienste aktivieren. (GPS oder Netzwerkposition). Willst Du es aktivieren?</string>
+    <string name="dialog_enable_location_service_title">Ortungsdienste</string>
+    <string name="dialog_enable_location_service_message">Um diese Funktion nutzen zu können musst Du Ortungsdienste aktivieren. (GPS oder Netzwerkposition). Willst Du es aktivieren?</string>
     <string name="nearby_yes">Ja</string>
     <string name="nearby_no">Nein</string>
 
@@ -51,12 +57,12 @@
 
     <!-- Composition fragment -->
     <string name="composition_text_hint">Nachricht eingeben</string>
-    <string name="composition_alert_empty_group_title">Nachricht kann nicht gesendet werden</string>
-    <string name="composition_alert_empty_group_text">Du kannst keine Nachrichten an die Gruppe verschicken, weil sie außer Dir keine Mitglieder hat. Du kannst aber deine Freunde in die Gruppe einladen.</string>
+    <string name="dialog_empty_group_title">Nachricht kann nicht gesendet werden</string>
+    <string name="dialog_empty_group_message">Du kannst keine Nachrichten an die Gruppe verschicken, weil sie außer Dir keine Mitglieder hat. Du kannst aber deine Freunde in die Gruppe einladen.</string>
 
     <!-- Messaging fragment -->
     <string name="messaging_loading">Lädt...</string>
-    <string name="messaging_no_messages"></string>
+    <string name="messaging_no_messages">Keine Nachrichten</string>
     <string name="messaging_invited_join">Gruppe beitreten</string>
     <string name="menu_copy_attachment">Kopieren</string>
 
@@ -69,10 +75,15 @@
     <string name="pairing_qr_show">QR Code anzeigen</string>
     <string name="pairing_qr_scan">QR Code scannen</string>
     <string name="pairing_token_generating">Erzeugen...</string>
-    <string name="pairing_token_send_sms">Einladen via SMS</string>
+    <string name="pairing_token_send_sms">Einladen per SMS</string>
+    <string name="pairing_token_send_email">Einladen per e-mail</string>
     <string name="pairing_success">Kontakt wurde erfolgreich hinzugefügt</string>
-    <string name="pairing_failure">Der Kontakt konnte nicht hinzugefügt werden</string>
-    <string name="pairing_failure_description">Der eingegebene Code ist ungültig.</string>
+    <string name="dialog_pairing_failed_title">Der Kontakt konnte nicht hinzugefügt werden</string>
+    <string name="dialog_pairing_failed_message">Der eingegebene Code ist ungültig.</string>
+	<string name="paired_with">Du bist nun befreundet mit </string>
+<string name="pairing_incorrect_code">Ungültiger Code. Bitte versuche es erneut.</string>
+<string name="pairing_scanner">QR-Scanner</string>
+<string name="pairing_generator">QR-Code</string>
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Mein Bild ändern</string>
@@ -90,6 +101,14 @@
     <string name="profile_user_unblock_button">User entblockieren</string>
     <string name="profile_user_depair_button">Verbindung aufheben</string>
     <string name="profile_user_delete_button">Kontakt löschen</string>
+
+    <string name="friend_request_add_as_friend">Als Freund hinzufügen</string>
+    <string name="friend_request_cancel_invitation">Freundschaftsanfrage zurückziehen</string>
+    <string name="friend_request_accept_invitation">Freundschafts- anfrage akzeptieren</string>
+    <string name="friend_request_decline_invitation">Freundschafts- anfrage ablehnen</string>
+    <string name="friend_request_invited_me_description">möchte dein Freund sein.</string>
+    <string name="friend_request_invited_by_you_description">hat eine Einladung von dir bekommen.</string>
+
     <string name="group_name_hint">Gruppenname</string>
     <string name="profile_group_members_title">Mitglieder</string>
     <string name="profile_group_create_button">Gruppe erstellen</string>
@@ -135,13 +154,13 @@
     <string name="setname_title">Benutzername ändern</string>
 
     <!-- Contact deletion dialog -->
-    <string name="deletecontact_title">Kontakt wirklich löschen?</string>
-    <string name="deletecontact_question">Bist du sicher, dass du diesen Kontakt löschen möchtest? Alle Nachrichten werden dann unwiderruflich gelöscht. 
+    <string name="dialog_delete_contact_title">Kontakt wirklich löschen?</string>
+    <string name="dialog_delete_contact_message">Bist du sicher, dass du diesen Kontakt löschen möchtest? Alle Nachrichten werden dann unwiderruflich gelöscht.
     </string>
 
     <!-- Depair dialog -->
     <string name="depaircontact_title">Verbindung auflösen?</string>
-    <string name="depaircontact_question">Bist du sicher, dass du die Verbindung auflösen möchtest? Es können dann keine Nachrichten ausgetauscht werden, bis ihr euch erneut verbindet. 
+    <string name="depaircontact_question">Bist du sicher, dass du die Verbindung auflösen möchtest? Es können dann keine Nachrichten ausgetauscht werden, bis ihr euch erneut verbindet.
     </string>
 
     <!-- Group kick selection dialog -->
@@ -151,29 +170,29 @@
     <string name="invite_title">In Gruppe einladen</string>
 
     <!-- Group manage selection dialog -->
-    <string name="manage_title">Gruppenmitglieder verwalten</string>
+    <string name="dialog_manage_group_title">Gruppenmitglieder verwalten</string>
 
     <!-- Location selection activity -->
     <string name="selectlocation_title">Standort auswählen</string>
 
     <!-- Group leave dialog -->
-    <string name="delete_group_title">Gruppe löschen</string>
-    <string name="delete_group_question">Bist du dir sicher, dass du die Gruppe löschen möchtest?</string>
-    <string name="reject_invitation_title">Einladung ablehnen</string>
-    <string name="reject_invitation_question">Bist du dir sicher, dass du die Einladung ablehnen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können. 
+    <string name="dialog_delete_group_title">Gruppe löschen</string>
+    <string name="dialog_delete_group_message">Bist du dir sicher, dass du die Gruppe löschen möchtest?</string>
+    <string name="dialog_reject_group_invitation_title">Einladung ablehnen</string>
+    <string name="dialog_reject_group_invitation_message">Bist du dir sicher, dass du die Einladung ablehnen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können.
     </string>
-    <string name="leave_title">Gruppe verlassen</string>
-    <string name="leave_question">Bist du dir sicher, dass du die Gruppe verlassen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können. 
+    <string name="dialog_leave_group_title">Gruppe verlassen</string>
+    <string name="dialog_leave_group_message">Bist du dir sicher, dass du die Gruppe verlassen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können.
     </string>
     <string name="common_group">Gruppe</string>
     <string name="common_group_invite">Eingeladen</string>
     <string name="common_friend">Freund</string>
     <string name="menu_licenses">Lizenzen</string>
-    <string name="feature_not_available">Dieses Feature ist noch nicht verfügbar</string>
+    <string name="feature_not_available">Diese Funktion ist noch nicht verfügbar</string>
     <string name="file_chooser_string">Datei auswählen</string>
     <string name="open_file">Datei öffnen</string>
     <string name="error_no_such_app">keine installierte App kann diese Datei öffnen</string>
-    <string name="error_no_videoplayer">Video nicht abspielbar. Bitte anderen Videoplayer installieren. 
+    <string name="error_no_videoplayer">Video nicht abspielbar. Bitte anderen Videoplayer installieren.
     </string>
     <string name="menu_group_delete_profile">Gruppe schließen</string>
     <string name="menu_group_edit_profile">Gruppe bearbeiten</string>
@@ -197,7 +216,7 @@
     <string name="dialog_attachment_choose_discard_option">Anhang verwerfen</string>
     <string name="dialog_attachment_title">Anhang bearbeiten</string>
     <string name="dialog_block_user_title">Kontakt blockieren</string>
-    <string name="dialog_block_user_message">Bist du dir sicher, dass du diesen Kontakt blockieren möchtest? Du wirst keine weiteren Nachrichten von diesem Kontakt erhalten. 
+    <string name="dialog_block_user_message">Bist du dir sicher, dass du diesen Kontakt blockieren möchtest? Du wirst keine weiteren Nachrichten von diesem Kontakt erhalten.
     </string>
 
     <!-- Preferences -->
@@ -207,45 +226,66 @@
     <string name="pref_auto_downloads_mobile">Im mobilen Netz</string>
     <string name="pref_auto_download_wifi">Im WLAN Netz</string>
     <string name="pref_auto_download">Automatischer Download</string>
+    <string name="pref_confirm_messages_seen">Lesebestätigung senden</string>
     <string name="pref_credentials">Zugangsdaten</string>
     <string name="pref_export_credentials">Zugangsdaten exportieren</string>
     <string name="pref_import_credentials">Zugangsdaten importieren</string>
     <string name="pref_legal_information">Rechtliches</string>
     <string name="pref_encryption">Verschlüsselung</string>
-    <string name="profile_compare_key_description">Für ein Extra an Sicherheit vergleiche diesen Fingerabdruck mit dem Fingerabdruck den Deine Freunde in deiner Kontaktkarte sehen
-    </string>
+    <string name="profile_compare_key_description">Für ein Extra an Sicherheit, vergleiche diesen Fingerabdruck mit dem Fingerabdruck, den deine Freunde in deiner Kontaktkarte sehen.</string>
     <string name="pref_please_wait">Bitte warten...</string>
     <string name="my_profile_title">Mein Profil</string>
     <string name="welcome_to_title">Willkommen bei XO!</string>
-    <string name="contact_item_receive_attachment">%1$s Datei erhalten</string>
-    <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar setzen.
-    </string>
+    <string name="contact_item_received_attachment">%1$s Datei erhalten</string>
+    <string name="contact_item_sent_attachment">%1$s Datei gesendet</string>
+    <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar verwenden.</string>
+    <string name="error_attachment_selection">Sie können diese Datei nicht als Anhang verwenden.</string>
     <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App HoccerXO zum sicheren Chatten! Jetzt herunterladen: http://hoccer.com/ Dann mich als Kontakt hinzufügen: %1$s%2$s
         \nxo %3$s
     </string>
-    <string name="export_credentials_dialog_title">Zugangsdaten exportieren</string>
+    <string name="email_invitation_text">Hey!\nich nutze die Gratis-App Hoccer XO zum sicheren Chatten! Jetzt herunterladen:\nhttp://hoccer.com/\nund mich als Kontakt hinzufügen:\n
+        &lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;
+        \nxo %3$s
+    </string>
+    <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>
     <string name="export_credentials_success">Zugangsdaten erfolgreich exportiert.</string>
-    <string name="export_credentials_failure">Es ist ein Fehler beim exportieren der Zugangsdaten aufgetreten.</string>
+    <string name="export_credentials_failure">Es ist ein Fehler beim Exportieren der Zugangsdaten aufgetreten.</string>
 
-    <string name="import_credentials_dialog_title">Zugangsdaten importieren</string>
+    <string name="dialog_import_credentials_title">Zugangsdaten importieren</string>
     <string name="import_credentials_success">Zugangsdaten erfolgreich importiert.\nBitte starten Sie die App neu.</string>
-    <string name="import_credentials_failure">Es ist ein Fehler beim importieren der Zugangsdaten aufgetreten.</string>
+    <string name="import_credentials_failure">Es ist ein Fehler beim Importieren der Zugangsdaten aufgetreten.</string>
 
     <string name="enter_password">Passwort:</string>
     <string name="no_password">Bitte geben Sie ein Passwort ein.</string>
     <string name="cant_find_credentials">Kann die Datei "credentials.json" mit den Zugangsdaten nicht finden.</string>
 
     <string name="placeholder_conversations_text">Lade deine Freunde zum Chatten ein!</string>
-    <string name="placeholder_nearby_text">Warten auf andere Nearby-Nutzer...</string>
+    <string name="placeholder_nearby_text">Warten auf Kontakte %1$s...</string>
+    <string name="placeholder_nearby_link_text">in der Nähe</string>
     <string name="actionbar_default_title">Hoccer</string>
+    <string name="content_audio_caption">Musik</string>
+    <string name="nearby_info_usercount">%1$d Benutzer in der Nähe</string>
+    <string name="profile_nickname_text">Anzeigename</string>
+    <string name="message_seen_text">gelesen</string>
+    <string name="nearby_text">Alle in der Nähe</string>
+    <string name="error_send_message">Die Nachricht konnte nicht gesendet werden.</string>
+    <string name="pref_privacy_title">Privatspähre</string>
+    <string name="error_send_message_empty_group">Diese Gruppe ist leer.</string>
+    <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
 
     <string-array name="preference_log_level_names">
+        <item>Fatal</item>
+        <item>Error</item>
+        <item>Warn</item>
         <item>Info</item>
         <item>Debug</item>
         <item>Trace</item>
     </string-array>
 
     <string-array name="preference_log_level_values">
+        <item>FATAL</item>
+        <item>ERROR</item>
+        <item>WARN</item>
         <item>INFO</item>
         <item>DEBUG</item>
         <item>TRACE</item>
@@ -253,7 +293,29 @@
 
     <string-array name="tab_names">
         <item>CHATS</item>
+        <item>EINLADUNGEN</item>
         <item>IN DER NÄHE</item>
     </string-array>
+
+    <string name="about_advert_text">Hoccer XO \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Hoccer neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Hoccer XO ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
+    <string name="about_version_description">Version %1$s</string>
+
+    <!-- media types for "expecting ..." in message states -->
+    <string name="attachment_expects_text">erwartet %1$s</string>
+    <string name="message_state_default">Anhang</string>
+    <string name="message_state_image">Bild</string>
+    <string name="message_state_video">Video</string>
+    <string name="message_state_audio">Audio</string>
+    <string name="message_state_data">Datei</string>
+    <string name="message_state_contact">vCard</string>
+    <string name="message_state_location">Position</string>
+
+
+    <string name="nearby_saved">Nahebei gespeichert</string>
+    <string name="message_unseen_text">ungelesen</string>
+    <string name="message_privat_text">zugestellt</string>
+    <string name="attachment_failed">Beim Herunterladen ist ein Fehler aufgetreten.</string>
+    <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
+    <string name="message_failed_text">Unzustellbar</string>
 
 </resources>

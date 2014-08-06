@@ -14,6 +14,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.commons.codec.binary.Base64;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
@@ -29,11 +30,11 @@ import java.util.*;
 @DatabaseTable(tableName = "clientContact")
 public class TalkClientContact implements Serializable {
 
-    public @interface ClientMethodOnly {};
-    public @interface ClientOrGroupMethodOnly {};
-    public @interface ClientOrSelfMethodOnly {};
-    public @interface GroupMethodOnly {};
-    public @interface SelfMethodOnly {};
+    public @interface ClientMethodOnly {}
+    public @interface ClientOrGroupMethodOnly {}
+    public @interface ClientOrSelfMethodOnly {}
+    public @interface GroupMethodOnly {}
+    public @interface SelfMethodOnly {}
 
     public static final String TYPE_SELF   = "self";
     public static final String TYPE_CLIENT = "client";
@@ -101,6 +102,9 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField
     private boolean isNearby;
+
+    @DatabaseField
+    private String nickname;
     
 
     public TalkClientContact() {
@@ -396,6 +400,17 @@ public class TalkClientContact implements Serializable {
         this.privateKey = privateKey;
     }
 
+    public String getNickname() {
+        if(nickname == null || nickname.isEmpty()) {
+            return getName();
+        }
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
     @SelfMethodOnly
     public TalkClientSelf getSelf() {
         ensureSelf();
@@ -433,6 +448,7 @@ public class TalkClientContact implements Serializable {
     }
 
     @GroupMethodOnly
+    @Nullable
     public TalkGroup getGroupPresence() {
         ensureGroup();
         return groupPresence;
@@ -492,6 +508,28 @@ public class TalkClientContact implements Serializable {
         }
         */
         return null;
+    }
+
+    @GroupMethodOnly
+    public  boolean isEmptyGroup() {
+        return (getActiveGroupMemberCount() <= 1);
+    }
+
+    @GroupMethodOnly
+    public int getActiveGroupMemberCount() {
+        int activeMemberCount = 0;
+        if (getGroupMemberships() != null) {
+            for (TalkClientMembership groupMembership : getGroupMemberships()) {
+                TalkGroupMember groupMember = groupMembership.getMember();
+                if (groupMember == null) {
+                    continue;
+                }
+                if (groupMember.getState().equals(TalkGroupMember.STATE_JOINED)) {
+                    activeMemberCount++;
+                }
+            }
+        }
+        return activeMemberCount;
     }
 
     public boolean isNearby() {
@@ -606,5 +644,28 @@ public class TalkClientContact implements Serializable {
         TalkClientContact groupContact = new TalkClientContact(TYPE_GROUP);
         groupContact.updateGroupTag(groupTag);
         return groupContact;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        TalkClientContact that = (TalkClientContact) o;
+
+        if (clientContactId != that.clientContactId) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return clientContactId;
     }
 }

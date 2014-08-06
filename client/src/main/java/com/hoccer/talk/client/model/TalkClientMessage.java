@@ -5,8 +5,10 @@ import com.hoccer.talk.model.TalkMessage;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
+import java.util.Set;
 
 @DatabaseTable(tableName = "clientMessage")
 public class TalkClientMessage {
@@ -81,6 +83,7 @@ public class TalkClientMessage {
         return outgoingDelivery != null;
     }
 
+    @Nullable
     public String getMessageId() {
         return messageId;
     }
@@ -210,33 +213,50 @@ public class TalkClientMessage {
     }
 
     public void updateIncoming(TalkDelivery delivery, TalkMessage message) {
-        if(outgoingDelivery != null) {
+        if (outgoingDelivery != null) {
             LOG.warn("incoming update for outgoing message");
             return;
         }
         this.message = message;
-        if(incomingDelivery == null) {
+        if (incomingDelivery == null) {
             incomingDelivery = delivery;
         } else {
-            updateDelivery(incomingDelivery, delivery);
-            if(message.getTimeSent() != null) {
+            Set<String> fields = delivery.nonNullFields();
+            incomingDelivery.updateWith(delivery, fields);
+            if (message.getTimeSent() != null) {
                 this.timestamp = message.getTimeSent();
             }
         }
     }
 
+    public void updateIncoming(TalkDelivery delivery) {
+        if (outgoingDelivery != null) {
+            LOG.error("incoming incremental update for outgoing message");
+            return;
+        }
+
+        if (incomingDelivery == null) {
+            LOG.error("incremental update for not yet received incoming delivery");
+            return;
+        }
+
+        Set<String> fields = delivery.nonNullFields();
+        incomingDelivery.updateWith(delivery, fields);
+    }
+
     public void updateOutgoing(TalkDelivery delivery) {
-        if(incomingDelivery != null) {
+        if (incomingDelivery != null) {
             LOG.warn("outgoing update for incoming message");
             return;
         }
-        if(outgoingDelivery == null) {
+        if (outgoingDelivery == null) {
             outgoingDelivery = delivery;
         } else {
-            updateDelivery(outgoingDelivery, delivery);
+            Set<String> fields = delivery.nonNullFields();
+            outgoingDelivery.updateWith(delivery, fields);
         }
     }
-
+ /*
     private void updateDelivery(TalkDelivery currentDelivery, TalkDelivery newDelivery) {
         currentDelivery.setState(newDelivery.getState());
         currentDelivery.setSenderId(newDelivery.getSenderId());
@@ -249,5 +269,24 @@ public class TalkClientMessage {
         currentDelivery.setTimeUpdatedIn(newDelivery.getTimeUpdatedIn());
         currentDelivery.setTimeUpdatedOut(newDelivery.getTimeUpdatedOut());
     }
+    */
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TalkClientMessage)) {
+            return false;
+        }
+
+        TalkClientMessage message = (TalkClientMessage) o;
+
+        return messageId != null && message.getMessageId() != null && messageId.equals(message.getMessageId());
+    }
+
+    @Override
+    public int hashCode() {
+        return messageId != null ? messageId.hashCode() : 0;
+    }
 }

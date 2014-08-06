@@ -3,7 +3,6 @@ package com.hoccer.xo.android;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.XoClientConfiguration;
 
 import org.eclipse.jetty.websocket.WebSocketClient;
 
@@ -25,13 +24,15 @@ public class XoAndroidClient extends XoClient {
 
     @Override
     protected void createJsonRpcClient(URI uri, WebSocketClient wsClient, ObjectMapper rpcMapper) {
-        String protocol = XoClientConfiguration.USE_BSON_PROTOCOL
-                ? XoClientConfiguration.PROTOCOL_STRING_BSON
-                : XoClientConfiguration.PROTOCOL_STRING_JSON;
+        String protocol = mClientHost.getUseBsonProtocol()
+                ? mClientHost.getBsonProtocolString()
+                : mClientHost.getJsonProtocolString();
         mConnection = new JsonRpcWsClient(uri, protocol, wsClient, rpcMapper, mClientHost.getIncomingBackgroundExecutor());
-        mConnection.setMaxIdleTime(XoClientConfiguration.CONNECTION_IDLE_TIMEOUT);
-        mConnection.setSendKeepAlives(XoClientConfiguration.KEEPALIVE_ENABLED);
-        if(XoClientConfiguration.USE_BSON_PROTOCOL) {
+        mConnection.setMaxIdleTime(mClientHost.getConnectionIdleTimeout());
+        mConnection.setSendKeepAlives(mClientHost.getKeepAliveEnabled());
+        // TODO: do we need to set a MaxIdleTime for bad networks (like edge)
+        //mConnection.setMaxIdleTime();
+        if(mClientHost.getUseBsonProtocol()) {
             mConnection.setSendBinaryMessages(true);
         }
     }

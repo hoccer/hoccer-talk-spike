@@ -6,7 +6,7 @@ import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.IXoTokenListener;
-import com.hoccer.talk.client.IXoTransferListener;
+import com.hoccer.talk.client.IXoTransferListenerOld;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -28,7 +28,7 @@ import java.util.List;
  *
  */
 public abstract class ContactsAdapter extends XoAdapter
-        implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListener {
+        implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
 
     protected final static long ITEM_ID_UNKNOWN = -1000;
     protected final static long ITEM_ID_CLIENT_HEADER = -1;
@@ -39,13 +39,22 @@ public abstract class ContactsAdapter extends XoAdapter
     protected final static int VIEW_TYPE_CLIENT    = 1;
     protected final static int VIEW_TYPE_GROUP     = 2;
     protected final static int VIEW_TYPE_TOKEN     = 3;
+    protected static final int VIEW_TYPE_NEARBY_HISTORY = 4;
 
-    protected final static int VIEW_TYPE_COUNT = 4;
+    protected final static int VIEW_TYPE_COUNT = 5;
 
     private OnItemCountChangedListener mOnItemCountChangedListener;
 
+    private boolean showNearbyHistory = false;
+    private long mNearbyMessagesCount = 0;
+
     public ContactsAdapter(XoActivity activity) {
         super(activity);
+    }
+
+    public ContactsAdapter(XoActivity activity, boolean showNearbyHistory) {
+        super(activity);
+        this.showNearbyHistory = showNearbyHistory;
     }
 
     Filter mFilter = null;
@@ -197,6 +206,11 @@ public abstract class ContactsAdapter extends XoAdapter
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
     }
+
+    @Override
+    public void onDownloadFailed(TalkClientDownload download) {
+    }
+
     @Override
     public void onDownloadStateChanged(TalkClientDownload download) {
         if(download.isAvatar() && download.getState() == TalkClientDownload.State.COMPLETE) {
@@ -212,6 +226,10 @@ public abstract class ContactsAdapter extends XoAdapter
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
     }
+
+    public void onUploadFailed(TalkClientUpload upload) {
+    }
+
     @Override
     public void onUploadStateChanged(TalkClientUpload upload) {
         if(upload.isAvatar()) {
@@ -241,6 +259,20 @@ public abstract class ContactsAdapter extends XoAdapter
         int count = 0;
         count += mSmsTokens.size();
         count += mClientContacts.size();
+
+        // add saved nearby messages
+        if (showNearbyHistory) {
+
+            // TODO: only if nearby history was found in db
+            try {
+                mNearbyMessagesCount = mDatabase.getNearbyMessageCount();
+                if (mNearbyMessagesCount > 0) {
+                    count++;
+                }
+            } catch (SQLException e) {
+                LOG.error("SQL Error while retrieving archived nearby messages", e);
+            }
+        }
         return count;
     }
 
@@ -261,7 +293,11 @@ public abstract class ContactsAdapter extends XoAdapter
             }
             offset += mClientContacts.size();
         }
-        return "";
+        // TODO: only if nearby history was found in db
+        if (position == getCount()-1 && mNearbyMessagesCount > 0) {
+            return new String("nearbyArchived");
+        }
+        return null;
     }
 
     @Override
@@ -280,6 +316,11 @@ public abstract class ContactsAdapter extends XoAdapter
                 return VIEW_TYPE_CLIENT;
             }
             offset += mClientContacts.size();
+        }
+
+        // TODO: only if nearby history was found in db
+        if (position == getCount()-1 && mNearbyMessagesCount > 0) {
+            return VIEW_TYPE_NEARBY_HISTORY;
         }
         return VIEW_TYPE_SEPARATOR;
     }
@@ -309,34 +350,40 @@ public abstract class ContactsAdapter extends XoAdapter
 
         View v = convertView;
 
-        switch(type) {
-        case VIEW_TYPE_CLIENT:
-            if(v == null) {
-                v = mInflater.inflate(getClientLayout(), null);
-            }
-            updateContact(v, (TalkClientContact) getItem(position));
-            break;
-        case VIEW_TYPE_GROUP:
-            if(v == null) {
-                v = mInflater.inflate(getGroupLayout(), null);
-            }
-            updateContact(v, (TalkClientContact)getItem(position));
-            break;
-        case VIEW_TYPE_SEPARATOR:
-            if(v == null) {
+        switch (type) {
+            case VIEW_TYPE_CLIENT:
+                if (v == null) {
+                    v = mInflater.inflate(getClientLayout(), null);
+                }
+                updateContact(v, (TalkClientContact) getItem(position));
+                break;
+            case VIEW_TYPE_GROUP:
+                if (v == null) {
+                    v = mInflater.inflate(getGroupLayout(), null);
+                }
+                updateContact(v, (TalkClientContact) getItem(position));
+                break;
+            case VIEW_TYPE_SEPARATOR:
+                if (v == null) {
+                    v = mInflater.inflate(getSeparatorLayout(), null);
+                }
+                updateSeparator(v, position);
+                break;
+            case VIEW_TYPE_TOKEN:
+                if (v == null) {
+                    v = mInflater.inflate(getTokenLayout(), null);
+                }
+                updateToken(v, (TalkClientSmsToken) getItem(position));
+                break;
+            case VIEW_TYPE_NEARBY_HISTORY:
+                if (v == null) {
+                    v = mInflater.inflate(getNearbyHistoryLayout(), null);
+                }
+                updateNearbyHistoryLayout(v);
+                break;
+            default:
                 v = mInflater.inflate(getSeparatorLayout(), null);
-            }
-            updateSeparator(v, position);
-            break;
-        case VIEW_TYPE_TOKEN:
-            if(v == null) {
-                v = mInflater.inflate(getTokenLayout(), null);
-            }
-            updateToken(v, (TalkClientSmsToken)getItem(position));
-            break;
-        default:
-            v = mInflater.inflate(getSeparatorLayout(), null);
-            break;
+                break;
         }
 
         return v;
@@ -346,10 +393,11 @@ public abstract class ContactsAdapter extends XoAdapter
     protected abstract int getGroupLayout();
     protected abstract int getSeparatorLayout();
     protected abstract int getTokenLayout();
+    protected abstract int getNearbyHistoryLayout();
 
+    protected abstract void updateNearbyHistoryLayout(View v);
     protected abstract void updateContact(View view, final TalkClientContact contact);
     protected abstract void updateToken(View view, final TalkClientSmsToken token);
-
 
     protected void updateSeparator(View view, int position) {
         LOG.debug("updateSeparator()");

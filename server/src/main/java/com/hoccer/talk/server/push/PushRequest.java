@@ -4,6 +4,7 @@ import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 import com.hoccer.talk.model.TalkClient;
+import com.hoccer.talk.model.TalkClientHostInfo;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServerConfiguration;
@@ -22,34 +23,36 @@ public class PushRequest {
 
     private static final Logger LOG = Logger.getLogger(PushRequest.class);
 
-    PushAgent mAgent;
+    private final PushAgent mAgent;
 
-    String mClientId;
-	TalkClient mClient;
+    private final String mClientId;
+    private TalkClient mClient;
+    private final TalkClientHostInfo mClientHostInfo;
 
-    TalkServerConfiguration mConfig;
+    private final TalkServerConfiguration mConfig;
 
-	public PushRequest(PushAgent agent, String clientId) {
+    public PushRequest(PushAgent agent, String clientId, TalkClientHostInfo clientHostInfo) {
         mAgent = agent;
         mConfig = mAgent.getConfiguration();
         mClientId = clientId;
-	}
+        mClientHostInfo = clientHostInfo;
+    }
 
     public void perform() {
         LOG.debug("pushing " + mClientId);
         // get up-to-date client object
         mClient = mAgent.getDatabase().findClientById(mClientId);
-        if(mClient == null) {
+        if (mClient == null) {
             LOG.warn("client " + mClientId + " does not exist");
             return;
         }
         // try to perform push
-        if(mConfig.isGcmEnabled() && mClient.isGcmCapable()) {
+        if (mConfig.isGcmEnabled() && mClient.isGcmCapable()) {
             performGcm();
-        } else if(mConfig.isApnsEnabled() && mClient.isApnsCapable()) {
+        } else if (mConfig.isApnsEnabled() && mClient.isApnsCapable()) {
             performApns();
         } else {
-            if(mClient.isPushCapable()) {
+            if (mClient.isPushCapable()) {
                 LOG.warn("client " + mClient + " push not available");
             } else {
                 LOG.info("client " + mClientId + " has no registration");
@@ -61,7 +64,7 @@ public class PushRequest {
         LOG.info("GCM push for " + mClientId);
         Message message = new Message.Builder()
                 .collapseKey("com.hoccer.talk.wake")
-                .timeToLive(mConfig.getGcmWakeTtl())
+                .timeToLive(TalkServerConfiguration.GCM_WAKE_TTL)
                 .restrictedPackageName(mClient.getGcmPackage())
                 .dryRun(false) //TODO: maybe make a setting out of it
                 .build();
@@ -69,12 +72,12 @@ public class PushRequest {
         try {
             Result res = gcmSender.send(message, mClient.getGcmRegistration(), 10);
             if (res.getMessageId() != null) {
-                if ( res.getCanonicalRegistrationId() != null ) {
+                if (res.getCanonicalRegistrationId() != null) {
                     LOG.warn("GCM returned a canonical registration id - we should do something with it");
                 }
-                LOG.debug("GCM push successful, return message id "+res.getMessageId());
+                LOG.debug("GCM push successful, return message id " + res.getMessageId());
             } else {
-                LOG.error("GCM push returned error '"+res.getErrorCodeName()+"'");
+                LOG.error("GCM push returned error '" + res.getErrorCodeName() + "'");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -84,7 +87,15 @@ public class PushRequest {
     private void performApns() {
         LOG.info("APNS push for " + mClientId);
         ITalkServerDatabase database = mAgent.getDatabase();
-        ApnsService apnsService = mAgent.getApnsService();
+
+        // We use the production service as default in all cases, even if no client host info is present,
+        // sandbox will only be used if buildVariant of host info is 'debug'
+        ApnsService apnsService = mAgent.getApnsService(PushAgent.APNS_SERVICE_TYPE.PRODUCTION);
+        if (mClientHostInfo != null && "debug".equals(mClientHostInfo.getClientBuildVariant())) {
+            LOG.info("  * using sandbox apns service");
+            apnsService = mAgent.getApnsService(PushAgent.APNS_SERVICE_TYPE.SANDBOX);
+        }
+
         PayloadBuilder b = APNS.newPayload();
         List<TalkDelivery> deliveries =
                 database.findDeliveriesForClientInState(
@@ -100,11 +111,8 @@ public class PushRequest {
             b.localizedKey("apn_one_new_message");
         }
 
-
-
         b.badge(messageCount);
         b.sound("default");
         apnsService.push(mClient.getApnsToken(), b.build());
     }
-	
 }

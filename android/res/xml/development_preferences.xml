@@ -3,6 +3,38 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
+            android:title="@string/pref_about_information">
+        <Preference
+                android:title="@string/menu_about"
+                android:key="preference_about">
+            <intent android:targetClass="com.hoccer.xo.android.activity.LegalImprintActivity"
+                    android:targetPackage="com.hoccer.xo.release"
+                    android:action="android.intent.action.VIEW">
+                <extra android:name="xo_legal_imprint_display_mode" android:value="1"></extra>
+            </intent>
+        </Preference>
+        <Preference
+                android:title="@string/menu_faq"
+                android:key="preference_faq">
+            <intent android:targetClass="com.hoccer.xo.android.activity.FaqTutorialActivity"
+                    android:targetPackage="com.hoccer.xo.release"
+                    android:action="android.intent.action.VIEW">
+                <extra android:name="URL" android:value="@string/link_faq"></extra>
+            </intent>
+        </Preference>
+        <Preference
+                android:title="@string/menu_tutorial"
+                android:key="preference_tutorial">
+            <intent android:targetClass="com.hoccer.xo.android.activity.FaqTutorialActivity"
+                    android:targetPackage="com.hoccer.xo.release"
+                    android:action="android.intent.action.VIEW">
+                <extra android:name="URL" android:value="@string/link_tutorial"></extra>
+            </intent>
+        </Preference>
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
             android:title="@string/pref_auto_download">
 
         <CheckBoxPreference
@@ -13,6 +45,16 @@
         <CheckBoxPreference
                 android:key="preference_download_auto_wifi"
                 android:title="@string/pref_auto_download_wifi"
+                android:defaultValue="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_privacy_title">
+
+        <CheckBoxPreference
+                android:key="preference_confirm_messages_seen"
+                android:title="@string/pref_confirm_messages_seen"
                 android:defaultValue="true"/>
 
     </PreferenceCategory>
@@ -45,14 +87,13 @@
     <PreferenceCategory
             android:title="@string/pref_legal_information">
         <Preference
-                android:title="@string/menu_about"
-                android:key="preference_about">
-            <intent android:action="com.hoccer.xo.ABOUT"/>
-        </Preference>
-        <Preference
                 android:title="@string/menu_licenses"
                 android:key="preference_licenses">
-            <intent android:action="com.hoccer.xo.LICENSES"/>
+            <intent android:targetClass="com.hoccer.xo.android.activity.LegalImprintActivity"
+                    android:targetPackage="com.hoccer.xo.release"
+                    android:action="android.intent.action.VIEW">
+                <extra android:name="xo_legal_imprint_display_mode" android:value="2"></extra>
+            </intent>
         </Preference>
     </PreferenceCategory>
 
@@ -88,17 +129,15 @@
 
         <ListPreference
                 android:key="preference_server_uri"
-                android:entries="@array/servers"
-                android:entryValues="@array/servers"
-                android:title="Select Server URI"
-                android:defaultValue="wss://talkserver.talk.hoccer.de:8443/"/>
+                android:entries="@array/servers_development"
+                android:entryValues="@array/servers_development"
+                android:title="Select Server URI"/>
 
         <ListPreference
                 android:key="preference_database"
-                android:entries="@array/databases"
-                android:entryValues="@array/database_values"
-                android:title="@string/preference_database_title"
-                android:defaultValue="hoccer-talk.db"/>
+                android:entries="@array/databases_development"
+                android:entryValues="@array/database_values_development"
+                android:title="@string/preference_database_title"/>
 
         <CheckBoxPreference
                 android:key="preference_environment_update"

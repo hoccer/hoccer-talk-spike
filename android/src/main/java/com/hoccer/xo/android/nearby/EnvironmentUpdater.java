@@ -69,8 +69,7 @@ public class EnvironmentUpdater implements LocationListener {
         }
 
         if (mNetworkProviderAvailable) {
-            mLocationManager
-                    .requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, this);
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, this);
         }
     }
 
@@ -78,6 +77,13 @@ public class EnvironmentUpdater implements LocationListener {
         mLocationManager.removeUpdates(this);
         mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
         isEnabled = false;
+    }
+
+    public void sendEnvironmentUpdate() {
+        TalkEnvironment environment = getEnvironment();
+        if (environment.isValid()) {
+            mClient.sendEnvironmentUpdate(environment);
+        }
     }
 
     public TalkEnvironment getEnvironment() {
@@ -124,7 +130,7 @@ public class EnvironmentUpdater implements LocationListener {
             for (ScanResult scan : scanResults) {
                 bssids.add(scan.BSSID);
             }
-            theEnvironment.setBssids(bssids.toArray(new String[0]));
+            theEnvironment.setBssids(bssids.toArray(new String[bssids.size()]));
         }
         theEnvironment.setTimestamp(new Date());
         return theEnvironment;
@@ -135,7 +141,7 @@ public class EnvironmentUpdater implements LocationListener {
     public void onLocationChanged(Location location) {
         LOG.debug("onLocationChanged:" + location.toString());
         if (isEnabled) {
-            mClient.sendEnvironmentUpdate(getEnvironment());
+            sendEnvironmentUpdate();
         }
     }
 
@@ -148,14 +154,14 @@ public class EnvironmentUpdater implements LocationListener {
     @Override
     public void onProviderEnabled(String provider) {
         LOG.debug("onProviderEnabled:" + provider);
-        mClient.sendEnvironmentUpdate(getEnvironment());
+        sendEnvironmentUpdate();
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         LOG.debug("onStatusChanged:" + provider);
         if (isEnabled) {
-            mClient.sendEnvironmentUpdate(getEnvironment());
+            sendEnvironmentUpdate();
         }
     }
 

@@ -5,6 +5,7 @@ import org.eclipse.jetty.websocket.WebSocketClientFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -23,10 +24,28 @@ public interface IXoClientHost {
     public boolean isSupportModeEnabled();
     public String getSupportTag();
 
+    public boolean getUseBsonProtocol();
+    public String getBsonProtocolString();
+    public String getJsonProtocolString();
+    public int getTransferThreads();
+    public int getConnectTimeout();
+    public int getIdleTimeout();
+
+    public boolean getKeepAliveEnabled();
+    public int getKeepAliveInterval();
+    public int getConnectionIdleTimeout();
+
+    public float getReconnectBackoffFixedDelay();
+    public float getReconnectBackoffVariableFactor();
+    public float getReconnectBackoffVariableMaximum();
+
+    public String getUrlScheme();
+
     public String getClientName();
     public String getClientLanguage();
     public String getClientVersionName();
     public int getClientVersionCode();
+    public String getClientBuildVariant();
     public Date getClientTime();
 
     public String getDeviceModel();
@@ -37,4 +56,5 @@ public interface IXoClientHost {
 
     public int getRSAKeysize();
 
+    public boolean isSendDeliveryConfirmationEnabled();
 }

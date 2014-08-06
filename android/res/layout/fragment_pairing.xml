@@ -42,6 +42,12 @@
         android:layout_width="match_parent"
         android:text="@string/pairing_token_send_sms"/>
 
+    <Button
+        android:id="@+id/pairing_token_email"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="@string/pairing_token_send_email"/>
+
     <TextView
         android:layout_height="wrap_content"
         android:layout_width="match_parent"

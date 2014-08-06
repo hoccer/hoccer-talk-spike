@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-import java.util.Date;
+import java.util.*;
 
 /**
  * Delivery objects represent the receiver-dependent
@@ -15,12 +15,11 @@ import java.util.Date;
  * - manipulated by delivery logic
  * - used in RPC for requesting delivery
  * - used in RPC for reflecting delivery state
- *
- * @author ingo
  */
 @DatabaseTable(tableName = "delivery")
 public class TalkDelivery {
 
+    // The database field names
     public static final String FIELD_DELIVERY_ID = "deliveryId";
     public static final String FIELD_MESSAGE_ID = "messageId";
     public static final String FIELD_MESSAGE_TAG = "messageTag";
@@ -34,21 +33,360 @@ public class TalkDelivery {
     public static final String FIELD_TIME_CHANGED = "timeChanged";
     public static final String FIELD_TIME_UPDATED_OUT = "timeUpdatedOut";
     public static final String FIELD_TIME_UPDATED_IN = "timeUpdatedIn";
+    public static final String FIELD_ATTACHMENT_STATE = "attachmentState";
+    public static final String FIELD_TIME_ATTACHMENT_RECEIVED = "timeAttachmentReceived";
+    public static final String FIELD_REASON = "reason";
 
+    public static final String[] REQUIRED_OUT_RESULT_FIELDS = {FIELD_DELIVERY_ID, FIELD_MESSAGE_ID, FIELD_MESSAGE_TAG,
+            FIELD_SENDER_ID, FIELD_RECEIVER_ID, FIELD_GROUP_ID, FIELD_STATE, FIELD_TIME_ACCEPTED, FIELD_TIME_CHANGED,
+            FIELD_ATTACHMENT_STATE, FIELD_TIME_ATTACHMENT_RECEIVED, FIELD_REASON
+    };
+    public static final Set<String> REQUIRED_OUT_RESULT_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_OUT_RESULT_FIELDS));
+
+    public static final String[] REQUIRED_OUT_UPDATE_FIELDS = {FIELD_DELIVERY_ID, FIELD_MESSAGE_ID, FIELD_MESSAGE_TAG,
+            FIELD_SENDER_ID, FIELD_RECEIVER_ID, FIELD_GROUP_ID, FIELD_STATE, FIELD_TIME_ACCEPTED, FIELD_TIME_CHANGED,
+            FIELD_ATTACHMENT_STATE, FIELD_TIME_ATTACHMENT_RECEIVED, FIELD_REASON
+    };
+    public static final Set<String> REQUIRED_OUT_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_OUT_UPDATE_FIELDS));
+
+    public static final String[] REQUIRED_IN_UPDATE_FIELDS = {FIELD_MESSAGE_ID, FIELD_RECEIVER_ID, FIELD_GROUP_ID, FIELD_MESSAGE_TAG, FIELD_STATE, FIELD_TIME_CHANGED,
+            FIELD_ATTACHMENT_STATE, FIELD_TIME_ATTACHMENT_RECEIVED, FIELD_REASON
+    };
+    public static final Set<String> REQUIRED_IN_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_IN_UPDATE_FIELDS));
+
+    // the delivery states
+    public static final String STATE_DRAFT = "draft";
     public static final String STATE_NEW = "new";
     public static final String STATE_DELIVERING = "delivering";
-    public static final String STATE_DELIVERED = "delivered";
-    public static final String STATE_CONFIRMED = "confirmed";
+    public static final String STATE_DELIVERED_PRIVATE = "deliveredPrivate";
+    public static final String STATE_DELIVERED_PRIVATE_ACKNOWLEDGED = "deliveredPrivateAcknowledged";
+    public static final String STATE_DELIVERED_UNSEEN = "deliveredUnseen";
+    public static final String STATE_DELIVERED_UNSEEN_ACKNOWLEDGED = "deliveredUnseenAcknowledged";
+    public static final String STATE_DELIVERED_SEEN = "deliveredSeen";
+    public static final String STATE_DELIVERED_SEEN_ACKNOWLEDGED = "deliveredSeenAcknowledged";
     public static final String STATE_FAILED = "failed";
     public static final String STATE_ABORTED = "aborted";
+    public static final String STATE_REJECTED = "rejected";
+    public static final String STATE_FAILED_ACKNOWLEDGED = "failedAcknowledged";
+    public static final String STATE_ABORTED_ACKNOWLEDGED = "abortedAcknowledged";
+    public static final String STATE_REJECTED_ACKNOWLEDGED = "rejectedAcknowledged";
+
+    // Old states are only needed for Database migrations. Maybe we should collect them somewhere else?
+    @Deprecated
+    public static final String STATE_NEW_OLD = "new";
+    @Deprecated
+    public static final String STATE_DELIVERING_OLD = "delivering";
+    @Deprecated
+    public static final String STATE_DELIVERED_OLD = "delivered";
+    @Deprecated
+    public static final String STATE_CONFIRMED_OLD = "confirmed";
+    @Deprecated
+    public static final String STATE_FAILED_OLD = "failed";
+    @Deprecated
+    public static final String STATE_ABORTED_OLD = "aborted";
+
+    public static final String[] ALL_STATES = {
+            STATE_DRAFT,
+            STATE_NEW,
+            STATE_DELIVERING,
+            STATE_DELIVERED_PRIVATE,
+            STATE_DELIVERED_PRIVATE_ACKNOWLEDGED,
+            STATE_DELIVERED_UNSEEN,
+            STATE_DELIVERED_UNSEEN_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN,
+            STATE_DELIVERED_SEEN_ACKNOWLEDGED,
+            STATE_FAILED,
+            STATE_FAILED_ACKNOWLEDGED,
+            STATE_ABORTED,
+            STATE_ABORTED_ACKNOWLEDGED,
+            STATE_REJECTED,
+            STATE_REJECTED_ACKNOWLEDGED
+    };
+    public static final Set<String> ALL_STATES_SET = new HashSet<String>(Arrays.asList(ALL_STATES));
+
+    public static final String[] SENDER_CALL_STATES = {
+            STATE_NEW,
+            STATE_DELIVERING,
+            STATE_DELIVERED_PRIVATE_ACKNOWLEDGED,
+            STATE_DELIVERED_UNSEEN_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN_ACKNOWLEDGED,
+            STATE_FAILED,
+            STATE_FAILED_ACKNOWLEDGED,
+            STATE_ABORTED,
+            STATE_ABORTED_ACKNOWLEDGED,
+            STATE_REJECTED_ACKNOWLEDGED
+    };
+    public static final Set<String> SENDER_CALL_STATES_SET = new HashSet<String>(Arrays.asList(SENDER_CALL_STATES));
+
+    public static final String[] SENDER_SHOULD_ACKNOWLEDGE_STATES = {
+            STATE_DELIVERED_PRIVATE,
+            STATE_DELIVERED_UNSEEN,
+            STATE_DELIVERED_SEEN,
+            STATE_FAILED,
+            STATE_REJECTED
+    };
+    public static final Set<String> SENDER_SHOULD_ACKNOWLEDGE_STATES_SET = new HashSet<String>(Arrays.asList(SENDER_SHOULD_ACKNOWLEDGE_STATES));
+
+    public static final String[] RECIPIENT_CALL_STATES = {
+            STATE_DELIVERED_PRIVATE,
+            STATE_DELIVERED_UNSEEN,
+            STATE_DELIVERED_SEEN,
+            STATE_REJECTED
+    };
+    public static final Set<String> RECIPIENT_CALL_STATES_SET = new HashSet<String>(Arrays.asList(RECIPIENT_CALL_STATES));
+
+    // The delivery states the sender is interested in for outgoingDeliverUpdated regardless of attachmentState
+    public static final String[] OUT_STATES = {STATE_DELIVERED_UNSEEN, STATE_DELIVERED_SEEN,
+            STATE_DELIVERED_PRIVATE, STATE_FAILED, STATE_REJECTED};
+    public static final Set<String> OUT_STATES_SET = new HashSet<String>(Arrays.asList(OUT_STATES));
+
+    // attachment state and delivery state combinations the sender is interested in addition to OUT_STATES
+    public final static String[] OUT_ATTACHMENT_DELIVERY_STATES = {STATE_DELIVERED_SEEN_ACKNOWLEDGED, STATE_DELIVERED_UNSEEN_ACKNOWLEDGED, STATE_DELIVERED_PRIVATE_ACKNOWLEDGED};
+    public final static String[] OUT_ATTACHMENT_STATES = {TalkDelivery.ATTACHMENT_STATE_RECEIVED, TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_ABORTED,
+            TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED};
+
+    // The delivery states the receiver is interested in for incomingDeliverUpdated
+    public static final String[] IN_STATES = {STATE_DELIVERING};
+    public static final Set<String> IN_STATES_SET = new HashSet<String>(Arrays.asList(IN_STATES));
+
+    // attachment state and delivery state combinations the receiver is interested in addition to IN_STATES
+    public final static String[] IN_ATTACHMENT_DELIVERY_STATES = {STATE_DELIVERED_UNSEEN, STATE_DELIVERED_UNSEEN_ACKNOWLEDGED, STATE_DELIVERED_SEEN,
+            STATE_DELIVERED_SEEN_ACKNOWLEDGED, STATE_DELIVERED_PRIVATE, STATE_DELIVERED_PRIVATE_ACKNOWLEDGED};
+
+    public final static String[] IN_ATTACHMENT_STATES = {TalkDelivery.ATTACHMENT_STATE_UPLOADING, TalkDelivery.ATTACHMENT_STATE_UPLOADED,
+            TalkDelivery.ATTACHMENT_STATE_UPLOAD_PAUSED, TalkDelivery.ATTACHMENT_STATE_UPLOAD_ABORTED, TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED};
+
+    public static final String[] DELIVERED_STATES = {
+            STATE_DELIVERED_PRIVATE,
+            STATE_DELIVERED_PRIVATE_ACKNOWLEDGED,
+            STATE_DELIVERED_UNSEEN,
+            STATE_DELIVERED_UNSEEN_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN,
+            STATE_DELIVERED_SEEN_ACKNOWLEDGED
+    };
+    public static final Set<String> DELIVERED_STATES_SET = new HashSet<String>(Arrays.asList(DELIVERED_STATES));
+
+    public static final String[] FINAL_STATES = {
+            STATE_DELIVERED_PRIVATE_ACKNOWLEDGED,
+            STATE_DELIVERED_SEEN_ACKNOWLEDGED,
+            STATE_FAILED_ACKNOWLEDGED,
+            STATE_ABORTED_ACKNOWLEDGED,
+            STATE_REJECTED_ACKNOWLEDGED
+    };
+    public static final Set<String> FINAL_STATES_SET = new HashSet<String>(Arrays.asList(FINAL_STATES));
+
+    public static final String[] FAILED_STATES = {
+            STATE_FAILED,
+            STATE_ABORTED,
+            STATE_REJECTED,
+            STATE_FAILED_ACKNOWLEDGED,
+            STATE_ABORTED_ACKNOWLEDGED,
+            STATE_REJECTED_ACKNOWLEDGED
+    };
+    public static final Set<String> FAILED_STATES_SET = new HashSet<String>(Arrays.asList(FAILED_STATES));
+
+    // the attachment delivery states
+    public static final String ATTACHMENT_STATE_NONE = "none";
+    public static final String ATTACHMENT_STATE_NEW = "new";
+    public static final String ATTACHMENT_STATE_UPLOADING = "uploading";
+    public static final String ATTACHMENT_STATE_UPLOAD_PAUSED = "paused";
+    public static final String ATTACHMENT_STATE_UPLOADED = "uploaded";
+    public static final String ATTACHMENT_STATE_RECEIVED = "received";
+    public static final String ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED = "receivedAcknowledged";
+    public static final String ATTACHMENT_STATE_UPLOAD_FAILED = "uploadFailed";
+    public static final String ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED = "uploadFailedAcknowledged";
+    public static final String ATTACHMENT_STATE_UPLOAD_ABORTED = "uploadAborted";
+    public static final String ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED = "uploadAbortedAcknowledged";
+    public static final String ATTACHMENT_STATE_DOWNLOAD_FAILED = "downloadFailed";
+    public static final String ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED = "downloadFailedAcknowledged";
+    public static final String ATTACHMENT_STATE_DOWNLOAD_ABORTED = "downloadAborted";
+    public static final String ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED = "downloadAbortedAcknowledged";
+
+    public static final String[] ALL_ATTACHMENT_STATES = {
+            ATTACHMENT_STATE_NONE,
+            ATTACHMENT_STATE_NEW,
+            ATTACHMENT_STATE_UPLOADING,
+            ATTACHMENT_STATE_UPLOAD_PAUSED,
+            ATTACHMENT_STATE_UPLOADED,
+            ATTACHMENT_STATE_RECEIVED,
+            ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_UPLOAD_FAILED,
+            ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_UPLOAD_ABORTED,
+            ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_DOWNLOAD_FAILED,
+            ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_DOWNLOAD_ABORTED,
+            ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
+    };
+    public static final Set<String> ALL_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(ALL_ATTACHMENT_STATES));
+
+    public static final String[] FINAL_ATTACHMENT_STATES = {ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED, ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED, ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED, ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
+    };
+    public static final Set<String> FINAL_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(FINAL_ATTACHMENT_STATES));
+
+
+    /* The delivery State logic has the following logic:
+    - states get advanced by subsequent rpc-calls from sender and receiver
+    - there are final states that are contained in FINAL_STATES and FINAL_ATTACHMENT_STATES
+    - once a delivery is in a final state (both state and attachmentState are in a final state),
+     it will no longer be sent out to a client and can be deleted by server
+    - end states can only be reached by a call from the sender
+    - when a party has initiated a call that puts the delivery into a non-final state like "received" or "delivered" or "aborted",
+    the counterparty is responsible to acknowledge the pre-final state, which will advance the delivery into a confirmed end-state
+     */
+
+    static final Map<String, Set<String>> nextState = new HashMap<String, Set<String>>();
+    static final Map<String, Set<String>> nextAttachmentState = new HashMap<String, Set<String>>();
+
+    static {
+        // nextstate tree init
+        nextState.put(STATE_DRAFT, new HashSet<String>(Arrays.asList(new String[]{STATE_NEW})));
+        nextState.put(STATE_NEW, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERING, STATE_FAILED})));
+        nextState.put(STATE_DELIVERING, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_UNSEEN, STATE_DELIVERED_PRIVATE, STATE_REJECTED, STATE_ABORTED})));
+        nextState.put(STATE_DELIVERED_PRIVATE, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_PRIVATE_ACKNOWLEDGED})));
+        nextState.put(STATE_DELIVERED_PRIVATE_ACKNOWLEDGED, new HashSet<String>());
+        nextState.put(STATE_DELIVERED_UNSEEN, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_UNSEEN_ACKNOWLEDGED})));
+        nextState.put(STATE_DELIVERED_UNSEEN_ACKNOWLEDGED, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_SEEN})));
+        nextState.put(STATE_DELIVERED_SEEN, new HashSet<String>(Arrays.asList(new String[]{STATE_DELIVERED_SEEN_ACKNOWLEDGED})));
+        nextState.put(STATE_DELIVERED_SEEN_ACKNOWLEDGED, new HashSet<String>());
+        nextState.put(STATE_FAILED, new HashSet<String>(Arrays.asList(new String[]{STATE_FAILED_ACKNOWLEDGED})));
+        nextState.put(STATE_FAILED_ACKNOWLEDGED, new HashSet<String>());
+        nextState.put(STATE_ABORTED, new HashSet<String>(Arrays.asList(new String[]{STATE_ABORTED_ACKNOWLEDGED})));
+        nextState.put(STATE_ABORTED_ACKNOWLEDGED, new HashSet<String>());
+        nextState.put(STATE_REJECTED, new HashSet<String>(Arrays.asList(new String[]{STATE_REJECTED_ACKNOWLEDGED})));
+        nextState.put(STATE_REJECTED_ACKNOWLEDGED, new HashSet<String>());
+
+        // nextAttachmentState tree init
+        nextAttachmentState.put(ATTACHMENT_STATE_NONE, new HashSet<String>());
+        nextAttachmentState.put(ATTACHMENT_STATE_NEW, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_UPLOADING})));
+        nextAttachmentState.put(ATTACHMENT_STATE_UPLOADING, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_UPLOADED, ATTACHMENT_STATE_UPLOAD_PAUSED, ATTACHMENT_STATE_UPLOAD_FAILED})));
+        nextAttachmentState.put(ATTACHMENT_STATE_UPLOAD_PAUSED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_UPLOADING})));
+        nextAttachmentState.put(ATTACHMENT_STATE_UPLOADED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_RECEIVED, ATTACHMENT_STATE_DOWNLOAD_FAILED, ATTACHMENT_STATE_DOWNLOAD_ABORTED})));
+        nextAttachmentState.put(ATTACHMENT_STATE_RECEIVED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED})));
+        nextAttachmentState.put(ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED, new HashSet<String>());
+        nextAttachmentState.put(ATTACHMENT_STATE_UPLOAD_FAILED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED})));
+        nextAttachmentState.put(ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED, new HashSet<String>());
+        nextAttachmentState.put(ATTACHMENT_STATE_UPLOAD_ABORTED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED})));
+        nextAttachmentState.put(ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED, new HashSet<String>());
+        nextAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_FAILED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED})));
+        nextAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED, new HashSet<String>());
+        nextAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_ABORTED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED})));
+        nextAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED, new HashSet<String>());
+    }
+
+    static boolean statePathExists(final String stateA, final String stateB) {
+        return statePathExists(nextState, stateA, stateB, new HashSet<String>());
+    }
+
+    static boolean attachentStatePathExists(final String stateA, final String stateB) {
+        return statePathExists(nextAttachmentState, stateA, stateB, new HashSet<String>());
+    }
+
+    static boolean statePathExists(final Map<String, Set<String>> graph, final String stateA, final String stateB, final Set<String> track) {
+        if (track.size() > graph.size()) {
+            throw new RuntimeException("impossible path length");
+        }
+        if (track.contains(stateA)) {
+            // we have already been here
+            return false;
+        }
+        final Set<String> aFollows = graph.get(stateA);
+        if (aFollows == null) {
+            throw new RuntimeException("state A ='" + stateA + "' does not exist");
+        }
+        final Set<String> bFollows = graph.get(stateB);
+        if (bFollows == null) {
+            throw new RuntimeException("state B ='" + stateB + "' does not exist");
+        }
+        if (aFollows.contains(stateB)) {
+            return true;
+        }
+        HashSet downTrack = new HashSet(track);
+        downTrack.add(stateA);
+        for (String next : aFollows) {
+            if (statePathExists(graph, next, stateB, downTrack)) return true;
+        }
+        return false;
+    }
+
+
+    @JsonIgnore
+    public boolean isFinished() {
+        return isFinalState(state) && isFinalAttachmentState(attachmentState);
+    }
+
+    @JsonIgnore
+    public boolean isFailure() {
+        return isFailedState(state);
+    }
 
     public static boolean isValidState(String state) {
-        return STATE_NEW.equals(state)  ||
-                STATE_DELIVERING.equals(state) ||
-                STATE_DELIVERED.equals(state) ||
-                STATE_CONFIRMED.equals(state) ||
-                STATE_FAILED.equals(state) ||
-                STATE_ABORTED.equals(state);
+        return ALL_STATES_SET.contains(state);
+    }
+
+    public static boolean isFinalState(String state) {
+        return FINAL_STATES_SET.contains(state);
+    }
+
+    public static boolean isFailedState(String state) {
+        return FAILED_STATES_SET.contains(state);
+    }
+
+
+    @JsonIgnore
+    public boolean nextStateAllowed(String nextState) {
+        if (!isValidState(state)) {
+            return true;
+        }
+        if (!isValidState(nextState)) {
+            return false;
+        }
+        if (state.equals(nextState)) {
+            return true;
+        }
+        if (isFinalState(state)) {
+            return false;
+        }
+        return statePathExists(state, nextState);
+    }
+
+    public static boolean isValidAttachmentState(String state) {
+        return ALL_ATTACHMENT_STATES_SET.contains(state);
+    }
+
+    public static boolean isFinalAttachmentState(String state) {
+        return FINAL_ATTACHMENT_STATES_SET.contains(state);
+    }
+
+
+    // returns true if nextState is a valid state and there are one or more state transition that lead form the current state to nextSate
+    @JsonIgnore
+    public boolean nextAttachmentStateAllowed(String nextState) {
+        if (!isValidAttachmentState(attachmentState)) {
+            return true;
+        }
+        if (!isValidAttachmentState(nextState)) {
+            return false;
+        }
+        if (attachmentState.equals(nextState)) {
+            return true;
+        }
+        if (isFinalAttachmentState(attachmentState)) {
+            return false;
+        }
+        return attachentStatePathExists(attachmentState, nextState);
+    }
+
+    @JsonIgnore
+    public boolean hasAttachment() {
+        return attachmentState != null && !ATTACHMENT_STATE_NONE.equals(attachmentState);
+    }
+
+    @JsonIgnore
+    boolean isInFinalState() {
+        return isFinalState(state) && isFinalAttachmentState(attachmentState);
     }
 
     /**
@@ -131,17 +469,65 @@ public class TalkDelivery {
     @DatabaseField(columnName = FIELD_TIME_UPDATED_IN, canBeNull = true)
     Date timeUpdatedIn;
 
+    @DatabaseField(columnName = FIELD_TIME_ATTACHMENT_RECEIVED, canBeNull = true)
+    Date timeAttachmentReceived;
+
+    @DatabaseField(columnName = FIELD_ATTACHMENT_STATE, canBeNull = true)
+    String attachmentState;
+
+    // may contain a reason for rejection, failure or abortion
+    @DatabaseField(columnName = FIELD_REASON, canBeNull = true)
+    String reason;
+
     public TalkDelivery() {
-        this.state = STATE_NEW;
-        this.timeAccepted = new Date(0);
-        this.timeChanged = new Date(0);
-        this.timeUpdatedIn = new Date(0);
-        this.timeUpdatedOut = new Date(0);
+    }
+
+    public TalkDelivery(boolean init) {
+        if (init) {
+            this.initialize();
+        }
     }
 
     @JsonIgnore
-    public boolean isFinished() {
-        return state.equals(STATE_ABORTED) || state.equals(STATE_FAILED) || state.equals(STATE_CONFIRMED);
+    public void initialize() {
+        this.state = STATE_NEW;
+        this.ensureDates();
+    }
+
+    @JsonIgnore
+    public void ensureDates() {
+        if (this.timeAccepted == null) {
+            this.timeAccepted = new Date(0);
+        }
+        if (this.timeChanged == null) {
+            this.timeChanged = new Date(0);
+        }
+        if (this.timeUpdatedIn == null) {
+            this.timeUpdatedIn = new Date(0);
+        }
+        if (this.timeUpdatedOut == null) {
+            this.timeUpdatedOut = new Date(0);
+        }
+    }
+
+    @JsonIgnore
+    public boolean isOutUpToDate() {
+        return  getTimeUpdatedOut().getTime() > getTimeChanged().getTime();
+    }
+
+    @JsonIgnore
+    public boolean isInUpToDate() {
+        return  getTimeUpdatedIn().getTime() > getTimeChanged().getTime();
+    }
+
+    @JsonIgnore
+    public boolean isOutStaleFor(long msec) {
+        return getTimeUpdatedOut().getTime()+msec <= new Date().getTime();
+    }
+
+    @JsonIgnore
+    public boolean isInStaleFor(long msec) {
+        return getTimeUpdatedIn().getTime()+msec <= new Date().getTime();
     }
 
     @JsonIgnore
@@ -152,6 +538,11 @@ public class TalkDelivery {
     @JsonIgnore
     public boolean isGroupDelivery() {
         return groupId != null && receiverId == null;
+    }
+
+    @JsonIgnore
+    public boolean isExpandedGroupDelivery() {
+        return groupId != null && receiverId != null;
     }
 
     @JsonIgnore
@@ -204,7 +595,9 @@ public class TalkDelivery {
     }
 
     public void setState(String state) {
-        // TODO: validate state (e.g. with isValidState)
+        if (!nextStateAllowed(state)) {
+            throw new RuntimeException("Delivery: state change from ‘" + this.state + "‘ -> '" + state + "' not allowed");
+        }
         this.state = state;
     }
 
@@ -238,6 +631,7 @@ public class TalkDelivery {
 
     public void setTimeChanged(Date timeChanged) {
         this.timeChanged = timeChanged;
+        System.out.println("@@@@" + this + " setTimeChanged(" + (timeChanged != null ? timeChanged.getTime() : "null") + ")");
     }
 
     public Date getTimeUpdatedOut() {
@@ -246,6 +640,7 @@ public class TalkDelivery {
 
     public void setTimeUpdatedOut(Date timeUpdatedOut) {
         this.timeUpdatedOut = timeUpdatedOut;
+        System.out.println("@@@@" + this + " setTimeUpdatedOut(" + (timeUpdatedOut != null ? timeUpdatedOut.getTime() : "null") + ")");
     }
 
     public Date getTimeUpdatedIn() {
@@ -254,5 +649,150 @@ public class TalkDelivery {
 
     public void setTimeUpdatedIn(Date timeUpdatedIn) {
         this.timeUpdatedIn = timeUpdatedIn;
+        System.out.println("@@@@" + this + " setTimeUpdatedIn(" + (timeUpdatedIn != null ? timeUpdatedIn.getTime() : "null") + ")");
+    }
+
+    public Date getTimeAttachmentReceived() {
+        return timeAttachmentReceived;
+    }
+
+    public void setTimeAttachmentReceived(Date timeAttachmentReceived) {
+        this.timeAttachmentReceived = timeAttachmentReceived;
+    }
+
+    public String getAttachmentState() {
+        return attachmentState;
+    }
+
+    public void setAttachmentState(String attachmentState) {
+        if (!nextAttachmentStateAllowed(attachmentState)) {
+            throw new RuntimeException("Delivery: state change from ‘" + this.attachmentState + "‘ -> '" + attachmentState + "' not allowed");
+        }
+        this.attachmentState = attachmentState;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    @JsonIgnore
+    public String getId() {
+        return _id;
+    }
+
+    @JsonIgnore
+    public void updateWith(TalkDelivery delivery) {
+        this.messageId = delivery.getMessageId();
+        this.messageTag = delivery.getMessageTag();
+        this.senderId = delivery.getSenderId();
+        this.receiverId = delivery.getReceiverId();
+        this.groupId = delivery.getGroupId();
+        this.state = delivery.getState();
+        this.keyId = delivery.getKeyId();
+        this.keyCiphertext = delivery.getKeyCiphertext();
+        this.timeAccepted = delivery.getTimeAccepted();
+        this.timeChanged = delivery.getTimeChanged();
+        this.timeUpdatedOut = delivery.getTimeUpdatedOut();
+        this.timeUpdatedIn = delivery.getTimeUpdatedIn();
+        this.timeAttachmentReceived = delivery.getTimeAttachmentReceived();
+        this.attachmentState = delivery.getAttachmentState();
+    }
+
+    @JsonIgnore
+    public Set<String> nonNullFields() {
+        Set<String> result = new HashSet<String>();
+        if (this.messageId != null) {
+            result.add(TalkDelivery.FIELD_MESSAGE_ID);
+        }
+        if (this.messageTag != null) {
+            result.add(TalkDelivery.FIELD_MESSAGE_TAG);
+        }
+        if (this.senderId != null) {
+            result.add(TalkDelivery.FIELD_SENDER_ID);
+        }
+        if (this.receiverId != null) {
+            result.add(TalkDelivery.FIELD_RECEIVER_ID);
+        }
+        if (this.groupId != null) {
+            result.add(TalkDelivery.FIELD_GROUP_ID);
+        }
+        if (this.state != null) {
+            result.add(TalkDelivery.FIELD_STATE);
+        }
+        if (this.keyId != null) {
+            result.add(TalkDelivery.FIELD_KEY_ID);
+        }
+        if (this.keyCiphertext != null) {
+            result.add(TalkDelivery.FIELD_KEY_CIPHERTEXT);
+        }
+        if (this.timeAccepted != null) {
+            result.add(TalkDelivery.FIELD_TIME_ACCEPTED);
+        }
+        if (this.timeChanged != null) {
+            result.add(TalkDelivery.FIELD_TIME_CHANGED);
+        }
+        if (this.timeUpdatedOut != null) {
+            result.add(TalkDelivery.FIELD_TIME_UPDATED_OUT);
+        }
+        if (this.timeUpdatedIn != null) {
+            result.add(TalkDelivery.FIELD_TIME_UPDATED_IN);
+        }
+        if (this.timeAttachmentReceived != null) {
+            result.add(TalkDelivery.FIELD_TIME_ATTACHMENT_RECEIVED);
+        }
+        if (this.attachmentState != null) {
+            result.add(TalkDelivery.FIELD_ATTACHMENT_STATE);
+        }
+        return result;
+    }
+
+    @JsonIgnore
+    public void updateWith(TalkDelivery delivery, Set<String> fields) {
+        if (fields == null || fields.contains(TalkDelivery.FIELD_MESSAGE_ID)) {
+            this.messageId = delivery.getMessageId();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_MESSAGE_TAG)) {
+            this.messageTag = delivery.getMessageTag();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_SENDER_ID)) {
+            this.senderId = delivery.getSenderId();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_RECEIVER_ID)) {
+            this.receiverId = delivery.getReceiverId();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_GROUP_ID)) {
+            this.groupId = delivery.getGroupId();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_STATE)) {
+            this.state = delivery.getState();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_KEY_ID)) {
+            this.keyId = delivery.getKeyId();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_KEY_CIPHERTEXT)) {
+            this.keyCiphertext = delivery.getKeyCiphertext();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_TIME_ACCEPTED)) {
+            this.timeAccepted = delivery.getTimeAccepted();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_TIME_CHANGED)) {
+            this.timeChanged = delivery.getTimeChanged();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_TIME_UPDATED_OUT)) {
+            this.timeUpdatedOut = delivery.getTimeUpdatedOut();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_TIME_UPDATED_IN)) {
+            this.timeUpdatedIn = delivery.getTimeUpdatedIn();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_TIME_ATTACHMENT_RECEIVED)) {
+            this.timeAttachmentReceived = delivery.getTimeAttachmentReceived();
+        }
+        if (fields == null || fields.contains(TalkDelivery.FIELD_ATTACHMENT_STATE)) {
+            this.attachmentState = delivery.getAttachmentState();
+        }
     }
 }
