@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--The app's URL scheme for registration links-->
-    <string name="url_scheme">hxod://</string>
+    <string name="url_scheme">${hoccer.invitation.uri.scheme}://</string>
 
     <!--Servers-->
-    <string name="servers_production">wss://talkserver-test1.talk.hoccer.de/</string>
+    <string name="servers_production">${hoccer.talkserver.url}</string>
 
     <!--Development Mode Only-->
     <string-array name="servers_development">

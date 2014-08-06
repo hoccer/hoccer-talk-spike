@@ -201,6 +201,14 @@
                     <include>AndroidManifest.xml</include>
                 </includes>
             </resource>
+            <resource>
+                <directory>${project.basedir}/res</directory>
+                <targetPath>${project.build.directory}/generated-resources</targetPath>
+                <filtering>true</filtering>
+                <includes>
+                    <include>values/clientConfiguration.xml</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <!-- Android plugin -->
@@ -272,6 +280,22 @@
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
+            </plugin>
+            <!-- Manipulate resources before android-maven-plugin uses them -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources.version}</version>
+                <configuration>
+                    <overwrite>true</overwrite>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
