@@ -15,7 +15,7 @@ import java.sql.SQLException;
 /**
  * Created by nico on 23/07/2014.
  */
-public class AttachmentAdapterDownloadHandler implements IXoTransferListener, IXoDownloadListener {
+public class AttachmentAdapterDownloadHandler implements IXoDownloadListener {
 
     private Activity mActivity;
     private AttachmentListAdapter mAdapter;
@@ -26,22 +26,7 @@ public class AttachmentAdapterDownloadHandler implements IXoTransferListener, IX
     }
 
     @Override
-    public void onDownloadRegistered(TalkClientDownload download) {
-
-    }
-
-    @Override
-    public void onDownloadStarted(TalkClientDownload download) {
-
-    }
-
-    @Override
-    public void onDownloadProgress(TalkClientDownload download) {
-
-    }
-
-    @Override
-    public void onDownloadFinished(TalkClientDownload download) {
+    public void onDownloadCreated(TalkClientDownload download) {
         int contactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
 
         try {
@@ -58,46 +43,6 @@ public class AttachmentAdapterDownloadHandler implements IXoTransferListener, IX
                 notifyDataSetChanged();
             }
         }
-    }
-
-    @Override
-    public void onDownloadFailed(TalkClientDownload download) {
-
-    }
-
-    @Override
-    public void onDownloadStateChanged(TalkClientDownload download) {
-
-    }
-
-    @Override
-    public void onUploadStarted(TalkClientUpload upload) {
-
-    }
-
-    @Override
-    public void onUploadProgress(TalkClientUpload upload) {
-
-    }
-
-    @Override
-    public void onUploadFinished(TalkClientUpload upload) {
-
-    }
-
-    @Override
-    public void onUploadFailed(TalkClientUpload upload) {
-
-    }
-
-    @Override
-    public void onUploadStateChanged(TalkClientUpload upload) {
-
-    }
-
-    @Override
-    public void onDownloadCreated(TalkClientDownload download) {
-
     }
 
     @Override

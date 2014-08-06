@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -14,6 +15,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.NearbyContactsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -23,9 +25,9 @@ import java.sql.SQLException;
 
 public class NearbyContactsFragment extends XoListFragment implements IXoContactListener {
     private static final Logger LOG = Logger.getLogger(NearbyContactsFragment.class);
+
     private NearbyContactsAdapter mNearbyAdapter;
     private TalkClientContact mCurrentNearbyGroup;
-
     private ListView mContactList;
     private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
@@ -35,13 +37,21 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_friend_requests, container, false);
         mContactList = (ListView) view.findViewById(android.R.id.list);
+
         mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
         mPlaceholderImageFrame.setImageResource(R.drawable.placeholder_chats);
+
         mPlaceholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
-        mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
+        } else {
+            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
+        }
+
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
         mPlaceholderText.setMovementMethod(LinkMovementMethod.getInstance());
         setPlaceholderText();
+
         return view;
     }
 
@@ -62,6 +72,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         } else {
             deactivateNearbyChat();
         }
+
         getXoActivity().getXoClient().registerContactListener(this);
         if (mNearbyAdapter != null) {
             mNearbyAdapter.notifyDataSetChanged();

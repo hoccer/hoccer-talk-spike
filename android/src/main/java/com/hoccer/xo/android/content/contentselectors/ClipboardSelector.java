@@ -12,7 +12,6 @@ import com.hoccer.xo.android.activity.ClipboardPreviewActivity;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;

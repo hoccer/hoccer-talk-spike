@@ -213,6 +213,7 @@ public class
         if (!chatItem.getMessage().isSeen()) {
             markMessageAsSeen(chatItem.getMessage());
         }
+
         if (convertView == null) {
             convertView = chatItem.getViewForMessage();
         } else {

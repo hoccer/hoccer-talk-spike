@@ -24,6 +24,7 @@ import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
+import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
 
@@ -37,17 +38,11 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private static final int STRESS_TEST_MESSAGE_COUNT = 15;
 
     private EditText mTextEdit;
-
     private TextWatcher mTextWatcher;
-
     private ImageButton mSendButton;
-
     private IContentObject mAttachment;
-
     private TalkClientContact mContact;
-
     private String mLastMessage = null;
-
     private ImageButton mAddAttachmentButton;
 
     @Override
@@ -156,24 +151,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         mSendButton.setEnabled(isComposed());
     }
 
-    public void setContact(TalkClientContact contact) {
-        LOG.debug("setContact(" + contact.getClientContactId() + ")");
-        mContact = contact;
-        configureMotionInterpreterForContact(mContact);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mTextEdit.setVisibility(View.VISIBLE);
-                mSendButton.setVisibility(View.VISIBLE);
-                mAddAttachmentButton.setVisibility(View.VISIBLE);
-
-                mTextEdit.setEnabled(true);
-                mSendButton.setEnabled(true);
-                mAddAttachmentButton.setEnabled(true);
-            }
-        });
-    }
-
     private void setAttachment(IContentObject contentObject) {
         mAttachment = contentObject;
         updateAttachmentButton();
@@ -231,15 +208,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private void updateSendButton() {
         boolean enabled = (isComposed() || (XoConfiguration.DEVELOPMENT_MODE_ENABLED && mLastMessage != null));
         mSendButton.setEnabled(enabled);
-    }
-
-    private void configureMotionInterpreterForContact(TalkClientContact contact) {
-        // react on gestures only when contact is nearby
-        if (contact != null && (contact.isNearby() || (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()))) {
-            mMotionInterpreter.activate();
-        } else {
-            mMotionInterpreter.deactivate();
-        }
     }
 
     private boolean isBlocked() {

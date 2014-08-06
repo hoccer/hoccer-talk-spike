@@ -58,7 +58,7 @@ public class AttachmentListFragment extends ListFragment {
     private ServiceConnection mConnection;
 
     private AttachmentListAdapter mAttachmentListAdapter;
-    private AttachmentAdapterDownloadHandler mTransferListener;
+    private AttachmentAdapterDownloadHandler mDownloadListener;
     private SearchResultsAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
@@ -80,8 +80,8 @@ public class AttachmentListFragment extends ListFragment {
         mAttachmentListAdapter.setContentMediaTypeFilter(mContentMediaTypeFilter);
         loadAttachments();
 
-        mTransferListener = new AttachmentAdapterDownloadHandler(getActivity(), mAttachmentListAdapter);
-        XoApplication.getXoClient().getDatabase().registerDownloadListener(mTransferListener);
+        mDownloadListener = new AttachmentAdapterDownloadHandler(getActivity(), mAttachmentListAdapter);
+        XoApplication.getXoClient().getDatabase().registerDownloadListener(mDownloadListener);
 
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
         mSearchContactsAdapter.onCreate();
@@ -127,8 +127,6 @@ public class AttachmentListFragment extends ListFragment {
         super.onStart();
 
         mSearchContactsAdapter.requestReload();
-
-        XoApplication.getXoClient().registerTransferListener(mTransferListener);
 
         getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         ListInteractionHandler listHandler = new ListInteractionHandler();
@@ -179,13 +177,12 @@ public class AttachmentListFragment extends ListFragment {
     @Override
     public void onStop() {
         super.onStop();
-        XoApplication.getXoClient().unregisterTransferListener(mTransferListener);
         getActivity().unbindService(mConnection);
     }
 
     @Override
     public void onDestroy() {
-        XoApplication.getXoClient().getDatabase().unregisterDownloadListener(mTransferListener);
+        XoApplication.getXoClient().getDatabase().unregisterDownloadListener(mDownloadListener);
         super.onDestroy();
     }
 
