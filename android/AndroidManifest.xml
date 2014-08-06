@@ -81,15 +81,10 @@
                 android:name="com.google.android.gms.version"
                 android:value="@integer/google_play_services_version"/>
 
-        <!--API key for Google Maps Android API v2 for RELEASE certificate-->
-        <!--<meta-data-->
-        <!--android:name="com.google.android.maps.v2.API_KEY"-->
-        <!--android:value="AIzaSyBDd2wBF1gH9UcU2KcAPXXKI9G6HQattkM"/>-->
-
-        <!-- API key for Google Maps Android API v2 based on DEBUG certificate -->
+        <!-- API key for Google Maps Android API v2 -->
         <meta-data
                 android:name="com.google.android.maps.v2.API_KEY"
-                android:value="AIzaSyC9hBvAarkQ9ktS0rWZ5Row-MXRatv8Dj0"/>
+                android:value="${google.maps.api.key}"/>
 
         <!-- Contact list - our main activity -->
         <activity
@@ -215,7 +210,7 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="hxod"/>
+                <data android:scheme="${hoccer.invitation.uri.scheme}"/>
             </intent-filter>
         </activity>
 

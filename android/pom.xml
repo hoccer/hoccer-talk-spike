@@ -183,7 +183,25 @@
 
     </dependencies>
 
+    <properties>
+        <!-- Can be overridden by calling `mvn -Denvironment=production` -->
+        <environment>testing</environment>
+    </properties>
+
     <build>
+        <filters>
+            <filter>environment-${environment}.properties</filter>
+        </filters>
+        <resources>
+            <resource>
+                <directory>${project.basedir}</directory>
+                <targetPath>${project.build.directory}</targetPath>
+                <filtering>true</filtering>
+                <includes>
+                    <include>AndroidManifest.xml</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <!-- Android plugin -->
             <!-- Documentation of configuration options can be found here:
@@ -194,7 +212,7 @@
                 <artifactId>android-maven-plugin</artifactId>
                 <version>${maven-android.version}</version>
                 <configuration>
-                    <androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
+                    <androidManifestFile>${project.build.directory}/AndroidManifest.xml</androidManifestFile>
                     <assetsDirectory>${project.basedir}/assets</assetsDirectory>
                     <resourceDirectory>${project.basedir}/res</resourceDirectory>
                     <resourceOverlayDirectory>${project.build.directory}/generated-resources</resourceOverlayDirectory>
