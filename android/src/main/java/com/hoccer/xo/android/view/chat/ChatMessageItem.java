@@ -21,7 +21,7 @@ import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
-import com.hoccer.xo.android.view.AvatarView;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
@@ -50,6 +50,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
     protected RelativeLayout mAttachmentView;
     protected LinearLayout mContentWrapper;
     protected AttachmentTransferControlView mContentTransferControl;
+
+    protected boolean mVisible = false;
 
     public ChatMessageItem(Context context, TalkClientMessage message) {
         super();
@@ -103,6 +105,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return ChatItemType.ChatItemWithText;
     }
 
+    public void setVisibility(boolean visible){
+        mVisible = visible;
+    }
+
     /**
      * Creates a new empty message layout.
      *
@@ -144,9 +150,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
             messageDeliveryInfo.setVisibility(View.GONE);
 
-            messageText.setBackgroundDrawable(mContext.getResources().getDrawable(getIncomingBackgroundResource()));
-            messageText.setTextColor(mContext.getResources().getColorStateList(android.R.color.black));
-            messageText.setLinkTextColor(mContext.getResources().getColorStateList(android.R.color.black));
+            messageText.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(mContext, getIncomingBackgroundResource(), false));
+            messageText.setTextColor(mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
+            messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
 
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
@@ -161,9 +167,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
             messageContactInfo.setVisibility(View.GONE);
 
-            messageText.setBackgroundDrawable(mContext.getResources().getDrawable(getOutgoingBackgroundResource()));
-            messageText.setTextColor(mContext.getResources().getColorStateList(android.R.color.white));
-            messageText.setLinkTextColor(mContext.getResources().getColorStateList(android.R.color.white));
+            messageText.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getOutgoingBackgroundResource()));
+            messageText.setTextColor(mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
+            messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
 
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
@@ -372,7 +378,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         }
         mContentObject = contentObject;
 
-        mAttachmentView.setBackgroundDrawable(bubbleForMessageAttachment(mMessage));
+        mAttachmentView.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(bubbleForMessageAttachment(mMessage)));
 
         mContentDescription.setText(mContentRegistry.getContentDescription(mContentObject));
         if (shouldDisplayTransferControl(getTransferState(mContentObject))) {

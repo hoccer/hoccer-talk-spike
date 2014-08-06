@@ -1,11 +1,3 @@
-/*
- * AboutFragment.java
- * HoccerXO Chat
- *
- * Created by Bjoern Heller 5/16/13 1:16 AM
- * Copyright (c) 2013. Hoccer Betriebs GmbH
- */
-
 package com.hoccer.xo.android.fragment;
 
 import android.app.Fragment;

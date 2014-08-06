@@ -7,7 +7,7 @@ import org.apache.log4j.PatternLayout;
 
 /**
  * Static client configuration
- * <p/>
+ *
  * This class collects various android-specific settings for the XO client.
  */
 public class XoConfiguration {
@@ -29,11 +29,11 @@ public class XoConfiguration {
     public static final boolean DEVELOPMENT_MODE_ENABLED = false;
 
     /* true: log level = debug, log to sdcard activated */
-    public static final boolean TESTING_MODE_ENABLED = false;
+    public static final boolean TESTING_MODE_ENABLED = true;
 
     /**
      * Background executor thread count
-     * <p/>
+     *
      * AFAIK this must be at least 3 for RPC to work.
      */
     public static final int CLIENT_THREADS = 100;

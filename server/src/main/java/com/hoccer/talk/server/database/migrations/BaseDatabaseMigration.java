@@ -29,7 +29,7 @@ class BaseDatabaseMigration {
         this.mExecuted = true;
     }
 
-    public void setDatabase(ITalkServerDatabase database) {
+    public void setDatabase(final ITalkServerDatabase database) {
         this.mDatabase = database;
     }
 

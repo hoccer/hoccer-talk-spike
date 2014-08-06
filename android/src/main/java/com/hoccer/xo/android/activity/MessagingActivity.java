@@ -3,34 +3,34 @@ package com.hoccer.xo.android.activity;
 import android.app.ActionBar;
 import android.content.*;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.view.Menu;
+import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.IMessagingFragmentManager;
+import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.fragment.CompositionFragment;
+import com.hoccer.xo.android.fragment.AttachmentListFragment;
+import com.hoccer.xo.android.fragment.GroupProfileFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
+import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
-import java.sql.SQLException;
-
-public class MessagingActivity extends XoActivity implements IXoContactListener {
+public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
 
     ActionBar mActionBar;
 
     MessagingFragment mMessagingFragment;
-    CompositionFragment mCompositionFragment;
+    AttachmentListFragment mAttachmentListFragment;
+    SingleProfileFragment mSingleProfileFragment;
+    GroupProfileFragment mGroupProfileFragment;
 
-    TalkClientContact mContact;
+    int mContactId;
     private IContentObject mClipboardAttachment;
     private getContactIdInConversation m_checkIdReceiver;
 
@@ -55,18 +55,23 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         // enable up navigation
         enableUpNavigation();
 
-        // get our primary fragment
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        mMessagingFragment = (MessagingFragment) fragmentManager.findFragmentById(R.id.activity_messaging_fragment);
-        mMessagingFragment.setRetainInstance(true);
-        mCompositionFragment = (CompositionFragment) fragmentManager.findFragmentById(R.id.activity_messaging_composer);
-        mCompositionFragment.setRetainInstance(true);
-
         // register receiver for notification check
         IntentFilter filter = new IntentFilter("com.hoccer.xo.android.activity.MessagingActivity$getContactIdInConversation");
         filter.addAction("CHECK_ID_IN_CONVERSATION");
         m_checkIdReceiver = new getContactIdInConversation();
         registerReceiver(m_checkIdReceiver, filter);
+
+        // handle converse intent
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
+            mContactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
+            m_checkIdReceiver.setId(mContactId);
+            if (mContactId == -1) {
+                LOG.error("invalid contact id");
+            } else {
+                showMessageFragment();
+            }
+        }
     }
 
     @Override
@@ -83,41 +88,15 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
             if (contactId == -1) {
                 LOG.error("invalid contact id");
             } else {
-                try {
-                    TalkClientContact contact = getXoDatabase().findClientContactById(contactId);
-                    if (contact != null) {
-                        setContact(contact);
-                    }
-                } catch (SQLException e) {
-                    LOG.error("sql error", e);
-                }
+                mContactId = contactId;
             }
         }
-        getXoClient().registerContactListener(this);
     }
 
     @Override
     protected void onPause() {
         LOG.debug("onPause()");
         super.onPause();
-
-        getXoClient().unregisterContactListener(this);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        LOG.debug("onCreateOptionsMenu()");
-        boolean result = super.onCreateOptionsMenu(menu);
-
-        // select client/group profile entry for appropriate icon
-        if (mContact != null) {
-            MenuItem clientItem = menu.findItem(R.id.menu_profile_client);
-            clientItem.setVisible(mContact.isClient());
-            MenuItem groupItem = menu.findItem(R.id.menu_single_profile);
-            groupItem.setVisible(mContact.isGroup());
-        }
-
-        return result;
     }
 
     @Override
@@ -127,19 +106,8 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
-        switch (item.getItemId()) {
-            case R.id.menu_profile_client:
-            case R.id.menu_single_profile:
-                if (mContact != null) {
-                    showContactProfile(mContact);
-                }
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-        return true;
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -189,76 +157,64 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
 
     public void setActionBarText(TalkClientContact contact) {
         String title;
-        if (contact.isGroup()) {
-            if (contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
-                title = getResources().getString(R.string.nearby_text);
-            } else {
-                title = contact.getName();
-            }
+        if (contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
+            title = getResources().getString(R.string.nearby_text);
         } else {
-            title = contact.getNickname();
+            title = contact.getName();
         }
         mActionBar.setTitle(title);
     }
 
     @Override
     public void clipBoardItemSelected(IContentObject contentObject) {
-        mCompositionFragment.onAttachmentSelected(contentObject);
-    }
-
-    private void setContact(TalkClientContact contact) {
-        LOG.debug("setContact(" + contact.getClientContactId() + ")");
-        mContact = contact;
-        setActionBarText(contact);
-        mMessagingFragment.setContact(contact);
-        mCompositionFragment.setContact(contact);
-        if (mContact.isDeleted()) {
-            finish();
-        }
-        // invalidate menu so that profile buttons get disabled/enabled
-        invalidateOptionsMenu();
+        mMessagingFragment.onAttachmentSelected(contentObject);
     }
 
     @Override
     protected void applicationWillEnterBackground() {
         super.applicationWillEnterBackground();
-        if (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
-            finish();
-        } else if (mContact.isClient() && mContact.isNearby()) {
-            finish();
-        }
+        mMessagingFragment.applicationWillEnterBackground();
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-        // we don't care
+    public void showMessageFragment() {
+        Bundle bundle = new Bundle();
+        bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, mContactId);
+
+        mMessagingFragment = new MessagingFragment();
+        mMessagingFragment.setArguments(bundle);
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fl_messaging_fragment_container, mMessagingFragment);
+        ft.commit();
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        if (mContact != null && mContact.getClientContactId() == contact.getClientContactId()) {
-            finish();
-        }
+    public void showSingleProfileFragment() {
+        Bundle bundle = new Bundle();
+        bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, mContactId);
+
+        mSingleProfileFragment = new SingleProfileFragment();
+        mSingleProfileFragment.setArguments(bundle);
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fl_messaging_fragment_container, mSingleProfileFragment);
+        ft.addToBackStack(null);
+        ft.commit();
     }
 
     @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-        // we don't care
-    }
+    public void showGroupProfileFragment() {
+        Bundle bundle = new Bundle();
+        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, mContactId);
 
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-        // we don't care
-    }
+        mGroupProfileFragment = new GroupProfileFragment();
+        mGroupProfileFragment.setArguments(bundle);
 
-    @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-        // we don't care
-    }
-
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-        // we don't care
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fl_messaging_fragment_container, mGroupProfileFragment);
+//        ft.addToBackStack(null);
+        ft.commit();
     }
 
     private class getContactIdInConversation extends BroadcastReceiver {

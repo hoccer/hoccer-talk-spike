@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/menu_delete_attachment"
+            android:title="@string/common_delete"
+            android:icon="@drawable/ic_delete"
+            android:visible="true"
+            android:showAsAction="always"/>
+
+    <item
+            android:id="@+id/menu_add_to_collection"
+            android:title="@string/add_to_collection"
+            android:icon="@drawable/ic_action_add_to_list"
+            android:visible="true"
+            android:showAsAction="always"/>
+
+    <item
+            android:id="@+id/menu_share"
+            android:title="@string/share_with_contact"
+            android:icon="@drawable/ic_action_share"
+            android:visible="true"
+            android:showAsAction="always"/>
+</menu>

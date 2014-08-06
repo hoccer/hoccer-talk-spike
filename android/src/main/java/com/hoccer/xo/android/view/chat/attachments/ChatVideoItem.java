@@ -3,7 +3,6 @@ package com.hoccer.xo.android.view.chat.attachments;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.*;
 import android.net.Uri;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -12,6 +11,7 @@ import android.widget.*;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.ThumbnailManager;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
@@ -50,15 +50,17 @@ public class ChatVideoItem extends ChatMessageItem {
         RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
         RelativeLayout videoContainer = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_container);
 
+        playButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_play, mMessage.isIncoming()));
+
         int mask;
         if (mMessage.isIncoming()) {
             rootView.setGravity(Gravity.LEFT);
             videoContainer.setGravity(Gravity.LEFT);
-            mask = R.drawable.bubble_grey;
+            mask = R.drawable.chat_bubble_incoming;
         } else {
             rootView.setGravity(Gravity.RIGHT);
             videoContainer.setGravity(Gravity.RIGHT);
-            mask = R.drawable.bubble_green;
+            mask = R.drawable.chat_bubble_compose;
         }
 
         String tag = (mMessage.getMessageId() != null) ? mMessage.getMessageId() : mMessage.getMessageTag();

@@ -1,15 +1,27 @@
 package com.hoccer.xo.android.base;
 
-import android.app.*;
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.TaskStackBuilder;
 import android.content.*;
+import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.*;
+import android.provider.MediaStore;
+import android.provider.Telephony;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.view.*;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.client.IXoAlertListener;
@@ -26,24 +38,11 @@ import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.release.R;
-
 import net.hockeyapp.android.CrashManager;
-
 import org.apache.log4j.Logger;
-
-import android.annotation.SuppressLint;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-
-import android.provider.MediaStore;
-import android.provider.Telephony;
-import android.view.*;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -298,13 +297,7 @@ public abstract class XoActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         // set up database connection
-        mDatabase = new XoClientDatabase(
-                AndroidTalkDatabase.getInstance(this.getApplicationContext()));
-        try {
-            mDatabase.initialize();
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
+        mDatabase = XoApplication.getXoClient().getDatabase();
 
         // set layout
         setContentView(getLayoutResource());
@@ -735,6 +728,11 @@ public abstract class XoActivity extends FragmentActivity {
     public void showPairing() {
         LOG.debug("showPairing()");
         startActivity(new Intent(this, PairingActivity.class));
+    }
+
+    public void showFullscreenPlayer() {
+        LOG.debug("showFullscreenPlayer()");
+        startActivity(new Intent(this, FullscreenPlayerActivity.class));
     }
 
     public void showPreferences() {

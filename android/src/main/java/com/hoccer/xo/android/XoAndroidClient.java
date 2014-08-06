@@ -1,5 +1,6 @@
 package com.hoccer.xo.android;
 
+import better.jsonrpc.websocket.JsonRpcWsClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.XoClient;
@@ -7,8 +8,6 @@ import com.hoccer.talk.client.XoClient;
 import org.eclipse.jetty.websocket.WebSocketClient;
 
 import java.net.URI;
-
-import better.jsonrpc.websocket.JsonRpcWsClient;
 
 /**
  * Created by jacob on 10.02.14.

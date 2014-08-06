@@ -9,9 +9,9 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
 
@@ -54,7 +54,7 @@ public class
     protected List<ChatMessageItem> mChatMessageItems;
 
     private ListView mListView;
-
+    private List < Integer > mLastVisibleViews = new ArrayList<Integer>();
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
@@ -116,6 +116,7 @@ public class
             final List<TalkClientMessage> messagesBatch = mDatabase.findMessagesByContactId(mContact.getClientContactId(), batchSize, offset);
             for (int i = 0; i < messagesBatch.size(); i++) {
                 ChatMessageItem messageItem = getItemForMessage(messagesBatch.get(i));
+
                 mChatMessageItems.set(offset + i, messageItem);
             }
             runOnUiThread(new Runnable() {
@@ -147,6 +148,11 @@ public class
         super.onDestroy();
         getXoClient().unregisterMessageListener(this);
         getXoClient().unregisterTransferListener(this);
+
+        for(int i = 0; i < mLastVisibleViews.size(); ++i){
+            int viewIndex = mLastVisibleViews.get(i);
+            getItem(viewIndex).setVisibility(false);
+        }
     }
 
     @Override
@@ -168,9 +174,42 @@ public class
         return position;
     }
 
+    private void removeInvisibleItems(){
+
+        int firstVisible = mListView.getFirstVisiblePosition();
+        int lastVisible = mListView.getLastVisiblePosition();
+
+        for (int i = 0; i < mLastVisibleViews.size(); ++i) {
+
+            int current = mLastVisibleViews.get(i);
+
+            if ((current < firstVisible) || (current > lastVisible)) {
+                if ( getItem(current) != null) {
+                    getItem(current).setVisibility(false);
+                }
+            }
+        }
+
+        int offset = 0;
+        mLastVisibleViews.clear();
+        while (firstVisible + offset <= lastVisible) {
+            mLastVisibleViews.add(firstVisible + offset);
+            offset++;
+        }
+    }
+
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
+
+        mListView.post(new Runnable() {
+            @Override
+            public void run() {
+                removeInvisibleItems();
+            }
+        });
+
         ChatMessageItem chatItem = getItem(position);
+
         if (!chatItem.getMessage().isSeen()) {
             markMessageAsSeen(chatItem.getMessage());
         }
@@ -179,6 +218,9 @@ public class
         } else {
             convertView = chatItem.recycleViewForMessage(convertView);
         }
+
+        chatItem.setVisibility(true);
+
         return convertView;
     }
 
@@ -210,17 +252,17 @@ public class
         }
 
         if (contentType != null) {
-            if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeImage)) {
+            if (contentType.equalsIgnoreCase(ContentMediaType.IMAGE)) {
                 chatItemType = ChatItemType.ChatItemWithImage;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeVideo)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.VIDEO)) {
                 chatItemType = ChatItemType.ChatItemWithVideo;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeAudio)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.AUDIO)) {
                 chatItemType = ChatItemType.ChatItemWithAudio;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeData)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.DATA)) {
                 chatItemType = ChatItemType.ChatItemWithData;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeVCard)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.VCARD)) {
                 chatItemType = ChatItemType.ChatItemWithContact;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeGeolocation)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.LOCATION)) {
                 chatItemType = ChatItemType.ChatItemWithLocation;
             }
         }
@@ -229,6 +271,7 @@ public class
 
     protected ChatMessageItem getItemForMessage(TalkClientMessage message) {
         ChatItemType itemType = getListItemTypeForMessage(message);
+
         if (itemType == ChatItemType.ChatItemWithImage) {
             return new ChatImageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithVideo) {
@@ -283,8 +326,8 @@ public class
     }
 
     @Override
-    public void onMessageAdded(final TalkClientMessage message) {
-        LOG.debug("onMessageAdded()");
+    public void onMessageCreated(final TalkClientMessage message) {
+        LOG.debug("onMessageCreated()");
         if (message.getConversationContact() == mContact && isValidMessage(message)) {
             for (int i = 0; i < mChatMessageItems.size(); i++) {
                 ChatMessageItem chatMessageItem = mChatMessageItems.get(i);
@@ -309,8 +352,8 @@ public class
     }
 
     @Override
-    public void onMessageRemoved(final TalkClientMessage message) {
-        LOG.debug("onMessageRemoved()");
+    public void onMessageDeleted(final TalkClientMessage message) {
+        LOG.debug("onMessageDeleted()");
         if (message.getConversationContact() == mContact) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -324,8 +367,8 @@ public class
     }
 
     @Override
-    public void onMessageStateChanged(final TalkClientMessage message) {
-        LOG.debug("onMessageStateChanged()");
+    public void onMessageUpdated(final TalkClientMessage message) {
+        LOG.debug("onMessageUpdated()");
         if (message.getConversationContact() == mContact && isValidMessage(message)) {
             runOnUiThread(new Runnable() {
                 @Override

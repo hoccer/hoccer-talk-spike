@@ -1192,7 +1192,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         try {
             TalkClientMessage message = mDatabase.findMessageByMessageTag(talkMessageTag, false);
             for(IXoMessageListener listener: mMessageListeners) {
-                listener.onMessageAdded(message);
+                listener.onMessageCreated(message);
             }
             if(TalkDelivery.STATE_NEW.equals(message.getOutgoingDelivery().getState())) {
                 requestDelivery(message);
@@ -2323,7 +2323,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         sendUploadDeliveryConfirmation(delivery);
 
         for(IXoMessageListener listener: mMessageListeners) {
-            listener.onMessageStateChanged(clientMessage);
+            listener.onMessageUpdated(clientMessage);
         }
     }
 
@@ -2471,7 +2471,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 mTransferAgent.onDownloadRegistered(attachmentDownload);
             }
             for(IXoMessageListener listener: mMessageListeners) {
-                listener.onMessageStateChanged(clientMessage);
+                listener.onMessageUpdated(clientMessage);
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
@@ -2540,9 +2540,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             for(IXoMessageListener listener: mMessageListeners) {
                 if(newMessage) {
-                    listener.onMessageAdded(clientMessage);
+                    listener.onMessageCreated(clientMessage);
                 } else {
-                    listener.onMessageStateChanged(clientMessage);
+                    listener.onMessageUpdated(clientMessage);
                 }
             }
 
@@ -3466,7 +3466,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         int length = mMessageListeners.size();
         for(int i = 0; i < length; i++) {
-            mMessageListeners.get(i).onMessageStateChanged(message);
+            mMessageListeners.get(i).onMessageUpdated(message);
         }
     }
 

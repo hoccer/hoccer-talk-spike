@@ -61,10 +61,10 @@ public class ChatImageItem extends ChatMessageItem {
         imageView.setVisibility(View.INVISIBLE);
         if (mMessage.isIncoming()) {
             rootView.setGravity(Gravity.LEFT);
-            mask = R.drawable.bubble_grey;
+            mask = R.drawable.chat_bubble_incoming;
         } else {
             rootView.setGravity(Gravity.RIGHT);
-            mask = R.drawable.bubble_green;
+            mask = R.drawable.chat_bubble_compose;
         }
         imageView.setVisibility(View.INVISIBLE);
         if (contentObject.getContentDataUrl() != null) {
