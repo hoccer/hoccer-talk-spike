@@ -49,6 +49,7 @@ public class ImageSelector implements IContentSelector {
         if (!isValidIntent) {
             return null;
         }
+
         Uri selectedContent = intent.getData();
         IContentCreator creator = findContentObjectCreator(selectedContent);
         if (creator == null) {
@@ -61,20 +62,33 @@ public class ImageSelector implements IContentSelector {
 
     private IContentCreator findContentObjectCreator(Uri selectedContent) {
         String contentString = selectedContent.toString();
-        if (contentString.contains(".android.gallery3d.")) {
-            return new PicasaContentObjectCreator();
-        } else if (contentString.startsWith("content://media/")) {
+	if (isPicasaContent(contentString)) {
+	    return new PicasaContentObjectCreator();
+	} else if (isFileContent(contentString)) {
             return new FileContentObjectCreator();
         }
 
         return null;
     }
 
+    static private boolean isPicasaContent(String contentString) {
+	return
+	    	// picase miages should at least contain this..
+	    contentString.contains(".android.gallery3d.")
+
+		// Moto G content string on dirks mobile
+	||  contentString.startsWith("content://com.google.android.apps.photos.content/");
+    }
+
+    static private boolean isFileContent(String contentString) {
+	return contentString.startsWith("content://media/");
+    }
+
     @Override
     public boolean isValidIntent(Context context, Intent intent) {
         Uri contentUri = intent.getData();
         String[] columns = {
-                MediaStore.Images.Media.MIME_TYPE
+            MediaStore.Images.Media.MIME_TYPE
         };
         Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
         cursor.moveToFirst();
