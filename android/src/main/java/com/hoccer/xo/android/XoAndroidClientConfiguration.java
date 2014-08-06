@@ -5,32 +5,39 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.hoccer.talk.client.XoDefaultClientConfiguration;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
-    private Context mContext;
-    private SharedPreferences mPreferences;
+
+    private static final Logger LOG = Logger.getLogger(XoAndroidClientConfiguration.class);
+
+    private final SharedPreferences mPreferences;
+    private final Properties mProperties;
 
     public XoAndroidClientConfiguration(Context context) {
-        mContext = context;
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        mProperties = new Properties();
+
+        try {
+            InputStream inputStream = context.getAssets().open("environment.properties");
+            mProperties.load(inputStream);
+        } catch (IOException e) {
+            LOG.error("Failed to load environment.properties file", e);
+        }
     }
 
     @Override
     public String getServerUri() {
-        String serverUri;
+        return mProperties.getProperty("hoccer.talkserver.uri");
+    }
 
-        try {
-            if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
-                serverUri = mPreferences.getString("preference_server_uri", mContext.getResources().getStringArray(R.array.servers_development)[0]);
-            } else {
-                serverUri = mContext.getResources().getString(R.string.servers_production);
-            }
-        }
-        catch(Exception e){
-            serverUri = "server url missing";
-        }
-
-        return serverUri;
+    @Override
+    public String getUrlScheme() {
+        return mProperties.getProperty("hoccer.invitation.uri.scheme") + "://";
     }
 
     @Override
