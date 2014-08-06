@@ -36,7 +36,7 @@ public class XoTransferAgent implements IXoTransferListener {
         ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
         tfb.setNameFormat("transfer-%d");
         tfb.setUncaughtExceptionHandler(client.getHost().getUncaughtExceptionHandler());
-        mExecutor = Executors.newScheduledThreadPool(client.getHost().getTransferThreads(), tfb.build());
+        mExecutor = Executors.newScheduledThreadPool(client.getConfiguration().getTransferThreads(), tfb.build());
         mListeners = new ArrayList<IXoTransferListener>();
         mDownloadsById = new HashMap<Integer, TalkClientDownload>();
         mUploadsById = new HashMap<Integer, TalkClientUpload>();

@@ -215,7 +215,7 @@ public class XoClientService extends Service {
     private void configureServiceUri() {
         String uriString = mPreferences.getString("preference_service_uri", "");
         if (uriString.isEmpty()) {
-            uriString = XoApplication.getXoClient().getHost().getServerUri();
+            uriString = XoApplication.getXoClient().getConfiguration().getServerUri();
         }
         URI uri = URI.create(uriString);
         mClient.setServiceUri(uri);

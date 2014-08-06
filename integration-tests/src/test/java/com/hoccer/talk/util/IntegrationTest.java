@@ -128,7 +128,7 @@ public class IntegrationTest {
         if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
-        return new XoClient(new TestClientHost(server));
+        return new XoClient(new TestClientHost(), new TestClientConfiguration(server));
     }
 
     private static void configureLogging() {

@@ -46,7 +46,7 @@ public class TalkToolClient {
         mDatabaseBackend = new TalkToolClientDatabase(this);
         mDatabaseBackend.initializeDb();
         mHost = new TalkToolClientHost(this);
-        mClient = new XoClient(mHost);
+        mClient = new XoClient(mHost, new TalkToolClientConfiguration(this));
 
         mLocationUpdater = Executors.newSingleThreadScheduledExecutor();
     }

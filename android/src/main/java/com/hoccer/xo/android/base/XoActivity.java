@@ -722,7 +722,7 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     public String getBarcodeString() {
-        return getXoClient().getHost().getUrlScheme() + getXoClient().generatePairingToken();
+        return getXoClient().getConfiguration().getUrlScheme() + getXoClient().generatePairingToken();
     }
 
     public void composeInviteSms(String token) {
@@ -732,7 +732,7 @@ public abstract class XoActivity extends FragmentActivity {
             TalkClientContact self = mDatabase.findSelfContact(false);
 
             String message = String
-                    .format(getString(R.string.sms_invitation_text), getResources().getString(R.string.url_scheme), token, self.getName());
+                    .format(getString(R.string.sms_invitation_text), getXoClient().getConfiguration().getUrlScheme(), token, self.getName());
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //At least KitKat
                 String defaultSmsPackageName = Telephony.Sms
@@ -764,7 +764,7 @@ public abstract class XoActivity extends FragmentActivity {
         try {
             TalkClientContact self = mDatabase.findSelfContact(false);
             String message = String
-                    .format(getString(R.string.email_invitation_text), getXoClient().getHost().getUrlScheme(), token, self.getName());
+                    .format(getString(R.string.email_invitation_text), getXoClient().getConfiguration().getUrlScheme(), token, self.getName());
             Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
             email.putExtra(Intent.EXTRA_SUBJECT,"Join me at Hoccer!");
             email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));
