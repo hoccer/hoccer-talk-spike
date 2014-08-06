@@ -1397,6 +1397,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 if (delivery.getSenderId().equals(clientId)) {
                     setDeliveryState(delivery, newState, false, true);
                 } else {
+                    // TODO: remove this fix in 2015 or after next forced update
+                    // temporary fix for bug in iOS-Client 2.2.12
+                    if (TalkDelivery.STATE_ABORTED_ACKNOWLEDGED.equals(newState)) {
+                        return inDeliveryReject(messageId, "no key or private key not found");
+                    }
+                    // end of fix
                     throw new RuntimeException("you are not the sender");
                 }
                 TalkDelivery result = new TalkDelivery();
@@ -2271,6 +2277,30 @@ public class TalkRpcHandler implements ITalkRpcServer {
         String clientId = mConnection.getClientId();
 
         for (String groupId : groupIds) {
+            TalkGroupMember membership = mDatabase.findGroupMemberForClient(groupId, clientId);
+            if (membership != null && (membership.isInvited() || membership.isMember())) {
+                result.add(true);
+            } else {
+                result.add(false);
+            }
+        }
+
+        return result.toArray(new Boolean[result.size()]);
+    }
+
+    @Override
+    public Boolean[] areMembersOfGroup(String groupId, String[] clientIds) {
+        requireIdentification(true);
+        ArrayList<Boolean> result = new ArrayList<Boolean>();
+        logCall("areMembersOfGroup(groupId: '"+groupId+"clientIds '" + Arrays.toString(clientIds) + "'");
+
+        String myClientId = mConnection.getClientId();
+        TalkGroupMember myMembership = mDatabase.findGroupMemberForClient(groupId, myClientId);
+        if (!(myMembership != null && (myMembership.isInvited() || myMembership.isMember()))) {
+            throw new RuntimeException("not allowed, you are not a member of this group");
+        }
+
+        for (String clientId : clientIds) {
             TalkGroupMember membership = mDatabase.findGroupMemberForClient(groupId, clientId);
             if (membership != null && (membership.isInvited() || membership.isMember())) {
                 result.add(true);

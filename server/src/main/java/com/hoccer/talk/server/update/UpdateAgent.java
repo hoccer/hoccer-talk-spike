@@ -590,9 +590,17 @@ public class UpdateAgent extends NotificationDeferrer {
                 withSharedKeyIdSalt = "RENEW";
             }
             ITalkRpcClient rpc = connection.getClientRpc();
-            LOG.info("requestGroupKeys, calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
-            String[] newKeyBoxes = rpc.getEncryptedGroupKeys(forGroupId, forSharedKeyId, withSharedKeyIdSalt, forClientIds, withPublicKeyIds);
-            LOG.info("requestGroupKeys, call of getEncryptedGroupKeys(" + forGroupId + ") returned " + newKeyBoxes.length + " items)");
+            LOG.info("requestGroupKeys, acquiring lock for calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
+            String[] newKeyBoxes;
+            // serialize encrypted key request for one client
+            synchronized (connection.keyRequestLock) {
+                LOG.info("requestGroupKeys, calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
+                // temporarily add penalty so this client won't be selected again unless there is no other who can do the work
+                connection.penalizePriorization(1000);
+                newKeyBoxes = rpc.getEncryptedGroupKeys(forGroupId, forSharedKeyId, withSharedKeyIdSalt, forClientIds, withPublicKeyIds);
+                connection.penalizePriorization(-1000);
+                LOG.info("requestGroupKeys, call of getEncryptedGroupKeys(" + forGroupId + ") returned " + newKeyBoxes.length + " items)");
+            }
             if (newKeyBoxes != null) {
                 boolean responseLengthOk;
                 if ("RENEW".equals(forSharedKeyId)) {
@@ -606,7 +614,7 @@ public class UpdateAgent extends NotificationDeferrer {
                     responseLengthOk = newKeyBoxes.length == forClientIds.length;
                 }
                 if (responseLengthOk) {
-                    connection.resetPriorityPenalty();
+                    connection.resetPriorityPenalty(0L);
                     Date now = new Date();
 
                     TalkGroup group = mDatabase.findGroupById(forGroupId);
