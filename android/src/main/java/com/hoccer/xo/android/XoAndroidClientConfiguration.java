@@ -77,4 +77,12 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     public boolean isCrashReportingEnabled() {
         return isDevelopmentModeEnabled() || mPreferences.getBoolean("preference_crash_report", false);
     }
+
+    public String getAttachmentsDirectory() {
+        return "Hoccer XO";
+    }
+
+    public String getAvatarsDirectory() {
+        return "avatars";
+    }
 }

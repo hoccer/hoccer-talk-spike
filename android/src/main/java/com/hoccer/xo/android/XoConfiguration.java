@@ -15,16 +15,6 @@ public class XoConfiguration {
     /* HockeyApp constant id  */
     public static final String HOCKEYAPP_ID = "60f2a55705e94d33e62a7b1643671f46";
 
-    /* Directories in external storage */
-    public static final String EXTERNAL_ATTACHMENTS = "Hoccer XO";
-
-    /* Directories in internal storage */
-    public static final String INTERNAL_AVATARS = "avatars";
-    public static final String INTERNAL_DOWNLOADS = "downloads";
-    public static final String INTERNAL_UPLOADS = "uploads";
-    public static final String INTERNAL_GENERATED = "generated";
-    public static final String INTERNAL_THUMBNAILS = "thumbnails";
-
     /**
      * Background executor thread count
      *

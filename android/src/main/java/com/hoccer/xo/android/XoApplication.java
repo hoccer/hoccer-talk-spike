@@ -33,6 +33,11 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class XoApplication extends Application implements Thread.UncaughtExceptionHandler {
 
+    /* Directories in internal storage */
+    private static final String DOWNLOADS_DIRECTORY = "downloads";
+    private static final String GENERATED_DIRECTORY = "generated";
+    private static final String THUMBNAILS_DIRECTORY = "thumbnails";
+
     /** logger for this class (initialized in onCreate) */
     private static Logger LOG = null;
 
@@ -104,24 +109,24 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private Thread.UncaughtExceptionHandler mPreviousHandler;
 
     public static File getAttachmentDirectory() {
-        return new File(EXTERNAL_STORAGE, XoConfiguration.EXTERNAL_ATTACHMENTS);
+        return new File(EXTERNAL_STORAGE, CONFIGURATION.getAttachmentsDirectory());
     }
 
     public static File getEncryptedDownloadDirectory() {
-        return new File(INTERNAL_STORAGE, XoConfiguration.INTERNAL_DOWNLOADS);
+        return new File(INTERNAL_STORAGE, DOWNLOADS_DIRECTORY);
     }
 
     public static File getGeneratedDirectory() {
-        return new File(INTERNAL_STORAGE, XoConfiguration.INTERNAL_GENERATED);
+        return new File(INTERNAL_STORAGE, GENERATED_DIRECTORY);
     }
 
     public static File getAvatarDirectory() {
-        return new File(EXTERNAL_STORAGE, XoConfiguration.INTERNAL_AVATARS);
+        return new File(EXTERNAL_STORAGE, CONFIGURATION.getAvatarsDirectory());
     }
 
 
     public static File getThumbnailDirectory() {
-        return new File(INTERNAL_STORAGE, XoConfiguration.INTERNAL_THUMBNAILS);
+        return new File(INTERNAL_STORAGE, THUMBNAILS_DIRECTORY);
     }
 
     public static File getAvatarLocation(TalkClientDownload download) {
@@ -177,6 +182,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // initialize logging system
         XoLogging.initialize(this);
+
+        // Initialize configuration
+        CONFIGURATION = new XoAndroidClientConfiguration(this);
+        XoConfiguration.initialize(this);
 
         // configure ormlite to use log4j
         System.setProperty("com.j256.ormlite.logger.type", "LOG4J");
@@ -252,10 +261,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         tfb2.setUncaughtExceptionHandler(this);
         INCOMING_EXECUTOR = Executors
                 .newScheduledThreadPool(XoConfiguration.CLIENT_THREADS, tfb2.build());
-
-        // Initialize configuration
-        CONFIGURATION = new XoAndroidClientConfiguration(this);
-        XoConfiguration.initialize(this);
 
         // create client instance
         LOG.info("creating client");
