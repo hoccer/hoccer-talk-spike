@@ -44,19 +44,19 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        AudioAttachmentView audioRowView = (AudioAttachmentView) convertView;
-        if (audioRowView == null) {
-            audioRowView = new AudioAttachmentView(parent.getContext());
+        AudioAttachmentView audioView = (AudioAttachmentView) convertView;
+        if (audioView == null) {
+            audioView = new AudioAttachmentView(parent.getContext());
         }
 
         TalkClientDownload item = mCollection.getItem(position);
-        audioRowView.setMediaItem(item);
-        audioRowView.updatePlayPauseView();
+        audioView.setMediaItem(item);
+        audioView.updatePlayPauseView();
         Integer itemId = (int)getItemId(position);
-        audioRowView.getChildAt(0).setSelected(mSelectedItemIds.contains(itemId));
-        audioRowView.showDragHandle(mShowDragHandle);
+        audioView.getChildAt(0).setSelected(mSelectedItemIds.contains(itemId));
+        audioView.showDragHandle(mShowDragHandle);
 
-        return audioRowView;
+        return audioView;
     }
 
     public void showDragHandle(boolean show) {
