@@ -89,11 +89,6 @@
                 android:title="Enable support mode on server"
                 android:defaultValue="false"/>
 
-        <EditTextPreference
-                android:key="preference_server_uri"
-                android:title="Enter Server URI"
-                />
-
         <ListPreference
                 android:key="preference_data_import"
                 android:title="Import data ..."

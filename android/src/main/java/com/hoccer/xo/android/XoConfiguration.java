@@ -91,8 +91,6 @@ public class XoConfiguration {
                 if(key.equals("preference_enable_server_side_support_mode")) {
                     sIsSupportModeEnabled = sPreferences.getBoolean("preference_enable_server_side_support_mode", false);
                     XoApplication.getXoClient().hello();
-                } else if(key.equals("preference_server_uri")) {
-                    XoApplication.reinitializeXoClient();
                 }
             }
         };
