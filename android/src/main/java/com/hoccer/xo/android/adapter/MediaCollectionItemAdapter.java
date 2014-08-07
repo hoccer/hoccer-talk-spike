@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.adapter;
 
 import android.database.DataSetObserver;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -70,14 +72,14 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     public void selectItem(int itemId) {
         if(!mSelectedItemIds.contains(itemId)) {
             mSelectedItemIds.add(itemId);
-            notifyDataSetChanged();
+            refreshView();
         }
     }
 
     public void deselectItem(int itemId) {
         if(mSelectedItemIds.contains(itemId)) {
             mSelectedItemIds.remove((Integer)itemId);
-            notifyDataSetChanged();
+            refreshView();
         }
     }
 
@@ -101,6 +103,16 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
         return result;
     }
 
+    private void refreshView() {
+        Handler guiHandler = new Handler(Looper.getMainLooper());
+        guiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
+    }
+
     @Override
     public boolean hasStableIds() {
         return true;
@@ -122,7 +134,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     @Override
     public void drop(int from, int to) {
         mCollection.reorderItemIndex(from, to);
-        notifyDataSetChanged();
+        refreshView();
     }
 
     @Override
@@ -132,24 +144,22 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
 
     @Override
     public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
-        notifyDataSetChanged();
-
+        refreshView();
     }
 
     @Override
     public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
         deselectItem(itemRemoved.getClientDownloadId());
-        notifyDataSetChanged();
+        refreshView();
     }
 
     @Override
     public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
-        notifyDataSetChanged();
-
+        refreshView();
     }
 
     @Override
     public void onCollectionCleared(TalkClientMediaCollection collection) {
-        notifyDataSetChanged();
+        refreshView();
     }
 }
