@@ -1,17 +1,13 @@
 package com.hoccer.xo.android.adapter;
 
 import android.database.DataSetObserver;
-import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMediaCollection;
-import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.client.IXoDownloadListener;
+import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.view.AudioAttachmentView;
 import com.mobeta.android.dslv.DragSortListView;
 import org.apache.log4j.Logger;
@@ -20,93 +16,61 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AttachmentListAdapter extends BaseAdapter implements DragSortListView.DropListener {
+public class AttachmentListAdapter extends BaseAdapter implements DragSortListView.DropListener, IXoDownloadListener {
 
-    private static final long INVALID_ID = -1;
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
-    private List<TalkClientDownload> mAttachmentItems = new ArrayList<TalkClientDownload>();
+    private List<TalkClientDownload> mItems = new ArrayList<TalkClientDownload>();
 
-    private String mContentMediaType;
-    private int mConversationContactId = MediaPlayerService.UNDEFINED_CONTACT_ID;
+    private String mMediaType = null;
+    private TalkClientContact mContact = null;
 
-    private SparseBooleanArray mCheckedItemPositions = new SparseBooleanArray();
+    private List<Integer> mSelectedItemIds = new ArrayList<Integer>();
 
-    private TalkClientMediaCollection mCollection = null;
     private boolean mShowDragHandle = false;
 
-    public AttachmentListAdapter() {
-        this(null, MediaPlayerService.UNDEFINED_CONTACT_ID);
-    }
+    /*
+     * Constructor
+     * If contact is null all downloads are considered.
+     * If mediaType is null all types of downloads are considered.
+     */
+    public AttachmentListAdapter(TalkClientContact contact, String mediaType) {
+        mMediaType = mediaType;
+        mContact = contact;
 
-    public AttachmentListAdapter(String pContentMediaType) {
-        this(pContentMediaType, MediaPlayerService.UNDEFINED_CONTACT_ID);
-    }
-
-    public AttachmentListAdapter(int pConversationContactId) {
-        this(null, pConversationContactId);
-    }
-
-    public AttachmentListAdapter(String pContentMediaType, int pConversationContactId) {
-        setContentMediaTypeFilter(pContentMediaType);
-        setContactIdFilter(pConversationContactId);
-    }
-
-    public TalkClientDownload[] getAttachmentItems() {
-        return mAttachmentItems.toArray(new TalkClientDownload[mAttachmentItems.size()]);
-    }
-
-    public void setItems(TalkClientDownload[] items) {
-        mAttachmentItems.clear();
-        for(int i = 0; i < items.length; i++) {
-            mAttachmentItems.add(items[i]);
-        }
-        notifyDataSetChanged();
+        updateItems();
+        XoApplication.getXoClient().getDatabase().registerDownloadListener(this);
     }
 
     @Override
     public int getCount() {
-        return mAttachmentItems.size();
+        return mItems.size();
     }
 
     @Override
     public TalkClientDownload getItem(int position) {
-        return mAttachmentItems.get(position);
+        return mItems.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        long itemId = INVALID_ID;
-
-        if (position >= 0 || position < mAttachmentItems.size()) {
-            TalkClientDownload item = getItem(position);
-            itemId = item.getClientDownloadId();
-        }
-
-        return itemId;
+        return getItem(position).getClientDownloadId();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (mAttachmentItems.get(position) == null) {
-            mAttachmentItems.remove(position);
-            if (mAttachmentItems.size() <= position) {
-                return null;
-            }
-            return getView(position, convertView, parent);
+        AudioAttachmentView audioView = (AudioAttachmentView) convertView;
+        if (audioView == null) {
+            audioView = new AudioAttachmentView(parent.getContext());
         }
 
-        AudioAttachmentView audioRowView = (AudioAttachmentView) convertView;
-        if (audioRowView == null) {
-            audioRowView = new AudioAttachmentView(parent.getContext());
-        }
+        audioView.setMediaItem(mItems.get(position));
+        audioView.updatePlayPauseView();
+        Integer itemId = (int)getItemId(position);
+        audioView.getChildAt(0).setSelected(mSelectedItemIds.contains(itemId));
+        audioView.showDragHandle(mShowDragHandle);
 
-        audioRowView.setMediaItem(mAttachmentItems.get(position));
-        audioRowView.updatePlayPauseView();
-        audioRowView.getChildAt(0).setSelected(mCheckedItemPositions.get(position));
-        audioRowView.showDragHandle(mShowDragHandle);
-
-        return audioRowView;
+        return audioView;
     }
 
     @Override
@@ -128,177 +92,181 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         }
     }
 
-    public void setContentMediaTypeFilter(String pContentMediaType) {
-        mContentMediaType = pContentMediaType;
-    }
-
-    public String getContentMediaType() {
-        return mContentMediaType;
-    }
-
-    public void setContactIdFilter(int pConversationContactId) {
-        mConversationContactId = pConversationContactId;
-    }
-
-    public int getConversationContactId() {
-        return mConversationContactId;
-    }
-
     @Override
     public void drop(int from, int to) {
         if (from != to) {
-            TalkClientDownload item = mAttachmentItems.get(from);
-            mAttachmentItems.remove(from);
-            mAttachmentItems.add(to, item);
+            TalkClientDownload item = mItems.get(from);
+            mItems.remove(from);
+            mItems.add(to, item);
 
-            if (mCollection != null) {
-                mCollection.reorderItemIndex(from, to);
+            notifyDataSetChanged();
+        }
+    }
+
+    public void setMediaType(String mediaType) {
+        // do nothing if already set
+        if(areEqual(mMediaType, mediaType)) {
+            return;
+        }
+
+        mMediaType = mediaType;
+        updateItems();
+    }
+
+    public String getMediaType() {
+        return mMediaType;
+    }
+
+    public void setContact(TalkClientContact contact) {
+        // do nothing if already set
+        if(areEqual(mContact, contact)) {
+            return;
+        }
+
+        mContact = contact;
+        updateItems();
+    }
+
+    public TalkClientContact getContact() {
+        return mContact;
+    }
+
+    public TalkClientDownload[] getItems() {
+        return mItems.toArray(new TalkClientDownload[mItems.size()]);
+    }
+
+    public void selectItem(int itemId) {
+        if(!mSelectedItemIds.contains(itemId)) {
+            mSelectedItemIds.add(itemId);
+            notifyDataSetChanged();
+        }
+    }
+
+    public void deselectItem(int itemId) {
+        if(mSelectedItemIds.contains(itemId)) {
+            mSelectedItemIds.remove((Integer)itemId);
+            notifyDataSetChanged();
+        }
+    }
+
+    public void selectAllItems() {
+        deselectAllItems();
+        for(int i = 0; i < getCount(); i++) {
+            selectItem((int) getItemId(i));
+        }
+    }
+
+    public void deselectAllItems() {
+        mSelectedItemIds.clear();
+    }
+
+    public List<TalkClientDownload> getSelectedItems() {
+        List<TalkClientDownload> result = new ArrayList<TalkClientDownload>();
+        for(int itemId : mSelectedItemIds) {
+            result.add(getItemFromId(itemId));
+        }
+
+        return result;
+    }
+
+    // Returns the item with the given id or null if not found
+    public TalkClientDownload getItemFromId(int itemId) {
+        TalkClientDownload result = null;
+        for(TalkClientDownload item : mItems) {
+            if(item.getClientDownloadId() == itemId) {
+                result = item;
+                break;
             }
-
-            notifyDataSetChanged();
         }
-        // TODO: update mCheckedItemPositions
-    }
-
-    public boolean removeItem(TalkClientDownload item) {
-        return removeItem(item, false);
-    }
-
-    public boolean removeItem(TalkClientDownload item, boolean removeFromCollection) {
-        if (removeFromCollection) {
-            removeItemFromCollection(item);
-        }
-
-        boolean isRemovable = mAttachmentItems.contains(item);
-        if (isRemovable) {
-            mAttachmentItems.remove(mAttachmentItems.indexOf(item));
-            notifyDataSetChanged();
-        }
-
-        return isRemovable;
-    }
-
-    public void removeItemAt(int which) throws IndexOutOfBoundsException {
-        removeItemAt(which, false);
-    }
-
-    public void removeItemAt(int which, boolean removeFromCollection) throws IndexOutOfBoundsException{
-        if (removeFromCollection) {
-            removeItemFromCollection(getItem(which));
-        }
-
-        mAttachmentItems.remove(which);
-        updateCheckedItems();
-    }
-
-    public void addItemAt(TalkClientDownload item, int pos) throws IndexOutOfBoundsException{
-            mAttachmentItems.add(pos, item);
-            updateCheckedItems();
-            notifyDataSetChanged();
-    }
-
-    public void clear() {
-        mAttachmentItems.clear();
-        notifyDataSetChanged();
-    }
-
-    public void setCheckedItemsPositions(SparseBooleanArray itemPositions) {
-        mCheckedItemPositions = itemPositions;
-        notifyDataSetChanged();
-    }
-
-    public SparseBooleanArray getCheckedItemPositions() {
-        return mCheckedItemPositions;
-    }
-
-    public void loadAttachments() {
-        mCollection = null;
-        try {
-            List<TalkClientDownload> downloads;
-            if (mContentMediaType != null) {
-                if (mConversationContactId != MediaPlayerService.UNDEFINED_CONTACT_ID) {
-                    downloads = XoApplication.getXoClient().getDatabase().findClientDownloadByMediaTypeAndConversationContactId(ContentMediaType.AUDIO, mConversationContactId);
-                } else {
-                    downloads = XoApplication.getXoClient().getDatabase().findClientDownloadByMediaType(mContentMediaType);
-                }
-            } else {
-                downloads = XoApplication.getXoClient().getDatabase().findAllClientDownloads();
-            }
-
-            createAttachmentsFromTalkClientDownloads(downloads);
-        } catch (SQLException e) {
-            LOG.error(e);
-        }
-    }
-
-    public void loadAttachmentsFromCollection(TalkClientMediaCollection collection) {
-        mCollection = collection;
-        List<TalkClientDownload> downloads = new ArrayList<TalkClientDownload>();
-        for (int i = 0; i < collection.size(); ++i) {
-            downloads.add(collection.getItem(i));
-        }
-        createAttachmentsFromTalkClientDownloads(downloads);
+        return result;
     }
 
     public void showDragHandle(boolean show) {
         mShowDragHandle = show;
     }
 
-    private void removeItemFromCollection(TalkClientDownload item) {
-        if (isItemPartOfCollection(item)) {
-            mCollection.removeItem((TalkClientDownload) item);
+    @Override
+    public void onDownloadCreated(TalkClientDownload download) {
+        if(shouldItemBeAdded(download)) {
+            updateItems();
         }
     }
 
-    private void createAttachmentsFromTalkClientDownloads(Iterable<TalkClientDownload> downloads) {
-        if (downloads != null) {
-            for (TalkClientDownload download : downloads) {
-                if (!isRecordedAudio(download.getFileName())) {
-                    mAttachmentItems.add(download);
+    @Override
+    public void onDownloadUpdated(TalkClientDownload download) {
+        if(shouldItemBeAdded(download)) {
+            updateItems();
+        }
+    }
+
+    @Override
+    public void onDownloadDeleted(TalkClientDownload download) {
+        if(mItems.contains(download)) {
+            mItems.remove(download);
+            deselectItem(download.getClientDownloadId());
+            notifyDataSetChanged();
+        }
+    }
+
+    public void updateItems() {
+        try {
+            if (mMediaType != null) {
+                if (mContact != null) {
+                    mItems = XoApplication.getXoClient().getDatabase().findClientDownloadByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
+                } else {
+                    mItems = XoApplication.getXoClient().getDatabase().findClientDownloadByMediaType(mMediaType);
+                }
+            } else {
+                if (mContact != null) {
+                    mItems = XoApplication.getXoClient().getDatabase().findClientDownloadByContactId(mContact.getClientContactId());
+                } else {
+                    mItems = XoApplication.getXoClient().getDatabase().findAllClientDownloads();
                 }
             }
+        } catch (SQLException e) {
+            LOG.error(e);
         }
+
+        notifyDataSetChanged();
     }
 
-    private void updateCheckedItems() {
-        if (mCheckedItemPositions.size() > 0) {
-            SparseBooleanArray updatedSelection = new SparseBooleanArray(mCheckedItemPositions.size());
+    private boolean shouldItemBeAdded(TalkClientDownload download) {
+        // do nothing if the download is incomplete or already contained
+        if(download.getState() != TalkClientDownload.State.COMPLETE || mItems.contains(download)) {
+            return false;
+        }
 
-            for (int i = 0; i < mCheckedItemPositions.size(); ++i) {
-                boolean b = mCheckedItemPositions.valueAt(i);
-                int k = mCheckedItemPositions.keyAt(i);
-                updatedSelection.put(k + 1, b);
-            }
+        // check if mediaType matches
+        if(mMediaType != null && !mMediaType.equals(download.getMediaType())) {
+            return false;
+        }
 
-            mCheckedItemPositions.clear();
-
-            //@Info Setting mSelection to updatedSelection won't work since the reference changes, which is not allowed
-            for (int i = 0; i < updatedSelection.size(); ++i) {
-                mCheckedItemPositions.append(updatedSelection.keyAt(i), updatedSelection.valueAt(i));
+        // check if contact matches
+        if(mContact != null) {
+            try {
+                TalkClientMessage message = XoApplication.getXoClient().getDatabase().findClientMessageByTalkClientDownloadId(download.getClientDownloadId());
+                if(message == null || !mContact.equals(message.getConversationContact())) {
+                    return false;
+                }
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
+
+        return true;
     }
 
-    private boolean isRecordedAudio(String fileName) {
-        if (fileName.startsWith("recording")) {
-            return true;
+    private boolean areEqual(Object obj1, Object obj2) {
+        if(obj1 != null) {
+            if (obj1.equals(obj2)) {
+                return true;
+            }
+        } else {
+            if(obj2 == null) {
+                return true;
+            }
         }
+
         return false;
-    }
-
-    private boolean isItemPartOfCollection(TalkClientDownload item) {
-        boolean isItemPartOfCollection = false;
-
-        try {
-            TalkClientDownload contentObject = (TalkClientDownload) item;
-            if (mCollection != null && contentObject != null && mCollection.hasItem(contentObject)) {
-                isItemPartOfCollection = true;
-            }
-
-        } catch (ClassCastException e) {
-
-        }
-
-        return isItemPartOfCollection;
     }
 }

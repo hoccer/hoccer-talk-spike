@@ -6,7 +6,6 @@ import android.content.*;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ListFragment;
-import android.util.SparseBooleanArray;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
@@ -26,7 +25,6 @@ import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SearchResultsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.content.AttachmentAdapterDownloadHandler;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
@@ -49,7 +47,6 @@ public class AttachmentListFragment extends ListFragment {
     public static final int SELECT_CONTACT_REQUEST = 2;
 
     public static final int ALL_CONTACTS_ID = -1;
-    private SparseBooleanArray mSelectedItems;
 
     private MediaPlayerService mMediaPlayerService;
 
@@ -57,16 +54,15 @@ public class AttachmentListFragment extends ListFragment {
 
     private ServiceConnection mConnection;
 
-    private AttachmentListAdapter mAttachmentListAdapter;
-    private AttachmentAdapterDownloadHandler mDownloadListener;
+    private AttachmentListAdapter mAttachmentAdapter;
     private SearchResultsAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
-    private int mContactIdFilter = ALL_CONTACTS_ID;
     private MenuItem mSearchMenuItem;
     private String mContentMediaTypeFilter = ContentMediaType.AUDIO;
     private boolean mInSearchMode = false;
     private XoClientDatabase mDatabase;
+    private ActionMode mCurrentActionMode;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,13 +71,7 @@ public class AttachmentListFragment extends ListFragment {
         mDatabase = XoApplication.getXoClient().getDatabase();
 
         setHasOptionsMenu(true);
-        mAttachmentListAdapter = new AttachmentListAdapter();
-        mAttachmentListAdapter.setContactIdFilter(mContactIdFilter);
-        mAttachmentListAdapter.setContentMediaTypeFilter(mContentMediaTypeFilter);
-        loadAttachments();
-
-        mDownloadListener = new AttachmentAdapterDownloadHandler(getActivity(), mAttachmentListAdapter);
-        XoApplication.getXoClient().getDatabase().registerDownloadListener(mDownloadListener);
+        mAttachmentAdapter = new AttachmentListAdapter(null, mContentMediaTypeFilter);
 
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
         mSearchContactsAdapter.onCreate();
@@ -90,36 +80,6 @@ public class AttachmentListFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_audio_attachment_list, container, false);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            switch (requestCode) {
-                case SELECT_COLLECTION_REQUEST:
-                    Integer mediaCollectionId = data.getIntExtra(MediaCollectionSelectionListFragment.MEDIA_COLLECTION_ID_EXTRA, -1);
-                    if (mediaCollectionId > -1) {
-                        addSelectedAttachmentsToCollection(mediaCollectionId);
-                    }
-                    break;
-                case SELECT_CONTACT_REQUEST:
-                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.SELECTED_CONTACT_IDS_EXTRA);
-                    // TODO better errorhandling!
-                    for (Integer contactId : contactSelections) {
-                        try {
-                            TalkClientContact contact = retrieveContactById(contactId);
-                            AttachmentOperationHelper.sendAttachmentsToContact(getSelectedAttachments(), contact);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (URISyntaxException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    break;
-            }
-        }
     }
 
     @Override
@@ -154,7 +114,7 @@ public class AttachmentListFragment extends ListFragment {
             toggleSearchMode(true);
             setListAdapter(mResultsAdapter);
         } else {
-            setListAdapter(mAttachmentListAdapter);
+            setListAdapter(mAttachmentAdapter);
         }
 
         getActivity().getActionBar().setTitle(R.string.menu_music_viewer);
@@ -182,7 +142,6 @@ public class AttachmentListFragment extends ListFragment {
 
     @Override
     public void onDestroy() {
-        XoApplication.getXoClient().getDatabase().unregisterDownloadListener(mDownloadListener);
         super.onDestroy();
     }
 
@@ -199,11 +158,36 @@ public class AttachmentListFragment extends ListFragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void loadAttachments() {
-        mAttachmentListAdapter.clear();
-        mAttachmentListAdapter.setContactIdFilter(mContactIdFilter);
-        mAttachmentListAdapter.setContentMediaTypeFilter(mContentMediaTypeFilter);
-        mAttachmentListAdapter.loadAttachments();
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case SELECT_COLLECTION_REQUEST:
+                    Integer mediaCollectionId = data.getIntExtra(MediaCollectionSelectionListFragment.MEDIA_COLLECTION_ID_EXTRA, -1);
+                    if (mediaCollectionId > -1) {
+                        retrieveCollectionAndAddSelectedAttachments(mediaCollectionId);
+                    }
+                    break;
+                case SELECT_CONTACT_REQUEST:
+                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.SELECTED_CONTACT_IDS_EXTRA);
+                    // send attachment to all selected contacts
+                    for (Integer contactId : contactSelections) {
+                        try {
+                            TalkClientContact contact = mDatabase.findClientContactById(contactId);
+                            AttachmentOperationHelper.sendAttachmentsToContact(mAttachmentAdapter.getSelectedItems(), contact);
+                        } catch (SQLException e) {
+                            LOG.error(e.getMessage(), e);
+                        } catch (FileNotFoundException e) {
+                            LOG.error(e.getMessage(), e);
+                        } catch (URISyntaxException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
+                    break;
+            }
+        }
+        mCurrentActionMode.finish();
     }
 
     private boolean isPaused(IContentObject item) {
@@ -273,19 +257,6 @@ public class AttachmentListFragment extends ListFragment {
                 mResultsAdapter.addSection(getString(R.string.search_section_caption_audio_files),
                         mSearchAttachmentAdapter);
             }
-
-//            setListAdapter(mResultsAdapter);
-        }
-    }
-
-    private void filterAttachmentsByContactId(int selectedContactId) {
-        if (mContactIdFilter != selectedContactId) {
-            mContactIdFilter = selectedContactId;
-            mAttachmentListAdapter.clear();
-            mAttachmentListAdapter.setContactIdFilter(mContactIdFilter);
-            mAttachmentListAdapter.setContentMediaTypeFilter(mContentMediaTypeFilter);
-            mAttachmentListAdapter.loadAttachments();
-            updateListView(mAttachmentListAdapter);
         }
     }
 
@@ -303,7 +274,7 @@ public class AttachmentListFragment extends ListFragment {
 
             setListAdapter(mResultsAdapter);
 
-            mSearchAttachmentAdapter = new AttachmentSearchResultAdapter(mAttachmentListAdapter.getAttachmentItems());
+            mSearchAttachmentAdapter = new AttachmentSearchResultAdapter(mAttachmentAdapter.getItems());
 
         } else {
             mInSearchMode = false;
@@ -312,82 +283,21 @@ public class AttachmentListFragment extends ListFragment {
         }
     }
 
-    private void setSelectedItems(SparseBooleanArray checkedItemPositions) {
-        mSelectedItems = new SparseBooleanArray();
-        for (int i = 0; i < checkedItemPositions.size(); ++i) {
-            mSelectedItems.append(checkedItemPositions.keyAt(i), checkedItemPositions.valueAt(i));
-        }
-    }
-
-    private void addSelectedAttachmentsToCollection(Integer mediaCollectionId) {
-        try {
-            retrieveCollectionAndAddSelectedAttachments(mediaCollectionId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) throws SQLException {
-        TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
-        List<String> addedFilenames = new ArrayList<String>();
-        for (TalkClientDownload download : getSelectedDownloads()) {
-            if (addAttachmentToCollection(mediaCollection, download)) {
-                addedFilenames.add(download.getFileName());
+    private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) {
+        List<TalkClientDownload> selectedItems = mAttachmentAdapter.getSelectedItems();
+        if(selectedItems.size() > 0) {
+            try {
+                TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
+                List<String> addedFilenames = new ArrayList<String>();
+                for (TalkClientDownload item : selectedItems) {
+                    mediaCollection.addItem(item);
+                    addedFilenames.add(item.getFileName());
+                }
+                Toast.makeText(getActivity(), String.format(getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
+            } catch (SQLException e) {
+                LOG.error("Could not find MediaCollection with id: " + String.valueOf(mediaCollectionId), e);
             }
         }
-        if (!addedFilenames.isEmpty()) {
-            Toast.makeText(getActivity(), String.format(getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private boolean addAttachmentToCollection(TalkClientMediaCollection mediaCollection, TalkClientDownload item) {
-        if (!mediaCollection.hasItem(item)) {
-            mediaCollection.addItem(item);
-            return true;
-        }
-        return false;
-    }
-
-    private TalkClientContact retrieveContactById(Integer contactId) {
-        TalkClientContact contact = null;
-        try {
-            contact = XoApplication.getXoClient().getDatabase().findClientContactById(contactId);
-        } catch (SQLException e) {
-            LOG.error("Contact not found for id: " + contactId, e);
-        }
-        return contact;
-    }
-
-    private List<TalkClientDownload> getSelectedAttachments() {
-        List<TalkClientDownload> attachments = new ArrayList<TalkClientDownload>();
-        for (int index = 0; index < mSelectedItems.size(); ++index) {
-            int pos = mSelectedItems.keyAt(index);
-            if (mSelectedItems.get(pos)) {
-                attachments.add(mAttachmentListAdapter.getItem(pos));
-            }
-        }
-        return attachments;
-    }
-
-    private List<TalkClientDownload> getSelectedDownloads() {
-        List<TalkClientDownload> downloads = new ArrayList<TalkClientDownload>();
-        for (int index = 0; index < mSelectedItems.size(); ++index) {
-            int pos = mSelectedItems.keyAt(index);
-            if (mSelectedItems.get(pos)) {
-                TalkClientDownload download = mAttachmentListAdapter.getItem(pos);
-                downloads.add(download);
-            }
-        }
-        return downloads;
-    }
-
-    private void updateListView(final BaseAdapter adapter) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                adapter.notifyDataSetChanged();
-            }
-        });
     }
 
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
@@ -402,7 +312,7 @@ public class AttachmentListFragment extends ListFragment {
                     position = 0;
                     mMediaPlayerService.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), download));
                 } else {
-                    setMediaList();
+                    mMediaPlayerService.setPlaylist(new UserPlaylist(mDatabase, mAttachmentAdapter.getContact()));
                 }
 
                 if (isPlaying(download)) {
@@ -418,15 +328,18 @@ public class AttachmentListFragment extends ListFragment {
             } else if (selectedItem instanceof TalkClientContact) {
                 toggleSearchMode(false);
                 mSearchMenuItem.collapseActionView();
-                filterAttachmentsByContactId(((TalkClientContact) selectedItem).getClientContactId());
-                setListAdapter(mAttachmentListAdapter);
+                mAttachmentAdapter.setContact((TalkClientContact) selectedItem);
+                setListAdapter(mAttachmentAdapter);
             }
         }
 
         @Override
         public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-            mAttachmentListAdapter.setCheckedItemsPositions(getListView().getCheckedItemPositions());
-            updateListView(mAttachmentListAdapter);
+            if(checked) {
+                mAttachmentAdapter.selectItem((int) id);
+            } else {
+                mAttachmentAdapter.deselectItem((int) id);
+            }
         }
 
         @Override
@@ -443,10 +356,7 @@ public class AttachmentListFragment extends ListFragment {
         }
 
         @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-
-            setSelectedItems(getListView().getCheckedItemPositions());
-
+        public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
                     XoDialogs.showYesNoDialog("RemoveAttachment", R.string.dialog_attachment_delete_title, R.string.dialog_attachment_delete_message, getActivity(),
@@ -454,22 +364,22 @@ public class AttachmentListFragment extends ListFragment {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
                                     deleteSelectedAttachments();
+                                    mode.finish();
                                 }
                             }, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                 }
                             });
-                    mode.finish();
                     return true;
                 case R.id.menu_share:
-                    mode.finish();
+                    mCurrentActionMode = mode;
                     startActivityForResult(new Intent(getActivity(), ContactSelectionActivity.class), SELECT_CONTACT_REQUEST);
-                    return false;
+                    return true;
                 case R.id.menu_add_to_collection:
-                    mode.finish();
+                    mCurrentActionMode = mode;
                     startActivityForResult(new Intent(getActivity(), MediaCollectionSelectionActivity.class), SELECT_COLLECTION_REQUEST);
-                    return false;
+                    return true;
                 default:
                     return false;
             }
@@ -477,18 +387,7 @@ public class AttachmentListFragment extends ListFragment {
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-        }
-
-        private void setMediaList() {
-            int contactId = mAttachmentListAdapter.getConversationContactId();
-            TalkClientContact contact;
-            try {
-                contact = mDatabase.findContactById(contactId);
-            } catch (SQLException e) {
-                LOG.error("Could not retrieve contact from database", e);
-                return;
-            }
-            mMediaPlayerService.setPlaylist(new UserPlaylist(mDatabase, contact));
+            mAttachmentAdapter.deselectAllItems();
         }
     }
 
@@ -525,7 +424,7 @@ public class AttachmentListFragment extends ListFragment {
         public boolean onMenuItemActionCollapse(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
                 toggleSearchMode(false);
-                setListAdapter(mAttachmentListAdapter);
+                setListAdapter(mAttachmentAdapter);
             }
 
             return true;
@@ -533,15 +432,13 @@ public class AttachmentListFragment extends ListFragment {
     }
 
     private void deleteSelectedAttachments() {
-        List<TalkClientDownload> selectedObjects = getSelectedAttachments();
+        List<TalkClientDownload> selectedObjects = mAttachmentAdapter.getSelectedItems();
         for(TalkClientDownload item : selectedObjects) {
             try {
                 XoApplication.getXoClient().getDatabase().deleteClientDownloadAndMessage(item);
             } catch (SQLException e) {
                 LOG.error(e);
             }
-            mAttachmentListAdapter.removeItem(item);
         }
-        updateListView(mAttachmentListAdapter);
     }
 }
