@@ -107,10 +107,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return new File(EXTERNAL_STORAGE, XoConfiguration.EXTERNAL_ATTACHMENTS);
     }
 
-//    public static File getEncryptedUploadDirectory() {
-//        return new File(INTERNAL_STORAGE, XoConfiguration.INTERNAL_UPLOADS);
-//    }
-
     public static File getEncryptedDownloadDirectory() {
         return new File(INTERNAL_STORAGE, XoConfiguration.INTERNAL_DOWNLOADS);
     }
@@ -240,8 +236,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ensureDirectory(getGeneratedDirectory());
         ensureNoMedia(getGeneratedDirectory());
         ensureDirectory(getThumbnailDirectory());
-//        ensureDirectory(getEncryptedUploadDirectory());
-//        ensureNoMedia(getEncryptedUploadDirectory());
         ensureDirectory(getEncryptedDownloadDirectory());
         ensureNoMedia(getEncryptedDownloadDirectory());
 
@@ -269,7 +263,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         XoClient client = new XoAndroidClient(CLIENT_HOST, CONFIGURATION);
         client.setAvatarDirectory(getAvatarDirectory().toString());
         client.setAttachmentDirectory(getAttachmentDirectory().toString());
-//        client.setEncryptedUploadDirectory(getEncryptedUploadDirectory().toString()); //TODO: to be deleted encryption happens on the fly now
         client.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
         CLIENT = client;
 
