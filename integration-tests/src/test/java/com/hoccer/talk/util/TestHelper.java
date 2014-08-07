@@ -99,7 +99,7 @@ public class TestHelper {
 
         // TODO: There are some currently unknown conditions missing that ensure that the invitation actually properly occured
         // removing this sleep leads to some failures, esp. involving the group key generation by members (instead of admins)
-        Thread.sleep(1000);
+        Thread.sleep(2000);
     }
 
     public static void joinGroup(final XoClient joiningClient, final String groupId) {
