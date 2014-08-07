@@ -54,12 +54,12 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     @Override
     public boolean isSupportModeEnabled() {
-        return XoConfiguration.isSupportModeEnabled();
+        return mPreferences.getBoolean("preference_enable_server_side_support_mode", false);
     }
 
     @Override
     public String getSupportTag() {
-        return XoConfiguration.SERVER_SUPPORT_TAG;
+        return "log";
     }
 
 }

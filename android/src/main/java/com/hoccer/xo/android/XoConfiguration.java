@@ -75,11 +75,6 @@ public class XoConfiguration {
     /** Timeout after which the client service terminates automatically (seconds) */
     public static final int SERVICE_KEEPALIVE_TIMEOUT       = 1800;
 
-    /** The tag describing server-side support mode */
-    public static final String SERVER_SUPPORT_TAG = "log";
-
-    private static boolean sIsSupportModeEnabled = false;
-
     private static SharedPreferences sPreferences;
     private static SharedPreferences.OnSharedPreferenceChangeListener sPreferencesListener;
 
@@ -89,13 +84,11 @@ public class XoConfiguration {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if(key.equals("preference_enable_server_side_support_mode")) {
-                    sIsSupportModeEnabled = sPreferences.getBoolean("preference_enable_server_side_support_mode", false);
                     XoApplication.getXoClient().hello();
                 }
             }
         };
         sPreferences.registerOnSharedPreferenceChangeListener(sPreferencesListener);
-        sIsSupportModeEnabled = sPreferences.getBoolean("preference_enable_server_side_support_mode", false);
         if (!sPreferences.contains("preference_keysize")) {
             SharedPreferences.Editor editor = sPreferences.edit();
             editor.putString("preference_keysize", "2048");
@@ -130,10 +123,6 @@ public class XoConfiguration {
         SharedPreferences.Editor editor = sPreferences.edit();
         editor.putBoolean("NEED_TO_REGENERATE_KEYS", false);
         editor.commit();
-    }
-
-    public static boolean isSupportModeEnabled() {
-        return sIsSupportModeEnabled;
     }
 
     public static boolean reportingEnable() {
