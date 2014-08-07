@@ -11,13 +11,6 @@ import org.apache.log4j.PatternLayout;
  * This class collects various android-specific settings for the XO client.
  */
 public class XoConfiguration {
-	
-    /**
-     * Background executor thread count
-     *
-     * AFAIK this must be at least 3 for RPC to work.
-     */
-    public static final int CLIENT_THREADS = 10;
 
     private static SharedPreferences sPreferences;
     private static SharedPreferences.OnSharedPreferenceChangeListener sPreferencesListener;

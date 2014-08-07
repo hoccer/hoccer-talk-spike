@@ -38,6 +38,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static final String GENERATED_DIRECTORY = "generated";
     private static final String THUMBNAILS_DIRECTORY = "thumbnails";
 
+    /**
+     * Background executor thread count
+     *
+     * AFAIK this must be at least 3 for RPC to work.
+     */
+    private static final int CLIENT_THREADS = 10;
+
     /** logger for this class (initialized in onCreate) */
     private static Logger LOG = null;
 
@@ -253,14 +260,11 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
         tfb.setNameFormat("client-%d");
         tfb.setUncaughtExceptionHandler(this);
-        EXECUTOR = Executors.newScheduledThreadPool(
-                        XoConfiguration.CLIENT_THREADS,
-                        tfb.build());
+        EXECUTOR = Executors.newScheduledThreadPool(CLIENT_THREADS, tfb.build());
         ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
         tfb2.setNameFormat("receiving client-%d");
         tfb2.setUncaughtExceptionHandler(this);
-        INCOMING_EXECUTOR = Executors
-                .newScheduledThreadPool(XoConfiguration.CLIENT_THREADS, tfb2.build());
+        INCOMING_EXECUTOR = Executors.newScheduledThreadPool(CLIENT_THREADS, tfb2.build());
 
         // create client instance
         LOG.info("creating client");
