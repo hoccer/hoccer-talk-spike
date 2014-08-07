@@ -82,6 +82,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     }
 
     public void selectAllItems() {
+        deselectAllItems();
         for(int i = 0; i < mCollection.size(); i++) {
             mSelectedItemIds.add((int)getItemId(i));
         }
@@ -91,7 +92,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
         mSelectedItemIds.clear();
     }
 
-    public List<TalkClientDownload> getAllSelectedItems() {
+    public List<TalkClientDownload> getSelectedItems() {
         List<TalkClientDownload> result = new ArrayList<TalkClientDownload>();
         for(int itemId : mSelectedItemIds) {
             result.add(mCollection.getItemFromId(itemId));
@@ -137,8 +138,8 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
 
     @Override
     public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
+        deselectItem(itemRemoved.getClientDownloadId());
         notifyDataSetChanged();
-
     }
 
     @Override

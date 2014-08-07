@@ -141,7 +141,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = retrieveContactById(contactId);
-                            AttachmentOperationHelper.sendAttachmentsToContact(mCollectionAdapter.getAllSelectedItems(), contact);
+                            AttachmentOperationHelper.sendAttachmentsToContact(mCollectionAdapter.getSelectedItems(), contact);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (URISyntaxException e) {
