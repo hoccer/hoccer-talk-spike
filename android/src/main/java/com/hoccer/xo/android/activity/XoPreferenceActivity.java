@@ -140,7 +140,7 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private void checkForCrashesIfEnabled() {
         if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
-            CrashManager.register(this, XoConfiguration.HOCKEYAPP_ID);
+            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId());
         }
     }
 

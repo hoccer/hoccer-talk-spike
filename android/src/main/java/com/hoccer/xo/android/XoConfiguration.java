@@ -12,9 +12,6 @@ import org.apache.log4j.PatternLayout;
  */
 public class XoConfiguration {
 	
-    /* HockeyApp constant id  */
-    public static final String HOCKEYAPP_ID = "60f2a55705e94d33e62a7b1643671f46";
-
     /**
      * Background executor thread count
      *

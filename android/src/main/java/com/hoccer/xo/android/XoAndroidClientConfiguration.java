@@ -85,4 +85,8 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     public String getAvatarsDirectory() {
         return "avatars";
     }
+
+    public String getHockeyAppId() {
+        return "60f2a55705e94d33e62a7b1643671f46";
+    }
 }
