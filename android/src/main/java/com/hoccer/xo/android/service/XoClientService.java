@@ -48,9 +48,10 @@ public class XoClientService extends Service {
 
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
-    private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
-
+    private static final long NOTIFICATION_ALARM_BACKOFF = 5000;
+    private static final long NOTIFICATION_CANCEL_BACKOFF = 2000;
     private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
+    private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
 
     /** Executor for ourselves and the client */
     ScheduledExecutorService mExecutor;
@@ -482,7 +483,7 @@ public class XoClientService extends Service {
 
 
         // do not sound alarms overly often (sound, vibrate)
-        if (passed < XoConfiguration.NOTIFICATION_ALARM_BACKOFF) {
+        if (passed < NOTIFICATION_ALARM_BACKOFF) {
             notify = false;
         }
 
@@ -617,7 +618,7 @@ public class XoClientService extends Service {
 
     private void cancelMessageNotification() {
         long now = System.currentTimeMillis();
-        long cancelTime = mNotificationTimestamp + XoConfiguration.NOTIFICATION_CANCEL_BACKOFF;
+        long cancelTime = mNotificationTimestamp + NOTIFICATION_CANCEL_BACKOFF;
         long delay = Math.max(0, cancelTime - now);
         mExecutor.schedule(new Runnable() {
             @Override
