@@ -190,6 +190,7 @@
 
     <build>
         <filters>
+            <filter>environment-${environment}.properties</filter>
             <filter>assets/${environment}/environment.properties</filter>
         </filters>
         <resources>
