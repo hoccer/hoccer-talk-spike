@@ -105,7 +105,7 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField
     private String nickname;
-    
+
 
     public TalkClientContact() {
         //System.out.println("TalkClientContact(): this="+this);
@@ -647,21 +647,12 @@ public class TalkClientContact implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if(obj != null && obj instanceof TalkClientContact && clientContactId == ((TalkClientContact)obj).clientContactId) {
             return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
+        } else {
             return false;
         }
-
-        TalkClientContact that = (TalkClientContact) o;
-
-        if (clientContactId != that.clientContactId) {
-            return false;
-        }
-
-        return true;
     }
 
     @Override
