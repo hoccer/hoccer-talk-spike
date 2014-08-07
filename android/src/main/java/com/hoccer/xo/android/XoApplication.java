@@ -44,6 +44,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static IXoClientHost CLIENT_HOST = null;
     /** global xo client (initialized in onCreate) */
     private static XoClient CLIENT = null;
+    /** global xo configuration (initialized in onCreate) */
+    private static XoAndroidClientConfiguration CONFIGURATION = null;
     /** global xo sound pool for system sounds (initialized in onCreate) */
     private static XoSoundPool SOUND_POOL = null;
 
@@ -63,6 +65,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     /** @return the xo client */
     public static XoClient getXoClient() {
         return CLIENT;
+    }
+    /** @return the xo configuration */
+    public static XoAndroidClientConfiguration getConfiguration() {
+        return CONFIGURATION;
     }
     /** @return the xo sound pool */
     public static XoSoundPool getXoSoundPool() {
@@ -257,7 +263,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // create client instance
         LOG.info("creating client");
         CLIENT_HOST = new XoAndroidClientHost(this);
-        XoClient client = new XoAndroidClient(CLIENT_HOST, new XoAndroidClientConfiguration(this));
+        CONFIGURATION = new XoAndroidClientConfiguration(this);
+        XoClient client = new XoAndroidClient(CLIENT_HOST, CONFIGURATION);
         client.setAvatarDirectory(getAvatarDirectory().toString());
         client.setAttachmentDirectory(getAttachmentDirectory().toString());
 //        client.setEncryptedUploadDirectory(getEncryptedUploadDirectory().toString()); //TODO: to be deleted encryption happens on the fly now
