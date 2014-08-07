@@ -14,14 +14,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
 import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.XoClientConfiguration;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.release.R;
 import net.sourceforge.zbar.*;
-
-
-import java.io.IOException;
 
 public class QrScannerActivity extends Activity implements IXoContactListener {
     private ImageScanner scanner;
