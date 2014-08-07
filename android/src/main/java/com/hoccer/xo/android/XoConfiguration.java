@@ -19,15 +19,6 @@ public class XoConfiguration {
      */
     public static final int CLIENT_THREADS = 10;
 
-    /** If true, GCM registration will be performed forcibly on every connect */
-    public static final boolean GCM_ALWAYS_REGISTER = false;
-    /** If true, GCM registration should always be pushed to server */
-    public static final boolean GCM_ALWAYS_UPDATE = true;
-    /** GCM sender id for push notifications */
-    public static final String GCM_SENDER_ID = "1894273085";
-    /** GCM server registration expiration (seconds) */
-    public static final long GCM_REGISTRATION_EXPIRATION = 24 * 3600;
-
     /** Log tag to use in logcat */
     public static final String LOG_LOGCAT_TAG = "HoccerXO";
     /** The layout for android logcat */

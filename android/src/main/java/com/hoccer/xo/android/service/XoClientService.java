@@ -274,7 +274,7 @@ public class XoClientService extends Service {
         if (mGcmSupported) {
             if (forced || !GCMRegistrar.isRegistered(this)) {
                 LOG.debug("requesting GCM registration");
-                GCMRegistrar.register(this, XoConfiguration.GCM_SENDER_ID);
+                GCMRegistrar.register(this, TalkPushService.GCM_SENDER_ID);
             } else {
                 LOG.debug("no need to request GCM registration");
             }
@@ -293,7 +293,7 @@ public class XoClientService extends Service {
                 mClient.registerGcm(this.getPackageName(), GCMRegistrar.getRegistrationId(this));
                 // set the registration timeout (XXX move elsewhere)
                 GCMRegistrar.setRegisterOnServerLifespan(
-                        this, XoConfiguration.GCM_REGISTRATION_EXPIRATION * 1000);
+                        this, TalkPushService.GCM_REGISTRATION_EXPIRATION * 1000);
                 // tell the registrar that we did this successfully
                 GCMRegistrar.setRegisteredOnServer(this, true);
             } else {
@@ -654,8 +654,8 @@ public class XoClientService extends Service {
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        doRegisterGcm(XoConfiguration.GCM_ALWAYS_REGISTER);
-                        doUpdateGcm(XoConfiguration.GCM_ALWAYS_UPDATE);
+                        doRegisterGcm(TalkPushService.GCM_ALWAYS_REGISTER);
+                        doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
                     }
                 });
             }
