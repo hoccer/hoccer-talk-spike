@@ -94,9 +94,10 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         });
 
         mSendButton = (ImageButton) view.findViewById(R.id.btn_messaging_composer_send);
-        mSendButton.setEnabled(false || XoConfiguration.DEVELOPMENT_MODE_ENABLED);
+        mSendButton.setEnabled(false || XoApplication.getConfiguration().isDevelopmentModeEnabled());
         mSendButton.setOnClickListener(this);
-        if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
+
+        if (XoApplication.getConfiguration().isDevelopmentModeEnabled()) {
             mSendButton.setOnLongClickListener(this);
             mSendButton.setLongClickable(true);
         }
@@ -130,7 +131,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             @Override
             public void afterTextChanged(Editable s) {
                 boolean enable = isComposed() || s.toString().length() > 0;
-                mSendButton.setEnabled(enable || XoConfiguration.DEVELOPMENT_MODE_ENABLED);
+                mSendButton.setEnabled(enable || XoApplication.getConfiguration().isDevelopmentModeEnabled());
             }
         };
         mTextEdit.addTextChangedListener(mTextWatcher);
@@ -195,7 +196,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     private void clearComposedMessage() {
         mTextEdit.setText(null);
-        mSendButton.setEnabled(false || XoConfiguration.DEVELOPMENT_MODE_ENABLED);
+        mSendButton.setEnabled(false || XoApplication.getConfiguration().isDevelopmentModeEnabled());
         clearAttachment();
     }
 

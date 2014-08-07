@@ -290,7 +290,7 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     private void checkForCrashesIfEnabled() {
-        if (XoConfiguration.reportingEnable()) {
+        if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
             CrashManager.register(this, XoConfiguration.HOCKEYAPP_ID);
         }
     }

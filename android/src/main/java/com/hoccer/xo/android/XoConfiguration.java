@@ -25,12 +25,6 @@ public class XoConfiguration {
     public static final String INTERNAL_GENERATED = "generated";
     public static final String INTERNAL_THUMBNAILS = "thumbnails";
 
-    /* Enable or disable development settings in preferences */
-    public static final boolean DEVELOPMENT_MODE_ENABLED = false;
-
-    /* true: log level = debug, log to sdcard activated */
-    public static final boolean TESTING_MODE_ENABLED = true;
-
     /**
      * Background executor thread count
      *
@@ -90,13 +84,13 @@ public class XoConfiguration {
         };
         sPreferences.registerOnSharedPreferenceChangeListener(sPreferencesListener);
 
-        if(TESTING_MODE_ENABLED) {
+        if(application.getConfiguration().isTestingModeEnabled()) {
             SharedPreferences.Editor editor = sPreferences.edit();
             editor.putString("preference_log_level", "DEBUG");
             editor.putBoolean("preference_log_sd", true);
             editor.commit();
         }
-        if(DEVELOPMENT_MODE_ENABLED) {
+        if(application.getConfiguration().isDevelopmentModeEnabled()) {
             SharedPreferences.Editor editor = sPreferences.edit();
             editor.putString("preference_log_level", "DEBUG");
             editor.commit();
@@ -120,7 +114,4 @@ public class XoConfiguration {
         editor.commit();
     }
 
-    public static boolean reportingEnable() {
-        return DEVELOPMENT_MODE_ENABLED || sPreferences.getBoolean("preference_crash_report", false);
-    }
 }

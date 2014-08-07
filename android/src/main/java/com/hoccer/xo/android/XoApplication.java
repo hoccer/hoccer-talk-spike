@@ -181,7 +181,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // initialize logging system
         XoLogging.initialize(this);
-        XoConfiguration.initialize(this);
 
         // configure ormlite to use log4j
         System.setProperty("com.j256.ormlite.logger.type", "LOG4J");
@@ -260,10 +259,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         INCOMING_EXECUTOR = Executors
                 .newScheduledThreadPool(XoConfiguration.CLIENT_THREADS, tfb2.build());
 
+        // Initialize configuration
+        CONFIGURATION = new XoAndroidClientConfiguration(this);
+        XoConfiguration.initialize(this);
+
         // create client instance
         LOG.info("creating client");
         CLIENT_HOST = new XoAndroidClientHost(this);
-        CONFIGURATION = new XoAndroidClientConfiguration(this);
         XoClient client = new XoAndroidClient(CLIENT_HOST, CONFIGURATION);
         client.setAvatarDirectory(getAvatarDirectory().toString());
         client.setAttachmentDirectory(getAttachmentDirectory().toString());

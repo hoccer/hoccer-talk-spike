@@ -30,6 +30,8 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
         }
     }
 
+    // Override generic XoClient configuration settings
+
     @Override
     public String getServerUri() {
         return mProperties.getProperty("hoccer.talkserver.uri");
@@ -62,4 +64,17 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
         return "log";
     }
 
+    // The following configuration settings are specific to the Android app
+
+    public boolean isDevelopmentModeEnabled() {
+        return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.enable.development.mode", "false"));
+    }
+
+    public boolean isTestingModeEnabled() {
+        return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.enable.testing.mode", "false"));
+    }
+
+    public boolean isCrashReportingEnabled() {
+        return isDevelopmentModeEnabled() || mPreferences.getBoolean("preference_crash_report", false);
+    }
 }

@@ -51,7 +51,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
         getActionBar().setDisplayHomeAsUpEnabled(true);
-        if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
+        if (XoApplication.getConfiguration().isDevelopmentModeEnabled()) {
             addPreferencesFromResource(R.xml.development_preferences);
         } else {
             addPreferencesFromResource(R.xml.preferences);
@@ -139,7 +139,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void checkForCrashesIfEnabled() {
-        if (XoConfiguration.reportingEnable()) {
+        if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
             CrashManager.register(this, XoConfiguration.HOCKEYAPP_ID);
         }
     }
