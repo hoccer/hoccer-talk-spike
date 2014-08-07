@@ -89,11 +89,6 @@ public class XoConfiguration {
             }
         };
         sPreferences.registerOnSharedPreferenceChangeListener(sPreferencesListener);
-        if (!sPreferences.contains("preference_keysize")) {
-            SharedPreferences.Editor editor = sPreferences.edit();
-            editor.putString("preference_keysize", "2048");
-            editor.commit();
-        }
 
         if(TESTING_MODE_ENABLED) {
             SharedPreferences.Editor editor = sPreferences.edit();
