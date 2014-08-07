@@ -305,8 +305,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         LOG.info("shutting down logging");
         XoLogging.shutdown();
-        LOG.info("shutting down configuration");
-        XoConfiguration.shutdown();
     }
 
     @Override

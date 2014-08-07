@@ -84,11 +84,6 @@
                 android:entryValues="@array/preference_log_level_values"
                 android:defaultValue="INFO"/>
 
-        <CheckBoxPreference
-                android:key="preference_enable_server_side_support_mode"
-                android:title="Enable support mode on server"
-                android:defaultValue="false"/>
-
         <ListPreference
                 android:key="preference_data_import"
                 android:title="Import data ..."

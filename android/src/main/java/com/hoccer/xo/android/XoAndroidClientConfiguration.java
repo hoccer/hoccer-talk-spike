@@ -54,16 +54,6 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
         return mPreferences.getBoolean("preference_confirm_messages_seen", true);
     }
 
-    @Override
-    public boolean isSupportModeEnabled() {
-        return mPreferences.getBoolean("preference_enable_server_side_support_mode", false);
-    }
-
-    @Override
-    public String getSupportTag() {
-        return "log";
-    }
-
     // The following configuration settings are specific to the Android app
 
     public boolean isDevelopmentModeEnabled() {

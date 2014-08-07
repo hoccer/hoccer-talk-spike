@@ -13,19 +13,9 @@ import org.apache.log4j.PatternLayout;
 public class XoConfiguration {
 
     private static SharedPreferences sPreferences;
-    private static SharedPreferences.OnSharedPreferenceChangeListener sPreferencesListener;
 
     public static void initialize(XoApplication application) {
         sPreferences = PreferenceManager.getDefaultSharedPreferences(application);
-        sPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if(key.equals("preference_enable_server_side_support_mode")) {
-                    XoApplication.getXoClient().hello();
-                }
-            }
-        };
-        sPreferences.registerOnSharedPreferenceChangeListener(sPreferencesListener);
 
         if(application.getConfiguration().isTestingModeEnabled()) {
             SharedPreferences.Editor editor = sPreferences.edit();
@@ -37,13 +27,6 @@ public class XoConfiguration {
             SharedPreferences.Editor editor = sPreferences.edit();
             editor.putString("preference_log_level", "DEBUG");
             editor.commit();
-        }
-    }
-
-    public static final void shutdown() {
-        if(sPreferencesListener != null) {
-            sPreferences.unregisterOnSharedPreferenceChangeListener(sPreferencesListener);
-            sPreferencesListener = null;
         }
     }
 
