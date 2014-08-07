@@ -19,9 +19,6 @@ public class XoConfiguration {
      */
     public static final int CLIENT_THREADS = 10;
 
-    /** Whether to reconnect explicitly on connection changes */
-    public static final boolean CONNECTIVITY_RECONNECT_ON_CHANGE = false;
-
     private static SharedPreferences sPreferences;
     private static SharedPreferences.OnSharedPreferenceChangeListener sPreferencesListener;
 
