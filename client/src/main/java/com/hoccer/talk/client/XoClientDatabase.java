@@ -539,13 +539,30 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return downloads;
     }
 
-    public List<TalkClientDownload> findClientDownloadByMediaTypeAndConversationContactId(String mediaType, int conversationContactId) throws SQLException {
+    public List<TalkClientDownload> findClientDownloadByContactId(int contactId) throws SQLException {
 
         QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
         messageQb
                 .orderBy("timestamp", false)
                 .where()
-                .eq("conversationContact_id", conversationContactId);
+                .eq("conversationContact_id", contactId);
+
+        QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
+        downloadQb.where()
+                .eq("state", TalkClientDownload.State.COMPLETE);
+
+        List<TalkClientDownload> downloads = downloadQb.join(messageQb).query();
+
+        return downloads;
+    }
+
+    public List<TalkClientDownload> findClientDownloadByMediaTypeAndContactId(String mediaType, int contactId) throws SQLException {
+
+        QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
+        messageQb
+                .orderBy("timestamp", false)
+                .where()
+                .eq("conversationContact_id", contactId);
 
         QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
         downloadQb.where()
