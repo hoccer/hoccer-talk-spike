@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.adapter;
 
 import android.database.DataSetObserver;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -99,7 +101,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
             mItems.remove(from);
             mItems.add(to, item);
 
-            notifyDataSetChanged();
+            refreshView();
         }
     }
 
@@ -138,14 +140,14 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     public void selectItem(int itemId) {
         if(!mSelectedItemIds.contains(itemId)) {
             mSelectedItemIds.add(itemId);
-            notifyDataSetChanged();
+            refreshView();
         }
     }
 
     public void deselectItem(int itemId) {
         if(mSelectedItemIds.contains(itemId)) {
             mSelectedItemIds.remove((Integer)itemId);
-            notifyDataSetChanged();
+            refreshView();
         }
     }
 
@@ -204,7 +206,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         if(mItems.contains(download)) {
             mItems.remove(download);
             deselectItem(download.getClientDownloadId());
-            notifyDataSetChanged();
+            refreshView();
         }
     }
 
@@ -227,7 +229,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
             LOG.error(e);
         }
 
-        notifyDataSetChanged();
+        refreshView();
     }
 
     private boolean shouldItemBeAdded(TalkClientDownload download) {
@@ -268,5 +270,15 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         }
 
         return false;
+    }
+
+    private void refreshView() {
+        Handler guiHandler = new Handler(Looper.getMainLooper());
+        guiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 }
