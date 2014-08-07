@@ -19,19 +19,6 @@ public class XoConfiguration {
      */
     public static final int CLIENT_THREADS = 10;
 
-    /** Log tag to use in logcat */
-    public static final String LOG_LOGCAT_TAG = "HoccerXO";
-    /** The layout for android logcat */
-    public static final Layout LOG_LOGCAT_LAYOUT = new PatternLayout("[%t] %-5p %c - %m%n");
-    /** Base name of log files */
-    public static final String LOG_FILE_NAME = "hoccer-xo.log";
-    /** The maximum number of log files to keep */
-    public static final int LOG_FILE_COUNT = 10;
-    /** The maximum size of each log file */
-    public static final int LOG_FILE_SIZE = 1024 * 1024;
-    /** The layout for log files */
-    public static final Layout LOG_FILE_LAYOUT = new PatternLayout("[%t] %-5p %c - %m%n");
-
     /** Whether to reconnect explicitly on connection changes */
     public static final boolean CONNECTIVITY_RECONNECT_ON_CHANGE = false;
 
