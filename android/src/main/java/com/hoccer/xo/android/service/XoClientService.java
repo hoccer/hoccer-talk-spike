@@ -44,6 +44,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class XoClientService extends Service {
 
+    /** Delay after which new activities send their first keepalive (seconds) */
+    public static final int SERVICE_KEEPALIVE_PING_DELAY    = 60;
+    /** Interval at which activities send keepalives to the client service (seconds) */
+    public static final int SERVICE_KEEPALIVE_PING_INTERVAL = 600;
+    /** Timeout after which the client service terminates automatically (seconds) */
+    public static final int SERVICE_KEEPALIVE_TIMEOUT       = 1800;
+
     private static final Logger LOG = Logger.getLogger(XoClientService.class);
 
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
@@ -328,7 +335,7 @@ public class XoClientService extends Service {
                         doShutdown();
                     }
                 },
-                XoConfiguration.SERVICE_KEEPALIVE_TIMEOUT, TimeUnit.SECONDS
+                SERVICE_KEEPALIVE_TIMEOUT, TimeUnit.SECONDS
         );
     }
 

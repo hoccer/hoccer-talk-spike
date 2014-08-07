@@ -22,13 +22,6 @@ public class XoConfiguration {
     /** Whether to reconnect explicitly on connection changes */
     public static final boolean CONNECTIVITY_RECONNECT_ON_CHANGE = false;
 
-    /** Delay after which new activities send their first keepalive (seconds) */
-    public static final int SERVICE_KEEPALIVE_PING_DELAY    = 60;
-    /** Interval at which activities send keepalives to the client service (seconds) */
-    public static final int SERVICE_KEEPALIVE_PING_INTERVAL = 600;
-    /** Timeout after which the client service terminates automatically (seconds) */
-    public static final int SERVICE_KEEPALIVE_TIMEOUT       = 1800;
-
     private static SharedPreferences sPreferences;
     private static SharedPreferences.OnSharedPreferenceChangeListener sPreferencesListener;
 

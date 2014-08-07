@@ -610,8 +610,8 @@ public abstract class XoActivity extends FragmentActivity {
                                                                           }
                                                                       }
                                                                   },
-                XoConfiguration.SERVICE_KEEPALIVE_PING_DELAY,
-                XoConfiguration.SERVICE_KEEPALIVE_PING_INTERVAL,
+                XoClientService.SERVICE_KEEPALIVE_PING_DELAY,
+                XoClientService.SERVICE_KEEPALIVE_PING_INTERVAL,
                 TimeUnit.SECONDS
         );
     }
