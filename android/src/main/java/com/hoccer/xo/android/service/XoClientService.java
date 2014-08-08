@@ -17,7 +17,6 @@ import com.hoccer.talk.android.push.TalkPushService;
 import com.hoccer.talk.client.*;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.activity.ContactsActivity;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.sms.SmsReceiver;

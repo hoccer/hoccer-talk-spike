@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.*;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Telephony;
 import android.support.v4.app.FragmentActivity;
@@ -28,7 +29,6 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.content.*;
@@ -295,7 +295,10 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     private void checkKeys() {
-        if (XoConfiguration.needToRegenerateKey()) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        boolean needToRegenerateKey = preferences.getBoolean("NEED_TO_REGENERATE_KEYS", true);
+
+        if (needToRegenerateKey) {
             createDialog();
             regenerateKeys();
         }
@@ -307,7 +310,11 @@ public abstract class XoActivity extends FragmentActivity {
             public void run() {
                 try {
                     XoApplication.getXoClient().regenerateKeyPair();
-                    XoConfiguration.setRegenerationDone();
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("NEED_TO_REGENERATE_KEYS", false);
+                    editor.commit();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {

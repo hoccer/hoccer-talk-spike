@@ -189,7 +189,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // Initialize configuration
         CONFIGURATION = new XoAndroidClientConfiguration(this);
-        XoConfiguration.initialize(this);
 
         // initialize logging system
         XoLogging.initialize(this);
