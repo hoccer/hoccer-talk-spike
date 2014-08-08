@@ -170,7 +170,7 @@ public class AttachmentListFragment extends ListFragment {
                     }
                     break;
                 case SELECT_CONTACT_REQUEST:
-                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.SELECTED_CONTACT_IDS_EXTRA);
+                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.EXTRA_SELECTED_CONTACT_IDS);
                     // send attachment to all selected contacts
                     for (Integer contactId : contactSelections) {
                         try {

@@ -335,11 +335,6 @@
         <item>NEARBY</item>
     </string-array>
 
-    <string-array name="recipient_selection_tab_names">
-        <item>CONTACTS</item>
-        <item>GROUPS</item>
-    </string-array>
-
     <string name="about_url">http://www.hoccer.com/xo-about-view</string>
 
     <string name="preference_database_title">Local Database</string>

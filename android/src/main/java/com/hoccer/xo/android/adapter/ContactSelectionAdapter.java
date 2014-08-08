@@ -10,6 +10,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -17,16 +18,13 @@ import java.util.List;
 
 public class ContactSelectionAdapter extends BaseAdapter {
 
-    private Context mContext;
+    static final Logger LOG = Logger.getLogger(ContactSelectionAdapter.class);
 
-    private List<TalkClientContact> mContacts = new ArrayList<TalkClientContact>();
+    private List<TalkClientContact> mContacts;
 
-    public static final int CLIENT_CONTACT_MODE = 0;
-    public static final int GROUP_CONTACT_MODE = 1;
-
-    private ContactSelectionAdapter(List<TalkClientContact> contacts, Context context) {
-        mContacts = contacts;
-        mContext = context;
+    public ContactSelectionAdapter() {
+        mContacts = new ArrayList<TalkClientContact>();
+        loadContacts();
     }
 
     @Override
@@ -49,7 +47,7 @@ public class ContactSelectionAdapter extends BaseAdapter {
         final ViewHolder viewHolder;
 
         if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.item_contact_checked, parent, false);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact_checked, parent, false);
 
             viewHolder = new ViewHolder();
             viewHolder.contactAvatarView = (AvatarView) (convertView.findViewById(R.id.contact_icon));
@@ -67,29 +65,38 @@ public class ContactSelectionAdapter extends BaseAdapter {
         return convertView;
     }
 
+    private void loadContacts() {
+        try {
+            for (TalkClientContact contact : XoApplication.getXoClient().getDatabase().findAllContacts()) {
+                if (shouldShow(contact)) {
+                    mContacts.add(contact);
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error("Could not load contacts from database", e);
+        }
+    }
+
+    private boolean shouldShow(TalkClientContact contact) {
+        boolean shouldShow = false;
+        if (contact.isGroup()) {
+            if (contact.isGroupInvolved() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && contact.getGroupPresence().isKept())) {
+                shouldShow = true;
+            }
+        } else if (contact.isClient()) {
+            if (contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship()
+                    .isBlocked())) {
+                shouldShow = true;
+            }
+        } else if (contact.isEverRelated()) {
+            shouldShow = true;
+        }
+
+        return shouldShow;
+    }
+
     private class ViewHolder {
         public AvatarView contactAvatarView;
         public CheckedTextView checkedtNameTextView;
-    }
-
-    public static ContactSelectionAdapter create(Context context, int mode) throws SQLException, InvalidContactModeException {
-        List<TalkClientContact> contacts;
-        switch (mode) {
-            case CLIENT_CONTACT_MODE:
-                contacts = XoApplication.getXoClient().getDatabase().findAllClientContacts();
-                break;
-            case GROUP_CONTACT_MODE:
-                contacts = XoApplication.getXoClient().getDatabase().findAllGroupContacts();
-                break;
-            default:
-                throw new InvalidContactModeException(mode);
-        }
-        return new ContactSelectionAdapter(contacts, context);
-    }
-
-    public static class InvalidContactModeException extends Throwable {
-        public InvalidContactModeException(int mode) {
-            super(String.format("%s is not supported", mode));
-        }
     }
 }

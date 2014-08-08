@@ -326,11 +326,6 @@
         <item>IN DER NÄHE</item>
     </string-array>
 
-    <string-array name="recipient_selection_tab_names">
-        <item>KONTAKTE</item>
-        <item>GRUPPEN</item>
-    </string-array>
-
     <string name="search_section_caption_contacts">Kontakte</string>
     <string name="search_section_caption_files">Dateien</string>
     <string name="search_section_caption_images">Bilddateien</string>

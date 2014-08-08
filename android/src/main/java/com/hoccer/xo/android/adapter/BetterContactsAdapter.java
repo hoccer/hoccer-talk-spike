@@ -57,8 +57,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     private void initialize() {
-        LOG.debug("initialize()");
-
         synchronized (this) {
 
             int oldItemCount = mContactItems.size();
@@ -153,7 +151,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void notifyDataSetChanged() {
-        LOG.debug("notifyDataSetChanged()");
         Collections.sort(mContactItems, LATEST_MESSAGE_COMPARATOR);
         super.notifyDataSetChanged();
     }

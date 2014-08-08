@@ -138,7 +138,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
                     }
                     break;
                 case SELECT_CONTACT_REQUEST:
-                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.SELECTED_CONTACT_IDS_EXTRA);
+                    List<Integer> contactSelections = data.getIntegerArrayListExtra(ContactSelectionActivity.EXTRA_SELECTED_CONTACT_IDS);
                     // TODO better errorhandling!
                     for (Integer contactId : contactSelections) {
                         try {
