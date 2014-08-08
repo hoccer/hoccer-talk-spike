@@ -176,33 +176,13 @@
   <properties>
     <!-- Can be overridden by calling `mvn -Denvironment=[testing|production]` -->
     <environment>development</environment>
+
+    <!-- Default values for default environment (development), can be overwritten in a profile below -->
+    <apk.signing.skip>false</apk.signing.skip>
+    <apk.signing.postfix>signed</apk.signing.postfix>
   </properties>
 
   <profiles>
-    <profile>
-      <id>environment-development</id>
-      <activation>
-        <property>
-          <name>environment</name>
-          <value>development</value>
-        </property>
-      </activation>
-      <properties>
-        <skip.apk.signing>false</skip.apk.signing>
-      </properties>
-    </profile>
-    <profile>
-      <id>environment-testing</id>
-      <activation>
-        <property>
-          <name>environment</name>
-          <value>testing</value>
-        </property>
-      </activation>
-      <properties>
-        <skip.apk.signing>false</skip.apk.signing>
-      </properties>
-    </profile>
     <profile>
       <id>environment-production</id>
       <activation>
@@ -212,7 +192,8 @@
         </property>
       </activation>
       <properties>
-        <skip.apk.signing>true</skip.apk.signing>
+        <apk.signing.skip>true</apk.signing.skip>
+        <apk.signing.postfix>unsigned</apk.signing.postfix>
       </properties>
     </profile>
   </profiles>
@@ -222,6 +203,7 @@
       <filter>environment-${environment}.properties</filter>
       <filter>assets/${environment}/environment.properties</filter>
     </filters>
+
     <resources>
       <resource>
         <directory>${project.basedir}</directory>
@@ -236,6 +218,9 @@
         <targetPath>${project.build.directory}/assets</targetPath>
       </resource>
     </resources>
+
+    <finalName>hoccer-xo-android-${project.version}-${environment}-${apk.signing.postfix}</finalName>
+
     <plugins>
       <!-- Android plugin -->
       <!-- Documentation of configuration options can be found here:
@@ -298,7 +283,7 @@
                 <argument>-digestalg</argument>
                 <argument>SHA1</argument>
               </arguments>
-              <skip>${skip.apk.signing}</skip>
+              <skip>${apk.signing.skip}</skip>
             </configuration>
           </execution>
         </executions>
