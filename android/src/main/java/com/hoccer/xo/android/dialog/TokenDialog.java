@@ -77,20 +77,17 @@ public class TokenDialog extends DialogFragment implements DialogInterface.OnCli
             LOG.debug("onClick(accept)");
             if(mToken != null) {
                 mActivity.getXoClient().useSmsToken(mToken);
-                mActivity.hackReturnedFromDialog();
             }
         }
         if(which == DialogInterface.BUTTON_NEGATIVE) {
             LOG.debug("onClick(decline)");
             if(mToken != null) {
                 mActivity.getXoClient().rejectSmsToken(mToken);
-                mActivity.hackReturnedFromDialog();
             }
         }
         if(which == DialogInterface.BUTTON_NEUTRAL) {
             LOG.debug("onClick(cancel)");
             dialog.dismiss();
-            mActivity.hackReturnedFromDialog();
         }
     }
 

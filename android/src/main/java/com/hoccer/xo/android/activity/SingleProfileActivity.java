@@ -94,15 +94,6 @@ public class SingleProfileActivity extends XoActionbarActivity {
         });
     }
 
-    @Override
-    public void hackReturnedFromDialog() {
-        LOG.debug("hackReturnedFromDialog()");
-        super.hackReturnedFromDialog();
-        mSingleProfileFragment.updateActionBar();
-        mSingleProfileFragment.finishActivityIfContactDeleted();
-        mSingleProfileFragment.refreshContact(mSingleProfileFragment.getContact());
-    }
-
     private void showSingleProfileFragment(int contactId) {
         Bundle bundle = new Bundle();
         bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, contactId);

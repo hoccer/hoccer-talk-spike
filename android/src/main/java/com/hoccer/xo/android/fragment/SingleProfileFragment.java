@@ -19,7 +19,6 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ContactsActivity;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
-import com.hoccer.xo.android.base.IMessagingFragmentManager;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
@@ -27,9 +26,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import org.apache.log4j.Logger;
 
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -37,11 +33,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -311,7 +304,7 @@ public class SingleProfileFragment extends XoFragment
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
                                     getXoActivity().getXoClient().deleteContact(mContact);
-                                    getXoActivity().hackReturnedFromDialog();
+                                    getActivity().finish();
                                 }
                             },
                             new DialogInterface.OnClickListener() {
@@ -547,7 +540,6 @@ public class SingleProfileFragment extends XoFragment
                     public void onClick(DialogInterface dialog, int id) {
                         if (mContact != null) {
                             getXoClient().blockContact(mContact);
-                            getXoActivity().finish();
                         }
                     }
                 },

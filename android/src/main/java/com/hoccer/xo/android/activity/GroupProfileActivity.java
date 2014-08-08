@@ -79,15 +79,6 @@ public class GroupProfileActivity extends XoActionbarActivity
         getXoClient().unregisterContactListener(this);
     }
 
-    @Override
-    public void hackReturnedFromDialog() {
-        LOG.debug("hackReturnedFromDialog()");
-        super.hackReturnedFromDialog();
-        mGroupProfileFragment.updateActionBar();
-        mGroupProfileFragment.finishActivityIfContactDeleted();
-        mGroupProfileFragment.refreshContact(mGroupProfileFragment.getContact());
-    }
-
     private boolean isMyContact(TalkClientContact contact) {
         TalkClientContact myContact = mGroupProfileFragment.getContact();
         return myContact != null && myContact.getClientContactId() == contact.getClientContactId();
@@ -107,33 +98,31 @@ public class GroupProfileActivity extends XoActionbarActivity
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        if (isMyContact(contact)) {
-            mGroupProfileFragment.updateActionBar();
-            mGroupProfileFragment.finishActivityIfContactDeleted();
-        }
+        processContactUpdate(contact);
     }
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        if (isMyContact(contact)) {
-            mGroupProfileFragment.updateActionBar();
-            mGroupProfileFragment.finishActivityIfContactDeleted();
-        }
+        processContactUpdate(contact);
     }
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-        if (isMyContact(contact)) {
-            mGroupProfileFragment.updateActionBar();
-            mGroupProfileFragment.finishActivityIfContactDeleted();
-        }
+        processContactUpdate(contact);
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
+        processContactUpdate(contact);
+    }
+
+    void processContactUpdate(TalkClientContact contact) {
         if (isMyContact(contact)) {
-            mGroupProfileFragment.updateActionBar();
-            mGroupProfileFragment.finishActivityIfContactDeleted();
+            if(contact.isDeleted()) {
+                finish();
+            } else {
+                mGroupProfileFragment.updateActionBar();
+            }
         }
     }
 
