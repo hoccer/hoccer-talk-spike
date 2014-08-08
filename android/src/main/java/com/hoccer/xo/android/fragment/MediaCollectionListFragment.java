@@ -10,7 +10,6 @@ import android.widget.ListView;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.util.AttachmentOperationHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -51,7 +50,7 @@ public class MediaCollectionListFragment extends BaseMediaCollectionListFragment
 
         private void showCollectionListFragment(Integer mediaCollectionId) {
             Bundle bundle = new Bundle();
-            bundle.putInt(AttachmentOperationHelper.ARG_MEDIA_COLLECTION_ID, mediaCollectionId);
+            bundle.putInt(MediaCollectionFragment.ARG_MEDIA_COLLECTION_ID, mediaCollectionId);
 
             MediaCollectionFragment fragment = new MediaCollectionFragment();
             fragment.setArguments(bundle);
