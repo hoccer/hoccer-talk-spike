@@ -837,9 +837,6 @@ public abstract class XoActivity extends FragmentActivity {
         }
     }
 
-    public void hackReturnedFromDialog() {
-    }
-
     public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
     }
 
