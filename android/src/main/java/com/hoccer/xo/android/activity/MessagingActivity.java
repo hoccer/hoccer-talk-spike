@@ -17,13 +17,15 @@ import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
+import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
 public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
-    public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
+    public static final String EXTRA_CLIENT_CONTACT_ID = "com.hoccer.xo.android.intent.extra.CLIENT_CONTACT_ID";
+    public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
     ActionBar mActionBar;
 
@@ -47,7 +49,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
 
         // get action bar (for setting title)
@@ -72,12 +73,13 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
             } else {
                 showMessageFragment();
             }
+        } else if (intent != null && intent.hasExtra(EXTRA_NEARBY_ARCHIVE)) {
+            showNearbyArchiveFragment();
         }
     }
 
     @Override
     protected void onResume() {
-        LOG.debug("onResume()");
         super.onResume();
 
         Intent intent = getIntent();
@@ -96,7 +98,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     @Override
     protected void onPause() {
-        LOG.debug("onPause()");
         super.onPause();
     }
 
@@ -200,6 +201,14 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fl_messaging_fragment_container, mGroupProfileFragment);
 //        ft.addToBackStack(null);
+        ft.commit();
+    }
+
+    private void showNearbyArchiveFragment() {
+        NearbyArchiveFragment fragment = new NearbyArchiveFragment();
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fl_messaging_fragment_container, fragment);
         ft.commit();
     }
 
