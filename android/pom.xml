@@ -171,16 +171,6 @@
       <type>apklib</type>
     </dependency>
 
-    <!-- GeoJson library -->
-    <!--
-      XXX switch to this library
-    <dependency>
-        <groupId>de.grundid.opendatalab</groupId>
-        <artifactId>geojson-jackson</artifactId>
-        <version>${geojson-jackson.version}</version>
-    </dependency>
-    -->
-
   </dependencies>
 
   <properties>
