@@ -12,6 +12,7 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
+import com.hoccer.xo.android.util.ThumbnailManager;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -43,7 +44,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
      *
      * AFAIK this must be at least 3 for RPC to work.
      */
-    private static final int CLIENT_THREADS = 10;
+    private static final int CLIENT_THREADS = 100;
 
     /** logger for this class (initialized in onCreate) */
     private static Logger LOG = null;
@@ -304,6 +305,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     }
 
     @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        LOG.warn("Received onTrimMemory(" + level + "). Will trim ThumbnailManager.");
+        ThumbnailManager.getInstance(this).clearCache();
+    }
+
+    @Override
     public void uncaughtException(Thread thread, Throwable ex) {
         LOG.error("uncaught exception on thread " + thread.getName(), ex);
         if(mPreviousHandler != null) {
@@ -355,11 +363,12 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
      * Starts a nearby session if not yet started.
      * Sets hasCurrentRunningNearbySession = true.
      */
-    public static void startNearbySession() {
-        if (!ENVIRONMENT_UPDATER.isEnabled()) {
+    public static void startNearbySession(boolean force) {
+        if (!ENVIRONMENT_UPDATER.isEnabled() || force) {
             try {
                 ENVIRONMENT_UPDATER.startEnvironmentTracking();
                 hasCurrentRunningNearbySession = true;
+                ENVIRONMENT_UPDATER.sendEnvironmentUpdate();
             } catch (EnvironmentUpdaterException e) {
                 LOG.error("Error when starting EnvironmentUpdater: ", e);
             }
@@ -404,7 +413,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // wake up suspended nearby session
         if (hasCurrentRunningNearbySession) {
-            startNearbySession();
+            startNearbySession(false);
         }
 
         LOG.info("Entered foreground mode");

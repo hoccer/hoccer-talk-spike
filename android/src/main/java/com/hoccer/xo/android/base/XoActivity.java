@@ -23,6 +23,8 @@ import android.text.util.Linkify;
 import android.view.*;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
@@ -185,14 +187,57 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void startExternalActivity(Intent intent) {
         LOG.debug(getClass() + " starting external activity " + intent.toString());
+        if (!canStartActivity(intent)) {
+            return;
+        }
         setBackgroundActive();
-        startActivity(intent);
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
     }
 
     public void startExternalActivityForResult(Intent intent, int requestCode) {
         LOG.debug(getClass() + " starting external activity " +  intent.toString() + " for request code: " + requestCode);
+        if (!canStartActivity(intent)) {
+            return;
+        }
         setBackgroundActive();
-        startActivityForResult(intent, requestCode);
+        try {
+            startActivityForResult(intent, requestCode);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+    }
+
+    private boolean canStartActivity(Intent intent) {
+        if (intent != null) {
+            ComponentName componentName = intent.resolveActivity(getPackageManager());
+            if (componentName != null) {
+                String activityName = componentName.getClassName();
+
+                // perform check on specified Activity classes.
+                if (activityName != null && activityName.equals(MapsLocationActivity.class.getName())) {
+                    int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+                    if (result > 0) {
+                        LOG.warn(getClass() + " aborting start of external activity " + intent.toString() + " because Google Play Services returned code " + result);
+                        showGooglePlayServicesErrorDialog(result);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private void showGooglePlayServicesErrorDialog(int result) {
+        Dialog googlePlayServicesErrorDialog = GooglePlayServicesUtil.getErrorDialog(result, this, 0);
+        if (googlePlayServicesErrorDialog != null) {
+            googlePlayServicesErrorDialog.show();
+        }
     }
 
     @Override
@@ -416,6 +461,7 @@ public abstract class XoActivity extends FragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        LOG.debug("onCreateOptionsMenu()");
         getMenuInflater().inflate(R.menu.common, menu);
         int activityMenu = getMenuResource();
         if (activityMenu >= 0) {
@@ -721,14 +767,25 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void showBarcode() {
         LOG.debug("scanBarcode()");
-        String qrString = getBarcodeString();
-        Intent qr = new Intent(this, QrCodeGeneratingActivity.class);
-        qr.putExtra("QR", qrString);
-        startActivity(qr);
-    }
 
-    public String getBarcodeString() {
-        return getXoClient().getConfiguration().getUrlScheme() + getXoClient().generatePairingToken();
+        XoApplication.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+
+                final String qrString = getXoClient().getConfiguration().getUrlScheme() + getXoClient().generatePairingToken();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        Intent qr = new Intent(XoActivity.this, QrCodeGeneratingActivity.class);
+                        qr.putExtra("QR", qrString);
+                        startActivity(qr);
+
+                    }
+                });
+
+            }
+        });
     }
 
     public void composeInviteSms(String token) {

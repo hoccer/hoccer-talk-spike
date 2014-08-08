@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.adapter;
 
 import android.database.DataSetObserver;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -44,19 +46,19 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        AudioAttachmentView audioRowView = (AudioAttachmentView) convertView;
-        if (audioRowView == null) {
-            audioRowView = new AudioAttachmentView(parent.getContext());
+        AudioAttachmentView audioView = (AudioAttachmentView) convertView;
+        if (audioView == null) {
+            audioView = new AudioAttachmentView(parent.getContext());
         }
 
         TalkClientDownload item = mCollection.getItem(position);
-        audioRowView.setMediaItem(item);
-        audioRowView.updatePlayPauseView();
+        audioView.setMediaItem(item);
+        audioView.updatePlayPauseView();
         Integer itemId = (int)getItemId(position);
-        audioRowView.getChildAt(0).setSelected(mSelectedItemIds.contains(itemId));
-        audioRowView.showDragHandle(mShowDragHandle);
+        audioView.getChildAt(0).setSelected(mSelectedItemIds.contains(itemId));
+        audioView.showDragHandle(mShowDragHandle);
 
-        return audioRowView;
+        return audioView;
     }
 
     public void showDragHandle(boolean show) {
@@ -70,18 +72,19 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     public void selectItem(int itemId) {
         if(!mSelectedItemIds.contains(itemId)) {
             mSelectedItemIds.add(itemId);
-            notifyDataSetChanged();
+            refreshView();
         }
     }
 
     public void deselectItem(int itemId) {
         if(mSelectedItemIds.contains(itemId)) {
             mSelectedItemIds.remove((Integer)itemId);
-            notifyDataSetChanged();
+            refreshView();
         }
     }
 
     public void selectAllItems() {
+        deselectAllItems();
         for(int i = 0; i < mCollection.size(); i++) {
             mSelectedItemIds.add((int)getItemId(i));
         }
@@ -91,13 +94,23 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
         mSelectedItemIds.clear();
     }
 
-    public List<TalkClientDownload> getAllSelectedItems() {
+    public List<TalkClientDownload> getSelectedItems() {
         List<TalkClientDownload> result = new ArrayList<TalkClientDownload>();
         for(int itemId : mSelectedItemIds) {
             result.add(mCollection.getItemFromId(itemId));
         }
 
         return result;
+    }
+
+    private void refreshView() {
+        Handler guiHandler = new Handler(Looper.getMainLooper());
+        guiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -121,7 +134,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     @Override
     public void drop(int from, int to) {
         mCollection.reorderItemIndex(from, to);
-        notifyDataSetChanged();
+        refreshView();
     }
 
     @Override
@@ -131,24 +144,22 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
 
     @Override
     public void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex) {
-        notifyDataSetChanged();
-
+        refreshView();
     }
 
     @Override
     public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
-        notifyDataSetChanged();
-
+        deselectItem(itemRemoved.getClientDownloadId());
+        refreshView();
     }
 
     @Override
     public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
-        notifyDataSetChanged();
-
+        refreshView();
     }
 
     @Override
     public void onCollectionCleared(TalkClientMediaCollection collection) {
-        notifyDataSetChanged();
+        refreshView();
     }
 }

@@ -49,6 +49,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
     private AttachmentSearchResultAdapter mSearchResultAdapter;
 
     private MediaPlayerServiceConnector mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
+    private ActionMode mCurrentActionMode;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -141,7 +142,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = retrieveContactById(contactId);
-                            AttachmentOperationHelper.sendAttachmentsToContact(mCollectionAdapter.getAllSelectedItems(), contact);
+                            AttachmentOperationHelper.sendAttachmentsToContact(mCollectionAdapter.getSelectedItems(), contact);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (URISyntaxException e) {
@@ -152,6 +153,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
                     break;
             }
         }
+        mCurrentActionMode.finish();
     }
 
     @Override
@@ -204,7 +206,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
     }
 
     private void addSelectedItemsToCollection(Integer mediaCollectionId) {
-        List<TalkClientDownload> selectedItems = mCollectionAdapter.getAllSelectedItems();
+        List<TalkClientDownload> selectedItems = mCollectionAdapter.getSelectedItems();
         if(selectedItems.size() > 0) {
             try {
                 TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
@@ -265,7 +267,6 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
         @Override
         public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
-            final List<TalkClientDownload> selectedItems = mCollectionAdapter.getAllSelectedItems();
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
                     XoDialogs.showSingleChoiceDialog("RemoveAttachment",
@@ -275,26 +276,27 @@ public class MediaCollectionFragment extends SearchableListFragment {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
-                                    switch(id) {
+                                    switch (id) {
                                         case 0:
-                                            removeItemsFromCollection(selectedItems);
+                                            removeSelectedItemsFromCollection();
+                                            mode.finish();
                                             break;
                                         case 1:
-                                            deleteItems(selectedItems);
+                                            deleteSelectedItems();
+                                            mode.finish();
                                             break;
                                         default:
                                             throw new IllegalArgumentException("Invalid array index selected.");
                                     }
                                 }
                             });
-                    mode.finish();
                     return true;
                 case R.id.menu_share:
-                    mode.finish();
+                    mCurrentActionMode = mode;
                     startActivityForResult(new Intent(getActivity(), ContactSelectionActivity.class), SELECT_CONTACT_REQUEST);
                     return false;
                 case R.id.menu_add_to_collection:
-                    mode.finish();
+                    mCurrentActionMode = mode;
                     startActivityForResult(new Intent(getActivity(), MediaCollectionSelectionActivity.class), SELECT_COLLECTION_REQUEST);
                     return false;
                 default:
@@ -315,13 +317,15 @@ public class MediaCollectionFragment extends SearchableListFragment {
             getListView().dispatchSetSelected(false);
         }
 
-        private void removeItemsFromCollection(List<TalkClientDownload> items) {
+        private void removeSelectedItemsFromCollection() {
+            List<TalkClientDownload> items = mCollectionAdapter.getSelectedItems();
             for (TalkClientDownload item : items) {
                 mCollection.removeItem(item);
             }
         }
 
-        private void deleteItems(List<TalkClientDownload> items) {
+        private void deleteSelectedItems() {
+            List<TalkClientDownload> items = mCollectionAdapter.getSelectedItems();
             for (TalkClientDownload item : items) {
                 try{
                     mDatabase.deleteClientDownloadAndMessage(item);

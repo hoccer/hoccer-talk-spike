@@ -38,7 +38,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
 
         try {
             if(contact != null) {
-                mList = mDatabase.findClientDownloadByMediaTypeAndConversationContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
+                mList = mDatabase.findClientDownloadByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
             } else {
                 mList = mDatabase.findClientDownloadByMediaType(ContentMediaType.AUDIO);
             }
@@ -96,7 +96,6 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
     @Override
     public void onDownloadCreated(TalkClientDownload download) {
         addItem(download);
-
     }
 
     @Override
@@ -110,7 +109,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
             try {
                 TalkClientMessage message = mDatabase.findClientMessageByTalkClientDownloadId(download.getClientDownloadId());
                 if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
-                    mList = mDatabase.findClientDownloadByMediaTypeAndConversationContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
+                    mList = mDatabase.findClientDownloadByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
                     invokeItemRemoved(download);
                 }
             } catch (SQLException e) {
@@ -137,7 +136,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
             try {
                 TalkClientMessage message = mDatabase.findClientMessageByTalkClientDownloadId(download.getClientDownloadId());
                 if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
-                    mList = mDatabase.findClientDownloadByMediaTypeAndConversationContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
+                    mList = mDatabase.findClientDownloadByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
                     invokeItemAdded(download);
                 }
             } catch (SQLException e) {

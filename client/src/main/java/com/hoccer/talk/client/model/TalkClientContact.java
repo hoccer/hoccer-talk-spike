@@ -14,6 +14,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.commons.codec.binary.Base64;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
@@ -104,7 +105,7 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField
     private String nickname;
-    
+
 
     public TalkClientContact() {
         //System.out.println("TalkClientContact(): this="+this);
@@ -447,6 +448,7 @@ public class TalkClientContact implements Serializable {
     }
 
     @GroupMethodOnly
+    @Nullable
     public TalkGroup getGroupPresence() {
         ensureGroup();
         return groupPresence;
@@ -506,6 +508,28 @@ public class TalkClientContact implements Serializable {
         }
         */
         return null;
+    }
+
+    @GroupMethodOnly
+    public  boolean isEmptyGroup() {
+        return (getActiveGroupMemberCount() <= 1);
+    }
+
+    @GroupMethodOnly
+    public int getActiveGroupMemberCount() {
+        int activeMemberCount = 0;
+        if (getGroupMemberships() != null) {
+            for (TalkClientMembership groupMembership : getGroupMemberships()) {
+                TalkGroupMember groupMember = groupMembership.getMember();
+                if (groupMember == null) {
+                    continue;
+                }
+                if (groupMember.getState().equals(TalkGroupMember.STATE_JOINED)) {
+                    activeMemberCount++;
+                }
+            }
+        }
+        return activeMemberCount;
     }
 
     public boolean isNearby() {
@@ -620,5 +644,19 @@ public class TalkClientContact implements Serializable {
         TalkClientContact groupContact = new TalkClientContact(TYPE_GROUP);
         groupContact.updateGroupTag(groupTag);
         return groupContact;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj != null && obj instanceof TalkClientContact && clientContactId == ((TalkClientContact)obj).clientContactId) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return clientContactId;
     }
 }

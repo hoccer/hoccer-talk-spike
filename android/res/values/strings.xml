@@ -28,9 +28,15 @@
     <string name="menu_settings">Settings</string>
     <string name="menu_music_viewer">Music</string>
     <string name="menu_about">About Hoccer XO</string>
+    <string name="menu_faq">FAQ</string>
+    <string name="menu_tutorial">Tutorial</string>
     <string name="menu_reconnect">Reconnect</string>
     <string name="menu_quit">Quit</string>
     <string name="menu_clear_conversation">Clear conversation</string>
+
+    <!-- Tutorial and FAQ links -->
+    <string name="link_tutorial">http://hoccer.com/hoccer-xo-tutorial/</string>
+    <string name="link_faq">http://hoccer.com/hoccer-xo-faq/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_category_friends">Friends</string>
@@ -285,6 +291,7 @@
     <string name="pref_export_credentials">Export credentials</string>
     <string name="pref_import_credentials">Import credentials</string>
     <string name="pref_legal_information">Legal Information</string>
+    <string name="pref_about_information">About</string>
     <string name="pref_encryption">Encryption</string>
     <string name="pref_crash_report">Send report after app crashed</string>
     <string name="pref_crash_report_switcher">Enable reporting</string>
@@ -294,11 +301,13 @@
     </string>
     <string name="my_profile_title">My profile</string>
     <string name="welcome_to_title">Welcome to XO!</string>
-    <string name="contact_item_receive_attachment">Received %1$s attachment</string>
+    <string name="contact_item_received_attachment">Received %1$s attachment</string>
+    <string name="contact_item_sent_attachment">Sent %1$s attachment</string>
     <string name="error_avatar_selection">The image you have selected is not suitable as Avatar.</string>
     <string name="error_attachment_selection">The file you have selected cannot be used as an attachment.</string>
     <string name="sms_invitation_text">Hey! I\'m now using the free app Hoccer XO for secure
-        chatting. Download it now: http://hoccer.com/ Then add me as a contact: %1$s%2$s
+        chatting. Download it now: http://hoccer.com/ Then add me as a contact:\n
+        %1$s%2$s
         \nxo %3$s
     </string>
     <string name="email_invitation_text">Hey!\nI\'m now using the free app Hoccer XO for secure
@@ -335,12 +344,13 @@
 
     <string name="preference_database_title">Local Database</string>
     <string name="placeholder_conversations_text">Invite friends to chat with!</string>
-    <string name="placeholder_nearby_text">Waiting for others nearby...</string>
+    <string name="placeholder_nearby_text">Waiting for others %1$s...</string>
+    <string name="placeholder_nearby_link_text">nearby</string>
     <string name="actionbar_default_title">Hoccer</string>
     <string name="content_audio_caption">Music</string>
     <string name="nearby_info_usercount">%1$d Users are Nearby</string>
     <string name="profile_nickname_text">Nickname</string>
-    <string name="seen_text">seen</string>
+    <string name="message_seen_text">read</string>
     <string name="nearby_text">All nearby</string>
     <string name="error_send_message">Could not send message.</string>
     <string name="pref_privacy_title">Privacy</string>
@@ -356,5 +366,20 @@
     <string name="search_section_caption_images">Images</string>
     <string name="search_section_caption_audio_files">Audio Files</string>
     <string name="search_section_caption_video_files">Video Files</string>
+
+    <!-- media types for "expecting ..." in message states -->
+    <string name="attachment_expects_text">expects %1$s</string>
+    <string name="message_state_default">attachment</string>
+    <string name="message_state_image">image</string>
+    <string name="message_state_video">video</string>
+    <string name="message_state_audio">audio</string>
+    <string name="message_state_data">file</string>
+    <string name="message_state_contact">vcard</string>
+    <string name="message_state_location">location</string>
+    <string name="message_unseen_text">unread</string>
+    <string name="message_privat_text">delivered</string>
+    <string name="attachment_failed">Error while downloading File.</string>
+    <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
+    <string name="message_failed_text">undeliverable</string>
 
 </resources>

@@ -45,29 +45,23 @@ public class ChatVideoItem extends ChatMessageItem {
             mContentWrapper.addView(videoLayout);
         }
 
-        TextView videoTitle = (TextView) mContentWrapper.findViewById(R.id.tv_video_title);
-        TextView videoDescription = (TextView) mContentWrapper.findViewById(R.id.tv_video_description);
         ImageButton playButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_content_open);
         ImageView thumbnailView = (ImageView) mContentWrapper.findViewById(R.id.iv_video_preview);
         RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        RelativeLayout videoContainer = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_container);
 
-        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
-
-        videoTitle.setTextColor(textColor);
-        videoDescription.setTextColor(textColor);
         playButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_play, mMessage.isIncoming()));
-        int mask;
 
+        int mask;
         if (mMessage.isIncoming()) {
             rootView.setGravity(Gravity.LEFT);
+            videoContainer.setGravity(Gravity.LEFT);
             mask = R.drawable.chat_bubble_incoming;
         } else {
             rootView.setGravity(Gravity.RIGHT);
-            mask = R.drawable.chat_bubble_compose;
+            videoContainer.setGravity(Gravity.RIGHT);
+            mask = R.drawable.chat_bubble_outgoing;
         }
-
-        videoTitle.setTextColor(textColor);
-        videoDescription.setTextColor(textColor);
 
         String tag = (mMessage.getMessageId() != null) ? mMessage.getMessageId() : mMessage.getMessageTag();
         thumbnailView.setVisibility(View.INVISIBLE);

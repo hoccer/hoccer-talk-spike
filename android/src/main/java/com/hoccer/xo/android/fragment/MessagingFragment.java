@@ -18,6 +18,7 @@ import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
+import com.hoccer.xo.android.util.ThumbnailManager;
 import com.hoccer.xo.android.view.OverscrollListView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -137,6 +138,8 @@ public class MessagingFragment extends XoListFragment
             mAdapter.onDestroy();
             mAdapter = null;
         }
+
+        ThumbnailManager.getInstance(getXoActivity()).clearCache();
     }
 
     @Override
@@ -215,7 +218,7 @@ public class MessagingFragment extends XoListFragment
 
     @Override
     public void onContactAdded(TalkClientContact contact) {
-
+        // do nothing
     }
 
     @Override
@@ -227,22 +230,22 @@ public class MessagingFragment extends XoListFragment
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-
+        // do nothing
     }
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-
+        // do nothing
     }
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-
+        // do nothing
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-
+        // do nothing
     }
 
     public void applicationWillEnterBackground() {

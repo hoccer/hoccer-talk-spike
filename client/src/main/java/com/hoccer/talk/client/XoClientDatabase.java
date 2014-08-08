@@ -12,7 +12,6 @@ import com.j256.ormlite.stmt.UpdateBuilder;
 import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -159,6 +158,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mDeliveries.createOrUpdate(delivery);
     }
 
+    public synchronized void updateDelivery(TalkDelivery delivery) throws SQLException {
+        int updatedRows = mDeliveries.update(delivery);
+        if (updatedRows < 1) {
+            throw new SQLException("cant find record for Delivery: " + delivery.getId().toString());
+        }
+    }
+
     public void savePublicKey(TalkKey publicKey) throws SQLException {
         mPublicKeys.createOrUpdate(publicKey);
     }
@@ -247,61 +253,34 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
     }
 
-    public List<TalkClientContact> findAllNearbyContacts() throws SQLException {
-        List<TalkClientContact> allGroupContacts = this.findAllGroupContacts();
-        List<TalkClientContact> allNearbyGroupContacts = new ArrayList<TalkClientContact>();
-        // add all nearby groups
-        for (TalkClientContact groupContact : allGroupContacts) {
-            if (groupContact.isGroupInvolved() && groupContact.isGroupExisting() && groupContact.getGroupPresence().isTypeNearby()) {
-                allNearbyGroupContacts.add(groupContact);
+    public int findGroupMemberCountForGroup(TalkClientContact groupContact) throws SQLException {
+        int count = 0;
+        TalkClientContact contact = mClientContacts.queryBuilder()
+                .where()
+                .eq("clientContactId", groupContact.getClientContactId())
+                .queryForFirst();
+        if (contact != null && contact.isGroup() && contact.getGroupMemberships() != null) {
+            for (TalkClientMembership memberShip : contact.getGroupMemberships()) {
+                TalkGroupMember groupMember = memberShip.getMember();
+                if (groupMember != null && groupMember.isNearby()) {
+                    count++;
+                }
             }
         }
-        allNearbyGroupContacts.addAll(findAllNerabyContactsOrderedByRecentMessage());
-        return allNearbyGroupContacts;
+        return count;
     }
 
-    private List<TalkClientContact> findAllNerabyContactsOrderedByRecentMessage() throws SQLException {
-        QueryBuilder<TalkClientMessage, Integer> recentUnreadMessages = mClientMessages.queryBuilder();
-        QueryBuilder<TalkClientContact, Integer> recentSenders = mClientContacts.queryBuilder();
-        recentUnreadMessages.orderBy("timestamp", false);
-        List<TalkClientContact> orderedListOfSenders = recentSenders.join(recentUnreadMessages).where()
-                .eq("deleted", false)
-                .and()
-                .eq("isNearby", true)
-                .query();
-        List<TalkClientContact> allContacts = mClientContacts.queryBuilder().where()
-                .eq("deleted", false)
-                .and()
-                .eq("contactType", TalkClientContact.TYPE_CLIENT)
-                .and()
-                .eq("isNearby", true)
-                .query();
-        ArrayList<TalkClientContact> orderedListOfDistinctSenders = new ArrayList<TalkClientContact>();
-        for (int i = 0; i < orderedListOfSenders.size(); i++) {
-            if (!orderedListOfDistinctSenders.contains(orderedListOfSenders.get(i))) {
-                orderedListOfDistinctSenders.add(orderedListOfSenders.get(i));
+    public List<TalkClientContact> findClientsInGroup(TalkClientContact groupContact) throws SQLException {
+        List<TalkClientContact> allGroupContacts = new ArrayList<TalkClientContact>();
+        if (groupContact != null && groupContact.isGroup() && groupContact.getGroupMemberships() != null) {
+            for (TalkClientMembership memberShip : groupContact.getGroupMemberships()) {
+                TalkGroupMember groupMember = memberShip.getMember();
+                if (groupMember != null && groupMember.isJoined()) {
+                    allGroupContacts.add(memberShip.getClientContact());
+                }
             }
         }
-        for (int i = 0; i < allContacts.size(); i++) {
-            if (!orderedListOfDistinctSenders.contains(allContacts.get(i))) {
-                orderedListOfDistinctSenders.add(allContacts.get(i));
-            }
-        }
-        return orderedListOfDistinctSenders;
-    }
-
-    public List<TalkClientContact> findAllNearbyGroups() throws SQLException {
-        List<TalkClientContact> allGroupContacts = this.findAllGroupContacts();
-        List<TalkClientContact> allNearbyGroupContacts = new ArrayList<TalkClientContact>();
-
-        // add all nearby groups
-        for (TalkClientContact groupContact : allGroupContacts) {
-            if (groupContact.isGroupInvolved() && groupContact.isGroupExisting() && groupContact.getGroupPresence().isTypeNearby()) {
-                allNearbyGroupContacts.add(groupContact);
-            }
-        }
-
-        return allNearbyGroupContacts;
+        return allGroupContacts;
     }
 
     public List<TalkClientSmsToken> findAllSmsTokens() throws SQLException {
@@ -465,9 +444,11 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
         ArrayList<TalkClientMessage> nearbyMessages = new ArrayList<TalkClientMessage>();
         for (TalkClientMessage message : messages) {
-            if (message.getConversationContact() != null && message.getConversationContact().getContactType() != null) {
-                if (message.getConversationContact().getContactType().equals("group")) {
-                    if (message.getConversationContact().getGroupPresence().isTypeNearby()) {
+            TalkClientContact conversationContact = message.getConversationContact();
+            if (conversationContact != null && conversationContact.getContactType() != null) {
+                if (conversationContact.getContactType().equals("group")) {
+                    TalkGroup groupPresence = conversationContact.getGroupPresence();
+                    if (groupPresence != null && groupPresence.isTypeNearby()) {
                         nearbyMessages.add(message);
                     }
                 }
@@ -493,9 +474,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public List<TalkClientMessage> findMessagesByContactId(int contactId, long count, long offset) throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
-        builder.limit(count);
+        if (count >= 0) {
+            builder.limit(count);
+        }
         builder.orderBy("timestamp", true);
-        builder.offset(offset);
+        if (offset >= 0) {
+            builder.offset(offset);
+        }
         Where<TalkClientMessage, Integer> where = builder.where()
                 .eq("conversationContact_id", contactId)
                 .eq("deleted", false)
@@ -554,13 +539,30 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return downloads;
     }
 
-    public List<TalkClientDownload> findClientDownloadByMediaTypeAndConversationContactId(String mediaType, int conversationContactId) throws SQLException {
+    public List<TalkClientDownload> findClientDownloadByContactId(int contactId) throws SQLException {
 
         QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
         messageQb
                 .orderBy("timestamp", false)
                 .where()
-                .eq("conversationContact_id", conversationContactId);
+                .eq("conversationContact_id", contactId);
+
+        QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
+        downloadQb.where()
+                .eq("state", TalkClientDownload.State.COMPLETE);
+
+        List<TalkClientDownload> downloads = downloadQb.join(messageQb).query();
+
+        return downloads;
+    }
+
+    public List<TalkClientDownload> findClientDownloadByMediaTypeAndContactId(String mediaType, int contactId) throws SQLException {
+
+        QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
+        messageQb
+                .orderBy("timestamp", false)
+                .where()
+                .eq("conversationContact_id", contactId);
 
         QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
         downloadQb.where()
@@ -718,6 +720,69 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return false;
     }
 
+    public TalkClientMessage getClientMessageForDelivery(TalkDelivery delivery) throws SQLException {
+        TalkClientMessage messageForDelivery = mClientMessages.queryBuilder()
+                .where()
+                .eq("messageTag", delivery.getMessageTag())
+                .eq("messageId", delivery.getMessageId())
+                .or(2)
+                .eq("deleted", false)
+                .and(2)
+                .queryForFirst();
+        return messageForDelivery;
+    }
+
+    public TalkClientMessage getClientMessageForUpload(TalkClientUpload upload) throws SQLException {
+        QueryBuilder<TalkClientUpload, Integer> clientUploads = mClientUploads.queryBuilder();
+        clientUploads.where().eq("clientUploadId", upload.getClientUploadId());
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
+        TalkClientMessage messageForUpload = clientMessages.join(clientUploads).where()
+                .eq("deleted", false)
+                .queryForFirst();
+        return messageForUpload;
+    }
+
+    public TalkClientMessage getClientMessageForDownload(TalkClientDownload download) throws SQLException {
+        QueryBuilder<TalkClientDownload, Integer> clientDownloads = mClientDownloads.queryBuilder();
+        clientDownloads.where().eq("clientDownloadId", download.getClientDownloadId());
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
+        TalkClientMessage messageForUpload = clientMessages.join(clientDownloads).where()
+                .eq("deleted", false)
+                .queryForFirst();
+        return messageForUpload;
+    }
+
+    public TalkClientUpload getClientUploadForDelivery(TalkDelivery delivery) throws SQLException {
+        TalkClientMessage message = getClientMessageForDelivery(delivery);
+        if (message != null) {
+            return message.getAttachmentUpload();
+        }
+        return null;
+    }
+
+    public TalkClientDownload getClientDownloadForDelivery(TalkDelivery delivery) throws SQLException {
+        TalkClientMessage message = getClientMessageForDelivery(delivery);
+        if (message != null) {
+            return message.getAttachmentDownload();
+        }
+        return null;
+    }
+
+    public TalkDelivery deliveryForUpload(TalkClientUpload upload) throws SQLException {
+        TalkClientMessage message = getClientMessageForUpload(upload);
+        if (message != null) {
+            return message.getOutgoingDelivery();
+        }
+        return null;
+    }
+
+    public TalkDelivery deliveryForDownload(TalkClientDownload download) throws SQLException {
+        TalkClientMessage message = getClientMessageForDownload(download);
+        if (message != null) {
+            return message.getIncomingDelivery();
+        }
+        return null;
+    }
 
     public void deleteAllClientContacts() throws SQLException {
         UpdateBuilder<TalkClientContact, Integer> updateBuilder = mClientContacts.updateBuilder();

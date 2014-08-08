@@ -64,7 +64,7 @@ public class ChatImageItem extends ChatMessageItem {
             mask = R.drawable.chat_bubble_incoming;
         } else {
             rootView.setGravity(Gravity.RIGHT);
-            mask = R.drawable.chat_bubble_compose;
+            mask = R.drawable.chat_bubble_outgoing;
         }
         imageView.setVisibility(View.INVISIBLE);
         if (contentObject.getContentDataUrl() != null) {
@@ -74,6 +74,9 @@ public class ChatImageItem extends ChatMessageItem {
     }
 
     private void displayImage(IContentObject contentObject) {
+        if (contentObject.getContentDataUrl() == null) {
+            return;
+        }
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.parse(contentObject.getContentDataUrl()), "image/*");
         try {

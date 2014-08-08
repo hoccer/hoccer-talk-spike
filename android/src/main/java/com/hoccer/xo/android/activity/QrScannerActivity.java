@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.AutoFocusCallback;
@@ -25,6 +26,7 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
     private CameraPreview mPreview;
     private Handler autoFocusHandler;
     private int mPairedContact;
+    private boolean hasAutoFocus;
 
     PreviewCallback previewCb = new PreviewCallback() {
         public void onPreviewFrame(byte[] data, Camera camera) {
@@ -71,8 +73,12 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
 
     private Runnable doAutoFocus = new Runnable() {
         public void run() {
-            if (mCamera!= null) {
-                mCamera.autoFocus(autoFocusCB);
+            try {
+                if (mCamera != null && hasAutoFocus) {
+                    mCamera.autoFocus(autoFocusCB);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     };
@@ -84,11 +90,14 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        hasAutoFocus = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS);
         setContentView(R.layout.activity_qr_scanner);
         scanner = new ImageScanner();
         scanner.setConfig(0, Config.X_DENSITY, 3);
         scanner.setConfig(0, Config.Y_DENSITY, 3);
-        autoFocusHandler = new Handler();
+        if(hasAutoFocus) {
+            autoFocusHandler = new Handler();
+        }
         XoApplication.getXoClient().registerContactListener(this);
     }
 
@@ -217,7 +226,9 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
                 return;
             }
             try {
-                mCamera.cancelAutoFocus();
+                if(hasAutoFocus) {
+                    mCamera.cancelAutoFocus();
+                }
                 mCamera.setPreviewCallback(null);
                 mCamera.stopPreview();
             } catch (Exception e) {
@@ -228,15 +239,21 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
                 mCamera.setPreviewDisplay(mHolder);
                 mCamera.setPreviewCallback(previewCallback);
                 mCamera.startPreview();
-                mCamera.autoFocus(autoFocusCallback);
+                if(hasAutoFocus) {
+                    mCamera.autoFocus(autoFocusCallback);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
         public void restartPreview() {
-            mCamera.setPreviewCallback(previewCallback);
-            mCamera.startPreview();
+            try {
+                mCamera.setPreviewCallback(previewCallback);
+                mCamera.startPreview();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

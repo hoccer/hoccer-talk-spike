@@ -15,7 +15,6 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.fragment.AttachmentListFragment;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
@@ -29,13 +28,12 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     ActionBar mActionBar;
 
     MessagingFragment mMessagingFragment;
-    AttachmentListFragment mAttachmentListFragment;
     SingleProfileFragment mSingleProfileFragment;
     GroupProfileFragment mGroupProfileFragment;
 
     int mContactId;
     private IContentObject mClipboardAttachment;
-    private getContactIdInConversation m_checkIdReceiver;
+    private ContactIdReceiver mCheckIdReceiver;
 
     @Override
     protected int getLayoutResource() {
@@ -59,16 +57,16 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         enableUpNavigation();
 
         // register receiver for notification check
-        IntentFilter filter = new IntentFilter("com.hoccer.xo.android.activity.MessagingActivity$getContactIdInConversation");
+        IntentFilter filter = new IntentFilter("com.hoccer.xo.android.activity.MessagingActivity$ContactIdReceiver");
         filter.addAction("CHECK_ID_IN_CONVERSATION");
-        m_checkIdReceiver = new getContactIdInConversation();
-        registerReceiver(m_checkIdReceiver, filter);
+        mCheckIdReceiver = new ContactIdReceiver();
+        registerReceiver(mCheckIdReceiver, filter);
 
         // handle converse intent
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
             mContactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
-            m_checkIdReceiver.setId(mContactId);
+            mCheckIdReceiver.setId(mContactId);
             if (mContactId == -1) {
                 LOG.error("invalid contact id");
             } else {
@@ -87,7 +85,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         // handle converse intent
         if (intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
             int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
-            m_checkIdReceiver.setId(contactId);
+            mCheckIdReceiver.setId(contactId);
             if (contactId == -1) {
                 LOG.error("invalid contact id");
             } else {
@@ -104,7 +102,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(m_checkIdReceiver);
+        unregisterReceiver(mCheckIdReceiver);
         super.onDestroy();
     }
 
@@ -205,18 +203,18 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         ft.commit();
     }
 
-    private class getContactIdInConversation extends BroadcastReceiver {
-        private int m_contactId;
+    private class ContactIdReceiver extends BroadcastReceiver {
+        private int mContactId;
 
         public void setId(int id) {
-            m_contactId = id;
+            mContactId = id;
         }
 
         @Override
         public void onReceive(Context arg0, Intent arg1) {
             Intent intent = new Intent();
             intent.setAction("CONTACT_ID_IN_CONVERSATION");
-            intent.putExtra("id", m_contactId);
+            intent.putExtra("id", mContactId);
             sendBroadcast(intent);
         }
 

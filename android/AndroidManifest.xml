@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.hoccer.xo.release"
 
-          android:versionCode="42"
+          android:versionCode="68"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -20,15 +20,27 @@
             />
 
     <!-- We can use the camera for capture -->
-    <uses-feature android:name="android.hardware.camera" android:required="false"/>
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
+    <uses-feature
+            android:name="android.hardware.camera"
+            android:required="false"/>
+    <uses-feature
+            android:name="android.hardware.camera.autofocus"
+            android:required="false"/>
     <!-- for Tablet devices without GSM like Nexus 7-->
-    <uses-feature android:name="android.hardware.telephony" android:required="false"/>
+    <uses-feature
+            android:name="android.hardware.telephony"
+            android:required="false"/>
     <!-- we also want to be listed for devices without GPS -->
-    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
-    <uses-feature android:name="android.hardware.location" android:required="false"/>
+    <uses-feature
+            android:name="android.hardware.location.gps"
+            android:required="false"/>
+    <uses-feature
+            android:name="android.hardware.location"
+            android:required="false"/>
     <!-- GMaps needs GLES2 -->
-    <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
+    <uses-feature
+            android:glEsVersion="0x00020000"
+            android:required="true"/>
 
     <!-- Obviously, we need internet access -->
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -60,7 +72,7 @@
     <!-- Wifi-Scanning for location grouping -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.GET_TASKS"/>
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <!-- Declare permission for controlling our own push package -->
     <permission
@@ -99,13 +111,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Nearby contacts activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.NearbyContactsActivity"
-                android:label="@string/actionbar_default_title"
-                android:configChanges="keyboardHidden|orientation|screenSize"
-                android:screenOrientation="portrait">
-        </activity>
 
         <!-- Messaging activity -->
         <activity
@@ -122,6 +127,9 @@
                 android:label="@string/actionbar_default_title"
                 android:windowSoftInputMode="stateHidden"
                 android:configChanges="keyboardHidden|orientation|screenSize">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
         </activity>
 
         <!-- Clipboard activity -->
@@ -208,6 +216,7 @@
                 android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="${hoccer.invitation.uri.scheme}"/>
@@ -226,10 +235,22 @@
         </activity>
 
         <!--Legal Imprint activity-->
-        <activity android:name="com.hoccer.xo.android.activity.LegalImprintActivity"
-                  android:label="@string/actionbar_default_title"
-                  android:parentActivityName="com.hoccer.xo.android.activity.XoPreferenceActivity"
-                  android:screenOrientation="portrait" >
+        <activity
+                android:name="com.hoccer.xo.android.activity.LegalImprintActivity"
+                android:label="@string/actionbar_default_title"
+                android:parentActivityName="com.hoccer.xo.android.activity.XoPreferenceActivity"
+                android:screenOrientation="portrait">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.XoPreferenceActivity"/>
+        </activity>
+
+        <!--FAQ and Tutorial activity-->
+        <activity
+                android:name="com.hoccer.xo.android.activity.FaqTutorialActivity"
+                android:label="@string/actionbar_default_title"
+                android:parentActivityName="com.hoccer.xo.android.activity.XoPreferenceActivity"
+                android:screenOrientation="portrait">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="com.hoccer.xo.android.activity.XoPreferenceActivity"/>
@@ -249,9 +270,10 @@
         </activity>
 
         <!-- Test Qr scanner activity -->
-        <activity android:name="com.hoccer.xo.android.activity.QrScannerActivity"
-                  android:label="@string/pairing_scanner"
-                  android:screenOrientation="portrait">
+        <activity
+                android:name="com.hoccer.xo.android.activity.QrScannerActivity"
+                android:label="@string/pairing_scanner"
+                android:screenOrientation="portrait">
         </activity>
 
         <!-- Connection and delivery service -->
