@@ -16,8 +16,8 @@
     <packaging>apk</packaging>
     
     <name>Hoccer Talk for Android</name>
-
     <artifactId>hoccer-talk-android</artifactId>
+    <version>2.3.0-SNAPSHOT</version>
 
     <dependencies>
 
@@ -183,7 +183,30 @@
 
     </dependencies>
 
+    <properties>
+        <!-- Can be overridden by calling `mvn -Denvironment=[testing|production]` -->
+        <environment>development</environment>
+    </properties>
+
     <build>
+        <filters>
+            <filter>environment-${environment}.properties</filter>
+            <filter>assets/${environment}/environment.properties</filter>
+        </filters>
+        <resources>
+            <resource>
+                <directory>${project.basedir}</directory>
+                <targetPath>${project.build.directory}</targetPath>
+                <filtering>true</filtering>
+                <includes>
+                    <include>AndroidManifest.xml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/assets/${environment}</directory>
+                <targetPath>${project.build.directory}/assets</targetPath>
+            </resource>
+        </resources>
         <plugins>
             <!-- Android plugin -->
             <!-- Documentation of configuration options can be found here:
@@ -194,8 +217,8 @@
                 <artifactId>android-maven-plugin</artifactId>
                 <version>${maven-android.version}</version>
                 <configuration>
-                    <androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
-                    <assetsDirectory>${project.basedir}/assets</assetsDirectory>
+                    <androidManifestFile>${project.build.directory}/AndroidManifest.xml</androidManifestFile>
+                    <assetsDirectory>${project.build.directory}/assets</assetsDirectory>
                     <resourceDirectory>${project.basedir}/res</resourceDirectory>
                     <resourceOverlayDirectory>${project.build.directory}/generated-resources</resourceOverlayDirectory>
                     <nativeLibrariesDirectory>${project.basedir}/libs</nativeLibrariesDirectory>
@@ -205,15 +228,47 @@
                     </sdk>
                     <undeployBeforeDeploy>true</undeployBeforeDeploy>
                     <sign>
-                      <debug>both</debug>
+                      <debug>false</debug>
                     </sign>
                     <proguard>
                       <skip>false</skip>
-                      <config>proguard.cfg</config>
+                      <configs>
+                          <config>proguard.cfg</config>
+                          <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
+                      </configs>
                       <proguardJarPath>${env.ANDROID_HOME}/tools/proguard/lib/proguard.jar</proguardJarPath>
                     </proguard>
                 </configuration>
                 <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jarsigner-plugin</artifactId>
+                <version>${maven-jarsigner.version}</version>
+                <executions>
+                    <execution>
+                        <id>signing</id>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <inherited>true</inherited>
+                        <configuration>
+                            <archiveDirectory/>
+                            <includes>
+                                <include>target/*.apk</include>
+                            </includes>
+                            <keystore>config/debug.keystore</keystore>
+                            <alias>androiddebugkey</alias>
+                            <keypass>android</keypass>
+                            <storepass>android</storepass>
+                            <arguments>
+                                <argument>-sigalg</argument><argument>MD5withRSA</argument>
+                                <argument>-digestalg</argument><argument>SHA1</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Git commit id -->
             <plugin>
@@ -254,6 +309,22 @@
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
+            </plugin>
+            <!-- Manipulate resources before android-maven-plugin uses them -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources.version}</version>
+                <configuration>
+                    <overwrite>true</overwrite>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

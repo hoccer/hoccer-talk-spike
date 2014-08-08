@@ -86,6 +86,7 @@ public class GroupProfileFragment extends XoFragment
                 mGroupCreateButton.setEnabled(false);
             }
         });
+
         mGroupNameText = (TextView) v.findViewById(R.id.profile_group_name);
         mGroupNameEdit = (EditText) v.findViewById(R.id.profile_group_name_edit);
         mGroupNameEdit.addTextChangedListener(new TextWatcher() {

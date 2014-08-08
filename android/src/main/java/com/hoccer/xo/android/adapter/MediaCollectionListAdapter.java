@@ -65,8 +65,6 @@ public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaC
         TalkClientMediaCollection mediaCollection = mMediaCollections.get(position);
         viewHolder.titleName.setText(mediaCollection.getName());
 
-
-
         // TODO find out why the f**k this doesn't work but setting the BG colour manually does
 //        convertView.setSelected(mSelectedItems.get(position));
 

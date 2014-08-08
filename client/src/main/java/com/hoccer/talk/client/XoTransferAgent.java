@@ -52,7 +52,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         ThreadFactoryBuilder threadFactoryBuilder = new ThreadFactoryBuilder();
         threadFactoryBuilder.setNameFormat(name);
         threadFactoryBuilder.setUncaughtExceptionHandler(mClient.getHost().getUncaughtExceptionHandler());
-        return Executors.newScheduledThreadPool(mClient.getHost().getTransferThreads(), threadFactoryBuilder.build());
+        return Executors.newScheduledThreadPool(mClient.getConfiguration().getTransferThreads(), threadFactoryBuilder.build());
     }
 
     private void initializeHttpClient() {

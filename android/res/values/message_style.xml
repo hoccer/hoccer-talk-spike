@@ -12,6 +12,6 @@
     <style name="AppBaseTheme.Message.Outgoing" parent="AppBaseTheme.Message">
         <item name="android:textColor">@color/xo_compose_message_textColor</item>
         <item name="android:textColorLink">@color/xo_compose_message_textColor</item>
-        <item name="android:background">@drawable/chat_bubble_compose</item>
+        <item name="android:background">@drawable/chat_bubble_outgoing</item>
     </style>
 </resources>

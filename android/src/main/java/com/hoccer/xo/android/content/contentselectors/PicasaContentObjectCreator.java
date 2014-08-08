@@ -7,8 +7,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.content.SelectedContent;
 import org.apache.log4j.Logger;
 
@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.net.URL;
 
 
 public class PicasaContentObjectCreator implements IContentCreator {
@@ -52,7 +51,7 @@ public class PicasaContentObjectCreator implements IContentCreator {
                     SelectedContent contentObject = new SelectedContent(intent, "file://" + imageFile.getAbsolutePath());
                     contentObject.setFileName(displayName);
                     contentObject.setContentType("image/jpeg");
-                    contentObject.setContentMediaType(ContentMediaTypes.MediaTypeImage);
+                    contentObject.setContentMediaType(ContentMediaType.IMAGE);
                     contentObject.setContentLength((int) imageFile.length());
                     contentObject.setContentAspectRatio(aspectRatio);
                     return contentObject;

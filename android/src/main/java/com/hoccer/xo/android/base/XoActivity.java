@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.*;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Telephony;
 import android.support.v4.app.FragmentActivity;
@@ -30,12 +31,10 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.content.*;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
-import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
@@ -335,13 +334,16 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     private void checkForCrashesIfEnabled() {
-        if (XoConfiguration.reportingEnable()) {
-            CrashManager.register(this, XoConfiguration.HOCKEYAPP_ID);
+        if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
+            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId());
         }
     }
 
     private void checkKeys() {
-        if (XoConfiguration.needToRegenerateKey()) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        boolean needToRegenerateKey = preferences.getBoolean("NEED_TO_REGENERATE_KEYS", true);
+
+        if (needToRegenerateKey) {
             createDialog();
             regenerateKeys();
         }
@@ -353,7 +355,11 @@ public abstract class XoActivity extends FragmentActivity {
             public void run() {
                 try {
                     XoApplication.getXoClient().regenerateKeyPair();
-                    XoConfiguration.setRegenerationDone();
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("NEED_TO_REGENERATE_KEYS", false);
+                    editor.commit();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {
@@ -657,8 +663,8 @@ public abstract class XoActivity extends FragmentActivity {
                                                                           }
                                                                       }
                                                                   },
-                XoConfiguration.SERVICE_KEEPALIVE_PING_DELAY,
-                XoConfiguration.SERVICE_KEEPALIVE_PING_INTERVAL,
+                XoClientService.SERVICE_KEEPALIVE_PING_DELAY,
+                XoClientService.SERVICE_KEEPALIVE_PING_INTERVAL,
                 TimeUnit.SECONDS
         );
     }
@@ -766,7 +772,7 @@ public abstract class XoActivity extends FragmentActivity {
             @Override
             public void run() {
 
-                final String qrString = getXoClient().getHost().getUrlScheme() + getXoClient().generatePairingToken();
+                final String qrString = getXoClient().getConfiguration().getUrlScheme() + getXoClient().generatePairingToken();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -789,7 +795,7 @@ public abstract class XoActivity extends FragmentActivity {
             TalkClientContact self = mDatabase.findSelfContact(false);
 
             String message = String
-                    .format(getString(R.string.sms_invitation_text), getResources().getString(R.string.url_scheme), token, self.getName());
+                    .format(getString(R.string.sms_invitation_text), getXoClient().getConfiguration().getUrlScheme(), token, self.getName());
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //At least KitKat
                 String defaultSmsPackageName = Telephony.Sms
@@ -821,7 +827,7 @@ public abstract class XoActivity extends FragmentActivity {
         try {
             TalkClientContact self = mDatabase.findSelfContact(false);
             String message = String
-                    .format(getString(R.string.email_invitation_text), getXoClient().getHost().getUrlScheme(), token, self.getName());
+                    .format(getString(R.string.email_invitation_text), getXoClient().getConfiguration().getUrlScheme(), token, self.getName());
             Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
             email.putExtra(Intent.EXTRA_SUBJECT,"Join me at Hoccer!");
             email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));

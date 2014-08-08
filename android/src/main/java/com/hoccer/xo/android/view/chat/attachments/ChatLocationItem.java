@@ -56,32 +56,31 @@ public class ChatLocationItem extends ChatMessageItem {
         TextView locationTitleView = (TextView) mContentWrapper.findViewById(R.id.tv_location_title);
         ImageButton locationButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_content_location);
 
-            int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
+        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
 
-            locationTextView.setTextColor(textColor);
-            locationTitleView.setTextColor(textColor);
+        locationTextView.setTextColor(textColor);
+        locationTitleView.setTextColor(textColor);
 
-            locationButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_location, mMessage.isIncoming()));
+        locationButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_location, mMessage.isIncoming()));
 
-            locationButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (contentObject.isContentAvailable()) {
-                        String url = contentObject.getContentUrl();
-                        if (url == null) {
-                            url = contentObject.getContentDataUrl();
-                        }
-                        if (url != null) {
-                            LatLng location = loadGeoJson(contentObject);
-                            String label = "Received Location";
-                            String uriString = "http://maps.google.com/maps?q=loc:"
-                                    + location.latitude + "," + location.longitude + " (" + label
-                                    + ")";
-                            Uri uri = Uri.parse(uriString);
-                            Intent intent = new Intent(android.content.Intent.ACTION_VIEW, uri);
-                            XoActivity activity = (XoActivity)view.getContext();
-                            activity.startExternalActivity(intent);
-                        }
+        locationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (contentObject.isContentAvailable()) {
+                    String url = contentObject.getContentUrl();
+                    if (url == null) {
+                        url = contentObject.getContentDataUrl();
+                    }
+                    if (url != null) {
+                        LatLng location = loadGeoJson(contentObject);
+                        String label = "Received Location";
+                        String uriString = "http://maps.google.com/maps?q=loc:"
+                                + location.latitude + "," + location.longitude + " (" + label
+                                + ")";
+                        Uri uri = Uri.parse(uriString);
+                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, uri);
+                        XoActivity activity = (XoActivity)view.getContext();
+                        activity.startExternalActivity(intent);
                     }
                 }
             }

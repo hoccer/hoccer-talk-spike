@@ -61,13 +61,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class XoClientService extends Service {
 
+    /** Delay after which new activities send their first keepalive (seconds) */
+    public static final int SERVICE_KEEPALIVE_PING_DELAY    = 60;
+    /** Interval at which activities send keepalives to the client service (seconds) */
+    public static final int SERVICE_KEEPALIVE_PING_INTERVAL = 600;
+    /** Timeout after which the client service terminates automatically (seconds) */
+    public static final int SERVICE_KEEPALIVE_TIMEOUT       = 1800;
+
     private static final Logger LOG = Logger.getLogger(XoClientService.class);
 
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
-    private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
-
+    private static final long NOTIFICATION_ALARM_BACKOFF = 5000;
+    private static final long NOTIFICATION_CANCEL_BACKOFF = 2000;
     private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
+    private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
 
     /** Executor for ourselves and the client */
     ScheduledExecutorService mExecutor;
@@ -232,7 +240,7 @@ public class XoClientService extends Service {
     private void configureServiceUri() {
         String uriString = mPreferences.getString("preference_service_uri", "");
         if (uriString.isEmpty()) {
-            uriString = XoApplication.getXoClient().getHost().getServerUri();
+            uriString = XoApplication.getXoClient().getConfiguration().getServerUri();
         }
         URI uri = URI.create(uriString);
         mClient.setServiceUri(uri);
@@ -290,7 +298,7 @@ public class XoClientService extends Service {
         if (mGcmSupported) {
             if (forced || !GCMRegistrar.isRegistered(this)) {
                 LOG.debug("requesting GCM registration");
-                GCMRegistrar.register(this, XoConfiguration.GCM_SENDER_ID);
+                GCMRegistrar.register(this, TalkPushService.GCM_SENDER_ID);
             } else {
                 LOG.debug("no need to request GCM registration");
             }
@@ -309,7 +317,7 @@ public class XoClientService extends Service {
                 mClient.registerGcm(this.getPackageName(), GCMRegistrar.getRegistrationId(this));
                 // set the registration timeout (XXX move elsewhere)
                 GCMRegistrar.setRegisterOnServerLifespan(
-                        this, XoConfiguration.GCM_REGISTRATION_EXPIRATION * 1000);
+                        this, TalkPushService.GCM_REGISTRATION_EXPIRATION * 1000);
                 // tell the registrar that we did this successfully
                 GCMRegistrar.setRegisteredOnServer(this, true);
             } else {
@@ -344,7 +352,7 @@ public class XoClientService extends Service {
                         doShutdown();
                     }
                 },
-                XoConfiguration.SERVICE_KEEPALIVE_TIMEOUT, TimeUnit.SECONDS
+                SERVICE_KEEPALIVE_TIMEOUT, TimeUnit.SECONDS
         );
     }
 
@@ -399,24 +407,8 @@ public class XoClientService extends Service {
             }
 
             // TODO: is this check too early ? Last if-statement above deactivates client when network dead.
-            boolean netState = activeNetwork.isConnected();
-            int netType = activeNetwork.getType();
-
-            // TODO: will this be executed while the XoClient is still activating / connecting / syncing on other threads ?
-            if (XoConfiguration.CONNECTIVITY_RECONNECT_ON_CHANGE) {
-                if (netState && !mClient.isIdle()) {
-                    if (!mPreviousConnectionState
-                            || mPreviousConnectionType == -1
-                            || mPreviousConnectionType != netType) {
-                        if (mClient.getState() < XoClient.STATE_CONNECTING) {
-                            mClient.reconnect("connection change");
-                        }
-                    }
-                }
-            }
-
-            mPreviousConnectionState = netState;
-            mPreviousConnectionType = netType;
+            mPreviousConnectionState = activeNetwork.isConnected();
+            mPreviousConnectionType = activeNetwork.getType();
         }
     }
 
@@ -499,7 +491,7 @@ public class XoClientService extends Service {
 
 
         // do not sound alarms overly often (sound, vibrate)
-        if (passed < XoConfiguration.NOTIFICATION_ALARM_BACKOFF) {
+        if (passed < NOTIFICATION_ALARM_BACKOFF) {
             notify = false;
         }
 
@@ -634,7 +626,7 @@ public class XoClientService extends Service {
 
     private void cancelMessageNotification() {
         long now = System.currentTimeMillis();
-        long cancelTime = mNotificationTimestamp + XoConfiguration.NOTIFICATION_CANCEL_BACKOFF;
+        long cancelTime = mNotificationTimestamp + NOTIFICATION_CANCEL_BACKOFF;
         long delay = Math.max(0, cancelTime - now);
         mExecutor.schedule(new Runnable() {
             @Override
@@ -670,8 +662,8 @@ public class XoClientService extends Service {
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        doRegisterGcm(XoConfiguration.GCM_ALWAYS_REGISTER);
-                        doUpdateGcm(XoConfiguration.GCM_ALWAYS_UPDATE);
+                        doRegisterGcm(TalkPushService.GCM_ALWAYS_REGISTER);
+                        doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
                     }
                 });
             }

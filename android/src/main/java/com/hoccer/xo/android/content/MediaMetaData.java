@@ -23,50 +23,55 @@ public class MediaMetaData {
     public static MediaMetaData retrieveMetaData(String mediaFilePath) {
         String mediaFileUri = Uri.parse(mediaFilePath).getPath();
 
+        MediaMetaData metaData = null;
         // return cached data if present
         if(mMetaDataCache.containsKey(mediaFileUri)) {
-            return mMetaDataCache.get(mediaFileUri);
+            metaData = mMetaDataCache.get(mediaFileUri);
+        } else {
+
+            MediaMetadataRetriever retriever = null;
+            try {
+                retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(mediaFileUri);
+                metaData = new MediaMetaData(mediaFileUri);
+                String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+                if (album == null) {
+                    album = retriever.extractMetadata(25); // workaround bug on Galaxy S3 and S4
+                }
+                metaData.mAlbumTitle = album;
+
+                String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                if (artist == null) {
+                    artist = retriever.extractMetadata(26); // workaround bug on Galaxy S3 and S4
+                }
+                metaData.mArtist = artist;
+
+                String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                if (title == null) {
+                    title = retriever.extractMetadata(31); // workaround bug on Galaxy S3 and S4
+                }
+                metaData.mTitle = title;
+
+                metaData.mMimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+
+                if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) != null) {
+                    metaData.mHasAudio = true;
+                }
+
+                if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) != null) {
+                    metaData.mHasVideo = true;
+                }
+
+            } catch (IllegalArgumentException e) {
+                LOG.info("Could not read meta data for file: " + mediaFileUri, e);
+                // cache the null object to prevent future retrieval attempts
+                metaData = null;
+            } finally {
+                mMetaDataCache.put(mediaFileUri, metaData);
+                retriever.release();
+            }
         }
 
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        try {
-            retriever.setDataSource(mediaFileUri);
-        } catch(IllegalArgumentException e) {
-            LOG.info("Could not read meta data for file: " + mediaFileUri, e);
-            mMetaDataCache.put(mediaFileUri, null);
-            return null;
-        }
-
-        MediaMetaData metaData = new MediaMetaData(mediaFileUri);
-        String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-        if (album == null) {
-            album = retriever.extractMetadata(25); // workaround bug on Galaxy S3 and S4
-        }
-        metaData.mAlbumTitle = album;
-
-        String artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-        if (artist == null) {
-            artist = retriever.extractMetadata(26); // workaround bug on Galaxy S3 and S4
-        }
-        metaData.mArtist = artist;
-
-        String title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-        if (title == null) {
-            title = retriever.extractMetadata(31); // workaround bug on Galaxy S3 and S4
-        }
-        metaData.mTitle = title;
-
-        metaData.mMimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
-
-        if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) != null) {
-            metaData.mHasAudio = true;
-        }
-
-        if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) != null) {
-            metaData.mHasVideo = true;
-        }
-
-        mMetaDataCache.put(mediaFileUri, metaData);
         return metaData;
     }
 
@@ -157,21 +162,23 @@ public class MediaMetaData {
                 @Override
                 protected Drawable doInBackground(Void... params) {
                     MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                    Drawable artwork = null;
                     try {
                         retriever.setDataSource(mFileUri);
+                        byte[] artworkRaw = retriever.getEmbeddedPicture();
+                        if (artworkRaw != null) {
+                            artwork = new BitmapDrawable(resources, BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
+                        }
+                        else {
+                            LOG.warn("Could not read artwork for file: " + mFileUri);
+                        }
                     } catch (IllegalArgumentException e) {
-                        LOG.error("Could not read meta data for file: " + mFileUri, e);
-                        return null;
+                        LOG.warn("Could not read meta data for file: " + mFileUri, e);
+                    } finally {
+                        retriever.release();
                     }
 
-                    byte[] artworkRaw = retriever.getEmbeddedPicture();
-                    if (artworkRaw != null) {
-                        return new BitmapDrawable(resources, BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
-                    }
-                    else {
-                        LOG.debug("Could not read artwork for file: " + mFileUri);
-                        return null;
-                    }
+                    return artwork;
                 }
 
                 @Override

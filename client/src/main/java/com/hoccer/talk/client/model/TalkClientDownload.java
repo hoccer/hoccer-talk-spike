@@ -970,11 +970,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     @Override
     public boolean equals(Object obj) {
-        TalkClientDownload download = (TalkClientDownload) obj;
-        if (download != null && clientDownloadId == download.getClientDownloadId()) {
+        if(obj instanceof TalkClientDownload && (clientDownloadId == ((TalkClientDownload)obj).getClientDownloadId())) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
 }

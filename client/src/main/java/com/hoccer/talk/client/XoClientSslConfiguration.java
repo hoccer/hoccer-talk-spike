@@ -1,6 +1,6 @@
 package com.hoccer.talk.client;
 
-public class XoClientConfiguration {
+public class XoClientSslConfiguration {
 
     /** Enable the session cache to improve connection latency */
     public static final boolean TLS_SESSION_CACHE_ENABLED = true;

@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
-import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
@@ -66,7 +65,7 @@ public class ImageSelector implements IContentSelector {
         if (contentString.contains(".android.gallery3d.")) {
             return new PicasaContentObjectCreator();
         } else if (contentString.startsWith("content://media/")) {
-            return new FileContentObjectCreator();
+            return new ImageFileContentObjectCreator();
         }
 
         return null;

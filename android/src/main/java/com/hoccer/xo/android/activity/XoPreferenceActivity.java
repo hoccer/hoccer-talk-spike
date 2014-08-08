@@ -6,7 +6,6 @@ import android.os.*;
 import android.preference.*;
 import android.view.*;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.XoDialogs;
@@ -51,7 +50,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
         getActionBar().setDisplayHomeAsUpEnabled(true);
-        if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
+        if (XoApplication.getConfiguration().isDevelopmentModeEnabled()) {
             addPreferencesFromResource(R.xml.development_preferences);
         } else {
             addPreferencesFromResource(R.xml.preferences);
@@ -139,8 +138,8 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void checkForCrashesIfEnabled() {
-        if (XoConfiguration.reportingEnable()) {
-            CrashManager.register(this, XoConfiguration.HOCKEYAPP_ID);
+        if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
+            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId());
         }
     }
 
@@ -383,5 +382,36 @@ public class XoPreferenceActivity extends PreferenceActivity
         }
         Toast.makeText(this, R.string.export_credentials_success, Toast.LENGTH_LONG).show();
     }
+
+    private void showAbout() {
+        Intent intent = new Intent(this, LegalImprintActivity.class);
+        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_ABOUT);
+        startActivity(intent);
+    }
+
+    private void showLicense() {
+        Intent intent = new Intent(this, LegalImprintActivity.class);
+        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_LICENSES);
+        startActivity(intent);
+    }
+
+    private void openFullScreenPlayer(){
+        Intent resultIntent = new Intent(this, FullscreenPlayerActivity.class);
+        startActivity(resultIntent);
+    }
+
+    private void updateActionBarIcons() {
+        if (mMediaPlayerServiceConnector.isConnected() && mMenu != null) {
+            MenuItem mediaPlayerItem = mMenu.findItem(R.id.menu_media_player);
+
+            MediaPlayerService service = mMediaPlayerServiceConnector.getService();
+            if (service.isStopped() || service.isPaused()) {
+                mediaPlayerItem.setVisible(false);
+            } else {
+                mediaPlayerItem.setVisible(true);
+            }
+        }
+    }
+
 
 }

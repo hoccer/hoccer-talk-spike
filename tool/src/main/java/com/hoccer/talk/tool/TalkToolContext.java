@@ -4,7 +4,7 @@ import better.cli.CLIContext;
 import better.cli.console.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.client.HttpClientWithKeyStore;
-import com.hoccer.talk.client.XoClientConfiguration;
+import com.hoccer.talk.client.XoClientSslConfiguration;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
@@ -64,10 +64,10 @@ public class TalkToolContext extends CLIContext {
         sslcFactory.setKeyStore(getKeyStore());
         sslcFactory.setEnableCRLDP(false);
         sslcFactory.setEnableOCSP(false);
-        sslcFactory.setSessionCachingEnabled(XoClientConfiguration.TLS_SESSION_CACHE_ENABLED);
-        sslcFactory.setSslSessionCacheSize(XoClientConfiguration.TLS_SESSION_CACHE_SIZE);
-        sslcFactory.setIncludeCipherSuites(XoClientConfiguration.TLS_CIPHERS);
-        sslcFactory.setIncludeProtocols(XoClientConfiguration.TLS_PROTOCOLS);
+        sslcFactory.setSessionCachingEnabled(XoClientSslConfiguration.TLS_SESSION_CACHE_ENABLED);
+        sslcFactory.setSslSessionCacheSize(XoClientSslConfiguration.TLS_SESSION_CACHE_SIZE);
+        sslcFactory.setIncludeCipherSuites(XoClientSslConfiguration.TLS_CIPHERS);
+        sslcFactory.setIncludeProtocols(XoClientSslConfiguration.TLS_PROTOCOLS);
     }
 
     public TalkToolContext(TalkTool app) {

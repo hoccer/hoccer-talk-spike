@@ -16,12 +16,12 @@ import java.io.IOException;
  */
 public class XoLogging {
 
-    private final static String TAG = XoConfiguration.LOG_LOGCAT_TAG;
-
-    /** SharedPreferences to listen on */
-    private static SharedPreferences sPreferences;
-    /** Listener watching preferences */
-    private static SharedPreferences.OnSharedPreferenceChangeListener sPreferencesListener;
+    private static final Layout LOG_FILE_LAYOUT = new PatternLayout("[%t] %-5p %c - %m%n");
+    private static final int LOG_FILE_SIZE = 1024 * 1024;
+    private static final int LOG_FILE_COUNT = 10;
+    private static final String LOG_FILE_BASENAME = "hoccer-xo.log";
+    private static final Layout LOG_LOGCAT_LAYOUT = new PatternLayout("[%t] %-5p %c - %m%n");
+    private final static String LOG_TAG = "HoccerXO";
 
     /** The root logger */
     private static Logger sRootLogger;
@@ -41,46 +41,28 @@ public class XoLogging {
      * @param application for context
      */
     public static void initialize(XoApplication application) {
-        Log.i(TAG, "[logging] initializing logging");
+        Log.i(LOG_TAG, "[logging] initializing logging");
 
         // get the root logger for configuration
         sRootLogger = Logger.getRootLogger();
 
         // create logcat appender
-        sLogcatAppender = new LogcatAppender(XoConfiguration.LOG_LOGCAT_LAYOUT);
+        sLogcatAppender = new LogcatAppender(LOG_LOGCAT_LAYOUT);
 
         // create file appender
         try {
-            File file = new File(getLogDirectory(), XoConfiguration.LOG_FILE_NAME);
-            sFileAppender = new RollingFileAppender(XoConfiguration.LOG_FILE_LAYOUT, file.toString());
-            sFileAppender.setMaximumFileSize(XoConfiguration.LOG_FILE_SIZE);
-            sFileAppender.setMaxBackupIndex(XoConfiguration.LOG_FILE_COUNT);
+            File file = new File(getLogDirectory(), LOG_FILE_BASENAME);
+            sFileAppender = new RollingFileAppender(LOG_FILE_LAYOUT, file.toString());
+            sFileAppender.setMaximumFileSize(LOG_FILE_SIZE);
+            sFileAppender.setMaxBackupIndex(LOG_FILE_COUNT);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        // attach preference listener
-        sPreferences = PreferenceManager.getDefaultSharedPreferences(application);
-        sPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if(key.equals("preference_log_logcat")) {
-                    configureLogLogcat();
-                }
-                if(key.equals("preference_log_sd")) {
-                    configureLogSd();
-                }
-                if(key.equals("preference_log_level")) {
-                    configureLogLevel();
-                }
-            }
-        };
-        sPreferences.registerOnSharedPreferenceChangeListener(sPreferencesListener);
-
         // apply initial configuration
-        configureLogLevel();
-        configureLogLogcat();
-        configureLogSd();
+        configureLogLevel(application.getConfiguration().getLogLevel());
+        configureLogLogcat(application.getConfiguration().isLoggingToLogcatEnabled());
+        configureLogSd(application.getConfiguration().isLoggingToSdEnabled());
         configureClassLogLevels();
     }
 
@@ -94,33 +76,16 @@ public class XoLogging {
         Logger.getLogger("org.eclipse.jetty.io.nio").setLevel(Level.WARN);
         Logger.getLogger(org.eclipse.jetty.io.nio.ChannelEndPoint.class).setLevel(Level.WARN);
         Logger.getLogger(org.eclipse.jetty.http.HttpParser.class).setLevel(Level.WARN);
-
-        if (XoConfiguration.TESTING_MODE_ENABLED) {
-            // This will display RPC-traffic when on DEBUG
-            Logger.getLogger(better.jsonrpc.client.JsonRpcClient.class).setLevel(Level.DEBUG);
-        }
     }
 
-    /**
-     * Shut down the logging system
-     */
-    public static final void shutdown() {
-        if(sPreferencesListener != null) {
-            sPreferences.unregisterOnSharedPreferenceChangeListener(sPreferencesListener);
-            sPreferencesListener = null;
-        }
-    }
-
-    private static void configureLogLevel() {
-        String levelString = sPreferences.getString("preference_log_level", "INFO");
-        Log.i(TAG, "[logging] setting log level to " + levelString);
+    private static void configureLogLevel(String levelString) {
+        Log.i(LOG_TAG, "[logging] setting log level to " + levelString);
         Level level = Level.toLevel(levelString);
         sRootLogger.setLevel(level);
     }
 
-    private static void configureLogSd() {
-        boolean enabled = sPreferences.getBoolean("preference_log_sd", false);
-        Log.i(TAG, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to SD card");
+    private static void configureLogSd(boolean enabled) {
+        Log.i(LOG_TAG, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to SD card");
         if(enabled) {
             XoApplication.ensureDirectory(getLogDirectory());
             sRootLogger.addAppender(sFileAppender);
@@ -129,9 +94,8 @@ public class XoLogging {
         }
     }
 
-    private static void configureLogLogcat() {
-        boolean enabled = sPreferences.getBoolean("preference_log_logcat", true);
-        Log.i(TAG, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to logcat");
+    private static void configureLogLogcat(boolean enabled) {
+        Log.i(LOG_TAG, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to logcat");
         if(enabled) {
             sRootLogger.addAppender(sLogcatAppender);
         } else {
@@ -152,34 +116,34 @@ public class XoLogging {
             int level = event.getLevel().toInt();
             if(level == Level.WARN_INT) {
                 if(event.getThrowableInformation() != null) {
-                    Log.w(TAG, message, event.getThrowableInformation().getThrowable());
+                    Log.w(LOG_TAG, message, event.getThrowableInformation().getThrowable());
                 } else {
-                    Log.w(TAG, message);
+                    Log.w(LOG_TAG, message);
                 }
             } else if(level == Level.ERROR_INT) {
                 if(event.getThrowableInformation() != null) {
-                    Log.e(TAG, message, event.getThrowableInformation().getThrowable());
+                    Log.e(LOG_TAG, message, event.getThrowableInformation().getThrowable());
                 } else {
-                    Log.e(TAG, message);
+                    Log.e(LOG_TAG, message);
                 }
             } else if(level == Level.FATAL_INT) {
                 if(event.getThrowableInformation() != null) {
-                    Log.wtf(TAG, message, event.getThrowableInformation().getThrowable());
+                    Log.wtf(LOG_TAG, message, event.getThrowableInformation().getThrowable());
                 } else {
-                    Log.wtf(TAG, message);
+                    Log.wtf(LOG_TAG, message);
                 }
             } else {
                 if(event.getThrowableInformation() != null) {
-                    Log.i(TAG, message, event.getThrowableInformation().getThrowable());
+                    Log.i(LOG_TAG, message, event.getThrowableInformation().getThrowable());
                 } else {
-                    Log.i(TAG, message);
+                    Log.i(LOG_TAG, message);
                 }
             }
         }
 
         @Override
         public void close() {
-            Log.v(TAG, "[logging] logcat appender closed");
+            Log.v(LOG_TAG, "[logging] logcat appender closed");
         }
 
         @Override
