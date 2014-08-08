@@ -2,12 +2,10 @@ package com.hoccer.xo.android.adapter;
 
 import android.view.View;
 import android.view.ViewGroup;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.IXoTokenListener;
-import com.hoccer.talk.client.IXoTransferListenerOld;
+import com.hoccer.talk.client.*;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.BaseContactItem;
@@ -62,20 +60,21 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
             int oldItemCount = mContactItems.size();
             mContactItems.clear();
             try {
-                List<TalkClientContact> allClientContacts = mActivity.getXoDatabase().findAllClientContacts();
+                XoClientDatabase db = XoApplication.getXoClient().getDatabase();
+                List<TalkClientContact> allClientContacts = db.findAllClientContacts();
                 List<TalkClientContact> filteredContacts = filter(allClientContacts);
                 for (TalkClientContact contact : filteredContacts) {
-                    mContactItems.add(new TalkClientContactItem(mActivity, contact));
+                    mContactItems.add(new TalkClientContactItem(contact, mActivity));
                 }
 
-                List<TalkClientSmsToken> allSmsTokens = mActivity.getXoDatabase().findAllSmsTokens();
+                List<TalkClientSmsToken> allSmsTokens = db.findAllSmsTokens();
                 for (TalkClientSmsToken smsToken : allSmsTokens) {
-                    mContactItems.add(new SmsContactItem(mActivity, smsToken));
+                    mContactItems.add(new SmsContactItem(smsToken, mActivity));
                 }
 
-                long nearbyMessageCount = mDatabase.getNearbyMessageCount();
+                long nearbyMessageCount = db.getNearbyMessageCount();
                 if (nearbyMessageCount > 0) {
-                    mContactItems.add(new NearbyGroupContactItem(mActivity));
+                    mContactItems.add(new NearbyGroupContactItem());
                 }
 
                 if (mOnItemCountChangedListener != null && oldItemCount != getCount()) {
@@ -171,12 +170,12 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup viewGroup) {
+    public View getView(int position, View convertView, ViewGroup parent) {
         if (position >= mContactItems.size()) {
             return convertView;
         }
 
-        return mContactItems.get(position).getView(convertView);
+        return mContactItems.get(position).getView(convertView, parent);
     }
 
 
@@ -189,7 +188,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                TalkClientContactItem item = new TalkClientContactItem(mActivity, contact);
+                TalkClientContactItem item = new TalkClientContactItem(contact, mActivity);
                 mContactItems.add(item);
                 refreshTokens(null, false);
                 notifyDataSetChanged();
@@ -245,7 +244,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
                 } else {
                     BaseContactItem item = findContactItemForContent(contact);
                     if (item == null) {
-                        item = new TalkClientContactItem(mActivity, contact);
+                        item = new TalkClientContactItem(contact, mActivity);
                         mContactItems.add(item);
                     }
                     item.update();
@@ -282,7 +281,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
             public void run() {
                 BaseContactItem item = findContactItemForContent(contact);
                 if (item == null) {
-                    item = new TalkClientContactItem(mActivity, contact);
+                    item = new TalkClientContactItem(contact, mActivity);
                     mContactItems.add(item);
                     notifyDataSetChanged();
                 } else {
@@ -356,7 +355,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         for (TalkClientSmsToken token : tokens) {
             SmsContactItem item = (SmsContactItem) findContactItemForContent(token);
             if (item == null) {
-                item = new SmsContactItem(mActivity, token);
+                item = new SmsContactItem(token, mActivity);
             }
             int index = mContactItems.indexOf(item);
             if (index > -1) {
