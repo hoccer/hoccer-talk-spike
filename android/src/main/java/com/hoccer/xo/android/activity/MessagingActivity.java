@@ -30,8 +30,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     ActionBar mActionBar;
 
     MessagingFragment mMessagingFragment;
-    SingleProfileFragment mSingleProfileFragment;
-    GroupProfileFragment mGroupProfileFragment;
 
     int mContactId;
     private IContentObject mClipboardAttachment;
@@ -154,13 +152,17 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     @Override
     public void clipBoardItemSelected(IContentObject contentObject) {
-        mMessagingFragment.onAttachmentSelected(contentObject);
+        if (mMessagingFragment != null) {
+            mMessagingFragment.onAttachmentSelected(contentObject);
+        }
     }
 
     @Override
     protected void applicationWillEnterBackground() {
         super.applicationWillEnterBackground();
-        mMessagingFragment.applicationWillEnterBackground();
+        if (mMessagingFragment != null) {
+            mMessagingFragment.applicationWillEnterBackground();
+        }
     }
 
     @Override
@@ -181,11 +183,11 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         Bundle bundle = new Bundle();
         bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, mContactId);
 
-        mSingleProfileFragment = new SingleProfileFragment();
-        mSingleProfileFragment.setArguments(bundle);
+        SingleProfileFragment singleProfileFragment = new SingleProfileFragment();
+        singleProfileFragment.setArguments(bundle);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_messaging_fragment_container, mSingleProfileFragment);
+        ft.replace(R.id.fl_messaging_fragment_container, singleProfileFragment);
         ft.addToBackStack(null);
         ft.commit();
     }
@@ -195,12 +197,11 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, mContactId);
 
-        mGroupProfileFragment = new GroupProfileFragment();
-        mGroupProfileFragment.setArguments(bundle);
+        GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
+        groupProfileFragment.setArguments(bundle);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_messaging_fragment_container, mGroupProfileFragment);
-//        ft.addToBackStack(null);
+        ft.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
         ft.commit();
     }
 
