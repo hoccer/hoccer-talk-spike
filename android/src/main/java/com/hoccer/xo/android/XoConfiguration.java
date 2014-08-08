@@ -16,18 +16,6 @@ public class XoConfiguration {
 
     public static void initialize(XoApplication application) {
         sPreferences = PreferenceManager.getDefaultSharedPreferences(application);
-
-        if(application.getConfiguration().isTestingModeEnabled()) {
-            SharedPreferences.Editor editor = sPreferences.edit();
-            editor.putString("preference_log_level", "DEBUG");
-            editor.putBoolean("preference_log_sd", true);
-            editor.commit();
-        }
-        if(application.getConfiguration().isDevelopmentModeEnabled()) {
-            SharedPreferences.Editor editor = sPreferences.edit();
-            editor.putString("preference_log_level", "DEBUG");
-            editor.commit();
-        }
     }
 
     public static boolean needToRegenerateKey() {

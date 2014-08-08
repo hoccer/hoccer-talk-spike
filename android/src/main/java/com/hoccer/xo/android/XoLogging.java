@@ -23,11 +23,6 @@ public class XoLogging {
     private static final Layout LOG_LOGCAT_LAYOUT = new PatternLayout("[%t] %-5p %c - %m%n");
     private final static String LOG_TAG = "HoccerXO";
 
-    /** SharedPreferences to listen on */
-    private static SharedPreferences sPreferences;
-    /** Listener watching preferences */
-    private static SharedPreferences.OnSharedPreferenceChangeListener sPreferencesListener;
-
     /** The root logger */
     private static Logger sRootLogger;
 
@@ -64,49 +59,19 @@ public class XoLogging {
             e.printStackTrace();
         }
 
-        // attach preference listener
-        sPreferences = PreferenceManager.getDefaultSharedPreferences(application);
-        sPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if(key.equals("preference_log_logcat")) {
-                    configureLogLogcat();
-                }
-                if(key.equals("preference_log_sd")) {
-                    configureLogSd();
-                }
-                if(key.equals("preference_log_level")) {
-                    configureLogLevel();
-                }
-            }
-        };
-        sPreferences.registerOnSharedPreferenceChangeListener(sPreferencesListener);
-
         // apply initial configuration
-        configureLogLevel();
-        configureLogLogcat();
-        configureLogSd();
+        configureLogLevel(application.getConfiguration().getLogLevel());
+        configureLogLogcat(application.getConfiguration().isLoggingToLogcatEnabled());
+        configureLogSd(application.getConfiguration().isLoggingToSdEnabled());
     }
 
-    /**
-     * Shut down the logging system
-     */
-    public static final void shutdown() {
-        if(sPreferencesListener != null) {
-            sPreferences.unregisterOnSharedPreferenceChangeListener(sPreferencesListener);
-            sPreferencesListener = null;
-        }
-    }
-
-    private static void configureLogLevel() {
-        String levelString = sPreferences.getString("preference_log_level", "INFO");
+    private static void configureLogLevel(String levelString) {
         Log.i(LOG_TAG, "[logging] setting log level to " + levelString);
         Level level = Level.toLevel(levelString);
         sRootLogger.setLevel(level);
     }
 
-    private static void configureLogSd() {
-        boolean enabled = sPreferences.getBoolean("preference_log_sd", false);
+    private static void configureLogSd(boolean enabled) {
         Log.i(LOG_TAG, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to SD card");
         if(enabled) {
             XoApplication.ensureDirectory(getLogDirectory());
@@ -116,8 +81,7 @@ public class XoLogging {
         }
     }
 
-    private static void configureLogLogcat() {
-        boolean enabled = sPreferences.getBoolean("preference_log_logcat", true);
+    private static void configureLogLogcat(boolean enabled) {
         Log.i(LOG_TAG, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to logcat");
         if(enabled) {
             sRootLogger.addAppender(sLogcatAppender);

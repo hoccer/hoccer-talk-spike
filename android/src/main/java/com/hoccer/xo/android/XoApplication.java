@@ -187,12 +187,12 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         EXTERNAL_STORAGE = Environment.getExternalStorageDirectory();
         INTERNAL_STORAGE = this.getFilesDir();
 
-        // initialize logging system
-        XoLogging.initialize(this);
-
         // Initialize configuration
         CONFIGURATION = new XoAndroidClientConfiguration(this);
         XoConfiguration.initialize(this);
+
+        // initialize logging system
+        XoLogging.initialize(this);
 
         // configure ormlite to use log4j
         System.setProperty("com.j256.ormlite.logger.type", "LOG4J");
@@ -302,9 +302,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
             EXECUTOR.shutdownNow();
             EXECUTOR = null;
         }
-
-        LOG.info("shutting down logging");
-        XoLogging.shutdown();
     }
 
     @Override

@@ -320,18 +320,6 @@
     <string name="no_password">Please enter a Password.</string>
     <string name="cant_find_credentials">Can\'t find "credentials.json" on your device.</string>
 
-    <string-array name="preference_log_level_names">
-        <item>Info</item>
-        <item>Debug</item>
-        <item>Trace</item>
-    </string-array>
-
-    <string-array name="preference_log_level_values">
-        <item>INFO</item>
-        <item>DEBUG</item>
-        <item>TRACE</item>
-    </string-array>
-
     <string-array name="tab_names">
         <item>CHATS</item>
         <item>INVITATIONS</item>

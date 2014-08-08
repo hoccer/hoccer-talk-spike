@@ -184,8 +184,8 @@
     </dependencies>
 
     <properties>
-        <!-- Can be overridden by calling `mvn -Denvironment=production` -->
-        <environment>testing</environment>
+        <!-- Can be overridden by calling `mvn -Denvironment=[testing|production]` -->
+        <environment>development</environment>
     </properties>
 
     <build>

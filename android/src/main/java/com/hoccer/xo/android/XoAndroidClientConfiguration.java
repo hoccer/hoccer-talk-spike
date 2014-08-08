@@ -60,10 +60,6 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
         return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.enable.development.mode", "false"));
     }
 
-    public boolean isTestingModeEnabled() {
-        return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.enable.testing.mode", "false"));
-    }
-
     public boolean isCrashReportingEnabled() {
         return isDevelopmentModeEnabled() || mPreferences.getBoolean("preference_crash_report", false);
     }
@@ -78,5 +74,17 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     public String getHockeyAppId() {
         return "60f2a55705e94d33e62a7b1643671f46";
+    }
+
+    public String getLogLevel() {
+        return mProperties.getProperty("hoccer.android.log.level", "INFO");
+    }
+
+    public boolean isLoggingToSdEnabled() {
+        return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.log.to.sd", "false"));
+    }
+
+    public boolean isLoggingToLogcatEnabled() {
+        return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.log.to.logcat", "true"));
     }
 }
