@@ -16,8 +16,8 @@
     <packaging>apk</packaging>
     
     <name>Hoccer Talk for Android</name>
-
     <artifactId>hoccer-talk-android</artifactId>
+    <version>2.3.0-SNAPSHOT</version>
 
     <dependencies>
 
