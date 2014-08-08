@@ -232,7 +232,10 @@
                     </sign>
                     <proguard>
                       <skip>false</skip>
-                      <config>proguard.cfg</config>
+                      <configs>
+                          <config>proguard.cfg</config>
+                          <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
+                      </configs>
                       <proguardJarPath>${env.ANDROID_HOME}/tools/proguard/lib/proguard.jar</proguardJarPath>
                     </proguard>
                 </configuration>
