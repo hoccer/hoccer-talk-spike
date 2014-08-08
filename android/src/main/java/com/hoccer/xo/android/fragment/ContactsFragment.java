@@ -11,7 +11,7 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.xo.android.activity.NearbyHistoryMessagingActivity;
+import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.BetterContactsAdapter;
 import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
 import com.hoccer.xo.android.base.XoListFragment;
@@ -210,7 +210,8 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
                         "TokenDialog");
             }
             if (item instanceof String) { // item can only be an instance of string if the user pressed on the nearby saved option
-                Intent intent = new Intent(getXoActivity(), NearbyHistoryMessagingActivity.class);
+                Intent intent = new Intent(getXoActivity(), MessagingActivity.class);
+                intent.putExtra(MessagingActivity.EXTRA_NEARBY_ARCHIVE, true);
                 startActivity(intent);
             }
         }

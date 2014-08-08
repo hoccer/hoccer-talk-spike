@@ -23,7 +23,7 @@ import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentListAdapter;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
-import com.hoccer.xo.android.adapter.SearchResultsAdapter;
+import com.hoccer.xo.android.adapter.SectionedListAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
@@ -55,7 +55,7 @@ public class AttachmentListFragment extends ListFragment {
     private ServiceConnection mConnection;
 
     private AttachmentListAdapter mAttachmentAdapter;
-    private SearchResultsAdapter mResultsAdapter;
+    private SectionedListAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
     private MenuItem mSearchMenuItem;
@@ -269,7 +269,7 @@ public class AttachmentListFragment extends ListFragment {
         if (toggle) {
             mInSearchMode = true;
             if (mResultsAdapter == null) {
-                mResultsAdapter = new SearchResultsAdapter();
+                mResultsAdapter = new SectionedListAdapter();
             }
 
             setListAdapter(mResultsAdapter);

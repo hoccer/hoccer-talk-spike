@@ -121,17 +121,6 @@
                 android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
 
-        <!-- Nearby History activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.NearbyHistoryMessagingActivity"
-                android:label="@string/actionbar_default_title"
-                android:windowSoftInputMode="stateHidden"
-                android:configChanges="keyboardHidden|orientation|screenSize">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
-        </activity>
-
         <!-- Clipboard activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.ClipboardPreviewActivity"
