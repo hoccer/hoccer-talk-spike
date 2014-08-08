@@ -35,7 +35,7 @@ public class SelectedContent implements IContentObject {
     String mFileName;
 
     String mContentUrl;
-    
+
     String mContentDataUrl;
 
     String mContentType = null;
@@ -225,6 +225,11 @@ public class SelectedContent implements IContentObject {
         return upload;
     }
 
+    /*
+     * Warning: This method does not work with TalkClientDownloads as 'object' since there is a contentLength mismatch between
+     * TalkClientUpload and TalkClientDownload although its the same file.
+     * The contentLength seems to be conceptually different between both.
+     */
     public static TalkClientUpload createAttachmentUpload(IContentObject object) {
         if(object instanceof SelectedContent) {
             ((SelectedContent)object).writeDataToFile();

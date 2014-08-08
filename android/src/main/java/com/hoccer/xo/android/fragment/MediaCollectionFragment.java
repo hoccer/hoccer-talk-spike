@@ -20,7 +20,7 @@ import com.hoccer.xo.android.adapter.MediaCollectionItemAdapter;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
-import com.hoccer.xo.android.util.AttachmentOperationHelper;
+import com.hoccer.xo.android.util.UploadHelper;
 import com.hoccer.xo.android.util.DragSortController;
 import com.hoccer.xo.release.R;
 import com.mobeta.android.dslv.DragSortListView;
@@ -36,6 +36,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
     private static final Logger LOG = Logger.getLogger(MediaCollectionFragment.class);
 
+    public static final String ARG_MEDIA_COLLECTION_ID = "com.hoccer.xo.android.argument.MEDIA_COLLECTION_ID";
     public static final int SELECT_COLLECTION_REQUEST = 1;
     public static final int SELECT_CONTACT_REQUEST = 2;
 
@@ -58,7 +59,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
         if (getArguments() != null) {
             try {
                 mDatabase = XoApplication.getXoClient().getDatabase();
-                int collectionId = getArguments().getInt(AttachmentOperationHelper.ARG_MEDIA_COLLECTION_ID);
+                int collectionId = getArguments().getInt(ARG_MEDIA_COLLECTION_ID);
                 mCollection = mDatabase.findMediaCollectionById(collectionId);
                 mCollectionAdapter = new MediaCollectionItemAdapter(mCollection);
                 setListAdapter(mCollectionAdapter);
@@ -142,7 +143,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = retrieveContactById(contactId);
-                            AttachmentOperationHelper.sendAttachmentsToContact(mCollectionAdapter.getSelectedItems(), contact);
+                            UploadHelper.sendDownloadsToContact(mCollectionAdapter.getSelectedItems(), contact);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (URISyntaxException e) {

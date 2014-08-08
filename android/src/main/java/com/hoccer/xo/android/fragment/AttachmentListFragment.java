@@ -28,7 +28,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
-import com.hoccer.xo.android.util.AttachmentOperationHelper;
+import com.hoccer.xo.android.util.UploadHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -175,7 +175,7 @@ public class AttachmentListFragment extends ListFragment {
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = mDatabase.findClientContactById(contactId);
-                            AttachmentOperationHelper.sendAttachmentsToContact(mAttachmentAdapter.getSelectedItems(), contact);
+                            UploadHelper.sendDownloadsToContact(mAttachmentAdapter.getSelectedItems(), contact);
                         } catch (SQLException e) {
                             LOG.error(e.getMessage(), e);
                         } catch (FileNotFoundException e) {
