@@ -1,331 +1,350 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <prerequisites>
-        <maven>3.1.1</maven>
-    </prerequisites>
+  <prerequisites>
+    <maven>3.1.1</maven>
+  </prerequisites>
 
-    <parent>
-        <groupId>hoccer</groupId>
-        <artifactId>hoccer-talk</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>hoccer</groupId>
+    <artifactId>hoccer-talk</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
 
-    <packaging>apk</packaging>
-    
-    <name>Hoccer Talk for Android</name>
-    <artifactId>hoccer-talk-android</artifactId>
-    <version>2.3.0-SNAPSHOT</version>
+  <packaging>apk</packaging>
 
-    <dependencies>
+  <name>Hoccer Talk for Android</name>
+  <artifactId>hoccer-talk-android</artifactId>
+  <version>2.3.0-SNAPSHOT</version>
 
-        <!-- JUnit 4 for testing functionality decoupled from android context -->
-        <!-- IMPORTANT: Needs to be added before the platform dependency to ensure priority in classpath -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
+  <dependencies>
 
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.179</version>
-            <scope>test</scope>
-        </dependency>
+    <!-- JUnit 4 for testing functionality decoupled from android context -->
+    <!-- IMPORTANT: Needs to be added before the platform dependency to ensure priority in classpath -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-        <!-- Android platform -->
-        <dependency>
-            <groupId>android</groupId>
-            <artifactId>android</artifactId>
-            <version>${android.platform.version}</version>
-            <scope>provided</scope>
-        </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.179</version>
+      <scope>test</scope>
+    </dependency>
 
-        <!-- Google Play Services (required for Google Maps) -->
-        <dependency>
-            <groupId>com.google.android.gms</groupId>
-            <artifactId>google-play-services</artifactId>
-            <version>${android.gms.version}</version>
-            <type>apklib</type>
-        </dependency>
-        <dependency>
-            <groupId>com.google.android.gms</groupId>
-            <artifactId>google-play-services</artifactId>
-            <version>${android.gms.version}</version>
-            <type>jar</type>
-        </dependency>
+    <!-- Android platform -->
+    <dependency>
+      <groupId>android</groupId>
+      <artifactId>android</artifactId>
+      <version>${android.platform.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
-        <!-- Google Maps API -->
-        <dependency>
-            <groupId>com.google.android.maps</groupId>
-            <artifactId>maps</artifactId>
-            <version>${android.gmaps.version}</version>
-        </dependency>
+    <!-- Google Play Services (required for Google Maps) -->
+    <dependency>
+      <groupId>com.google.android.gms</groupId>
+      <artifactId>google-play-services</artifactId>
+      <version>${android.gms.version}</version>
+      <type>apklib</type>
+    </dependency>
+    <dependency>
+      <groupId>com.google.android.gms</groupId>
+      <artifactId>google-play-services</artifactId>
+      <version>${android.gms.version}</version>
+      <type>jar</type>
+    </dependency>
 
-        <!-- ez-vcard for vcard reading/writing -->
-        <dependency>
-            <groupId>com.googlecode.ez-vcard</groupId>
-            <artifactId>ez-vcard</artifactId>
-            <version>${ez-vcard.version}</version>
-        </dependency>
+    <!-- Google Maps API -->
+    <dependency>
+      <groupId>com.google.android.maps</groupId>
+      <artifactId>maps</artifactId>
+      <version>${android.gmaps.version}</version>
+    </dependency>
 
-        <!-- Universal image loader -->
-        <dependency>
-            <groupId>com.nostra13.universalimageloader</groupId>
-            <artifactId>universal-image-loader</artifactId>
-            <version>${universal.image.loader.version}</version>
-        </dependency>
+    <!-- ez-vcard for vcard reading/writing -->
+    <dependency>
+      <groupId>com.googlecode.ez-vcard</groupId>
+      <artifactId>ez-vcard</artifactId>
+      <version>${ez-vcard.version}</version>
+    </dependency>
 
-        <!-- Talk client library -->
-        <dependency>
-          <groupId>hoccer</groupId>
-          <artifactId>hoccer-talk-client</artifactId>
-          <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        
-        <!-- ORM library for database management -->
-        <dependency>
-          <groupId>com.j256.ormlite</groupId>
-          <artifactId>ormlite-android</artifactId>
-          <version>${ormlite.version}</version>
-        </dependency>
-        <!-- We include the JDBC variant just for log4j support -->
-        <dependency>
-          <groupId>com.j256.ormlite</groupId>
-          <artifactId>ormlite-jdbc</artifactId>
-          <version>${ormlite.version}</version>
-        </dependency>
+    <!-- Universal image loader -->
+    <dependency>
+      <groupId>com.nostra13.universalimageloader</groupId>
+      <artifactId>universal-image-loader</artifactId>
+      <version>${universal.image.loader.version}</version>
+    </dependency>
 
-        <!-- Logging -->
-        <dependency>
-          <groupId>ufwa-common</groupId>
-          <artifactId>log4j-android</artifactId>
-          <version>${log4j-android.version}</version>
-        </dependency>
-        <!-- exclude "normal" non-android log4j -->
-        <dependency>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-          <version>${log4j.version}</version>
-          <scope>provided</scope>
-        </dependency>
+    <!-- Talk client library -->
+    <dependency>
+      <groupId>hoccer</groupId>
+      <artifactId>hoccer-talk-client</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
 
-        <!-- Apache Commons Codec (BASE64 and hex encoding) -->
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>${commons-codec.version}</version>
-        </dependency>
+    <!-- ORM library for database management -->
+    <dependency>
+      <groupId>com.j256.ormlite</groupId>
+      <artifactId>ormlite-android</artifactId>
+      <version>${ormlite.version}</version>
+    </dependency>
+    <!-- We include the JDBC variant just for log4j support -->
+    <dependency>
+      <groupId>com.j256.ormlite</groupId>
+      <artifactId>ormlite-jdbc</artifactId>
+      <version>${ormlite.version}</version>
+    </dependency>
 
-        <!-- Android provides HTTP client in some hacked up version -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${apache.httpclient.version}</version>
-            <scope>provided</scope>
-        </dependency>
+    <!-- Logging -->
+    <dependency>
+      <groupId>ufwa-common</groupId>
+      <artifactId>log4j-android</artifactId>
+      <version>${log4j-android.version}</version>
+    </dependency>
+    <!-- exclude "normal" non-android log4j -->
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>${log4j.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
-        <!-- Android support library -->
-        <dependency>
-            <groupId>com.android.support</groupId>
-            <artifactId>support-v4</artifactId>
-            <version>${android.supportv4.version}</version>
-        </dependency>
+    <!-- Apache Commons Codec (BASE64 and hex encoding) -->
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>${commons-codec.version}</version>
+    </dependency>
 
-        <!-- HockeyApp -->
-        <dependency>
-            <groupId>net.hockeyapp.android</groupId>
-            <artifactId>HockeySDK</artifactId>
-            <version>3.0.1</version>
-            <scope>compile</scope>
-        </dependency>
+    <!-- Android provides HTTP client in some hacked up version -->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>${apache.httpclient.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
-        <!-- ZXing barcode core-->
-        <dependency>
-            <groupId>com.google.zxing</groupId>
-            <artifactId>core</artifactId>
-            <version>3.0.1</version>
-        </dependency>
+    <!-- Android support library -->
+    <dependency>
+      <groupId>com.android.support</groupId>
+      <artifactId>support-v4</artifactId>
+      <version>${android.supportv4.version}</version>
+    </dependency>
 
-        <!-- Zbar scanner-->
-        <dependency>
-            <groupId>inter.nal.barcodescanner</groupId>
-            <artifactId>zbar</artifactId>
-            <version>1.0</version>
-        </dependency>
+    <!-- HockeyApp -->
+    <dependency>
+      <groupId>net.hockeyapp.android</groupId>
+      <artifactId>HockeySDK</artifactId>
+      <version>3.0.1</version>
+      <scope>compile</scope>
+    </dependency>
 
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.1.5</version>
-        </dependency>
+    <!-- ZXing barcode core-->
+    <dependency>
+      <groupId>com.google.zxing</groupId>
+      <artifactId>core</artifactId>
+      <version>3.0.1</version>
+    </dependency>
 
-        <dependency>
-            <groupId>com.mobeta.android.dslv</groupId>
-            <artifactId>drag-sort-listview</artifactId>
-            <version>0.6.2-SNAPSHOT</version>
-            <type>apklib</type>
-        </dependency>
+    <!-- Zbar scanner-->
+    <dependency>
+      <groupId>inter.nal.barcodescanner</groupId>
+      <artifactId>zbar</artifactId>
+      <version>1.0</version>
+    </dependency>
 
-        <!-- GeoJson library -->
-        <!--
-          XXX switch to this library
-        <dependency>
-            <groupId>de.grundid.opendatalab</groupId>
-            <artifactId>geojson-jackson</artifactId>
-            <version>${geojson-jackson.version}</version>
-        </dependency>
-        -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.1.5</version>
+    </dependency>
 
-    </dependencies>
+    <dependency>
+      <groupId>com.mobeta.android.dslv</groupId>
+      <artifactId>drag-sort-listview</artifactId>
+      <version>0.6.2-SNAPSHOT</version>
+      <type>apklib</type>
+    </dependency>
 
-    <properties>
-        <!-- Can be overridden by calling `mvn -Denvironment=[testing|production]` -->
-        <environment>development</environment>
-    </properties>
+  </dependencies>
 
-    <build>
-        <filters>
-            <filter>environment-${environment}.properties</filter>
-            <filter>assets/${environment}/environment.properties</filter>
-        </filters>
-        <resources>
-            <resource>
-                <directory>${project.basedir}</directory>
-                <targetPath>${project.build.directory}</targetPath>
-                <filtering>true</filtering>
-                <includes>
-                    <include>AndroidManifest.xml</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>${project.basedir}/assets/${environment}</directory>
-                <targetPath>${project.build.directory}/assets</targetPath>
-            </resource>
-        </resources>
-        <plugins>
-            <!-- Android plugin -->
-            <!-- Documentation of configuration options can be found here:
-                 http://jayway.github.io/maven-android-plugin/apk-mojo.html and here:
-                 http://jayway.github.io/maven-android-plugin/plugin-info.html-->
-            <plugin>
-                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-                <artifactId>android-maven-plugin</artifactId>
-                <version>${maven-android.version}</version>
-                <configuration>
-                    <androidManifestFile>${project.build.directory}/AndroidManifest.xml</androidManifestFile>
-                    <assetsDirectory>${project.build.directory}/assets</assetsDirectory>
-                    <resourceDirectory>${project.basedir}/res</resourceDirectory>
-                    <resourceOverlayDirectory>${project.build.directory}/generated-resources</resourceOverlayDirectory>
-                    <nativeLibrariesDirectory>${project.basedir}/libs</nativeLibrariesDirectory>
-                    <extractDuplicates>true</extractDuplicates>
-                    <sdk>
-                        <platform>19</platform>
-                    </sdk>
-                    <undeployBeforeDeploy>true</undeployBeforeDeploy>
-                    <sign>
-                      <debug>false</debug>
-                    </sign>
-                    <proguard>
-                      <skip>false</skip>
-                      <configs>
-                          <config>proguard.cfg</config>
-                          <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
-                      </configs>
-                      <proguardJarPath>${env.ANDROID_HOME}/tools/proguard/lib/proguard.jar</proguardJarPath>
-                    </proguard>
-                </configuration>
-                <extensions>true</extensions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jarsigner-plugin</artifactId>
-                <version>${maven-jarsigner.version}</version>
-                <executions>
-                    <execution>
-                        <id>signing</id>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <inherited>true</inherited>
-                        <configuration>
-                            <archiveDirectory/>
-                            <includes>
-                                <include>target/*.apk</include>
-                            </includes>
-                            <keystore>config/debug.keystore</keystore>
-                            <alias>androiddebugkey</alias>
-                            <keypass>android</keypass>
-                            <storepass>android</storepass>
-                            <arguments>
-                                <argument>-sigalg</argument><argument>MD5withRSA</argument>
-                                <argument>-digestalg</argument><argument>SHA1</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Git commit id -->
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>${git-commit-id.version}</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <prefix>git</prefix>
-                    <dateFormat>yyyy-MM-dd HH:mm:ss z</dateFormat>
-                    <verbose>true</verbose>
-                    <!-- skip projects with <packaging>pom</packaging> -->
-                    <skipPoms>true</skipPoms>
-                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <generateGitPropertiesFilename>${project.build.directory}/generated-resources/raw/git_properties</generateGitPropertiesFilename>
-                    <failOnNoGitDirectory>true</failOnNoGitDirectory>
-                    <gitDescribe>
-                        <skip>false</skip>
-                        <always>true</always>
-                        <abbrev>7</abbrev>
-                        <dirty>-dirty</dirty>
-                        <forceLongFormat>true</forceLongFormat>
-                    </gitDescribe>
-                </configuration>
-            </plugin>
-            <!-- Java compiler -->
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler.version}</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-            <!-- Manipulate resources before android-maven-plugin uses them -->
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>${maven-resources.version}</version>
-                <configuration>
-                    <overwrite>true</overwrite>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>resources</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+  <properties>
+    <!-- Can be overridden by calling `mvn -Denvironment=[testing|production]` -->
+    <environment>development</environment>
+
+    <!-- Default values for default environment (development), can be overwritten in a profile below -->
+    <apk.signing.skip>false</apk.signing.skip>
+    <apk.signing.postfix>signed</apk.signing.postfix>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>environment-production</id>
+      <activation>
+        <property>
+          <name>environment</name>
+          <value>production</value>
+        </property>
+      </activation>
+      <properties>
+        <apk.signing.skip>true</apk.signing.skip>
+        <apk.signing.postfix>unsigned</apk.signing.postfix>
+      </properties>
+    </profile>
+  </profiles>
+
+  <build>
+    <filters>
+      <filter>environment-${environment}.properties</filter>
+      <filter>assets/${environment}/environment.properties</filter>
+    </filters>
+
+    <resources>
+      <resource>
+        <directory>${project.basedir}</directory>
+        <targetPath>${project.build.directory}</targetPath>
+        <filtering>true</filtering>
+        <includes>
+          <include>AndroidManifest.xml</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>${project.basedir}/assets/${environment}</directory>
+        <targetPath>${project.build.directory}/assets</targetPath>
+      </resource>
+    </resources>
+
+    <finalName>hoccer-xo-android-${project.version}-${environment}-${apk.signing.postfix}</finalName>
+
+    <plugins>
+      <!-- Android plugin -->
+      <!-- Documentation of configuration options can be found here:
+           http://jayway.github.io/maven-android-plugin/apk-mojo.html and here:
+           http://jayway.github.io/maven-android-plugin/plugin-info.html-->
+      <plugin>
+        <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+        <artifactId>android-maven-plugin</artifactId>
+        <version>${maven-android.version}</version>
+        <configuration>
+          <androidManifestFile>${project.build.directory}/AndroidManifest.xml</androidManifestFile>
+          <assetsDirectory>${project.build.directory}/assets</assetsDirectory>
+          <resourceDirectory>${project.basedir}/res</resourceDirectory>
+          <resourceOverlayDirectory>${project.build.directory}/generated-resources</resourceOverlayDirectory>
+          <nativeLibrariesDirectory>${project.basedir}/libs</nativeLibrariesDirectory>
+          <extractDuplicates>true</extractDuplicates>
+          <sdk>
+            <platform>19</platform>
+          </sdk>
+          <undeployBeforeDeploy>true</undeployBeforeDeploy>
+          <sign>
+            <debug>false</debug>
+          </sign>
+          <proguard>
+            <skip>false</skip>
+            <configs>
+              <config>proguard.cfg</config>
+              <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
+            </configs>
+            <proguardJarPath>${env.ANDROID_HOME}/tools/proguard/lib/proguard.jar</proguardJarPath>
+          </proguard>
+        </configuration>
+        <extensions>true</extensions>
+      </plugin>
+      <!-- Sign APK -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jarsigner-plugin</artifactId>
+        <version>${maven-jarsigner.version}</version>
+        <executions>
+          <execution>
+            <id>signing</id>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+            <phase>package</phase>
+            <inherited>true</inherited>
+            <configuration>
+              <archiveDirectory/>
+              <includes>
+                <include>target/*.apk</include>
+              </includes>
+              <keystore>config/debug.keystore</keystore>
+              <alias>androiddebugkey</alias>
+              <keypass>android</keypass>
+              <storepass>android</storepass>
+              <arguments>
+                <argument>-sigalg</argument>
+                <argument>MD5withRSA</argument>
+                <argument>-digestalg</argument>
+                <argument>SHA1</argument>
+              </arguments>
+              <skip>${apk.signing.skip}</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Git commit id -->
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>${git-commit-id.version}</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <prefix>git</prefix>
+          <dateFormat>yyyy-MM-dd HH:mm:ss z</dateFormat>
+          <verbose>true</verbose>
+          <!-- skip projects with <packaging>pom</packaging> -->
+          <skipPoms>true</skipPoms>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <generateGitPropertiesFilename>${project.build.directory}/generated-resources/raw/git_properties
+          </generateGitPropertiesFilename>
+          <failOnNoGitDirectory>true</failOnNoGitDirectory>
+          <gitDescribe>
+            <skip>false</skip>
+            <always>true</always>
+            <abbrev>7</abbrev>
+            <dirty>-dirty</dirty>
+            <forceLongFormat>true</forceLongFormat>
+          </gitDescribe>
+        </configuration>
+      </plugin>
+      <!-- Java compiler -->
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler.version}</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+      <!-- Manipulate resources before android-maven-plugin uses them -->
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven-resources.version}</version>
+        <configuration>
+          <overwrite>true</overwrite>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
