@@ -861,18 +861,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         });
     }
 
-    public void depairContact(final TalkClientContact contact) {
-        resetIdle();
-        if(contact.isClient()) {
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    mServerRpc.depairClient(contact.getClientId());
-                }
-            });
-        }
-    }
-
     public void deleteContact(final TalkClientContact contact) {
         resetIdle();
         if(contact.isClient() || contact.isGroup()) {
