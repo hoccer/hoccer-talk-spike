@@ -212,6 +212,13 @@
             </intent-filter>
         </activity>
 
+
+        <!-- Invitation activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.AddressBookActivity"
+                android:label="@string/actionbar_default_title">
+        </activity>
+
         <!-- Preference activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.XoPreferenceActivity"
