@@ -35,7 +35,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_friend_requests, container, false);
+        View view = inflater.inflate(R.layout.fragment_contacts, container, false);
         mContactList = (ListView) view.findViewById(android.R.id.list);
 
         mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);

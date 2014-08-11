@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.AdapterView;
@@ -11,6 +12,7 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.BetterContactsAdapter;
 import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
@@ -44,22 +46,34 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDatabase = getXoActivity().getXoDatabase();
+        mDatabase = XoApplication.getXoClient().getDatabase();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         LOG.debug("onCreateView()");
-        View view = inflater.inflate(R.layout.fragment_friend_requests, container, false);
+        View view = inflater.inflate(R.layout.fragment_contacts, container, false);
         mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
-        mPlaceholderImageFrame.setBackgroundDrawable(getResources().getDrawable(R.drawable.placeholder_chats));
         mPlaceholderImage= (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
-        mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            mPlaceholderImageFrame.setBackground(getResources().getDrawable(R.drawable.placeholder_chats));
+            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
+        } else {
+            mPlaceholderImageFrame.setBackgroundDrawable(getResources().getDrawable(R.drawable.placeholder_chats));
+            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
+        }
 
         registerForContextMenu(view);
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        initBetterContactListAdapter();
     }
 
     @Override
@@ -68,8 +82,6 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         super.onPause();
         if (mAdapter != null) {
             mAdapter.onPause();
-            mAdapter.onDestroy();
-            mAdapter = null;
         }
     }
 
@@ -77,7 +89,17 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     public void onResume() {
         LOG.debug("onResume()");
         super.onResume();
-        initBetterContactListAdapter();
+        if (mAdapter != null) {
+            mAdapter.onResume();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mAdapter != null) {
+            mAdapter.onDestroy();
+        }
     }
 
     @Override
@@ -141,36 +163,32 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     }
 
     private void initBetterContactListAdapter() {
-        if (mAdapter == null) {
-            BetterContactsAdapter.Filter filter = new BetterContactsAdapter.Filter() {
-                @Override
-                public boolean shouldShow(TalkClientContact contact) {
-                    if (contact.isGroup()) {
-                        if (contact.isGroupInvolved() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()))) {
-                            return true;
-                        }
-                    } else if (contact.isClient()) {
-                        if (contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship()
-                                .isBlocked())) {
-                            return true;
-                        }
-                    } else if (contact.isEverRelated()) {
+        BetterContactsAdapter.Filter filter = new BetterContactsAdapter.Filter() {
+            @Override
+            public boolean shouldShow(TalkClientContact contact) {
+                if (contact.isGroup()) {
+                    if (contact.isGroupInvolved() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()))) {
                         return true;
                     }
-                    return false;
+                } else if (contact.isClient()) {
+                    if (contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship()
+                            .isBlocked())) {
+                        return true;
+                    }
+                } else if (contact.isEverRelated()) {
+                    return true;
                 }
-            };
-            mAdapter = new BetterContactsAdapter(getXoActivity(), filter);
-            mAdapter.onCreate();
+                return false;
+            }
+        };
 
-            setListAdapter(mAdapter);
-            onItemCountChanged(mAdapter.getCount());
-        }
-
+        mAdapter = new BetterContactsAdapter(getXoActivity(), filter);
+        mAdapter.onCreate();
         mAdapter.setOnItemCountChangedListener(this);
         mAdapter.requestReload();
-        mAdapter.onResume();
+
         onItemCountChanged(mAdapter.getCount());
+        setListAdapter(mAdapter);
     }
 
     public void onGroupCreationSucceeded(int contactId) {
