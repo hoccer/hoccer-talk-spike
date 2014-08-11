@@ -1967,35 +1967,43 @@ public class TalkRpcHandler implements ITalkRpcServer {
         final String clientId = mConnection.getClientId();
         logCall("processFileDownloadMessage(fileId: '" + fileId + "') for client "+clientId + ", nextState='"+nextState+"'");
 
-        List<TalkMessage> messages = mDatabase.findMessagesWithAttachmentFileId(fileId);
-        if (messages.isEmpty()) {
-            throw new RuntimeException("No message found with file id "+fileId);
-        }
-        if (messages.size() > 1) {
-            LOG.error("Multiple messages ("+messages.size()+") found with file id " + fileId);
-        }
-        for (TalkMessage message : messages) {
-            if (clientId.equals(message.getSenderId())) {
-                throw new RuntimeException("Sender must not mess with download, messageId="+message.getMessageId());
+        TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("deliveryRequest-"+clientId);
+        try {
+            lock.lock("processFileDownloadMessage");
+            List<TalkMessage> messages = mDatabase.findMessagesWithAttachmentFileId(fileId);
+            if (messages.isEmpty()) {
+                throw new RuntimeException("No message found with file id "+fileId);
             }
-            synchronized (mServer.idLock(message.getMessageId())) {
-                TalkDelivery delivery = mDatabase.findDelivery(message.getMessageId(), clientId);
-                if (delivery != null) {
-                    LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (download), messageId="+message.getMessageId()+", delivery="+delivery.getId());
+            if (messages.size() > 1) {
+                LOG.error("Multiple messages ("+messages.size()+") found with file id " + fileId);
+            }
+            for (TalkMessage message : messages) {
+                if (clientId.equals(message.getSenderId())) {
+                    throw new RuntimeException("Sender must not mess with download, messageId="+message.getMessageId());
+                }
+                synchronized (mServer.idLock(message.getMessageId())) {
+                    TalkDelivery delivery = mDatabase.findDelivery(message.getMessageId(), clientId);
+                    if (delivery != null) {
+                        LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (download), messageId="+message.getMessageId()+", delivery="+delivery.getId());
 
-                    if (!delivery.nextAttachmentStateAllowed(nextState)) {
-                        throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                        if (!delivery.nextAttachmentStateAllowed(nextState)) {
+                            throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                        }
+                        delivery.setAttachmentState(nextState);
+                        delivery.setTimeChanged(new Date());
+                        mDatabase.saveDelivery(delivery);
+                        mServer.getDeliveryAgent().requestDelivery(delivery.getSenderId(), false);
+                    } else {
+                        throw new RuntimeException("delivery not found, messageId="+message.getMessageId());
                     }
-                    delivery.setAttachmentState(nextState);
-                    delivery.setTimeChanged(new Date());
-                    mDatabase.saveDelivery(delivery);
-                    mServer.getDeliveryAgent().requestDelivery(delivery.getSenderId(), false);
-                } else {
-                    throw new RuntimeException("delivery not found, messageId="+message.getMessageId());
                 }
             }
+            return nextState;
+        } catch (InterruptedException e) {
+            throw new RuntimeException("processFileDownloadMessage ",e);
+        } finally {
+            lock.unlock();
         }
-        return nextState;
     }
 
     //------ sender attachment state indication methods
@@ -2063,39 +2071,54 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (messages.isEmpty()) {
             throw new RuntimeException("No message found with file id "+fileId);
         }
-        for (TalkMessage message : messages) {
-            if (clientId.equals(message.getSenderId())) {
-                synchronized (mServer.idLock(message.getMessageId())) {
-                    message.setAttachmentUploadStarted(new Date());
-                    mDatabase.saveMessage(message);
-                    List<TalkDelivery> deliveries = mDatabase.findDeliveriesForMessage(message.getMessageId());
-                    for (TalkDelivery delivery : deliveries) {
-                        // for some calls we update only a specific delivery, while for other calls we update only the delivery with the proper receiverId
-                        if (receiverId == null || delivery.getReceiverId().equals(receiverId)) {
-                            LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (upload), messageId="+message.getMessageId()+", delivery="+delivery.getId());
 
-                            if ((TalkDelivery.ATTACHMENT_STATE_RECEIVED.equals(delivery.getAttachmentState()) ||
-                                    TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED.equals(delivery.getAttachmentState()))
-                                    && TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState)) {
-                                LOG.info("AttachmentState already '"+delivery.getAttachmentState()+"', ignoring next state 'uploaded' returning current state, messageId="+message.getMessageId()+", delivery="+delivery.getId());
-                                return delivery.getAttachmentState();
-                            }
+        String result = nextState;
+        TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("deliveryRequest-"+clientId);
+        try {
+            lock.lock("processFileUploadMessage");
+            for (TalkMessage message : messages) {
+                if (clientId.equals(message.getSenderId())) {
+                    synchronized (mServer.idLock(message.getMessageId())) {
+                        message.setAttachmentUploadStarted(new Date());
+                        mDatabase.saveMessage(message);
+                        List<TalkDelivery> deliveries = mDatabase.findDeliveriesForMessage(message.getMessageId());
 
-                            if (!delivery.nextAttachmentStateAllowed(nextState)) {
-                                throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                        // update all concerned deliveries
+                        for (TalkDelivery delivery : deliveries) {
+                            // for some calls we update only a specific delivery, while for other calls we update only the delivery with the proper receiverId
+                            if (receiverId == null || delivery.getReceiverId().equals(receiverId)) {
+                                LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (upload), messageId="+message.getMessageId()+", delivery="+delivery.getId());
+
+                                if ((TalkDelivery.ATTACHMENT_STATE_RECEIVED.equals(delivery.getAttachmentState()) ||
+                                        TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED.equals(delivery.getAttachmentState()))
+                                        && TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState)) {
+                                    LOG.info("AttachmentState already '"+delivery.getAttachmentState()+"', ignoring next state 'uploaded' returning current state, messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                                    result = delivery.getAttachmentState();
+                                    continue;
+                                }
+
+                                if (!delivery.nextAttachmentStateAllowed(nextState)) {
+                                    LOG.warn("next state '" + nextState + "'not allowed, delivery already in state '" + delivery.getAttachmentState() + "', messageId=" + message.getMessageId() + ", delivery=" + delivery.getId());
+                                    result = delivery.getAttachmentState();
+                                    continue;
+                                }
+                                delivery.setAttachmentState(nextState);
+                                delivery.setTimeChanged(message.getAttachmentUploadStarted());
+                                mDatabase.saveDelivery(delivery);
+                                mServer.getDeliveryAgent().requestDelivery(delivery.getReceiverId(), false);
                             }
-                            delivery.setAttachmentState(nextState);
-                            delivery.setTimeChanged(message.getAttachmentUploadStarted());
-                            mDatabase.saveDelivery(delivery);
-                            mServer.getDeliveryAgent().requestDelivery(delivery.getReceiverId(), false);
                         }
                     }
+                } else {
+                    throw new RuntimeException("you are not the sender of this file with messageId="+message.getMessageId());
                 }
-            } else {
-                throw new RuntimeException("you are not the sender of this file with messageId="+message.getMessageId());
             }
+            return result;
+        } catch (InterruptedException e) {
+            throw new RuntimeException("processFileDownloadMessage ",e);
+        } finally {
+            lock.unlock();
         }
-        return nextState;
     }
 
 
