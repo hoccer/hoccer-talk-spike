@@ -1995,9 +1995,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         if (receiverId == null || delivery.getReceiverId().equals(receiverId)) {
                             LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (upload), messageId="+message.getMessageId()+", delivery="+delivery.getId());
 
-                            if (TalkDelivery.ATTACHMENT_STATE_RECEIVED.equals(delivery.getAttachmentState()) &&
-                                    TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState)) {
-                                LOG.info("AttachmentState already 'received', ignoring next state 'uploaded' (download) returning state 'received', messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                            if ((TalkDelivery.ATTACHMENT_STATE_RECEIVED.equals(delivery.getAttachmentState()) ||
+                                    TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED.equals(delivery.getAttachmentState()))
+                                    && TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState)) {
+                                LOG.info("AttachmentState already '"+delivery.getAttachmentState()+"', ignoring next state 'uploaded' returning current state, messageId="+message.getMessageId()+", delivery="+delivery.getId());
                                 return delivery.getAttachmentState();
                             }
 
