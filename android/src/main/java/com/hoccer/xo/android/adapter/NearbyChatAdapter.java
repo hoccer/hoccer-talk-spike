@@ -69,42 +69,42 @@ public class NearbyChatAdapter extends ChatAdapter {
             convertView = ((LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE))
                     .inflate(R.layout.item_chat_separator, null);
             TextView tv = (TextView) convertView.findViewById(R.id.tv_header);
-            tv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            XoDialogs.showYesNoDialog("ConfirmDeletion",
-                                    R.string.dialog_confirm_nearby_deletion_title,
-                                    R.string.dialog_confirm_nearby_deletion_message,
-                                    mXoActivity,
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            try {
-                                                mDatabase.deleteAllMessagesFromContactId(chatItem.getConversationContactId());
-                                                initialize();
-                                            } catch (SQLException e) {
-                                                e.printStackTrace();
-                                            }
-                                            notifyDataSetChanged();
-                                        }
-                                    },
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int id) {
-                                        }
-                                    }
-                            );
-
-
-
-                            notifyDataSetChanged();
-                        }
-                    });
-                }
-            });
+//            tv.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            XoDialogs.showYesNoDialog("ConfirmDeletion",
+//                                    R.string.dialog_confirm_nearby_deletion_title,
+//                                    R.string.dialog_confirm_nearby_deletion_message,
+//                                    mXoActivity,
+//                                    new DialogInterface.OnClickListener() {
+//                                        @Override
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                            try {
+//                                                mDatabase.deleteAllMessagesFromContactId(chatItem.getConversationContactId());
+//                                                initialize();
+//                                            } catch (SQLException e) {
+//                                                e.printStackTrace();
+//                                            }
+//                                            notifyDataSetChanged();
+//                                        }
+//                                    },
+//                                    new DialogInterface.OnClickListener() {
+//                                        @Override
+//                                        public void onClick(DialogInterface dialog, int id) {
+//                                        }
+//                                    }
+//                            );
+//
+//
+//
+//                            notifyDataSetChanged();
+//                        }
+//                    });
+//                }
+//            });
             tv.setText(chatItem.getText());
             convertView.setTag("SEPARATOR");
             return convertView;
