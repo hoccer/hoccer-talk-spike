@@ -465,7 +465,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             TalkClientMessage separator = new TalkClientMessage();
             separator.setConversationContact(c);
             separator.setText("Nearby: " + c.getNickname());
-            separator.setMessageId("SEPARATOR");
+            separator.setMessageId(TalkClientMessage.TYPE_SEPARATOR);
             orderedMessages.add(separator);
             orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(), nearbyMessages.size(), 0));
         }

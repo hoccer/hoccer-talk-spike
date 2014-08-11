@@ -539,7 +539,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     public boolean isSeparator() {
-        return "SEPARATOR".equals(mMessage.getMessageId());
+        return TalkClientMessage.TYPE_SEPARATOR.equals(mMessage.getMessageId());
     }
 
     public String getText() {
