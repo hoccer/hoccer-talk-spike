@@ -21,6 +21,7 @@ public class GroupProfileActivity extends XoActionbarActivity
 
     /* use this extra to show the given contact */
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
+    public static final String EXTRA_MAKE_FROM_NEARBY = "fromNearby";
 
     ActionBar mActionBar;
 
@@ -57,7 +58,11 @@ public class GroupProfileActivity extends XoActionbarActivity
                 } else {
                     showGroupProfileFragment(contactId);
                 }
+            } else if (intent.hasExtra(EXTRA_MAKE_FROM_NEARBY)) {
+                String[] clientIds = intent.getStringArrayExtra(EXTRA_MAKE_FROM_NEARBY);
+                createGroupFromNearby(clientIds);
             }
+
         }
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -111,6 +116,11 @@ public class GroupProfileActivity extends XoActionbarActivity
         processContactUpdate(contact);
     }
 
+    private void createGroupFromNearby(String[] clientIds) {
+        LOG.debug("createGroupFromNearby()");
+        mGroupProfileFragment.createGroupFromNearby(clientIds);
+    }
+
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
         processContactUpdate(contact);
@@ -118,7 +128,7 @@ public class GroupProfileActivity extends XoActionbarActivity
 
     void processContactUpdate(TalkClientContact contact) {
         if (isMyContact(contact)) {
-            if(contact.isDeleted()) {
+            if (contact.isDeleted()) {
                 finish();
             } else {
                 mGroupProfileFragment.updateActionBar();

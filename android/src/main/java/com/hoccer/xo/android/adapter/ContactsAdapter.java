@@ -405,6 +405,15 @@ public abstract class ContactsAdapter extends XoAdapter
         mOnItemCountChangedListener = onItemCountChangedListener;
     }
 
+    public String[] getMembersIds() {
+        String[] ids = new String[mClientContacts.size()];
+        int i = 0;
+        for (TalkClientContact c: mClientContacts) {
+            ids[i++] = c.getClientId();
+        }
+        return ids;
+    }
+
     public interface Filter {
         public boolean shouldShow(TalkClientContact contact);
     }

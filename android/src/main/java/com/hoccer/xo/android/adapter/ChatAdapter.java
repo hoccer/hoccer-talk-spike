@@ -312,7 +312,6 @@ public class
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
-
         if (shouldAutoScroll) {
             if (mListView.getLastVisiblePosition() >= getCount() - AUTO_SCROLL_LIMIT) {
                 mListView.smoothScrollToPosition(getCount() - 1);
@@ -323,6 +322,7 @@ public class
     @Override
     public void onReloadRequest() {
         super.onReloadRequest();
+        initialize();
         notifyDataSetChanged();
     }
 

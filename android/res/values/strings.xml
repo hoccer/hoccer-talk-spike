@@ -75,6 +75,10 @@
     <string name="dialog_confirm_nearby_deletion_title">Confirm deletion</string>
     <string name="dialog_confirm_nearby_deletion_message">Do you really want to delete messages from this group?</string>
 
+    <!-- Invitation dialog -->
+    <string name="dialog_invite">Invite</string>
+    <string name="dialog_cancel">Cancel</string>
+
     <!-- Contact list items -->
     <string name="contact_name_new_client">New Friend</string>
     <string name="contact_name_new_group">New Group</string>
@@ -91,6 +95,7 @@
     <string name="messaging_no_messages">No Messages</string>
     <string name="messaging_invited_join">Join group</string>
     <string name="menu_copy_attachment">Copy</string>
+    <string name="menu_delete_message">Delete</string>
 
     <!-- Pairing fragment -->
     <string name="pairing_token_info">Give this token to someone:</string>
@@ -138,6 +143,7 @@
     <string name="group_name_hint">Group name</string>
     <string name="profile_group_members_title">Members</string>
     <string name="profile_group_create_button">Create group</string>
+    <string name="profile_group_permanent_button">Make permanent</string>
     <string name="profile_group_join_button">Join group</string>
     <string name="profile_group_invite_button">Invite users to this Group</string>
     <string name="profile_group_leave_button">Leave this Group</string>
@@ -352,6 +358,7 @@
     <string name="nearby_saved">Nearby saved</string>
     <string name="error_send_message_empty_group">There is nobody in this group.</string>
     <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
+    <string name="invite_several_entries">Has several entries</string>
 
     <string name="about_advert_text">Hoccer XO \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. Hoccer sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. Hoccer XO provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s</string>

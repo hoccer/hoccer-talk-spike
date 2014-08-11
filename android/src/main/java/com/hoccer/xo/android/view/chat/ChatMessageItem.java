@@ -196,6 +196,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         messageText.setText(mMessage.getText());
 
         mMessageText = messageText;
+        configureContextMenu(messageText);
     }
 
     private void updateIncomingMessageStatus(View view) {
@@ -452,10 +453,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
      * @param contentObject The IContentObject to display
      */
     protected void displayAttachment(IContentObject contentObject) {
-        configureContextMenu();
         mContentTransferProgress.setVisibility(View.GONE);
         mContentTransferControl.setOnClickListener(null);
         mContentWrapper.setVisibility(View.VISIBLE);
+        configureContextMenu(mContentWrapper);
     }
 
     /**
@@ -465,7 +466,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
      * @return true if the transfer control should be displayed for a incomplete transfer
      */
     protected boolean shouldDisplayTransferControl(ContentState state) {
-        return !(state == ContentState.SELECTED || state == ContentState.UPLOAD_COMPLETE || state == ContentState.UPLOAD_FAILED || state == ContentState.DOWNLOAD_COMPLETE || state == ContentState.DOWNLOAD_FAILED);
+        return !(state == ContentState.SELECTED || state == ContentState.UPLOAD_COMPLETE || state == ContentState.DOWNLOAD_COMPLETE);
     }
 
     protected ContentState getTransferState(IContentObject object) {
@@ -500,12 +501,12 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return state;
     }
 
-    private void configureContextMenu() {
+    private void configureContextMenu(View view) {
         final ChatMessageItem messageItem = this;
-        mContentWrapper.setOnLongClickListener(new View.OnLongClickListener() {
+        view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                XoActivity activity = (XoActivity) mContext;
+                XoActivity activity = (XoActivity)mContext;
                 activity.showPopupForMessageItem(messageItem, v);
                 return true;
             }

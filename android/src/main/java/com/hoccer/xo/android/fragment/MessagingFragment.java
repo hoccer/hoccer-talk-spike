@@ -233,6 +233,10 @@ public class MessagingFragment extends XoListFragment
         // do nothing
     }
 
+    public void updateAdapter() {
+        mAdapter.requestReload();
+    }
+
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
         // do nothing

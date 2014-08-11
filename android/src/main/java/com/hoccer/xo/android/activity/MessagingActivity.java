@@ -1,10 +1,7 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.ActionBar;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
@@ -21,6 +18,8 @@ import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
+
+import java.sql.SQLException;
 
 public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
@@ -113,30 +112,45 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     @Override
     public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
         IContentObject contentObject = messageItem.getContent();
-
-        if (contentObject.isContentAvailable()) {
-            mClipboardAttachment = contentObject;
-
-            PopupMenu popup = new PopupMenu(this, messageItemView);
-            popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
-            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-
-                public boolean onMenuItemClick(MenuItem item) {
-                    popupItemSelected(item);
-                    return true;
-                }
-            });
-
-            popup.show();
+        final int messageId = messageItem.getMessage().getClientMessageId();
+        final String messageText = messageItem.getText();
+        PopupMenu popup = new PopupMenu(this, messageItemView);
+        if (contentObject != null) {
+            if (contentObject.isContentAvailable()) {
+                mClipboardAttachment = contentObject;
+            }
         }
+        popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                popupItemSelected(item, messageId, messageText);
+                return true;
+            }
+        });
+        popup.show();
     }
 
-    private void popupItemSelected(MenuItem item) {
+    public void popupItemSelected(MenuItem item, int messageId, String text) {
         switch (item.getItemId()) {
             case R.id.menu_copy_attachment:
-                Clipboard clipboard = Clipboard.get(this);
-                clipboard.storeAttachment(mClipboardAttachment);
-                mClipboardAttachment = null;
+                if (mClipboardAttachment != null) {
+                    Clipboard clipboard = Clipboard.get(this);
+                    clipboard.storeAttachment(mClipboardAttachment);
+                    mClipboardAttachment = null;
+                } else {
+                    ClipboardManager clipboardText = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("simple text",text);
+                    clipboardText.setPrimaryClip(clip);
+                }
+                break;
+            case R.id.menu_delete_message:
+                try {
+                    getXoDatabase().deleteMessageById(messageId);
+                    mMessagingFragment.updateAdapter();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
         }
     }
 
