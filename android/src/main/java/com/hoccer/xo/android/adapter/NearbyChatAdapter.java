@@ -121,7 +121,7 @@ public class NearbyChatAdapter extends ChatAdapter {
     }
 
     public void updateAdapter() {
-        mAdapter.requestReload();
+        requestReload();
     }
 
     @Override

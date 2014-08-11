@@ -40,7 +40,7 @@ public class GroupProfileFragment extends XoFragment
         implements View.OnClickListener, IXoContactListener, ActionMode.Callback,
         AdapterView.OnItemClickListener {
 
-    private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
+    private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
     private boolean mBackPressed = false;
     private boolean mFromNearby = false;
     public static final String ARG_CREATE_GROUP = "ARG_CREATE_GROUP";
@@ -126,6 +126,18 @@ public class GroupProfileFragment extends XoFragment
             }
         });
 
+        mMakePermanentButton = (Button) v.findViewById(R.id.profile_group_button_make_permanent);
+        mMakePermanentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                makeNearbyPermanent();
+                mGroupCreateButton.setEnabled(false);
+            }
+        });
+        mGroupMembersContainer = (LinearLayout) v.findViewById(R.id.profile_group_members_container);
+        mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
+        mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
+
         if (getArguments() != null) {
             if (getArguments().getBoolean(ARG_CREATE_GROUP)) {
                 createGroup();
@@ -138,18 +150,10 @@ public class GroupProfileFragment extends XoFragment
                     e.printStackTrace();
                 }
             }
-        });
-        mMakePermanentButton = (Button) v.findViewById(R.id.profile_group_button_make_permanent);
-        mMakePermanentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                makeNearbyPermanent();
-                mGroupCreateButton.setEnabled(false);
-            }
-        });
-        mGroupMembersContainer = (LinearLayout) v.findViewById(R.id.profile_group_members_container);
-        mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
-        mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
+        } else {
+            LOG.error("Creating GroupProfileFragment without arguments is not supported.");
+        }
+
         return v;
     }
 
@@ -345,9 +349,11 @@ public class GroupProfileFragment extends XoFragment
     }
 
     private void makeNearbyPermanent() {
-        Intent intent = new Intent(getActivity(), GroupProfileActivity.class);
-        intent.putExtra(GroupProfileActivity.EXTRA_MAKE_FROM_NEARBY, mGroupMemberAdapter.getMembersIds());
-        getActivity().startActivity(intent);
+//        Intent intent = new Intent(getActivity(), GroupProfileActivity.class);
+//        intent.putExtra(GroupProfileActivity.EXTRA_MAKE_FROM_NEARBY, mGroupMemberAdapter.getMembersIds());
+//        getActivity().startActivity(intent);
+
+        createGroupFromNearby(mGroupMemberAdapter.getMembersIds());
     }
 
     private void updateAvatar(TalkClientContact contact) {

@@ -46,11 +46,6 @@ public class GroupProfileActivity extends XoActionbarActivity
 
         mActionBar = getActionBar();
 
-		FragmentManager fragmentManager = getSupportFragmentManager();
-        mGroupProfileFragment = (GroupProfileFragment) fragmentManager.findFragmentById(R.id.activity_group_profile_fragment);
-        mStatusFragment = (StatusFragment) fragmentManager.findFragmentById(R.id.activity_profile_status_fragment);
-        mStatusFragment.getView().setVisibility(View.VISIBLE);
-
         Intent intent = getIntent();
 
         if (intent != null) {
@@ -123,7 +118,6 @@ public class GroupProfileActivity extends XoActionbarActivity
 
     private void createGroupFromNearby(String[] clientIds) {
         LOG.debug("createGroupFromNearby()");
-        mMode = Mode.EDIT_GROUP;
         mGroupProfileFragment.createGroupFromNearby(clientIds);
     }
 
@@ -134,7 +128,7 @@ public class GroupProfileActivity extends XoActionbarActivity
 
     void processContactUpdate(TalkClientContact contact) {
         if (isMyContact(contact)) {
-            if(contact.isDeleted()) {
+            if (contact.isDeleted()) {
                 finish();
             } else {
                 mGroupProfileFragment.updateActionBar();
@@ -142,10 +136,6 @@ public class GroupProfileActivity extends XoActionbarActivity
         }
     }
 
-    public enum Mode {
-        PROFILE,
-        CREATE_SELF,
-        EDIT_GROUP
     private void showGroupProfileFragment(int contactId) {
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, contactId);

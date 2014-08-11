@@ -809,6 +809,11 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .eq("clientMessageId", messageId)
                 .and(2);
         updateBuilder.update();
+
+        TalkClientMessage message = mClientMessages.queryForId(messageId);
+        for (IXoMessageListener listener : mMessageListeners) {
+            listener.onMessageDeleted(message);
+        }
     }
 
     public void deleteAllMessagesFromContactId(int contactId) throws SQLException {
@@ -875,15 +880,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         migratedUrl = "https://filecache.talk.hoccer.de:8444" + migratedUrl;
         LOG.debug("migrated url: " + url + " to: " + migratedUrl);
         return migratedUrl;
-    }
-
-    public void deleteMessageById(int clientMessageId) throws SQLException {
-        TalkClientMessage message = mClientMessages.queryForId(clientMessageId);
-        mClientMessages.deleteById(clientMessageId);
-
-        for (IXoMessageListener listener : mMessageListeners) {
-            listener.onMessageDeleted(message);
-        }
     }
 
     public void deleteClientDownload(TalkClientDownload download) throws SQLException {

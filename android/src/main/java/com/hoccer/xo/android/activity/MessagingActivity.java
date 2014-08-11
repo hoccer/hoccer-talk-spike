@@ -19,6 +19,8 @@ import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
+import java.sql.SQLException;
+
 public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
     public static final String EXTRA_CLIENT_CONTACT_ID = "com.hoccer.xo.android.intent.extra.CLIENT_CONTACT_ID";
