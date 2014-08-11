@@ -100,6 +100,7 @@ public class GroupProfileFragment extends XoFragment
                 mGroupCreateButton.setEnabled(false);
             }
         });
+
         mGroupNameText = (TextView) v.findViewById(R.id.profile_group_name);
         mGroupNameEdit = (EditText) v.findViewById(R.id.profile_group_name_edit);
         mGroupNameEdit.setFocusableInTouchMode(true);
@@ -521,17 +522,6 @@ public class GroupProfileFragment extends XoFragment
         });
     }
 
-    public void finishActivityIfContactDeleted() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mGroup.isDeleted()) {
-                    getActivity().finish();
-                }
-            }
-        });
-    }
-
     private void manageGroupMembers() {
         LOG.debug("manageGroupMembers()");
         if (mCurrentClientsInGroup.isEmpty()) {
@@ -710,6 +700,7 @@ public class GroupProfileFragment extends XoFragment
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 getXoActivity().getXoClient().deleteContact(mGroup);
+                                getActivity().finish();
                             }
                         },
                         new DialogInterface.OnClickListener() {

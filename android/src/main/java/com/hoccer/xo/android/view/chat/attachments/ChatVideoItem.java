@@ -60,7 +60,7 @@ public class ChatVideoItem extends ChatMessageItem {
         } else {
             rootView.setGravity(Gravity.RIGHT);
             videoContainer.setGravity(Gravity.RIGHT);
-            mask = R.drawable.chat_bubble_compose;
+            mask = R.drawable.chat_bubble_outgoing;
         }
 
         String tag = (mMessage.getMessageId() != null) ? mMessage.getMessageId() : mMessage.getMessageTag();

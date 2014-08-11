@@ -277,7 +277,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     private void updateMetaDataView(RemoteViews views) {
-        MediaMetaData metaData = MediaMetaData.retrieveMetaData(mCurrentItem.getContentUrl());
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(mCurrentItem.getContentDataUrl());
         if (metaData != null) {
             String metaDataTitle = metaData.getTitle();
             String metaDataArtist = metaData.getArtist();
@@ -293,7 +293,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         } else {
             views.setViewVisibility(R.id.filename_text, View.VISIBLE);
             views.setViewVisibility(R.id.media_metadata_layout, View.GONE);
-            views.setTextViewText(R.id.filename_text, mCurrentItem.getContentUrl());
+            views.setTextViewText(R.id.filename_text, mCurrentItem.getContentDataUrl());
         }
     }
 

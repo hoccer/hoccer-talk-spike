@@ -115,8 +115,8 @@ public class HttpClientWithKeyStore extends DefaultHttpClient {
         public Socket createSocket() throws IOException {
             LOG.debug("createSocket()");
             SSLSocket s = (SSLSocket)super.createSocket();
-            s.setEnabledCipherSuites(XoClientConfiguration.TLS_CIPHERS);
-            s.setEnabledProtocols(XoClientConfiguration.TLS_PROTOCOLS);
+            s.setEnabledCipherSuites(XoClientSslConfiguration.TLS_CIPHERS);
+            s.setEnabledProtocols(XoClientSslConfiguration.TLS_PROTOCOLS);
             return s;
         }
     }

@@ -91,7 +91,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     /** Host of this client */
-    protected IXoClientHost mClientHost;
+    IXoClientHost mClientHost;
+
+    IXoClientConfiguration mClientConfiguration;
 
     /* The database instance we use */
     XoClientDatabase mDatabase;
@@ -164,7 +166,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     /**
      * Create a Hoccer Talk client using the given client database
      */
-    public XoClient(IXoClientHost host) {
+    public XoClient(IXoClientHost host, IXoClientConfiguration configuration) {
+        mClientConfiguration = configuration;
         initialize(host);
     }
 
@@ -172,7 +175,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         // remember the host
         mClientHost = host;
 
-        mIdleTimeout = mClientHost.getIdleTimeout();
+        mIdleTimeout = mClientConfiguration.getIdleTimeout();
 
         // fetch executor and db immediately
         mExecutor = host.getBackgroundExecutor();
@@ -188,7 +191,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         // create URI object referencing the server
         URI uri = null;
         try {
-            uri = new URI(mClientHost.getServerUri());
+            uri = new URI(mClientConfiguration.getServerUri());
         } catch (URISyntaxException e) {
             LOG.error("uri is wrong", e);
         }
@@ -199,7 +202,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         // create RPC object mapper (BSON or JSON)
         JsonFactory rpcFactory;
-        if(mClientHost.getUseBsonProtocol()) {
+        if(mClientConfiguration.getUseBsonProtocol()) {
             rpcFactory = new BsonFactory();
         } else {
             rpcFactory = jsonFactory;
@@ -237,13 +240,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     protected void createJsonRpcClient(URI uri, WebSocketClient wsClient, ObjectMapper rpcMapper) {
-        String protocol = mClientHost.getUseBsonProtocol()
-                ? mClientHost.getBsonProtocolString()
-                : mClientHost.getJsonProtocolString();
+        String protocol = mClientConfiguration.getUseBsonProtocol()
+                ? mClientConfiguration.getBsonProtocolString()
+                : mClientConfiguration.getJsonProtocolString();
+
         mConnection = new JsonRpcWsClient(uri, protocol, wsClient, rpcMapper);
-        mConnection.setMaxIdleTime(mClientHost.getConnectionIdleTimeout());
-        mConnection.setSendKeepAlives(mClientHost.getKeepAliveEnabled());
-        if(mClientHost.getUseBsonProtocol()) {
+        mConnection.setMaxIdleTime(mClientConfiguration.getConnectionIdleTimeout());
+        mConnection.setSendKeepAlives(mClientConfiguration.getKeepAliveEnabled());
+
+        if(mClientConfiguration.getUseBsonProtocol()) {
             mConnection.setSendBinaryMessages(true);
         }
     }
@@ -315,6 +320,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public IXoClientHost getHost() {
         return mClientHost;
     }
+
+    public IXoClientConfiguration getConfiguration() { return mClientConfiguration; }
 
     public XoClientDatabase getDatabase() {
         return mDatabase;
@@ -597,8 +604,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             clientInfo.setSystemLanguage(mClientHost.getSystemLanguage());
             clientInfo.setSystemVersion(mClientHost.getSystemVersion());
             clientInfo.setClientBuildVariant(mClientHost.getClientBuildVariant());
-            if (mClientHost.isSupportModeEnabled()) {
-                clientInfo.setSupportTag(mClientHost.getSupportTag());
+            if (mClientConfiguration.isSupportModeEnabled()) {
+                clientInfo.setSupportTag(mClientConfiguration.getSupportTag());
             }
 
             LOG.debug("Hello: Saying hello to the server.");
@@ -852,18 +859,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
             }
         });
-    }
-
-    public void depairContact(final TalkClientContact contact) {
-        resetIdle();
-        if(contact.isClient()) {
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    mServerRpc.depairClient(contact.getClientId());
-                }
-            });
-        }
     }
 
     public void deleteContact(final TalkClientContact contact) {
@@ -1383,7 +1378,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void doConnect() {
         LOG.debug("performing connect on connection #" + mConnection.getConnectionId());
         try {
-            mConnection.connect(mClientHost.getConnectTimeout(), TimeUnit.SECONDS);
+            mConnection.connect(mClientConfiguration.getConnectTimeout(), TimeUnit.SECONDS);
         } catch (Exception e) {
             LOG.warn("[connection #" + mConnection.getConnectionId() + "] exception while connecting: ", e);
         }
@@ -1431,7 +1426,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void scheduleKeepAlive() {
         shutdownKeepAlive();
-        if(mClientHost.getKeepAliveEnabled()) {
+        if(mClientConfiguration.getKeepAliveEnabled()) {
             mKeepAliveFuture = mExecutor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
@@ -1443,8 +1438,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     }
                 }
             },
-                    mClientHost.getKeepAliveInterval(),
-                    mClientHost.getKeepAliveInterval(),
+                    mClientConfiguration.getKeepAliveInterval(),
+                    mClientConfiguration.getKeepAliveInterval(),
                     TimeUnit.SECONDS);
         }
     }
@@ -1469,11 +1464,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             // compute variable backoff component
             double variableTime =
                     Math.random() * Math.min(
-                            mClientHost.getReconnectBackoffVariableMaximum(),
-                            variableFactor * mClientHost.getReconnectBackoffVariableFactor());
+                            mClientConfiguration.getReconnectBackoffVariableMaximum(),
+                            variableFactor * mClientConfiguration.getReconnectBackoffVariableFactor());
 
             // compute total backoff
-            double totalTime = mClientHost.getReconnectBackoffFixedDelay() + variableTime;
+            double totalTime = mClientConfiguration.getReconnectBackoffFixedDelay() + variableTime;
 
             // convert to msecs
             backoffDelay = (int) Math.round(1000.0 * totalTime);
@@ -2126,7 +2121,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         if(publicKey == null || privateKey == null) {
             Date now = new Date();
             try {
-                mRSAKeysize = mClientHost.getRSAKeysize();
+                mRSAKeysize = mClientConfiguration.getRSAKeysize();
                 LOG.info("[connection #" + mConnection.getConnectionId() + "] generating new RSA keypair with size "+mRSAKeysize);
                 KeyPair keyPair = RSACryptor.generateRSAKeyPair(mRSAKeysize);
 
@@ -2567,7 +2562,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
                         try {
                             TalkDelivery result;
-                            boolean sendDeliveryConfirmation = mClientHost.isSendDeliveryConfirmationEnabled();
+                            boolean sendDeliveryConfirmation = mClientConfiguration.isSendDeliveryConfirmationEnabled();
                             if (sendDeliveryConfirmation) {
                                 result = mServerRpc.inDeliveryConfirmUnseen(delivery.getMessageId());
                             } else {
@@ -3362,8 +3357,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             @Override
             public void run() {
                 // check if the url is for a pairing token
-                if(urlString.startsWith(mClientHost.getUrlScheme())) {
-                    String token = urlString.substring(mClientHost.getUrlScheme().length());
+                if(urlString.startsWith(mClientConfiguration.getUrlScheme())) {
+                    String token = urlString.substring(mClientConfiguration.getUrlScheme().length());
                     // build new token object
                     TalkClientSmsToken tokenObject = new TalkClientSmsToken();
                     tokenObject.setSender(sender);
@@ -3428,7 +3423,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             public void run() {
                 message.markAsSeen();
 
-                if (mClientHost.isSendDeliveryConfirmationEnabled()) {
+                if (mClientConfiguration.isSendDeliveryConfirmationEnabled()) {
                     try {
                         mServerRpc.inDeliveryConfirmSeen(message.getMessageId());
                     } catch (Exception e) {

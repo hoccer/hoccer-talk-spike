@@ -13,12 +13,12 @@ import java.util.List;
 /**
  * Created by nico on 02/07/2014.
  */
-public class SearchResultsAdapter extends BaseAdapter {
+public class SectionedListAdapter extends BaseAdapter {
 
     private List<Section> mSections = new ArrayList<Section>();
     private static int TYPE_SECTION_HEADER = 0;
 
-    public SearchResultsAdapter() {
+    public SectionedListAdapter() {
         super();
     }
 

@@ -11,7 +11,7 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.xo.android.activity.NearbyHistoryMessagingActivity;
+import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.BetterContactsAdapter;
 import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
 import com.hoccer.xo.android.base.XoListFragment;
@@ -36,8 +36,6 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     private XoClientDatabase mDatabase;
     private BetterContactsAdapter mAdapter;
 
-    private ListView mContactList;
-
     private TextView mPlaceholderText;
 
     private ImageView mPlaceholderImageFrame;
@@ -54,14 +52,13 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
                              Bundle savedInstanceState) {
         LOG.debug("onCreateView()");
         View view = inflater.inflate(R.layout.fragment_friend_requests, container, false);
-        mContactList = (ListView) view.findViewById(android.R.id.list);
         mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
         mPlaceholderImageFrame.setBackgroundDrawable(getResources().getDrawable(R.drawable.placeholder_chats));
         mPlaceholderImage= (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
         mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
 
-        registerForContextMenu(mContactList);
+        registerForContextMenu(view);
         return view;
     }
 
@@ -166,7 +163,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
             mAdapter = new BetterContactsAdapter(getXoActivity(), filter);
             mAdapter.onCreate();
 
-            mContactList.setAdapter(mAdapter);
+            setListAdapter(mAdapter);
             onItemCountChanged(mAdapter.getCount());
         }
 
@@ -191,28 +188,25 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-        if (l == mContactList) {
 
-            LOG.debug("onListItemClick(contactList," + position + ")");
-
-            Object item = mContactList.getItemAtPosition(position);
-            if (item instanceof TalkClientContact) {
-                TalkClientContact contact = (TalkClientContact) item;
-                if (contact.isGroup() && contact.isGroupInvited()) {
-                    getXoActivity().showContactProfile(contact);
-                } else {
-                    getXoActivity().showContactConversation(contact);
-                }
+        Object item = l.getItemAtPosition(position);
+        if (item instanceof TalkClientContact) {
+            TalkClientContact contact = (TalkClientContact) item;
+            if (contact.isGroup() && contact.isGroupInvited()) {
+                getXoActivity().showContactProfile(contact);
+            } else {
+                getXoActivity().showContactConversation(contact);
             }
-            if (item instanceof TalkClientSmsToken) {
-                TalkClientSmsToken token = (TalkClientSmsToken) item;
-                new TokenDialog(getXoActivity(), token).show(getXoActivity().getFragmentManager(),
-                        "TokenDialog");
-            }
-            if (item instanceof String) { // item can only be an instance of string if the user pressed on the nearby saved option
-                Intent intent = new Intent(getXoActivity(), NearbyHistoryMessagingActivity.class);
-                startActivity(intent);
-            }
+        }
+        if (item instanceof TalkClientSmsToken) {
+            TalkClientSmsToken token = (TalkClientSmsToken) item;
+            new TokenDialog(getXoActivity(), token).show(getXoActivity().getFragmentManager(),
+                    "TokenDialog");
+        }
+        if (item instanceof String) { // item can only be an instance of string if the user pressed on the nearby saved option
+            Intent intent = new Intent(getXoActivity(), MessagingActivity.class);
+            intent.putExtra(MessagingActivity.EXTRA_NEARBY_ARCHIVE, true);
+            startActivity(intent);
         }
     }
 

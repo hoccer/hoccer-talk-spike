@@ -1,14 +1,12 @@
 package com.hoccer.xo.android.adapter;
 
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoActivity;
@@ -21,16 +19,10 @@ import java.util.List;
 
 public class NearbyChatAdapter extends ChatAdapter {
     private XoActivity mXoActivity;
-    private LayoutInflater mInflater;
-    private ListView mListView;
-    private NearbyChatAdapter mAdapter;
 
     public NearbyChatAdapter(ListView listView, XoActivity activity) {
         super(listView, activity, null);
-        mListView = listView;
         mXoActivity = activity;
-        mInflater = (LayoutInflater)activity.getSystemService(activity.LAYOUT_INFLATER_SERVICE);
-        mAdapter = this;
     }
 
     @Override
@@ -74,7 +66,8 @@ public class NearbyChatAdapter extends ChatAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         final ChatMessageItem chatItem = getItem(position);
         if (chatItem.isSeparator()) {
-            convertView = mInflater.inflate(R.layout.item_chat_separator, null);
+            convertView = ((LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+                    .inflate(R.layout.item_chat_separator, null);
             TextView tv = (TextView) convertView.findViewById(R.id.tv_header);
             tv.setOnClickListener(new View.OnClickListener() {
                 @Override

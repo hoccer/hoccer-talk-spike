@@ -3,7 +3,7 @@
           package="com.hoccer.xo.release"
 
           android:versionCode="68"
-          android:versionName="2.2.2">
+          android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
     <uses-sdk
@@ -93,15 +93,10 @@
                 android:name="com.google.android.gms.version"
                 android:value="@integer/google_play_services_version"/>
 
-        <!--API key for Google Maps Android API v2 for RELEASE certificate-->
+        <!-- API key for Google Maps Android API v2 -->
         <meta-data
                 android:name="com.google.android.maps.v2.API_KEY"
-                android:value="AIzaSyBDd2wBF1gH9UcU2KcAPXXKI9G6HQattkM"/>
-
-        <!-- API key for Google Maps Android API v2 based on DEBUG certificate -->
-        <!--<meta-data-->
-        <!--android:name="com.google.android.maps.v2.API_KEY"-->
-        <!--android:value="AIzaSyC9hBvAarkQ9ktS0rWZ5Row-MXRatv8Dj0"/>-->
+                android:value="${google.maps.api.key}"/>
 
         <!-- Contact list - our main activity -->
         <activity
@@ -124,17 +119,6 @@
                 android:windowSoftInputMode="stateHidden"
                 android:exported="true"
                 android:configChanges="keyboardHidden|orientation|screenSize">
-        </activity>
-
-        <!-- Nearby History activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.NearbyHistoryMessagingActivity"
-                android:label="@string/actionbar_default_title"
-                android:windowSoftInputMode="stateHidden"
-                android:configChanges="keyboardHidden|orientation|screenSize">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
         </activity>
 
         <!-- Clipboard activity -->
@@ -224,8 +208,7 @@
 
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data android:scheme="hxo"/>
+                <data android:scheme="${hoccer.invitation.uri.scheme}"/>
             </intent-filter>
         </activity>
 

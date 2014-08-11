@@ -41,8 +41,8 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
                 SymbolSet symbols = scanner.getResults();
                 for (Symbol sym : symbols) {
                     String code = sym.getData();
-                    if (code.startsWith(XoApplication.getXoClient().getHost().getUrlScheme())) {
-                        code = code.replace(XoApplication.getXoClient().getHost().getUrlScheme(), "");
+                    if (code.startsWith(XoApplication.getXoClient().getConfiguration().getUrlScheme())) {
+                        code = code.replace(XoApplication.getXoClient().getConfiguration().getUrlScheme(), "");
                         XoApplication.getXoClient().performTokenPairing(code);
                     } else {
                         runOnUiThread(new Runnable() {

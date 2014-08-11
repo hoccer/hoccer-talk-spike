@@ -27,7 +27,7 @@ public class TestHelper {
         if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
-        return new XoClient(new TestClientHost(server));
+        return new XoClient(new TestClientHost(), new TestClientConfiguration(server));
     }
 
     public static HashMap<String, XoClient> initializeTalkClients(TestTalkServer server, int amount) throws Exception {
@@ -99,7 +99,7 @@ public class TestHelper {
 
         // TODO: There are some currently unknown conditions missing that ensure that the invitation actually properly occured
         // removing this sleep leads to some failures, esp. involving the group key generation by members (instead of admins)
-        Thread.sleep(1000);
+        Thread.sleep(2000);
     }
 
     public static void joinGroup(final XoClient joiningClient, final String groupId) {

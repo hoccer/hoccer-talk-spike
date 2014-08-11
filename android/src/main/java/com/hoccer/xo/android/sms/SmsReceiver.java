@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -59,12 +60,12 @@ public class SmsReceiver extends BroadcastReceiver {
      * @return true if the message is for us
      */
     private boolean handleMessage(Context context, String sender, String body) {
-
-        String urlPatternSource = ".*(" + context.getResources().getString(R.string.url_scheme) + "[a-zA-Z0-9]*).*";
+        String urlScheme = XoApplication.getXoClient().getConfiguration().getUrlScheme();
+        String urlPatternSource = ".*(" + urlScheme + "[a-zA-Z0-9]*).*";
         Pattern urlPattern = Pattern.compile(urlPatternSource, Pattern.DOTALL);
 
         // do a simple string check first
-        if(body.contains(context.getResources().getString(R.string.url_scheme))) {
+        if(body.contains(urlScheme)) {
             // regex-match the URL
             Matcher matcher = urlPattern.matcher(body);
             if(matcher.matches() && matcher.groupCount() > 0) {
@@ -77,6 +78,7 @@ public class SmsReceiver extends BroadcastReceiver {
                 return true;
             }
         }
+
         // message is not for us
         return false;
     }

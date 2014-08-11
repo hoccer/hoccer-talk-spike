@@ -7,7 +7,6 @@ import better.cli.annotations.CLIEntry;
 import better.cli.exceptions.CLIInitException;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.hoccer.talk.client.XoClientConfiguration;
 
 @CLIEntry
 public class TalkTool extends CommandLineApplication<TalkToolContext> {

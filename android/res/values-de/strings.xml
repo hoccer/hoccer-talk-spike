@@ -321,33 +321,10 @@
     <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
     <string name="dialog_invite">Invite</string>
 
-    <string-array name="preference_log_level_names">
-        <item>Fatal</item>
-        <item>Error</item>
-        <item>Warn</item>
-        <item>Info</item>
-        <item>Debug</item>
-        <item>Trace</item>
-    </string-array>
-
-    <string-array name="preference_log_level_values">
-        <item>FATAL</item>
-        <item>ERROR</item>
-        <item>WARN</item>
-        <item>INFO</item>
-        <item>DEBUG</item>
-        <item>TRACE</item>
-    </string-array>
-
     <string-array name="tab_names">
         <item>CHATS</item>
         <item>EINLADUNGEN</item>
         <item>IN DER NÄHE</item>
-    </string-array>
-
-    <string-array name="recipient_selection_tab_names">
-        <item>KONTAKTE</item>
-        <item>GRUPPEN</item>
     </string-array>
 
     <string name="search_section_caption_contacts">Kontakte</string>

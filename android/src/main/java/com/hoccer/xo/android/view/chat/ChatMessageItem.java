@@ -2,6 +2,7 @@ package com.hoccer.xo.android.view.chat;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
@@ -150,7 +152,12 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
             messageDeliveryInfo.setVisibility(View.GONE);
 
-            messageText.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(mContext, getIncomingBackgroundResource(), false));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                messageText.setBackground(getIncomingBackgroundDrawable());
+            } else {
+                messageText.setBackgroundDrawable(getIncomingBackgroundDrawable());
+            }
+
             messageText.setTextColor(mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
             messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
 
@@ -167,7 +174,13 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
             messageContactInfo.setVisibility(View.GONE);
 
-            messageText.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getOutgoingBackgroundResource()));
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                messageText.setBackground(getOutgoingBackgroundDrawable());
+            } else {
+                messageText.setBackgroundDrawable(getOutgoingBackgroundDrawable());
+            }
+
             messageText.setTextColor(mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
             messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
 
@@ -261,34 +274,44 @@ public class ChatMessageItem implements AttachmentTransferListener {
         messageStatusLabel.setTextColor(messageStatusLabel.getResources().getColor(colorId));
     }
 
-    public int getOutgoingBackgroundResource() {
+    public Drawable getOutgoingBackgroundDrawable() {
         String currentState = mMessage.getOutgoingDelivery().getState();
-        if (currentState == null) {
-            return R.drawable.bubble_light_green;
+        Drawable background = null;
+        if (currentState != null) {
+            if (currentState.equals(TalkDelivery.STATE_ABORTED) ||
+                    currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED) ||
+                    currentState.equals(TalkDelivery.STATE_REJECTED) ||
+                    currentState.equals(TalkDelivery.STATE_REJECTED_ACKNOWLEDGED) ||
+                    currentState.equals(TalkDelivery.STATE_FAILED) ||
+                    currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+                background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
+            } else {
+                background = ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_outgoing, true);
+            }
+        } else {
+            background = ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_outgoing, true);
         }
-        if (currentState.equals(TalkDelivery.STATE_DELIVERING)) {
-            return R.drawable.bubble_light_green;
-        } else if (currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red_outgoing;
-        } else if (currentState.equals(TalkDelivery.STATE_REJECTED) || currentState.equals(TalkDelivery.STATE_REJECTED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red_outgoing;
-        } else if (currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red_outgoing;
-        }
-        return R.drawable.bubble_green;
+
+        return background;
     }
 
-    public int getIncomingBackgroundResource() {
+    public Drawable getIncomingBackgroundDrawable() {
         String currentState = mMessage.getIncomingDelivery().getState();
-        if (currentState == null) {
-            return R.drawable.bubble_grey;
+        Drawable background = null;
+        if (currentState != null) {
+            if (currentState.equals(TalkDelivery.STATE_ABORTED) ||
+                    currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED) ||
+                    currentState.equals(TalkDelivery.STATE_FAILED) ||
+                    currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+                background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_incoming);
+            } else {
+                background = ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_incoming, false);
+            }
+        } else {
+            background = ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_incoming, false);
         }
-        if (currentState.equals(TalkDelivery.STATE_ABORTED) || currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red_incoming;
-        } else if (currentState.equals(TalkDelivery.STATE_FAILED) || currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
-            return R.drawable.bubble_red_incoming;
-        }
-        return R.drawable.bubble_grey;
+
+        return background;
     }
 
     private String getMessageTimestamp(TalkClientMessage message) {
@@ -317,7 +340,6 @@ public class ChatMessageItem implements AttachmentTransferListener {
                 @Override
                 public void onClick(View v) {
                     if (!contact.isSelf()) {
-
                         // TODO: reevaluate - might not work
                         ((XoActivity) mContext).showContactProfile(contact);
                     }
@@ -378,7 +400,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         }
         mContentObject = contentObject;
 
-        mAttachmentView.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(bubbleForMessageAttachment(mMessage)));
+        mAttachmentView.setBackgroundDrawable(bubbleForMessageAttachment(mMessage));
 
         mContentDescription.setText(mContentRegistry.getContentDescription(mContentObject));
         if (shouldDisplayTransferControl(getTransferState(mContentObject))) {
@@ -409,15 +431,15 @@ public class ChatMessageItem implements AttachmentTransferListener {
         Drawable bubbleForMessage;
         if (clientMessage.isIncoming()) {
             if (clientMessage.getIncomingDelivery().isFailure()) {
-                bubbleForMessage = mContext.getResources().getDrawable(R.drawable.bubble_red_incoming);
+                bubbleForMessage = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_incoming);
             } else {
-                bubbleForMessage = mContext.getResources().getDrawable(R.drawable.bubble_grey);
+                bubbleForMessage = ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_incoming, false);
             }
         } else {
             if (clientMessage.getOutgoingDelivery().isFailure()) {
-                bubbleForMessage = mContext.getResources().getDrawable(R.drawable.bubble_red_outgoing);
+                bubbleForMessage = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
             } else {
-                bubbleForMessage = mContext.getResources().getDrawable(R.drawable.bubble_green);
+                bubbleForMessage = ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_outgoing, true);
             }
         }
         return bubbleForMessage;

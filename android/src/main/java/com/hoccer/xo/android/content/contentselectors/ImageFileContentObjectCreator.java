@@ -6,14 +6,13 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
-import com.hoccer.xo.android.content.ContentMediaTypes;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 
-
-public class FileContentObjectCreator implements IContentCreator {
+public class ImageFileContentObjectCreator implements IContentCreator {
 
     Logger LOG = Logger.getLogger(getClass());
 
@@ -81,7 +80,7 @@ public class FileContentObjectCreator implements IContentCreator {
         SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
         contentObject.setFileName(fileName);
         contentObject.setContentType(mimeType);
-        contentObject.setContentMediaType(ContentMediaTypes.MediaTypeImage);
+        contentObject.setContentMediaType(ContentMediaType.IMAGE);
         contentObject.setContentLength(fileSize);
         contentObject.setContentAspectRatio(aspectRatio);
         return contentObject;

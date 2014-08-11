@@ -1,8 +1,10 @@
 package com.hoccer.xo.android.view.model;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
@@ -26,15 +28,14 @@ public class NearbyGroupContactItem extends BaseContactItem {
     private Date mLastMessageTimeStamp = null;
     private String mLastMessageText = "";
 
-    public NearbyGroupContactItem(XoActivity activity) {
-        super(activity);
+    public NearbyGroupContactItem() {
         update();
     }
 
     @Override
     public void update() {
         try {
-            mNearbyMessages = mXoActivity.getXoDatabase().getAllNearbyGroupMessages();
+            mNearbyMessages = XoApplication.getXoClient().getDatabase().getAllNearbyGroupMessages();
         } catch (SQLException e) {
             LOG.error("Error while retrieving all nearby group messages: ", e);
         }
@@ -48,7 +49,7 @@ public class NearbyGroupContactItem extends BaseContactItem {
     }
 
     @Override
-    protected View configure(View view) {
+    protected View configure(Context context, View view) {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
         TextView typeView = (TextView) view.findViewById(R.id.contact_type);

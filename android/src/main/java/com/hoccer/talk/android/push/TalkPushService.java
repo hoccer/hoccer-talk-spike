@@ -3,7 +3,6 @@ package com.hoccer.talk.android.push;
 import android.content.Context;
 import android.content.Intent;
 import com.google.android.gcm.GCMBaseIntentService;
-import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.service.XoClientService;
 import org.apache.log4j.Logger;
 
@@ -22,6 +21,11 @@ import org.apache.log4j.Logger;
  */
 public class TalkPushService extends GCMBaseIntentService {
 
+    public static final boolean GCM_ALWAYS_REGISTER = false;
+    public static final boolean GCM_ALWAYS_UPDATE = true;
+    public static final String GCM_SENDER_ID = "1894273085";
+    public static final long GCM_REGISTRATION_EXPIRATION = 24 * 3600;
+
     public static final String EXTRA_GCM_REGISTERED = "com.hoccer.xo.GCM_REGISTERED";
     public static final String EXTRA_GCM_UNREGISTERED = "com.hoccer.xo.GCM_UNREGISTERED";
     public static final String EXTRA_WAKE_CLIENT = "com.hoccer.xo.WAKE_CLIENT";
@@ -29,7 +33,7 @@ public class TalkPushService extends GCMBaseIntentService {
     private static final Logger LOG = Logger.getLogger(TalkPushService.class);
 
     public TalkPushService() {
-        super(XoConfiguration.GCM_SENDER_ID);
+        super(GCM_SENDER_ID);
     }
 
     private void sendServiceIntent(String extra, String extraValue) {
