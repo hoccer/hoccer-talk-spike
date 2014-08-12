@@ -182,15 +182,15 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     }
 
     private void updateAdapter(final TalkClientContact group) {
-        mXoActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (this) {
-                    retrieveDataFromDb(group);
+        synchronized (this) {
+            retrieveDataFromDb(group);
+            mXoActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
                 }
-                notifyDataSetChanged();
-            }
-        });
+            });
+        }
     }
 
     private void scheduleUpdateAdapter(final TalkClientContact group) {
