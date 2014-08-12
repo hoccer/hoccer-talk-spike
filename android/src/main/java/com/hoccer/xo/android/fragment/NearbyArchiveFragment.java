@@ -35,7 +35,6 @@ public class NearbyArchiveFragment extends ListFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mAdapter = new NearbyChatAdapter(getListView(), (XoActivity) activity);
         mItemClickListener = setupOnItemClickListener();
         mDataSetObserver = setupDataSetObserver(activity);
     }
@@ -45,6 +44,7 @@ public class NearbyArchiveFragment extends ListFragment {
         super.onViewCreated(view, savedInstanceState);
         getListView().setStackFromBottom(true);
         getListView().setOnItemClickListener(mItemClickListener);
+        mAdapter = new NearbyChatAdapter(getListView(), (XoActivity) getActivity());
         setListAdapter(mAdapter);
     }
 
