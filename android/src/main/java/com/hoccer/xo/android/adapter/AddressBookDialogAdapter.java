@@ -230,11 +230,7 @@ public class AddressBookDialogAdapter extends CursorAdapter {
         final static Uri CONTENT_URI = ContactsContract.Data.CONTENT_URI;
 
         @SuppressLint("InlinedApi")
-        final static String SELECTION_WITH_PHONES =
-                (hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) +
-                        "<>''" + " AND " + ContactsContract.CommonDataKinds.Phone.IS_PRIMARY +
-                        "<>'0'" + " AND " + ContactsContract.Data.MIMETYPE  + "='" +
-                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE + "'";
+        final static String SELECTION_WITH_PHONES = ContactsContract.Data.HAS_PHONE_NUMBER  + " > 0" + " AND " + ContactsContract.CommonDataKinds.Phone.IS_PRIMARY + " != 0";
 
         @SuppressLint("InlinedApi")
         final static String SELECTION_WITH_PHONES_FILTERED =

@@ -54,7 +54,7 @@ public class
     protected List<ChatMessageItem> mChatMessageItems;
 
     private ListView mListView;
-    private List < Integer > mLastVisibleViews = new ArrayList<Integer>();
+    private List<Integer> mLastVisibleViews = new ArrayList<Integer>();
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
@@ -97,7 +97,7 @@ public class
     /**
      * Loads a range of TalkClientMessage objects from database starting at a given offset.
      * Range is defined by constant BATCH_SIZE.
-     *
+     * <p/>
      * Creates the appropriate ChatMessageItem for each TalkClientMessage and adds it to mChatMessageItems.
      *
      * @param offset Index of the first TalkClientMessage object
@@ -108,11 +108,11 @@ public class
         }
         try {
             long batchSize = BATCH_SIZE;
-            if(offset < 0) {
+            if (offset < 0) {
                 batchSize = batchSize + offset;
                 offset = 0;
             }
-            LOG.debug("loading Messages " + offset + "-" + Math.max((offset - batchSize -1), 0));
+            LOG.debug("loading Messages " + offset + "-" + Math.max((offset - batchSize - 1), 0));
             final List<TalkClientMessage> messagesBatch = mDatabase.findMessagesByContactId(mContact.getClientContactId(), batchSize, offset);
             for (int i = 0; i < messagesBatch.size(); i++) {
                 ChatMessageItem messageItem = getItemForMessage(messagesBatch.get(i));
@@ -149,7 +149,7 @@ public class
         getXoClient().unregisterMessageListener(this);
         getXoClient().unregisterTransferListener(this);
 
-        for(int i = 0; i < mLastVisibleViews.size(); ++i){
+        for (int i = 0; i < mLastVisibleViews.size(); ++i) {
             int viewIndex = mLastVisibleViews.get(i);
             getItem(viewIndex).setVisibility(false);
         }
@@ -174,7 +174,7 @@ public class
         return position;
     }
 
-    private void removeInvisibleItems(){
+    private void removeInvisibleItems() {
 
         int firstVisible = mListView.getFirstVisiblePosition();
         int lastVisible = mListView.getLastVisiblePosition();
@@ -184,7 +184,7 @@ public class
             int current = mLastVisibleViews.get(i);
 
             if ((current < firstVisible) || (current > lastVisible)) {
-                if ( getItem(current) != null) {
+                if (getItem(current) != null) {
                     getItem(current).setVisibility(false);
                 }
             }
@@ -300,10 +300,10 @@ public class
     }
 
     private boolean isValidMessage(TalkClientMessage message) {
-        if(message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
+        if (message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
             return true;
         }
-        if(!message.getText().isEmpty()) {
+        if (!message.getText().isEmpty()) {
             return true;
         }
         return false;
@@ -332,10 +332,10 @@ public class
         if (message.getConversationContact() == mContact && isValidMessage(message)) {
             for (int i = 0; i < mChatMessageItems.size(); i++) {
                 ChatMessageItem chatMessageItem = mChatMessageItems.get(i);
-                if(chatMessageItem == null) {
+                if (chatMessageItem == null) {
                     continue;
                 }
-                if(message.getClientMessageId() == chatMessageItem.getMessage().getClientMessageId()) {
+                if (message.getClientMessageId() == chatMessageItem.getMessage().getClientMessageId()) {
                     LOG.warn("tried to add a \"new\" message which was already added!");
                     return;
                 }
