@@ -7,9 +7,9 @@ import android.app.Dialog;
 import android.app.TaskStackBuilder;
 import android.content.*;
 import android.database.Cursor;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.*;
 import android.preference.PreferenceManager;
@@ -23,7 +23,6 @@ import android.text.util.Linkify;
 import android.view.*;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
@@ -33,7 +32,8 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
-import com.hoccer.xo.android.content.*;
+import com.hoccer.xo.android.content.ContentRegistry;
+import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
@@ -312,6 +312,9 @@ public abstract class XoActivity extends FragmentActivity {
         registerReceiver(mScreenListener, filter);
 
         mAlertListener = new XoAlertListener(this);
+
+        // get the background executor
+        mBackgroundExecutor = XoApplication.getExecutor();
     }
 
     @Override
@@ -319,9 +322,6 @@ public abstract class XoActivity extends FragmentActivity {
         LOG.debug("onResume()");
         super.onResume();
         checkForCrashesIfEnabled();
-
-        // get the background executor
-        mBackgroundExecutor = XoApplication.getExecutor();
 
         // start the backend service and bind to it
         Intent serviceIntent = new Intent(getApplicationContext(), XoClientService.class);

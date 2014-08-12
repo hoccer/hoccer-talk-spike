@@ -13,6 +13,8 @@ import java.util.Set;
 @DatabaseTable(tableName = "clientMessage")
 public class TalkClientMessage {
 
+    public static final String TYPE_SEPARATOR = "separator";
+
     private static final Logger LOG = Logger.getLogger(TalkClientMessage.class);
 
     @DatabaseField(generatedId = true)

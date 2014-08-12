@@ -1,14 +1,12 @@
 package com.hoccer.xo.android.adapter;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
@@ -18,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NearbyChatAdapter extends ChatAdapter {
+
     private XoActivity mXoActivity;
 
     public NearbyChatAdapter(ListView listView, XoActivity activity) {
@@ -69,50 +68,14 @@ public class NearbyChatAdapter extends ChatAdapter {
             convertView = ((LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE))
                     .inflate(R.layout.item_chat_separator, null);
             TextView tv = (TextView) convertView.findViewById(R.id.tv_header);
-//            tv.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            XoDialogs.showYesNoDialog("ConfirmDeletion",
-//                                    R.string.dialog_confirm_nearby_deletion_title,
-//                                    R.string.dialog_confirm_nearby_deletion_message,
-//                                    mXoActivity,
-//                                    new DialogInterface.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(DialogInterface dialog, int id) {
-//                                            try {
-//                                                mDatabase.deleteAllMessagesFromContactId(chatItem.getConversationContactId());
-//                                                initialize();
-//                                            } catch (SQLException e) {
-//                                                e.printStackTrace();
-//                                            }
-//                                            notifyDataSetChanged();
-//                                        }
-//                                    },
-//                                    new DialogInterface.OnClickListener() {
-//                                        @Override
-//                                        public void onClick(DialogInterface dialog, int id) {
-//                                        }
-//                                    }
-//                            );
-//
-//
-//
-//                            notifyDataSetChanged();
-//                        }
-//                    });
-//                }
-//            });
             tv.setText(chatItem.getText());
-            convertView.setTag("SEPARATOR");
+            convertView.setTag(TalkClientMessage.TYPE_SEPARATOR);
             return convertView;
         }
         if (!chatItem.getMessage().isSeen()) {
             markMessageAsSeen(chatItem.getMessage());
         }
-        if (convertView == null || (convertView.getTag()!= null && convertView.getTag().equals("SEPARATOR"))) {
+        if (convertView == null || (convertView.getTag()!= null && convertView.getTag().equals(TalkClientMessage.TYPE_SEPARATOR))) {
             convertView = chatItem.getViewForMessage();
         } else {
             convertView = chatItem.recycleViewForMessage(convertView);

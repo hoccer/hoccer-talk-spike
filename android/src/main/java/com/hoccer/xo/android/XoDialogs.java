@@ -39,6 +39,7 @@ public class XoDialogs {
                 if(noListener != null) {
                     builder.setNegativeButton(R.string.common_no, noListener);
                 }
+
                 return builder.create();
             }
         };
