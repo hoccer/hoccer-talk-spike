@@ -177,6 +177,8 @@
     <!-- Can be overridden by calling `mvn -Denvironment=[testing|production]` -->
     <environment>development</environment>
 
+    <environment.path>${project.basedir}/environments/${environment}</environment.path>
+
     <!-- Default values for default environment (development), can be overwritten in a profile below -->
     <apk.signing.skip>false</apk.signing.skip>
     <apk.signing.postfix>signed</apk.signing.postfix>
@@ -200,8 +202,8 @@
 
   <build>
     <filters>
-      <filter>environment-${environment}.properties</filter>
-      <filter>assets/${environment}/environment.properties</filter>
+      <filter>${environment.path}/environment.properties</filter>
+      <filter>${environment.path}/assets/environment.properties</filter>
     </filters>
 
     <resources>
@@ -214,7 +216,7 @@
         </includes>
       </resource>
       <resource>
-        <directory>${project.basedir}/assets/${environment}</directory>
+        <directory>${environment.path}/assets/</directory>
         <targetPath>${project.build.directory}/assets</targetPath>
       </resource>
     </resources>
@@ -247,7 +249,8 @@
           <proguard>
             <skip>false</skip>
             <configs>
-              <config>proguard.cfg</config>
+              <config>${environment.path}/proguard.cfg</config>
+              <config>${project.basedir}/proguard.cfg</config>
               <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
             </configs>
             <proguardJarPath>${env.ANDROID_HOME}/tools/proguard/lib/proguard.jar</proguardJarPath>

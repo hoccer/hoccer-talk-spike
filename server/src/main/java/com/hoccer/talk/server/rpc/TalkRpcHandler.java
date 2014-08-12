@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -462,11 +464,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
         existing.updateWith(presence, fields);
         existing.setClientId(mConnection.getClientId());
         existing.setTimestamp(new Date());
+
+        if (fields == null || fields.contains(TalkPresence.FIELD_AVATAR_URL)) {
+            // iOS clients did not migrate their avatar URLs when the Filecache URL changed.
+            // These URLs can cause problems on Android clients. This workaround "redirects"
+            // all avatar URLs to the current Filecache.
+            // TODO: Remove this when all iOS clients migrated their avatar URLs
+            existing.setAvatarUrl(urlOnCurrentFilecache(presence.getAvatarUrl()));
+        }
+
         if (fields != null) {
             fields.add(TalkPresence.FIELD_CLIENT_ID);
             // if we do not send time stamp updates on presenceModified, we are more conservative and cause a full presence sync after login
             // fields.add(TalkPresence.FIELD_TIMESTAMP);
         }
+
         if (fields == null || fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
             if (presence.isOffline()) {
                 // client os lying about it's presence
@@ -484,6 +496,16 @@ public class TalkRpcHandler implements ITalkRpcServer {
         mServer.getUpdateAgent().requestPresenceUpdate(mConnection.getClientId(), fields);
         if (keyIdChanged) {
             checkMembershipKeysForClient(mConnection.getClientId());
+        }
+    }
+
+    private String urlOnCurrentFilecache(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            String downloadId = url.getPath().replace("/download/", "");
+            return mServer.getConfiguration().getFilecacheDownloadBase() + downloadId;
+        } catch (MalformedURLException e) {
+            return urlString;
         }
     }
 
