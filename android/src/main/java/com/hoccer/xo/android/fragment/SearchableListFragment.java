@@ -3,6 +3,7 @@ package com.hoccer.xo.android.fragment;
 import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.ListFragment;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -66,16 +67,16 @@ public abstract class SearchableListFragment extends ListFragment {
 
     protected abstract void onSearchModeDisabled();
 
-    private void showSoftKeyboard() {
-        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-    }
-
     private class SearchActionHandler implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
+
+        private IBinder mWindowToken;
 
         @Override
         public boolean onQueryTextSubmit(String query) {
-            showSoftKeyboard();
+            if (mWindowToken != null) {
+                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(mWindowToken, InputMethodManager.HIDE_IMPLICIT_ONLY);
+            }
 
             return true;
         }
@@ -96,6 +97,7 @@ public abstract class SearchableListFragment extends ListFragment {
                 mCachedListAdapter = getListAdapter();
                 onSearchModeEnabled();
                 SearchView searchView = (SearchView) item.getActionView();
+                mWindowToken = searchView.getWindowToken();
                 SearchableListFragment.this.setListAdapter(searchInAdapter(searchView.getQuery().toString()));
             }
 

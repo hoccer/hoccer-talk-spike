@@ -90,7 +90,9 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         LOG.debug("onResume()");
         super.onResume();
         if (mAdapter != null) {
+            mAdapter.requestReload();
             mAdapter.onResume();
+            mAdapter.notifyDataSetChanged();
         }
     }
 
