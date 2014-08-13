@@ -458,6 +458,12 @@ public interface ITalkRpcServer {
     // abort a delivery as sender
     TalkDelivery outDeliveryAbort(String messageId, String recipientId);
 
+    // inform the server that a delivery is unknown to you as sender
+    void outDeliveryUnknown(String messageId, String recipientId);
+
+    // inform the server that a delivery is unknown to you as receiver
+    void inDeliveryUnknown(String messageId);
+
     // reject a delivery as receiver
     TalkDelivery inDeliveryReject(String messageId, String reason);
 
