@@ -9,6 +9,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.activity.MessagingActivity;
@@ -18,6 +19,7 @@ import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.ThumbnailManager;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -254,7 +256,12 @@ public class MessagingFragment extends XoListFragment
 
     public void showAudioAttachmentList() {
         Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
-        intent.putExtra(MessagingActivity.EXTRA_CONTACT_ID, mContact.getClientContactId());
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         startActivity(intent);
+    }
+
+    @Override
+    public void onAttachmentSelected(IContentObject co) {
+        mCompositionFragment.onAttachmentSelected(co);
     }
 }

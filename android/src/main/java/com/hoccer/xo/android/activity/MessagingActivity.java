@@ -16,12 +16,12 @@ import com.hoccer.xo.android.fragment.GroupProfileFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
 public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
-    public static final String EXTRA_CONTACT_ID = "com.hoccer.xo.android.intent.extra.CONTACT_ID";
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
     ActionBar mActionBar;
@@ -52,15 +52,15 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         enableUpNavigation();
 
         // register receiver for notification check
-        IntentFilter filter = new IntentFilter("com.hoccer.xo.android.activity.MessagingActivity$ContactIdReceiver");
-        filter.addAction("CHECK_ID_IN_CONVERSATION");
+        IntentFilter filter = new IntentFilter(ContactIdReceiver.class.getName());
+        filter.addAction(IntentHelper.ACTION_CHECK_ID_IN_CONVERSATION);
         mCheckIdReceiver = new ContactIdReceiver();
         registerReceiver(mCheckIdReceiver, filter);
 
         // handle converse intent
         Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(EXTRA_CONTACT_ID)) {
-            int contactId = intent.getIntExtra(EXTRA_CONTACT_ID, -1);
+        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
             mCheckIdReceiver.setId(contactId);
 
             if (contactId == -1) {
@@ -82,8 +82,8 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         Intent intent = getIntent();
 
         // handle converse intent
-        if (intent != null && intent.hasExtra(EXTRA_CONTACT_ID)) {
-            int contactId = intent.getIntExtra(EXTRA_CONTACT_ID, -1);
+        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
             mCheckIdReceiver.setId(contactId);
             if (contactId == -1) {
                 LOG.error("invalid contact id");
@@ -227,8 +227,8 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         @Override
         public void onReceive(Context arg0, Intent arg1) {
             Intent intent = new Intent();
-            intent.setAction("CONTACT_ID_IN_CONVERSATION");
-            intent.putExtra(EXTRA_CONTACT_ID, mContactId);
+            intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
+            intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContactId);
             sendBroadcast(intent);
         }
 
