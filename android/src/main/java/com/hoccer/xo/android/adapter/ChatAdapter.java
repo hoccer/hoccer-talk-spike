@@ -215,7 +215,7 @@ public class
         }
 
         if (convertView == null) {
-            convertView = chatItem.getViewForMessage();
+            convertView = chatItem.createViewForMessage();
         } else {
             convertView = chatItem.recycleViewForMessage(convertView);
         }

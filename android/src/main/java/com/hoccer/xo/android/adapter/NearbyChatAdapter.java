@@ -76,7 +76,7 @@ public class NearbyChatAdapter extends ChatAdapter {
             markMessageAsSeen(chatItem.getMessage());
         }
         if (convertView == null || (convertView.getTag()!= null && convertView.getTag().equals(TalkClientMessage.TYPE_SEPARATOR))) {
-            convertView = chatItem.getViewForMessage();
+            convertView = chatItem.createViewForMessage();
         } else {
             convertView = chatItem.recycleViewForMessage(convertView);
         }

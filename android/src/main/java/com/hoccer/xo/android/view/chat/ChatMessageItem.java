@@ -79,7 +79,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
      *
      * @return A new View object containing the message layout
      */
-    public View getViewForMessage() {
+    public View createViewForMessage() {
         View view = createView();
         configureViewForMessage(view);
         return view;
