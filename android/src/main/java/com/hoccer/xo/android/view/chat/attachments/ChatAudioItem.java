@@ -171,7 +171,7 @@ public class ChatAudioItem extends ChatMessageItem {
     }
 
     private void initializeMediaPlayerService(){
-        mMediaPlayerServiceConnector.connect(mContext,
+        mMediaPlayerServiceConnector.connect(
                 IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override
