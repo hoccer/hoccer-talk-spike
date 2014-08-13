@@ -558,7 +558,7 @@ public class XoClientService extends Service {
             TalkClientContact singleContact = contacts.get(0);
             // create intent to start the messaging activity for the right contact
             Intent messagingIntent = new Intent(this, MessagingActivity.class);
-            messagingIntent.putExtra("clientContactId", singleContact.getClientContactId());
+            messagingIntent.putExtra(MessagingActivity.EXTRA_CONTACT_ID, singleContact.getClientContactId());
             // make a pending intent with correct back-stack
             PendingIntent pendingIntent = null;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -585,7 +585,7 @@ public class XoClientService extends Service {
         } else {
             // create pending intent
             Intent contactsIntent = new Intent(this, ContactsActivity.class);
-            PendingIntent pendingIntent = null;
+            PendingIntent pendingIntent;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 pendingIntent =
                         TaskStackBuilder.create(this)
@@ -612,7 +612,7 @@ public class XoClientService extends Service {
         }
 
         // finish up
-        Notification notification = null;
+        Notification notification;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             notification = builder.build();
         } else {

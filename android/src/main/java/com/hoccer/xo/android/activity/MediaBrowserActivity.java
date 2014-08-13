@@ -34,7 +34,7 @@ public class MediaBrowserActivity extends XoActionbarActivity {
 
         mContactId = -1;
         if (getIntent() != null) {
-            mContactId = getIntent().getIntExtra(MessagingActivity.EXTRA_CLIENT_CONTACT_ID, mContactId);
+            mContactId = getIntent().getIntExtra(MessagingActivity.EXTRA_CONTACT_ID, mContactId);
         }
 
         showAudioAttachmentListFragment();

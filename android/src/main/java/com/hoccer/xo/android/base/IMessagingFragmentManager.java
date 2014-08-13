@@ -2,9 +2,9 @@ package com.hoccer.xo.android.base;
 
 public interface IMessagingFragmentManager {
 
-    void showMessageFragment();
+    void showMessageFragment(int contactId);
 
-    void showSingleProfileFragment();
+    void showSingleProfileFragment(int clientContactId);
 
-    void showGroupProfileFragment();
+    void showGroupProfileFragment(int groupContactId);
 }
