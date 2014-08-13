@@ -71,9 +71,14 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initBetterContactListAdapter();
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
-        initBetterContactListAdapter();
     }
 
     @Override
@@ -90,7 +95,9 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         LOG.debug("onResume()");
         super.onResume();
         if (mAdapter != null) {
+            mAdapter.requestReload();
             mAdapter.onResume();
+            mAdapter.notifyDataSetChanged();
         }
     }
 

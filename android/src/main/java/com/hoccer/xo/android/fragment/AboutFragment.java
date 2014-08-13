@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Fragment;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -31,9 +32,8 @@ public class AboutFragment extends Fragment {
             appNameView.setText(R.string.app_name);
 
             TextView appVersionView = (TextView) view.findViewById(R.id.tv_about_app_version);
-            String versionName = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0)
-                    .versionName;
-            appVersionView.setText(String.format(getString(R.string.about_version_description), versionName));
+            PackageInfo packageInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+            appVersionView.setText(String.format(getString(R.string.about_version_description), packageInfo.versionName, packageInfo.versionCode));
 
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();

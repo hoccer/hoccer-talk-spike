@@ -133,6 +133,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (mHeadsetStateBroadcastReceiver != null) {
+            unregisterReceiver(mHeadsetStateBroadcastReceiver);
+        }
+
         reset();
     }
 

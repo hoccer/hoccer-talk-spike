@@ -361,7 +361,7 @@
     <string name="invite_several_entries">Has several entries</string>
 
     <string name="about_advert_text">Hoccer XO \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. Hoccer sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. Hoccer XO provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
-    <string name="about_version_description">Version %1$s</string>
+    <string name="about_version_description">Version %1$s (%2$d)</string>
 
     <string name="search_section_caption_contacts">Contacts</string>
     <string name="search_section_caption_files">Files</string>
