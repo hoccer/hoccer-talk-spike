@@ -20,14 +20,14 @@ public class FullscreenPlayerActivity extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen_player);
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
+        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         mPlayerFragment = (FullscreenPlayerFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_fullscreen_player);
-        mMediaPlayerServiceConnector.connect(this,
+        mMediaPlayerServiceConnector.connect(
                 IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override

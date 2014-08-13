@@ -33,7 +33,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     public AudioAttachmentView(Context context) {
         super(context.getApplicationContext());
         mContext = context;
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
+        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(mContext);
         addView(inflate(mContext, R.layout.item_audio_attachment, null));
 
         mTitleTextView = ((TextView) findViewById(R.id.tv_title_name));
@@ -72,7 +72,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mMediaPlayerServiceConnector.connect(mContext, IntentHelper.ACTION_PLAYER_STATE_CHANGED,
+        mMediaPlayerServiceConnector.connect(IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override
                     public void onConnected(MediaPlayerService service) {

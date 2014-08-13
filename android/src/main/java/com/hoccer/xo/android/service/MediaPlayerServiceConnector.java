@@ -3,6 +3,7 @@ package com.hoccer.xo.android.service;
 import android.content.*;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import com.hoccer.xo.android.util.IntentHelper;
 
 /**
  * Wraps the binding and callback mechanism.
@@ -25,26 +26,40 @@ public class MediaPlayerServiceConnector {
         void onAction(String action, MediaPlayerService service);
     }
 
-    public void connect(Context context) {
-        disconnect();
-        mContext = context;
+    public MediaPlayerServiceConnector(Context mContext) {
+        this.mContext = mContext;
+    }
 
-        Intent serviceIntent = new Intent(context, MediaPlayerService.class);
-        context.startService(serviceIntent);
+    public void connect() {
+        disconnect();
+
+        Intent serviceIntent = new Intent(mContext, MediaPlayerService.class);
+        mContext.startService(serviceIntent);
         bindMediaPlayerService(serviceIntent);
     }
 
-    public void connect(Context context, String intent, Listener listener) {
+    public void connect(Listener listener) {
         disconnect();
 
-        mContext = context;
+        mIntent = IntentHelper.ACTION_PLAYER_STATE_CHANGED;
+        mListener = listener;
+
+        Intent serviceIntent = new Intent(mContext, MediaPlayerService.class);
+        mContext.startService(serviceIntent);
+        createMediaPlayerBroadcastReceiver();
+        bindMediaPlayerService(serviceIntent);
+    }
+
+    public void connect(String intent, Listener listener) {
+        disconnect();
+
         mIntent = intent;
         mListener = listener;
 
-        Intent serviceIntent = new Intent(context, MediaPlayerService.class);
-        context.startService(serviceIntent);
-        bindMediaPlayerService(serviceIntent);
+        Intent serviceIntent = new Intent(mContext, MediaPlayerService.class);
+        mContext.startService(serviceIntent);
         createMediaPlayerBroadcastReceiver();
+        bindMediaPlayerService(serviceIntent);
     }
 
     public void disconnect() {

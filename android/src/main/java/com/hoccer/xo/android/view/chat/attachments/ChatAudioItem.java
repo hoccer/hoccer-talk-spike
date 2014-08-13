@@ -36,7 +36,7 @@ public class ChatAudioItem extends ChatMessageItem {
 
     public ChatAudioItem(Context context, TalkClientMessage message) {
         super(context, message);
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
+        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(context);
     }
 
     @Override

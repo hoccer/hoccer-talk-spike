@@ -56,8 +56,8 @@ public class XoPreferenceActivity extends PreferenceActivity
             addPreferencesFromResource(R.xml.preferences);
         }
         getListView().setBackgroundColor(Color.WHITE);
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
-        mMediaPlayerServiceConnector.connect(this,
+        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(this);
+        mMediaPlayerServiceConnector.connect(
                 IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override

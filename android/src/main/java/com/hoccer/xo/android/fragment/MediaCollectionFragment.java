@@ -49,7 +49,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
     private MediaCollectionItemAdapter mCollectionAdapter;
     private AttachmentSearchResultAdapter mSearchResultAdapter;
 
-    private MediaPlayerServiceConnector mMediaPlayerServiceConnector = new MediaPlayerServiceConnector();
+    private MediaPlayerServiceConnector mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(getActivity());
     private ActionMode mCurrentActionMode;
 
     @Override
@@ -67,7 +67,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
                 LOG.error(e);
             }
 
-            mMediaPlayerServiceConnector.connect(getActivity());
+            mMediaPlayerServiceConnector.connect();
         } else {
             LOG.error("No Media Collection ID transmitted");
         }
