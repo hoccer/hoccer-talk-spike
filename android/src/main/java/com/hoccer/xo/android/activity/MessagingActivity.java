@@ -143,14 +143,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
                     clipboardText.setPrimaryClip(clip);
                 }
                 break;
-            case R.id.menu_delete_message:
-                try {
-                    getXoDatabase().deleteMessageById(messageId);
-                    mMessagingFragment.updateAdapter();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                break;
         }
     }
 

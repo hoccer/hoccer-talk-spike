@@ -92,14 +92,6 @@ public class NearbyHistoryMessagingActivity extends XoActivity {
                     clipboardText.setPrimaryClip(clip);
                 }
                 break;
-            case R.id.menu_delete_message:
-                try {
-                    getXoDatabase().deleteMessageById(messageId);
-                    ((NearbyChatAdapter)mListView.getAdapter()).updateAdapter();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                break;
         }
     }
 }
