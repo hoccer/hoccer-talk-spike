@@ -351,7 +351,6 @@
     <string name="content_audio_caption">Music</string>
     <string name="nearby_info_usercount">%1$d Users are Nearby</string>
     <string name="profile_nickname_text">Nickname</string>
-    <string name="message_seen_text">read</string>
     <string name="nearby_text">All nearby</string>
     <string name="error_send_message">Could not send message.</string>
     <string name="pref_privacy_title">Privacy</string>
@@ -370,7 +369,9 @@
     <string name="search_section_caption_video_files">Video Files</string>
 
     <!-- media types for "expecting ..." in message states -->
-    <string name="attachment_expects_text">expects %1$s</string>
+    <string name="attachment_expects_text">expecting %1$s</string>
+    <string name="attachment_failed_text">%1$s undeliverable</string>
+
     <string name="message_state_default">attachment</string>
     <string name="message_state_image">image</string>
     <string name="message_state_video">video</string>
@@ -378,10 +379,17 @@
     <string name="message_state_data">file</string>
     <string name="message_state_contact">vcard</string>
     <string name="message_state_location">location</string>
+
+    <string name="message_pending_text">pending</string>
+    <string name="message_sent_text">sent</string>
+    <string name="message_seen_text">read</string>
     <string name="message_unseen_text">unread</string>
     <string name="message_privat_text">delivered</string>
+    <string name="message_failed_text">undeliverable</string>
+    <string name="message_aborted_text">aborted</string>
+    <string name="message_rejected_text">rejected</string>
+
     <string name="attachment_failed">Error while downloading File.</string>
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
-    <string name="message_failed_text">undeliverable</string>
 
 </resources>

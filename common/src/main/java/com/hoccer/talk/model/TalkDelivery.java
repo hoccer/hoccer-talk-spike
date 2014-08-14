@@ -227,6 +227,25 @@ public class TalkDelivery {
     };
     public static final Set<String> FINAL_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(FINAL_ATTACHMENT_STATES));
 
+    public static final String[] FAILED_ATTACHMENT_STATES = {
+            ATTACHMENT_STATE_UPLOAD_FAILED,
+            ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_UPLOAD_ABORTED,
+            ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_DOWNLOAD_FAILED,
+            ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_DOWNLOAD_ABORTED,
+            ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
+    };
+    public static final Set<String> FAILED_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(FAILED_ATTACHMENT_STATES));
+
+    public static final String[] PENDING_ATTACHMENT_STATES = {
+            ATTACHMENT_STATE_NEW,
+            ATTACHMENT_STATE_UPLOADING,
+            ATTACHMENT_STATE_UPLOAD_PAUSED,
+            ATTACHMENT_STATE_UPLOADED,
+    };
+    public static final Set<String> PENDING_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(PENDING_ATTACHMENT_STATES));
 
     /* The delivery State logic has the following logic:
     - states get advanced by subsequent rpc-calls from sender and receiver
@@ -360,48 +379,14 @@ public class TalkDelivery {
         }
     }
 
-    /*
-    static String findNextFinalState(final Map<String, Set<String>> graph, final String currentState, Set<String>finalStates, final Set<String> track) {
-        if (finalStates.contains(currentState)) {
-            return currentState;
+    @JsonIgnore
+    public boolean isInState(String theState) {
+        if (!ALL_STATES_SET.contains(theState)) {
+            throw new RuntimeException("illegal state:"+theState);
         }
-
-        if (track.size() > graph.size()) {
-            throw new RuntimeException("impossible path length");
-        }
-        if (track.contains(currentState)) {
-            // we have already been here
-            return null;
-        }
-        final Set<String> nextStates = graph.get(currentState);
-        if (nextStates == null) {
-            throw new RuntimeException("currentState ='" + currentState + "' does not exist");
-        }
-        for (String next : nextStates) {
-            if (finalStates.contains(next)) {
-                return next;
-            }
-        }
-        Set<String> downTrack = new HashSet<String>(track);
-        downTrack.add(currentState);
-        for (String next : nextStates) {
-            String finalState = findNextFinalState(graph, next, nextStates, downTrack);
-            if (finalState != null) {
-                return finalState;
-            }
-        }
-        return null;
+        return theState.equals(state);
     }
 
-
-   public static String findNextFinalState(String state) {
-        return findNextFinalState(nextState, state, FINAL_STATES_SET, new HashSet<String>());
-   }
-
-    public static String findNextFinalAttachmentState(String state) {
-        return findNextFinalState(nextAttachmentState, state, FINAL_ATTACHMENT_STATES_SET, new HashSet<String>());
-    }
-    */
     @JsonIgnore
     public boolean isFinished() {
         return isFinalState(state) && isFinalAttachmentState(attachmentState);
@@ -409,7 +394,42 @@ public class TalkDelivery {
 
     @JsonIgnore
     public boolean isFailure() {
+        return isFailureState(state);
+    }
+
+    @JsonIgnore
+    public boolean isDelivered() {
+        return isDeliveredState(state);
+    }
+
+    @JsonIgnore
+    public boolean isSeen() {
+        return isSeenState(state);
+    }
+
+    @JsonIgnore
+    public boolean isPrivate() {
+        return isPrivateState(state);
+    }
+
+    @JsonIgnore
+    public boolean isUnseen() {
+        return isUnseenState(state);
+    }
+
+    @JsonIgnore
+    public boolean isFailed() {
         return isFailedState(state);
+    }
+
+    @JsonIgnore
+    public boolean isAborted() {
+        return isAbortedState(state);
+    }
+
+    @JsonIgnore
+    public boolean isRejected() {
+        return isRejectedState(state);
     }
 
     public static boolean isValidState(String state) {
@@ -420,8 +440,36 @@ public class TalkDelivery {
         return FINAL_STATES_SET.contains(state);
     }
 
-    public static boolean isFailedState(String state) {
+    public static boolean isFailureState(String state) {
         return FAILED_STATES_SET.contains(state);
+    }
+
+    public static boolean isDeliveredState(String state) {
+        return DELIVERED_STATES_SET.contains(state);
+    }
+
+    public static boolean isSeenState(String state) {
+        return STATE_DELIVERED_SEEN.equals(state) || STATE_DELIVERED_SEEN_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isPrivateState(String state) {
+        return STATE_DELIVERED_PRIVATE.equals(state) || STATE_DELIVERED_PRIVATE_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isUnseenState(String state) {
+        return STATE_DELIVERED_UNSEEN.equals(state) || STATE_DELIVERED_UNSEEN_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isFailedState(String state) {
+        return STATE_FAILED.equals(state) || STATE_FAILED_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isAbortedState(String state) {
+        return STATE_ABORTED.equals(state) || STATE_ABORTED_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isRejectedState(String state) {
+        return STATE_REJECTED.equals(state) || STATE_REJECTED_ACKNOWLEDGED.equals(state);
     }
 
     public static boolean nextStateAllowed(String currentState, String nextState) {
@@ -445,6 +493,20 @@ public class TalkDelivery {
         return nextStateAllowed(this.state, nextState);
     }
 
+    @JsonIgnore
+    public boolean isAttachmentFailure() {
+        return isFailedAttachmentState(attachmentState);
+    }
+
+    @JsonIgnore
+    public boolean isAttachmentDelivered() {
+        return isDeliveredAttachmentState(attachmentState);
+    }
+
+    @JsonIgnore
+    public boolean isAttachmentPending() {
+        return isPendingAttachmentState(attachmentState);
+    }
     public static boolean isValidAttachmentState(String state) {
         return ALL_ATTACHMENT_STATES_SET.contains(state);
     }
@@ -453,6 +515,17 @@ public class TalkDelivery {
         return FINAL_ATTACHMENT_STATES_SET.contains(state);
     }
 
+    public static boolean isFailedAttachmentState(String state) {
+        return FAILED_ATTACHMENT_STATES_SET.contains(state);
+    }
+
+    public static boolean isDeliveredAttachmentState(String state) {
+        return ATTACHMENT_STATE_RECEIVED.equals(state) || ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isPendingAttachmentState(String state) {
+        return PENDING_ATTACHMENT_STATES_SET.contains(state);
+    }
 
     // returns true if nextState is a valid state and there are one or more state transition that lead form the current state to nextSate
     @JsonIgnore
