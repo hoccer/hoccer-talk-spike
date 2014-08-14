@@ -163,6 +163,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private long serverTimeDiff = 0;
 
+    private boolean mBackgroundMode = false;
+
     /**
      * Create a Hoccer Talk client using the given client database
      */
@@ -268,6 +270,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public boolean isRegistered() {
         return mSelfContact.isSelfRegistered();
+    }
+
+    public boolean isBackgroundMode() {
+        return mBackgroundMode;
+    }
+
+    public void setBackgroundMode(boolean backgroundMode) {
+        this.mBackgroundMode = backgroundMode;
     }
 
     public TalkClientContact getSelfContact() {
@@ -542,6 +552,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
+    public void wakeInBackground() {
+        LOG.debug("client: wakeInBackground()");
+        mBackgroundMode = true;
+        wake();
+     }
+
     /**
      * Reconnect the client immediately
      */
@@ -690,8 +706,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     mDatabase.savePresence(presence);
                     if (TalkPresence.CONN_STATUS_ONLINE.equals(newStatus)) {
                         LOG.debug("entering foreground -> idle timer deactivated");
+                        //LOG.debug("stacktrace", new Exception());
+                        mBackgroundMode = false;
                         shutdownIdle();
                     } else if (TalkPresence.CONN_STATUS_BACKGROUND.equals(newStatus)) {
+                        mBackgroundMode = true;
                         LOG.debug("entering background -> idle timer activated");
                         scheduleIdle();
                     }
@@ -1545,7 +1564,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     LOG.debug("sync: HELLO");
                     hello();
                     LOG.debug("sync: updating presence");
-                    setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+                    if (mBackgroundMode) {
+                        setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+                    } else {
+                        setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+                    }
                     ScheduledFuture sendPresenceFuture = sendPresence();
                     LOG.debug("sync: syncing presences");
                     TalkPresence[] presences = mServerRpc.getPresences(never);

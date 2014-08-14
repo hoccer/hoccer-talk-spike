@@ -199,7 +199,7 @@ public class XoClientService extends Service {
         LOG.debug("onStartCommand(" + ((intent == null) ? "null" : intent.toString()) + ")");
         if (intent != null) {
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
-                wakeClient();
+                wakeClientInBackground();
             }
             if (intent.hasExtra(TalkPushService.EXTRA_GCM_REGISTERED)) {
                 doUpdateGcm(true);
@@ -255,6 +255,12 @@ public class XoClientService extends Service {
     private void wakeClient() {
         if (mPreviousConnectionState) {
             mClient.wake();
+        }
+    }
+
+    private void wakeClientInBackground() {
+        if (mPreviousConnectionState) {
+            mClient.wakeInBackground();
         }
     }
 
