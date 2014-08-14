@@ -26,7 +26,7 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
     private XoActivity mActivity;
 
     public XoFragment() {
-        LOG = Logger.getLogger(getClass());
+        LOG = Logger.getLogger(XoFragment.class);
     }
 
     public XoClient getXoClient() {
