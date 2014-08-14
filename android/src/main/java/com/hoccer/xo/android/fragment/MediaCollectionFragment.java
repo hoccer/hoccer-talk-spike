@@ -49,7 +49,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
     private MediaCollectionItemAdapter mCollectionAdapter;
     private AttachmentSearchResultAdapter mSearchResultAdapter;
 
-    private MediaPlayerServiceConnector mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(getActivity());
+    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
     private ActionMode mCurrentActionMode;
 
     @Override
@@ -67,7 +67,6 @@ public class MediaCollectionFragment extends SearchableListFragment {
                 LOG.error(e);
             }
 
-            mMediaPlayerServiceConnector.connect();
         } else {
             LOG.error("No Media Collection ID transmitted");
         }
@@ -91,6 +90,13 @@ public class MediaCollectionFragment extends SearchableListFragment {
         mListView.setMultiChoiceModeListener(handler);
 
         return mListView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(getActivity());
+        mMediaPlayerServiceConnector.connect();
     }
 
     @Override
