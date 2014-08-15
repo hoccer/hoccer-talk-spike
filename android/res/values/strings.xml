@@ -6,7 +6,7 @@
     <string name="demo_message">Lorem ipsum dolor...</string>
 
     <!-- common strings -->
-    <string name="common_ok">Ok</string>
+    <string name="common_ok">OK</string>
     <string name="common_cancel">Cancel</string>
     <string name="common_yes">Yes</string>
     <string name="common_no">No</string>
