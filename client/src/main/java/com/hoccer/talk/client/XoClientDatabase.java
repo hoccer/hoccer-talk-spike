@@ -47,6 +47,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     Dao<TalkClientMediaCollection, Integer> mMediaCollections;
     Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
 
+    private WeakListenerArray<IXoUploadListener> mUploadListeners = new WeakListenerArray<IXoUploadListener>();
     private WeakListenerArray<IXoDownloadListener> mDownloadListeners = new WeakListenerArray<IXoDownloadListener>();
     private WeakListenerArray<IXoMessageListener> mMessageListeners = new WeakListenerArray<IXoMessageListener>();
     private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListeners = new WeakListenerArray<IXoMediaCollectionListener>();
@@ -188,7 +189,17 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public void saveClientUpload(TalkClientUpload upload) throws SQLException {
-        mClientUploads.createOrUpdate(upload);
+        Dao.CreateOrUpdateStatus result = mClientUploads.createOrUpdate(upload);
+
+        if(result.isCreated()) {
+            for (IXoUploadListener listener : mUploadListeners) {
+                listener.onUploadCreated(upload);
+            }
+        } else {
+            for (IXoUploadListener listener : mUploadListeners) {
+                listener.onUploadUpdated(upload);
+            }
+        }
     }
 
     public void refreshClientContact(TalkClientContact contact) throws SQLException {
@@ -971,6 +982,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
                 break;
         }
+    }
+
+    public void registerUploadListener(IXoUploadListener listener) {
+        mUploadListeners.registerListener(listener);
+    }
+
+    public void unregisterUploadListener(IXoUploadListener listener) {
+        mUploadListeners.unregisterListener(listener);
     }
 
     public void registerDownloadListener(IXoDownloadListener listener) {
