@@ -3,14 +3,16 @@ package com.hoccer.xo.android.content;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.*;
 import android.graphics.drawable.Drawable;
+import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.activity.MapsLocationActivity;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.contentselectors.*;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -197,15 +199,15 @@ public class ContentRegistry {
      * @param requestCode identifying returned intents
      * @return a new selection handle object
      */
-    public ContentSelection selectAttachment(final Activity activity, final int requestCode) {
+    public ContentSelection selectAttachment(final Fragment fragment, final int requestCode) {
         // create handle representing this selection attempt
         final ContentSelection contentSelection = new ContentSelection(fragment.getActivity());
 
         // collect selection intents and associated information
         final List<Map<String, Object>> options = new ArrayList<Map<String, Object>>();
-        for(IContentSelector selector: mAttachmentSelectors) {
-            Intent selectionIntent = selector.createSelectionIntent(activity);
-            if(IntentHelper.isIntentResolvable(selectionIntent, activity)) {
+        for (IContentSelector selector : mAttachmentSelectors) {
+            Intent selectionIntent = selector.createSelectionIntent(fragment.getActivity());
+            if (IntentHelper.isIntentResolvable(selectionIntent, fragment.getActivity())) {
                 Map<String, Object> fields = new HashMap<String, Object>();
                 fields.put(KEY_INTENT, selectionIntent);
                 fields.put(KEY_SELECTOR, selector);
@@ -217,14 +219,14 @@ public class ContentRegistry {
 
         // Add ClipboardSelector when it has something to process
         if (mClipboardSelector.canProcessClipboard()) {
-            Map<String, Object> fields = createDataObjectFromContentSelector(activity, mClipboardSelector);
+            Map<String, Object> fields = createDataObjectFromContentSelector(fragment.getActivity(), mClipboardSelector);
             if (fields != null) {
                 options.add(fields);
             }
         }
 
         // prepare an adapter for the selection options
-        SimpleAdapter adapter = new SimpleAdapter(activity, options, R.layout.select_content,
+        SimpleAdapter adapter = new SimpleAdapter(fragment.getActivity(), options, R.layout.select_content,
                 new String[]{KEY_ICON, KEY_NAME},
                 new int[]{R.id.select_content_icon, R.id.select_content_text});
         adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
@@ -240,7 +242,7 @@ public class ContentRegistry {
         });
 
         // build the selection dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getActivity());
         builder.setTitle(R.string.selectattachment_title);
         builder.setCancelable(true);
         builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
@@ -257,14 +259,12 @@ public class ContentRegistry {
                 contentSelection.setSelector(selector);
                 Intent intent = (Intent) sel.get(KEY_INTENT);
 
-                // handle ClipboardSelector differently
                 if (selector instanceof ClipboardSelector) {
                     ClipboardSelector clipboardSelector = (ClipboardSelector) selector;
                     XoActivity xoActivity = (XoActivity) fragment.getActivity();
                     xoActivity.clipBoardItemSelected(clipboardSelector.selectObjectFromClipboard(xoActivity, intent));
                 } else {
-                    XoActivity xoActivity = (XoActivity)activity;
-                    xoActivity.startExternalActivityForResult(intent, requestCode);
+                    startExternalActivityForResult(fragment, intent, requestCode);
                 }
             }
         });
@@ -318,6 +318,21 @@ public class ContentRegistry {
         }
 
         return null;
+    }
+
+    private void startExternalActivityForResult(Fragment fragment, Intent intent, int requestCode) {
+        XoActivity xoActivity = (XoActivity) fragment.getActivity();
+
+        if (!xoActivity.canStartActivity(intent)) {
+            return;
+        }
+        xoActivity.setBackgroundActive();
+        try {
+            fragment.startActivityForResult(intent, requestCode);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(xoActivity, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
     }
 
 }

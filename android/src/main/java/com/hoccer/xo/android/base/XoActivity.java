@@ -64,8 +64,6 @@ public abstract class XoActivity extends FragmentActivity {
 
     public final static int REQUEST_CROP_AVATAR = 24;
 
-    public final static int REQUEST_SELECT_ATTACHMENT = 42;
-
     protected Logger LOG = null;
 
     /**
@@ -102,11 +100,6 @@ public abstract class XoActivity extends FragmentActivity {
      * Ongoing avatar selection
      */
     ContentSelection mAvatarSelection = null;
-
-    /**
-     * Ongoing attachment selection
-     */
-    ContentSelection mAttachmentSelection = null;
 
     boolean mUpEnabled = false;
 
@@ -181,7 +174,7 @@ public abstract class XoActivity extends FragmentActivity {
         XoApplication.enterBackgroundActiveMode();
     }
 
-    protected void setBackgroundActive() {
+    public void setBackgroundActive() {
         isBackgroundActive = true;
     }
 
@@ -212,8 +205,7 @@ public abstract class XoActivity extends FragmentActivity {
             e.printStackTrace();
         }
     }
-
-    private boolean canStartActivity(Intent intent) {
+    public boolean canStartActivity(Intent intent) {
         if (intent != null) {
             ComponentName componentName = intent.resolveActivity(getPackageManager());
             if (componentName != null) {
@@ -315,6 +307,36 @@ public abstract class XoActivity extends FragmentActivity {
 
         // get the background executor
         mBackgroundExecutor = XoApplication.getExecutor();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        LOG.debug("onActivityResult(" + requestCode + "," + resultCode);
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (intent == null) {
+            return;
+        }
+
+        if (requestCode == REQUEST_SELECT_AVATAR) {
+            if (mAvatarSelection != null) {
+                ImageSelector selector = (ImageSelector) mAvatarSelection.getSelector();
+                startExternalActivityForResult(selector.createCropIntent(this, intent.getData()), REQUEST_CROP_AVATAR);
+            }
+        } else if (requestCode == REQUEST_CROP_AVATAR) {
+            intent = selectedAvatarPreProcessing(intent);
+            if (intent != null) {
+                IContentObject contentObject = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection, intent);
+                if (contentObject != null) {
+                    LOG.debug("selected avatar " + contentObject.getContentDataUrl());
+                    for (IXoFragment fragment : mTalkFragments) {
+                        fragment.onAvatarSelected(contentObject);
+                    }
+                }
+            } else {
+                showAvatarSelectionError();
+            }
+        }
     }
 
     @Override
@@ -565,52 +587,8 @@ public abstract class XoActivity extends FragmentActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOG.debug("onActivityResult(" + requestCode + "," + resultCode);
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (data == null) {
-            return;
-        }
-
-        if (requestCode == REQUEST_SELECT_AVATAR) {
-            if (mAvatarSelection != null) {
-                ImageSelector selector = (ImageSelector) mAvatarSelection.getSelector();
-                startExternalActivityForResult(selector.createCropIntent(this, data.getData()), REQUEST_CROP_AVATAR);
-            }
-        } else if (requestCode == REQUEST_CROP_AVATAR) {
-            data = selectedAvatarPreProcessing(data);
-            if (data != null) {
-                IContentObject contentObject = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection, data);
-                if (contentObject != null) {
-                    LOG.debug("selected avatar " + contentObject.getContentDataUrl());
-                    for (IXoFragment fragment : mTalkFragments) {
-                        fragment.onAvatarSelected(contentObject);
-                    }
-                }
-            } else {
-                showAvatarSelectionError();
-            }
-        } else if (requestCode == REQUEST_SELECT_ATTACHMENT) {
-            IContentObject contentObject = ContentRegistry.get(this).createSelectedAttachment(mAttachmentSelection, data);
-            if (contentObject != null) {
-                LOG.debug("selected attachment " + contentObject.getContentDataUrl());
-                for (IXoFragment fragment : mTalkFragments) {
-                    fragment.onAttachmentSelected(contentObject);
-                }
-            } else {
-                showAttachmentSelectionError();
-            }
-        }
-    }
-
     private void showAvatarSelectionError() {
         Toast.makeText(this, R.string.error_avatar_selection, Toast.LENGTH_LONG).show();
-    }
-
-    private void showAttachmentSelectionError() {
-        Toast.makeText(this, R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
     }
 
     protected void enableUpNavigation() {
@@ -749,14 +727,6 @@ public abstract class XoActivity extends FragmentActivity {
     public void selectAvatar() {
         LOG.debug("selectAvatar()");
         mAvatarSelection = ContentRegistry.get(this).selectAvatar(this, REQUEST_SELECT_AVATAR);
-    }
-
-    public void selectAttachment() {
-        LOG.debug("selectAttachment()");
-
-        setBackgroundActive();
-
-        mAttachmentSelection = ContentRegistry.get(this).selectAttachment(this, REQUEST_SELECT_ATTACHMENT);
     }
 
     public void scanBarcode() {
