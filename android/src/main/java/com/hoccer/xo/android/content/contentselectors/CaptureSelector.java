@@ -3,20 +3,35 @@ package com.hoccer.xo.android.content.contentselectors;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.widget.Toast;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class CaptureSelector implements IContentSelector {
 
+    private static final Logger LOG = Logger.getLogger(CaptureSelector.class);
+
     private String mName;
     private Drawable mIcon;
+    private Uri mFileUri;
+    private Context mContext;
 
     public CaptureSelector(Context context) {
+        mContext = context;
         mName = context.getResources().getString(R.string.content_capture);
         mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_video, true);
     }
@@ -33,7 +48,27 @@ public class CaptureSelector implements IContentSelector {
 
     @Override
     public Intent createSelectionIntent(Context context) {
-        return new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            mFileUri = createOutputMediaFileUri();
+        } catch (ExternalStorageNotMountedException e) {
+            Toast.makeText(mContext, "Error accessing public storage directory", Toast.LENGTH_LONG).show();
+            LOG.error(e.getLocalizedMessage(), e);
+        }
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, mFileUri);
+        return intent;
+    }
+
+    private Uri createOutputMediaFileUri() throws ExternalStorageNotMountedException {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String fileName = String.format("hoccer_%s", timestamp);
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), fileName);
+            return Uri.fromFile(file);
+        } else {
+            throw new ExternalStorageNotMountedException("External storage is not mounted.");
+        }
     }
 
     @Override
@@ -43,45 +78,50 @@ public class CaptureSelector implements IContentSelector {
             return null;
         }
 
-        Uri selectedContent = intent.getData();
         String[] filePathColumn = {
-                MediaStore.Images.Media.MIME_TYPE,
                 MediaStore.Images.Media.DATA,
-                MediaStore.Images.Media.SIZE,
-                MediaStore.Images.Media.WIDTH,
-                MediaStore.Images.Media.HEIGHT,
-                MediaStore.Images.Media.TITLE
         };
 
-        Cursor cursor = context.getContentResolver().query(
-                selectedContent, filePathColumn, null, null, null);
-        cursor.moveToFirst();
+        File file = new File(mFileUri.getPath());
 
-        int typeIndex = cursor.getColumnIndex(filePathColumn[0]);
-        String fileType = cursor.getString(typeIndex);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        int imageHeight = options.outHeight;
+        int imageWidth = options.outWidth;
+        String imageType = options.outMimeType;
+
+        Uri contentUri;
+        String uriString = null;
+        try {
+            uriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), mFileUri.getPath(), file.getName(), file.getName());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        contentUri = Uri.parse(uriString);
+
+        Cursor cursor = context.getContentResolver().query(
+                contentUri, filePathColumn, null, null, null);
+        cursor.moveToFirst();
         int dataIndex = cursor.getColumnIndex(filePathColumn[1]);
         String filePath = cursor.getString(dataIndex);
-        int sizeIndex = cursor.getColumnIndex(filePathColumn[2]);
-        int fileSize = cursor.getInt(sizeIndex);
-        int widthIndex = cursor.getColumnIndex(filePathColumn[3]);
-        int fileWidth = cursor.getInt(widthIndex);
-        int heightIndex = cursor.getColumnIndex(filePathColumn[4]);
-        int fileHeight = cursor.getInt(heightIndex);
-        int fileNameIndex = cursor.getColumnIndex(filePathColumn[5]);
-        String fileName = cursor.getString(fileNameIndex);
-
         cursor.close();
 
         if (filePath == null) {
             return null;
         }
+        File imageFile = new File(filePath);
 
         SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
-        contentObject.setFileName(fileName);
+        contentObject.setFileName(imageFile.getName());
         contentObject.setContentMediaType(ContentMediaType.IMAGE);
-        contentObject.setContentType(fileType);
-        contentObject.setContentLength(fileSize);
-        contentObject.setContentAspectRatio(((float) fileWidth) / ((float) fileHeight));
+        contentObject.setContentType(imageType);
+        contentObject.setContentLength((int) imageFile.length());
+        contentObject.setContentAspectRatio(((float) imageWidth) / ((float) imageHeight));
+
+        if (file.exists()) {
+            file.delete();
+        }
 
         return contentObject;
     }
@@ -91,4 +131,10 @@ public class CaptureSelector implements IContentSelector {
         return true;
     }
 
+    public class ExternalStorageNotMountedException extends Throwable {
+
+        private ExternalStorageNotMountedException(String message) {
+            super(message);
+        }
+    }
 }
