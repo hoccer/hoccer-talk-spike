@@ -21,6 +21,7 @@ import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.activity.ContactsActivity;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.sms.SmsReceiver;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 
 import org.apache.log4j.Logger;
@@ -167,8 +168,8 @@ public class XoClientService extends Service {
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        IntentFilter filter = new IntentFilter("com.hoccer.xo.android.service.XoClientService$ClientIdReceiver");
-        filter.addAction("CONTACT_ID_IN_CONVERSATION");
+        IntentFilter filter = new IntentFilter(ClientIdReceiver.class.getName());
+        filter.addAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
         m_clientIdReceiver = new ClientIdReceiver();
         registerReceiver(m_clientIdReceiver, filter);
     }
@@ -198,7 +199,7 @@ public class XoClientService extends Service {
         LOG.debug("onStartCommand(" + ((intent == null) ? "null" : intent.toString()) + ")");
         if (intent != null) {
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
-                wakeClient();
+                wakeClientInBackground();
             }
             if (intent.hasExtra(TalkPushService.EXTRA_GCM_REGISTERED)) {
                 doUpdateGcm(true);
@@ -254,6 +255,12 @@ public class XoClientService extends Service {
     private void wakeClient() {
         if (mPreviousConnectionState) {
             mClient.wake();
+        }
+    }
+
+    private void wakeClientInBackground() {
+        if (mPreviousConnectionState) {
+            mClient.wakeInBackground();
         }
     }
 
@@ -558,9 +565,9 @@ public class XoClientService extends Service {
             TalkClientContact singleContact = contacts.get(0);
             // create intent to start the messaging activity for the right contact
             Intent messagingIntent = new Intent(this, MessagingActivity.class);
-            messagingIntent.putExtra("clientContactId", singleContact.getClientContactId());
+            messagingIntent.putExtra(IntentHelper.EXTRA_CONTACT_ID, singleContact.getClientContactId());
             // make a pending intent with correct back-stack
-            PendingIntent pendingIntent = null;
+            PendingIntent pendingIntent;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 pendingIntent =
                         TaskStackBuilder.create(this)
@@ -585,7 +592,7 @@ public class XoClientService extends Service {
         } else {
             // create pending intent
             Intent contactsIntent = new Intent(this, ContactsActivity.class);
-            PendingIntent pendingIntent = null;
+            PendingIntent pendingIntent;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 pendingIntent =
                         TaskStackBuilder.create(this)
@@ -612,7 +619,7 @@ public class XoClientService extends Service {
         }
 
         // finish up
-        Notification notification = null;
+        Notification notification;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             notification = builder.build();
         } else {
@@ -697,7 +704,7 @@ public class XoClientService extends Service {
                     m_clientIdReceiver.setContactId(unseenMessages.get(0).getConversationContact().getClientContactId());
                     m_clientIdReceiver.setNotificationData(unseenMessages, notify);
                     Intent intent = new Intent();
-                    intent.setAction("CHECK_ID_IN_CONVERSATION");
+                    intent.setAction(IntentHelper.ACTION_CHECK_ID_IN_CONVERSATION);
                     sendBroadcast(intent);
             } else {
                 updateMessageNotification(unseenMessages, notify);
@@ -835,13 +842,15 @@ public class XoClientService extends Service {
     }
 
     private class ClientIdReceiver extends BroadcastReceiver {
+
+
         private int m_id;
         private List<TalkClientMessage> m_unseenMessages = new ArrayList<TalkClientMessage>();
         private boolean m_notify;
 
         @Override
         public void onReceive(Context arg0, Intent intent) {
-            if (m_id != intent.getIntExtra("id", -1)) {
+            if (m_id != intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1)) {
                 updateMessageNotification(m_unseenMessages, m_notify);
             }
         }

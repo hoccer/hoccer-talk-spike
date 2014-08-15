@@ -6,7 +6,7 @@
     <string name="demo_message">Lorem ipsum dolor...</string>
 
     <!-- common strings -->
-    <string name="common_ok">Ok</string>
+    <string name="common_ok">OK</string>
     <string name="common_cancel">Abbrechen</string>
     <string name="common_yes">Ja</string>
     <string name="common_no">Nein</string>
@@ -313,7 +313,6 @@
     <string name="content_audio_caption">Musik</string>
     <string name="nearby_info_usercount">%1$d Benutzer in der Nähe</string>
     <string name="profile_nickname_text">Anzeigename</string>
-    <string name="message_seen_text">gelesen</string>
     <string name="nearby_text">Alle in der Nähe</string>
     <string name="error_send_message">Die Nachricht konnte nicht gesendet werden.</string>
     <string name="pref_privacy_title">Privatspähre</string>
@@ -338,6 +337,8 @@
 
     <!-- media types for "expecting ..." in message states -->
     <string name="attachment_expects_text">erwartet %1$s</string>
+    <string name="attachment_failed_text">%1$s gestört</string>
+
     <string name="message_state_default">Anhang</string>
     <string name="message_state_image">Bild</string>
     <string name="message_state_video">Video</string>
@@ -346,12 +347,17 @@
     <string name="message_state_contact">vCard</string>
     <string name="message_state_location">Position</string>
 
-
-    <string name="nearby_saved">Nahebei gespeichert</string>
+    <string name="message_pending_text">ausgehend</string>
+    <string name="message_sent_text">gesendet</string>
+    <string name="message_seen_text">gelesen</string>
     <string name="message_unseen_text">ungelesen</string>
     <string name="message_privat_text">zugestellt</string>
+    <string name="message_failed_text">unzustellbar</string>
+    <string name="message_aborted_text">abgebrochen</string>
+    <string name="message_rejected_text">zurückgewiesen</string>
+
+    <string name="nearby_saved">Nahebei gespeichert</string>
     <string name="attachment_failed">Beim Herunterladen ist ein Fehler aufgetreten.</string>
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
-    <string name="message_failed_text">Unzustellbar</string>
 
 </resources>

@@ -37,6 +37,7 @@ import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.release.R;
@@ -704,7 +705,7 @@ public abstract class XoActivity extends FragmentActivity {
     public void showContactConversation(TalkClientContact contact) {
         LOG.debug("showContactConversation(" + contact.getClientContactId() + ")");
         Intent intent = new Intent(this, MessagingActivity.class);
-        intent.putExtra(MessagingActivity.EXTRA_CLIENT_CONTACT_ID,
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID,
                 contact.getClientContactId());
         startActivity(intent);
     }

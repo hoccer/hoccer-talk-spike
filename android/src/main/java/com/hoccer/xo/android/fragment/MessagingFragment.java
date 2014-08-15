@@ -22,8 +22,8 @@ import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.ThumbnailManager;
-import com.hoccer.xo.android.view.OverscrollListView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -133,14 +133,12 @@ public class MessagingFragment extends XoListFragment
 
         mMessageListView.setAdapter(mAdapter);
 
-
         configureMotionInterpreterForContact(mContact);
         XoApplication.getXoClient().registerContactListener(this);
     }
 
     @Override
     public void onPause() {
-        LOG.debug("onPause()");
         super.onPause();
         mAdapter.onPause();
         mMotionInterpreter.deactivate();
@@ -149,7 +147,6 @@ public class MessagingFragment extends XoListFragment
 
     @Override
     public void onDestroy() {
-        LOG.debug("onDestroy()");
         super.onDestroy();
         if (mAdapter != null) {
             mAdapter.onDestroy();
@@ -182,12 +179,12 @@ public class MessagingFragment extends XoListFragment
         switch (item.getItemId()) {
             case R.id.menu_profile_single:
                 if (mContact != null && mgr != null) {
-                    mgr.showSingleProfileFragment();
+                    mgr.showSingleProfileFragment(mContact.getClientContactId());
                 }
                 break;
             case R.id.menu_profile_group:
                 if (mContact != null && mgr != null) {
-                    mgr.showGroupProfileFragment();
+                    mgr.showGroupProfileFragment(mContact.getClientContactId());
                 }
                 break;
             case R.id.menu_audio_attachment_list:
@@ -275,7 +272,12 @@ public class MessagingFragment extends XoListFragment
 
     public void showAudioAttachmentList() {
         Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
-        intent.putExtra(MessagingActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         startActivity(intent);
+    }
+
+    @Override
+    public void onAttachmentSelected(IContentObject co) {
+        mCompositionFragment.onAttachmentSelected(co);
     }
 }

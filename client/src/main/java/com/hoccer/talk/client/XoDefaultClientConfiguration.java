@@ -48,7 +48,7 @@ public abstract class XoDefaultClientConfiguration implements IXoClientConfigura
 
     @Override
     public int getIdleTimeout() {
-        return 120;
+        return 90;
     }
 
     @Override

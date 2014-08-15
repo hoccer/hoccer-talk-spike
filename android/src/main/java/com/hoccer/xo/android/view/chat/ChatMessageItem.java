@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.view.chat;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.format.DateUtils;
@@ -198,7 +199,23 @@ public class ChatMessageItem implements AttachmentTransferListener {
         mMessageText = messageText;
         configureContextMenu(messageText);
     }
+    private void updateIncomingMessageStatus(View view) {
+        TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
+        if (mMessage.getConversationContact().isGroup()) {
+            deliveryInfo.setVisibility(View.GONE);
+            return;
+        }
 
+        TalkDelivery incomingDelivery = mMessage.getIncomingDelivery();
+        deliveryInfo.setVisibility(View.VISIBLE);
+
+        if (incomingDelivery.isFailure()) {
+            setMessageStatusText(deliveryInfo, stateStringForDelivery(incomingDelivery, view), R.color.xo_message_failed_color);
+        } else {
+            deliveryInfo.setVisibility(View.GONE);
+        }
+    }
+    /*
     private void updateIncomingMessageStatus(View view) {
         TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
         if (mMessage.getConversationContact().isGroup()) {
@@ -221,7 +238,73 @@ public class ChatMessageItem implements AttachmentTransferListener {
             deliveryInfo.setVisibility(View.GONE);
         }
     }
+    */
+    private String stateStringForDelivery(TalkDelivery myDelivery, View view) {
+        Resources res = view.getResources();
 
+        if (myDelivery.isInState(TalkDelivery.STATE_NEW)) {
+            return res.getString(R.string.message_pending_text);
+
+        } else if (myDelivery.isInState(TalkDelivery.STATE_DELIVERING)) {
+            return res.getString(R.string.message_sent_text);
+
+        } else if (myDelivery.isDelivered()) {
+
+            if (myDelivery.isAttachmentFailure()) {
+                String mediaType = res.getString(getMediaTextResource());
+                String text = res.getString(R.string.attachment_failed_text);
+                return String.format(text, mediaType);
+            } else if (myDelivery.isAttachmentPending()) {
+                String mediaType = res.getString(getMediaTextResource());
+                String text = res.getString(R.string.attachment_expects_text);
+                return String.format(text, mediaType);
+            } else {
+                if (myDelivery.isSeen()) {
+                    return res.getString(R.string.message_seen_text);
+                } else if (!myDelivery.isPrivate()) {
+                    return res.getString(R.string.message_unseen_text);
+                } else {
+                    return res.getString(R.string.message_privat_text);
+                }
+            }
+        } else if (myDelivery.isFailure()) {
+            if (myDelivery.isFailed()) {
+                return res.getString(R.string.message_failed_text);
+            } else if (myDelivery.isAborted()) {
+                return res.getString(R.string.message_aborted_text);
+            } else if (myDelivery.isRejected()) {
+                return res.getString(R.string.message_rejected_text);
+            }
+        } else {
+            throw new RuntimeException("unknown delivery state: "+myDelivery.getState());
+        }
+        return myDelivery.getState();
+    }
+
+    private int statusColorId(TalkDelivery myDelivery) {
+        if (myDelivery.isFailure()) {
+            return R.color.xo_message_failed_color;
+        }
+        return R.color.xo_app_main_color;
+    }
+
+    private void updateOutgoingMessageStatus(View view) {
+        TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
+        if (mMessage.getConversationContact().isGroup()) {
+            deliveryInfo.setVisibility(View.GONE);
+            return;
+        }
+
+        TalkDelivery outgoingDelivery = mMessage.getOutgoingDelivery();
+        deliveryInfo.setVisibility(View.VISIBLE);
+
+        String statusText = stateStringForDelivery(outgoingDelivery, view);
+        int statusColor = statusColorId(outgoingDelivery);
+
+        setMessageStatusText(deliveryInfo, statusText, statusColor);
+    }
+
+   /*
     private void updateOutgoingMessageStatus(View view) {
         TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
         if (mMessage.getConversationContact().isGroup()) {
@@ -267,7 +350,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             deliveryInfo.setVisibility(View.GONE);
         }
     }
-
+    */
     private void setMessageStatusText(TextView messageStatusLabel, String text, int colorId) {
         messageStatusLabel.setVisibility(View.VISIBLE);
         messageStatusLabel.setText(text);
@@ -278,12 +361,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         String currentState = mMessage.getOutgoingDelivery().getState();
         Drawable background = null;
         if (currentState != null) {
-            if (currentState.equals(TalkDelivery.STATE_ABORTED) ||
-                    currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED) ||
-                    currentState.equals(TalkDelivery.STATE_REJECTED) ||
-                    currentState.equals(TalkDelivery.STATE_REJECTED_ACKNOWLEDGED) ||
-                    currentState.equals(TalkDelivery.STATE_FAILED) ||
-                    currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+            if (TalkDelivery.isFailureState(currentState)) {
                 background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
             } else {
                 background = ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_outgoing, true);
@@ -299,10 +377,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         String currentState = mMessage.getIncomingDelivery().getState();
         Drawable background = null;
         if (currentState != null) {
-            if (currentState.equals(TalkDelivery.STATE_ABORTED) ||
-                    currentState.equals(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED) ||
-                    currentState.equals(TalkDelivery.STATE_FAILED) ||
-                    currentState.equals(TalkDelivery.STATE_FAILED_ACKNOWLEDGED)) {
+            if (TalkDelivery.isFailureState(currentState)) {
                 background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_incoming);
             } else {
                 background = ColorSchemeManager.getRepaintedDrawable(mContext, R.drawable.chat_bubble_incoming, false);

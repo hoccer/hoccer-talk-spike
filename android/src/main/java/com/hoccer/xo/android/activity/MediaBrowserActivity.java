@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.fragment.AttachmentListFragment;
 import com.hoccer.xo.android.fragment.MediaCollectionListFragment;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 
 public class MediaBrowserActivity extends XoActionbarActivity {
@@ -34,7 +35,7 @@ public class MediaBrowserActivity extends XoActionbarActivity {
 
         mContactId = -1;
         if (getIntent() != null) {
-            mContactId = getIntent().getIntExtra(MessagingActivity.EXTRA_CLIENT_CONTACT_ID, mContactId);
+            mContactId = getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, mContactId);
         }
 
         showAudioAttachmentListFragment();

@@ -50,7 +50,7 @@ public class TalkDelivery {
     };
     public static final Set<String> REQUIRED_OUT_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_OUT_UPDATE_FIELDS));
 
-    public static final String[] REQUIRED_IN_UPDATE_FIELDS = {FIELD_MESSAGE_ID, FIELD_RECEIVER_ID, FIELD_GROUP_ID, FIELD_MESSAGE_TAG, FIELD_STATE, FIELD_TIME_CHANGED,
+    public static final String[] REQUIRED_IN_UPDATE_FIELDS = {FIELD_MESSAGE_ID, FIELD_RECEIVER_ID, FIELD_SENDER_ID, FIELD_GROUP_ID, FIELD_MESSAGE_TAG, FIELD_STATE, FIELD_TIME_CHANGED,
             FIELD_ATTACHMENT_STATE, FIELD_TIME_ATTACHMENT_RECEIVED, FIELD_REASON
     };
     public static final Set<String> REQUIRED_IN_UPDATE_FIELDS_SET = new HashSet<String>(Arrays.asList(REQUIRED_IN_UPDATE_FIELDS));
@@ -146,7 +146,7 @@ public class TalkDelivery {
     public final static String[] OUT_ATTACHMENT_STATES = {TalkDelivery.ATTACHMENT_STATE_RECEIVED, TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_ABORTED,
             TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED};
 
-    // The delivery states the receiver is interested in for incomingDeliverUpdated
+    // The delivery states the receiver is interested in for incomingDeliveryUpdated regardless of attachmentState
     public static final String[] IN_STATES = {STATE_DELIVERING};
     public static final Set<String> IN_STATES_SET = new HashSet<String>(Arrays.asList(IN_STATES));
 
@@ -227,6 +227,25 @@ public class TalkDelivery {
     };
     public static final Set<String> FINAL_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(FINAL_ATTACHMENT_STATES));
 
+    public static final String[] FAILED_ATTACHMENT_STATES = {
+            ATTACHMENT_STATE_UPLOAD_FAILED,
+            ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_UPLOAD_ABORTED,
+            ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_DOWNLOAD_FAILED,
+            ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED,
+            ATTACHMENT_STATE_DOWNLOAD_ABORTED,
+            ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED
+    };
+    public static final Set<String> FAILED_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(FAILED_ATTACHMENT_STATES));
+
+    public static final String[] PENDING_ATTACHMENT_STATES = {
+            ATTACHMENT_STATE_NEW,
+            ATTACHMENT_STATE_UPLOADING,
+            ATTACHMENT_STATE_UPLOAD_PAUSED,
+            ATTACHMENT_STATE_UPLOADED,
+    };
+    public static final Set<String> PENDING_ATTACHMENT_STATES_SET = new HashSet<String>(Arrays.asList(PENDING_ATTACHMENT_STATES));
 
     /* The delivery State logic has the following logic:
     - states get advanced by subsequent rpc-calls from sender and receiver
@@ -240,6 +259,14 @@ public class TalkDelivery {
 
     static final Map<String, Set<String>> nextState = new HashMap<String, Set<String>>();
     static final Map<String, Set<String>> nextAttachmentState = new HashMap<String, Set<String>>();
+
+    // State transitions for in and out in case of unknown deliveries
+    public static final Map<String, String> nextUnknownInState = new HashMap<String, String>();
+    public static final Map<String, String> nextUnknownOutState = new HashMap<String, String>();
+
+    public static final Map<String, String> nextUnknownInAttachmentState = new HashMap<String, String>();
+    public static final Map<String, String> nextUnknownOutAttachmentState = new HashMap<String, String>();
+
 
     static {
         // nextstate tree init
@@ -259,10 +286,37 @@ public class TalkDelivery {
         nextState.put(STATE_REJECTED, new HashSet<String>(Arrays.asList(new String[]{STATE_REJECTED_ACKNOWLEDGED})));
         nextState.put(STATE_REJECTED_ACKNOWLEDGED, new HashSet<String>());
 
+        // transitions into silent states in case of unknown out deliveries on the client side
+        nextUnknownOutState.put(STATE_DELIVERED_PRIVATE, STATE_DELIVERED_PRIVATE_ACKNOWLEDGED);
+        nextUnknownOutState.put(STATE_DELIVERED_UNSEEN, STATE_DELIVERED_UNSEEN_ACKNOWLEDGED);
+        nextUnknownOutState.put(STATE_DELIVERED_SEEN, STATE_DELIVERED_SEEN_ACKNOWLEDGED);
+        nextUnknownOutState.put(STATE_FAILED, STATE_FAILED_ACKNOWLEDGED);
+        nextUnknownOutState.put(STATE_ABORTED, STATE_ABORTED_ACKNOWLEDGED);
+        nextUnknownOutState.put(STATE_REJECTED, STATE_REJECTED_ACKNOWLEDGED);
+
+        // transitions into silent states in case of unknown IN delivery updates on the client side
+        // there are no such states
+
+        // transitions into silent attachment tates in case of unknown OUT delivery updates on the client side
+        nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_NEW, ATTACHMENT_STATE_UPLOAD_ABORTED);
+        nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_UPLOADING, ATTACHMENT_STATE_UPLOAD_ABORTED);
+        nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_UPLOAD_PAUSED, ATTACHMENT_STATE_UPLOAD_ABORTED);
+        nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_RECEIVED, ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
+        nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_FAILED, ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED);
+        nextUnknownOutAttachmentState.put(ATTACHMENT_STATE_DOWNLOAD_ABORTED, ATTACHMENT_STATE_DOWNLOAD_ABORTED_ACKNOWLEDGED);
+
+        // transitions into silent attachment tates in case of unknown IN delivery updates on the client side
+        nextUnknownInAttachmentState.put(ATTACHMENT_STATE_NEW, ATTACHMENT_STATE_DOWNLOAD_ABORTED);
+        nextUnknownInAttachmentState.put(ATTACHMENT_STATE_UPLOADING, ATTACHMENT_STATE_DOWNLOAD_ABORTED);
+        nextUnknownInAttachmentState.put(ATTACHMENT_STATE_UPLOAD_PAUSED, ATTACHMENT_STATE_DOWNLOAD_ABORTED);
+        nextUnknownInAttachmentState.put(ATTACHMENT_STATE_UPLOADED, ATTACHMENT_STATE_DOWNLOAD_ABORTED);
+        nextUnknownInAttachmentState.put(ATTACHMENT_STATE_UPLOAD_FAILED, ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED);
+        nextUnknownInAttachmentState.put(ATTACHMENT_STATE_UPLOAD_ABORTED, ATTACHMENT_STATE_UPLOAD_ABORTED_ACKNOWLEDGED);
+
         // nextAttachmentState tree init
         nextAttachmentState.put(ATTACHMENT_STATE_NONE, new HashSet<String>());
         nextAttachmentState.put(ATTACHMENT_STATE_NEW, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_UPLOADING})));
-        nextAttachmentState.put(ATTACHMENT_STATE_UPLOADING, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_UPLOADED, ATTACHMENT_STATE_UPLOAD_PAUSED, ATTACHMENT_STATE_UPLOAD_FAILED})));
+        nextAttachmentState.put(ATTACHMENT_STATE_UPLOADING, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_UPLOADED, ATTACHMENT_STATE_UPLOAD_PAUSED, ATTACHMENT_STATE_UPLOAD_FAILED,ATTACHMENT_STATE_UPLOAD_ABORTED})));
         nextAttachmentState.put(ATTACHMENT_STATE_UPLOAD_PAUSED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_UPLOADING})));
         nextAttachmentState.put(ATTACHMENT_STATE_UPLOADED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_RECEIVED, ATTACHMENT_STATE_DOWNLOAD_FAILED, ATTACHMENT_STATE_DOWNLOAD_ABORTED})));
         nextAttachmentState.put(ATTACHMENT_STATE_RECEIVED, new HashSet<String>(Arrays.asList(new String[]{ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED})));
@@ -281,7 +335,7 @@ public class TalkDelivery {
         return statePathExists(nextState, stateA, stateB, new HashSet<String>());
     }
 
-    static boolean attachentStatePathExists(final String stateA, final String stateB) {
+    static boolean attachmentStatePathExists(final String stateA, final String stateB) {
         return statePathExists(nextAttachmentState, stateA, stateB, new HashSet<String>());
     }
 
@@ -293,23 +347,20 @@ public class TalkDelivery {
             // we have already been here
             return false;
         }
-        // TODO: use containsKey() for this?
+
         final Set<String> aFollows = graph.get(stateA);
         if (aFollows == null) {
             throw new RuntimeException("state A ='" + stateA + "' does not exist");
         }
 
-        // TODO: use containsKey() for this?
-        final Set<String> bFollows = graph.get(stateB);
-        if (bFollows == null) {
+        if (!graph.containsKey(stateB)) {
             throw new RuntimeException("state B ='" + stateB + "' does not exist");
         }
 
         if (aFollows.contains(stateB)) {
             return true;
         }
-        // TODO: HashSet<String> downTrack = new HashSet<String>(track);
-        HashSet downTrack = new HashSet(track);
+        Set<String> downTrack = new HashSet<String>(track);
         downTrack.add(stateA);
         for (String next : aFollows) {
             if (statePathExists(graph, next, stateB, downTrack)) {
@@ -319,6 +370,22 @@ public class TalkDelivery {
         return false;
     }
 
+    public static String findNextUnknownState(final Map<String, String> map, String state) {
+        String next = map.get(state);
+        if (next == null) {
+            return state;
+        } else {
+            return next;
+        }
+    }
+
+    @JsonIgnore
+    public boolean isInState(String theState) {
+        if (!ALL_STATES_SET.contains(theState)) {
+            throw new RuntimeException("illegal state:"+theState);
+        }
+        return theState.equals(state);
+    }
 
     @JsonIgnore
     public boolean isFinished() {
@@ -327,7 +394,42 @@ public class TalkDelivery {
 
     @JsonIgnore
     public boolean isFailure() {
+        return isFailureState(state);
+    }
+
+    @JsonIgnore
+    public boolean isDelivered() {
+        return isDeliveredState(state);
+    }
+
+    @JsonIgnore
+    public boolean isSeen() {
+        return isSeenState(state);
+    }
+
+    @JsonIgnore
+    public boolean isPrivate() {
+        return isPrivateState(state);
+    }
+
+    @JsonIgnore
+    public boolean isUnseen() {
+        return isUnseenState(state);
+    }
+
+    @JsonIgnore
+    public boolean isFailed() {
         return isFailedState(state);
+    }
+
+    @JsonIgnore
+    public boolean isAborted() {
+        return isAbortedState(state);
+    }
+
+    @JsonIgnore
+    public boolean isRejected() {
+        return isRejectedState(state);
     }
 
     public static boolean isValidState(String state) {
@@ -338,8 +440,36 @@ public class TalkDelivery {
         return FINAL_STATES_SET.contains(state);
     }
 
-    public static boolean isFailedState(String state) {
+    public static boolean isFailureState(String state) {
         return FAILED_STATES_SET.contains(state);
+    }
+
+    public static boolean isDeliveredState(String state) {
+        return DELIVERED_STATES_SET.contains(state);
+    }
+
+    public static boolean isSeenState(String state) {
+        return STATE_DELIVERED_SEEN.equals(state) || STATE_DELIVERED_SEEN_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isPrivateState(String state) {
+        return STATE_DELIVERED_PRIVATE.equals(state) || STATE_DELIVERED_PRIVATE_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isUnseenState(String state) {
+        return STATE_DELIVERED_UNSEEN.equals(state) || STATE_DELIVERED_UNSEEN_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isFailedState(String state) {
+        return STATE_FAILED.equals(state) || STATE_FAILED_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isAbortedState(String state) {
+        return STATE_ABORTED.equals(state) || STATE_ABORTED_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isRejectedState(String state) {
+        return STATE_REJECTED.equals(state) || STATE_REJECTED_ACKNOWLEDGED.equals(state);
     }
 
     public static boolean nextStateAllowed(String currentState, String nextState) {
@@ -363,6 +493,20 @@ public class TalkDelivery {
         return nextStateAllowed(this.state, nextState);
     }
 
+    @JsonIgnore
+    public boolean isAttachmentFailure() {
+        return isFailedAttachmentState(attachmentState);
+    }
+
+    @JsonIgnore
+    public boolean isAttachmentDelivered() {
+        return isDeliveredAttachmentState(attachmentState);
+    }
+
+    @JsonIgnore
+    public boolean isAttachmentPending() {
+        return isPendingAttachmentState(attachmentState);
+    }
     public static boolean isValidAttachmentState(String state) {
         return ALL_ATTACHMENT_STATES_SET.contains(state);
     }
@@ -371,6 +515,17 @@ public class TalkDelivery {
         return FINAL_ATTACHMENT_STATES_SET.contains(state);
     }
 
+    public static boolean isFailedAttachmentState(String state) {
+        return FAILED_ATTACHMENT_STATES_SET.contains(state);
+    }
+
+    public static boolean isDeliveredAttachmentState(String state) {
+        return ATTACHMENT_STATE_RECEIVED.equals(state) || ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED.equals(state);
+    }
+
+    public static boolean isPendingAttachmentState(String state) {
+        return PENDING_ATTACHMENT_STATES_SET.contains(state);
+    }
 
     // returns true if nextState is a valid state and there are one or more state transition that lead form the current state to nextSate
     @JsonIgnore
@@ -387,7 +542,7 @@ public class TalkDelivery {
         if (isFinalAttachmentState(attachmentState)) {
             return false;
         }
-        return attachentStatePathExists(attachmentState, nextState);
+        return attachmentStatePathExists(attachmentState, nextState);
     }
 
     @JsonIgnore

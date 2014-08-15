@@ -16,21 +16,18 @@ import com.hoccer.xo.android.fragment.GroupProfileFragment;
 import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
-import java.sql.SQLException;
-
 public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
-    public static final String EXTRA_CLIENT_CONTACT_ID = "com.hoccer.xo.android.intent.extra.CLIENT_CONTACT_ID";
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
     ActionBar mActionBar;
 
     MessagingFragment mMessagingFragment;
 
-    int mContactId;
     private IContentObject mClipboardAttachment;
     private ContactIdReceiver mCheckIdReceiver;
 
@@ -55,23 +52,26 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         enableUpNavigation();
 
         // register receiver for notification check
-        IntentFilter filter = new IntentFilter("com.hoccer.xo.android.activity.MessagingActivity$ContactIdReceiver");
-        filter.addAction("CHECK_ID_IN_CONVERSATION");
+        IntentFilter filter = new IntentFilter(ContactIdReceiver.class.getName());
+        filter.addAction(IntentHelper.ACTION_CHECK_ID_IN_CONVERSATION);
         mCheckIdReceiver = new ContactIdReceiver();
         registerReceiver(mCheckIdReceiver, filter);
 
         // handle converse intent
         Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
-            mContactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
-            mCheckIdReceiver.setId(mContactId);
-            if (mContactId == -1) {
+        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+            mCheckIdReceiver.setId(contactId);
+
+            if (contactId == -1) {
                 LOG.error("invalid contact id");
             } else {
-                showMessageFragment();
+                showMessageFragment(contactId);
             }
         } else if (intent != null && intent.hasExtra(EXTRA_NEARBY_ARCHIVE)) {
             showNearbyArchiveFragment();
+        } else {
+            LOG.error("Neither contact ID nor nearby-archive specified");
         }
     }
 
@@ -82,13 +82,11 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         Intent intent = getIntent();
 
         // handle converse intent
-        if (intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
-            int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
+        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
             mCheckIdReceiver.setId(contactId);
             if (contactId == -1) {
                 LOG.error("invalid contact id");
-            } else {
-                mContactId = contactId;
             }
         }
     }
@@ -172,9 +170,9 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     }
 
     @Override
-    public void showMessageFragment() {
+    public void showMessageFragment(int contactId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, mContactId);
+        bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, contactId);
 
         mMessagingFragment = new MessagingFragment();
         mMessagingFragment.setArguments(bundle);
@@ -185,9 +183,9 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     }
 
     @Override
-    public void showSingleProfileFragment() {
+    public void showSingleProfileFragment(int clientContactId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, mContactId);
+        bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, clientContactId);
 
         SingleProfileFragment singleProfileFragment = new SingleProfileFragment();
         singleProfileFragment.setArguments(bundle);
@@ -199,9 +197,9 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     }
 
     @Override
-    public void showGroupProfileFragment() {
+    public void showGroupProfileFragment(int grouContactId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, mContactId);
+        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, grouContactId);
 
         GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
         groupProfileFragment.setArguments(bundle);
@@ -229,8 +227,8 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         @Override
         public void onReceive(Context arg0, Intent arg1) {
             Intent intent = new Intent();
-            intent.setAction("CONTACT_ID_IN_CONVERSATION");
-            intent.putExtra("id", mContactId);
+            intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
+            intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContactId);
             sendBroadcast(intent);
         }
 
