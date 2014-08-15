@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import com.hoccer.talk.client.IXoDownloadListener;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.*;
-import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.AudioAttachmentView;
 import com.mobeta.android.dslv.DragSortListView;
@@ -22,7 +22,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
-    private List<TalkClientDownload> mItems = new ArrayList<TalkClientDownload>();
+    private List<XoTransfer> mItems = new ArrayList<XoTransfer>();
 
     private String mMediaType = null;
     private TalkClientContact mContact = null;
@@ -50,13 +50,13 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     @Override
-    public TalkClientDownload getItem(int position) {
+    public XoTransfer getItem(int position) {
         return mItems.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return getItem(position).getClientDownloadId();
+        return getItem(position).getTransferId();
     }
 
     @Override
@@ -97,7 +97,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     @Override
     public void drop(int from, int to) {
         if (from != to) {
-            TalkClientDownload item = mItems.get(from);
+            XoTransfer item = mItems.get(from);
             mItems.remove(from);
             mItems.add(to, item);
 
@@ -162,8 +162,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         mSelectedItemIds.clear();
     }
 
-    public List<TalkClientDownload> getSelectedItems() {
-        List<TalkClientDownload> result = new ArrayList<TalkClientDownload>();
+    public List<XoTransfer> getSelectedItems() {
+        List<XoTransfer> result = new ArrayList<XoTransfer>();
         for(int itemId : mSelectedItemIds) {
             result.add(getItemFromId(itemId));
         }
@@ -172,10 +172,10 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     // Returns the item with the given id or null if not found
-    public TalkClientDownload getItemFromId(int itemId) {
-        TalkClientDownload result = null;
-        for(TalkClientDownload item : mItems) {
-            if(item.getClientDownloadId() == itemId) {
+    public XoTransfer getItemFromId(int itemId) {
+        XoTransfer result = null;
+        for(XoTransfer item : mItems) {
+            if(item.getTransferId() == itemId) {
                 result = item;
                 break;
             }
@@ -214,15 +214,15 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         try {
             if (mMediaType != null) {
                 if (mContact != null) {
-                    mItems = XoApplication.getXoClient().getDatabase().findClientDownloadByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
+                    mItems = new ArrayList<XoTransfer>(XoApplication.getXoClient().getDatabase().findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
                 } else {
-                    mItems = XoApplication.getXoClient().getDatabase().findClientDownloadByMediaType(mMediaType);
+                    mItems = XoApplication.getXoClient().getDatabase().findTransfersByMediaType(mMediaType);
                 }
             } else {
                 if (mContact != null) {
-                    mItems = XoApplication.getXoClient().getDatabase().findClientDownloadByContactId(mContact.getClientContactId());
+                    mItems = new ArrayList<XoTransfer>(XoApplication.getXoClient().getDatabase().findClientDownloadsByContactId(mContact.getClientContactId()));
                 } else {
-                    mItems = XoApplication.getXoClient().getDatabase().findAllClientDownloads();
+                    mItems = XoApplication.getXoClient().getDatabase().findAllTransfers();
                 }
             }
         } catch (SQLException e) {

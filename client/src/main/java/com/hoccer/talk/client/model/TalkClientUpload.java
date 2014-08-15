@@ -568,6 +568,16 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     /**********************************************************************************************/
     /********************************* XoTransfer implementation **********************************/
     /**********************************************************************************************/
+    @Override
+    public int getTransferId() {
+        return -1 * getClientUploadId();
+    }
+
+    @Override
+    public int getUploadOrDownloadId() {
+        return getClientUploadId();
+    }
+
     /**
      * ******************************************************************************************
      */

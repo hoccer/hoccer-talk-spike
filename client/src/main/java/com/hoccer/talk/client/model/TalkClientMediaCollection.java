@@ -1,6 +1,7 @@
 package com.hoccer.talk.client.model;
 
 import com.hoccer.talk.client.IXoMediaCollectionDatabase;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.util.WeakListenerArray;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.field.DatabaseField;
@@ -18,7 +19,7 @@ import java.util.NoSuchElementException;
  * Encapsulates a collection of media items with a specific order. The data is kept in sync with the database.
  */
 @DatabaseTable(tableName = "mediaCollection")
-public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
+public class TalkClientMediaCollection implements Iterable<XoTransfer> {
 
     // collection update/change listener
     public interface Listener {
@@ -26,9 +27,9 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
         void onItemOrderChanged(TalkClientMediaCollection collection, int fromIndex, int toIndex);
 
-        void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved);
+        void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, XoTransfer itemRemoved);
 
-        void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded);
+        void onItemAdded(TalkClientMediaCollection collection, int indexAdded, XoTransfer itemAdded);
 
         void onCollectionCleared(TalkClientMediaCollection collection);
     }
@@ -43,7 +44,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
 
     private IXoMediaCollectionDatabase mDatabase;
 
-    private List<TalkClientDownload> mItemList = new ArrayList<TalkClientDownload>();
+    private List<XoTransfer> mItemList = new ArrayList<XoTransfer>();
 
     WeakListenerArray<Listener> mListenerArray = new WeakListenerArray<Listener>();
 
@@ -81,12 +82,12 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     }
 
     // Appends the given item to the collection
-    public void addItem(TalkClientDownload item) {
+    public void addItem(XoTransfer item) {
         addItem(mItemList.size(), item);
     }
 
     // Inserts the given item into the collection
-    public void addItem(int index, TalkClientDownload item) {
+    public void addItem(int index, XoTransfer item) {
         if(hasItem(item)) {
             return;
         }
@@ -100,17 +101,17 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     }
 
     // Returns if a given item is contained in this collection or not
-    public boolean hasItem(TalkClientDownload item) {
+    public boolean hasItem(XoTransfer item) {
         return mItemList.contains(item);
     }
 
     // Returns the index of the item if it is contained in this collection or -1
-    public int indexOf(TalkClientDownload item) {
+    public int indexOf(XoTransfer item) {
         return mItemList.indexOf(item);
     }
 
     // Removes the given item from the collection
-    public void removeItem(TalkClientDownload item) {
+    public void removeItem(XoTransfer item) {
         int index = mItemList.indexOf(item);
         if (index >= 0) {
             removeItem(index);
@@ -120,7 +121,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     // Removes the item at the given index from the collection
     public void removeItem(int index) {
         if (removeRelation(index)) {
-            TalkClientDownload item = mItemList.get(index);
+            XoTransfer item = mItemList.get(index);
             mItemList.remove(index);
             for (Listener listener : mListenerArray) {
                 listener.onItemRemoved(this, index, item);
@@ -144,7 +145,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
         }
 
         if (reorderRelation(from, to)) {
-            TalkClientDownload item = mItemList.get(from);
+            XoTransfer item = mItemList.get(from);
             mItemList.remove(from);
             mItemList.add(to, item);
             for (Listener listener : mListenerArray) {
@@ -159,15 +160,15 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     }
 
     // Returns the item at the given index
-    public TalkClientDownload getItem(int index) {
+    public XoTransfer getItem(int index) {
         return mItemList.get(index);
     }
 
     // Returns the item with the given id or null if not found
-    public TalkClientDownload getItemFromId(int itemId) {
-        TalkClientDownload result = null;
-        for(TalkClientDownload item : mItemList) {
-            if(item.getClientDownloadId() == itemId) {
+    public XoTransfer getItemFromId(int itemId) {
+        XoTransfer result = null;
+        for(XoTransfer item : mItemList) {
+            if(item.getTransferId() == itemId) {
                 result = item;
                 break;
             }
@@ -222,8 +223,8 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
     }
 
     @Override
-    public Iterator<TalkClientDownload> iterator() {
-        return new Iterator<TalkClientDownload>() {
+    public Iterator<XoTransfer> iterator() {
+        return new Iterator<XoTransfer>() {
             private int mCurrentIndex = 0;
 
             @Override
@@ -232,7 +233,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
             }
 
             @Override
-            public TalkClientDownload next() {
+            public XoTransfer next() {
                 if (hasNext()) {
                     return mItemList.get(mCurrentIndex++);
                 } else {
@@ -251,8 +252,8 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
         };
     }
 
-    private List<TalkClientDownload> findMediaCollectionItemsOrderedByIndex() {
-        List<TalkClientDownload> items = new ArrayList<TalkClientDownload>();
+    private List<XoTransfer> findMediaCollectionItemsOrderedByIndex() {
+        List<XoTransfer> items = new ArrayList<XoTransfer>();
 
         try {
             List<TalkClientMediaCollectionRelation> relations = mDatabase.getMediaCollectionRelationDao().queryBuilder()
@@ -262,7 +263,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
                     .query();
 
             for (TalkClientMediaCollectionRelation relation : relations) {
-                items.add(relation.getItem());
+                items.add(relation.getTransferItem());
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -306,7 +307,7 @@ public class TalkClientMediaCollection implements Iterable<TalkClientDownload> {
         return true;
     }
 
-    private boolean createRelation(TalkClientDownload item, int index) {
+    private boolean createRelation(XoTransfer item, int index) {
         try {
             // increment index of all items with same or higher index
             Dao<TalkClientMediaCollectionRelation, Integer> relationDao = mDatabase.getMediaCollectionRelationDao();

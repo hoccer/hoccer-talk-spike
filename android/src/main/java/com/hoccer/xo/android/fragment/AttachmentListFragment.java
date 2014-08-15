@@ -10,6 +10,7 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
@@ -175,7 +176,7 @@ public class AttachmentListFragment extends ListFragment {
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = mDatabase.findClientContactById(contactId);
-                            UploadHelper.sendDownloadsToContact(mAttachmentAdapter.getSelectedItems(), contact);
+                            UploadHelper.sendTransfersToContact(mAttachmentAdapter.getSelectedItems(), contact);
                         } catch (SQLException e) {
                             LOG.error(e.getMessage(), e);
                         } catch (FileNotFoundException e) {
@@ -284,12 +285,12 @@ public class AttachmentListFragment extends ListFragment {
     }
 
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) {
-        List<TalkClientDownload> selectedItems = mAttachmentAdapter.getSelectedItems();
+        List<XoTransfer> selectedItems = mAttachmentAdapter.getSelectedItems();
         if(selectedItems.size() > 0) {
             try {
                 TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
                 List<String> addedFilenames = new ArrayList<String>();
-                for (TalkClientDownload item : selectedItems) {
+                for (XoTransfer item : selectedItems) {
                     mediaCollection.addItem(item);
                     addedFilenames.add(item.getFileName());
                 }
@@ -306,18 +307,18 @@ public class AttachmentListFragment extends ListFragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Object selectedItem = getListAdapter().getItem(position);
 
-            if (selectedItem instanceof TalkClientDownload) {
-                TalkClientDownload download = (TalkClientDownload)selectedItem;
+            if (selectedItem instanceof XoTransfer) {
+                XoTransfer transfer = (XoTransfer)selectedItem;
                 if (mInSearchMode) {
                     position = 0;
-                    mMediaPlayerService.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), download));
+                    mMediaPlayerService.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), transfer));
                 } else {
                     mMediaPlayerService.setPlaylist(new UserPlaylist(mDatabase, mAttachmentAdapter.getContact()));
                 }
 
-                if (isPlaying(download)) {
+                if (isPlaying(transfer)) {
                     mMediaPlayerService.setCurrentIndex(position);
-                } else if (isPaused(download)) {
+                } else if (isPaused(transfer)) {
                     mMediaPlayerService.setCurrentIndex(position);
                     mMediaPlayerService.play();
                 } else {
@@ -432,10 +433,10 @@ public class AttachmentListFragment extends ListFragment {
     }
 
     private void deleteSelectedAttachments() {
-        List<TalkClientDownload> selectedObjects = mAttachmentAdapter.getSelectedItems();
-        for(TalkClientDownload item : selectedObjects) {
+        List<XoTransfer> selectedObjects = mAttachmentAdapter.getSelectedItems();
+        for(XoTransfer item : selectedObjects) {
             try {
-                XoApplication.getXoClient().getDatabase().deleteClientDownloadAndMessage(item);
+                XoApplication.getXoClient().getDatabase().deleteTransferAndMessage(item);
             } catch (SQLException e) {
                 LOG.error(e);
             }

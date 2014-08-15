@@ -290,7 +290,7 @@ public class MediaPlaylistTest {
 
         // delete download of user1
         try {
-            mDatabase.deleteClientDownload(playlist1.getItem(1));
+            mDatabase.deleteTransferAndMessage(playlist1.getItem(1));
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -309,12 +309,13 @@ public class MediaPlaylistTest {
     public void testSingleItemPlaylist() {
         LOG.info("testSingleItemPlaylist");
 
-        TalkClientDownload item = new TalkClientDownload();
-        TalkClientDownload other_item = new TalkClientDownload();
+        TalkClientContact user = new TalkClientContact(TalkClientContact.TYPE_CLIENT);
+        TalkClientDownload item = createAudioDownloadWithUser(user);
+        TalkClientDownload otherItem = createAudioDownloadWithUser(user);
 
         try {
             mDatabase.saveClientDownload(item);
-            mDatabase.saveClientDownload(other_item);
+            mDatabase.saveClientDownload(otherItem);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -325,7 +326,7 @@ public class MediaPlaylistTest {
 
         assertEquals(1, playlist.size());
 
-        TalkClientDownload expectedItem = item;
+        XoTransfer expectedItem = item;
         IContentObject actualItem = playlist.getItem(0);
         assertTrue(expectedItem.equals(actualItem));
 
@@ -340,11 +341,11 @@ public class MediaPlaylistTest {
 
         // test indexOf
         assertEquals(0, playlist.indexOf(item));
-        assertEquals(-1, playlist.indexOf(other_item));
+        assertEquals(-1, playlist.indexOf(otherItem));
 
         // test hasItem
         assertTrue(playlist.hasItem(item));
-        assertFalse(playlist.hasItem(other_item));
+        assertFalse(playlist.hasItem(otherItem));
 
         // set listener
         final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
@@ -378,7 +379,7 @@ public class MediaPlaylistTest {
 
         // remove other item (should not bother playlist)
         try {
-            mDatabase.deleteClientDownload(other_item);
+            mDatabase.deleteTransferAndMessage(otherItem);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -391,7 +392,7 @@ public class MediaPlaylistTest {
 
         // remove item
         try {
-            mDatabase.deleteClientDownload(item);
+            mDatabase.deleteTransferAndMessage(item);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();

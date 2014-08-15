@@ -1,6 +1,6 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.content.IContentObject;
 
@@ -25,12 +25,12 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
         }
 
         @Override
-        public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
+        public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, XoTransfer itemRemoved) {
             invokeItemRemoved(itemRemoved);
         }
 
         @Override
-        public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
+        public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, XoTransfer itemAdded) {
             invokeItemAdded(itemAdded);
         }
 
@@ -61,9 +61,9 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
 
     @Override
     public boolean hasItem(IContentObject item) {
-        TalkClientDownload download = (TalkClientDownload)item;
-        if(download != null) {
-            return mCollection.hasItem(download);
+        XoTransfer transfer = (XoTransfer)item;
+        if(transfer != null) {
+            return mCollection.hasItem(transfer);
         } else {
             return false;
         }
@@ -71,9 +71,9 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
 
     @Override
     public int indexOf(IContentObject item) {
-        TalkClientDownload download = (TalkClientDownload)item;
-        if(download != null) {
-            return mCollection.indexOf(download);
+        XoTransfer transfer = (XoTransfer)item;
+        if(transfer != null) {
+            return mCollection.indexOf(transfer);
         } else {
             return -1;
         }
@@ -82,7 +82,7 @@ public class MediaCollectionPlaylist extends MediaPlaylist {
     @Override
     public Iterator<IContentObject> iterator() {
         return new Iterator<IContentObject>() {
-            private Iterator<TalkClientDownload> mIterator = mCollection.iterator();
+            private Iterator<XoTransfer> mIterator = mCollection.iterator();
 
             @Override
             public boolean hasNext() {
