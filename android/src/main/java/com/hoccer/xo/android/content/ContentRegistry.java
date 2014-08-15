@@ -199,7 +199,7 @@ public class ContentRegistry {
      */
     public ContentSelection selectAttachment(final Activity activity, final int requestCode) {
         // create handle representing this selection attempt
-        final ContentSelection cs = new ContentSelection(activity);
+        final ContentSelection contentSelection = new ContentSelection(fragment.getActivity());
 
         // collect selection intents and associated information
         final List<Map<String, Object>> options = new ArrayList<Map<String, Object>>();
@@ -253,8 +253,8 @@ public class ContentRegistry {
             @Override
             public void onClick(DialogInterface dialog, int index) {
                 Map<String, Object> sel = options.get(index);
-                IContentSelector selector = (IContentSelector)sel.get(KEY_SELECTOR);
-                cs.setSelector(selector);
+                IContentSelector selector = (IContentSelector) sel.get(KEY_SELECTOR);
+                contentSelection.setSelector(selector);
                 Intent intent = (Intent) sel.get(KEY_INTENT);
 
                 // handle ClipboardSelector differently
@@ -276,7 +276,7 @@ public class ContentRegistry {
         dialog.show();
 
         // return the selection handle
-        return cs;
+        return contentSelection;
     }
 
     /**
