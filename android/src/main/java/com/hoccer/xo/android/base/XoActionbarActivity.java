@@ -1,6 +1,6 @@
 package com.hoccer.xo.android.base;
 
-import android.content.*;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,12 +18,13 @@ import com.hoccer.xo.release.R;
 public abstract class XoActionbarActivity extends XoActivity {
 
     private Menu mMenu;
-    private MediaPlayerServiceConnector mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(this);
+    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(this);
         mMediaPlayerServiceConnector.connect(
                 IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
@@ -31,14 +32,17 @@ public abstract class XoActionbarActivity extends XoActivity {
                     public void onConnected(MediaPlayerService service) {
                         updateActionBarIcons();
                     }
+
                     @Override
                     public void onDisconnected() {
                     }
+
                     @Override
                     public void onAction(String action, MediaPlayerService service) {
                         updateActionBarIcons();
                     }
-                });
+                }
+        );
     }
 
     @Override
@@ -68,7 +72,7 @@ public abstract class XoActionbarActivity extends XoActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void openFullScreenPlayer(){
+    private void openFullScreenPlayer() {
         Intent resultIntent = new Intent(this, FullscreenPlayerActivity.class);
         startActivity(resultIntent);
     }
