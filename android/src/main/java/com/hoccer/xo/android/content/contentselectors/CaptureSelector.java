@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -18,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -84,6 +87,13 @@ public class CaptureSelector implements IContentSelector {
 
         File file = new File(mFileUri.getPath());
 
+        ExifInterface exif = null;
+        try {
+            exif = new ExifInterface(file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(file.getAbsolutePath(), options);
@@ -91,13 +101,21 @@ public class CaptureSelector implements IContentSelector {
         int imageWidth = options.outWidth;
         String imageType = options.outMimeType;
 
-        Uri contentUri;
-        String uriString = null;
-        try {
-            uriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), mFileUri.getPath(), file.getName(), file.getName());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        options.inJustDecodeBounds = false;
+        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+
+        int exifOrientation = Integer.parseInt(exif.getAttribute(ExifInterface.TAG_ORIENTATION));
+        LOG.error("#foo " + exifOrientation);
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+            Matrix matrix = new Matrix();
+            matrix.postRotate(90);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                    bitmap.getWidth(), bitmap.getHeight(),
+                    matrix, true);
         }
+        Uri contentUri;
+        String uriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, file.getName(), file.getName());
+
         contentUri = Uri.parse(uriString);
 
         Cursor cursor = context.getContentResolver().query(
