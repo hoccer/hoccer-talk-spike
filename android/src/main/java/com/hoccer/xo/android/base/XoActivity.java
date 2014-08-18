@@ -789,57 +789,6 @@ public abstract class XoActivity extends FragmentActivity {
         });
     }
 
-    public void composeInviteSms(String token, String recipients) {
-        LOG.debug("composeInviteSms(" + token + ")");
-
-        try {
-            TalkClientContact self = mDatabase.findSelfContact(false);
-
-            String message = String
-                    .format(getString(R.string.sms_invitation_text), getXoClient().getConfiguration().getUrlScheme(), token, self.getName());
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //At least KitKat
-                String defaultSmsPackageName = Telephony.Sms
-                        .getDefaultSmsPackage(this); //Need to change the build to API 19
-
-                Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
-                sendIntent.setData(Uri.parse("smsto:" + recipients));
-                sendIntent.setType("text/plain");
-                sendIntent.putExtra(Intent.EXTRA_TEXT, message);
-
-                if (defaultSmsPackageName != null) {
-                    sendIntent.setPackage(defaultSmsPackageName);
-                }
-                startActivity(sendIntent);
-            } else {
-                Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse("smsto:" + recipients));
-                intent.putExtra("sms_body", message);
-
-                startActivity(intent);
-            }
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
-    }
-
-    public void composeInviteEmail(String token, String recipients) {
-        LOG.debug("composeInviteEmail(" + token + ")");
-
-        try {
-            TalkClientContact self = mDatabase.findSelfContact(false);
-            String message = String
-                    .format(getString(R.string.email_invitation_text), getXoClient().getConfiguration().getUrlScheme(), token, self.getName());
-            Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
-            email.putExtra(Intent.EXTRA_SUBJECT,"Join me at Hoccer!");
-            email.putExtra(Intent.EXTRA_BCC, recipients.split(";"));
-            email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));
-            startActivity(Intent.createChooser(email, "Choose Email Client"));
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
-    }
-
     public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
     }
 
