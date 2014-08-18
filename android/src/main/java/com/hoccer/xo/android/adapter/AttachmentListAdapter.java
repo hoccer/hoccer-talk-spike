@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import com.hoccer.talk.client.IXoDownloadListener;
+import com.hoccer.talk.client.IXoUploadListener;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.xo.android.XoApplication;
@@ -18,7 +20,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AttachmentListAdapter extends BaseAdapter implements DragSortListView.DropListener, IXoDownloadListener {
+public class AttachmentListAdapter extends BaseAdapter implements DragSortListView.DropListener, IXoUploadListener, IXoDownloadListener {
 
     protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
 
@@ -188,24 +190,51 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     }
 
     @Override
+    public void onUploadCreated(TalkClientUpload upload) {
+        addItem(upload);
+    }
+
+    @Override
+    public void onUploadUpdated(TalkClientUpload upload) {
+        addItem(upload);
+    }
+
+    @Override
+    public void onUploadDeleted(TalkClientUpload upload) {
+        removeItem(upload);
+    }
+
+    @Override
     public void onDownloadCreated(TalkClientDownload download) {
-        if(shouldItemBeAdded(download)) {
-            updateItems();
+        // do nothing if the download is incomplete
+        if(download.getState() == TalkClientDownload.State.COMPLETE) {
+            addItem(download);
         }
     }
 
     @Override
     public void onDownloadUpdated(TalkClientDownload download) {
-        if(shouldItemBeAdded(download)) {
-            updateItems();
+        // do nothing if the download is incomplete
+        if(download.getState() == TalkClientDownload.State.COMPLETE) {
+            addItem(download);
         }
     }
 
     @Override
     public void onDownloadDeleted(TalkClientDownload download) {
-        if(mItems.contains(download)) {
-            mItems.remove(download);
-            deselectItem(download.getClientDownloadId());
+        removeItem(download);
+    }
+
+    private void addItem(XoTransfer item) {
+        if(shouldItemBeAdded(item)) {
+            updateItems();
+        }
+    }
+
+    private void removeItem(XoTransfer item) {
+        if(mItems.contains(item)) {
+            mItems.remove(item);
+            deselectItem(item.getTransferId());
             refreshView();
         }
     }
@@ -232,21 +261,25 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         refreshView();
     }
 
-    private boolean shouldItemBeAdded(TalkClientDownload download) {
-        // do nothing if the download is incomplete or already contained
-        if(download.getState() != TalkClientDownload.State.COMPLETE || mItems.contains(download)) {
+    private boolean shouldItemBeAdded(XoTransfer transfer) {
+        // check if item is already in the list
+        if (mItems.contains(transfer)) {
             return false;
         }
 
         // check if mediaType matches
-        if(mMediaType != null && !mMediaType.equals(download.getMediaType())) {
+        if(mMediaType != null && !mMediaType.equals(transfer.getContentMediaType())) {
             return false;
         }
 
         // check if contact matches
         if(mContact != null) {
             try {
-                TalkClientMessage message = XoApplication.getXoClient().getDatabase().findClientMessageByTalkClientDownloadId(download.getClientDownloadId());
+                XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+                TalkClientMessage message = transfer.isUpload() ?
+                        database.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
+                        database.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
+
                 if(message == null || !mContact.equals(message.getConversationContact())) {
                     return false;
                 }

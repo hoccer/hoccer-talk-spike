@@ -615,7 +615,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public TalkClientMessage findClientMessageByTalkClientUploadId(int attachmentUploadId) throws SQLException {
-        return mClientMessages.queryForEq("attachmentUpload_id", attachmentUploadId).get(0);
+        List<TalkClientMessage> messages = mClientMessages.queryForEq("attachmentUpload_id", attachmentUploadId);
+        int numberOfMessages = messages.size();
+
+        if (numberOfMessages == 0) {
+            return null;
+        } else {
+            return messages.get(0);
+        }
     }
 
     public List<XoTransfer> findAllTransfers() throws SQLException {
