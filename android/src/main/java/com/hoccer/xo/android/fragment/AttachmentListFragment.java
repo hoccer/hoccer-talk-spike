@@ -12,7 +12,6 @@ import android.widget.*;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
@@ -29,7 +28,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
-import com.hoccer.xo.android.util.UploadHelper;
+import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -176,7 +175,7 @@ public class AttachmentListFragment extends ListFragment {
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = mDatabase.findClientContactById(contactId);
-                            UploadHelper.sendTransfersToContact(mAttachmentAdapter.getSelectedItems(), contact);
+                            ContactOperations.sendTransfersToContact(mAttachmentAdapter.getSelectedItems(), contact);
                         } catch (SQLException e) {
                             LOG.error(e.getMessage(), e);
                         } catch (FileNotFoundException e) {

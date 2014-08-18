@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.activity.AddressBookActivity;
+import com.hoccer.xo.android.activity.DeviceContactsSelectionActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.release.R;
 
@@ -180,16 +180,16 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         }
         if (v == mTokenSendSms) {
             LOG.debug("onClick(smsSend)");
-            Intent addressBook = new Intent(getActivity(), AddressBookActivity.class);
-            addressBook.putExtra("SMS", true);
-            addressBook.putExtra("TOKEN", mTokenText.getText().toString());
+            Intent addressBook = new Intent(getActivity(), DeviceContactsSelectionActivity.class);
+            addressBook.putExtra(DeviceContactsSelectionFragment.EXTRA_IS_SMS_INVITATION, true);
+            addressBook.putExtra(DeviceContactsSelectionFragment.EXTRA_TOKEN, mTokenText.getText().toString());
             getActivity().startActivity(addressBook);
         }
         if (v == mTokenSendEmail) {
             LOG.debug("onClick(smsSend)");
-            Intent addressBook = new Intent(getActivity(), AddressBookActivity.class);
-            addressBook.putExtra("SMS", false);
-            addressBook.putExtra("TOKEN", mTokenText.getText().toString());
+            Intent addressBook = new Intent(getActivity(), DeviceContactsSelectionActivity.class);
+            addressBook.putExtra(DeviceContactsSelectionFragment.EXTRA_IS_SMS_INVITATION, false);
+            addressBook.putExtra(DeviceContactsSelectionFragment.EXTRA_TOKEN, mTokenText.getText().toString());
             getActivity().startActivity(addressBook);
         }
     }
