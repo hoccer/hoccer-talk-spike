@@ -103,7 +103,7 @@ public class CaptureSelector implements IContentSelector {
         Cursor cursor = context.getContentResolver().query(
                 contentUri, filePathColumn, null, null, null);
         cursor.moveToFirst();
-        int dataIndex = cursor.getColumnIndex(filePathColumn[1]);
+        int dataIndex = cursor.getColumnIndex(filePathColumn[0]);
         String filePath = cursor.getString(dataIndex);
         cursor.close();
 
