@@ -263,6 +263,9 @@
         receive any further messages from this contact.
     </string>
 
+    <!-- Device contact data selection dialog -->
+    <string name="dialog_device_contact_data_selection">Select entry</string>
+
     <!-- Media Player -->
     <string name="media_meta_data_unknown_title">Unknown title</string>
     <string name="media_meta_data_unknown_artist">Unknown artist</string>
