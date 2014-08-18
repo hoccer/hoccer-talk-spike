@@ -210,8 +210,8 @@ public class TalkClientMediaCollection implements Iterable<XoTransfer> {
     }
 
     // Returns a copy of the internal TalkClientDownload array
-    public TalkClientDownload[] toArray() {
-        return mItemList.toArray(new TalkClientDownload[mItemList.size()]);
+    public List<XoTransfer> getItems() {
+        return new ArrayList<XoTransfer>(mItemList);
     }
 
     public void registerListener(Listener listener) {

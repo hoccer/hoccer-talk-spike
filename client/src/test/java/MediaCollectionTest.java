@@ -989,10 +989,10 @@ public class MediaCollectionTest {
     }
 
     @Test
-    public void testToArray() {
-        LOG.info("testToArray");
+    public void testGetItems() {
+        LOG.info("testGetItems");
 
-        final String collectionName = "testToArray_collection";
+        final String collectionName = "testGetItems_collection";
         TalkClientMediaCollection collection = null;
 
         int itemCount = 10;
@@ -1012,13 +1012,13 @@ public class MediaCollectionTest {
             fail();
         }
 
-        TalkClientDownload[] itemList = collection.toArray();
+        List<XoTransfer> itemList = collection.getItems();
 
-        assertEquals(expectedItemList.size(), itemList.length);
+        assertEquals(expectedItemList.size(), itemList.size());
 
         int index = 0;
         for(TalkClientDownload item : expectedItemList) {
-            assertEquals(item, itemList[index++]);
+            assertEquals(item, itemList.get(index++));
         }
     }
 

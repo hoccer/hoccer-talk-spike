@@ -137,8 +137,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         return mContact;
     }
 
-    public TalkClientDownload[] getItems() {
-        return mItems.toArray(new TalkClientDownload[mItems.size()]);
+    public List<XoTransfer> getItems() {
+        return new ArrayList<XoTransfer>(mItems);
     }
 
     public void selectItem(int itemId) {

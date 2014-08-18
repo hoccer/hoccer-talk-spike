@@ -171,7 +171,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
     @Override
     protected void onSearchModeEnabled() {
-        mSearchResultAdapter = new AttachmentSearchResultAdapter(mCollection.toArray());
+        mSearchResultAdapter = new AttachmentSearchResultAdapter(mCollection.getItems());
     }
 
     @Override
