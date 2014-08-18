@@ -20,7 +20,7 @@ import com.hoccer.xo.android.adapter.MediaCollectionItemAdapter;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
-import com.hoccer.xo.android.util.UploadHelper;
+import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.DragSortController;
 import com.hoccer.xo.release.R;
 import com.mobeta.android.dslv.DragSortListView;
@@ -149,7 +149,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = retrieveContactById(contactId);
-                            UploadHelper.sendDownloadsToContact(mCollectionAdapter.getSelectedItems(), contact);
+                            ContactOperations.sendDownloadsToContact(mCollectionAdapter.getSelectedItems(), contact);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (URISyntaxException e) {
@@ -278,12 +278,12 @@ public class MediaCollectionFragment extends SearchableListFragment {
                 case R.id.menu_delete_attachment:
                     XoDialogs.showSingleChoiceDialog("RemoveAttachment",
                             R.string.dialog_attachment_delete_title,
-                            R.array.delete_options,
+                            getResources().getStringArray(R.array.delete_options),
                             getActivity(),
-                            new DialogInterface.OnClickListener() {
+                            new XoDialogs.OnSingleSelectionFinishedListener() {
                                 @Override
-                                public void onClick(DialogInterface dialog, int id) {
-                                    switch (id) {
+                                public void onClick(DialogInterface dialog, int id, int selectedItem) {
+                                    switch (selectedItem) {
                                         case 0:
                                             removeSelectedItemsFromCollection();
                                             mode.finish();

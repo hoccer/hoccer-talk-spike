@@ -154,33 +154,62 @@ public class XoDialogs {
         dialogFragment.show(activity.getFragmentManager(), tag);
     }
 
-    // Used to set an integer value from within an anonymous method.
-    private static class IntegerBox {
-        public IntegerBox(int value) {
-            this.value = value;
-        }
-        public int value;
+    // extended the onClick listener providing the selected item
+    public interface OnSingleSelectionFinishedListener {
+        public void onClick(DialogInterface dialog, int id, int selectedItem);
     }
 
-    public static void showSingleChoiceDialog(final String tag, final int titleId, final int items, final Activity activity, final DialogInterface.OnClickListener okListener) {
+    public static void showSingleChoiceDialog(final String tag, final int titleId, final String[] items, final Activity activity, final OnSingleSelectionFinishedListener listener) {
         DialogFragment dialogFragment = new DialogFragment() {
             @Override
             public Dialog onCreateDialog(Bundle savedInstanceState) {
                 LOG.debug("Creating dialog: " + tag);
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder.setTitle(titleId);
-                final IntegerBox selectedIndex = new IntegerBox(0);
-                builder.setSingleChoiceItems(items, selectedIndex.value, new DialogInterface.OnClickListener() {
+                final Integer[] selectedIndex = new Integer[]{0};
+                builder.setSingleChoiceItems(items, selectedIndex[0], new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        selectedIndex.value = id;
+                        selectedIndex[0] = id;
                     }
                 });
 
                 builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        okListener.onClick(dialog, selectedIndex.value);
+                        listener.onClick(dialog, id, selectedIndex[0]);
+                    }
+                });
+                return builder.create();
+            }
+        };
+        dialogFragment.show(activity.getFragmentManager(), tag);
+    }
+
+    // extended the onClick listener providing the selected items
+    public interface OnMultiSelectionFinishedListener {
+        public void onClick(DialogInterface dialog, int id, boolean[] selectionStates);
+    }
+
+    public static void showMultiChoiceDialog(final String tag, final int titleId, final String[] items, final boolean[] initialSelectionStates, final Activity activity, final OnMultiSelectionFinishedListener selectionListener) {
+        DialogFragment dialogFragment = new DialogFragment() {
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                LOG.debug("Creating dialog: " + tag);
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setTitle(titleId);
+                final boolean[] selectionStates = initialSelectionStates.clone();
+                builder.setMultiChoiceItems(items, initialSelectionStates, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                        selectionStates[which] = isChecked;
+                    }
+                });
+
+                builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        selectionListener.onClick(dialog, id, selectionStates);
                     }
                 });
                 return builder.create();
