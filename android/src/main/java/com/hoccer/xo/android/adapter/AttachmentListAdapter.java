@@ -41,9 +41,11 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
     public AttachmentListAdapter(TalkClientContact contact, String mediaType) {
         mMediaType = mediaType;
         mContact = contact;
-
         updateItems();
-        XoApplication.getXoClient().getDatabase().registerDownloadListener(this);
+
+        XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+        database.registerUploadListener(this);
+        database.registerDownloadListener(this);
     }
 
     @Override

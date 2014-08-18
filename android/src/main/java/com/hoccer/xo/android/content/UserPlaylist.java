@@ -1,11 +1,13 @@
 package com.hoccer.xo.android.content;
 
 import com.hoccer.talk.client.IXoDownloadListener;
+import com.hoccer.talk.client.IXoUploadListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
 import org.apache.log4j.Logger;
@@ -19,7 +21,7 @@ import java.util.List;
 /**
  * Playlist instance wrapping a user filtered list of media items.
  */
-public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
+public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IXoDownloadListener {
 
     private static final Logger LOG = Logger.getLogger(UserPlaylist.class);
 
@@ -35,6 +37,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
         mContact = contact;
         mList = new ArrayList<XoTransfer>();
         mDatabase = database;
+        mDatabase.registerUploadListener(this);
         mDatabase.registerDownloadListener(this);
 
         try {
@@ -96,49 +99,55 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
 
     @Override
     public void onDownloadCreated(TalkClientDownload download) {
-        addItem(download);
+        // do nothing if the download is incomplete
+        if(download.getState() != TalkClientDownload.State.COMPLETE) {
+            addItem(download);
+        }
     }
 
     @Override
     public void onDownloadUpdated(TalkClientDownload download) {
-        addItem(download);
+        // do nothing if the download is incomplete
+        if(download.getState() != TalkClientDownload.State.COMPLETE) {
+            addItem(download);
+        }
     }
 
     @Override
     public void onDownloadDeleted(TalkClientDownload download) {
-        if(mContact != null) {
-            try {
-                TalkClientMessage message = mDatabase.findClientMessageByTalkClientDownloadId(download.getClientDownloadId());
-                if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
-                    mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
-                    invokeItemRemoved(download);
-                }
-            } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        } else {
-            try {
-                mList = mDatabase.findTransfersByMediaType(ContentMediaType.AUDIO);
-                invokeItemRemoved(download);
-            } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
+        removeItem(download);
     }
 
-    private void addItem(TalkClientDownload download) {
-        // do nothing if the download is incomplete or already contained
-        if(download.getState() != TalkClientDownload.State.COMPLETE || mList.contains(download)) {
+    @Override
+    public void onUploadCreated(TalkClientUpload upload) {
+        addItem(upload);
+    }
+
+    @Override
+    public void onUploadUpdated(TalkClientUpload upload) {
+        addItem(upload);
+    }
+
+    @Override
+    public void onUploadDeleted(TalkClientUpload upload) {
+        removeItem(upload);
+    }
+    private void addItem(XoTransfer transfer) {
+        // check if the item is already in the playlist
+        if(mList.contains(transfer)) {
             return;
         }
 
         if(mContact != null) {
             // check if contact matches
             try {
-                TalkClientMessage message = mDatabase.findClientMessageByTalkClientDownloadId(download.getClientDownloadId());
+                TalkClientMessage message = transfer.isUpload() ?
+                        mDatabase.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
+                        mDatabase.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
+
                 if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
                     mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
-                    invokeItemAdded(download);
+                    invokeItemAdded(transfer);
                 }
             } catch (SQLException e) {
                 LOG.error(e.getMessage(), e);
@@ -146,7 +155,31 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
         } else {
             try {
                 mList = mDatabase.findTransfersByMediaType(ContentMediaType.AUDIO);
-                invokeItemAdded(download);
+                invokeItemAdded(transfer);
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    private void removeItem(XoTransfer transfer) {
+        if(mContact != null) {
+            try {
+                TalkClientMessage message = transfer.isUpload() ?
+                        mDatabase.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
+                        mDatabase.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
+
+                if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
+                    mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
+                    invokeItemRemoved(transfer);
+                }
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        } else {
+            try {
+                mList = mDatabase.findTransfersByMediaType(ContentMediaType.AUDIO);
+                invokeItemRemoved(transfer);
             } catch (SQLException e) {
                 LOG.error(e.getMessage(), e);
             }
