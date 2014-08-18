@@ -408,7 +408,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     private boolean isNotificationActive() {
-        return isApplicationSentToBackground(this);
+        return mNotificationViews != null;
     }
 
     public void setSeekPosition(final int position) {
@@ -538,8 +538,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mLocalBroadcastManager.sendBroadcast(intent);
     }
 
-
     private void removeNotification() {
         stopForeground(true);
+        mNotificationViews = null;
     }
 }
