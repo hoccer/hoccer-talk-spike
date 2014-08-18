@@ -56,9 +56,9 @@ public class SelectedContent implements IContentObject {
     byte[] mData = null;
 
     public SelectedContent(Intent resultIntent, String contentDataUrl) {
-        Uri contentUrl = resultIntent.getData();
 
-        if (contentUrl != null) {
+        if (resultIntent != null && resultIntent.getData() != null) {
+            Uri contentUrl = resultIntent.getData();
             LOG.debug("new selected content: " + contentUrl);
             mContentUrl = contentUrl.toString();
             mContentType = resultIntent.getType();

@@ -1,7 +1,9 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.*;
 import android.widget.ListView;
@@ -17,6 +19,7 @@ import com.hoccer.xo.android.adapter.ChatAdapter;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -25,6 +28,7 @@ import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Fragment for conversations
@@ -98,6 +102,18 @@ public class MessagingFragment extends XoListFragment
 
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_container, mCompositionFragment).commit();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        List<Fragment> fragments = getChildFragmentManager().getFragments();
+        if (fragments != null) {
+            for (Fragment fragment : fragments) {
+                fragment.onActivityResult(requestCode, resultCode, intent);
+            }
+        }
     }
 
     @Override
