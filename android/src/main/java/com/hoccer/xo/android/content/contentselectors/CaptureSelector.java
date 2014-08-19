@@ -81,7 +81,7 @@ public class CaptureSelector implements IContentSelector {
             return null;
         }
 
-        String[] filePathColumn = {
+        String[] projection = {
                 MediaStore.Images.Media.DATA
         };
 
@@ -119,9 +119,9 @@ public class CaptureSelector implements IContentSelector {
         contentUri = Uri.parse(uriString);
 
         Cursor cursor = context.getContentResolver().query(
-                contentUri, filePathColumn, null, null, null);
+                contentUri, projection, null, null, null);
         cursor.moveToFirst();
-        int dataIndex = cursor.getColumnIndex(filePathColumn[0]);
+        int dataIndex = cursor.getColumnIndex(projection[0]);
         String filePath = cursor.getString(dataIndex);
         cursor.close();
 
