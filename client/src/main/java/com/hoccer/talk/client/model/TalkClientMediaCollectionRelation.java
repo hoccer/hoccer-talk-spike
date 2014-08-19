@@ -1,5 +1,6 @@
 package com.hoccer.talk.client.model;
 
+import com.hoccer.talk.client.XoTransfer;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.log4j.Logger;
@@ -18,19 +19,31 @@ public class TalkClientMediaCollectionRelation {
     @DatabaseField(columnName = "collection_id")
     private int mMediaCollectionId;
 
+    @DatabaseField(columnName = "uploadItem", foreign = true, foreignAutoRefresh = true)
+    private TalkClientUpload mUploadItem;
+
     @DatabaseField(columnName = "item", foreign = true, foreignAutoRefresh = true)
-    private TalkClientDownload mItem;
+    private TalkClientDownload mDownloadItem;
 
     @DatabaseField(columnName = "index")
     private int mIndex;
 
     // do not call constructor directly but create instances via IXoMediaCollectionDatabase.createMediaCollectionRelation()
-    public TalkClientMediaCollectionRelation() {
+    private TalkClientMediaCollectionRelation() {
     }
 
-    public TalkClientMediaCollectionRelation(int collectionId, TalkClientDownload item, int index) {
+    public TalkClientMediaCollectionRelation(int collectionId, XoTransfer item, int index) {
         mMediaCollectionId = collectionId;
-        mItem = item;
+
+        switch (item.getDirection()) {
+            case UPLOAD:
+                mUploadItem = (TalkClientUpload)item;
+                break;
+            case DOWNLOAD:
+                mDownloadItem = (TalkClientDownload)item;
+                break;
+        }
+
         mIndex = index;
     }
 
@@ -42,8 +55,12 @@ public class TalkClientMediaCollectionRelation {
         return mMediaCollectionId;
     }
 
-    public TalkClientDownload getItem() {
-        return mItem;
+    public XoTransfer getTransferItem() {
+        if (mUploadItem != null) {
+            return mUploadItem;
+        } else {
+            return mDownloadItem;
+        }
     }
 
     // This setter updates the index locally only and does not update database fields automatically.

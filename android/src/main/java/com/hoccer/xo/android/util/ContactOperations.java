@@ -6,11 +6,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.Telephony;
 import android.text.Html;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -25,25 +24,25 @@ public class ContactOperations {
 
     private static final Logger LOG = Logger.getLogger(ContactOperations.class);
 
-    public static void sendDownloadsToContact(List<TalkClientDownload> attachments, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
-        for (TalkClientDownload attachment : attachments) {
-            sendDownloadToContact(attachment, contact);
+    public static void sendTransfersToContact(List<XoTransfer> transfers, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
+        for (XoTransfer transfer : transfers) {
+            sendTransferToContact(transfer, contact);
         }
     }
 
-    public static void sendDownloadToContact(TalkClientDownload download, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
-        File file = new File(download.getDataFile());
+    public static void sendTransferToContact(XoTransfer transfer, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
+        File file = new File(transfer.getDataFile());
 
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(
-                download.getFileName(),
-                download.getContentUrl(),
-                download.getContentDataUrl(),
-                download.getContentType(),
-                download.getContentMediaType(),
-                download.getContentAspectRatio(),
+                transfer.getFileName(),
+                transfer.getContentUrl(),
+                transfer.getContentDataUrl(),
+                transfer.getContentType(),
+                transfer.getContentMediaType(),
+                transfer.getContentAspectRatio(),
                 (int)file.length(),
-                download.getContentHmac());
+                transfer.getContentHmac());
 
         String messageTag = XoApplication.getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
         LOG.debug("Sending Attachment " + upload + " to contact " + contact);

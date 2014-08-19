@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.release.R;
@@ -26,24 +26,24 @@ import java.util.List;
  */
 public class AttachmentSearchResultAdapter extends BaseAdapter {
 
-    List<TalkClientDownload> mItems;
-    List<TalkClientDownload> mMatchedItems;
+    List<XoTransfer> mItems;
+    List<XoTransfer> mMatchedItems;
 
     private String mLastQuery = "";
 
-    public AttachmentSearchResultAdapter(TalkClientDownload[] items) {
-        mItems = Arrays.asList(items);
-        mMatchedItems = new ArrayList<TalkClientDownload>();
+    public AttachmentSearchResultAdapter(List<XoTransfer> items) {
+        mItems = items;
+        mMatchedItems = new ArrayList<XoTransfer>();
     }
 
     @Override
-    public TalkClientDownload getItem(int position) {
+    public XoTransfer getItem(int position) {
         return mMatchedItems.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return mItems.get(position).getClientDownloadId();
+        return mItems.get(position).getTransferId();
     }
 
     @Override
@@ -60,7 +60,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
         mLastQuery = query.toLowerCase();
         mMatchedItems.clear();
         if (!mLastQuery.isEmpty()) {
-            for (TalkClientDownload attachment : mItems) {
+            for (XoTransfer attachment : mItems) {
                 MediaMetaData metaData = MediaMetaData.retrieveMetaData(attachment.getContentDataUrl());
                 String title = metaData.getTitle();
                 String artist = metaData.getArtist();
@@ -74,7 +74,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    private View createAttachmentView(Context context, TalkClientDownload attachment) {
+    private View createAttachmentView(Context context, XoTransfer attachment) {
         View attachmentView = View.inflate(context, R.layout.item_attachment_search_result, null);
         String type = attachment.getContentMediaType();
         if (type.equals(ContentMediaType.AUDIO)) {
@@ -83,7 +83,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
         return attachmentView;
     }
 
-    private View setupAudioAttachmentView(final Context context, View attachmentView, TalkClientDownload attachment) {
+    private View setupAudioAttachmentView(final Context context, View attachmentView, XoTransfer attachment) {
         TextView titleTv = (TextView) attachmentView.findViewById(R.id.tv_title);
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(attachment.getContentDataUrl());
         String title = metaData.getTitleOrFilename();

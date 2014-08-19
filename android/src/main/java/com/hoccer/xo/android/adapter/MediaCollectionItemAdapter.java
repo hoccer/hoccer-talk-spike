@@ -6,7 +6,7 @@ import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.xo.android.view.AudioAttachmentView;
 import com.mobeta.android.dslv.DragSortListView;
@@ -35,13 +35,13 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     }
 
     @Override
-    public TalkClientDownload getItem(int position) {
+    public XoTransfer getItem(int position) {
         return mCollection.getItem(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return mCollection.getItem(position).getClientDownloadId();
+        return mCollection.getItem(position).getTransferId();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
             audioView = new AudioAttachmentView(parent.getContext());
         }
 
-        TalkClientDownload item = mCollection.getItem(position);
+        XoTransfer item = mCollection.getItem(position);
         audioView.setMediaItem(item);
         audioView.updatePlayPauseView();
         Integer itemId = (int)getItemId(position);
@@ -63,10 +63,6 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
 
     public void showDragHandle(boolean show) {
         mShowDragHandle = show;
-    }
-
-    public TalkClientDownload[] getItems() {
-        return mCollection.toArray();
     }
 
     public void selectItem(int itemId) {
@@ -94,8 +90,9 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
         mSelectedItemIds.clear();
     }
 
-    public List<TalkClientDownload> getSelectedItems() {
-        List<TalkClientDownload> result = new ArrayList<TalkClientDownload>();
+    public List<XoTransfer> getSelectedItems() {
+        List<XoTransfer> result = new ArrayList<XoTransfer>();
+
         for(int itemId : mSelectedItemIds) {
             result.add(mCollection.getItemFromId(itemId));
         }
@@ -148,13 +145,13 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
     }
 
     @Override
-    public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, TalkClientDownload itemRemoved) {
-        deselectItem(itemRemoved.getClientDownloadId());
+    public void onItemRemoved(TalkClientMediaCollection collection, int indexRemoved, XoTransfer itemRemoved) {
+        deselectItem(itemRemoved.getTransferId());
         refreshView();
     }
 
     @Override
-    public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, TalkClientDownload itemAdded) {
+    public void onItemAdded(TalkClientMediaCollection collection, int indexAdded, XoTransfer itemAdded) {
         refreshView();
     }
 
