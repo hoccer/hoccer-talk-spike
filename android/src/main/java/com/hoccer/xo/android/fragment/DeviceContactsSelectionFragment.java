@@ -67,12 +67,10 @@ public class DeviceContactsSelectionFragment extends ListFragment {
             @Override
             public void onClick(View view) {
                 String[] selectedContacts = mAdapter.getSelectedData();
-                if (selectedContacts.length > 0) {
-                    if (mIsSmsInvitation) {
-                        composeInviteSms(selectedContacts);
-                    } else {
-                        composeInviteEmail(selectedContacts);
-                    }
+                if (mIsSmsInvitation) {
+                    composeInviteSms(selectedContacts);
+                } else {
+                    composeInviteEmail(selectedContacts);
                 }
             }
         });
