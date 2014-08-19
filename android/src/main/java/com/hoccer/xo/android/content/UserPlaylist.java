@@ -1,10 +1,13 @@
 package com.hoccer.xo.android.content;
 
 import com.hoccer.talk.client.IXoDownloadListener;
+import com.hoccer.talk.client.IXoUploadListener;
 import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
 import org.apache.log4j.Logger;
@@ -18,11 +21,11 @@ import java.util.List;
 /**
  * Playlist instance wrapping a user filtered list of media items.
  */
-public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
+public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IXoDownloadListener {
 
     private static final Logger LOG = Logger.getLogger(UserPlaylist.class);
 
-    private List<TalkClientDownload> mList;
+    private List<XoTransfer> mList;
     private TalkClientContact mContact;
     private XoClientDatabase mDatabase;
 
@@ -32,15 +35,16 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
      */
     public UserPlaylist(XoClientDatabase database, TalkClientContact contact) {
         mContact = contact;
-        mList = new ArrayList<TalkClientDownload>();
+        mList = new ArrayList<XoTransfer>();
         mDatabase = database;
+        mDatabase.registerUploadListener(this);
         mDatabase.registerDownloadListener(this);
 
         try {
             if(contact != null) {
-                mList = mDatabase.findClientDownloadByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
+                mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
             } else {
-                mList = mDatabase.findClientDownloadByMediaType(ContentMediaType.AUDIO);
+                mList = mDatabase.findTransfersByMediaType(ContentMediaType.AUDIO);
             }
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
@@ -52,7 +56,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
     }
 
     @Override
-    public TalkClientDownload getItem(int index) {
+    public XoTransfer getItem(int index) {
         return mList.get(index);
     }
 
@@ -74,7 +78,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
     @Override
     public Iterator<IContentObject> iterator() {
         return new Iterator<IContentObject>() {
-            private Iterator<TalkClientDownload> mIterator = mList.iterator();
+            private Iterator<XoTransfer> mIterator = mList.iterator();
 
             @Override
             public boolean hasNext() {
@@ -95,57 +99,87 @@ public class UserPlaylist extends MediaPlaylist implements IXoDownloadListener {
 
     @Override
     public void onDownloadCreated(TalkClientDownload download) {
-        addItem(download);
+        // do nothing if the download is incomplete
+        if(download.getState() != TalkClientDownload.State.COMPLETE) {
+            addItem(download);
+        }
     }
 
     @Override
     public void onDownloadUpdated(TalkClientDownload download) {
-        addItem(download);
+        // do nothing if the download is incomplete
+        if(download.getState() != TalkClientDownload.State.COMPLETE) {
+            addItem(download);
+        }
     }
 
     @Override
     public void onDownloadDeleted(TalkClientDownload download) {
-        if(mContact != null) {
-            try {
-                TalkClientMessage message = mDatabase.findClientMessageByTalkClientDownloadId(download.getClientDownloadId());
-                if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
-                    mList = mDatabase.findClientDownloadByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
-                    invokeItemRemoved(download);
-                }
-            } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        } else {
-            try {
-                mList = mDatabase.findClientDownloadByMediaType(ContentMediaType.AUDIO);
-                invokeItemRemoved(download);
-            } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
+        removeItem(download);
     }
 
-    private void addItem(TalkClientDownload download) {
-        // do nothing if the download is incomplete or already contained
-        if(download.getState() != TalkClientDownload.State.COMPLETE || mList.contains(download)) {
+    @Override
+    public void onUploadCreated(TalkClientUpload upload) {
+        addItem(upload);
+    }
+
+    @Override
+    public void onUploadUpdated(TalkClientUpload upload) {
+        addItem(upload);
+    }
+
+    @Override
+    public void onUploadDeleted(TalkClientUpload upload) {
+        removeItem(upload);
+    }
+    private void addItem(XoTransfer transfer) {
+        // check if the item is already in the playlist
+        if(mList.contains(transfer)) {
             return;
         }
 
         if(mContact != null) {
             // check if contact matches
             try {
-                TalkClientMessage message = mDatabase.findClientMessageByTalkClientDownloadId(download.getClientDownloadId());
+                TalkClientMessage message = transfer.isUpload() ?
+                        mDatabase.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
+                        mDatabase.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
+
                 if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
-                    mList = mDatabase.findClientDownloadByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId());
-                    invokeItemAdded(download);
+                    mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
+                    invokeItemAdded(transfer);
                 }
             } catch (SQLException e) {
                 LOG.error(e.getMessage(), e);
             }
         } else {
             try {
-                mList = mDatabase.findClientDownloadByMediaType(ContentMediaType.AUDIO);
-                invokeItemAdded(download);
+                mList = mDatabase.findTransfersByMediaType(ContentMediaType.AUDIO);
+                invokeItemAdded(transfer);
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    private void removeItem(XoTransfer transfer) {
+        if(mContact != null) {
+            try {
+                TalkClientMessage message = transfer.isUpload() ?
+                        mDatabase.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
+                        mDatabase.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
+
+                if(message != null && message.getConversationContact().getClientId() == mContact.getClientId()) {
+                    mList = new ArrayList<XoTransfer>(mDatabase.findClientDownloadsByMediaTypeAndContactId(ContentMediaType.AUDIO, mContact.getClientContactId()));
+                    invokeItemRemoved(transfer);
+                }
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        } else {
+            try {
+                mList = mDatabase.findTransfersByMediaType(ContentMediaType.AUDIO);
+                invokeItemRemoved(transfer);
             } catch (SQLException e) {
                 LOG.error(e.getMessage(), e);
             }

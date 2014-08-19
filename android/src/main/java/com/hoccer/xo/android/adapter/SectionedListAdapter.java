@@ -85,8 +85,7 @@ public class SectionedListAdapter extends BaseAdapter {
             int size = section.getAdapter().getCount() + 1;
 
             if (position < size) {
-                return typeOffset + section.getAdapter()
-                        .getItemViewType(position - 1);
+                return typeOffset + section.getAdapter().getItemViewType(position - 1);
             }
 
             position -= size;
@@ -112,16 +111,14 @@ public class SectionedListAdapter extends BaseAdapter {
 
         for (Section section : this.mSections) {
             if (position == 0) {
-                return getHeaderView(section.getCaption(), sectionIndex,
-                        convertView, parent);
+                return getHeaderView(section.getCaption(), sectionIndex, convertView, parent);
             }
 
             // size includes the header
             int size = section.getAdapter().getCount() + 1;
 
             if (position < size) {
-                return section.getAdapter().getView(position - 1, convertView,
-                        parent);
+                return section.getAdapter().getView(position - 1, convertView, parent);
             }
 
             position -= size;
@@ -137,7 +134,7 @@ public class SectionedListAdapter extends BaseAdapter {
     }
 
     private View getHeaderView(String caption, int index,
-                               View convertView, ViewGroup parent){
+                               View convertView, ViewGroup parent) {
         View headerView = convertView;
         if (headerView == null) {
             headerView = View.inflate(parent.getContext(), R.layout.item_section_header, null);

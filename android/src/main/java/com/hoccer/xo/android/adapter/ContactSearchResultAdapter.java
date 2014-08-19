@@ -105,7 +105,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
 
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
-        nameView.setText(getHighlightedSearchResult(contact.getName(), mLastQuery));
+        nameView.setText(getHighlightedSearchResult(contact.getName()));
         TextView typeView = (TextView) view.findViewById(R.id.contact_type);
 
         avatarView.setContact(contact);
@@ -123,7 +123,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
     protected void updateToken(View view, TalkClientSmsToken token) {
     }
 
-    private Spannable getHighlightedSearchResult(String text, String query) {
+    private Spannable getHighlightedSearchResult(String text) {
         Spannable result = new SpannableString(text);
         result.setSpan(new ForegroundColorSpan(Color.BLACK), 0, mLastQuery.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         return result;
