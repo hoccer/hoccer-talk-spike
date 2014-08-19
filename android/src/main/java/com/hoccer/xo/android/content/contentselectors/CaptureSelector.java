@@ -82,7 +82,7 @@ public class CaptureSelector implements IContentSelector {
         }
 
         String[] filePathColumn = {
-                MediaStore.Images.Media.DATA,
+                MediaStore.Images.Media.DATA
         };
 
         File file = new File(mFileUri.getPath());
