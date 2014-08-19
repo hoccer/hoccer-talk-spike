@@ -10,9 +10,6 @@ import com.hoccer.xo.release.R;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by nico on 02/07/2014.
- */
 public class SectionedListAdapter extends BaseAdapter {
 
     private List<Section> mSections = new ArrayList<Section>();
@@ -108,24 +105,30 @@ public class SectionedListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         int sectionIndex = 0;
+        int itemViewType = getItemViewType(position);
+        View reusableConvertView = convertView != null && convertView.getTag().equals(itemViewType) ? convertView : null;
+        View v = null;
 
         for (Section section : this.mSections) {
             if (position == 0) {
-                return getHeaderView(section.getCaption(), sectionIndex, convertView, parent);
+                v = getHeaderView(section.getCaption(), sectionIndex, reusableConvertView, parent);
+                break;
             }
 
             // size includes the header
             int size = section.getAdapter().getCount() + 1;
 
             if (position < size) {
-                return section.getAdapter().getView(position - 1, convertView, parent);
+                v = section.getAdapter().getView(position - 1, reusableConvertView, parent);
+                break;
             }
 
             position -= size;
             sectionIndex++;
         }
 
-        return null;
+        v.setTag(itemViewType);
+        return v;
     }
 
     @Override
