@@ -100,7 +100,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
     @Override
     public void onDownloadCreated(TalkClientDownload download) {
         // do nothing if the download is incomplete
-        if(download.getState() != TalkClientDownload.State.COMPLETE) {
+        if(download.getState() == TalkClientDownload.State.COMPLETE) {
             addItem(download);
         }
     }
@@ -108,7 +108,7 @@ public class UserPlaylist extends MediaPlaylist implements IXoUploadListener, IX
     @Override
     public void onDownloadUpdated(TalkClientDownload download) {
         // do nothing if the download is incomplete
-        if(download.getState() != TalkClientDownload.State.COMPLETE) {
+        if(download.getState() == TalkClientDownload.State.COMPLETE) {
             addItem(download);
         }
     }
