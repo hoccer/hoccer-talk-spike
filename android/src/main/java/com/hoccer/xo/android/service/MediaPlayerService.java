@@ -64,7 +64,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     @Override
     public void onCurrentItemChanged(IContentObject newItem) {
         if(newItem != null) {
-            play(mPlaylistController.getCurrentItem());
+            playNewTrack(mPlaylistController.getCurrentItem());
         } else {
             reset();
         }
