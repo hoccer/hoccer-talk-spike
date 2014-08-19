@@ -1,3 +1,5 @@
+package com.hoccer.xo.android.content;
+
 import com.hoccer.talk.client.*;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -5,10 +7,6 @@ import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.content.EmptyPlaylist;
-import com.hoccer.xo.android.content.MediaCollectionPlaylist;
-import com.hoccer.xo.android.content.SingleItemPlaylist;
-import com.hoccer.xo.android.content.UserPlaylist;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -290,7 +288,7 @@ public class MediaPlaylistTest {
 
         // delete download of user1
         try {
-            mDatabase.deleteClientDownload(playlist1.getItem(1));
+            mDatabase.deleteTransferAndMessage(playlist1.getItem(1));
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -309,12 +307,13 @@ public class MediaPlaylistTest {
     public void testSingleItemPlaylist() {
         LOG.info("testSingleItemPlaylist");
 
-        TalkClientDownload item = new TalkClientDownload();
-        TalkClientDownload other_item = new TalkClientDownload();
+        TalkClientContact user = new TalkClientContact(TalkClientContact.TYPE_CLIENT);
+        TalkClientDownload item = createAudioDownloadWithUser(user);
+        TalkClientDownload otherItem = createAudioDownloadWithUser(user);
 
         try {
             mDatabase.saveClientDownload(item);
-            mDatabase.saveClientDownload(other_item);
+            mDatabase.saveClientDownload(otherItem);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -325,7 +324,7 @@ public class MediaPlaylistTest {
 
         assertEquals(1, playlist.size());
 
-        TalkClientDownload expectedItem = item;
+        XoTransfer expectedItem = item;
         IContentObject actualItem = playlist.getItem(0);
         assertTrue(expectedItem.equals(actualItem));
 
@@ -340,11 +339,11 @@ public class MediaPlaylistTest {
 
         // test indexOf
         assertEquals(0, playlist.indexOf(item));
-        assertEquals(-1, playlist.indexOf(other_item));
+        assertEquals(-1, playlist.indexOf(otherItem));
 
         // test hasItem
         assertTrue(playlist.hasItem(item));
-        assertFalse(playlist.hasItem(other_item));
+        assertFalse(playlist.hasItem(otherItem));
 
         // set listener
         final ValueContainer<Boolean> onItemOrderChangedCalled = new ValueContainer<Boolean>(false);
@@ -378,7 +377,7 @@ public class MediaPlaylistTest {
 
         // remove other item (should not bother playlist)
         try {
-            mDatabase.deleteClientDownload(other_item);
+            mDatabase.deleteTransferAndMessage(otherItem);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -391,7 +390,7 @@ public class MediaPlaylistTest {
 
         // remove item
         try {
-            mDatabase.deleteClientDownload(item);
+            mDatabase.deleteTransferAndMessage(item);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();

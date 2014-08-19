@@ -64,7 +64,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     @Override
     public void onCurrentItemChanged(IContentObject newItem) {
         if(newItem != null) {
-            play(mPlaylistController.getCurrentItem());
+            playNewTrack(mPlaylistController.getCurrentItem());
         } else {
             reset();
         }
@@ -315,9 +315,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return mPlaylistController.size();
     }
 
-    public void play(int position) {
-        mPlaylistController.setCurrentIndex(position);
-        playNewTrack(mPlaylistController.getCurrentItem());
+    public void playItemInPlaylist(IContentObject item, MediaPlaylist playlist) {
+        boolean isCurrentMediaItem = item.equals(getCurrentMediaItem());
+        boolean isCurrentlyPlaying = isCurrentMediaItem && !isPaused() && !isStopped();
+        boolean isCurrentlyPaused = isCurrentMediaItem && isPaused();
+
+        setPlaylist(playlist);
+        setCurrentIndex(playlist.indexOf(item));
+
+        if (isCurrentlyPlaying) {
+            // do nothing
+        } else if (isCurrentlyPaused) {
+            play();
+        } else {
+            playNewTrack(mPlaylistController.getCurrentItem());
+        }
     }
 
     public void play() {
@@ -408,7 +420,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     private boolean isNotificationActive() {
-        return isApplicationSentToBackground(this);
+        return mNotificationViews != null;
     }
 
     public void setSeekPosition(final int position) {
@@ -499,11 +511,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return conversationContactId;
     }
 
-    public void setPlaylist(MediaPlaylist playlist) {
+    private void setPlaylist(MediaPlaylist playlist) {
         mPlaylistController.setPlaylist(playlist);
     }
 
-    public void setCurrentIndex(int pos) {
+    private void setCurrentIndex(int pos) {
         mPlaylistController.setCurrentIndex(pos);
     }
 
@@ -538,8 +550,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mLocalBroadcastManager.sendBroadcast(intent);
     }
 
-
     private void removeNotification() {
         stopForeground(true);
+        mNotificationViews = null;
     }
 }

@@ -47,6 +47,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     Dao<TalkClientMediaCollection, Integer> mMediaCollections;
     Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
 
+    private WeakListenerArray<IXoUploadListener> mUploadListeners = new WeakListenerArray<IXoUploadListener>();
     private WeakListenerArray<IXoDownloadListener> mDownloadListeners = new WeakListenerArray<IXoDownloadListener>();
     private WeakListenerArray<IXoMessageListener> mMessageListeners = new WeakListenerArray<IXoMessageListener>();
     private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListeners = new WeakListenerArray<IXoMediaCollectionListener>();
@@ -188,7 +189,17 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public void saveClientUpload(TalkClientUpload upload) throws SQLException {
-        mClientUploads.createOrUpdate(upload);
+        Dao.CreateOrUpdateStatus result = mClientUploads.createOrUpdate(upload);
+
+        if(result.isCreated()) {
+            for (IXoUploadListener listener : mUploadListeners) {
+                listener.onUploadCreated(upload);
+            }
+        } else {
+            for (IXoUploadListener listener : mUploadListeners) {
+                listener.onUploadUpdated(upload);
+            }
+        }
     }
 
     public void refreshClientContact(TalkClientContact contact) throws SQLException {
@@ -524,22 +535,40 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return mClientDownloads.queryForId(clientDownloadId);
     }
 
-    public List<TalkClientDownload> findClientDownloadByMediaType(String mediaType) throws SQLException {
-        QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
-        messageQb.orderBy("timestamp", false);
+    public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
+        List<TalkClientUpload> uploads = mClientUploads.queryForEq("mediaType", mediaType);
+        List<TalkClientDownload> downloads = mClientDownloads.queryForEq("mediaType", mediaType);
 
-        QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
-        downloadQb
-                .where()
-                .eq("mediaType", mediaType)
-                .and()
-                .eq("state", TalkClientDownload.State.COMPLETE);
-
-        List<TalkClientDownload> downloads = downloadQb.join(messageQb).query();
-        return downloads;
+        return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
     }
 
-    public List<TalkClientDownload> findClientDownloadByContactId(int contactId) throws SQLException {
+    private List<XoTransfer> mergeUploadsAndDownloadsByMessageTimestamp(List<TalkClientUpload> uploads, List<TalkClientDownload> downloads) throws SQLException {
+        List<TalkClientMessage> messages = mClientMessages.queryBuilder()
+                .orderBy("timestamp", false)
+                .where()
+                .isNotNull("attachmentUpload_id")
+                .isNotNull("attachmentDownload_id")
+                .or(2)
+                .query();
+
+        List<XoTransfer> transfers = new ArrayList<XoTransfer>();
+
+        for (TalkClientMessage message : messages) {
+            TalkClientUpload upload = message.getAttachmentUpload();
+            if (upload != null && uploads.contains(upload)) {
+                transfers.add(upload);
+            }
+
+            TalkClientDownload download = message.getAttachmentDownload();
+            if (download != null && download.getState() == TalkClientDownload.State.COMPLETE && downloads.contains(download)) {
+                transfers.add(download);
+            }
+        }
+
+        return transfers;
+    }
+
+    public List<TalkClientDownload> findClientDownloadsByContactId(int contactId) throws SQLException {
 
         QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
         messageQb
@@ -556,7 +585,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return downloads;
     }
 
-    public List<TalkClientDownload> findClientDownloadByMediaTypeAndContactId(String mediaType, int contactId) throws SQLException {
+    public List<TalkClientDownload> findClientDownloadsByMediaTypeAndContactId(String mediaType, int contactId) throws SQLException {
 
         QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
         messageQb
@@ -587,11 +616,20 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public TalkClientMessage findClientMessageByTalkClientUploadId(int attachmentUploadId) throws SQLException {
-        return mClientMessages.queryForEq("attachmentUpload_id", attachmentUploadId).get(0);
+        List<TalkClientMessage> messages = mClientMessages.queryForEq("attachmentUpload_id", attachmentUploadId);
+        int numberOfMessages = messages.size();
+
+        if (numberOfMessages == 0) {
+            return null;
+        } else {
+            return messages.get(0);
+        }
     }
 
-    public List<TalkClientDownload> findAllClientDownloads() throws SQLException {
-        return mClientDownloads.queryForAll();
+    public List<XoTransfer> findAllTransfers() throws SQLException {
+        List<TalkClientUpload> uploads = mClientUploads.queryForAll();
+        List<TalkClientDownload> downloads = mClientDownloads.queryForAll();
+        return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
     }
 
     public TalkClientMessage findClientMessageById(int clientMessageId) throws SQLException {
@@ -618,8 +656,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .queryForFirst();
     }
 
+    public TalkClientMessage findMessageByUploadId(int uploadId) throws SQLException {
+        return mClientMessages.queryBuilder()
+                .where()
+                .eq("attachmentUpload_id", uploadId)
+                .queryForFirst();
+    }
+
     public TalkClientMessage findMessageByDownloadId(int downloadId) throws SQLException {
-        List<TalkClientMessage> messages = mClientMessages.queryForAll();
         return mClientMessages.queryBuilder()
                 .where()
                 .eq("attachmentDownload_id", downloadId)
@@ -882,10 +926,26 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return migratedUrl;
     }
 
+    private void deleteClientUpload(TalkClientUpload upload) throws SQLException {
+        int deletedRowsCount = mClientUploads.delete(upload);
+
+        if (deletedRowsCount > 0) {
+            // remove upload from all collections
+            List<TalkClientMediaCollection> collections = findAllMediaCollectionsContainingItem(upload);
+            for (TalkClientMediaCollection collection : collections) {
+                collection.removeItem(upload);
+            }
+
+            for (IXoUploadListener listener : mUploadListeners) {
+                listener.onUploadDeleted(upload);
+            }
+        }
+    }
+
     public void deleteClientDownload(TalkClientDownload download) throws SQLException {
         int deletedRowsCount = mClientDownloads.delete(download);
-        if (deletedRowsCount > 0) {
 
+        if (deletedRowsCount > 0) {
             // remove download from all collections
             List<TalkClientMediaCollection> collections = findAllMediaCollectionsContainingItem(download);
             for (TalkClientMediaCollection collection : collections) {
@@ -896,6 +956,23 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 listener.onDownloadDeleted(download);
             }
         }
+    }
+
+    public void deleteTransferAndMessage(XoTransfer transfer) throws SQLException {
+        switch (transfer.getDirection()) {
+            case UPLOAD:
+                deleteClientUploadAndMessage((TalkClientUpload)transfer);
+                break;
+            case DOWNLOAD:
+                deleteClientDownloadAndMessage((TalkClientDownload)transfer);
+                break;
+        }
+    }
+
+    public void deleteClientUploadAndMessage(TalkClientUpload upload) throws SQLException {
+        deleteClientUpload(upload);
+        int messageId = findMessageByUploadId(upload.getClientUploadId()).getClientMessageId();
+        deleteMessageById(messageId);
     }
 
     public void deleteClientDownloadAndMessage(TalkClientDownload download) throws SQLException {
@@ -973,6 +1050,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
     }
 
+    public void registerUploadListener(IXoUploadListener listener) {
+        mUploadListeners.registerListener(listener);
+    }
+
+    public void unregisterUploadListener(IXoUploadListener listener) {
+        mUploadListeners.unregisterListener(listener);
+    }
+
     public void registerDownloadListener(IXoDownloadListener listener) {
         mDownloadListeners.registerListener(listener);
     }
@@ -1014,11 +1099,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     @Override
-    public List<TalkClientMediaCollection> findAllMediaCollectionsContainingItem(TalkClientDownload item) throws SQLException {
+    public List<TalkClientMediaCollection> findAllMediaCollectionsContainingItem(XoTransfer item) throws SQLException {
+        String column = item.isUpload() ? "uploadItem" : "item";
 
         List<TalkClientMediaCollectionRelation> relations = mMediaCollectionRelations.queryBuilder()
                 .where()
-                .eq("item", item.getClientDownloadId()).query();
+                .eq(column, item.getUploadOrDownloadId())
+                .query();
 
         List<TalkClientMediaCollection> collections = new ArrayList<TalkClientMediaCollection>();
         for (TalkClientMediaCollectionRelation relation : relations) {

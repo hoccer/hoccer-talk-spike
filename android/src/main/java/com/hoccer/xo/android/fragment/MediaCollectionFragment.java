@@ -7,8 +7,8 @@ import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
 import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -18,9 +18,10 @@ import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.MediaCollectionItemAdapter;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
+import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
-import com.hoccer.xo.android.util.UploadHelper;
+import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.DragSortController;
 import com.hoccer.xo.release.R;
 import com.mobeta.android.dslv.DragSortListView;
@@ -149,7 +150,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
                     for (Integer contactId : contactSelections) {
                         try {
                             TalkClientContact contact = retrieveContactById(contactId);
-                            UploadHelper.sendDownloadsToContact(mCollectionAdapter.getSelectedItems(), contact);
+                            ContactOperations.sendTransfersToContact(mCollectionAdapter.getSelectedItems(), contact);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (URISyntaxException e) {
@@ -171,7 +172,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
     @Override
     protected void onSearchModeEnabled() {
-        mSearchResultAdapter = new AttachmentSearchResultAdapter(mCollection.toArray());
+        mSearchResultAdapter = new AttachmentSearchResultAdapter(mCollection.getItems());
     }
 
     @Override
@@ -213,13 +214,13 @@ public class MediaCollectionFragment extends SearchableListFragment {
     }
 
     private void addSelectedItemsToCollection(Integer mediaCollectionId) {
-        List<TalkClientDownload> selectedItems = mCollectionAdapter.getSelectedItems();
+        List<XoTransfer> selectedItems = mCollectionAdapter.getSelectedItems();
         if(selectedItems.size() > 0) {
             try {
                 TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
                 List<String> addedFilenames = new ArrayList<String>();
-                for (TalkClientDownload item : selectedItems) {
-                    mediaCollection.addItem((TalkClientDownload) item);
+                for (XoTransfer item : selectedItems) {
+                    mediaCollection.addItem(item);
                     addedFilenames.add(item.getFileName());
                 }
                 Toast.makeText(getActivity(), String.format(getString(R.string.added_attachment_to_collection), addedFilenames, mediaCollection.getName()), Toast.LENGTH_LONG).show();
@@ -233,15 +234,15 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            TalkClientDownload clickedItem = (TalkClientDownload)getListAdapter().getItem(position);
+            XoTransfer clickedItem = (XoTransfer)getListAdapter().getItem(position);
+
             if (mMediaPlayerServiceConnector.isConnected()) {
-                if (isSearchModeEnabled()) {
-                    mMediaPlayerServiceConnector.getService().setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem));
-                } else {
-                    MediaCollectionPlaylist playlist = new MediaCollectionPlaylist(mCollection);
-                    mMediaPlayerServiceConnector.getService().setPlaylist(playlist);
-                    mMediaPlayerServiceConnector.getService().play(position);
-                }
+                MediaPlaylist playlist = isSearchModeEnabled() ?
+                        new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem) :
+                        new MediaCollectionPlaylist(mCollection);
+
+                mMediaPlayerServiceConnector.getService().playItemInPlaylist(clickedItem, playlist);
+
                 getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else {
                 LOG.error("MediaPlayerService is not connected");
@@ -278,12 +279,12 @@ public class MediaCollectionFragment extends SearchableListFragment {
                 case R.id.menu_delete_attachment:
                     XoDialogs.showSingleChoiceDialog("RemoveAttachment",
                             R.string.dialog_attachment_delete_title,
-                            R.array.delete_options,
+                            getResources().getStringArray(R.array.delete_options),
                             getActivity(),
-                            new DialogInterface.OnClickListener() {
+                            new XoDialogs.OnSingleSelectionFinishedListener() {
                                 @Override
-                                public void onClick(DialogInterface dialog, int id) {
-                                    switch (id) {
+                                public void onClick(DialogInterface dialog, int id, int selectedItem) {
+                                    switch (selectedItem) {
                                         case 0:
                                             removeSelectedItemsFromCollection();
                                             mode.finish();
@@ -325,17 +326,17 @@ public class MediaCollectionFragment extends SearchableListFragment {
         }
 
         private void removeSelectedItemsFromCollection() {
-            List<TalkClientDownload> items = mCollectionAdapter.getSelectedItems();
-            for (TalkClientDownload item : items) {
+            List<XoTransfer> items = mCollectionAdapter.getSelectedItems();
+            for (XoTransfer item : items) {
                 mCollection.removeItem(item);
             }
         }
 
         private void deleteSelectedItems() {
-            List<TalkClientDownload> items = mCollectionAdapter.getSelectedItems();
-            for (TalkClientDownload item : items) {
+            List<XoTransfer> items = mCollectionAdapter.getSelectedItems();
+            for (XoTransfer item : items) {
                 try{
-                    mDatabase.deleteClientDownloadAndMessage(item);
+                    mDatabase.deleteTransferAndMessage(item);
                 } catch(SQLException e) {
                     LOG.error("Could not delete download", e);
                 }

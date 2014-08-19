@@ -81,8 +81,8 @@ public class CaptureSelector implements IContentSelector {
             return null;
         }
 
-        String[] filePathColumn = {
-                MediaStore.Images.Media.DATA,
+        String[] projection = {
+                MediaStore.Images.Media.DATA
         };
 
         File file = new File(mFileUri.getPath());
@@ -101,11 +101,11 @@ public class CaptureSelector implements IContentSelector {
         int imageWidth = options.outWidth;
         String imageType = options.outMimeType;
 
+        options.inSampleSize = 2;
         options.inJustDecodeBounds = false;
         Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 
         int exifOrientation = Integer.parseInt(exif.getAttribute(ExifInterface.TAG_ORIENTATION));
-        LOG.error("#foo " + exifOrientation);
         if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
@@ -119,9 +119,9 @@ public class CaptureSelector implements IContentSelector {
         contentUri = Uri.parse(uriString);
 
         Cursor cursor = context.getContentResolver().query(
-                contentUri, filePathColumn, null, null, null);
+                contentUri, projection, null, null, null);
         cursor.moveToFirst();
-        int dataIndex = cursor.getColumnIndex(filePathColumn[0]);
+        int dataIndex = cursor.getColumnIndex(projection[0]);
         String filePath = cursor.getString(dataIndex);
         cursor.close();
 

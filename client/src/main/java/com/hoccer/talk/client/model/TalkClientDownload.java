@@ -736,6 +736,16 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     /**********************************************************************************************/
     /********************************* XoTransfer implementation **********************************/
     /**********************************************************************************************/
+    @Override
+    public int getTransferId() {
+        return getClientDownloadId();
+    }
+
+    @Override
+    public int getUploadOrDownloadId() {
+        return getClientDownloadId();
+    }
+
     /**
      * ******************************************************************************************
      */

@@ -5,20 +5,12 @@
               android:layout_height="wrap_content">
 
     <ListView
-            android:id="@+id/lv_address_book_dialog"
+            android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="visible"
             android:layout_marginBottom="60dp">
-            <!--android:paddingTop="60dp">-->
     </ListView>
-
-    <!--<SearchView-->
-            <!--android:id="@+id/tv_search"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="60dp"-->
-            <!--android:layout_alignTop="@+id/lv_address_book_dialog">-->
-    <!--</SearchView>-->
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -26,14 +18,6 @@
             android:orientation="horizontal"
             android:layout_alignBottom="@+id/lv_address_book_dialog"
             android:layout_alignParentBottom="true">
-
-
-        <!--<Button-->
-                <!--android:id="@+id/bt_cancel"-->
-                <!--android:layout_height="60dp"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_weight="1"-->
-                <!--android:text="@string/dialog_cancel"/>-->
 
         <Button
                 android:id="@+id/bt_invite"
@@ -44,7 +28,5 @@
                 android:textSize="18sp"
                 style="@style/AppBaseTheme.Group.CreateButton"
                 android:layout_toRightOf="@+id/bt_cancel"/>
-
     </LinearLayout>
-
 </RelativeLayout>
