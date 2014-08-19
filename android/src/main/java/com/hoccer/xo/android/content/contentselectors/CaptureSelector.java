@@ -114,9 +114,9 @@ public class CaptureSelector implements IContentSelector {
                     matrix, true);
         }
         Uri contentUri;
-        String uriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, file.getName(), file.getName());
+        String contentUriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, file.getName(), file.getName());
 
-        contentUri = Uri.parse(uriString);
+        contentUri = Uri.parse(contentUriString);
 
         Cursor cursor = context.getContentResolver().query(
                 contentUri, projection, null, null, null);
@@ -130,7 +130,7 @@ public class CaptureSelector implements IContentSelector {
         }
         File imageFile = new File(filePath);
 
-        SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
+        SelectedContent contentObject = new SelectedContent(contentUriString, "file://" + filePath);
         contentObject.setFileName(imageFile.getName());
         contentObject.setContentMediaType(ContentMediaType.IMAGE);
         contentObject.setContentType(imageType);
@@ -155,4 +155,5 @@ public class CaptureSelector implements IContentSelector {
             super(message);
         }
     }
+
 }
