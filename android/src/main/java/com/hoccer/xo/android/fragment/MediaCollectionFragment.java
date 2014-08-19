@@ -237,15 +237,12 @@ public class MediaCollectionFragment extends SearchableListFragment {
             XoTransfer clickedItem = (XoTransfer)getListAdapter().getItem(position);
 
             if (mMediaPlayerServiceConnector.isConnected()) {
-                if (isSearchModeEnabled()) {
-                    MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem);
-                    mMediaPlayerServiceConnector.getService().setPlaylist(playlist);
-                    mMediaPlayerServiceConnector.getService().play(0);
-                } else {
-                    MediaPlaylist playlist = new MediaCollectionPlaylist(mCollection);
-                    mMediaPlayerServiceConnector.getService().setPlaylist(playlist);
-                    mMediaPlayerServiceConnector.getService().play(position);
-                }
+                MediaPlaylist playlist = isSearchModeEnabled() ?
+                        new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem) :
+                        new MediaCollectionPlaylist(mCollection);
+
+                mMediaPlayerServiceConnector.getService().playItemInPlaylist(clickedItem, playlist);
+
                 getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else {
                 LOG.error("MediaPlayerService is not connected");

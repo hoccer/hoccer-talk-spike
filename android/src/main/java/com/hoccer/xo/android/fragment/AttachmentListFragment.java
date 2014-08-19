@@ -14,7 +14,6 @@ import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.ContactSelectionActivity;
@@ -25,6 +24,7 @@ import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.ContactSearchResultAdapter;
 import com.hoccer.xo.android.adapter.SectionedListAdapter;
 import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
@@ -190,26 +190,6 @@ public class AttachmentListFragment extends ListFragment {
         mCurrentActionMode.finish();
     }
 
-    private boolean isPaused(IContentObject item) {
-        if (mMediaPlayerService != null && mMediaPlayerService.isPaused()) {
-            if (item.equals(mMediaPlayerService.getCurrentMediaItem())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isPlaying(IContentObject item) {
-        if (mMediaPlayerService != null && !mMediaPlayerService.isStopped() && !mMediaPlayerService.isPaused()) {
-            if (item.equals(mMediaPlayerService.getCurrentMediaItem())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private void bindToMediaPlayerService(Intent intent) {
         mConnection = new ServiceConnection() {
             @Override
@@ -308,24 +288,12 @@ public class AttachmentListFragment extends ListFragment {
 
             if (selectedItem instanceof XoTransfer) {
                 XoTransfer transfer = (XoTransfer)selectedItem;
-                boolean isTransferPlaying = isPlaying(transfer);
-                boolean isTransferPaused = isPaused(transfer);
 
-                if (mInSearchMode) {
-                    position = 0;
-                    mMediaPlayerService.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), transfer));
-                } else {
-                    mMediaPlayerService.setPlaylist(new UserPlaylist(mDatabase, mAttachmentAdapter.getContact()));
-                }
+                MediaPlaylist playlist = mInSearchMode ?
+                        new SingleItemPlaylist(mDatabase, transfer) :
+                        new UserPlaylist(mDatabase, mAttachmentAdapter.getContact());
 
-                if (isTransferPlaying) {
-                    mMediaPlayerService.setCurrentIndex(position);
-                } else if (isTransferPaused) {
-                    mMediaPlayerService.setCurrentIndex(position);
-                    mMediaPlayerService.play();
-                } else {
-                    mMediaPlayerService.play(position);
-                }
+                mMediaPlayerService.playItemInPlaylist(transfer, playlist);
 
                 getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else if (selectedItem instanceof TalkClientContact) {
