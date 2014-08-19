@@ -101,11 +101,11 @@ public class CaptureSelector implements IContentSelector {
         int imageWidth = options.outWidth;
         String imageType = options.outMimeType;
 
+        options.inSampleSize = 2;
         options.inJustDecodeBounds = false;
         Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 
         int exifOrientation = Integer.parseInt(exif.getAttribute(ExifInterface.TAG_ORIENTATION));
-        LOG.error("#foo " + exifOrientation);
         if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
