@@ -1,3 +1,5 @@
+package com.hoccer.xo.android.content;
+
 import com.hoccer.talk.client.*;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -5,10 +7,6 @@ import com.hoccer.talk.client.model.TalkClientMediaCollection;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.content.EmptyPlaylist;
-import com.hoccer.xo.android.content.MediaCollectionPlaylist;
-import com.hoccer.xo.android.content.SingleItemPlaylist;
-import com.hoccer.xo.android.content.UserPlaylist;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
