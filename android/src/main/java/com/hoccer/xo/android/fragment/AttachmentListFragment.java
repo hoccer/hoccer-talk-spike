@@ -308,6 +308,9 @@ public class AttachmentListFragment extends ListFragment {
 
             if (selectedItem instanceof XoTransfer) {
                 XoTransfer transfer = (XoTransfer)selectedItem;
+                boolean isTransferPlaying = isPlaying(transfer);
+                boolean isTransferPaused = isPaused(transfer);
+
                 if (mInSearchMode) {
                     position = 0;
                     mMediaPlayerService.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), transfer));
@@ -315,9 +318,9 @@ public class AttachmentListFragment extends ListFragment {
                     mMediaPlayerService.setPlaylist(new UserPlaylist(mDatabase, mAttachmentAdapter.getContact()));
                 }
 
-                if (isPlaying(transfer)) {
+                if (isTransferPlaying) {
                     mMediaPlayerService.setCurrentIndex(position);
-                } else if (isPaused(transfer)) {
+                } else if (isTransferPaused) {
                     mMediaPlayerService.setCurrentIndex(position);
                     mMediaPlayerService.play();
                 } else {
