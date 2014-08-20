@@ -25,6 +25,7 @@ import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.ThumbnailManager;
 import com.hoccer.xo.release.R;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -143,6 +144,7 @@ public class MessagingFragment extends XoListFragment
         mAdapter.onPause();
         mMotionInterpreter.deactivate();
         XoApplication.getXoClient().unregisterContactListener(this);
+        ImageLoader.getInstance().clearMemoryCache();
     }
 
     @Override
