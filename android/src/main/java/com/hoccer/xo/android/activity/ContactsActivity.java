@@ -15,11 +15,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsPageAdapter;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.fragment.NearbyContactsFragment;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -82,6 +84,13 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
             mEnvironmentUpdatesEnabled = mPreferences.getBoolean("preference_environment_update", true);
 
             getXoClient().registerStateListener(this);
+        }
+
+        // check wether we should immediatly open the conversation with a contact
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+            showContactConversation(contactId);
         }
     }
 
