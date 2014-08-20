@@ -1,5 +1,5 @@
-import com.hoccer.talk.util.WeakListenerArray;
-import junit.framework.Assert;
+package com.hoccer.talk.util;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,8 +7,6 @@ import org.junit.Test;
 import static junit.framework. TestCase.assertTrue;
 import static junit.framework. TestCase.assertFalse;
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.fail;
 
 public class WeakListenerArrayTest {
     private interface Listener {

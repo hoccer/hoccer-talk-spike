@@ -12,8 +12,8 @@ import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.AudioAttachmentItem;
 import com.hoccer.xo.android.content.MediaMetaData;
+import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.ColorSchemeManager;
@@ -131,12 +131,8 @@ public class ChatAudioItem extends ChatMessageItem {
     private void startPlaying() {
         if (mMediaPlayerServiceConnector.isConnected()) {
             MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            if (service.isPaused() && service.getCurrentMediaItem() != null && mAudioContentObject.equals(service.getCurrentMediaItem())) {
-                service.play();
-            } else {
-                service.setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAudioContentObject));
-                service.play(0);
-            }
+            MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAudioContentObject);
+            service.playItemInPlaylist(mAudioContentObject, playlist);
         }
     }
 

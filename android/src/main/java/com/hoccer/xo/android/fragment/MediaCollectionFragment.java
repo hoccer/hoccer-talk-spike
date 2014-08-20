@@ -18,6 +18,7 @@ import com.hoccer.xo.android.activity.MediaCollectionSelectionActivity;
 import com.hoccer.xo.android.adapter.AttachmentSearchResultAdapter;
 import com.hoccer.xo.android.adapter.MediaCollectionItemAdapter;
 import com.hoccer.xo.android.content.MediaCollectionPlaylist;
+import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.ContactOperations;
@@ -234,14 +235,14 @@ public class MediaCollectionFragment extends SearchableListFragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             XoTransfer clickedItem = (XoTransfer)getListAdapter().getItem(position);
+
             if (mMediaPlayerServiceConnector.isConnected()) {
-                if (isSearchModeEnabled()) {
-                    mMediaPlayerServiceConnector.getService().setPlaylist(new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem));
-                } else {
-                    MediaCollectionPlaylist playlist = new MediaCollectionPlaylist(mCollection);
-                    mMediaPlayerServiceConnector.getService().setPlaylist(playlist);
-                    mMediaPlayerServiceConnector.getService().play(position);
-                }
+                MediaPlaylist playlist = isSearchModeEnabled() ?
+                        new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), clickedItem) :
+                        new MediaCollectionPlaylist(mCollection);
+
+                mMediaPlayerServiceConnector.getService().playItemInPlaylist(clickedItem, playlist);
+
                 getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else {
                 LOG.error("MediaPlayerService is not connected");
