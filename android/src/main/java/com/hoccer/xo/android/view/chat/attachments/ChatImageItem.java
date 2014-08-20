@@ -73,7 +73,7 @@ public class ChatImageItem extends ChatMessageItem {
         ImageView imageView = (ImageView) mContentWrapper.findViewById(R.id.iv_image_view);
         RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
         int mask;
-        String tag = (mMessage.getMessageId() != null) ? mMessage.getMessageId() : mMessage.getMessageTag();
+        String messageTag = (mMessage.getMessageId() != null) ? mMessage.getMessageId() : mMessage.getMessageTag();
         if (mMessage.isIncoming()) {
             rootView.setGravity(Gravity.LEFT);
             mask = R.drawable.chat_bubble_incoming;
@@ -83,7 +83,7 @@ public class ChatImageItem extends ChatMessageItem {
         }
         if (contentObject.getContentDataUrl() != null) {
             mAttachmentView.setBackgroundDrawable(null);
-            ThumbnailManager.getInstance(mContext).displayThumbnailForImage(contentObject.getContentDataUrl(), imageView, mask, tag);
+            ThumbnailManager.getInstance(mContext).displayThumbnailForImage(contentObject.getContentDataUrl(), imageView, mask, messageTag);
         }
     }
 
