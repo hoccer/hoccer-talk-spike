@@ -6,7 +6,6 @@ import android.graphics.*;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
-import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -15,14 +14,14 @@ import android.support.v4.util.LruCache;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import com.hoccer.xo.android.XoApplication;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,11 +39,13 @@ public class ThumbnailManager {
 
     private Context mContext;
     private Drawable mStubDrawable;
+    private DisplayImageOptions mDisplayOptions;
 
 
     private ThumbnailManager(Context context) {
         mContext = context;
         mRunningRenderJobs = new ConcurrentHashMap<String, AsyncTask>();
+
         init(context);
     }
 
@@ -80,6 +81,13 @@ public class ThumbnailManager {
         };
 
         mStubDrawable = new ColorDrawable(Color.LTGRAY);
+        mDisplayOptions = new DisplayImageOptions.Builder()
+                .showImageOnLoading(mStubDrawable)
+                .showImageForEmptyUri(mStubDrawable)
+                .showImageOnFail(mStubDrawable)
+                .cacheInMemory(true)
+                .cacheOnDisc(true)
+                .build();
     }
 
     private void addBitmapToMemoryCache(String key, Bitmap bitmap) {
@@ -96,43 +104,51 @@ public class ThumbnailManager {
     /**
      * Retrieves a thumbnail representation of an image at a specified URI + specified tag and adds it to a given ImageView.
      *
-     * @param uri          The URI of the image
+     * @param imageUri     The URI of the image
      * @param imageView    The ImageView which will display the thumbnail
      * @param maskResource The resource id of a drawable to mask the thumbnail
-     * @param tag          The tag to identify this specific thumbnail representation
+     * @param messageTag   The tag to identify this specific thumbnail representation
      */
-    public void displayThumbnailForImage(String uri, ImageView imageView, int maskResource, String tag) {
+    public void displayThumbnailForImage(String imageUri, ImageView imageView, int maskResource, String messageTag) {
 
-        String thumbnailUri = taggedThumbnailUri(uri, tag);
-
-        Bitmap bitmap = null;
-        if (uri != null) {
-            bitmap = getBitmapFromMemCache(thumbnailUri);
-        }
-        if (bitmap == null) {
-            bitmap = loadThumbnailForUri(uri, tag);
-        }
-        if (bitmap != null) {
-            imageView.setImageBitmap(bitmap);
-            imageView.setVisibility(View.VISIBLE);
+        String thumbnailFilePath = createTaggedThumbnailFilePath(imageUri, messageTag);
+        File thumbnail = new File(thumbnailFilePath);
+        if (thumbnail.exists()) {
+            imageView.getLayoutParams().height = getImageHeight(thumbnail);
+            ImageLoader.getInstance().displayImage(Uri.fromFile(thumbnail).toString(), imageView, mDisplayOptions);
         } else {
-            imageView.setImageDrawable(mStubDrawable);
-            if (uri != null) {
-                queueImageThumbnailCreation(uri, imageView, maskResource, tag);
-            }
+            queueImageThumbnailCreation(imageUri, thumbnailFilePath, imageView, maskResource);
         }
     }
 
-    private String taggedThumbnailUri(String uri, String tag) {
+    private int getImageHeight(File thumbnail) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(thumbnail.getAbsolutePath(), options);
+        int height = options.outHeight;
+        return height;
+    }
+
+    private String createTaggedThumbnailFilePath(String uri, String tag) {
         String thumbnailFilename = uri.substring(uri.lastIndexOf("/") + 1, uri.length());
         int index = thumbnailFilename.lastIndexOf(".");
         String taggedFilename = thumbnailFilename.substring(0, index) + String.valueOf(tag) + thumbnailFilename.substring(index);
         return XoApplication.getThumbnailDirectory() + File.separator + taggedFilename;
     }
 
-    // TODO: use DiskLruCache instead
+    private void queueImageThumbnailCreation(String imageUri, String thumbnailFilePath, ImageView imageView, int maskResource) {
+        synchronized (mRunningRenderJobs) {
+            if (!mRunningRenderJobs.containsKey(thumbnailFilePath)) {
+                LOG.trace("Adding image render job to queue: " + thumbnailFilePath);
+                ImageThumbnailRenderTask imageThumbnailRenderTask = new ImageThumbnailRenderTask();
+                mRunningRenderJobs.put(thumbnailFilePath, imageThumbnailRenderTask);
+                imageThumbnailRenderTask.execute(imageUri, imageView, maskResource, thumbnailFilePath);
+            }
+        }
+    }
+
     private Bitmap loadThumbnailForUri(String uri, String tag) {
-        String thumbnailUri = taggedThumbnailUri(uri, tag);
+        String thumbnailUri = createTaggedThumbnailFilePath(uri, tag);
         File thumbnail = new File(thumbnailUri);
         Bitmap bitmap = null;
         if (thumbnail.exists()) {
@@ -144,9 +160,8 @@ public class ThumbnailManager {
         return bitmap;
     }
 
-    // TODO: use DiskLruCache instead
-    private void saveToThumbnailDirectory(Bitmap bitmap, String uri, String tag) {
-        File destination = new File(taggedThumbnailUri(uri, tag));
+    private void saveToThumbnailDirectory(Bitmap bitmap, String thumbnailUri) {
+        File destination = new File(thumbnailUri);
         try {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(destination));
         } catch (FileNotFoundException e) {
@@ -154,33 +169,33 @@ public class ThumbnailManager {
         }
     }
 
-    private Bitmap rotateBitmap(Bitmap bitmap, String filePath) {
-        int rotation = 0;
-        try {
-            ExifInterface exif = new ExifInterface(filePath);
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-            switch (orientation) {
-                case 6:
-                    rotation = 90;
-                    break;
-                case 3:
-                    rotation = 180;
-                    break;
-                case 8:
-                    rotation = -90;
-                    break;
-                default:
-                    rotation = 0;
-                    break;
-            }
-
-        } catch (IOException e) {
-            LOG.error("Error while accessing Exif information for image: " + filePath, e);
-        }
-        Matrix matrix = new Matrix();
-        matrix.postRotate(rotation);
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-    }
+//    private Bitmap rotateBitmap(Bitmap bitmap, String filePath) {
+//        int rotation = 0;
+//        try {
+//            ExifInterface exif = new ExifInterface(filePath);
+//            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+//            switch (orientation) {
+//                case 6:
+//                    rotation = 90;
+//                    break;
+//                case 3:
+//                    rotation = 180;
+//                    break;
+//                case 8:
+//                    rotation = -90;
+//                    break;
+//                default:
+//                    rotation = 0;
+//                    break;
+//            }
+//
+//        } catch (IOException e) {
+//            LOG.error("Error while accessing Exif information for image: " + filePath, e);
+//        }
+//        Matrix matrix = new Matrix();
+//        matrix.postRotate(rotation);
+//        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+//    }
 
     private Bitmap scaleBitmap(Bitmap bitmap, Context context) {
         if (bitmap == null || context == null) {
@@ -203,9 +218,9 @@ public class ThumbnailManager {
         return result;
     }
 
-    private String getRealPathFromURI(Uri contentURI, Context context) {
+    private String getRealPathFromURI(Uri contentURI) {
         String result = "";
-        Cursor cursor = context.getContentResolver().query(contentURI, null, null, null, null);
+        Cursor cursor = mContext.getContentResolver().query(contentURI, null, null, null, null);
         if (cursor == null) {
             result = contentURI.getPath();
         } else {
@@ -218,52 +233,41 @@ public class ThumbnailManager {
         return result;
     }
 
-    private void queueImageThumbnailCreation(String uri, ImageView imageView, int maskResource, String tag) {
-        String key = taggedThumbnailUri(uri, tag);
-        synchronized (mRunningRenderJobs) {
-            if (!mRunningRenderJobs.containsKey(key)) {
-                LOG.trace("Adding image render job to queue: " + key);
-                ImageThumbnailRenderer imageThumbnailRenderer = new ImageThumbnailRenderer();
-                mRunningRenderJobs.put(key, imageThumbnailRenderer);
-                imageThumbnailRenderer.execute(uri, imageView, maskResource, tag, key);
-            }
-        }
-    }
-
-    private Bitmap createImageThumbnail(String uri, int maskResource, String tag) {
-        if (uri == null) {
+    private Bitmap createThumbnailBitmap(String imageUri, String thumbnailUri, int maskResource) {
+        if (imageUri == null) {
             return null;
         }
         Bitmap thumbnail;
-        File imageFile = new File(getRealPathFromURI(Uri.parse(uri), mContext));
+        File imageFile = new File(getRealPathFromURI(Uri.parse(imageUri)));
         if (imageFile.exists()) {
             thumbnail = renderImageThumbnail(imageFile, maskResource);
             if (thumbnail != null) {
-                saveToThumbnailDirectory(thumbnail, uri, tag);
+                saveToThumbnailDirectory(thumbnail, thumbnailUri);
                 return thumbnail;
             }
         }
         return null;
     }
 
-    // TODO: use ThumbnailUtils methods for all this.
     private Bitmap renderImageThumbnail(File file, int maskResource) {
-        // Dry-loading of bitmap to calculate sample size
+
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-        int fileHeight = options.outHeight;
-        int sampleSize = fileHeight / DEFAULT_HEIGHT_DP;
-        // Load bitmap in appropriate size
-        options = new BitmapFactory.Options();
+
+        WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        int deviceWidth = (int) (windowManager.getDefaultDisplay().getWidth() * 0.8);
+        int deviceHeight = (int) (windowManager.getDefaultDisplay().getHeight() * 0.8);
+        int sampleSize = calculateInSampleSize(options, deviceWidth, deviceHeight);
+
         options.inSampleSize = sampleSize;
+        options.inJustDecodeBounds = false;
         Bitmap original = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-        original = rotateBitmap(original, file.getAbsolutePath());
-        original = scaleBitmap(original, mContext);
-        //Load mask
+//        original = rotateBitmap(original, file.getAbsolutePath());
+//        original = scaleBitmap(original, mContext);
         Bitmap mask = getNinePatchMask(maskResource, original.getWidth(), original.getHeight(), mContext);
-        //Draw everything on canvas
         Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_8888);
+
         Canvas c = new Canvas(result);
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
@@ -273,22 +277,33 @@ public class ThumbnailManager {
         return result;
     }
 
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
 
-    private class ImageToLoad {
-        public String mUrl;
-        public ImageView mImageView;
+        if (height > reqHeight || width > reqWidth) {
 
-        public ImageToLoad(String url, ImageView imageView) {
-            mUrl = url;
-            mImageView = imageView;
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
         }
+
+        return inSampleSize;
     }
 
-    private class ImageThumbnailRenderer extends AsyncTask<Object, Object, Bitmap> {
-        private ImageToLoad mImageToLoad;
-        private int mMaskResource;
-        private String mTag;
-        public String mThumbnailUri;
+    private class ImageThumbnailRenderTask extends AsyncTask<Object, Object, Bitmap> {
+
+        private ImageView mImageView;
+        private String mThumbnailFilePath;
 
         @Override
         protected void onPreExecute() {
@@ -297,37 +312,30 @@ public class ThumbnailManager {
 
         @Override
         protected Bitmap doInBackground(Object[] params) {
-            String uri = (String) params[0];
-            mImageToLoad = new ImageToLoad(uri, (ImageView) params[1]);
-            mMaskResource = (Integer) params[2];
-            mTag = (String) params[3];
-            mThumbnailUri = (String) params[4];
+            mImageView = (ImageView) params[1];
+            mThumbnailFilePath = (String) params[3];
 
-            Bitmap thumbnail = createImageThumbnail(mImageToLoad.mUrl, mMaskResource, mTag);
-            if (thumbnail == null) {
-                return null;
-            }
+            String imageUri = (String) params[0];
+            int maskResource = (Integer) params[2];
 
+            Bitmap thumbnail = createThumbnailBitmap(imageUri, mThumbnailFilePath, maskResource);
             return thumbnail;
         }
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             if (bitmap != null) {
-                addBitmapToMemoryCache(mThumbnailUri, bitmap);
-                mImageToLoad.mImageView.setImageBitmap(bitmap);
-                mImageToLoad.mImageView.setVisibility(View.VISIBLE);
-            } else {
-                mImageToLoad.mImageView.setImageDrawable(mStubDrawable);
+                mImageView.getLayoutParams().height = bitmap.getHeight();
+                ImageLoader.getInstance().displayImage(Uri.fromFile(new File(mThumbnailFilePath)).toString(), mImageView, mDisplayOptions);
             }
-
             synchronized (mRunningRenderJobs) {
-                if (mRunningRenderJobs.containsKey(mThumbnailUri)) {
-                    LOG.trace("Removing render job from queue: " + mThumbnailUri);
-                    mRunningRenderJobs.remove(mThumbnailUri);
+                if (mRunningRenderJobs.containsKey(mThumbnailFilePath)) {
+                    LOG.trace("Removing render job from queue: " + mThumbnailFilePath);
+                    mRunningRenderJobs.remove(mThumbnailFilePath);
                 }
             }
         }
+
     }
 
     private class VideoThumbnailRenderer extends AsyncTask<Object, Void, Bitmap> {
@@ -378,7 +386,7 @@ public class ThumbnailManager {
      * @param tag          The tag to identify this specific thumbnail representation
      */
     public void displayThumbnailForVideo(String uri, ImageView imageView, int maskResource, String tag) {
-        String taggedUri = taggedThumbnailUri(uri, tag);
+        String taggedUri = createTaggedThumbnailFilePath(uri, tag);
         Bitmap bitmap = getBitmapFromMemCache(taggedUri);
 
         if (bitmap == null) {
@@ -394,7 +402,7 @@ public class ThumbnailManager {
     }
 
     private void queueVideoThumbnailCreation(String uri, ImageView imageView, int maskResource, String tag) {
-        String taggedUri = taggedThumbnailUri(uri, tag);
+        String taggedUri = createTaggedThumbnailFilePath(uri, tag);
         synchronized (mRunningRenderJobs) {
             if (!mRunningRenderJobs.containsKey(taggedUri)) {
                 LOG.trace("adding video job to queue: " + taggedUri);
@@ -406,7 +414,7 @@ public class ThumbnailManager {
     }
 
     private Bitmap createVideoThumbnail(String uri, int maskResource, String tag) {
-        String path = getRealPathFromURI(Uri.parse(uri), mContext);
+        String path = getRealPathFromURI(Uri.parse(uri));
         Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Images.Thumbnails.MINI_KIND);
         if (bitmap == null) {
             return null;
@@ -420,7 +428,7 @@ public class ThumbnailManager {
             result = renderThumbnailForVideo(bitmap, maskResource);
         }
         if (result != null) {
-            saveToThumbnailDirectory(result, uri, tag);
+            saveToThumbnailDirectory(result, uri/*, tag*/);
         }
         return result;
     }
