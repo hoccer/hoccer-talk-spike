@@ -32,6 +32,8 @@ import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -390,19 +392,37 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     private String getMessageTimestamp(TalkClientMessage message) {
-        String timeStamp = null;
-        Date time = message.getTimestamp();
-        if (time != null) {
+        StringBuffer result = new StringBuffer();
+        Date timeStamp = message.getTimestamp();
 
-            timeStamp = (String) DateUtils.getRelativeDateTimeString(
-                    mContext,
-                    time.getTime(),
-                    DateUtils.MINUTE_IN_MILLIS,
-                    DateUtils.WEEK_IN_MILLIS,
-                    0
-            );
+        if (timeStamp != null) {
+            long timeStampDay = getTimeAtStartOfDay(timeStamp);
+            long today = getTimeAtStartOfDay(new Date());
+            long difference = Math.abs(today - timeStampDay);
+
+            if (difference <= DateUtils.DAY_IN_MILLIS) {
+                result.append(DateUtils.getRelativeTimeSpanString(timeStampDay, today, DateUtils.DAY_IN_MILLIS, 0));
+            } else {
+                result.append(SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG).format(timeStamp));
+            }
+
+            result.append(' ');
+            result.append(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(timeStamp));
         }
-        return timeStamp;
+
+        return result.toString();
+    }
+
+    private long getTimeAtStartOfDay(Date time) {
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.setTime(time);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        return calendar.getTimeInMillis();
     }
 
     private void setAvatar(AvatarView avatarView, final TalkClientContact sendingContact) {
