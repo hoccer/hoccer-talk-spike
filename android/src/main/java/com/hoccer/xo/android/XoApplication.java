@@ -13,6 +13,8 @@ import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
 import com.hoccer.xo.android.util.ThumbnailManager;
+import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
+import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -240,8 +242,15 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
                 .bitmapConfig(Bitmap.Config.RGB_565)
                 .considerExifParams(true)
                 .build();
+
+        final int maxMemoryInKiloByte = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        final int cacheSize = maxMemoryInKiloByte / 8;
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
                 .threadPoolSize(2)
+                .memoryCache(new LruMemoryCache(cacheSize))
+                .memoryCacheSize(cacheSize)
+                .discCacheSize(50 * 1024 * 1024)
+                .discCacheFileCount(100)
                 .build();
         ImageLoader.getInstance().init(config);
 
