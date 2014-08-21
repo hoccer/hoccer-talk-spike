@@ -1,9 +1,11 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -463,8 +465,7 @@ public class SingleProfileFragment extends XoFragment
         }
 
         // apply data from the contact that needs to recurse
-        String name = null;
-
+        String name = getResources().getString(R.string.profile_user_name_unknown);
         if (contact.isClient() || contact.isSelf()) {
             if (contact.isSelf() && !contact.isSelfRegistered()) {
                 name = contact.getSelf().getRegistrationName();
@@ -475,17 +476,7 @@ public class SingleProfileFragment extends XoFragment
                 }
             }
         }
-        if (name == null) {
-            if (mMode == Mode.CREATE_SELF) {
-                name = "<chose a name>";
-            }
-        }
-        if (name == null) {
-            name = "<unnamed>";
-        }
-        LOG.debug("name is " + name);
         mNameText.setText(name);
-
         mKeyText.setText(getFingerprint());
 
         updateInviteButton(contact);
@@ -648,7 +639,10 @@ public class SingleProfileFragment extends XoFragment
         mNameText.setVisibility(View.INVISIBLE);
         if (isRegistered) {
             mEditName.setText(mNameText.getText());
+        } else {
+            mEditName.setText(getResources().getString(R.string.profile_self_initial_name));
         }
+        mEditName.setSelection(mEditName.getText().length());
         mAvatarImage.setOnClickListener(this);
         return true;
     }
@@ -680,7 +674,6 @@ public class SingleProfileFragment extends XoFragment
             refreshContact(mContact);
             update(mContact);
         }
-
     }
 
     public enum Mode {
