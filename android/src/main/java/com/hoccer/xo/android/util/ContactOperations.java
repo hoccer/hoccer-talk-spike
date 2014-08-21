@@ -58,20 +58,17 @@ public class ContactOperations {
         }
 
         Intent intent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) // Android 4.4 and up
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { // Android 4.4 and up
             String defaultSmsPackageName = Telephony.Sms.getDefaultSmsPackage(context);
 
             intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + Uri.encode(recipientString)));
             intent.putExtra("sms_body", message);
 
-            if (defaultSmsPackageName != null) // Can be null in case that there is no default, then the user would be able to choose any app that supports this intent.
-            {
+            if (defaultSmsPackageName != null) { // Can be null in case that there is no default, then the user would be able to choose any app that supports this intent.
                 intent.setPackage(defaultSmsPackageName);
             }
         }
-        else
-        {
+        else {
             intent = new Intent(Intent.ACTION_VIEW);
             intent.setType("vnd.android-dir/mms-sms");
             intent.putExtra("address", recipientString);
