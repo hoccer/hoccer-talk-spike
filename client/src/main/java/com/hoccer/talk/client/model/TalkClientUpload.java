@@ -684,8 +684,17 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         return fileName;
     }
 
+    @Override
     public String getDataFile() {
-        return dataFile;
+        // TODO fix up this field on db upgrade
+        if (dataFile != null) {
+            if (dataFile.startsWith("file://")) {
+                return dataFile.substring(7);
+            } else {
+                return dataFile;
+            }
+        }
+        return null;
     }
 
     public String getDownloadUrl() {
