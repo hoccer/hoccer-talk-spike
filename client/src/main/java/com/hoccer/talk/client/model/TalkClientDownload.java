@@ -909,6 +909,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.contentHmac = hmac;
     }
 
+    @Override
     public String getDataFile() {
         // TODO fix up this field on db upgrade
         if (dataFile != null) {
