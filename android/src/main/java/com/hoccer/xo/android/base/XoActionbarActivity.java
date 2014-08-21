@@ -78,7 +78,7 @@ public abstract class XoActionbarActivity extends XoActivity {
     }
 
     private void updateActionBarIcons() {
-        if (mMediaPlayerServiceConnector.isConnected() && mMenu != null) {
+        if (mMediaPlayerServiceConnector != null && mMediaPlayerServiceConnector.isConnected() && mMenu != null) {
             MenuItem mediaPlayerItem = mMenu.findItem(R.id.menu_media_player);
 
             MediaPlayerService service = mMediaPlayerServiceConnector.getService();
