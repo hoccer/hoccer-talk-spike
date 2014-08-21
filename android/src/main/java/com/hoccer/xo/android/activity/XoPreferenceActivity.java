@@ -308,11 +308,6 @@ public class XoPreferenceActivity extends PreferenceActivity
                             Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
                         }
                     }
-                },
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
                 }
         );
     }
@@ -353,11 +348,6 @@ public class XoPreferenceActivity extends PreferenceActivity
                         } else {
                             Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
                         }
-                    }
-                },
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
                     }
                 }
         );

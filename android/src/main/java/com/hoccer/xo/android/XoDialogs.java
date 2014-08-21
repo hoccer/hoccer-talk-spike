@@ -38,6 +38,13 @@ public class XoDialogs {
 
                 if(noListener != null) {
                     builder.setNegativeButton(R.string.common_no, noListener);
+                } else {
+                    builder.setNegativeButton(R.string.common_no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do nothing
+                        }
+                    });
                 }
 
                 return builder.create();
@@ -88,15 +95,15 @@ public class XoDialogs {
                     }
                 });
 
-                if(cancelListener != null) {
-                    builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            inputMethodManager.hideSoftInputFromWindow(passwordInput.getWindowToken(), 0);
+                builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        inputMethodManager.hideSoftInputFromWindow(passwordInput.getWindowToken(), 0);
+                        if(cancelListener != null) {
                             cancelListener.onClick(dialog, id);
                         }
-                    });
-                }
+                    }
+                });
                 builder.setView(passwordInputView);
                 Dialog dialog = builder.create();
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
@@ -136,15 +143,15 @@ public class XoDialogs {
                     }
                 });
 
-                if(cancelListener != null) {
-                    builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            inputMethodManager.hideSoftInputFromWindow(textInput.getWindowToken(), 0);
+                builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        inputMethodManager.hideSoftInputFromWindow(textInput.getWindowToken(), 0);
+                        if(cancelListener != null) {
                             cancelListener.onClick(dialog, id);
                         }
-                    });
-                }
+                    }
+                });
                 builder.setView(textInputView);
                 Dialog dialog = builder.create();
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
