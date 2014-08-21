@@ -69,8 +69,10 @@ public class DeviceContactsSelectionFragment extends ListFragment {
                 String[] selectedContacts = mAdapter.getSelectedData();
                 if (mIsSmsInvitation) {
                     composeInviteSms(selectedContacts);
+                    getActivity().finish();
                 } else {
                     composeInviteEmail(selectedContacts);
+                    getActivity().finish();
                 }
             }
         });
