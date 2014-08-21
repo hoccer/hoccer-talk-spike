@@ -28,6 +28,8 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
     private final List<IXoTransferListenerOld> mListeners;
 
+    private final int mFileSizeLimit;
+
     private HttpClient mHttpClient;
 
     private final Map<Integer, TalkClientUpload> mUploadsById;
@@ -45,6 +47,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         mDownloadsById = new ConcurrentHashMap<Integer, TalkClientDownload>();
         mUploadsById = new ConcurrentHashMap<Integer, TalkClientUpload>();
         mDownloadRetryQueue = new ConcurrentHashMap<Integer, ScheduledFuture>();
+        mFileSizeLimit = mClient.getUpAndDownloadFileSizeLimit();
         initializeHttpClient();
     }
 
@@ -101,6 +104,12 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
     public void startOrRestartDownload(final TalkClientDownload download) {
         LOG.info("startOrRestartDownload()");
+        if(download.getContentLength() >= mFileSizeLimit) {
+            LOG.debug("download aborted because the download exceeds the fileSizeLimit");
+            download.pause(this);
+            return;
+        }
+
         synchronized (mDownloadsById) {
             final int downloadId = download.getClientDownloadId();
             if (!mDownloadsById.containsKey(downloadId)) {
@@ -193,6 +202,12 @@ public class XoTransferAgent implements IXoTransferListenerOld {
                 " | datafile: " + upload.getDataFile() +
                 " | contenttype: " + upload.getContentType() +
                 " | clientUploadId: " + upload.getClientUploadId());
+
+        if(upload.getContentLength() >= mFileSizeLimit) {
+            LOG.debug("upload aborted because the upload exceeds the fileSizeLimit");
+            upload.pause(this);
+            return;
+        }
 
         if (upload.getState() == TalkClientUpload.State.COMPLETE) {
             mUploadsById.remove(upload.getClientUploadId());

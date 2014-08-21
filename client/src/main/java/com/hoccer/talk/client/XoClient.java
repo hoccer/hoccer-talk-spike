@@ -81,6 +81,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             "inactive", "idle", "connecting", "reconnecting", "registering", "login", "syncing", "active"
     };
 
+    private int mUpAndDownloadFileSizeLimit = Integer.MAX_VALUE;
+
     /** Return the name of the given state */
     public static final String stateToString(int state) {
         if(state >= 0 && state < STATE_NAMES.length) {
@@ -1739,6 +1741,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.debug("created message with id " + clientMessage.getClientMessageId() + " and tag " + message.getMessageTag());
 
         return clientMessage;
+    }
+
+    public int getUpAndDownloadFileSizeLimit() {
+        return mUpAndDownloadFileSizeLimit;
+    }
+
+    public void setUpAndDownloadFileSizeLimit(int upAndDownloadFileSizeLimit) {
+        mUpAndDownloadFileSizeLimit = upAndDownloadFileSizeLimit;
     }
 
     /**
