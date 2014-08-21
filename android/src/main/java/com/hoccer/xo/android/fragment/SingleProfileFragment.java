@@ -636,7 +636,6 @@ public class SingleProfileFragment extends XoFragment
         } else {
             mEditName.setText(getResources().getString(R.string.profile_self_initial_name));
         }
-        mEditName.setSelection(mEditName.getText().length());
         mAvatarImage.setOnClickListener(this);
         return true;
     }
