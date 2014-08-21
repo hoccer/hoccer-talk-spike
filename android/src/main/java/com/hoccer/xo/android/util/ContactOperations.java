@@ -36,7 +36,7 @@ public class ContactOperations {
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(
                 transfer.getFileName(),
-                transfer.getContentUrl(),
+                null, // HACK: when re-sending an upload or download, the content url is cleared to exclude it from the music browser
                 transfer.getContentDataUrl(),
                 transfer.getContentType(),
                 transfer.getContentMediaType(),

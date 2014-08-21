@@ -536,7 +536,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
-        List<TalkClientUpload> uploads = mClientUploads.queryForEq("mediaType", mediaType);
+        List<TalkClientUpload> uploads = mClientUploads.queryBuilder()
+            .where()
+            .eq("mediaType", mediaType)
+            .isNotNull("contentUrl")
+            .and(2)
+            .query();
+
         List<TalkClientDownload> downloads = mClientDownloads.queryForEq("mediaType", mediaType);
 
         return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
@@ -627,8 +633,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<XoTransfer> findAllTransfers() throws SQLException {
-        List<TalkClientUpload> uploads = mClientUploads.queryForAll();
+        List<TalkClientUpload> uploads = mClientUploads.queryBuilder()
+                .where()
+                .isNotNull("contentUrl")
+                .query();
+
         List<TalkClientDownload> downloads = mClientDownloads.queryForAll();
+
         return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
     }
 
