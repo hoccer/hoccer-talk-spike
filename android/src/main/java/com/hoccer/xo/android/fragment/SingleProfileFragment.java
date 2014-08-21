@@ -648,22 +648,24 @@ public class SingleProfileFragment extends XoFragment
     @Override
     public void onDestroyActionMode(ActionMode mode) {
         String nameString = mEditName.getText().toString();
-        mNameText.setText(nameString);
+        String newUserName = nameString.isEmpty() ? getResources().getString(R.string.profile_self_initial_name) : nameString;
+
+        mNameText.setText(newUserName);
         mEditName.setVisibility(View.GONE);
         mNameText.setVisibility(View.VISIBLE);
         mAvatarImage.setOnClickListener(null);
 
         if (!isRegistered) {
-            mContact.getSelf().setRegistrationName(nameString);
+            mContact.getSelf().setRegistrationName(newUserName);
             mContact.updateSelfConfirmed();
             getXoClient().register();
             SingleProfileActivity activity = (SingleProfileActivity) getXoActivity();
             activity.confirmSelf();
-            getXoClient().setClientString(nameString, "happy");
+            getXoClient().setClientString(newUserName, "happy");
             Intent intent = new Intent(activity, ContactsActivity.class);
             activity.startActivity(intent);
         } else {
-            getXoClient().setClientString(nameString, "happier");
+            getXoClient().setClientString(newUserName, "happier");
             refreshContact(mContact);
             update(mContact);
         }
