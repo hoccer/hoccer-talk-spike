@@ -1,11 +1,9 @@
 package com.hoccer.xo.android.fragment;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -67,8 +65,6 @@ public class SingleProfileFragment extends XoFragment
     private EditText mEditName;
 
     private boolean isRegistered = true;
-
-    private Menu mMenu;
 
     private ImageButton mNicknameEditButton;
 
@@ -283,8 +279,6 @@ public class SingleProfileFragment extends XoFragment
                 }
             }
         }
-
-        mMenu = menu;
     }
 
 	@Override
