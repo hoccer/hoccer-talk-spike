@@ -132,6 +132,8 @@
     <string name="profile_user_unblock_button">Unblock this user</string>
     <string name="profile_user_depair_button">Depair this user</string>
     <string name="profile_user_delete_button">Delete this user</string>
+    <string name="profile_user_name_unknown">unknown</string>
+    <string name="profile_self_initial_name">anonymous</string>
 
     <string name="friend_request_add_as_friend">Add as a friend</string>
     <string name="friend_request_cancel_invitation">Cancel invitation</string>

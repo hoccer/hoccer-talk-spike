@@ -119,6 +119,8 @@
     <string name="profile_user_unblock_button">User entblockieren</string>
     <string name="profile_user_depair_button">Verbindung aufheben</string>
     <string name="profile_user_delete_button">Kontakt löschen</string>
+    <string name="profile_user_name_unknown">unbekannt</string>
+    <string name="profile_self_initial_name">anonym</string>
 
     <string name="friend_request_add_as_friend">Als Freund hinzufügen</string>
     <string name="friend_request_cancel_invitation">Freundschaftsanfrage zurückziehen</string>

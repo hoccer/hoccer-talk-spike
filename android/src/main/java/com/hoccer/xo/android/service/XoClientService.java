@@ -564,7 +564,7 @@ public class XoClientService extends Service {
         if (contacts.size() == 1) {
             TalkClientContact singleContact = contacts.get(0);
             // create intent to start the messaging activity for the right contact
-            Intent messagingIntent = new Intent(this, MessagingActivity.class);
+            Intent messagingIntent = new Intent(this, ContactsActivity.class);
             messagingIntent.putExtra(IntentHelper.EXTRA_CONTACT_ID, singleContact.getClientContactId());
             // make a pending intent with correct back-stack
             PendingIntent pendingIntent;

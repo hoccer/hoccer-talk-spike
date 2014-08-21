@@ -36,7 +36,7 @@ public class ContactOperations {
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(
                 transfer.getFileName(),
-                transfer.getContentUrl(),
+                null, // HACK: when re-sending an upload or download, the content url is cleared to exclude it from the music browser
                 transfer.getContentDataUrl(),
                 transfer.getContentType(),
                 transfer.getContentMediaType(),
@@ -57,27 +57,27 @@ public class ContactOperations {
             recipientString += recipients[i] + ";";
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { // At least KitKat
-            String defaultSmsPackageName = Telephony.Sms
-                    .getDefaultSmsPackage(context); //Need to change the build to API 19
+        Intent intent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { // Android 4.4 and up
+            String defaultSmsPackageName = Telephony.Sms.getDefaultSmsPackage(context);
 
-            Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
-            sendIntent.setData(Uri.parse("smsto:" + recipientString));
-            sendIntent.setType("text/plain");
-            sendIntent.putExtra(Intent.EXTRA_TEXT, message);
-
-            if (defaultSmsPackageName != null) {
-                sendIntent.setPackage(defaultSmsPackageName);
-            }
-            context.startActivity(sendIntent);
-        } else {
-            Intent intent = new Intent(Intent.ACTION_SENDTO);
-            intent.setData(Uri.parse("smsto:" + recipientString));
+            intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + Uri.encode(recipientString)));
             intent.putExtra("sms_body", message);
 
-            context.startActivity(intent);
+            if (defaultSmsPackageName != null) { // Can be null in case that there is no default, then the user would be able to choose any app that supports this intent.
+                intent.setPackage(defaultSmsPackageName);
+            }
         }
+        else {
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setType("vnd.android-dir/mms-sms");
+            intent.putExtra("address", recipientString);
+            intent.putExtra("sms_body", message);
+        }
+        context.startActivity(intent);
     }
+
+
 
     public static void sendEMail(Context context, String subject, String message, String[] recipients) {
         LOG.debug("Sending EMail with message: " + message);

@@ -59,18 +59,21 @@ public class MessagingFragment extends XoListFragment
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-            if (clientContactId == -1) {
-                LOG.error("invalid contact id");
-            } else {
-                try {
-                    mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
-                } catch (SQLException e) {
-                    LOG.error("sql error", e);
-                }
+            try {
+                mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+            } catch (SQLException e) {
+                LOG.error("sql error", e);
+                return;
             }
 
+            // log error if the contact was not found
+            if(mContact == null) {
+                LOG.error("Client contact with id '" + clientContactId + "' does not exist");
+                return;
+            }
         } else {
             LOG.error("MessagingFragment requires contactId as argument.");
+            return;
         }
 
         mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, getXoActivity(), mCompositionFragment);

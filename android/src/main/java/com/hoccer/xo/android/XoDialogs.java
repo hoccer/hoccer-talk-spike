@@ -7,6 +7,9 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -38,6 +41,13 @@ public class XoDialogs {
 
                 if(noListener != null) {
                     builder.setNegativeButton(R.string.common_no, noListener);
+                } else {
+                    builder.setNegativeButton(R.string.common_no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do nothing
+                        }
+                    });
                 }
 
                 return builder.create();
@@ -79,6 +89,7 @@ public class XoDialogs {
             public Dialog onCreateDialog(Bundle savedInstanceState) {
                 LOG.debug("Creating dialog: " + tag);
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setView(passwordInputView);
                 builder.setTitle(titleId);
                 builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
                     @Override
@@ -88,19 +99,47 @@ public class XoDialogs {
                     }
                 });
 
-                if(cancelListener != null) {
-                    builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            inputMethodManager.hideSoftInputFromWindow(passwordInput.getWindowToken(), 0);
+                builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        inputMethodManager.hideSoftInputFromWindow(passwordInput.getWindowToken(), 0);
+                        if(cancelListener != null) {
                             cancelListener.onClick(dialog, id);
                         }
-                    });
-                }
-                builder.setView(passwordInputView);
-                Dialog dialog = builder.create();
-                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-                return dialog;
+                    }
+                });
+
+                final AlertDialog alertDialog = builder.create();
+                alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialog) {
+                        // disable positive button initially
+                        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                    }
+                });
+                alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+                // update positive button enabled state
+                passwordInput.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
+
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if (TextUtils.isEmpty(s)) {
+                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                        } else {
+                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                        }
+
+                    }
+                });
+                return alertDialog;
             }
         };
         dialogFragment.show(activity.getFragmentManager(), tag);
@@ -123,6 +162,7 @@ public class XoDialogs {
             public Dialog onCreateDialog(Bundle savedInstanceState) {
                 LOG.debug("Creating dialog: " + tag);
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setView(textInputView);
                 builder.setTitle(titleId);
                 if (messageId > 0) {
                     builder.setMessage(messageId);
@@ -136,19 +176,47 @@ public class XoDialogs {
                     }
                 });
 
-                if(cancelListener != null) {
-                    builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            inputMethodManager.hideSoftInputFromWindow(textInput.getWindowToken(), 0);
+                builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        inputMethodManager.hideSoftInputFromWindow(textInput.getWindowToken(), 0);
+                        if(cancelListener != null) {
                             cancelListener.onClick(dialog, id);
                         }
-                    });
-                }
-                builder.setView(textInputView);
-                Dialog dialog = builder.create();
-                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-                return dialog;
+                    }
+                });
+
+                final AlertDialog alertDialog = builder.create();
+                alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialog) {
+                        // disable positive button initially
+                        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                    }
+                });
+                alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+                // update positive button enabled state
+                textInput.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
+
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if (TextUtils.isEmpty(s)) {
+                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                        } else {
+                            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                        }
+
+                    }
+                });
+                return alertDialog;
             }
         };
         dialogFragment.show(activity.getFragmentManager(), tag);

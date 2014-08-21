@@ -15,6 +15,8 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -243,6 +245,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    Toast.makeText(getXoActivity(), R.string.pairing_success, Toast.LENGTH_LONG).show();
                     getXoActivity().finish();
                 }
             });

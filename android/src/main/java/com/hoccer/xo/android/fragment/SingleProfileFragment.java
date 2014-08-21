@@ -66,8 +66,6 @@ public class SingleProfileFragment extends XoFragment
 
     private boolean isRegistered = true;
 
-    private Menu mMenu;
-
     private ImageButton mNicknameEditButton;
 
     private TextView mNicknameTextView;
@@ -281,8 +279,6 @@ public class SingleProfileFragment extends XoFragment
                 }
             }
         }
-
-        mMenu = menu;
     }
 
 	@Override
@@ -463,8 +459,7 @@ public class SingleProfileFragment extends XoFragment
         }
 
         // apply data from the contact that needs to recurse
-        String name = null;
-
+        String name = getResources().getString(R.string.profile_user_name_unknown);
         if (contact.isClient() || contact.isSelf()) {
             if (contact.isSelf() && !contact.isSelfRegistered()) {
                 name = contact.getSelf().getRegistrationName();
@@ -475,17 +470,7 @@ public class SingleProfileFragment extends XoFragment
                 }
             }
         }
-        if (name == null) {
-            if (mMode == Mode.CREATE_SELF) {
-                name = "<chose a name>";
-            }
-        }
-        if (name == null) {
-            name = "<unnamed>";
-        }
-        LOG.debug("name is " + name);
         mNameText.setText(name);
-
         mKeyText.setText(getFingerprint());
 
         updateInviteButton(contact);
@@ -648,6 +633,8 @@ public class SingleProfileFragment extends XoFragment
         mNameText.setVisibility(View.INVISIBLE);
         if (isRegistered) {
             mEditName.setText(mNameText.getText());
+        } else {
+            mEditName.setText(getResources().getString(R.string.profile_self_initial_name));
         }
         mAvatarImage.setOnClickListener(this);
         return true;
@@ -661,26 +648,27 @@ public class SingleProfileFragment extends XoFragment
     @Override
     public void onDestroyActionMode(ActionMode mode) {
         String nameString = mEditName.getText().toString();
-        mNameText.setText(nameString);
+        String newUserName = nameString.isEmpty() ? getResources().getString(R.string.profile_self_initial_name) : nameString;
+
+        mNameText.setText(newUserName);
         mEditName.setVisibility(View.GONE);
         mNameText.setVisibility(View.VISIBLE);
         mAvatarImage.setOnClickListener(null);
 
         if (!isRegistered) {
-            mContact.getSelf().setRegistrationName(nameString);
+            mContact.getSelf().setRegistrationName(newUserName);
             mContact.updateSelfConfirmed();
             getXoClient().register();
             SingleProfileActivity activity = (SingleProfileActivity) getXoActivity();
             activity.confirmSelf();
-            getXoClient().setClientString(nameString, "happy");
+            getXoClient().setClientString(newUserName, "happy");
             Intent intent = new Intent(activity, ContactsActivity.class);
             activity.startActivity(intent);
         } else {
-            getXoClient().setClientString(nameString, "happier");
+            getXoClient().setClientString(newUserName, "happier");
             refreshContact(mContact);
             update(mContact);
         }
-
     }
 
     public enum Mode {

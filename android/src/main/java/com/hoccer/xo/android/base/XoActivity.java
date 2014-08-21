@@ -703,10 +703,13 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     public void showContactConversation(TalkClientContact contact) {
-        LOG.debug("showContactConversation(" + contact.getClientContactId() + ")");
+        showContactConversation(contact.getClientContactId());
+    }
+
+    public void showContactConversation(int contactId) {
+        LOG.debug("showContactConversation(" + contactId + ")");
         Intent intent = new Intent(this, MessagingActivity.class);
-        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID,
-                contact.getClientContactId());
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contactId);
         startActivity(intent);
     }
 
