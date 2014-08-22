@@ -21,6 +21,8 @@ import com.squareup.picasso.Transformation;
 
 public class ChatImageItem extends ChatMessageItem {
 
+    private static final double IMAGE_SCALE_FACTOR = 0.7;
+
     private Context mContext;
     private int mImageWidth;
 
@@ -28,12 +30,7 @@ public class ChatImageItem extends ChatMessageItem {
         super(context, message);
         mContext = context;
 
-        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-
-        mImageWidth = (int) (size.x * 0.7);
+        setRequiredImageWidth();
     }
 
     public ChatItemType getType() {
@@ -147,6 +144,15 @@ public class ChatImageItem extends ChatMessageItem {
         } catch (ClassCastException e) {
             e.printStackTrace();
         }
+    }
+
+
+    private void setRequiredImageWidth() {
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        mImageWidth = (int) (size.x * IMAGE_SCALE_FACTOR);
     }
 
 }
