@@ -84,7 +84,6 @@ public class ChatImageItem extends ChatMessageItem {
             imageView.getLayoutParams().height = height;
             imageView.requestLayout();
 
-            Picasso.with(mContext).setIndicatorsEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
             Picasso.with(mContext)
                     .load(contentObject.getContentDataUrl())
                     .resize(mImageWidth, height)
