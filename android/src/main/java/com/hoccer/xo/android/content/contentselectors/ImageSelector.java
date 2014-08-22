@@ -63,9 +63,9 @@ public class ImageSelector implements IContentSelector {
 
     private IContentCreator findContentObjectCreator(Uri selectedContent) {
         String contentString = selectedContent.toString();
-	    if (isPicasaContent(contentString)) {
-	        return new PicasaContentObjectCreator();
-	    } else if (isFileContent(contentString)) {
+        if (isPicasaContent(contentString)) {
+            return new PicasaContentObjectCreator();
+        } else if (isFileContent(contentString)) {
             return new ImageFileContentObjectCreator();
         }
 
@@ -73,16 +73,16 @@ public class ImageSelector implements IContentSelector {
     }
 
     static private boolean isPicasaContent(String contentString) {
-	return
-	    // picasa images should at least contain this..
-	    contentString.contains(".android.gallery3d.")
+        return
+                // picasa images should at least contain this..
+                contentString.contains(".android.gallery3d.")
 
-		// Moto G content string on dirks mobile
-	||  contentString.startsWith("content://com.google.android.apps.photos.content/");
+                        // Moto G content string on dirks mobile
+                        || contentString.startsWith("content://com.google.android.apps.photos.content/");
     }
 
     static private boolean isFileContent(String contentString) {
-	return contentString.startsWith("content://media/");
+        return contentString.startsWith("content://media/");
     }
 
     @Override
