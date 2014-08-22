@@ -6,7 +6,9 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
+import com.hoccer.xo.android.activity.MultiImagePickerActivity;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
@@ -39,8 +41,12 @@ public class ImageSelector implements IContentSelector {
 
     @Override
     public Intent createSelectionIntent(Context context) {
+
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
+
+//        Intent intent = new Intent(context, MultiImagePickerActivity.class);
+
         return intent;
     }
 
