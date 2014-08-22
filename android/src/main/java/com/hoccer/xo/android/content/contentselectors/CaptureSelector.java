@@ -101,7 +101,6 @@ public class CaptureSelector implements IContentSelector {
         int imageWidth = options.outWidth;
         String imageType = options.outMimeType;
 
-        options.inSampleSize = 2;
         options.inJustDecodeBounds = false;
         Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 
@@ -112,6 +111,8 @@ public class CaptureSelector implements IContentSelector {
             bitmap = Bitmap.createBitmap(bitmap, 0, 0,
                     bitmap.getWidth(), bitmap.getHeight(),
                     matrix, true);
+            imageWidth = bitmap.getWidth();
+            imageHeight = bitmap.getHeight();
         }
         Uri contentUri;
         String contentUriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, file.getName(), file.getName());
