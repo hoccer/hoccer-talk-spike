@@ -243,14 +243,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
                 .considerExifParams(true)
                 .build();
 
-        final int maxMemoryInKiloByte = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        final int cacheSize = maxMemoryInKiloByte / 8;
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
                 .threadPoolSize(2)
-                .memoryCache(new LruMemoryCache(cacheSize))
-                .memoryCacheSize(cacheSize)
-                .discCacheSize(50 * 1024 * 1024)
-                .discCacheFileCount(100)
                 .build();
         ImageLoader.getInstance().init(config);
 
