@@ -437,7 +437,7 @@ public class SingleProfileFragment extends XoFragment
             avatarUpload = contact.getAvatarUpload();
             if (avatarUpload != null) {
                 if (avatarUpload.isContentAvailable()) {
-                    avatarUrl = avatarUpload.getDataFile();
+                    avatarUrl = avatarUpload.getContentDataUrl();
                 }
             }
         }
