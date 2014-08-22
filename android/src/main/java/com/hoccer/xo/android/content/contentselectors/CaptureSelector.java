@@ -102,10 +102,11 @@ public class CaptureSelector implements IContentSelector {
         String imageType = options.outMimeType;
 
         options.inJustDecodeBounds = false;
-        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-
+        Bitmap bitmap;
         int exifOrientation = Integer.parseInt(exif.getAttribute(ExifInterface.TAG_ORIENTATION));
         if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+            options.inSampleSize = 2;
+            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0,
@@ -113,6 +114,8 @@ public class CaptureSelector implements IContentSelector {
                     matrix, true);
             imageWidth = bitmap.getWidth();
             imageHeight = bitmap.getHeight();
+        } else {
+            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
         }
         Uri contentUri;
         String contentUriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, file.getName(), file.getName());
