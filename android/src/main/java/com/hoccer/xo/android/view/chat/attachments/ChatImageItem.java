@@ -1,8 +1,6 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
 import android.graphics.*;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.view.*;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -24,10 +22,18 @@ import com.squareup.picasso.Transformation;
 public class ChatImageItem extends ChatMessageItem {
 
     private Context mContext;
+    private int mImageWidth;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
         super(context, message);
         mContext = context;
+
+        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        mImageWidth = (int) (size.x * 0.7);
     }
 
     public ChatItemType getType() {
@@ -61,7 +67,6 @@ public class ChatImageItem extends ChatMessageItem {
         ImageView imageView = (ImageView) mContentWrapper.findViewById(R.id.iv_image_view);
         RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
         int mask;
-        String messageTag = (mMessage.getMessageId() != null) ? mMessage.getMessageId() : mMessage.getMessageTag();
         if (mMessage.isIncoming()) {
             rootView.setGravity(Gravity.LEFT);
             mask = R.drawable.chat_bubble_incoming;
@@ -72,33 +77,19 @@ public class ChatImageItem extends ChatMessageItem {
         if (contentObject.getContentDataUrl() != null) {
             mAttachmentView.setBackgroundDrawable(null);
 
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(contentObject.getContentDataUrl(), options);
-
             double aspectRatio = contentObject.getContentAspectRatio();
+            int height = (int) (mImageWidth / aspectRatio);
 
-            WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-            Display display = wm.getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            int width = (int) (size.x * 0.8);
-            int height = (int) (width / aspectRatio);
-
-//            Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), mask);
-//            byte[] chunk = bitmap.getNinePatchChunk();
-//            NinePatchDrawable drawable = new NinePatchDrawable(mContext.getResources(), bitmap, chunk, new Rect(), null);
-//            drawable.setBounds(0, 0, width, height);
+            imageView.getLayoutParams().width = mImageWidth;
+            imageView.getLayoutParams().height = height;
+            imageView.requestLayout();
 
             Picasso.with(mContext).setIndicatorsEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
             Picasso.with(mContext)
                     .load(contentObject.getContentDataUrl())
-//                    .placeholder(drawable)
-                    .resize(width, height)
+                    .resize(mImageWidth, height)
                     .transform(new BubbleTransformation(mask))
                     .into(imageView);
-
-//            ThumbnailManager.getInstance(mContext).displayThumbnailForImage(contentObject.getContentDataUrl(), imageView, mask, messageTag);
         }
     }
 
