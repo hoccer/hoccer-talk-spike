@@ -8,18 +8,29 @@ import com.hoccer.talk.client.XoClient;
 
 import org.eclipse.jetty.websocket.WebSocketClient;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 import java.net.URI;
 
-/**
- * Created by jacob on 10.02.14.
- */
-public class XoAndroidClient extends XoClient {
+public class XoAndroidClient extends XoClient implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private final XoApplication mApplication;
 
     /**
      * Create a Hoccer Talk client using the given client database
      */
-    public XoAndroidClient(IXoClientHost host, IXoClientConfiguration configuration) {
-        super(host, configuration);
+    public XoAndroidClient(IXoClientHost client_host, XoAndroidClientConfiguration configuration, XoApplication xoApplication) {
+        super(client_host, configuration);
+        mApplication = xoApplication;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(xoApplication);
+        preferences.registerOnSharedPreferenceChangeListener(this);
+        setTransferLimitFromPreferences(preferences);
+    }
+
+    private void setTransferLimitFromPreferences(SharedPreferences preferences) {
+        String transferLimitString = preferences.getString("preference_transfer_limit", "-1");
+        setTransferLimit(Integer.parseInt(transferLimitString));
     }
 
     @Override
@@ -39,4 +50,10 @@ public class XoAndroidClient extends XoClient {
         }
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if(key != null && key.equals("preference_transfer_limit")) {
+            setTransferLimitFromPreferences(sharedPreferences);
+        }
+    }
 }

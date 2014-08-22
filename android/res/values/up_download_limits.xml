@@ -18,7 +18,7 @@
         <item name="10">10485760</item>
         <item name="50">52428800</item>
         <item name="100">104857600</item>
-        <item name="unlimited">2147483647</item>
+        <item name="unlimited">-1</item>
     </string-array>
 
 </resources>
