@@ -1051,7 +1051,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     // start of error checking section, remove when all works
                     TalkClientMembership membership = null;
                     try {
-                        LOG.error("createGroup: looking for membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
+                        LOG.debug("createGroup: looking for membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
                         membership = mDatabase.findMembershipByContacts(
                                 groupContact.getClientContactId(), mSelfContact.getClientContactId(), false);
                         if (membership == null) {
