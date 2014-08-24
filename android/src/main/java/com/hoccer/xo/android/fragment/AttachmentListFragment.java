@@ -240,7 +240,7 @@ public class AttachmentListFragment extends ListFragment {
         }
     }
 
-    private void showSoftKeyboard() {
+    private void toggleSoftKeyboard() {
         InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
     }
@@ -366,7 +366,7 @@ public class AttachmentListFragment extends ListFragment {
 
         @Override
         public boolean onQueryTextSubmit(String query) {
-            showSoftKeyboard();
+            toggleSoftKeyboard();
 
             return true;
         }
