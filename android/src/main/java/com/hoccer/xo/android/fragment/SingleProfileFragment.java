@@ -399,7 +399,7 @@ public class SingleProfileFragment extends XoFragment
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                getActivity().getActionBar().setTitle(mContact.getName());
+                getActivity().getActionBar().setTitle(mContact.getNickname());
                 if (mMode == Mode.CREATE_SELF) {
                     getActivity().getActionBar().setTitle(R.string.welcome_to_title);
                 } else {

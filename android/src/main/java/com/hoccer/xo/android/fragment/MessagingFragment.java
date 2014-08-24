@@ -172,7 +172,7 @@ public class MessagingFragment extends XoListFragment
             MenuItem groupItem = menu.findItem(R.id.menu_profile_group);
             groupItem.setVisible(mContact.isGroup());
             menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
-            getActivity().getActionBar().setTitle(mContact.getName());
+            getActivity().getActionBar().setTitle(mContact.getNickname());
         }
     }
 
