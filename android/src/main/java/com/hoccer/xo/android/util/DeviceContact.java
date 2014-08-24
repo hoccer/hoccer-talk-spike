@@ -3,7 +3,7 @@ package com.hoccer.xo.android.util;
 import java.util.ArrayList;
 
 /**
- * Holds device contact data.
+ * Holds device contact data and a list of generic data item strings.
  */
 public class DeviceContact {
 
@@ -13,9 +13,7 @@ public class DeviceContact {
 
     private String mThumbnailUri = "";
 
-    private ArrayList<String> mPhoneNumbers = new ArrayList<String>();
-
-    private ArrayList<String> mEMailAddresses = new ArrayList<String>();
+    private ArrayList<String> mDataItems = new ArrayList<String>();
 
     public DeviceContact(String lookupKey, String displayName) {
         mLookupKey = lookupKey;
@@ -38,20 +36,11 @@ public class DeviceContact {
         mThumbnailUri = thumbnailUri;
     }
 
-    public void addPhoneNumber(String phoneNumber) {
-        mPhoneNumbers.add(phoneNumber);
+    public void addDataItem(String item) {
+        mDataItems.add(item);
     }
 
-    public String[] getPhoneNumbers() {
-        return mPhoneNumbers.toArray(new String[mPhoneNumbers.size()]);
+    public String[] getDataItem() {
+        return mDataItems.toArray(new String[mDataItems.size()]);
     }
-
-    public void addEMailAddress(String eMailAddress) {
-        mEMailAddresses.add(eMailAddress);
-    }
-
-    public String[] getEMailAddresses() {
-        return mEMailAddresses.toArray(new String[mEMailAddresses.size()]);
-    }
-
 }

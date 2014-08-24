@@ -120,18 +120,17 @@ public class DeviceContactsSelectionFragment extends ListFragment {
                     contacts.add(currentContact);
                 }
 
+                String dataItem;
                 if (mIsSmsInvitation) {
-                    String phoneNumber = cursor.getString(PHONE_NUMBER_FIELD);
-                    currentContact.addPhoneNumber(phoneNumber);
+                    dataItem = cursor.getString(PHONE_NUMBER_FIELD);
                 } else {
-                    String eMailAddress = cursor.getString(EMAIL_ADDRESS_FIELD);
-                    currentContact.addEMailAddress(eMailAddress);
+                    dataItem = cursor.getString(EMAIL_ADDRESS_FIELD);
                 }
+                currentContact.addDataItem(dataItem);
             } while (cursor.moveToNext());
         }
 
-        DeviceContactsAdapter.DataType dataType = mIsSmsInvitation ? DeviceContactsAdapter.DataType.PhoneNumber : DeviceContactsAdapter.DataType.EMailAddress;
-        mAdapter = new DeviceContactsAdapter(contacts, dataType, getActivity());
+        mAdapter = new DeviceContactsAdapter(contacts, getActivity());
         setListAdapter(mAdapter);
     }
 

@@ -29,25 +29,17 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
     private static final Logger LOG = Logger.getLogger(DeviceContactsAdapter.class);
 
-    public enum DataType {
-        PhoneNumber,
-        EMailAddress
-    }
-
     private Activity mActivity;
     private List<DeviceContact> mContacts;
     private List<DeviceContact> mQueriedContacts;
     private String mQuery;
     private List<String> mSelectedData;
 
-    private DataType mDataType;
-
     private LayoutInflater mInflater = null;
 
     // Constructor expects an ordered list of device contacts and the data type to show
-    public DeviceContactsAdapter(List<DeviceContact> items, DataType dataType, Activity activity) {
+    public DeviceContactsAdapter(List<DeviceContact> items, Activity activity) {
         mContacts = items;
-        mDataType = dataType;
         mActivity = activity;
 
         mQuery = "";
@@ -88,7 +80,7 @@ public class DeviceContactsAdapter extends BaseAdapter {
         RelativeLayout clicker = (RelativeLayout) convertView.findViewById(R.id.clickablelayout);
 
         boolean isSelected = false;
-        final String[] contactDataList = getContactData(contact);
+        final String[] contactDataList = contact.getDataItem();
         if(contactDataList.length > 0) {
             if(contactDataList.length == 1) {
                 final String data = contactDataList[0];
@@ -181,17 +173,6 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
     public String[] getSelectedData() {
         return mSelectedData.toArray(new String[mSelectedData.size()]);
-    }
-
-    private String[] getContactData(DeviceContact contact) {
-        switch(mDataType) {
-            case PhoneNumber:
-                return contact.getPhoneNumbers();
-            case EMailAddress:
-                return contact.getEMailAddresses();
-            default:
-                throw new IllegalArgumentException("Invalid data type encountered");
-        }
     }
 
     /* Sets the new query which is used to filter the contact list.
