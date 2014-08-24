@@ -184,13 +184,17 @@ public class DeviceContactsSelectionFragment extends ListFragment {
 
         @Override
         public boolean onQueryTextChange(final String query) {
-            mAdapter.setQuery(query);
+            // only set query if we are in search mode
+            if(mAdapter.getQuery() != null) {
+                mAdapter.setQuery(query);
+            }
             return false;
         }
 
         @Override
         public boolean onMenuItemActionExpand(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
+                mAdapter.setQuery("");
             }
             return true;
         }
@@ -198,7 +202,7 @@ public class DeviceContactsSelectionFragment extends ListFragment {
         @Override
         public boolean onMenuItemActionCollapse(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
-                mAdapter.setQuery("");
+                mAdapter.setQuery(null);
             }
             return true;
         }

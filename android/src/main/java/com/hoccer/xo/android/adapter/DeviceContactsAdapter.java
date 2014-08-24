@@ -42,7 +42,6 @@ public class DeviceContactsAdapter extends BaseAdapter {
         mContacts = items;
         mActivity = activity;
 
-        mQuery = "";
         mQueriedContacts = mContacts;
 
         mSelectedData = new ArrayList<String>();
@@ -60,7 +59,7 @@ public class DeviceContactsAdapter extends BaseAdapter {
         DeviceContact contact = mQueriedContacts.get(position);
         TextView displayNameView = (TextView) convertView.findViewById(R.id.tv_displayname);
 
-        if(mQuery.isEmpty()) {
+        if(mQuery == null) {
             displayNameView.setText(contact.getDisplayName());
         } else {
             displayNameView.setText(getHighlightedSearchResult(contact.getDisplayName()));
@@ -176,25 +175,24 @@ public class DeviceContactsAdapter extends BaseAdapter {
     }
 
     /* Sets the new query which is used to filter the contact list.
-     * If query is an empty string no filtering is applied.
+     * If query is null no filtering is applied.
+     * If query is empty string everything is filtered.
      */
     public void setQuery(String query) {
-        String lowerCaseQuery = query.toLowerCase();
-        if(mQuery.equals(lowerCaseQuery)) {
-            return;
-        }
-
-        mQuery = lowerCaseQuery;
-
-        if(mQuery.isEmpty()) {
-            mQueriedContacts = mContacts;
-        } else {
+        if(query != null) {
+            mQuery = query.toLowerCase();
             mQueriedContacts = new ArrayList<DeviceContact>();
-            for(DeviceContact contact : mContacts) {
-                if(contact.getDisplayName().toLowerCase().contains(mQuery)) {
-                    mQueriedContacts.add(contact);
+
+            if(!mQuery.isEmpty()) {
+                for (DeviceContact contact : mContacts) {
+                    if (contact.getDisplayName().toLowerCase().contains(mQuery)) {
+                        mQueriedContacts.add(contact);
+                    }
                 }
             }
+        } else {
+            mQuery = null;
+            mQueriedContacts = mContacts;
         }
 
         notifyDataSetChanged();
