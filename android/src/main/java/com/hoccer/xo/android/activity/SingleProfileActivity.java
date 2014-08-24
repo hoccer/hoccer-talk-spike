@@ -78,22 +78,6 @@ public class SingleProfileActivity extends XoActionbarActivity {
         }
     }
 
-    public void confirmSelf() {
-        LOG.debug("confirmSelf()");
-        mMode = Mode.CONFIRM_SELF;
-        mSingleProfileFragment.confirmSelf();
-        mSingleProfileFragment.updateActionBar();
-        mSingleProfileFragment.finishActivityIfContactDeleted();
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                finish();
-                startActivity(new Intent(SingleProfileActivity.this, ContactsActivity.class));
-            }
-        });
-    }
-
     private void showSingleProfileFragment(int contactId) {
         Bundle bundle = new Bundle();
         bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, contactId);

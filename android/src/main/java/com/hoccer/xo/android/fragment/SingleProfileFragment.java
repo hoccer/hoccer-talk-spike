@@ -19,8 +19,6 @@ import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.activity.ContactsActivity;
-import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
@@ -94,7 +92,6 @@ public class SingleProfileFragment extends XoFragment
         mNicknameTextView = (TextView) v.findViewById(R.id.tv_profile_nickname);
         mNicknameEditText = (EditText) v.findViewById(R.id.et_profile_nickname);
         mInviteButtonContainer = (LinearLayout) v.findViewById(R.id.inc_profile_request);
-
         return v;
     }
 
@@ -428,13 +425,6 @@ public class SingleProfileFragment extends XoFragment
         });
     }
 
-    public void confirmSelf() {
-        LOG.debug("confirmSelf()");
-        mMode = Mode.CONFIRM_SELF;
-        mContact = getXoClient().getSelfContact();
-        update(mContact);
-    }
-
     private void update(TalkClientContact contact) {
         LOG.debug("update(" + contact.getClientContactId() + ")");
 
@@ -620,18 +610,10 @@ public class SingleProfileFragment extends XoFragment
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-        if (isMyContact(contact)) {
-            updateActionBar();
-            finishActivityIfContactDeleted();
-        }
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        if (isMyContact(contact)) {
-            updateActionBar();
-            finishActivityIfContactDeleted();
-        }
     }
 
     // Actionmode Callbacks
@@ -672,11 +654,8 @@ public class SingleProfileFragment extends XoFragment
             mContact.getSelf().setRegistrationName(newUserName);
             mContact.updateSelfConfirmed();
             getXoClient().register();
-            SingleProfileActivity activity = (SingleProfileActivity) getXoActivity();
-            activity.confirmSelf();
             getXoClient().setClientString(newUserName, "happy");
-            Intent intent = new Intent(activity, ContactsActivity.class);
-            activity.startActivity(intent);
+            getActivity().finish();
         } else {
             getXoClient().setClientString(newUserName, "happier");
             refreshContact(mContact);
@@ -686,8 +665,7 @@ public class SingleProfileFragment extends XoFragment
 
     public enum Mode {
         PROFILE,
-        CREATE_SELF,
-        CONFIRM_SELF
+        CREATE_SELF
     }
 
 }
