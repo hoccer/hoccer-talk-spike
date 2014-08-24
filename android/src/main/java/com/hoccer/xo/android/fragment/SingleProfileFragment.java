@@ -1,9 +1,11 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -97,8 +99,10 @@ public class SingleProfileFragment extends XoFragment
     }
 
     private void showNicknameEdit() {
-        mNicknameEditText.setVisibility(View.VISIBLE);
         mNicknameTextView.setVisibility(View.INVISIBLE);
+        mNicknameEditText.setVisibility(View.VISIBLE);
+        mNicknameEditText.requestFocus();
+        mNicknameEditText.setSelection(mNicknameEditText.getText().length());
         mNicknameEditButton.setImageResource(R.drawable.ic_light_navigation_accept);
         mNicknameEditButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,6 +116,9 @@ public class SingleProfileFragment extends XoFragment
                 }
                 updateNickname(mContact);
                 hideNicknameEdit();
+                toggleSoftKeyboard();
+
+                updateActionBar();
             }
         });
     }
@@ -124,8 +131,14 @@ public class SingleProfileFragment extends XoFragment
             @Override
             public void onClick(View view) {
                 showNicknameEdit();
+                toggleSoftKeyboard();
             }
         });
+    }
+
+    private void toggleSoftKeyboard() {
+        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
     }
 
     private void updateInviteButton(final TalkClientContact contact) {
