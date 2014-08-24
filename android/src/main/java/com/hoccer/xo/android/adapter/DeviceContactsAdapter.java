@@ -5,8 +5,12 @@ import android.content.DialogInterface;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,7 +67,12 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
         DeviceContact contact = mQueriedContacts.get(position);
         TextView displayNameView = (TextView) convertView.findViewById(R.id.tv_displayname);
-        displayNameView.setText(contact.getDisplayName());
+
+        if(mQuery.isEmpty()) {
+            displayNameView.setText(contact.getDisplayName());
+        } else {
+            displayNameView.setText(getHighlightedSearchResult(contact.getDisplayName()));
+        }
 
         QuickContactBadge quickContact = (QuickContactBadge) convertView.findViewById(R.id.cb_quickcontact);
         quickContact.assignContactUri(ContactsContract.Contacts.getLookupUri(0, contact.getLookupKey()));
@@ -212,6 +221,25 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
     public String getQuery() {
         return mQuery;
+    }
+
+    private Spannable getHighlightedSearchResult(String text) {
+        Spannable result = new SpannableString(text);
+        String lowerCaseText = text.toLowerCase();
+
+        // initialize the string as not highlighted
+        result.setSpan(new ForegroundColorSpan(Color.GRAY), 0, text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        int fromIndex = 0;
+        int highlightStart = lowerCaseText.indexOf(mQuery, fromIndex);
+        while(highlightStart >= 0) {
+            int highlightEnd = highlightStart + mQuery.length();
+            result.setSpan(new ForegroundColorSpan(Color.BLACK), highlightStart, highlightEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            fromIndex = highlightEnd;
+            highlightStart = lowerCaseText.indexOf(mQuery, fromIndex);
+        }
+
+        return result;
     }
 
     private Bitmap loadContactPhotoThumbnail(String photoData) {
