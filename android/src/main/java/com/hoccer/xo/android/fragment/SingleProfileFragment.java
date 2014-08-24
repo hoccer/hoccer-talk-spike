@@ -333,7 +333,31 @@ public class SingleProfileFragment extends XoFragment
     public void onClick(View v) {
         if (v.getId() == R.id.profile_avatar_image) {
             if (mContact != null && mContact.isEditable()) {
-                getXoActivity().selectAvatar();
+                if(mContact.getAvatarContentUrl() != null) {
+                    XoDialogs.showSingleChoiceDialog("AvatarSelection",
+                            R.string.dialog_avatar_options_title,
+                            new String[] {
+                                    getResources().getString(R.string.dialog_set_avatar_option),
+                                    getResources().getString(R.string.dialog_delete_avatar_option)
+                            },
+                            getActivity(),
+                            new XoDialogs.OnSingleSelectionFinishedListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id, int selectedItem) {
+                                    switch (selectedItem) {
+                                        case 0: {
+                                            getXoActivity().selectAvatar();
+                                        }
+                                        break;
+                                        case 1: {
+                                            updateAvatar(null);
+                                        }
+                                    }
+                                }
+                            });
+                } else {
+                    getXoActivity().selectAvatar();
+                }
             }
         }
     }
@@ -347,15 +371,19 @@ public class SingleProfileFragment extends XoFragment
     @Override
     public void onServiceConnected() {
         LOG.debug("onServiceConnected()");
+        if(mAvatarToSet != null) {
+            updateAvatar(mAvatarToSet);
+            mAvatarToSet = null;
+        }
+    }
 
-        final IContentObject newAvatar = mAvatarToSet;
-        mAvatarToSet = null;
-        if (newAvatar != null) {
+    private void updateAvatar(final IContentObject avatar) {
+        if (avatar != null) {
             XoApplication.getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     LOG.debug("creating avatar upload");
-                    TalkClientUpload upload = SelectedContent.createAvatarUpload(newAvatar);
+                    TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
                     try {
                         getXoDatabase().saveClientUpload(upload);
                         if (mContact.isSelf()) {
@@ -366,6 +394,8 @@ public class SingleProfileFragment extends XoFragment
                     }
                 }
             });
+        } else {
+            getXoClient().setClientAvatar(null);
         }
     }
 

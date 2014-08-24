@@ -732,20 +732,30 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
+    /*
+     * If upload is null no avatar is set.
+     */
     public void setClientAvatar(final TalkClientUpload upload) {
-        LOG.debug("new client avatar as upload " + upload);
         resetIdle();
-        mTransferAgent.startOrRestartUpload(upload);
+        if(upload != null) {
+            LOG.debug("new client avatar as upload " + upload);
+            mTransferAgent.startOrRestartUpload(upload);
+        }
         sendPresenceUpdateWithNewAvatar(upload);
     }
 
     private void sendPresenceUpdateWithNewAvatar(final TalkClientUpload upload) {
         try {
-            String downloadUrl = upload.getDownloadUrl();
             TalkPresence presence = mSelfContact.getClientPresence();
             if (presence != null) {
-                presence.setAvatarUrl(downloadUrl);
+                if (upload != null) {
+                    String downloadUrl = upload.getDownloadUrl();
+                    presence.setAvatarUrl(downloadUrl);
+                } else {
+                    presence.setAvatarUrl(null);
+                }
             }
+
             mSelfContact.setAvatarUpload(upload);
             mDatabase.savePresence(presence);
             mDatabase.saveContact(mSelfContact);
@@ -1646,7 +1656,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     sendPresenceFuture.get();
 
                     switchState(STATE_ACTIVE, "Synchronization successfull");
-                    
+
                 } catch (SQLException e) {
                     LOG.error("SQL Error while syncing: ", e);
                 } catch (JsonRpcClientException e) {
@@ -2198,7 +2208,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-        
+
                 try {
                     TalkClientContact contact = mSelfContact;
                     ensureSelfPresence(contact);
@@ -2943,6 +2953,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         boolean haveUrl = avatarUrl != null && !avatarUrl.isEmpty();
         if(!haveUrl) {
             LOG.warn("no avatar url for contact " + contact.getClientContactId());
+            contact.setAvatarDownload(null);
             return false;
         }
 
@@ -3314,7 +3325,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private String[] updateableClients(TalkClientContact group, String[] onlyWithClientIds) {
-        
+
         ArrayList<String> clientIds = new ArrayList<String>();
         HashSet<String> clientIdSet = new HashSet<String>(Arrays.asList(onlyWithClientIds));
         ForeignCollection<TalkClientMembership> memberships = group.getGroupMemberships();
