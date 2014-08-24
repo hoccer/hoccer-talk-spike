@@ -103,7 +103,7 @@ public class DeviceContactsSelectionFragment extends ListFragment {
         // create a DeviceContact instance for every individual contact encountered keeping the order
         if(cursor.moveToFirst()) {
             DeviceContact currentContact = null;
-            while (cursor.moveToNext()) {
+            do {
                 String lookupKey = cursor.getString(LOOKUP_KEY_FIELD);
 
                 if (currentContact == null || !currentContact.getLookupKey().equals(lookupKey)) {
@@ -121,7 +121,7 @@ public class DeviceContactsSelectionFragment extends ListFragment {
                     String eMailAddress = cursor.getString(EMAIL_ADDRESS_FIELD);
                     currentContact.addEMailAddress(eMailAddress);
                 }
-            }
+            } while (cursor.moveToNext());
         }
 
         DeviceContactsAdapter.DataType dataType = mIsSmsInvitation ? DeviceContactsAdapter.DataType.PhoneNumber : DeviceContactsAdapter.DataType.EMailAddress;
