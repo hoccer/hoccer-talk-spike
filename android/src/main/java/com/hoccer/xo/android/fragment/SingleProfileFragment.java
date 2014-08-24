@@ -140,7 +140,7 @@ public class SingleProfileFragment extends XoFragment
 
     private void updateInviteButton(final TalkClientContact contact) {
         Button inviteButton = (Button) getView().findViewById(R.id.btn_profile_invite);
-        if(contact == null || contact.isSelf() || contact.isGroup()) {
+        if(contact == null || contact.isSelf()) {
             mInviteButtonContainer.setVisibility(View.GONE);
             return;
         } else {
@@ -185,7 +185,7 @@ public class SingleProfileFragment extends XoFragment
     private void updateDeclineButton(final TalkClientContact contact) {
 
         Button declineButton = (Button) getView().findViewById(R.id.btn_profile_decline);
-        if(contact == null || contact.isSelf() || contact.isGroup()) {
+        if(contact == null || contact.isSelf()) {
             declineButton.setVisibility(View.GONE);
             return;
         } else {
@@ -361,9 +361,6 @@ public class SingleProfileFragment extends XoFragment
                         if (mContact.isSelf()) {
                             getXoClient().setClientAvatar(upload);
                         }
-                        if (mContact.isGroup()) {
-                            getXoClient().setGroupAvatar(mContact, upload);
-                        }
                     } catch (SQLException e) {
                         LOG.error("sql error", e);
                     }
@@ -429,14 +426,10 @@ public class SingleProfileFragment extends XoFragment
         LOG.debug("update(" + contact.getClientContactId() + ")");
 
         String avatarUrl = null;
-        if (contact.isGroup()) {
-            avatarUrl = "drawable://" + R.drawable.avatar_default_group_large;
-        } else {
-            avatarUrl = "drawable://" + R.drawable.avatar_default_contact_large;
-        }
+        avatarUrl = "drawable://" + R.drawable.avatar_default_contact_large;
         TalkClientUpload avatarUpload = null;
         TalkClientDownload avatarDownload = null;
-        if (contact.isSelf() || contact.isGroup()) {
+        if (contact.isSelf()) {
             avatarUpload = contact.getAvatarUpload();
             if (avatarUpload != null) {
                 if (avatarUpload.isContentAvailable()) {
@@ -444,7 +437,7 @@ public class SingleProfileFragment extends XoFragment
                 }
             }
         }
-        if (avatarUpload == null && (contact.isClient() || contact.isGroup())) {
+        if (avatarUpload == null && (contact.isClient())) {
             avatarDownload = contact.getAvatarDownload();
             if (avatarDownload != null) {
                 if (avatarDownload.isContentAvailable()) {
