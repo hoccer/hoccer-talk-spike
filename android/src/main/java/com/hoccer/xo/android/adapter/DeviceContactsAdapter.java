@@ -32,8 +32,12 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
     private Activity mActivity;
     private List<DeviceContact> mContacts;
+    private List<DeviceContact> mQueriedContacts;
+    private String mQuery;
     private List<String> mSelectedData;
+
     private DataType mDataType;
+
     private LayoutInflater mInflater = null;
 
     // Constructor expects an ordered list of device contacts and the data type to show
@@ -41,6 +45,9 @@ public class DeviceContactsAdapter extends BaseAdapter {
         mContacts = items;
         mDataType = dataType;
         mActivity = activity;
+
+        mQuery = "";
+        mQueriedContacts = mContacts;
 
         mSelectedData = new ArrayList<String>();
     }
@@ -54,7 +61,7 @@ public class DeviceContactsAdapter extends BaseAdapter {
             convertView = mInflater.inflate(R.layout.item_dialog_multi_invitation, null);
         }
 
-        DeviceContact contact = mContacts.get(position);
+        DeviceContact contact = mQueriedContacts.get(position);
         TextView displayNameView = (TextView) convertView.findViewById(R.id.tv_displayname);
         displayNameView.setText(contact.getDisplayName());
 
@@ -145,12 +152,12 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return mContacts.size();
+        return mQueriedContacts.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mContacts.get(position);
+        return mQueriedContacts.get(position);
     }
 
     @Override
@@ -176,6 +183,35 @@ public class DeviceContactsAdapter extends BaseAdapter {
             default:
                 throw new IllegalArgumentException("Invalid data type encountered");
         }
+    }
+
+    /* Sets the new query which is used to filter the contact list.
+     * If query is an empty string no filtering is applied.
+     */
+    public void setQuery(String query) {
+        String lowerCaseQuery = query.toLowerCase();
+        if(mQuery.equals(lowerCaseQuery)) {
+            return;
+        }
+
+        mQuery = lowerCaseQuery;
+
+        if(mQuery.isEmpty()) {
+            mQueriedContacts = mContacts;
+        } else {
+            mQueriedContacts = new ArrayList<DeviceContact>();
+            for(DeviceContact contact : mContacts) {
+                if(contact.getDisplayName().toLowerCase().contains(mQuery)) {
+                    mQueriedContacts.add(contact);
+                }
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
+    public String getQuery() {
+        return mQuery;
     }
 
     private Bitmap loadContactPhotoThumbnail(String photoData) {
