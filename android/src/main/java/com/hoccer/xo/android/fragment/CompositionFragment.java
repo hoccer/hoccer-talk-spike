@@ -317,7 +317,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         LOG.debug("Received gesture of type: " + gestureName);
 
         if (isComposed()) {
-            getXoSoundPool().playThrowSound();
+            XoApplication.getXoSoundPool().playThrowSound();
             sendComposedMessage();
         }
     }

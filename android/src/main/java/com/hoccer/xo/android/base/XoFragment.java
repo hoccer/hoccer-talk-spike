@@ -33,32 +33,12 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
         return XoApplication.getXoClient();
     }
 
-    public XoSoundPool getXoSoundPool() {
-        return XoApplication.getXoSoundPool();
-    }
-
-    public File getAvatarDirectory() {
-        return new File(mActivity.getFilesDir(), "avatars");
-    }
-
-    public ScheduledExecutorService getBackgroundExecutor() {
-        return mActivity.getBackgroundExecutor();
-    }
-
     public XoActivity getXoActivity() {
         return mActivity;
     }
 
     public XoClientDatabase getXoDatabase() {
         return mActivity.getXoDatabase();
-    }
-
-    public IXoClientService getXoService() {
-        return mActivity.getXoService();
-    }
-
-    public void runOnUiThread(Runnable runnable) {
-        mActivity.runOnUiThread(runnable);
     }
 
     @Override
@@ -97,5 +77,4 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
 
     public void onAvatarSelected(IContentObject contentObject) {
     }
-
 }

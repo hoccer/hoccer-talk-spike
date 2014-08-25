@@ -430,7 +430,7 @@ public class SingleProfileFragment extends XoFragment
 
     public void updateActionBar() {
         LOG.debug("update(" + mContact.getClientContactId() + ")");
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 getActivity().getActionBar().setTitle(mContact.getNickname());
@@ -446,7 +446,7 @@ public class SingleProfileFragment extends XoFragment
     }
 
     public void finishActivityIfContactDeleted() {
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (mContact.isDeleted()) {
@@ -583,7 +583,7 @@ public class SingleProfileFragment extends XoFragment
                 LOG.error("SQL error", e);
             }
         }
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 LOG.debug("updating ui");

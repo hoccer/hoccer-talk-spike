@@ -230,7 +230,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         mActiveToken = token;
         mTokenEdit.setEnabled(false);
         mTokenPairButton.setEnabled(false);
-        getBackgroundExecutor().execute(new Runnable() {
+        getXoActivity().getBackgroundExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 getXoClient().performTokenPairing(token);
@@ -242,7 +242,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onTokenPairingSucceeded(String token) {
         LOG.debug("onTokenPairingSucceeded()");
         if (token.equals(mActiveToken)) {
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Toast.makeText(getXoActivity(), R.string.pairing_success, Toast.LENGTH_LONG).show();
@@ -256,7 +256,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onTokenPairingFailed(String token) {
         LOG.debug("onTokenPairingFailed()");
         if (token.equals(mActiveToken)) {
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     showPairingFailure();

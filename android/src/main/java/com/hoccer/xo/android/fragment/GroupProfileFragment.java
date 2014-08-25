@@ -462,7 +462,7 @@ public class GroupProfileFragment extends XoFragment
             LOG.error("SQL error", e);
         }
 
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (mGroup.isDeleted()) {
@@ -491,7 +491,7 @@ public class GroupProfileFragment extends XoFragment
     }
 
     private void updateActionBar() {
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 getActivity().getActionBar().setTitle(mGroup.getName());
@@ -540,7 +540,7 @@ public class GroupProfileFragment extends XoFragment
             saveEditedGroup();
 
             final GroupProfileFragment fragment = this;
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     getXoActivity().startActionMode(fragment);
