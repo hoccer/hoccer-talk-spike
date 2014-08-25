@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.SearchView;
 import com.hoccer.xo.release.R;
@@ -120,6 +121,15 @@ public abstract class SearchableListFragment extends ListFragment {
         @Override
         public boolean onMenuItemActionExpand(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
+                // set the correct icons since android changes them for some reason
+                getActivity().getActionBar().setIcon(R.drawable.ic_launcher_plain);
+
+                int searchImgId = getResources().getIdentifier("android:id/search_mag_icon", null, null);
+                ImageView searchIcon = ((ImageView) mSearchMenuItem.getActionView().findViewById(searchImgId));
+                if (searchIcon != null) {
+                    searchIcon.setImageResource(R.drawable.ic_action_search);
+                }
+
                 mIsSearchModeEnabled = true;
                 mCachedListAdapter = getListAdapter();
                 onSearchModeEnabled();
