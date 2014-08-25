@@ -29,11 +29,14 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
 public class CompositionFragment extends XoFragment implements View.OnClickListener,
         View.OnLongClickListener, MotionGestureListener {
+
+    private static final Logger LOG = Logger.getLogger(CompositionFragment.class);
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
     public static final int REQUEST_SELECT_ATTACHMENT = 42;
@@ -317,7 +320,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         LOG.debug("Received gesture of type: " + gestureName);
 
         if (isComposed()) {
-            getXoSoundPool().playThrowSound();
+            XoApplication.getXoSoundPool().playThrowSound();
             sendComposedMessage();
         }
     }

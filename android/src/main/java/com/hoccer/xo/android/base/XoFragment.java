@@ -21,28 +21,12 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public abstract class XoFragment extends Fragment implements IXoFragment {
 
-    protected Logger LOG = null;
+    private static final Logger LOG = Logger.getLogger(XoFragment.class);
 
     private XoActivity mActivity;
 
-    public XoFragment() {
-        LOG = Logger.getLogger(XoFragment.class);
-    }
-
     public XoClient getXoClient() {
         return XoApplication.getXoClient();
-    }
-
-    public XoSoundPool getXoSoundPool() {
-        return XoApplication.getXoSoundPool();
-    }
-
-    public File getAvatarDirectory() {
-        return new File(mActivity.getFilesDir(), "avatars");
-    }
-
-    public ScheduledExecutorService getBackgroundExecutor() {
-        return mActivity.getBackgroundExecutor();
     }
 
     public XoActivity getXoActivity() {
@@ -51,14 +35,6 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
 
     public XoClientDatabase getXoDatabase() {
         return mActivity.getXoDatabase();
-    }
-
-    public IXoClientService getXoService() {
-        return mActivity.getXoService();
-    }
-
-    public void runOnUiThread(Runnable runnable) {
-        mActivity.runOnUiThread(runnable);
     }
 
     @Override
@@ -97,5 +73,4 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
 
     public void onAvatarSelected(IContentObject contentObject) {
     }
-
 }

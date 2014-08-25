@@ -754,17 +754,16 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 } else {
                     presence.setAvatarUrl(null);
                 }
-            }
 
-            mSelfContact.setAvatarUpload(upload);
-            mDatabase.savePresence(presence);
-            mDatabase.saveContact(mSelfContact);
-            for (int i = 0; i < mContactListeners.size(); i++) {
-                IXoContactListener listener = mContactListeners.get(i);
-                listener.onClientPresenceChanged(mSelfContact);
+                mSelfContact.setAvatarUpload(upload);
+                mDatabase.savePresence(presence);
+                mDatabase.saveContact(mSelfContact);
+                for (int i = 0; i < mContactListeners.size(); i++) {
+                    IXoContactListener listener = mContactListeners.get(i);
+                    listener.onClientPresenceChanged(mSelfContact);
+                }
+                sendPresence();
             }
-            LOG.debug("sending new presence");
-            sendPresence();
         } catch (Exception e) {
             LOG.error("setClientAvatar", e);
         }
@@ -801,55 +800,43 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
        });
     }
 
+    /*
+    * If upload is null no avatar is set.
+    */
     public void setGroupAvatar(final TalkClientContact group, final TalkClientUpload upload) {
-        LOG.debug("new group avatar as upload " + upload);
         resetIdle();
-        mTransferAgent.startOrRestartUpload(upload);
+        if(upload != null) {
+            LOG.debug("new group avatar as upload " + upload);
+            mTransferAgent.startOrRestartUpload(upload);
+        }
         sendGroupPresenceUpdateWithNewAvatar(group, upload);
     }
 
     private void sendGroupPresenceUpdateWithNewAvatar(final TalkClientContact group, final TalkClientUpload upload) {
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                String downloadUrl = upload.getDownloadUrl();
-                if(downloadUrl == null) {
-                    LOG.error("registered avatar upload without download url");
-                    return;
-                }
-                TalkGroup presence = group.getGroupPresence();
-                if(presence == null) {
-                    LOG.error("group has no presence");
-                    return;
-                }
-                LOG.debug("setting and requesting upload");
-                try {
+        try {
+            TalkGroup presence = group.getGroupPresence();
+            if (presence != null) {
+                if (upload != null) {
+                    String downloadUrl = upload.getDownloadUrl();
                     presence.setGroupAvatarUrl(downloadUrl);
-                    group.setAvatarUpload(upload);
-                    mDatabase.saveClientUpload(upload);
-                    if(group.isGroupRegistered()) {
-                        try {
-                            mDatabase.saveGroup(presence);
-                            mDatabase.saveContact(group);
-                            LOG.debug("sending new group presence");
-                            mServerRpc.updateGroup(presence);
-                        } catch (SQLException e) {
-                            LOG.error("sql error", e);
-                        } catch (JsonRpcClientException e) {
-                            LOG.error("Error while sending new group presence: " , e);
-                        }
-                    }
-                    mTransferAgent.startOrRestartUpload(upload);
-                    LOG.debug("group presence update");
+                } else {
+                    presence.setGroupAvatarUrl(null);
+                }
+
+                group.setAvatarUpload(upload);
+                if (group.isGroupRegistered()) {
+                    mDatabase.saveGroup(presence);
+                    mDatabase.saveContact(group);
+                    mServerRpc.updateGroup(presence);
                     for (int i = 0; i < mContactListeners.size(); i++) {
                         IXoContactListener listener = mContactListeners.get(i);
                         listener.onGroupPresenceChanged(group);
                     }
-                } catch (Exception e) {
-                    LOG.error("error creating group avatar", e);
                 }
             }
-        });
+        } catch(Exception e){
+            LOG.error("error creating group avatar", e);
+        }
     }
 
     public String generatePairingToken() {

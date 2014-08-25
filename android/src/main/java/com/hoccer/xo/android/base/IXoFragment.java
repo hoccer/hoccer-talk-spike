@@ -16,8 +16,6 @@ public interface IXoFragment {
 
     public XoClientDatabase getXoDatabase();
 
-    public IXoClientService getXoService();
-
     public void onServiceConnected();
     public void onServiceDisconnected();
 

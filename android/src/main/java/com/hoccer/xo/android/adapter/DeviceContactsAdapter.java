@@ -2,11 +2,7 @@ package com.hoccer.xo.android.adapter;
 
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.res.AssetFileDescriptor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.Uri;
 import android.provider.ContactsContract;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -21,10 +17,8 @@ import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DeviceContactsAdapter extends BaseAdapter {
 
@@ -38,7 +32,7 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
     private LayoutInflater mInflater = null;
 
-    // Constructor expects an ordered list of device contacts and the data type to show
+    // Constructor expects an ordered list of device contacts
     public DeviceContactsAdapter(List<DeviceContact> items, Activity activity) {
         mContacts = items;
         mActivity = activity;
@@ -71,8 +65,8 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
         Picasso.with(mActivity)
                 .load(contact.getThumbnailUri())
-//                .placeholder(R.drawable.ic_contact_picture)
-//                .error(R.drawable.ic_contact_picture)
+                .placeholder(R.drawable.ic_contact_picture)
+                .error(R.drawable.ic_contact_picture)
                 .into(quickContact);
 
         TextView dataView = (TextView) convertView.findViewById(R.id.tv_detailed_info);
