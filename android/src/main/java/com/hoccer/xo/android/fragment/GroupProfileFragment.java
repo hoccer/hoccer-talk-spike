@@ -24,7 +24,7 @@ import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.release.R;
-import com.nostra13.universalimageloader.core.ImageLoader;
+import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -371,8 +371,7 @@ public class GroupProfileFragment extends XoFragment
     private void update() {
         LOG.debug("update(" + mGroup.getClientContactId() + ")");
 
-        String avatarUrl;
-        avatarUrl = "drawable://" + R.drawable.avatar_default_group_large;
+        String avatarUrl = null;
         if (mGroup.isGroupAdmin()) {
             TalkClientUpload avatarUpload = mGroup.getAvatarUpload();
             if (avatarUpload != null && avatarUpload.isContentAvailable()) {
@@ -387,7 +386,11 @@ public class GroupProfileFragment extends XoFragment
                 }
             }
         }
-        ImageLoader.getInstance().displayImage(avatarUrl, mAvatarImage);
+        Picasso.with(getActivity())
+                .load(avatarUrl)
+                .placeholder(R.drawable.avatar_default_group_large)
+                .error(R.drawable.avatar_default_group_large)
+                .into(mAvatarImage);
 
         mGroupMembersTitle.setVisibility(mGroup.isGroupRegistered() ? View.VISIBLE : View.GONE);
         mGroupMembersList.setVisibility(mGroup.isGroupRegistered() || !mCurrentClientsInGroup.isEmpty() ? View.VISIBLE : View.GONE);

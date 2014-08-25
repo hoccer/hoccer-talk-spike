@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
@@ -22,7 +21,7 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
-import com.nostra13.universalimageloader.core.ImageLoader;
+import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 import android.content.DialogInterface;
@@ -460,7 +459,7 @@ public class SingleProfileFragment extends XoFragment
     private void update() {
         LOG.debug("update(" + mContact.getClientContactId() + ")");
 
-        String avatarUrl = "drawable://" + R.drawable.avatar_default_contact_large;
+        String avatarUrl = null;
         if (mContact.isSelf()) {
             TalkClientUpload avatarUpload = mContact.getAvatarUpload();
             if (avatarUpload != null && avatarUpload.isContentAvailable()) {
@@ -475,7 +474,12 @@ public class SingleProfileFragment extends XoFragment
                 }
             }
         }
-        ImageLoader.getInstance().displayImage(avatarUrl, mAvatarImage);
+
+        Picasso.with(getActivity())
+                .load(avatarUrl)
+                .placeholder(R.drawable.avatar_default_contact_large)
+                .error(R.drawable.avatar_default_contact_large)
+                .into(mAvatarImage);
 
         // apply data from the contact that needs to recurse
         String name = getResources().getString(R.string.profile_user_name_unknown);
