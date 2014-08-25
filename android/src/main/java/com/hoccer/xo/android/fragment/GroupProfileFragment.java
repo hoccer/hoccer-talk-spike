@@ -565,18 +565,28 @@ public class GroupProfileFragment extends XoFragment
     }
 
     @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
+    public void onGroupPresenceChanged(final TalkClientContact contact) {
         if (isCurrentGroup(contact)) {
-            refreshContact(contact);
-            updateActionBar();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshContact(contact);
+                    updateActionBar();
+                }
+            });
         }
     }
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
+    public void onGroupMembershipChanged(final TalkClientContact contact) {
         if (isCurrentGroup(contact)) {
-            refreshContact(contact);
-            updateActionBar();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshContact(contact);
+                    updateActionBar();
+                }
+            });
         }
     }
 

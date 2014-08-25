@@ -24,9 +24,13 @@ public class PicasaContentObjectCreator implements IContentCreator {
 
     @Override
     public SelectedContent apply(Context context, Intent intent) {
-        Uri selectedContent = intent.getData();
-        final String[] filePathColumn = {MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.Images.Media.ORIENTATION};
-        Cursor cursor = context.getContentResolver().query(selectedContent, filePathColumn, null, null, null);
+        final Uri contentUri = intent.getData();
+        final String[] projection = {
+                MediaStore.MediaColumns.DATA,
+                MediaStore.MediaColumns.DISPLAY_NAME,
+                MediaStore.Images.Media.ORIENTATION };
+
+        Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
 
         if (cursor != null) {
             cursor.moveToFirst();
@@ -34,15 +38,13 @@ public class PicasaContentObjectCreator implements IContentCreator {
             if (columnIndex != -1) {
                 try {
                     String displayName = cursor.getString(columnIndex);
-                    final Uri contentUri = selectedContent;
-                    Bitmap bmp = getBitmap(context, contentUri);
+                    Bitmap bitmap = getBitmap(context, contentUri);
                     File imageFile = new File(XoApplication.getAttachmentDirectory(), displayName);
 
-                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(imageFile));
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(imageFile));
 
-                    int fileWidth = bmp.getWidth();
-                    int fileHeight = bmp.getHeight();
-
+                    int fileWidth = bitmap.getWidth();
+                    int fileHeight = bitmap.getHeight();
                     int orientation = ImageContentHelper.retrieveOrientation(context, contentUri, imageFile.getAbsolutePath());
                     double aspectRatio = ImageContentHelper.calculateAspectRatio(fileWidth, fileHeight, orientation);
 
@@ -60,7 +62,6 @@ public class PicasaContentObjectCreator implements IContentCreator {
                 }
             }
         }
-
         return null;
     }
 

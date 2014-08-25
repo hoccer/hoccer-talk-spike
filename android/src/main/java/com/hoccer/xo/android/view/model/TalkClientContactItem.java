@@ -11,6 +11,7 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
+import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -20,7 +21,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class TalkClientContactItem extends BaseContactItem {
+public class TalkClientContactItem extends BaseContactItem implements SearchAdapter.Searchable{
 
     private static final Logger LOG = Logger.getLogger(TalkClientContactItem.class);
 
@@ -152,4 +153,9 @@ public class TalkClientContactItem extends BaseContactItem {
         return mLastMessageTimeStamp.getTime();
     }
 
+    @Override
+    public boolean matches(String query) {
+        return mContact.getName().toLowerCase().startsWith(query.toLowerCase()) || mContact.getNickname().toLowerCase()
+                .startsWith(query.toLowerCase());
+    }
 }

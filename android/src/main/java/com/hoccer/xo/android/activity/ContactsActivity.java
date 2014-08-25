@@ -20,7 +20,9 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsPageAdapter;
 import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.fragment.ContactsFragment;
 import com.hoccer.xo.android.fragment.NearbyContactsFragment;
+import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -220,7 +222,10 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
         @Override
         public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-
+            Fragment fragment = mAdapter.getItem(tab.getPosition());
+            if (fragment instanceof SearchableListFragment) {
+                ((SearchableListFragment) fragment).leaveSearchMode();
+            }
         }
 
         @Override
