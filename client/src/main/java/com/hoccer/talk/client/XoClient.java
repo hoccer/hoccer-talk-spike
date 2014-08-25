@@ -734,29 +734,38 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
+    /*
+     * If upload is null no avatar is set.
+     */
     public void setClientAvatar(final TalkClientUpload upload) {
-        LOG.debug("new client avatar as upload " + upload);
         resetIdle();
-        mTransferAgent.startOrRestartUpload(upload);
+        if(upload != null) {
+            LOG.debug("new client avatar as upload " + upload);
+            mTransferAgent.startOrRestartUpload(upload);
+        }
         sendPresenceUpdateWithNewAvatar(upload);
     }
 
     private void sendPresenceUpdateWithNewAvatar(final TalkClientUpload upload) {
         try {
-            String downloadUrl = upload.getDownloadUrl();
             TalkPresence presence = mSelfContact.getClientPresence();
             if (presence != null) {
-                presence.setAvatarUrl(downloadUrl);
+                if (upload != null) {
+                    String downloadUrl = upload.getDownloadUrl();
+                    presence.setAvatarUrl(downloadUrl);
+                } else {
+                    presence.setAvatarUrl(null);
+                }
+
+                mSelfContact.setAvatarUpload(upload);
+                mDatabase.savePresence(presence);
+                mDatabase.saveContact(mSelfContact);
+                for (int i = 0; i < mContactListeners.size(); i++) {
+                    IXoContactListener listener = mContactListeners.get(i);
+                    listener.onClientPresenceChanged(mSelfContact);
+                }
+                sendPresence();
             }
-            mSelfContact.setAvatarUpload(upload);
-            mDatabase.savePresence(presence);
-            mDatabase.saveContact(mSelfContact);
-            for (int i = 0; i < mContactListeners.size(); i++) {
-                IXoContactListener listener = mContactListeners.get(i);
-                listener.onClientPresenceChanged(mSelfContact);
-            }
-            LOG.debug("sending new presence");
-            sendPresence();
         } catch (Exception e) {
             LOG.error("setClientAvatar", e);
         }
@@ -793,55 +802,43 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
        });
     }
 
+    /*
+    * If upload is null no avatar is set.
+    */
     public void setGroupAvatar(final TalkClientContact group, final TalkClientUpload upload) {
-        LOG.debug("new group avatar as upload " + upload);
         resetIdle();
-        mTransferAgent.startOrRestartUpload(upload);
+        if(upload != null) {
+            LOG.debug("new group avatar as upload " + upload);
+            mTransferAgent.startOrRestartUpload(upload);
+        }
         sendGroupPresenceUpdateWithNewAvatar(group, upload);
     }
 
     private void sendGroupPresenceUpdateWithNewAvatar(final TalkClientContact group, final TalkClientUpload upload) {
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                String downloadUrl = upload.getDownloadUrl();
-                if(downloadUrl == null) {
-                    LOG.error("registered avatar upload without download url");
-                    return;
-                }
-                TalkGroup presence = group.getGroupPresence();
-                if(presence == null) {
-                    LOG.error("group has no presence");
-                    return;
-                }
-                LOG.debug("setting and requesting upload");
-                try {
+        try {
+            TalkGroup presence = group.getGroupPresence();
+            if (presence != null) {
+                if (upload != null) {
+                    String downloadUrl = upload.getDownloadUrl();
                     presence.setGroupAvatarUrl(downloadUrl);
-                    group.setAvatarUpload(upload);
-                    mDatabase.saveClientUpload(upload);
-                    if(group.isGroupRegistered()) {
-                        try {
-                            mDatabase.saveGroup(presence);
-                            mDatabase.saveContact(group);
-                            LOG.debug("sending new group presence");
-                            mServerRpc.updateGroup(presence);
-                        } catch (SQLException e) {
-                            LOG.error("sql error", e);
-                        } catch (JsonRpcClientException e) {
-                            LOG.error("Error while sending new group presence: " , e);
-                        }
-                    }
-                    mTransferAgent.startOrRestartUpload(upload);
-                    LOG.debug("group presence update");
+                } else {
+                    presence.setGroupAvatarUrl(null);
+                }
+
+                group.setAvatarUpload(upload);
+                if (group.isGroupRegistered()) {
+                    mDatabase.saveGroup(presence);
+                    mDatabase.saveContact(group);
+                    mServerRpc.updateGroup(presence);
                     for (int i = 0; i < mContactListeners.size(); i++) {
                         IXoContactListener listener = mContactListeners.get(i);
                         listener.onGroupPresenceChanged(group);
                     }
-                } catch (Exception e) {
-                    LOG.error("error creating group avatar", e);
                 }
             }
-        });
+        } catch(Exception e){
+            LOG.error("error creating group avatar", e);
+        }
     }
 
     public String generatePairingToken() {
@@ -1053,7 +1050,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     // start of error checking section, remove when all works
                     TalkClientMembership membership = null;
                     try {
-                        LOG.error("createGroup: looking for membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
+                        LOG.debug("createGroup: looking for membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
                         membership = mDatabase.findMembershipByContacts(
                                 groupContact.getClientContactId(), mSelfContact.getClientContactId(), false);
                         if (membership == null) {
@@ -1648,7 +1645,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     sendPresenceFuture.get();
 
                     switchState(STATE_ACTIVE, "Synchronization successfull");
-                    
+
                 } catch (SQLException e) {
                     LOG.error("SQL Error while syncing: ", e);
                 } catch (JsonRpcClientException e) {
@@ -2208,7 +2205,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-        
+
                 try {
                     TalkClientContact contact = mSelfContact;
                     ensureSelfPresence(contact);
@@ -2953,6 +2950,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         boolean haveUrl = avatarUrl != null && !avatarUrl.isEmpty();
         if(!haveUrl) {
             LOG.warn("no avatar url for contact " + contact.getClientContactId());
+            contact.setAvatarDownload(null);
             return false;
         }
 
@@ -3324,7 +3322,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private String[] updateableClients(TalkClientContact group, String[] onlyWithClientIds) {
-        
+
         ArrayList<String> clientIds = new ArrayList<String>();
         HashSet<String> clientIdSet = new HashSet<String>(Arrays.asList(onlyWithClientIds));
         ForeignCollection<TalkClientMembership> memberships = group.getGroupMemberships();

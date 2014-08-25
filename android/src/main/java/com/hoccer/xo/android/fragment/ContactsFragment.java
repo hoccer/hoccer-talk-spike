@@ -114,17 +114,16 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        if (menuInfo == null) {
-            return;
-        }
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        Object object = mAdapter.getItem(info.position);
-        if (object instanceof TalkClientContact) {
-            MenuInflater inflater = getActivity().getMenuInflater();
-            inflater.inflate(R.menu.context_menu_contacts, menu);
-        } else if (object instanceof String) {
-            MenuInflater inflater = getActivity().getMenuInflater();
-            inflater.inflate(R.menu.context_menu_contacts, menu);
+        if(menuInfo != null) {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+            Object object = mAdapter.getItem(info.position);
+            if (object instanceof TalkClientContact) {
+                MenuInflater inflater = getActivity().getMenuInflater();
+                inflater.inflate(R.menu.context_menu_contacts, menu);
+            } else if (object instanceof String) {
+                MenuInflater inflater = getActivity().getMenuInflater();
+                inflater.inflate(R.menu.context_menu_contacts, menu);
+            }
         }
     }
 

@@ -101,22 +101,26 @@ public class CaptureSelector implements IContentSelector {
         int imageWidth = options.outWidth;
         String imageType = options.outMimeType;
 
-        options.inSampleSize = 2;
         options.inJustDecodeBounds = false;
-        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-
+        Bitmap bitmap;
         int exifOrientation = Integer.parseInt(exif.getAttribute(ExifInterface.TAG_ORIENTATION));
         if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+            options.inSampleSize = 2;
+            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0,
                     bitmap.getWidth(), bitmap.getHeight(),
                     matrix, true);
+            imageWidth = bitmap.getWidth();
+            imageHeight = bitmap.getHeight();
+        } else {
+            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
         }
         Uri contentUri;
-        String uriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, file.getName(), file.getName());
+        String contentUriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, file.getName(), file.getName());
 
-        contentUri = Uri.parse(uriString);
+        contentUri = Uri.parse(contentUriString);
 
         Cursor cursor = context.getContentResolver().query(
                 contentUri, projection, null, null, null);
@@ -130,7 +134,7 @@ public class CaptureSelector implements IContentSelector {
         }
         File imageFile = new File(filePath);
 
-        SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
+        SelectedContent contentObject = new SelectedContent(contentUriString, "file://" + filePath);
         contentObject.setFileName(imageFile.getName());
         contentObject.setContentMediaType(ContentMediaType.IMAGE);
         contentObject.setContentType(imageType);
@@ -155,4 +159,5 @@ public class CaptureSelector implements IContentSelector {
             super(message);
         }
     }
+
 }

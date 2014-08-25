@@ -124,6 +124,9 @@
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Change my image</string>
+    <string name="dialog_avatar_options_title">Avatar options</string>
+    <string name="dialog_set_avatar_option">Change avatar</string>
+    <string name="dialog_delete_avatar_option">Delete avatar</string>
     <string name="profile_name_title">Name</string>
     <string name="profile_name_hint">Your name</string>
     <string name="profile_status_text">status</string>
@@ -138,6 +141,8 @@
     <string name="profile_user_unblock_button">Unblock this user</string>
     <string name="profile_user_depair_button">Depair this user</string>
     <string name="profile_user_delete_button">Delete this user</string>
+    <string name="profile_user_name_unknown">unknown</string>
+    <string name="profile_self_initial_name">anonymous</string>
 
     <string name="friend_request_add_as_friend">Add as a friend</string>
     <string name="friend_request_cancel_invitation">Cancel invitation</string>
@@ -222,7 +227,10 @@
     <!-- Location selection activity -->
     <string name="selectlocation_title">Select location</string>
 
-    <!-- Group leave dialog -->
+    <!-- Location selection activity -->
+    <string name="select_images_title">Select images</string>
+
+  <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Delete group</string>
     <string name="dialog_delete_group_message">Are you sure you want to delete this group?</string>
     <string name="dialog_reject_group_invitation_title">Reject invitation</string>

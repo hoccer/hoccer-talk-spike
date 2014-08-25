@@ -50,7 +50,7 @@ public class ClipboardPreviewFragment extends XoFragment {
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getXoActivity().finish();
+                getActivity().finish();
             }
         });
 

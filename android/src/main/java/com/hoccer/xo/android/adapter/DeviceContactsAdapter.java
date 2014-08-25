@@ -2,11 +2,11 @@ package com.hoccer.xo.android.adapter;
 
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.res.AssetFileDescriptor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
+import android.graphics.Color;
 import android.provider.ContactsContract;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,33 +14,30 @@ import android.widget.*;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.util.DeviceContact;
 import com.hoccer.xo.release.R;
+import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DeviceContactsAdapter extends BaseAdapter {
 
     private static final Logger LOG = Logger.getLogger(DeviceContactsAdapter.class);
 
-    public enum DataType {
-        PhoneNumber,
-        EMailAddress
-    }
-
     private Activity mActivity;
     private List<DeviceContact> mContacts;
+    private List<DeviceContact> mQueriedContacts;
+    private String mQuery;
     private List<String> mSelectedData;
-    private DataType mDataType;
+
     private LayoutInflater mInflater = null;
 
-    // Constructor expects an ordered list of device contacts and the data type to show
-    public DeviceContactsAdapter(List<DeviceContact> items, DataType dataType, Activity activity) {
+    // Constructor expects an ordered list of device contacts
+    public DeviceContactsAdapter(List<DeviceContact> items, Activity activity) {
         mContacts = items;
-        mDataType = dataType;
         mActivity = activity;
+
+        mQueriedContacts = mContacts;
 
         mSelectedData = new ArrayList<String>();
     }
@@ -54,25 +51,30 @@ public class DeviceContactsAdapter extends BaseAdapter {
             convertView = mInflater.inflate(R.layout.item_dialog_multi_invitation, null);
         }
 
-        DeviceContact contact = mContacts.get(position);
+        DeviceContact contact = mQueriedContacts.get(position);
         TextView displayNameView = (TextView) convertView.findViewById(R.id.tv_displayname);
-        displayNameView.setText(contact.getDisplayName());
+
+        if(mQuery == null) {
+            displayNameView.setText(contact.getDisplayName());
+        } else {
+            displayNameView.setText(getHighlightedSearchResult(contact.getDisplayName()));
+        }
 
         QuickContactBadge quickContact = (QuickContactBadge) convertView.findViewById(R.id.cb_quickcontact);
         quickContact.assignContactUri(ContactsContract.Contacts.getLookupUri(0, contact.getLookupKey()));
-        Bitmap thumbnailBitmap =  loadContactPhotoThumbnail(contact.getThumbnailUri());
-        if (thumbnailBitmap != null) {
-            quickContact.setImageBitmap(thumbnailBitmap);
-        } else {
-            quickContact.setImageToDefault();
-        }
+
+        Picasso.with(mActivity)
+                .load(contact.getThumbnailUri())
+                .placeholder(R.drawable.ic_contact_picture)
+                .error(R.drawable.ic_contact_picture)
+                .into(quickContact);
 
         TextView dataView = (TextView) convertView.findViewById(R.id.tv_detailed_info);
         CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checkBox);
         RelativeLayout clicker = (RelativeLayout) convertView.findViewById(R.id.clickablelayout);
 
         boolean isSelected = false;
-        final String[] contactDataList = getContactData(contact);
+        final String[] contactDataList = contact.getDataItem();
         if(contactDataList.length > 0) {
             if(contactDataList.length == 1) {
                 final String data = contactDataList[0];
@@ -145,12 +147,12 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return mContacts.size();
+        return mQueriedContacts.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mContacts.get(position);
+        return mQueriedContacts.get(position);
     }
 
     @Override
@@ -167,39 +169,50 @@ public class DeviceContactsAdapter extends BaseAdapter {
         return mSelectedData.toArray(new String[mSelectedData.size()]);
     }
 
-    private String[] getContactData(DeviceContact contact) {
-        switch(mDataType) {
-            case PhoneNumber:
-                return contact.getPhoneNumbers();
-            case EMailAddress:
-                return contact.getEMailAddresses();
-            default:
-                throw new IllegalArgumentException("Invalid data type encountered");
-        }
-    }
+    /* Sets the new query which is used to filter the contact list.
+     * If query is null no filtering is applied.
+     * If query is empty string everything is filtered.
+     */
+    public void setQuery(String query) {
+        if(query != null) {
+            mQuery = query.toLowerCase();
+            mQueriedContacts = new ArrayList<DeviceContact>();
 
-    private Bitmap loadContactPhotoThumbnail(String photoData) {
-        if (photoData == null) {
-            return null;
-        }
-        AssetFileDescriptor afd = null;
-        try {
-            Uri thumbUri = Uri.parse(photoData);
-            afd = mActivity.getContentResolver().openAssetFileDescriptor(thumbUri, "r");
-            FileDescriptor fileDescriptor = afd.getFileDescriptor();
-            if (fileDescriptor != null) {
-                return BitmapFactory.decodeFileDescriptor(fileDescriptor);
-            }
-        } catch (FileNotFoundException e) {
-
-        } finally {
-            if (afd != null) {
-                try {
-                    afd.close();
-                } catch (IOException e) {
+            if(!mQuery.isEmpty()) {
+                for (DeviceContact contact : mContacts) {
+                    if (contact.getDisplayName().toLowerCase().contains(mQuery)) {
+                        mQueriedContacts.add(contact);
+                    }
                 }
             }
+        } else {
+            mQuery = null;
+            mQueriedContacts = mContacts;
         }
-        return null;
+
+        notifyDataSetChanged();
+    }
+
+    public String getQuery() {
+        return mQuery;
+    }
+
+    private Spannable getHighlightedSearchResult(String text) {
+        Spannable result = new SpannableString(text);
+        String lowerCaseText = text.toLowerCase();
+
+        // initialize the string as not highlighted
+        result.setSpan(new ForegroundColorSpan(Color.GRAY), 0, text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        int fromIndex = 0;
+        int highlightStart = lowerCaseText.indexOf(mQuery, fromIndex);
+        while(highlightStart >= 0) {
+            int highlightEnd = highlightStart + mQuery.length();
+            result.setSpan(new ForegroundColorSpan(Color.BLACK), highlightStart, highlightEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            fromIndex = highlightEnd;
+            highlightStart = lowerCaseText.indexOf(mQuery, fromIndex);
+        }
+
+        return result;
     }
 }

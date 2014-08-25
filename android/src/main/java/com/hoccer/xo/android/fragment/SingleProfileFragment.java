@@ -1,9 +1,10 @@
 package com.hoccer.xo.android.fragment;
 
-import android.content.Intent;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,12 +18,10 @@ import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.activity.ContactsActivity;
-import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
-import com.nostra13.universalimageloader.core.ImageLoader;
+import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 import android.content.DialogInterface;
@@ -45,6 +44,11 @@ import java.sql.SQLException;
 public class SingleProfileFragment extends XoFragment
         implements View.OnClickListener, IXoContactListener, ActionMode.Callback {
 
+    public enum Mode {
+        PROFILE,
+        CREATE_SELF
+    }
+
     public static final String ARG_CREATE_SELF = "ARG_CREATE_SELF";
     public static final String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
 
@@ -65,8 +69,6 @@ public class SingleProfileFragment extends XoFragment
     private EditText mEditName;
 
     private boolean isRegistered = true;
-
-    private Menu mMenu;
 
     private ImageButton mNicknameEditButton;
 
@@ -94,13 +96,14 @@ public class SingleProfileFragment extends XoFragment
         mNicknameTextView = (TextView) v.findViewById(R.id.tv_profile_nickname);
         mNicknameEditText = (EditText) v.findViewById(R.id.et_profile_nickname);
         mInviteButtonContainer = (LinearLayout) v.findViewById(R.id.inc_profile_request);
-
         return v;
     }
 
     private void showNicknameEdit() {
-        mNicknameEditText.setVisibility(View.VISIBLE);
         mNicknameTextView.setVisibility(View.INVISIBLE);
+        mNicknameEditText.setVisibility(View.VISIBLE);
+        mNicknameEditText.requestFocus();
+        mNicknameEditText.setSelection(mNicknameEditText.getText().length());
         mNicknameEditButton.setImageResource(R.drawable.ic_light_navigation_accept);
         mNicknameEditButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,6 +117,9 @@ public class SingleProfileFragment extends XoFragment
                 }
                 updateNickname(mContact);
                 hideNicknameEdit();
+                toggleSoftKeyboard();
+
+                updateActionBar();
             }
         });
     }
@@ -126,13 +132,19 @@ public class SingleProfileFragment extends XoFragment
             @Override
             public void onClick(View view) {
                 showNicknameEdit();
+                toggleSoftKeyboard();
             }
         });
     }
 
+    private void toggleSoftKeyboard() {
+        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+    }
+
     private void updateInviteButton(final TalkClientContact contact) {
         Button inviteButton = (Button) getView().findViewById(R.id.btn_profile_invite);
-        if(contact == null || contact.isSelf() || contact.isGroup()) {
+        if(contact == null || contact.isSelf()) {
             mInviteButtonContainer.setVisibility(View.GONE);
             return;
         } else {
@@ -177,7 +189,7 @@ public class SingleProfileFragment extends XoFragment
     private void updateDeclineButton(final TalkClientContact contact) {
 
         Button declineButton = (Button) getView().findViewById(R.id.btn_profile_decline);
-        if(contact == null || contact.isSelf() || contact.isGroup()) {
+        if(contact == null || contact.isSelf()) {
             declineButton.setVisibility(View.GONE);
             return;
         } else {
@@ -281,8 +293,6 @@ public class SingleProfileFragment extends XoFragment
                 }
             }
         }
-
-        mMenu = menu;
     }
 
 	@Override
@@ -299,7 +309,7 @@ public class SingleProfileFragment extends XoFragment
                     XoDialogs.showYesNoDialog("ContactDeleteDialog",
                             R.string.dialog_delete_contact_title,
                             R.string.dialog_delete_contact_message,
-                            getXoActivity(),
+                            getActivity(),
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
@@ -327,7 +337,31 @@ public class SingleProfileFragment extends XoFragment
     public void onClick(View v) {
         if (v.getId() == R.id.profile_avatar_image) {
             if (mContact != null && mContact.isEditable()) {
-                getXoActivity().selectAvatar();
+                if(mContact.getAvatarContentUrl() != null) {
+                    XoDialogs.showSingleChoiceDialog("AvatarSelection",
+                            R.string.dialog_avatar_options_title,
+                            new String[] {
+                                    getResources().getString(R.string.dialog_set_avatar_option),
+                                    getResources().getString(R.string.dialog_delete_avatar_option)
+                            },
+                            getActivity(),
+                            new XoDialogs.OnSingleSelectionFinishedListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id, int selectedItem) {
+                                    switch (selectedItem) {
+                                        case 0: {
+                                            getXoActivity().selectAvatar();
+                                        }
+                                        break;
+                                        case 1: {
+                                            updateAvatar(null);
+                                        }
+                                    }
+                                }
+                            });
+                } else {
+                    getXoActivity().selectAvatar();
+                }
             }
         }
     }
@@ -341,28 +375,31 @@ public class SingleProfileFragment extends XoFragment
     @Override
     public void onServiceConnected() {
         LOG.debug("onServiceConnected()");
+        if(mAvatarToSet != null) {
+            updateAvatar(mAvatarToSet);
+            mAvatarToSet = null;
+        }
+    }
 
-        final IContentObject newAvatar = mAvatarToSet;
-        mAvatarToSet = null;
-        if (newAvatar != null) {
+    private void updateAvatar(final IContentObject avatar) {
+        if (avatar != null) {
             XoApplication.getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     LOG.debug("creating avatar upload");
-                    TalkClientUpload upload = SelectedContent.createAvatarUpload(newAvatar);
+                    TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
                     try {
                         getXoDatabase().saveClientUpload(upload);
                         if (mContact.isSelf()) {
                             getXoClient().setClientAvatar(upload);
-                        }
-                        if (mContact.isGroup()) {
-                            getXoClient().setGroupAvatar(mContact, upload);
                         }
                     } catch (SQLException e) {
                         LOG.error("sql error", e);
                     }
                 }
             });
+        } else {
+            getXoClient().setClientAvatar(null);
         }
     }
 
@@ -386,17 +423,17 @@ public class SingleProfileFragment extends XoFragment
             isRegistered = false;
             getActivity().startActionMode(this);
         }
-        update(mContact);
+        update();
         updateActionBar();
         finishActivityIfContactDeleted();
     }
 
     public void updateActionBar() {
         LOG.debug("update(" + mContact.getClientContactId() + ")");
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                getActivity().getActionBar().setTitle(mContact.getName());
+                getActivity().getActionBar().setTitle(mContact.getNickname());
                 if (mMode == Mode.CREATE_SELF) {
                     getActivity().getActionBar().setTitle(R.string.welcome_to_title);
                 } else {
@@ -409,7 +446,7 @@ public class SingleProfileFragment extends XoFragment
     }
 
     public void finishActivityIfContactDeleted() {
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (mContact.isDeleted()) {
@@ -419,83 +456,54 @@ public class SingleProfileFragment extends XoFragment
         });
     }
 
-    public void confirmSelf() {
-        LOG.debug("confirmSelf()");
-        mMode = Mode.CONFIRM_SELF;
-        mContact = getXoClient().getSelfContact();
-        update(mContact);
-    }
-
-    private void update(TalkClientContact contact) {
-        LOG.debug("update(" + contact.getClientContactId() + ")");
+    private void update() {
+        LOG.debug("update(" + mContact.getClientContactId() + ")");
 
         String avatarUrl = null;
-        if (contact.isGroup()) {
-            avatarUrl = "drawable://" + R.drawable.avatar_default_group_large;
+        if (mContact.isSelf()) {
+            TalkClientUpload avatarUpload = mContact.getAvatarUpload();
+            if (avatarUpload != null && avatarUpload.isContentAvailable()) {
+                avatarUrl = avatarUpload.getContentDataUrl();
+            }
         } else {
-            avatarUrl = "drawable://" + R.drawable.avatar_default_contact_large;
-        }
-        TalkClientUpload avatarUpload = null;
-        TalkClientDownload avatarDownload = null;
-        if (contact.isSelf() || contact.isGroup()) {
-            avatarUpload = contact.getAvatarUpload();
-            if (avatarUpload != null) {
-                if (avatarUpload.isContentAvailable()) {
-                    avatarUrl = avatarUpload.getDataFile();
+            TalkClientDownload avatarDownload = mContact.getAvatarDownload();
+            if (avatarDownload != null && avatarDownload.isContentAvailable()) {
+                if (avatarDownload.getDataFile() != null) {
+                    Uri uri = Uri.fromFile(new File(avatarDownload.getDataFile()));
+                    avatarUrl = uri.toString();
                 }
             }
         }
-        if (avatarUpload == null && (contact.isClient() || contact.isGroup())) {
-            avatarDownload = contact.getAvatarDownload();
-            if (avatarDownload != null) {
-                if (avatarDownload.isContentAvailable()) {
-                    avatarUrl = avatarDownload.getDataFile();
-                    if (avatarUrl != null) {
-                        Uri uri = Uri.fromFile(new File(avatarUrl));
-                        avatarUrl = uri.toString();
-                    }
-                }
-            }
-        }
-        if (avatarUrl != null) {
-            LOG.debug("avatar is " + avatarUrl);
-            ImageLoader.getInstance().displayImage(avatarUrl, mAvatarImage);
-        }
+
+        Picasso.with(getActivity())
+                .load(avatarUrl)
+                .placeholder(R.drawable.avatar_default_contact_large)
+                .error(R.drawable.avatar_default_contact_large)
+                .into(mAvatarImage);
 
         // apply data from the contact that needs to recurse
-        String name = null;
-
-        if (contact.isClient() || contact.isSelf()) {
-            if (contact.isSelf() && !contact.isSelfRegistered()) {
-                name = contact.getSelf().getRegistrationName();
+        String name = getResources().getString(R.string.profile_user_name_unknown);
+        if (mContact.isClient() || mContact.isSelf()) {
+            if (mContact.isSelf() && !mContact.isSelfRegistered()) {
+                name = mContact.getSelf().getRegistrationName();
             } else {
-                TalkPresence presence = contact.getClientPresence();
+                TalkPresence presence = mContact.getClientPresence();
                 if (presence != null) {
                     name = presence.getClientName();
                 }
             }
         }
-        if (name == null) {
-            if (mMode == Mode.CREATE_SELF) {
-                name = "<chose a name>";
-            }
-        }
-        if (name == null) {
-            name = "<unnamed>";
-        }
-        LOG.debug("name is " + name);
         mNameText.setText(name);
-
         mKeyText.setText(getFingerprint());
 
-        updateInviteButton(contact);
-        updateDeclineButton(contact);
+        updateInviteButton(mContact);
+        updateDeclineButton(mContact);
         hideNicknameEdit();
         View nickNameContainer = getView().findViewById(R.id.inc_profile_nickname);
-        if(mContact.isSelf()) {
+        if(this.mContact.isSelf()) {
             nickNameContainer.setVisibility(View.GONE);
         } else {
-            updateNickname(contact);
+            updateNickname(mContact);
             nickNameContainer.setVisibility(View.VISIBLE);
         }
 
@@ -534,7 +542,7 @@ public class SingleProfileFragment extends XoFragment
         XoDialogs.showYesNoDialog("BlockContactDialog",
                 R.string.dialog_block_user_title,
                 R.string.dialog_block_user_message,
-                getXoActivity(),
+                getActivity(),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
@@ -554,11 +562,11 @@ public class SingleProfileFragment extends XoFragment
         LOG.debug("unblockContact()");
         if (mContact != null) {
             getXoClient().unblockContact(mContact);
-            getXoActivity().finish();
+            getActivity().finish();
         }
     }
 
-    public void refreshContact(TalkClientContact newContact) {
+    private void refreshContact(TalkClientContact newContact) {
         LOG.debug("refreshContact()");
         if (mMode == Mode.PROFILE) {
             mContact = newContact;
@@ -575,11 +583,11 @@ public class SingleProfileFragment extends XoFragment
                 LOG.error("SQL error", e);
             }
         }
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 LOG.debug("updating ui");
-                update(mContact);
+                update();
             }
         });
     }
@@ -622,18 +630,10 @@ public class SingleProfileFragment extends XoFragment
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-        if (isMyContact(contact)) {
-            updateActionBar();
-            finishActivityIfContactDeleted();
-        }
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        if (isMyContact(contact)) {
-            updateActionBar();
-            finishActivityIfContactDeleted();
-        }
     }
 
     // Actionmode Callbacks
@@ -648,6 +648,8 @@ public class SingleProfileFragment extends XoFragment
         mNameText.setVisibility(View.INVISIBLE);
         if (isRegistered) {
             mEditName.setText(mNameText.getText());
+        } else {
+            mEditName.setText(getResources().getString(R.string.profile_self_initial_name));
         }
         mAvatarImage.setOnClickListener(this);
         return true;
@@ -661,32 +663,23 @@ public class SingleProfileFragment extends XoFragment
     @Override
     public void onDestroyActionMode(ActionMode mode) {
         String nameString = mEditName.getText().toString();
-        mNameText.setText(nameString);
+        String newUserName = nameString.isEmpty() ? getResources().getString(R.string.profile_self_initial_name) : nameString;
+
+        mNameText.setText(newUserName);
         mEditName.setVisibility(View.GONE);
         mNameText.setVisibility(View.VISIBLE);
         mAvatarImage.setOnClickListener(null);
 
         if (!isRegistered) {
-            mContact.getSelf().setRegistrationName(nameString);
+            mContact.getSelf().setRegistrationName(newUserName);
             mContact.updateSelfConfirmed();
             getXoClient().register();
-            SingleProfileActivity activity = (SingleProfileActivity) getXoActivity();
-            activity.confirmSelf();
-            getXoClient().setClientString(nameString, "happy");
-            Intent intent = new Intent(activity, ContactsActivity.class);
-            activity.startActivity(intent);
+            getXoClient().setClientString(newUserName, "happy");
+            getActivity().finish();
         } else {
-            getXoClient().setClientString(nameString, "happier");
+            getXoClient().setClientString(newUserName, "happier");
             refreshContact(mContact);
-            update(mContact);
+            update();
         }
-
     }
-
-    public enum Mode {
-        PROFILE,
-        CREATE_SELF,
-        CONFIRM_SELF
-    }
-
 }

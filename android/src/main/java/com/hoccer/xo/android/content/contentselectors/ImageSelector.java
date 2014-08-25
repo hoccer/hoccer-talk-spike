@@ -6,7 +6,9 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
+import com.hoccer.xo.android.activity.MultiImagePickerActivity;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
@@ -39,8 +41,12 @@ public class ImageSelector implements IContentSelector {
 
     @Override
     public Intent createSelectionIntent(Context context) {
+
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
+
+//        Intent intent = new Intent(context, MultiImagePickerActivity.class);
+
         return intent;
     }
 
@@ -63,9 +69,9 @@ public class ImageSelector implements IContentSelector {
 
     private IContentCreator findContentObjectCreator(Uri selectedContent) {
         String contentString = selectedContent.toString();
-	    if (isPicasaContent(contentString)) {
-	        return new PicasaContentObjectCreator();
-	    } else if (isFileContent(contentString)) {
+        if (isPicasaContent(contentString)) {
+            return new PicasaContentObjectCreator();
+        } else if (isFileContent(contentString)) {
             return new ImageFileContentObjectCreator();
         }
 
@@ -73,29 +79,33 @@ public class ImageSelector implements IContentSelector {
     }
 
     static private boolean isPicasaContent(String contentString) {
-	return
-	    // picasa images should at least contain this..
-	    contentString.contains(".android.gallery3d.")
+        return
+                // picasa images should at least contain this..
+                contentString.contains(".android.gallery3d.")
 
-		// Moto G content string on dirks mobile
-	||  contentString.startsWith("content://com.google.android.apps.photos.content/");
+                        // Moto G content string on dirks mobile
+                        || contentString.startsWith("content://com.google.android.apps.photos.content/");
     }
 
     static private boolean isFileContent(String contentString) {
-	return contentString.startsWith("content://media/");
+        return contentString.startsWith("content://media/");
     }
 
     @Override
     public boolean isValidIntent(Context context, Intent intent) {
         Uri contentUri = intent.getData();
-        String[] columns = {
-            MediaStore.Images.Media.MIME_TYPE
-        };
-        Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
-        cursor.moveToFirst();
-        int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
-        String mimeType = cursor.getString(mimeTypeIndex);
-        return (mimeType.startsWith("image"));
+        if (contentUri != null) {
+            String[] columns = {
+                    MediaStore.Images.Media.MIME_TYPE
+            };
+            Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
+            cursor.moveToFirst();
+            int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
+            String mimeType = cursor.getString(mimeTypeIndex);
+            return (mimeType.startsWith("image"));
+        } else {
+            return false;
+        }
     }
 
     public Intent createCropIntent(Context context, Uri data) {

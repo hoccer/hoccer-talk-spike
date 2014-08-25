@@ -1,29 +1,37 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
+import android.graphics.*;
+import android.graphics.drawable.NinePatchDrawable;
+import android.view.*;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.util.ThumbnailManager;
+import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 
 public class ChatImageItem extends ChatMessageItem {
 
+    private static final double IMAGE_SCALE_FACTOR = 0.7;
+
     private Context mContext;
+    private int mImageWidth;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
         super(context, message);
         mContext = context;
+
+        setRequiredImageWidth();
     }
 
     public ChatItemType getType() {
@@ -57,8 +65,6 @@ public class ChatImageItem extends ChatMessageItem {
         ImageView imageView = (ImageView) mContentWrapper.findViewById(R.id.iv_image_view);
         RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
         int mask;
-        String tag = (mMessage.getMessageId() != null) ? mMessage.getMessageId() : mMessage.getMessageTag();
-        imageView.setVisibility(View.INVISIBLE);
         if (mMessage.isIncoming()) {
             rootView.setGravity(Gravity.LEFT);
             mask = R.drawable.chat_bubble_incoming;
@@ -66,11 +72,65 @@ public class ChatImageItem extends ChatMessageItem {
             rootView.setGravity(Gravity.RIGHT);
             mask = R.drawable.chat_bubble_outgoing;
         }
-        imageView.setVisibility(View.INVISIBLE);
         if (contentObject.getContentDataUrl() != null) {
             mAttachmentView.setBackgroundDrawable(null);
-            ThumbnailManager.getInstance(mContext).displayThumbnailForImage(contentObject.getContentDataUrl(), imageView, mask, tag);
+
+            double aspectRatio = contentObject.getContentAspectRatio();
+            int height = (int) (mImageWidth / aspectRatio);
+
+            imageView.getLayoutParams().width = mImageWidth;
+            imageView.getLayoutParams().height = height;
+            imageView.requestLayout();
+
+            Picasso.with(mContext)
+                    .load(contentObject.getContentDataUrl())
+                    .resize(mImageWidth, height)
+                    .transform(new BubbleTransformation(mask))
+                    .into(imageView);
         }
+    }
+
+    private class BubbleTransformation implements Transformation {
+
+        private int mask;
+
+        public BubbleTransformation(int mask) {
+            this.mask = mask;
+        }
+
+        @Override
+        public Bitmap transform(Bitmap source) {
+            Bitmap mask = getNinePatchMask(this.mask, source.getWidth(), source.getHeight(), mContext);
+            Bitmap result = Bitmap.createBitmap(source.getWidth(), source.getHeight(), Bitmap.Config.ARGB_8888);
+
+            Canvas c = new Canvas(result);
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+            c.drawBitmap(source, 0, 0, null);
+            c.drawBitmap(mask, 0, 0, paint);
+
+            paint.setXfermode(null);
+            if (result != source) {
+                source.recycle();
+            }
+            return result;
+        }
+
+        @Override
+        public String key() {
+            return "square()";
+        }
+    }
+
+    private Bitmap getNinePatchMask(int id, int x, int y, Context context) {
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), id);
+        byte[] chunk = bitmap.getNinePatchChunk();
+        NinePatchDrawable drawable = new NinePatchDrawable(context.getResources(), bitmap, chunk, new Rect(), null);
+        drawable.setBounds(0, 0, x, y);
+        Bitmap result = Bitmap.createBitmap(x, y, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        drawable.draw(canvas);
+        return result;
     }
 
     private void displayImage(IContentObject contentObject) {
@@ -85,6 +145,12 @@ public class ChatImageItem extends ChatMessageItem {
         } catch (ClassCastException e) {
             e.printStackTrace();
         }
+    }
+
+
+    private void setRequiredImageWidth() {
+        Point size = DisplayUtils.getDisplaySize(mContext);
+        mImageWidth = (int) (size.x * IMAGE_SCALE_FACTOR);
     }
 
 }

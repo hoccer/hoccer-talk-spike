@@ -19,7 +19,6 @@ import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class GroupManageDialog extends DialogFragment {
 
@@ -117,7 +116,7 @@ public class GroupManageDialog extends DialogFragment {
 
     private void updateMemberships() {
         if (mFromNearby) {
-            ((GroupProfileFragment) getTargetFragment()).updateContactLis(mContactsToInvite);
+            ((GroupProfileFragment) getTargetFragment()).updateContactList(mContactsToInvite);
         } else {
             for (TalkClientContact contact : mContactsToInvite) {
                 ((XoActivity) getActivity()).getXoClient().inviteClientToGroup(mGroup.getGroupId(), contact.getClientId());
