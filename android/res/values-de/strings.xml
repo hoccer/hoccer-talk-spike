@@ -149,7 +149,8 @@
     <string name="content_downloading">Downloading...</string>
     <string name="content_uploading">Uploading...</string>
 
-    <string name="content_images">Foto</string>
+    <string name="content_images">Bild</string>
+    <string name="content_multi_images">Mehrere Bilder</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Foto aufnehmen</string>
     <string name="content_music">Musik</string>

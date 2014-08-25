@@ -10,9 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.activity.MapsLocationActivity;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.contentselectors.*;
 import com.hoccer.xo.android.fragment.CompositionFragment;
@@ -88,6 +86,7 @@ public class ContentRegistry {
         mAvatarSelector = new ImageSelector(mContext);
 
         initializeSelector(new ImageSelector(mContext));
+        initializeSelector(new MultiImageSelector(mContext));
         initializeSelector(new VideoSelector(mContext));
         initializeSelector(new MusicSelector(mContext));
         initializeSelector(new ContactSelector(mContext));
@@ -265,7 +264,7 @@ public class ContentRegistry {
                     XoActivity xoActivity = (XoActivity) fragment.getActivity();
                     xoActivity.clipBoardItemSelected(clipboardSelector.selectObjectFromClipboard(xoActivity, intent));
                 } else {
-                    if (selector instanceof ImageSelector) {
+                    if (selector instanceof MultiImageSelector) {
                         startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGES_ATTACHMENT);
                     } else {
                         startExternalActivityForResult(fragment, intent, requestCode);
@@ -303,9 +302,9 @@ public class ContentRegistry {
     }
 
     public ArrayList<IContentObject> createSelectedImagesAttachment(ContentSelection selection, Intent intent) {
-        ImageSelector selector = (ImageSelector) selection.getSelector();
+        MultiImageSelector selector = (MultiImageSelector) selection.getSelector();
         if(selector != null) {
-            return selector.createImageObjectsFromSelectionResult(selection.getActivity(), intent);
+            return selector.createObjectsFromSelectionResult(selection.getActivity(), intent);
         }
         return null;
     }
