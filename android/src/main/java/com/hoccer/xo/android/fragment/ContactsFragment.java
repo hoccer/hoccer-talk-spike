@@ -3,6 +3,7 @@ package com.hoccer.xo.android.fragment;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.view.*;
 import android.widget.*;
 import com.hoccer.talk.client.XoClientDatabase;
@@ -147,8 +148,13 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
 
     @Override
     protected void onSearchModeDisabled() {
-        mAddGroupMenuItem.setVisible(true);
-        mPairWithContactMenuItem.setVisible(true);
+        if (mAddGroupMenuItem != null) {
+            mAddGroupMenuItem.setVisible(true);
+        }
+
+        if (mPairWithContactMenuItem != null) {
+            mPairWithContactMenuItem.setVisible(true);
+        }
     }
 
     private void deleteChatHistoryAt(int position) {
@@ -266,4 +272,5 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
         mPlaceholderImage.setVisibility(View.GONE);
         mPlaceholderText.setVisibility(View.GONE);
     }
+
 }

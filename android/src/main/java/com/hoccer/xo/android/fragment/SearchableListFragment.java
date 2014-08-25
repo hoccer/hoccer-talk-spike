@@ -48,7 +48,7 @@ public abstract class SearchableListFragment extends ListFragment {
     public void onPause() {
         super.onPause();
         mSearchMenuItem.collapseActionView();
-        disableSearchMode();
+        leaveSearchMode();
     }
 
     @Override
@@ -81,7 +81,7 @@ public abstract class SearchableListFragment extends ListFragment {
 
     protected abstract void onSearchModeDisabled();
 
-    private void disableSearchMode() {
+    public void leaveSearchMode() {
         mIsSearchModeEnabled = false;
         if (mCachedListAdapter != null) {
             setListAdapter(mCachedListAdapter);
@@ -97,7 +97,8 @@ public abstract class SearchableListFragment extends ListFragment {
         @Override
         public boolean onQueryTextSubmit(String query) {
             if (mWindowToken != null) {
-                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager inputManager = (InputMethodManager) getActivity()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputManager.hideSoftInputFromWindow(mWindowToken, InputMethodManager.HIDE_IMPLICIT_ONLY);
             }
 
@@ -110,7 +111,7 @@ public abstract class SearchableListFragment extends ListFragment {
             if (mSearchMenuItem.isActionViewExpanded()) {
                 searchInAdapter(query);
             } else {
-                disableSearchMode();
+                leaveSearchMode();
             }
 
             return false;
@@ -133,7 +134,7 @@ public abstract class SearchableListFragment extends ListFragment {
         @Override
         public boolean onMenuItemActionCollapse(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
-                disableSearchMode();
+                leaveSearchMode();
             }
 
             return true;
