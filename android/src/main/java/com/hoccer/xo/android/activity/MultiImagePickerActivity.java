@@ -7,6 +7,10 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 
@@ -40,7 +46,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                 if (!mSelectedImages.isEmpty()) {
                     String[] images = new String[mSelectedImages.size()];
                     int counter = 0;
-                    for (String uri: mSelectedImages) {
+                    for (String uri : mSelectedImages) {
                         images[counter++] = uri;
                     }
                     Intent intent = new Intent();
@@ -52,14 +58,24 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
             }
         });
         getLoaderManager().initLoader(ImageQuery.QUERY_ID, null, this);
-//        ThumbnailManager.getInstance(this).setHeightDp(80);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Point size = DisplayUtils.getDisplaySize(this);
+        if (size.x > size.y) {
+            // horizontal
+            mImageGridView.setNumColumns(5);
+        } else {
+            // vertical
+            mImageGridView.setNumColumns(3);
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        ThumbnailManager.getInstance(this).setHeightDp(200);
-//        ThumbnailManager.getInstance(this).clearCache();
     }
 
     @Override
@@ -90,7 +106,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
 
         class ViewHolder {
             ImageView imageview;
-            CheckBox checkbox;
+            ImageView selectedImage;
             int id;
         }
 
@@ -99,7 +115,8 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
             final View itemLayout = mInflater.inflate(R.layout.item_multi_image_picker, viewGroup, false);
             final ViewHolder holder = new ViewHolder();
             holder.imageview = (ImageView) itemLayout.findViewById(R.id.thumbImage);
-            holder.checkbox = (CheckBox) itemLayout.findViewById(R.id.itemCheckBox);
+            holder.selectedImage = (ImageView) itemLayout.findViewById(R.id.itemCheckBox);
+
             itemLayout.setTag(holder);
             return itemLayout;
         }
@@ -110,35 +127,48 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
             final String id = cursor.getString(ImageQuery.ID);
             final String contentUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "" + id).toString();
             final String dataUri = cursor.getString(ImageQuery.DATA);
-            holder.checkbox.setOnCheckedChangeListener(null);
+
             if (mSelectedImages.contains(contentUri.toString())) {
-                holder.checkbox.setChecked(true);
+                holder.imageview.setSelected(true);
+                holder.imageview.setAlpha(200);
+                holder.selectedImage.setVisibility(View.VISIBLE);
             } else {
-                holder.checkbox.setChecked(false);
+                holder.imageview.setSelected(false);
+                holder.imageview.setAlpha(255);
+                holder.selectedImage.setVisibility(View.GONE);
             }
-            holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean selected) {
-                    if (selected) {
-                        mSelectedImages.add(contentUri.toString());
-                    } else {
-                        mSelectedImages.remove(contentUri.toString());
-                    }
-                }
-            });
 
             Picasso.with(mContext)
                     .load(contentUri)
-                    .resize(200,200)
+                    .placeholder(R.drawable.ic_light_content_picture)
+                    .resize(200, 200)
                     .centerCrop()
                     .into(holder.imageview);
 
             holder.imageview.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
+                    if (!holder.imageview.isSelected()) {
+                        holder.imageview.setSelected(true);
+                        mSelectedImages.add(contentUri.toString());
+                        holder.imageview.setAlpha(200);
+                        holder.selectedImage.setVisibility(View.VISIBLE);
+                    } else {
+                        holder.imageview.setSelected(false);
+                        mSelectedImages.remove(contentUri.toString());
+                        holder.imageview.setAlpha(255);
+                        holder.selectedImage.setVisibility(View.GONE);
+                    }
+                }
+            });
+
+            holder.imageview.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_VIEW);
                     intent.setDataAndType(Uri.parse("file://" + dataUri), "image/*");
                     startActivity(intent);
+                    return true;
                 }
             });
         }

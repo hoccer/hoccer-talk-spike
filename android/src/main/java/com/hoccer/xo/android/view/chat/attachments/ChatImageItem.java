@@ -7,6 +7,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
@@ -148,10 +149,7 @@ public class ChatImageItem extends ChatMessageItem {
 
 
     private void setRequiredImageWidth() {
-        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
+        Point size = DisplayUtils.getDisplaySize(mContext);
         mImageWidth = (int) (size.x * IMAGE_SCALE_FACTOR);
     }
 

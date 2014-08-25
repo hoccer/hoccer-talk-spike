@@ -13,14 +13,14 @@
 
   <GridView
       android:id="@+id/gv_images"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent"
-      android:numColumns="2"
-      android:verticalSpacing="10dp"
-      android:horizontalSpacing="10dp"
-      android:columnWidth="90dp"
-      android:stretchMode="columnWidth"
-      android:gravity="center"
-      android:layout_above="@id/selectBtn" />
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:numColumns="3"
+      android:scrollbars="none"
+      android:scrollbarStyle="insideOverlay"
+      android:layout_above="@id/selectBtn"
+      android:horizontalSpacing="2dp"
+      android:verticalSpacing="2dp"
+      />
 
 </RelativeLayout>
