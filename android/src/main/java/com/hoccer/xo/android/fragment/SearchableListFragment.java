@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.SearchView;
 import com.hoccer.xo.release.R;
@@ -34,7 +35,21 @@ public abstract class SearchableListFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (!mIsSearchModeEnabled && mCachedListAdapter != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setListAdapter(mCachedListAdapter);
+                }
+            });
+        }
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        mSearchMenuItem.collapseActionView();
+        leaveSearchMode();
     }
 
     @Override
@@ -67,6 +82,15 @@ public abstract class SearchableListFragment extends ListFragment {
 
     protected abstract void onSearchModeDisabled();
 
+    public void leaveSearchMode() {
+        mIsSearchModeEnabled = false;
+        if (mCachedListAdapter != null) {
+            setListAdapter(mCachedListAdapter);
+        }
+
+        onSearchModeDisabled();
+    }
+
     private class SearchActionHandler implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
 
         private IBinder mWindowToken;
@@ -74,7 +98,8 @@ public abstract class SearchableListFragment extends ListFragment {
         @Override
         public boolean onQueryTextSubmit(String query) {
             if (mWindowToken != null) {
-                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager inputManager = (InputMethodManager) getActivity()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputManager.hideSoftInputFromWindow(mWindowToken, InputMethodManager.HIDE_IMPLICIT_ONLY);
             }
 
@@ -83,8 +108,11 @@ public abstract class SearchableListFragment extends ListFragment {
 
         @Override
         public boolean onQueryTextChange(final String query) {
-            if (mIsSearchModeEnabled) {
+            // check if expanded to determine legality for search-mode
+            if (mSearchMenuItem.isActionViewExpanded()) {
                 searchInAdapter(query);
+            } else {
+                leaveSearchMode();
             }
 
             return false;
@@ -93,6 +121,15 @@ public abstract class SearchableListFragment extends ListFragment {
         @Override
         public boolean onMenuItemActionExpand(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
+                // set the correct icons since android changes them for some reason
+                getActivity().getActionBar().setIcon(R.drawable.ic_launcher_plain);
+
+                int searchImgId = getResources().getIdentifier("android:id/search_mag_icon", null, null);
+                ImageView searchIcon = ((ImageView) mSearchMenuItem.getActionView().findViewById(searchImgId));
+                if (searchIcon != null) {
+                    searchIcon.setImageResource(R.drawable.ic_action_search);
+                }
+
                 mIsSearchModeEnabled = true;
                 mCachedListAdapter = getListAdapter();
                 onSearchModeEnabled();
@@ -107,9 +144,7 @@ public abstract class SearchableListFragment extends ListFragment {
         @Override
         public boolean onMenuItemActionCollapse(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
-                mIsSearchModeEnabled = false;
-                setListAdapter(mCachedListAdapter);
-                onSearchModeDisabled();
+                leaveSearchMode();
             }
 
             return true;

@@ -610,21 +610,32 @@ public class SingleProfileFragment extends XoFragment
     }
 
     @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
+    public void onClientPresenceChanged(final TalkClientContact contact) {
         if (isMyContact(contact)) {
-            refreshContact(contact);
-            updateActionBar();
-            finishActivityIfContactDeleted();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshContact(contact);
+                    getActivity().invalidateOptionsMenu();
+                    updateActionBar();
+                    finishActivityIfContactDeleted();
+                }
+            });
         }
     }
 
     @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
+    public void onClientRelationshipChanged(final TalkClientContact contact) {
         if (isMyContact(contact)) {
-            refreshContact(contact);
-            getActivity().invalidateOptionsMenu();
-            updateActionBar();
-            finishActivityIfContactDeleted();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshContact(contact);
+                    getActivity().invalidateOptionsMenu();
+                    updateActionBar();
+                    finishActivityIfContactDeleted();
+                }
+            });
         }
     }
 

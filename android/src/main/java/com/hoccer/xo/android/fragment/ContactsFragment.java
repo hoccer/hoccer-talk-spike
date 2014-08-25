@@ -3,11 +3,9 @@ package com.hoccer.xo.android.fragment;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.view.*;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
@@ -16,12 +14,15 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.BetterContactsAdapter;
 import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
-import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.android.adapter.SearchAdapter;
+import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.dialog.TokenDialog;
+import com.hoccer.xo.android.view.model.BaseContactItem;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
+import java.lang.ref.WeakReference;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -31,29 +32,31 @@ import java.util.List;
  * This currently shows only contact data but should also be able to show
  * recent conversations for use as a "conversations" view.
  */
-public class ContactsFragment extends XoListFragment implements OnItemCountChangedListener {
+public class ContactsFragment extends SearchableListFragment implements OnItemCountChangedListener {
 
     private static final Logger LOG = Logger.getLogger(ContactsFragment.class);
 
     private XoClientDatabase mDatabase;
     private BetterContactsAdapter mAdapter;
+    private WeakReference<SearchAdapter> mSearchAdapterReference = new WeakReference<SearchAdapter>(null);
 
     private TextView mPlaceholderText;
 
     private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
+    private MenuItem mPairWithContactMenuItem;
+    private MenuItem mAddGroupMenuItem;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mDatabase = XoApplication.getXoClient().getDatabase();
-        initBetterContactListAdapter();
+        initContactListAdapter();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        LOG.debug("onCreateView()");
         View view = inflater.inflate(R.layout.fragment_contacts, container, false);
         mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
         mPlaceholderImage= (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
@@ -61,10 +64,10 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             mPlaceholderImageFrame.setBackground(getResources().getDrawable(R.drawable.placeholder_chats));
-            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
+            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
         } else {
             mPlaceholderImageFrame.setBackgroundDrawable(getResources().getDrawable(R.drawable.placeholder_chats));
-            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_chats_head, true));
+            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
         }
 
         registerForContextMenu(view);
@@ -79,28 +82,17 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+//        inflater.inflate(R.menu.fragment_contacts, menu);
+        mAddGroupMenuItem = menu.findItem(R.id.menu_new_group);
+        mPairWithContactMenuItem = menu.findItem(R.id.menu_pair);
     }
 
     @Override
     public void onPause() {
-        LOG.debug("onPause()");
         super.onPause();
-        if (mAdapter != null) {
-            mAdapter.onPause();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        LOG.debug("onResume()");
-        super.onResume();
-        if (mAdapter != null) {
-            mAdapter.requestReload();
-            mAdapter.onResume();
-            mAdapter.notifyDataSetChanged();
-        }
+        mAdapter.onPause();
     }
 
     @Override
@@ -116,7 +108,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         super.onCreateContextMenu(menu, v, menuInfo);
         if(menuInfo != null) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            Object object = mAdapter.getItem(info.position);
+            Object object = ((BaseContactItem) mAdapter.getItem(info.position)).getContent();
             if (object instanceof TalkClientContact) {
                 MenuInflater inflater = getActivity().getMenuInflater();
                 inflater.inflate(R.menu.context_menu_contacts, menu);
@@ -139,8 +131,34 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         }
     }
 
+    @Override
+    protected ListAdapter searchInAdapter(String query) {
+        return mSearchAdapterReference.get().query(query);
+    }
+
+    @Override
+    protected void onSearchModeEnabled() {
+        mAddGroupMenuItem.setVisible(false);
+        mPairWithContactMenuItem.setVisible(false);
+        if (mSearchAdapterReference.get() == null) {
+            mSearchAdapterReference = new WeakReference<SearchAdapter>(new SearchAdapter(mAdapter));
+
+        }
+    }
+
+    @Override
+    protected void onSearchModeDisabled() {
+        if (mAddGroupMenuItem != null) {
+            mAddGroupMenuItem.setVisible(true);
+        }
+
+        if (mPairWithContactMenuItem != null) {
+            mPairWithContactMenuItem.setVisible(true);
+        }
+    }
+
     private void deleteChatHistoryAt(int position) {
-        Object item = mAdapter.getItem(position);
+        Object item = ((BaseContactItem) mAdapter.getItem(position)).getContent();
         if (item instanceof TalkClientContact) {
             clearConversationForContact((TalkClientContact) item);
         } else if (item instanceof String) {
@@ -173,7 +191,7 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         }
     }
 
-    private void initBetterContactListAdapter() {
+    private void initContactListAdapter() {
         BetterContactsAdapter.Filter filter = new BetterContactsAdapter.Filter() {
             @Override
             public boolean shouldShow(TalkClientContact contact) {
@@ -193,18 +211,16 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
             }
         };
 
-        mAdapter = new BetterContactsAdapter(getXoActivity(), filter);
+        mAdapter = new BetterContactsAdapter((XoActivity) getActivity(), filter);
         mAdapter.onCreate();
         mAdapter.setOnItemCountChangedListener(this);
-        mAdapter.requestReload();
     }
 
     public void onGroupCreationSucceeded(int contactId) {
-        LOG.debug("onGroupCreationSucceeded(" + contactId + ")");
         try {
-            TalkClientContact contact = getXoDatabase().findClientContactById(contactId);
+            TalkClientContact contact = XoApplication.getXoClient().getDatabase().findClientContactById(contactId);
             if (contact != null) {
-                getXoActivity().showContactProfile(contact);
+                ((XoActivity) getActivity()).showContactProfile(contact);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -215,22 +231,22 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        Object item = l.getItemAtPosition(position);
+        Object item = ((BaseContactItem)l.getItemAtPosition(position)).getContent();
         if (item instanceof TalkClientContact) {
             TalkClientContact contact = (TalkClientContact) item;
             if (contact.isGroup() && contact.isGroupInvited()) {
-                getXoActivity().showContactProfile(contact);
+                ((XoActivity) getActivity()).showContactProfile(contact);
             } else {
-                getXoActivity().showContactConversation(contact);
+                ((XoActivity) getActivity()).showContactConversation(contact);
             }
         }
         if (item instanceof TalkClientSmsToken) {
             TalkClientSmsToken token = (TalkClientSmsToken) item;
-            new TokenDialog(getXoActivity(), token).show(getXoActivity().getFragmentManager(),
+            new TokenDialog((XoActivity) getActivity(), token).show(getActivity().getFragmentManager(),
                     "TokenDialog");
         }
         if (item instanceof String) { // item can only be an instance of string if the user pressed on the nearby saved option
-            Intent intent = new Intent(getXoActivity(), MessagingActivity.class);
+            Intent intent = new Intent(getActivity(), MessagingActivity.class);
             intent.putExtra(MessagingActivity.EXTRA_NEARBY_ARCHIVE, true);
             startActivity(intent);
         }
@@ -256,4 +272,5 @@ public class ContactsFragment extends XoListFragment implements OnItemCountChang
         mPlaceholderImage.setVisibility(View.GONE);
         mPlaceholderText.setVisibility(View.GONE);
     }
+
 }
