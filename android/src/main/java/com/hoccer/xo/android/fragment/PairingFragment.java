@@ -23,11 +23,14 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.DeviceContactsSelectionActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class PairingFragment extends XoFragment implements View.OnClickListener, IXoPairingListener {
+
+    private static final Logger LOG = Logger.getLogger(PairingFragment.class);
 
     TextView mTokenMessage;
     TextView mTokenText;
@@ -46,7 +49,6 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
 
     String mActiveToken;
     String mTokenFromEmail;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -230,7 +232,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         mActiveToken = token;
         mTokenEdit.setEnabled(false);
         mTokenPairButton.setEnabled(false);
-        getBackgroundExecutor().execute(new Runnable() {
+        getXoActivity().getBackgroundExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 getXoClient().performTokenPairing(token);
@@ -242,11 +244,11 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onTokenPairingSucceeded(String token) {
         LOG.debug("onTokenPairingSucceeded()");
         if (token.equals(mActiveToken)) {
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Toast.makeText(getXoActivity(), R.string.pairing_success, Toast.LENGTH_LONG).show();
-                    getXoActivity().finish();
+                    getActivity().finish();
                 }
             });
         }
@@ -256,7 +258,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onTokenPairingFailed(String token) {
         LOG.debug("onTokenPairingFailed()");
         if (token.equals(mActiveToken)) {
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     showPairingFailure();

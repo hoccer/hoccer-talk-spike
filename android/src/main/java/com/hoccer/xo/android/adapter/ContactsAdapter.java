@@ -408,8 +408,8 @@ public abstract class ContactsAdapter extends XoAdapter
     public String[] getMembersIds() {
         String[] ids = new String[mClientContacts.size()];
         int i = 0;
-        for (TalkClientContact c: mClientContacts) {
-            ids[i++] = c.getClientId();
+        for (TalkClientContact contact : mClientContacts) {
+            ids[i++] = contact.getClientId();
         }
         return ids;
     }

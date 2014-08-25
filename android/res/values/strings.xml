@@ -221,7 +221,10 @@
     <!-- Location selection activity -->
     <string name="selectlocation_title">Select location</string>
 
-    <!-- Group leave dialog -->
+    <!-- Location selection activity -->
+    <string name="select_images_title">Select images</string>
+
+  <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Delete group</string>
     <string name="dialog_delete_group_message">Are you sure you want to delete this group?</string>
     <string name="dialog_reject_group_invitation_title">Reject invitation</string>

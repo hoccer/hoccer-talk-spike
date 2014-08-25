@@ -2,11 +2,7 @@ package com.hoccer.xo.android.adapter;
 
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.res.AssetFileDescriptor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.Uri;
 import android.provider.ContactsContract;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -18,12 +14,11 @@ import android.widget.*;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.util.DeviceContact;
 import com.hoccer.xo.release.R;
+import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DeviceContactsAdapter extends BaseAdapter {
 
@@ -37,7 +32,7 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
     private LayoutInflater mInflater = null;
 
-    // Constructor expects an ordered list of device contacts and the data type to show
+    // Constructor expects an ordered list of device contacts
     public DeviceContactsAdapter(List<DeviceContact> items, Activity activity) {
         mContacts = items;
         mActivity = activity;
@@ -67,12 +62,12 @@ public class DeviceContactsAdapter extends BaseAdapter {
 
         QuickContactBadge quickContact = (QuickContactBadge) convertView.findViewById(R.id.cb_quickcontact);
         quickContact.assignContactUri(ContactsContract.Contacts.getLookupUri(0, contact.getLookupKey()));
-        Bitmap thumbnailBitmap =  loadContactPhotoThumbnail(contact.getThumbnailUri());
-        if (thumbnailBitmap != null) {
-            quickContact.setImageBitmap(thumbnailBitmap);
-        } else {
-            quickContact.setImageToDefault();
-        }
+
+        Picasso.with(mActivity)
+                .load(contact.getThumbnailUri())
+                .placeholder(R.drawable.ic_contact_picture)
+                .error(R.drawable.ic_contact_picture)
+                .into(quickContact);
 
         TextView dataView = (TextView) convertView.findViewById(R.id.tv_detailed_info);
         CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checkBox);
@@ -219,30 +214,5 @@ public class DeviceContactsAdapter extends BaseAdapter {
         }
 
         return result;
-    }
-
-    private Bitmap loadContactPhotoThumbnail(String photoData) {
-        if (photoData == null) {
-            return null;
-        }
-        AssetFileDescriptor afd = null;
-        try {
-            Uri thumbUri = Uri.parse(photoData);
-            afd = mActivity.getContentResolver().openAssetFileDescriptor(thumbUri, "r");
-            FileDescriptor fileDescriptor = afd.getFileDescriptor();
-            if (fileDescriptor != null) {
-                return BitmapFactory.decodeFileDescriptor(fileDescriptor);
-            }
-        } catch (FileNotFoundException e) {
-
-        } finally {
-            if (afd != null) {
-                try {
-                    afd.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-        return null;
     }
 }
