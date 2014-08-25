@@ -15,6 +15,7 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.activity.MapsLocationActivity;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.contentselectors.*;
+import com.hoccer.xo.android.fragment.CompositionFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -264,7 +265,11 @@ public class ContentRegistry {
                     XoActivity xoActivity = (XoActivity) fragment.getActivity();
                     xoActivity.clipBoardItemSelected(clipboardSelector.selectObjectFromClipboard(xoActivity, intent));
                 } else {
-                    startExternalActivityForResult(fragment, intent, requestCode);
+                    if (selector instanceof ImageSelector) {
+                        startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGES_ATTACHMENT);
+                    } else {
+                        startExternalActivityForResult(fragment, intent, requestCode);
+                    }
                 }
             }
         });
@@ -293,6 +298,14 @@ public class ContentRegistry {
         IContentSelector selector = selection.getSelector();
         if (selector != null) {
             return selector.createObjectFromSelectionResult(selection.getActivity(), intent);
+        }
+        return null;
+    }
+
+    public ArrayList<IContentObject> createSelectedImagesAttachment(ContentSelection selection, Intent intent) {
+        ImageSelector selector = (ImageSelector) selection.getSelector();
+        if(selector != null) {
+            return selector.createImageObjectsFromSelectionResult(selection.getActivity(), intent);
         }
         return null;
     }
