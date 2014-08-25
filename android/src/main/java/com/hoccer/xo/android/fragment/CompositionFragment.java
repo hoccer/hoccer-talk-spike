@@ -219,8 +219,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private boolean isComposed() {
-        boolean composed = (mTextEdit.getText().length() > 0 || mAttachment != null);
-        return composed;
+        return (mTextEdit.getText().length() > 0 || mAttachment != null);
     }
 
     private void clearComposedMessage() {
