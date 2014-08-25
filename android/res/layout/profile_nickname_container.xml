@@ -32,7 +32,10 @@
             android:layout_below="@+id/v_profile_nickname_delimiter"
             android:layout_alignLeft="@+id/tv_profile_nickname_text"
             android:layout_toLeftOf="@+id/ib_profile_nickname_edit"
-            android:visibility="gone"/>
+            android:inputType="text"
+            android:visibility="gone"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"/>
+
 
     <TextView
             android:id="@+id/tv_profile_nickname"

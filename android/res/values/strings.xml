@@ -118,6 +118,9 @@
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Change my image</string>
+    <string name="dialog_avatar_options_title">Avatar options</string>
+    <string name="dialog_set_avatar_option">Change avatar</string>
+    <string name="dialog_delete_avatar_option">Delete avatar</string>
     <string name="profile_name_title">Name</string>
     <string name="profile_name_hint">Your name</string>
     <string name="profile_status_text">status</string>

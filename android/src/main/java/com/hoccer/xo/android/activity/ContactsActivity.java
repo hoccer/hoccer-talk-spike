@@ -50,40 +50,41 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        String[] tabs = getResources().getStringArray(R.array.tab_names);
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setOnPageChangeListener(new ConversationsPageListener());
+
+        mActionBar = getActionBar();
+        mAdapter = new ContactsPageAdapter(getSupportFragmentManager(), tabs.length);
+        mViewPager.setAdapter(mAdapter);
+        mActionBar.setHomeButtonEnabled(false);
+        mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        for (String tabName : tabs) {
+            mActionBar.addTab(mActionBar.newTab().setText(tabName).setTabListener(new ConversationsTabListener()));
+        }
+
+        SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        // TODO: remove, was only for debug purposes to manually active environment updates before there was a UI for that
+        SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key.equals("preference_environment_update")) {
+                    mEnvironmentUpdatesEnabled = sharedPreferences.getBoolean("preference_environment_update", true);
+                    refreshEnvironmentUpdater(false);
+                }
+            }
+        };
+        mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesListener);
+        mEnvironmentUpdatesEnabled = mPreferences.getBoolean("preference_environment_update", true);
+
+        getXoClient().registerStateListener(this);
+
+        // if the client is not yet registered start the registration procedure
         if (!getXoClient().isRegistered()) {
             Intent intent = new Intent(this, SingleProfileActivity.class);
             intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CREATE_SELF, true);
             startActivity(intent);
-        } else {
-            String[] tabs = getResources().getStringArray(R.array.tab_names);
-            mViewPager = (ViewPager) findViewById(R.id.pager);
-            mViewPager.setOnPageChangeListener(new ConversationsPageListener());
-
-            mActionBar = getActionBar();
-            mAdapter = new ContactsPageAdapter(getSupportFragmentManager(), tabs.length);
-            mViewPager.setAdapter(mAdapter);
-            mActionBar.setHomeButtonEnabled(false);
-            mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-            for (String tabName : tabs) {
-                mActionBar.addTab(mActionBar.newTab().setText(tabName).setTabListener(new ConversationsTabListener()));
-            }
-
-            SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
-            // TODO: remove, was only for debug purposes to manually active environment updates before there was a UI for that
-            SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-                @Override
-                public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                    if (key.equals("preference_environment_update")) {
-                        mEnvironmentUpdatesEnabled = sharedPreferences.getBoolean("preference_environment_update", true);
-                        refreshEnvironmentUpdater(false);
-                    }
-                }
-            };
-            mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesListener);
-            mEnvironmentUpdatesEnabled = mPreferences.getBoolean("preference_environment_update", true);
-
-            getXoClient().registerStateListener(this);
         }
 
         // check wether we should immediatly open the conversation with a contact
@@ -109,11 +110,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     @Override
     protected void onResume() {
         super.onResume();
-        if (!getXoClient().isRegistered()) {
-            finish();
-        } else {
-            refreshEnvironmentUpdater(false);
-        }
+        refreshEnvironmentUpdater(false);
         getXoClient().registerStateListener(this);
     }
 

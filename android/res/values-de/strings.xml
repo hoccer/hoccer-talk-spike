@@ -105,6 +105,9 @@
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Mein Bild ändern</string>
+    <string name="dialog_avatar_options_title">Avatar Optionen</string>
+    <string name="dialog_set_avatar_option">Ändere Avatar</string>
+    <string name="dialog_delete_avatar_option">Lösche Avatar</string>
     <string name="profile_name_title">Name</string>
     <string name="profile_name_hint">Dein Name</string>
     <string name="profile_status_text">Status</string>
