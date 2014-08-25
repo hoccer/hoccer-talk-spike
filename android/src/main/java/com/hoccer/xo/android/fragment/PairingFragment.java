@@ -23,11 +23,14 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.DeviceContactsSelectionActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class PairingFragment extends XoFragment implements View.OnClickListener, IXoPairingListener {
+
+    private static final Logger LOG = Logger.getLogger(PairingFragment.class);
 
     TextView mTokenMessage;
     TextView mTokenText;
@@ -46,7 +49,6 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
 
     String mActiveToken;
     String mTokenFromEmail;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

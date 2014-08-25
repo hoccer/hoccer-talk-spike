@@ -21,13 +21,9 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public abstract class XoFragment extends Fragment implements IXoFragment {
 
-    protected Logger LOG = null;
+    private static final Logger LOG = Logger.getLogger(XoFragment.class);
 
     private XoActivity mActivity;
-
-    public XoFragment() {
-        LOG = Logger.getLogger(XoFragment.class);
-    }
 
     public XoClient getXoClient() {
         return XoApplication.getXoClient();
