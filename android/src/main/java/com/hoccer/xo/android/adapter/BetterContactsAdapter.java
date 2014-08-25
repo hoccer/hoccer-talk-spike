@@ -37,7 +37,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         }
     };
 
-    final private List<BaseContactItem> mContactItems = new ArrayList<BaseContactItem>();
+    final protected List<BaseContactItem> mContactItems = new ArrayList<BaseContactItem>();
 
     @Nullable
     private Filter mFilter = null;
@@ -164,7 +164,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public Object getItem(int i) {
-        return mContactItems.get(i).getContent();
+        return mContactItems.get(i);
     }
 
     @Override

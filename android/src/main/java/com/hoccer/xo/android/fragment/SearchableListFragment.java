@@ -34,7 +34,21 @@ public abstract class SearchableListFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (!mIsSearchModeEnabled && mCachedListAdapter != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setListAdapter(mCachedListAdapter);
+                }
+            });
+        }
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        mSearchMenuItem.collapseActionView();
+        disableSearchMode();
     }
 
     @Override
@@ -67,6 +81,15 @@ public abstract class SearchableListFragment extends ListFragment {
 
     protected abstract void onSearchModeDisabled();
 
+    private void disableSearchMode() {
+        mIsSearchModeEnabled = false;
+        if (mCachedListAdapter != null) {
+            setListAdapter(mCachedListAdapter);
+        }
+
+        onSearchModeDisabled();
+    }
+
     private class SearchActionHandler implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
 
         private IBinder mWindowToken;
@@ -83,8 +106,11 @@ public abstract class SearchableListFragment extends ListFragment {
 
         @Override
         public boolean onQueryTextChange(final String query) {
-            if (mIsSearchModeEnabled) {
+            // check if expanded to determine legality for search-mode
+            if (mSearchMenuItem.isActionViewExpanded()) {
                 searchInAdapter(query);
+            } else {
+                disableSearchMode();
             }
 
             return false;
@@ -107,9 +133,7 @@ public abstract class SearchableListFragment extends ListFragment {
         @Override
         public boolean onMenuItemActionCollapse(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
-                mIsSearchModeEnabled = false;
-                setListAdapter(mCachedListAdapter);
-                onSearchModeDisabled();
+                disableSearchMode();
             }
 
             return true;

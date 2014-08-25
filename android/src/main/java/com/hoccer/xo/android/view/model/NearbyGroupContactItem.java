@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
@@ -17,7 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 
-public class NearbyGroupContactItem extends BaseContactItem {
+public class NearbyGroupContactItem extends BaseContactItem implements SearchAdapter.Searchable{
 
     private static final Logger LOG = Logger.getLogger(TalkClientContactItem.class);
 
@@ -82,5 +83,11 @@ public class NearbyGroupContactItem extends BaseContactItem {
             SimpleDateFormat sdf = new SimpleDateFormat("EEE HH:mm");
             lastMessageTime.setText(sdf.format(mLastMessageTimeStamp));
         }
+    }
+
+    @Override
+    public boolean matches(String query) {
+        // should not be searched for. Interface implemented for compatibility reasons
+        return false;
     }
 }

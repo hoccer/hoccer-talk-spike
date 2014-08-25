@@ -8,12 +8,13 @@ import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
+import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-public class SmsContactItem extends BaseContactItem {
+public class SmsContactItem extends BaseContactItem implements SearchAdapter.Searchable{
 
     private static final Logger LOG = Logger.getLogger(SmsContactItem.class);
 
@@ -85,4 +86,8 @@ public class SmsContactItem extends BaseContactItem {
         return 0;
     }
 
+    @Override
+    public boolean matches(String query) {
+        return mName.contains(query);
+    }
 }
