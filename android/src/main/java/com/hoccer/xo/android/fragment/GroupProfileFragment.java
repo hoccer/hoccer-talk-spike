@@ -329,7 +329,7 @@ public class GroupProfileFragment extends XoFragment
         groupPresence.setGroupTag(mGroup.getGroupTag());
         groupPresence.setGroupType(TalkGroup.GROUP_TYPE_USER);
         mGroup.updateGroupPresence(groupPresence);
-        update(mGroup);
+        update();
         mFromNearby = true;
 
         getActivity().runOnUiThread(new Runnable() {
@@ -368,42 +368,33 @@ public class GroupProfileFragment extends XoFragment
         getXoClient().setGroupName(mGroup, newGroupName);
     }
 
-    private void updateAvatar(TalkClientContact contact) {
-        String avatarUrl = "drawable://" + R.drawable.avatar_default_group_large;
+    private void update() {
+        LOG.debug("update(" + mGroup.getClientContactId() + ")");
 
-        TalkClientUpload avatarUpload;
-        TalkClientDownload avatarDownload;
-
-        avatarUpload = contact.getAvatarUpload();
-        if (avatarUpload != null) {
-            if (avatarUpload.isContentAvailable()) {
+        String avatarUrl;
+        avatarUrl = "drawable://" + R.drawable.avatar_default_group_large;
+        if (mGroup.isGroupAdmin()) {
+            TalkClientUpload avatarUpload = mGroup.getAvatarUpload();
+            if (avatarUpload != null && avatarUpload.isContentAvailable()) {
                 avatarUrl = avatarUpload.getContentDataUrl();
             }
-        }
-
-        if (avatarUpload == null) {
-            avatarDownload = contact.getAvatarDownload();
-            if (avatarDownload != null) {
-                if (avatarDownload.isContentAvailable()) {
-                    avatarUrl = avatarDownload.getDataFile();
-                    Uri uri = Uri.fromFile(new File(avatarUrl));
+        } else {
+            TalkClientDownload avatarDownload = mGroup.getAvatarDownload();
+            if (avatarDownload != null && avatarDownload.isContentAvailable()) {
+                if (avatarDownload.getDataFile() != null) {
+                    Uri uri = Uri.fromFile(new File(avatarDownload.getDataFile()));
                     avatarUrl = uri.toString();
                 }
             }
         }
-
         ImageLoader.getInstance().displayImage(avatarUrl, mAvatarImage);
-    }
 
-    private void update(TalkClientContact contact) {
-        updateAvatar(contact);
-
-        mGroupMembersTitle.setVisibility(contact.isGroupRegistered() ? View.VISIBLE : View.GONE);
-        mGroupMembersList.setVisibility(contact.isGroupRegistered() || !mCurrentClientsInGroup.isEmpty() ? View.VISIBLE : View.GONE);
+        mGroupMembersTitle.setVisibility(mGroup.isGroupRegistered() ? View.VISIBLE : View.GONE);
+        mGroupMembersList.setVisibility(mGroup.isGroupRegistered() || !mCurrentClientsInGroup.isEmpty() ? View.VISIBLE : View.GONE);
 
         String name = null;
 
-        TalkGroup groupPresence = contact.getGroupPresence();
+        TalkGroup groupPresence = mGroup.getGroupPresence();
         if (groupPresence != null) {
             name = groupPresence.getGroupName();
         }
@@ -419,7 +410,7 @@ public class GroupProfileFragment extends XoFragment
             name = mGroupNameEdit.getText().toString();
         }
 
-        if(mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
+        if(this.mGroup.getGroupPresence() != null && this.mGroup.getGroupPresence().isTypeNearby()) {
             mGroupNameText.setText(R.string.nearby_text);
             mMakePermanentButton.setVisibility(View.VISIBLE);
         } else {
@@ -475,7 +466,7 @@ public class GroupProfileFragment extends XoFragment
                 if (mGroup.isDeleted()) {
                     getXoActivity().finish();
                 } else {
-                    update(mGroup);
+                    update();
                 }
             }
         });
@@ -488,7 +479,7 @@ public class GroupProfileFragment extends XoFragment
         TalkGroup groupPresence = new TalkGroup();
         groupPresence.setGroupTag(mGroup.getGroupTag());
         mGroup.updateGroupPresence(groupPresence);
-        update(mGroup);
+        update();
     }
 
     public void updateContactList(ArrayList<TalkClientContact> mContactsToInvite) {
@@ -591,7 +582,31 @@ public class GroupProfileFragment extends XoFragment
     public void onClick(View v) {
         if (v.getId() == R.id.profile_group_profile_image) {
             if (mGroup != null && mGroup.isEditable()) {
-                getXoActivity().selectAvatar();
+                if(mGroup.getAvatarContentUrl() != null) {
+                    XoDialogs.showSingleChoiceDialog("AvatarSelection",
+                            R.string.dialog_avatar_options_title,
+                            new String[] {
+                                    getResources().getString(R.string.dialog_set_avatar_option),
+                                    getResources().getString(R.string.dialog_delete_avatar_option)
+                            },
+                            getActivity(),
+                            new XoDialogs.OnSingleSelectionFinishedListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id, int selectedItem) {
+                                    switch (selectedItem) {
+                                        case 0: {
+                                            getXoActivity().selectAvatar();
+                                        }
+                                        break;
+                                        case 1: {
+                                            updateAvatar(null);
+                                        }
+                                    }
+                                }
+                            });
+                } else {
+                    getXoActivity().selectAvatar();
+                }
             }
         }
     }
@@ -603,13 +618,20 @@ public class GroupProfileFragment extends XoFragment
 
     @Override
     public void onServiceConnected() {
-        final IContentObject newAvatar = mAvatarToSet;
-        mAvatarToSet = null;
-        if (newAvatar != null) {
+        LOG.debug("onServiceConnected()");
+        if(mAvatarToSet != null) {
+            updateAvatar(mAvatarToSet);
+            mAvatarToSet = null;
+        }
+    }
+
+    private void updateAvatar(final IContentObject avatar) {
+        if (avatar != null) {
             XoApplication.getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
-                    TalkClientUpload upload = SelectedContent.createAvatarUpload(newAvatar);
+                    LOG.debug("creating avatar upload");
+                    TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
                     try {
                         getXoDatabase().saveClientUpload(upload);
                         getXoClient().setGroupAvatar(mGroup, upload);
@@ -618,6 +640,8 @@ public class GroupProfileFragment extends XoFragment
                     }
                 }
             });
+        } else {
+            getXoClient().setGroupAvatar(mGroup, null);
         }
     }
 
@@ -648,7 +672,7 @@ public class GroupProfileFragment extends XoFragment
 
         mMode = Mode.EDIT_GROUP;
         configureActionMenuItems(menu);
-        update(mGroup);
+        update();
 
         return true;
     }
@@ -707,7 +731,7 @@ public class GroupProfileFragment extends XoFragment
         mBackPressed = false;
         mAvatarImage.setOnClickListener(null);
         mMode = Mode.PROFILE;
-        update(mGroup);
+        update();
 
         configureOptionsMenuItems(mOptionsMenu);
     }
