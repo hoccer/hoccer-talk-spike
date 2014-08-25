@@ -205,6 +205,9 @@
     <!-- Location selection activity -->
     <string name="selectlocation_title">Standort auswählen</string>
 
+    <!-- Multi image selection activity -->
+    <string name="select_images_title">Bilder auswählen</string>
+
     <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Gruppe löschen</string>
     <string name="dialog_delete_group_message">Bist du dir sicher, dass du die Gruppe löschen möchtest?</string>
