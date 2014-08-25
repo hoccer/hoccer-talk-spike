@@ -45,6 +45,11 @@ import java.sql.SQLException;
 public class SingleProfileFragment extends XoFragment
         implements View.OnClickListener, IXoContactListener, ActionMode.Callback {
 
+    public enum Mode {
+        PROFILE,
+        CREATE_SELF
+    }
+
     public static final String ARG_CREATE_SELF = "ARG_CREATE_SELF";
     public static final String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
 
@@ -685,10 +690,4 @@ public class SingleProfileFragment extends XoFragment
             update(mContact);
         }
     }
-
-    public enum Mode {
-        PROFILE,
-        CREATE_SELF
-    }
-
 }
