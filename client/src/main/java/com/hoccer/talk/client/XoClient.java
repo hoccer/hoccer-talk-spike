@@ -800,6 +800,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
        });
     }
 
+    /*
+    * If upload is null no avatar is set.
+    */
     public void setGroupAvatar(final TalkClientContact group, final TalkClientUpload upload) {
         resetIdle();
         if(upload != null) {
