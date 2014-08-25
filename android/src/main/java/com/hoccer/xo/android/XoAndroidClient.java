@@ -15,14 +15,11 @@ import java.net.URI;
 
 public class XoAndroidClient extends XoClient implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private final XoApplication mApplication;
-
     /**
      * Create a Hoccer Talk client using the given client database
      */
     public XoAndroidClient(IXoClientHost client_host, XoAndroidClientConfiguration configuration, XoApplication xoApplication) {
         super(client_host, configuration);
-        mApplication = xoApplication;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(xoApplication);
         preferences.registerOnSharedPreferenceChangeListener(this);
         setTransferLimitFromPreferences(preferences);
