@@ -263,7 +263,6 @@ public class GroupProfileFragment extends XoFragment
                 }
             }
         }
-
     }
 
     @Override
