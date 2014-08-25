@@ -309,7 +309,7 @@ public class SingleProfileFragment extends XoFragment
                     XoDialogs.showYesNoDialog("ContactDeleteDialog",
                             R.string.dialog_delete_contact_title,
                             R.string.dialog_delete_contact_message,
-                            getXoActivity(),
+                            getActivity(),
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
@@ -542,7 +542,7 @@ public class SingleProfileFragment extends XoFragment
         XoDialogs.showYesNoDialog("BlockContactDialog",
                 R.string.dialog_block_user_title,
                 R.string.dialog_block_user_message,
-                getXoActivity(),
+                getActivity(),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
@@ -562,7 +562,7 @@ public class SingleProfileFragment extends XoFragment
         LOG.debug("unblockContact()");
         if (mContact != null) {
             getXoClient().unblockContact(mContact);
-            getXoActivity().finish();
+            getActivity().finish();
         }
     }
 

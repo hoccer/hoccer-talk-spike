@@ -246,7 +246,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
                 @Override
                 public void run() {
                     Toast.makeText(getXoActivity(), R.string.pairing_success, Toast.LENGTH_LONG).show();
-                    getXoActivity().finish();
+                    getActivity().finish();
                 }
             });
         }

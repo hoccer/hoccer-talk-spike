@@ -280,7 +280,7 @@ public class GroupProfileFragment extends XoFragment
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 getXoActivity().getXoClient().leaveGroup(mGroup.getGroupId());
-                                getXoActivity().finish();
+                                getActivity().finish();
                             }
                         },
                         new DialogInterface.OnClickListener() {
@@ -301,7 +301,7 @@ public class GroupProfileFragment extends XoFragment
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 getXoActivity().getXoClient().leaveGroup(mGroup.getGroupId());
-                                getXoActivity().finish();
+                                getActivity().finish();
                             }
                         },
                         new DialogInterface.OnClickListener() {
@@ -466,7 +466,7 @@ public class GroupProfileFragment extends XoFragment
             @Override
             public void run() {
                 if (mGroup.isDeleted()) {
-                    getXoActivity().finish();
+                    getActivity().finish();
                 } else {
                     update();
                 }
@@ -505,12 +505,12 @@ public class GroupProfileFragment extends XoFragment
         }
         GroupManageDialog dialog = new GroupManageDialog(mGroup, mCurrentClientsInGroup, mContactsToInvite, mFromNearby);
         dialog.setTargetFragment(this, 0);
-        dialog.show(getXoActivity().getSupportFragmentManager(), "GroupManageDialog");
+        dialog.show(getActivity().getSupportFragmentManager(), "GroupManageDialog");
     }
 
     private void joinGroup() {
         getXoClient().joinGroup(mGroup.getGroupId());
-        getXoActivity().finish();
+        getActivity().finish();
     }
 
     private boolean isCurrentGroup(TalkClientContact contact) {
@@ -686,7 +686,7 @@ public class GroupProfileFragment extends XoFragment
                 XoDialogs.showYesNoDialog("GroupDeleteDialog",
                         R.string.dialog_delete_group_title,
                         R.string.dialog_delete_group_message,
-                        getXoActivity(),
+                        getActivity(),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
