@@ -566,7 +566,7 @@ public class SingleProfileFragment extends XoFragment
         }
     }
 
-    public void refreshContact(TalkClientContact newContact) {
+    private void refreshContact(TalkClientContact newContact) {
         LOG.debug("refreshContact()");
         if (mMode == Mode.PROFILE) {
             mContact = newContact;
