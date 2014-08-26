@@ -374,5 +374,7 @@
     <string name="nearby_saved">Nahebei gespeichert</string>
     <string name="attachment_failed">Beim Herunterladen ist ein Fehler aufgetreten.</string>
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
+    <string name="pref_upload_limit">Upload limit</string>
+    <string name="pref_download_limit">Download limit</string>
 
 </resources>

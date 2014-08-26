@@ -22,12 +22,8 @@ public class XoAndroidClient extends XoClient implements SharedPreferences.OnSha
         super(client_host, configuration);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(xoApplication);
         preferences.registerOnSharedPreferenceChangeListener(this);
-        setTransferLimitFromPreferences(preferences);
-    }
-
-    private void setTransferLimitFromPreferences(SharedPreferences preferences) {
-        String transferLimitString = preferences.getString("preference_transfer_limit", "-1");
-        setTransferLimit(Integer.parseInt(transferLimitString));
+        onSharedPreferenceChanged(preferences, "preference_upload_limit");
+        onSharedPreferenceChanged(preferences, "preference_download_limit");
     }
 
     @Override
@@ -48,9 +44,13 @@ public class XoAndroidClient extends XoClient implements SharedPreferences.OnSha
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(key != null && key.equals("preference_transfer_limit")) {
-            setTransferLimitFromPreferences(sharedPreferences);
+    public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+        if(key != null && key.equals("preference_upload_limit") || key.equals("preference_download_limit")) {
+            String uploadLimitString = preferences.getString(key, "-1");
+            setUploadLimit(Integer.parseInt(uploadLimitString));
+        } else if(key != null && key.equals("preference_download_limit")) {
+            String downloadLimitString = preferences.getString(key, "-1");
+            setDownloadLimit(Integer.parseInt(downloadLimitString));
         }
     }
 }

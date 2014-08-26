@@ -401,5 +401,7 @@
 
     <string name="attachment_failed">Error while downloading File.</string>
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
+    <string name="pref_upload_limit">Upload limit</string>
+    <string name="pref_download_limit">Download limit</string>
 
 </resources>

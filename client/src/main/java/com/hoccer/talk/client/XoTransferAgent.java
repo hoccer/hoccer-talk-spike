@@ -102,7 +102,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     public void startOrRestartDownload(final TalkClientDownload download) {
         LOG.info("startOrRestartDownload()");
 
-        int transferLimit = mClient.getTransferLimit();
+        int transferLimit = mClient.getDownloadLimit();
         if(transferLimit != -1 && download.getContentLength() >= transferLimit) {
             LOG.debug("download aborted because the download exceeds the transferLimit");
             download.pause(this);
@@ -202,7 +202,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
                 " | contenttype: " + upload.getContentType() +
                 " | clientUploadId: " + upload.getClientUploadId());
 
-        int transferLimit = mClient.getTransferLimit();
+        int transferLimit = mClient.getUploadLimit();
         if(transferLimit != -1 && upload.getContentLength() >= transferLimit) {
             LOG.debug("upload aborted because the upload exceeds the transferLimit");
             upload.pause(this);

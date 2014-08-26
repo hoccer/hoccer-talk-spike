@@ -81,7 +81,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             "inactive", "idle", "connecting", "reconnecting", "registering", "login", "syncing", "active"
     };
 
-    private int mTransferLimit = -1;
+    private int mUploadLimit = -1;
+
+    private int mDownloadLimit = -1;
 
     /** Return the name of the given state */
     public static final String stateToString(int state) {
@@ -1740,12 +1742,20 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return clientMessage;
     }
 
-    public int getTransferLimit() {
-        return mTransferLimit;
+    public int getDownloadLimit() {
+        return mDownloadLimit;
     }
 
-    public void setTransferLimit(int upAndDownloadFileSizeLimit) {
-        mTransferLimit = upAndDownloadFileSizeLimit;
+    public void setDownloadLimit(int downloadLimit) {
+        mDownloadLimit = downloadLimit;
+    }
+
+    public int getUploadLimit() {
+        return mUploadLimit;
+    }
+
+    public void setUploadLimit(int uploadLimit) {
+        mUploadLimit = uploadLimit;
     }
 
     /**

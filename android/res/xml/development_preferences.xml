@@ -48,11 +48,18 @@
                 android:defaultValue="true"/>
 
         <ListPreference
-                android:key="preference_transfer_limit"
-                android:title="@string/pref_up_down_limit"
+                android:key="preference_upload_limit"
+                android:title="@string/pref_upload_limit"
                 android:entries="@array/transfer_limits"
                 android:entryValues="@array/transfer_limits_values"
-                android:defaultValue="2147483647"/>
+                android:defaultValue="-1"/>
+
+        <ListPreference
+                android:key="preference_download_limit"
+                android:title="@string/pref_download_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
 
     </PreferenceCategory>
 
