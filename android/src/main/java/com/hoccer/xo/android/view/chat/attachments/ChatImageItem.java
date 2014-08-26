@@ -1,8 +1,15 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.*;
 import android.graphics.drawable.NinePatchDrawable;
-import android.view.*;
+import android.net.Uri;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
@@ -10,22 +17,18 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
-
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
 
-public class ChatImageItem extends ChatMessageItem {
+public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChangeListener {
 
     private static final double IMAGE_SCALE_FACTOR = 0.7;
 
     private Context mContext;
     private int mImageWidth;
+    private ImageView mImageView;
+    private View mMessageView;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -39,8 +42,41 @@ public class ChatImageItem extends ChatMessageItem {
     }
 
     @Override
+    public void detachView() {
+        mImageView.removeOnLayoutChangeListener(this);
+    }
+
+    @Override
+    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+
+        RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        int mask;
+        if (mMessage.isIncoming()) {
+            rootView.setGravity(Gravity.LEFT);
+            mask = R.drawable.chat_bubble_incoming;
+        } else {
+            rootView.setGravity(Gravity.RIGHT);
+            mask = R.drawable.chat_bubble_outgoing;
+        }
+
+        Picasso picasso = Picasso.with(mContext);
+        picasso.setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
+        picasso.setIndicatorsEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
+
+        LOG.error("Width: " + mImageView.getWidth() + " Height: " + mImageView.getHeight());
+        Picasso.with(mContext).load(mContentObject.getContentUrl())
+//                .fit()
+                .resize(mImageView.getWidth(), mImageView.getHeight())
+//                .transform(new BubbleTransformation(mask))
+                .into((ImageView) mImageView);
+
+        mImageView.removeOnLayoutChangeListener(this);
+    }
+
+    @Override
     protected void configureViewForMessage(View view) {
         super.configureViewForMessage(view);
+        mMessageView = view;
         configureAttachmentViewForMessage(view);
     }
 
@@ -62,32 +98,22 @@ public class ChatImageItem extends ChatMessageItem {
             }
         });
 
-        ImageView imageView = (ImageView) mContentWrapper.findViewById(R.id.iv_image_view);
-        RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
-        int mask;
-        if (mMessage.isIncoming()) {
-            rootView.setGravity(Gravity.LEFT);
-            mask = R.drawable.chat_bubble_incoming;
-        } else {
-            rootView.setGravity(Gravity.RIGHT);
-            mask = R.drawable.chat_bubble_outgoing;
-        }
-        if (contentObject.getContentDataUrl() != null) {
-            mAttachmentView.setBackgroundDrawable(null);
+        mAttachmentView.setBackgroundDrawable(null);
 
-            double aspectRatio = contentObject.getContentAspectRatio();
-            int height = (int) (mImageWidth / aspectRatio);
+        mImageView = (ImageView) mContentWrapper.findViewById(R.id.iv_image_view);
+        mImageView.addOnLayoutChangeListener(this);
 
-            imageView.getLayoutParams().width = mImageWidth;
-            imageView.getLayoutParams().height = height;
-            imageView.requestLayout();
+        double aspectRatio = contentObject.getContentAspectRatio();
+        int height = (int) (mImageWidth / aspectRatio);
 
-            Picasso.with(mContext)
-                    .load(contentObject.getContentDataUrl())
-                    .resize(mImageWidth, height)
-                    .transform(new BubbleTransformation(mask))
-                    .into(imageView);
-        }
+        mImageView.getLayoutParams().width = mImageWidth;
+        mImageView.getLayoutParams().height = height;
+
+        mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+        // set item as tag for this view
+        mMessageView.setTag(this);
+        LOG.error("Attach message item: " + mMessage.getClientMessageId() + " from view: " + mMessageView.hashCode());
     }
 
     private class BubbleTransformation implements Transformation {
@@ -152,5 +178,5 @@ public class ChatImageItem extends ChatMessageItem {
         Point size = DisplayUtils.getDisplaySize(mContext);
         mImageWidth = (int) (size.x * IMAGE_SCALE_FACTOR);
     }
-
 }
+

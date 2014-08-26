@@ -174,39 +174,8 @@ public class
         return position;
     }
 
-    private void removeInvisibleItems() {
-
-        int firstVisible = mListView.getFirstVisiblePosition();
-        int lastVisible = mListView.getLastVisiblePosition();
-
-        for (int i = 0; i < mLastVisibleViews.size(); ++i) {
-
-            int current = mLastVisibleViews.get(i);
-
-            if ((current < firstVisible) || (current > lastVisible)) {
-                if (getItem(current) != null) {
-                    getItem(current).setVisibility(false);
-                }
-            }
-        }
-
-        int offset = 0;
-        mLastVisibleViews.clear();
-        while (firstVisible + offset <= lastVisible) {
-            mLastVisibleViews.add(firstVisible + offset);
-            offset++;
-        }
-    }
-
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-
-        mListView.post(new Runnable() {
-            @Override
-            public void run() {
-                removeInvisibleItems();
-            }
-        });
 
         ChatMessageItem chatItem = getItem(position);
 

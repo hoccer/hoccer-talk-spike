@@ -25,10 +25,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
-import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
+import com.hoccer.xo.android.view.chat.attachments.*;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -112,6 +109,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     public void setVisibility(boolean visible){
         mVisible = visible;
+    }
+
+    public void detachView() {
     }
 
     /**
@@ -200,7 +200,16 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         mMessageText = messageText;
         configureContextMenu(messageText);
+
+        // if there is an old item attached to this view destroy it now
+        ChatMessageItem item = (ChatMessageItem) view.getTag();
+        if(item != null) {
+            item.detachView();
+            view.setTag(null);
+            LOG.error("Detach message item: " + item.mMessage.getClientMessageId() + " from view: " + view.hashCode());
+        }
     }
+
     private void updateIncomingMessageStatus(View view) {
         TextView deliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
         if (mMessage.getConversationContact().isGroup()) {

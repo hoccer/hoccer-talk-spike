@@ -24,8 +24,11 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.ThumbnailManager;
+import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.squareup.picasso.Cache;
+import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -157,8 +160,15 @@ public class MessagingFragment extends XoListFragment
             mAdapter.onDestroy();
             mAdapter = null;
         }
-
         ThumbnailManager.getInstance(getXoActivity()).clearCache();
+
+        // Ensure that all items receive the detach call
+        for (int i = 0; i < mMessageListView.getCount(); i++) {
+            ChatMessageItem item = (ChatMessageItem) mMessageListView.getChildAt(i).getTag();
+            if (item != null) {
+                item.detachView();
+            }
+        }
     }
 
     @Override
