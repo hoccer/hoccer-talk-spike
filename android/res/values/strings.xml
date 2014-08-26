@@ -393,5 +393,6 @@
 
     <string name="attachment_failed">Error while downloading File.</string>
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
+    <string name="toast_stored_external_file_to_clipboard">Your file has been stored in the clipboard.</string>
 
 </resources>

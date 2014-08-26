@@ -366,5 +366,6 @@
     <string name="nearby_saved">Nahebei gespeichert</string>
     <string name="attachment_failed">Beim Herunterladen ist ein Fehler aufgetreten.</string>
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
+    <string name="toast_stored_external_file_to_clipboard">Die Datei wurde in der Zwischenablage gespeichert.</string>
 
 </resources>
