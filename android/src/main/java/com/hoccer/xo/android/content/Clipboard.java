@@ -44,6 +44,11 @@ public class Clipboard {
         return mClipBoardAttachmentType;
     }
 
+    public IContentObject getClipboardContentObject() {
+
+        return null;
+    }
+
     private void initialize() {
 
         sPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -100,6 +105,6 @@ public class Clipboard {
     }
 
     public boolean canProcessClipboard() {
-        return (mClipBoardAttachmentId > 0 && mClipBoardAttachmentType != null);
+        return (mClipBoardAttachmentId != 0 && mClipBoardAttachmentType != null);
     }
 }

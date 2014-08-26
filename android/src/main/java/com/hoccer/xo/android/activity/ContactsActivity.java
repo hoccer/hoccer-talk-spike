@@ -7,25 +7,36 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsPageAdapter;
 import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.content.Clipboard;
+import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.content.contentselectors.ImageSelector;
+import com.hoccer.xo.android.content.contentselectors.VideoSelector;
 import com.hoccer.xo.android.fragment.ContactsFragment;
 import com.hoccer.xo.android.fragment.NearbyContactsFragment;
 import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
+
+import java.sql.SQLException;
 
 public class ContactsActivity extends XoActionbarActivity implements IXoStateListener {
 
@@ -95,6 +106,50 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
             int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
             showContactConversation(contactId);
         }
+
+        if(getIntent().getAction() == Intent.ACTION_SEND) {
+            initWithShareIntent();
+        }
+    }
+
+    private void initWithShareIntent() {
+        Clipboard clipboard = Clipboard.get(this);
+        Intent intent = getIntent();
+        String type = intent.getType();
+        Uri contentUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+        IContentObject contentObject = null;
+        if(type.startsWith("image/")) {
+            contentObject =  getImageContentObject(contentUri);
+        } else if(type.startsWith("video/")) {
+            contentObject =  getVideoContentObject(contentUri);
+        }
+        if(contentObject != null) {
+            TalkClientUpload attachmentUpload = SelectedContent.createAttachmentUpload(contentObject);
+            try {
+                getXoDatabase().saveClientUpload(attachmentUpload);
+                clipboard.storeAttachment(attachmentUpload);
+                Toast.makeText(this, getString(R.string.toast_stored_external_file_to_clipboard), Toast.LENGTH_LONG).show();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private IContentObject getVideoContentObject(Uri uri) {
+        Intent intent = new Intent();
+        intent.setData(uri);
+
+        VideoSelector videoSelector = new VideoSelector(this);
+        return videoSelector.createObjectFromSelectionResult(this, intent);
+    }
+
+    private IContentObject getImageContentObject(Uri uri) {
+        Intent intent = new Intent();
+        intent.setData(uri);
+
+        ImageSelector imageSelector = new ImageSelector(this);
+        return imageSelector.createObjectFromSelectionResult(this, intent);
     }
 
     @Override
