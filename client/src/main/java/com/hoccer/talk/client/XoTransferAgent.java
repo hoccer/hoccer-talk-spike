@@ -325,7 +325,9 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     public void onDownloadStateChanged(TalkClientDownload download) {
         LOG.info("onDownloadStateChanged(" + download.getClientDownloadId() + ")");
 
-        if (download.getState() == TalkClientDownload.State.PAUSED || download.getState() == TalkClientDownload.State.RETRYING) {
+        if (download.getState() == TalkClientDownload.State.PAUSED
+                || download.getState() == TalkClientDownload.State.ON_HOLD
+                || download.getState() == TalkClientDownload.State.RETRYING) {
             LOG.debug("Download paused. " + download.getClientDownloadId() + " Removing from queue.");
             deactivateDownload(download);
         }
@@ -377,7 +379,8 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     public void onUploadStateChanged(TalkClientUpload upload) {
         LOG.info("onUploadStateChanged(id: " + upload.getClientUploadId() + ")");
 
-        if (upload.getState() == TalkClientUpload.State.PAUSED) {
+        if (upload.getState() == TalkClientUpload.State.PAUSED
+                || upload.getState() == TalkClientUpload.State.ON_HOLD) {
             LOG.debug("Upload paused. " + upload.getClientUploadId() + " Removing from queue.");
             deactivateUpload(upload);
         }

@@ -497,7 +497,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         mAttachmentView.setBackgroundDrawable(bubbleForMessageAttachment(mMessage));
 
-        mContentDescription.setText(mContentRegistry.getContentDescription(mContentObject));
+        setContentDescription();
+
         if (shouldDisplayTransferControl(getTransferState(mContentObject))) {
             mContentTransferProgress.setVisibility(View.VISIBLE);
             mContentWrapper.setVisibility(View.GONE);
@@ -519,6 +520,15 @@ public class ChatMessageItem implements AttachmentTransferListener {
             mMessageText.setVisibility(View.GONE);
         } else {
             mMessageText.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setContentDescription() {
+        mContentDescription.setText(mContentRegistry.getContentDescription(mContentObject));
+        if (mContentObject.getContentState().equals(ContentState.DOWNLOAD_ON_HOLD) || mContentObject.getContentState().equals(ContentState.UPLOAD_ON_HOLD)) {
+            mContentDescription.setVisibility(View.INVISIBLE);
+        } else {
+            mContentDescription.setVisibility(View.VISIBLE);
         }
     }
 
