@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.text.format.Formatter;
 import android.view.View;
 import com.hoccer.talk.client.IXoTransferListener;
-import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.client.model.IXoTransferState;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -57,7 +56,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                             if (mContent instanceof TalkClientDownload) {
                                 LOG.debug("Will resume download for " + ((TalkClientDownload) mContent).getDownloadUrl());
                                 TalkClientDownload download = (TalkClientDownload) mContent;
-                                XoApplication.getXoClient().requestDownload(download);
+                                XoApplication.getXoClient().requestDownload(download, true);
                             }
                             break;
                         case CANCEL_DOWNLOAD:
@@ -98,6 +97,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
         switch (state) {
             case DOWNLOAD_NEW:
             case DOWNLOAD_PAUSED:
+            case DOWNLOAD_ON_HOLD:
                 mTransferAction = TransferAction.REQUEST_DOWNLOAD;
                 break;
             case DOWNLOAD_DETECTING:
@@ -149,7 +149,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                 int progress = 0;
                 Resources res = mTransferControl.getResources();
                 ContentState contentState = mContent.getContentState();
-                String fileSize = Formatter.formatShortFileSize(mTransferControl.getContext(), mContent.getContentLength());
+                String fileSize;
                 switch (contentState) {
                     case DOWNLOAD_DETECTING:
                         break;
@@ -167,6 +167,18 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         mTransferControl.setMax(length);
                         mTransferControl.setProgressImmediately(progress);
                         mTransferControl.setText(res.getString(R.string.transfer_state_pause));
+                        mTransferControl.prepareToDownload();
+                        mTransferControl.pause();
+                        break;
+
+                    case DOWNLOAD_ON_HOLD:
+                        length = mContent.getTransferLength();
+                        progress = mContent.getTransferProgress();
+                        mTransferControl.setMax(length);
+                        mTransferControl.setProgressImmediately(progress);
+                        TalkClientDownload download = (TalkClientDownload)mContent;
+                        fileSize = Formatter.formatShortFileSize(mTransferControl.getContext(), download.getTransmittedContentLength());
+                        mTransferControl.setText(res.getString(R.string.attachment_on_hold_download_question, fileSize));
                         mTransferControl.prepareToDownload();
                         mTransferControl.pause();
                         break;
@@ -225,6 +237,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         progress = mContent.getTransferProgress();
                         mTransferControl.setMax(length);
                         mTransferControl.setProgressImmediately(progress);
+                        fileSize = Formatter.formatShortFileSize(mTransferControl.getContext(), mContent.getContentLength());
                         mTransferControl.setText(res.getString(R.string.attachment_on_hold_upload_question, fileSize));
                         mTransferControl.pause();
                         break;

@@ -11,6 +11,7 @@ public enum ContentState {
     DOWNLOAD_COMPLETE,
     DOWNLOAD_PAUSED,
     DOWNLOAD_FAILED,
+    DOWNLOAD_ON_HOLD,
     /* content being uploaded in various states */
     UPLOAD_NEW,
     UPLOAD_REGISTERING,

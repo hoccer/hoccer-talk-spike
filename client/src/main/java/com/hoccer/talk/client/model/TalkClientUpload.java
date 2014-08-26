@@ -478,6 +478,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private void doOnHoldAction() {
+        if (mUploadRequest != null) {
+            mUploadRequest.abort();
+            mUploadRequest = null;
+            LOG.debug("aborted current Upload request. Upload can still resume.");
+        }
         mTransferAgent.onUploadStateChanged(this);
     }
 

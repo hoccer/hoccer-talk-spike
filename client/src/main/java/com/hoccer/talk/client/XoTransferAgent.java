@@ -99,14 +99,16 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         }
     }
 
-    public void startOrRestartDownload(final TalkClientDownload download) {
+    public void startOrRestartDownload(final TalkClientDownload download, boolean forcedDownload) {
         LOG.info("startOrRestartDownload()");
 
-        int transferLimit = mClient.getDownloadLimit();
-        if(transferLimit != -1 && download.getContentLength() >= transferLimit) {
-            LOG.debug("download aborted because the download exceeds the transferLimit");
-            download.pause(this);
-            return;
+        if (!forcedDownload) {
+            int transferLimit = mClient.getDownloadLimit();
+            if (transferLimit != -1 && download.getTransmittedContentLength() >= transferLimit) {
+                LOG.debug("download put on hold because the download exceeds the transferLimit");
+                download.hold(this);
+                return;
+            }
         }
 
         synchronized (mDownloadsById) {
@@ -141,7 +143,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
     public void resumeDownload(TalkClientDownload download) {
         LOG.info("resumeUpload(" + download.getClientDownloadId() + ")");
-        startOrRestartDownload(download);
+        startOrRestartDownload(download, true);
     }
 
     public void cancelDownload(TalkClientDownload download) {
@@ -168,7 +170,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         ScheduledFuture<?> future = mDownloadExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                startOrRestartDownload(download);
+                startOrRestartDownload(download, false);
             }
         }, delay, TimeUnit.SECONDS);
         mDownloadRetryQueue.put(download.getClientDownloadId(), future);

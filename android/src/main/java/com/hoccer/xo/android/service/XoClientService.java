@@ -742,7 +742,7 @@ public class XoClientService extends Service {
                         break;
                 }
                 if (auto) {
-                    mClient.requestDownload(download);
+                    mClient.requestDownload(download, false);
                 }
             }
         }

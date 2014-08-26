@@ -2937,7 +2937,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("updateClientPresence", e);
         }
         if(avatarDownload != null && wantDownload) {
-            mTransferAgent.startOrRestartDownload(avatarDownload);
+            mTransferAgent.startOrRestartDownload(avatarDownload, true);
         }
 
         final TalkClientContact fContact = clientContact;
@@ -3165,7 +3165,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("SQL Error when saving avatar download", e);
         }
         if(avatarDownload != null) {
-            mTransferAgent.startOrRestartDownload(avatarDownload);
+            mTransferAgent.startOrRestartDownload(avatarDownload, true);
         }
     }
 
@@ -3384,8 +3384,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    public void requestDownload(TalkClientDownload download) {
-        mTransferAgent.startOrRestartDownload(download);
+    public void requestDownload(TalkClientDownload download, boolean forcedDownload) {
+        mTransferAgent.startOrRestartDownload(download, forcedDownload);
     }
 
     public void pauseDownload(TalkClientDownload download) {
