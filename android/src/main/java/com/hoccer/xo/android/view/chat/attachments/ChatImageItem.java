@@ -29,6 +29,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     private int mImageWidth;
     private ImageView mImageView;
     private View mMessageView;
+    private int mMask;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -49,26 +50,16 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     @Override
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
 
-        RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
-        int mask;
-        if (mMessage.isIncoming()) {
-            rootView.setGravity(Gravity.LEFT);
-            mask = R.drawable.chat_bubble_incoming;
-        } else {
-            rootView.setGravity(Gravity.RIGHT);
-            mask = R.drawable.chat_bubble_outgoing;
-        }
-
         Picasso picasso = Picasso.with(mContext);
         picasso.setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
         picasso.setIndicatorsEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
 
         LOG.error("Width: " + mImageView.getWidth() + " Height: " + mImageView.getHeight());
-        Picasso.with(mContext).load(mContentObject.getContentUrl())
-//                .fit()
+        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
                 .resize(mImageView.getWidth(), mImageView.getHeight())
-//                .transform(new BubbleTransformation(mask))
-                .into((ImageView) mImageView);
+                .centerInside()
+                .transform(new BubbleTransformation(mMask))
+                .into(mImageView);
 
         mImageView.removeOnLayoutChangeListener(this);
     }
@@ -110,6 +101,15 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
         mImageView.getLayoutParams().height = height;
 
         mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+        RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        if (mMessage.isIncoming()) {
+            rootView.setGravity(Gravity.LEFT);
+            mMask = R.drawable.chat_bubble_error_incoming;
+        } else {
+            rootView.setGravity(Gravity.RIGHT);
+            mMask = R.drawable.chat_bubble_outgoing;
+        }
 
         // set item as tag for this view
         mMessageView.setTag(this);
