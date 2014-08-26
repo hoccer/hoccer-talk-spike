@@ -50,22 +50,29 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         REGISTERING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, NEW);
+                return EnumSet.of(PAUSED, NEW, ON_HOLD);
             }
         },
         UPLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(COMPLETE, FAILED, PAUSED);
+                return EnumSet.of(COMPLETE, FAILED, PAUSED, ON_HOLD);
             }
         },
         PAUSED {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(UPLOADING);
+                return EnumSet.of(UPLOADING, ON_HOLD);
             }
         },
-        COMPLETE, FAILED;
+        COMPLETE,
+        FAILED,
+        ON_HOLD {
+            @Override
+            public Set<State> possibleFollowUps() {
+                return EnumSet.of(REGISTERING, UPLOADING);
+            }
+        };
 
         public Set<State> possibleFollowUps() {
             return EnumSet.noneOf(State.class);
@@ -204,6 +211,12 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         switchState(State.PAUSED);
     }
 
+    @Override
+    public void hold(XoTransferAgent agent) {
+        mTransferAgent = agent;
+        switchState(State.ON_HOLD);
+    }
+
     /**********************************************************************************************/
     /**********************************************************************************************/
     /************************************** PRIVATE METHODS ***************************************/
@@ -237,6 +250,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             case FAILED:
                 doFailedAction();
                 break;
+            case ON_HOLD:
+                doOnHoldAction();
         }
     }
 
@@ -462,6 +477,10 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         mTransferAgent.onUploadFailed(this);
     }
 
+    private void doOnHoldAction() {
+        mTransferAgent.onUploadStateChanged(this);
+    }
+
     private boolean isUploadComplete(Header checkRangeHeader) {
         if (checkRangeHeader == null) {
             return false;
@@ -614,6 +633,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 return ContentState.UPLOAD_UPLOADING;
             case PAUSED:
                 return ContentState.UPLOAD_PAUSED;
+            case ON_HOLD:
+                return ContentState.UPLOAD_ON_HOLD;
             default:
                 throw new IllegalArgumentException("Unknown upload state '" + state + "'");
         }

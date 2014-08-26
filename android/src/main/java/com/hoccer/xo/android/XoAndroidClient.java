@@ -15,6 +15,9 @@ import java.net.URI;
 
 public class XoAndroidClient extends XoClient implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private static String sPreferenceUploadLimitKey = "preference_upload_limit";
+    private static String sPreferenceDownloadLimitKey = "preference_download_limit";
+
     /**
      * Create a Hoccer Talk client using the given client database
      */
@@ -22,8 +25,8 @@ public class XoAndroidClient extends XoClient implements SharedPreferences.OnSha
         super(client_host, configuration);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(xoApplication);
         preferences.registerOnSharedPreferenceChangeListener(this);
-        onSharedPreferenceChanged(preferences, "preference_upload_limit");
-        onSharedPreferenceChanged(preferences, "preference_download_limit");
+        onSharedPreferenceChanged(preferences, sPreferenceUploadLimitKey);
+        onSharedPreferenceChanged(preferences, sPreferenceDownloadLimitKey);
     }
 
     @Override
@@ -45,10 +48,14 @@ public class XoAndroidClient extends XoClient implements SharedPreferences.OnSha
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
-        if(key != null && key.equals("preference_upload_limit") || key.equals("preference_download_limit")) {
+        loadPreferences(preferences, key);
+    }
+
+    private void loadPreferences(SharedPreferences preferences, String key) {
+        if(key != null && key.equals(sPreferenceUploadLimitKey)) {
             String uploadLimitString = preferences.getString(key, "-1");
             setUploadLimit(Integer.parseInt(uploadLimitString));
-        } else if(key != null && key.equals("preference_download_limit")) {
+        } else if(key != null && key.equals(sPreferenceDownloadLimitKey)) {
             String downloadLimitString = preferences.getString(key, "-1");
             setDownloadLimit(Integer.parseInt(downloadLimitString));
         }

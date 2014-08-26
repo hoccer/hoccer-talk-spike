@@ -19,4 +19,5 @@ public enum ContentState {
     UPLOAD_COMPLETE,
     UPLOAD_PAUSED,
     UPLOAD_FAILED,
+    UPLOAD_ON_HOLD
 }

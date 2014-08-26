@@ -2,6 +2,7 @@ package com.hoccer.xo.android.view.chat.attachments;
 
 
 import android.content.res.Resources;
+import android.text.format.Formatter;
 import android.view.View;
 import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.XoTransferAgent;
@@ -70,8 +71,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                             if (mContent instanceof TalkClientUpload) {
                                 LOG.debug("Will resume upload for " + ((TalkClientUpload) mContent).getUploadUrl());
                                 TalkClientUpload upload = (TalkClientUpload) mContent;
-                                XoApplication.getXoClient().getTransferAgent().startOrRestartUpload(upload);
-
+                                XoApplication.getXoClient().getTransferAgent().startOrRestartUpload(upload, true);
                             }
                             break;
                         case CANCEL_UPLOAD:
@@ -109,6 +109,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                 break;
             case UPLOAD_NEW:
             case UPLOAD_PAUSED:
+            case UPLOAD_ON_HOLD:
                 mTransferAction = TransferAction.REQUEST_UPLOAD;
                 break;
             case UPLOAD_REGISTERING:
@@ -148,6 +149,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                 int progress = 0;
                 Resources res = mTransferControl.getResources();
                 ContentState contentState = mContent.getContentState();
+                String fileSize = Formatter.formatShortFileSize(mTransferControl.getContext(), mContent.getContentLength());
                 switch (contentState) {
                     case DOWNLOAD_DETECTING:
                         break;
@@ -215,6 +217,15 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         mTransferControl.setMax(length);
                         mTransferControl.setProgressImmediately(progress);
                         mTransferControl.setText(res.getString(R.string.transfer_state_pause));
+                        mTransferControl.pause();
+                        break;
+
+                    case UPLOAD_ON_HOLD:
+                        length = mContent.getTransferLength();
+                        progress = mContent.getTransferProgress();
+                        mTransferControl.setMax(length);
+                        mTransferControl.setProgressImmediately(progress);
+                        mTransferControl.setText(res.getString(R.string.attachment_on_hold_upload_question, fileSize));
                         mTransferControl.pause();
                         break;
 
