@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -217,22 +218,22 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         }
         String mediaType = mAttachment.getContentMediaType();
         int imageResource = -1;
-        if(mediaType != null) {
-            if(mediaType.equals(ContentMediaType.IMAGE)) {
+        if (mediaType != null) {
+            if (mediaType.equals(ContentMediaType.IMAGE)) {
                 if (mImages != null) {
                     imageResource = R.drawable.ic_light_images;
                 } else {
                     imageResource = R.drawable.ic_light_image;
                 }
-            } else if(mediaType.equals(ContentMediaType.VIDEO)) {
+            } else if (mediaType.equals(ContentMediaType.VIDEO)) {
                 imageResource = R.drawable.ic_light_video;
-            } else if(mediaType.equals(ContentMediaType.VCARD)) {
+            } else if (mediaType.equals(ContentMediaType.VCARD)) {
                 imageResource = R.drawable.ic_light_contact;
-            } else if(mediaType.equals(ContentMediaType.LOCATION)) {
+            } else if (mediaType.equals(ContentMediaType.LOCATION)) {
                 imageResource = R.drawable.ic_light_location;
-            } else if(mediaType.equals(ContentMediaType.DATA)) {
+            } else if (mediaType.equals(ContentMediaType.DATA)) {
                 imageResource = R.drawable.ic_light_data;
-            } else if(mediaType.equals(ContentMediaType.AUDIO)) {
+            } else if (mediaType.equals(ContentMediaType.AUDIO)) {
                 imageResource = R.drawable.ic_light_video;
             }
         } else {
@@ -334,7 +335,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         TalkClientUpload upload = null;
         ArrayList<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>();
         if (mImages != null && mImages.size() > 1) {
-            for (IContentObject o: mImages) {
+            for (IContentObject o : mImages) {
                 uploads.add(SelectedContent.createAttachmentUpload(o));
             }
         } else if (mAttachment != null) {
@@ -346,16 +347,32 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             if (messageText != null && !messageText.equals("")) {
                 messages.add(getXoClient().composeClientMessage(mContact, messageText, null));
             }
-            for (TalkClientUpload u: uploads) {
+            for (TalkClientUpload u : uploads) {
                 messages.add(getXoClient().composeClientMessage(mContact, "", u));
             }
             if (isAborted) {
-                for (TalkClientMessage m: messages) {
+                for (TalkClientMessage m : messages) {
                     getXoClient().markMessagesAsAborted(m);
                 }
             } else {
-                for (TalkClientMessage m: messages) {
-                    getXoClient().sendMessage(m.getMessageTag());
+                for (TalkClientMessage m : messages) {
+                    new AsyncTask<TalkClientMessage, Void, TalkClientMessage>() {
+                        @Override
+                        protected TalkClientMessage doInBackground(TalkClientMessage... params) {
+
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            return params[0];
+                        }
+
+                        @Override
+                        protected void onPostExecute(TalkClientMessage message) {
+                            getXoClient().sendMessage(message.getMessageTag());
+                        }
+                    }.execute(m);
                 }
             }
         } else {
