@@ -254,9 +254,9 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         return (mContact != null && mContact.isGroup() && mContact.isEmptyGroup());
     }
 
-    private boolean euploadExceedsTransferLimit(TalkClientUpload upload) {
+    private boolean uploadExceedsTransferLimit(TalkClientUpload upload) {
         int transferLimit = getXoClient().getUploadLimit();
-        return (transferLimit != -1 && upload.getContentLength() >= transferLimit);
+        return (transferLimit >= 0 && upload.getContentLength() >= transferLimit);
     }
 
     private void validateAndSendComposedMessage() {
@@ -287,7 +287,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         }
 
         if (upload != null) {
-            if (euploadExceedsTransferLimit(upload)) {
+            if (uploadExceedsTransferLimit(upload)) {
                 String alertTitle = getString(R.string.attachment_over_limit_title);
                 String fileSize = Formatter.formatShortFileSize(getXoActivity(), upload.getContentLength());
                 String alertMessage = getString(R.string.attachment_over_limit_upload_question, fileSize);

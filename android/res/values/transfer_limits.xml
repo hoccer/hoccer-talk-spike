@@ -9,6 +9,7 @@
         <item name="50">50 MB</item>
         <item name="100">100 MB</item>
         <item name="unlimited">@string/up_down_unlimited_option</item>
+        <item name="manual">@string/up_down_manual_option</item>
     </string-array>
 
     <string-array name="transfer_limits_values">
@@ -19,6 +20,7 @@
         <item name="50">52428800</item>
         <item name="100">104857600</item>
         <item name="unlimited">-1</item>
+        <item name="manual">-2</item>
     </string-array>
 
 </resources>

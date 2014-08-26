@@ -306,9 +306,12 @@
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>
     <string name="preference_keysize_title">RSA Key Size</string>
     <string name="category">Category</string>
-    <string name="pref_auto_downloads_mobile">On mobile networks</string>
-    <string name="pref_auto_download_wifi">On wireless networks</string>
-    <string name="pref_auto_download">Automatic downloads</string>
+
+    <string name="pref_auto_downloads_mobile">Cellular Attachment Transfer</string>
+    <string name="pref_auto_download_wifi">WI-FI Attachment Transfer</string>
+    <string name="pref_upload_limit">Auto Upload limit</string>
+    <string name="pref_download_limit">Auto Download limit</string>
+
     <string name="pref_confirm_messages_seen">Confirm seen messages</string>
     <string name="pref_credentials">Credentials</string>
     <string name="pref_export_credentials">Export credentials</string>
@@ -321,6 +324,7 @@
     <string name="pref_please_wait">Please wait…</string>
     <string name="pref_up_down_limit">Up/Download Limit</string>
     <string name="up_down_unlimited_option">unlimited</string>
+    <string name="up_down_manual_option">manual transfer</string>
     <string name="profile_compare_key_description">For extra security compare this fingerprint with
         the fingerprint seen by your friends in your contact card.
     </string>
@@ -401,7 +405,5 @@
 
     <string name="attachment_failed">Error while downloading File.</string>
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
-    <string name="pref_upload_limit">Upload limit</string>
-    <string name="pref_download_limit">Download limit</string>
 
 </resources>

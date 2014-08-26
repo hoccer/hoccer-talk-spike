@@ -90,9 +90,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     /**********************************************************************************************/
     /****************************************** Download*******************************************/
     /**********************************************************************************************/
-    /**
-     * ******************************************************************************************
-     */
+    /**********************************************************************************************/
     public boolean isDownloadActive(TalkClientDownload download) {
         synchronized (mDownloadsById) {
             return mDownloadsById.containsKey(download.getClientDownloadId());
@@ -104,6 +102,11 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
         if (!forcedDownload) {
             int transferLimit = mClient.getDownloadLimit();
+            if (transferLimit == -2) {
+                LOG.debug("download put on hold because manual downloads are activated");
+                download.hold(this);
+                return;
+            }
             if (transferLimit != -1 && download.getTransmittedContentLength() >= transferLimit) {
                 LOG.debug("download put on hold because the download exceeds the transferLimit");
                 download.hold(this);
@@ -188,9 +191,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     /**********************************************************************************************/
     /****************************************** Upload ********************************************/
     /**********************************************************************************************/
-    /**
-     * ******************************************************************************************
-     */
+    /**********************************************************************************************/
     public boolean isUploadActive(TalkClientUpload upload) {
         synchronized (mUploadsById) {
             return mUploadsById.containsKey(upload.getClientUploadId());
@@ -206,7 +207,12 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
         if (!forcedUpload) {
             int transferLimit = mClient.getUploadLimit();
-            if (transferLimit != -1 && upload.getContentLength() >= transferLimit) {
+            if (transferLimit == -2) {
+                LOG.debug("upload put on hold because manual uploads are activated");
+                upload.hold(this);
+                return;
+            }
+            if (transferLimit >= 0 && upload.getContentLength() >= transferLimit) {
                 LOG.debug("upload aborted because the upload exceeds the transferLimit");
                 upload.hold(this);
                 return;
