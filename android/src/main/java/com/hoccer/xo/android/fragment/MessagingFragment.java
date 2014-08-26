@@ -163,7 +163,7 @@ public class MessagingFragment extends XoListFragment
         ThumbnailManager.getInstance(getXoActivity()).clearCache();
 
         // Ensure that all items receive the detach call
-        for (int i = 0; i < mMessageListView.getCount(); i++) {
+        for (int i = 0; i < mMessageListView.getChildCount(); i++) {
             ChatMessageItem item = (ChatMessageItem) mMessageListView.getChildAt(i).getTag();
             if (item != null) {
                 item.detachView();
