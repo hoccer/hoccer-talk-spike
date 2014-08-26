@@ -176,7 +176,9 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         progress = mContent.getTransferProgress();
                         mTransferControl.setMax(length);
                         mTransferControl.setProgressImmediately(progress);
-                        mTransferControl.setText("");
+                        TalkClientDownload download = (TalkClientDownload)mContent;
+                        fileSize = Formatter.formatShortFileSize(mTransferControl.getContext(), download.getTransmittedContentLength());
+                        mTransferControl.setText(res.getString(R.string.attachment_on_hold_download_question, fileSize));
                         mTransferControl.prepareToDownload();
                         mTransferControl.pause();
                         break;
@@ -235,7 +237,8 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         progress = mContent.getTransferProgress();
                         mTransferControl.setMax(length);
                         mTransferControl.setProgressImmediately(progress);
-                        mTransferControl.setText("");
+                        fileSize = Formatter.formatShortFileSize(mTransferControl.getContext(), mContent.getContentLength());
+                        mTransferControl.setText(res.getString(R.string.attachment_on_hold_upload_question, fileSize));
                         mTransferControl.pause();
                         break;
 
