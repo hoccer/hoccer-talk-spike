@@ -368,4 +368,8 @@
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
     <string name="toast_stored_external_file_to_clipboard">Die Datei wurde in der Zwischenablage gespeichert.</string>
 
+    <!-- Nearby all invite texts -->
+    <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
+    <string name="nearby_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
+
 </resources>
