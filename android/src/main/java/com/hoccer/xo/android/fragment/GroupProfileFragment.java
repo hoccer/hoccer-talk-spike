@@ -168,7 +168,6 @@ public class GroupProfileFragment extends XoFragment
     @Override
     public void onResume() {
         super.onResume();
-        getXoClient().registerContactListener(this);
 
         if (mGroupMemberAdapter == null) {
             mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity(), mGroup);
@@ -206,6 +205,8 @@ public class GroupProfileFragment extends XoFragment
             mGroupMembersList.setOnItemClickListener(null);
         }
         setHasOptionsMenu(true);
+
+        getXoClient().registerContactListener(this);
     }
 
     @Override

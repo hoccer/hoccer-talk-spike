@@ -81,7 +81,6 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     @Override
     public void onDestroy() {
-        getXoActivity().getXoClient().unregisterContactListener(this);
         if (mNearbyAdapter != null) {
             mNearbyAdapter.unregisterListeners();
         }
