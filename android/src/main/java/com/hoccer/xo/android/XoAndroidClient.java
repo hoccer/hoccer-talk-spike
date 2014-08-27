@@ -20,7 +20,7 @@ public class XoAndroidClient extends XoClient {
     /**
      * Create a Hoccer Talk client using the given client database
      */
-    public XoAndroidClient(IXoClientHost client_host, XoAndroidClientConfiguration configuration, XoApplication xoApplication) {
+    public XoAndroidClient(IXoClientHost client_host, XoAndroidClientConfiguration configuration) {
         super(client_host, configuration);
     }
 
