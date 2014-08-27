@@ -65,7 +65,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 return EnumSet.of(UPLOADING);
             }
         },
-        COMPLETE, FAILED;
+        COMPLETE,
+        FAILED;
 
         public Set<State> possibleFollowUps() {
             return EnumSet.noneOf(State.class);
@@ -202,6 +203,10 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     public void cancel(XoTransferAgent agent) {
         mTransferAgent = agent;
         switchState(State.PAUSED);
+    }
+
+    @Override
+    public void hold(XoTransferAgent agent) {
     }
 
     /**********************************************************************************************/
@@ -460,6 +465,15 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private void doFailedAction() {
         deleteTemporaryFile();
         mTransferAgent.onUploadFailed(this);
+    }
+
+    private void doOnHoldAction() {
+        if (mUploadRequest != null) {
+            mUploadRequest.abort();
+            mUploadRequest = null;
+            LOG.debug("aborted current Upload request. Upload can still resume.");
+        }
+        mTransferAgent.onUploadStateChanged(this);
     }
 
     private boolean isUploadComplete(Header checkRangeHeader) {

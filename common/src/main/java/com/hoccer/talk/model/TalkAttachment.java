@@ -87,6 +87,14 @@ public class TalkAttachment {
         return contentSize;
     }
 
+    public int getContentSizeAsInt(){
+        try {
+            return Integer.parseInt(contentSize);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
     public void setContentSize(String contentSize) {
         this.contentSize = contentSize;
     }

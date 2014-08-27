@@ -3,7 +3,7 @@
 
     <string name="app_name">Hoccer XO</string>
 
-    <string name="demo_message">Lorem ipsum dolor...</string>
+    <string name="demo_message">Lorem ipsum dolor…</string>
 
     <!-- common strings -->
     <string name="common_ok">OK</string>
@@ -78,8 +78,14 @@
     <string name="dialog_empty_group_title">Nachricht kann nicht gesendet werden</string>
     <string name="dialog_empty_group_message">Du kannst keine Nachrichten an die Gruppe verschicken, weil sie außer Dir keine Mitglieder hat. Du kannst aber deine Freunde in die Gruppe einladen.</string>
 
+    <string name="attachment_over_limit_title">Nachricht versenden?</string>
+    <string name="attachment_over_limit_upload_question">Der Anhang ist %1$s groß. Willst du die Nachricht wirklich versenden?</string>
+    <string name="attachment_over_limit_confirm">Senden</string>
+    <string name="attachment_on_hold_upload_question">%1$s hochladen?</string>
+    <string name="attachment_on_hold_download_question">%1$s runterladen?</string>
+
     <!-- Messaging fragment -->
-    <string name="messaging_loading">Lädt...</string>
+    <string name="messaging_loading">Lädt…</string>
     <string name="messaging_no_messages">Keine Nachrichten</string>
     <string name="messaging_invited_join">Gruppe beitreten</string>
     <string name="menu_copy_attachment">Kopieren</string>
@@ -92,7 +98,7 @@
     <string name="pairing_qr_info">Füge einen neuen Kontakt per QR Scan hinzu:</string>
     <string name="pairing_qr_show">QR Code anzeigen</string>
     <string name="pairing_qr_scan">QR Code scannen</string>
-    <string name="pairing_token_generating">Erzeugen...</string>
+    <string name="pairing_token_generating">Erzeugen…</string>
     <string name="pairing_token_send_sms">Einladen per SMS</string>
     <string name="pairing_token_send_email">Einladen per e-mail</string>
     <string name="pairing_success">Kontakt wurde erfolgreich hinzugefügt</string>
@@ -146,8 +152,8 @@
     <string name="message_text">Deine Nachricht</string>
 
     <!-- Content -->
-    <string name="content_downloading">Downloading...</string>
-    <string name="content_uploading">Uploading...</string>
+    <string name="content_downloading">Downloading…</string>
+    <string name="content_uploading">Uploading…</string>
 
     <string name="content_images">Bild</string>
     <string name="content_multi_images">Mehrere Bilder</string>
@@ -241,10 +247,10 @@
     <string name="profile_name_text">Name</string>
     <string name="profile_key_text">Schlüssel</string>
 
-    <string name="transfer_state_encrypting">Verschlüsseln...</string>
-    <string name="transfer_state_decrypting">Entschlüsseln...</string>
-    <string name="transfer_state_downloading">Downloading...</string>
-    <string name="transfer_state_uploading">Uploading...</string>
+    <string name="transfer_state_encrypting">Verschlüsseln…</string>
+    <string name="transfer_state_decrypting">Entschlüsseln…</string>
+    <string name="transfer_state_downloading">Downloading…</string>
+    <string name="transfer_state_uploading">Uploading…</string>
     <string name="transfer_state_pause">Pause</string>
     <string name="dialog_attachment_choose_reselect_option">Anderen Anhang auswählen</string>
     <string name="dialog_attachment_choose_discard_option">Anhang verwerfen</string>
@@ -272,7 +278,7 @@
     <string name="added_attachment_to_collection">%1$s zur Sammlung \'%2$s\' hinzugefügt</string>
     <string name="select_recipients">Empfänger auswählen</string>
     <string name="error_could_not_find_file_for_sending">Datei \'%1$s\' konnte nicht gefunden und gesendet werden</string>
-    <string name="rename_collection">Sammlung umbennen</string>
+    <string name="rename_collection">Sammlung umbenennen</string>
     <string name="dialog_delete_collection_title">Sammlungen entfernen</string>
     <string name="dialog_delete_collection_message">Bist du dir sicher, dass du die ausgewählte(n) Sammlung(en) entfernen möchtest? Die
         Dateien selbst werden dabei nicht gelöscht.
@@ -282,9 +288,12 @@
     <string name="preference_keysize_summary">RSA Schlüssel mit gewählter Schlüssellänge erneuern</string>
     <string name="preference_keysize_title">RSA Schlüssellänge</string>
     <string name="category">Kategorie</string>
-    <string name="pref_auto_downloads_mobile">Im mobilen Netz</string>
-    <string name="pref_auto_download_wifi">Im WLAN Netz</string>
-    <string name="pref_auto_download">Automatischer Download</string>
+
+    <string name="pref_auto_downloads_mobile">Mobildaten Attachment Transfer</string>
+    <string name="pref_auto_download_wifi">WLAN Attachment Transfer</string>
+    <string name="pref_upload_limit">Auto Upload limit</string>
+    <string name="pref_download_limit">Auto Download limit</string>
+
     <string name="pref_confirm_messages_seen">Lesebestätigung senden</string>
     <string name="pref_credentials">Zugangsdaten</string>
     <string name="pref_export_credentials">Zugangsdaten exportieren</string>
@@ -292,7 +301,10 @@
     <string name="pref_legal_information">Rechtliches</string>
     <string name="pref_encryption">Verschlüsselung</string>
     <string name="profile_compare_key_description">Für ein Extra an Sicherheit, vergleiche diesen Fingerabdruck mit dem Fingerabdruck, den deine Freunde in deiner Kontaktkarte sehen.</string>
-    <string name="pref_please_wait">Bitte warten...</string>
+    <string name="pref_please_wait">Bitte warten…</string>
+    <string name="pref_up_down_limit">Up/Download Limit</string>
+    <string name="up_down_unlimited_option">unbegrenzt</string>
+    <string name="up_down_manual_option">manuell</string>
     <string name="my_profile_title">Mein Profil</string>
     <string name="welcome_to_title">Willkommen bei XO!</string>
     <string name="contact_item_received_attachment">%1$s Datei erhalten</string>
@@ -315,7 +327,7 @@
     <string name="cant_find_credentials">Kann die Datei "credentials.json" mit den Zugangsdaten nicht finden.</string>
 
     <string name="placeholder_conversations_text">Lade deine Freunde zum Chatten ein!</string>
-    <string name="placeholder_nearby_text">Warten auf Kontakte %1$s...</string>
+    <string name="placeholder_nearby_text">Warten auf Kontakte %1$s…</string>
     <string name="placeholder_nearby_link_text">in der Nähe</string>
     <string name="actionbar_default_title">Hoccer</string>
     <string name="content_audio_caption">Musik</string>
