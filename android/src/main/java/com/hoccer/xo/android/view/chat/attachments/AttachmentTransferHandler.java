@@ -70,7 +70,7 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                             if (mContent instanceof TalkClientUpload) {
                                 LOG.debug("Will resume upload for " + ((TalkClientUpload) mContent).getUploadUrl());
                                 TalkClientUpload upload = (TalkClientUpload) mContent;
-                                XoApplication.getXoClient().getTransferAgent().startOrRestartUpload(upload, true);
+                                XoApplication.getXoClient().getTransferAgent().startOrRestartUpload(upload);
                             }
                             break;
                         case CANCEL_UPLOAD:

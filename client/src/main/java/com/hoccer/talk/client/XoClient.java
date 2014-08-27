@@ -743,7 +743,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         resetIdle();
         if(upload != null) {
             LOG.debug("new client avatar as upload " + upload);
-            mTransferAgent.startOrRestartUpload(upload, true);
+            mTransferAgent.startOrRestartUpload(upload);
         }
         sendPresenceUpdateWithNewAvatar(upload);
     }
@@ -811,7 +811,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         resetIdle();
         if(upload != null) {
             LOG.debug("new group avatar as upload " + upload);
-            mTransferAgent.startOrRestartUpload(upload, true);
+            mTransferAgent.startOrRestartUpload(upload);
         }
         sendGroupPresenceUpdateWithNewAvatar(group, upload);
     }
@@ -2117,7 +2117,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 resultingDeliveries = mServerRpc.outDeliveryRequest(message, deliveries);
                 TalkClientUpload upload = clientMessage.getAttachmentUpload();
                 if(upload != null) {
-                    mTransferAgent.startOrRestartUpload(upload, false);
+                    mTransferAgent.startOrRestartUpload(upload);
                 }
             } catch (Exception e) {
                 LOG.error("error while performing delivery request for message " + clientMessage.getClientMessageId(), e);

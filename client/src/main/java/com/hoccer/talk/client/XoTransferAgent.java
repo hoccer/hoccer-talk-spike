@@ -198,26 +198,12 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         }
     }
 
-    public void startOrRestartUpload(final TalkClientUpload upload, boolean forcedUpload) {
+    public void startOrRestartUpload(final TalkClientUpload upload) {
         LOG.info("startOrRestartUpload(), dataurl: " + upload.getContentDataUrl() +
                 " | contenturl: " + upload.getContentUrl() +
                 " | datafile: " + upload.getDataFile() +
                 " | contenttype: " + upload.getContentType() +
                 " | clientUploadId: " + upload.getClientUploadId());
-
-        if (!forcedUpload) {
-//            int transferLimit = mClient.getUploadLimit();
-//            if (transferLimit == -2) {
-//                LOG.debug("upload put on hold because manual uploads are activated");
-//                upload.hold(this);
-//                return;
-//            }
-//            if (transferLimit >= 0 && upload.getContentLength() >= transferLimit) {
-//                LOG.debug("upload aborted because the upload exceeds the transferLimit");
-//                upload.hold(this);
-//                return;
-//            }
-        }
 
         if (upload.getState() == TalkClientUpload.State.COMPLETE) {
             mUploadsById.remove(upload.getClientUploadId());
@@ -258,7 +244,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
     public void resumeUpload(TalkClientUpload upload) {
         LOG.info("resumeUpload(" + upload.getClientUploadId() + ")");
-        startOrRestartUpload(upload, true);
+        startOrRestartUpload(upload);
     }
 
     public void cancelUpload(TalkClientUpload upload) {

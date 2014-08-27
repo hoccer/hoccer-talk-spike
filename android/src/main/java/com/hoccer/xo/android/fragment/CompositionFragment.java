@@ -90,7 +90,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     if (isComposed()) {
-                        validateAndSendComposedMessage();
+                        processMessage();
                     }
                 }
                 return false;
@@ -165,7 +165,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        validateAndSendComposedMessage();
+        processMessage();
     }
 
     private void selectAttachment() {
@@ -254,7 +254,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         return (mContact != null && mContact.isGroup() && mContact.isEmptyGroup());
     }
 
-    private boolean uploadExceedsTransferLimit(TalkClientUpload upload) {
+    private boolean uploadExceedsTransferLimit(IContentObject upload) {
         int transferLimit = getXoClient().getUploadLimit();
         return (transferLimit == -2 || (transferLimit >= 0 && upload.getContentLength() >= transferLimit));
     }
@@ -285,19 +285,21 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             showAlertSendMessageNotPossible();
             return;
         }
-
-        if (upload != null) {
-            if (uploadExceedsTransferLimit(upload)) {
-                String alertTitle = getString(R.string.attachment_over_limit_title);
-                String fileSize = Formatter.formatShortFileSize(getXoActivity(), upload.getContentLength());
-                String alertMessage = getString(R.string.attachment_over_limit_upload_question, fileSize);
-                showAlertTransferLimitExceeded(alertTitle, alertMessage, messageText, upload);
-                return;
-            }
-        }
         sendComposedMessage(messageText, upload);
     }
 
+    private void processMessage() {
+        if (mAttachment != null) {
+            if (uploadExceedsTransferLimit(mAttachment)) {
+                String alertTitle = getString(R.string.attachment_over_limit_title);
+                String fileSize = Formatter.formatShortFileSize(getXoActivity(), mAttachment.getContentLength());
+                String alertMessage = getString(R.string.attachment_over_limit_upload_question, fileSize);
+                showAlertTransferLimitExceeded(alertTitle, alertMessage);
+                return;
+            }
+        }
+        validateAndSendComposedMessage();
+    }
 
     private void sendComposedMessage(String messageText, TalkClientUpload upload) {
         getXoClient().sendMessage(getXoClient().composeClientMessage(mContact, messageText, upload).getMessageTag());
@@ -317,14 +319,14 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         );
     }
 
-    private void showAlertTransferLimitExceeded(String alertTitle, String alertMessage, String messageText, TalkClientUpload upload) {
+    private void showAlertTransferLimitExceeded(String alertTitle, String alertMessage) {
         XoDialogs.showPositiveNegativeDialog("TransferLimitExceededDialog",
                 alertTitle,
                 alertMessage,
                 getXoActivity(),
                 R.string.attachment_over_limit_confirm,
                 R.string.common_no,
-                new SendOversizeAttachmentCallbackHandler(messageText, upload),
+                new SendOversizeAttachmentCallbackHandler(),
                 null);
     }
 
@@ -348,7 +350,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
         if (isComposed()) {
             XoApplication.getXoSoundPool().playThrowSound();
-            validateAndSendComposedMessage();
+            processMessage();
         }
     }
 
@@ -394,18 +396,9 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private class SendOversizeAttachmentCallbackHandler implements DialogInterface.OnClickListener {
-
-        private String mMessageText = null;
-        private TalkClientUpload mUpload = null;
-
-        SendOversizeAttachmentCallbackHandler(String messageText, TalkClientUpload upload) {
-            mMessageText = messageText;
-            mUpload = upload;
-        }
-
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
-            sendComposedMessage(mMessageText, mUpload);
+            validateAndSendComposedMessage();
         }
     }
 }
