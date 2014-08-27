@@ -206,17 +206,17 @@ public class XoTransferAgent implements IXoTransferListenerOld {
                 " | clientUploadId: " + upload.getClientUploadId());
 
         if (!forcedUpload) {
-            int transferLimit = mClient.getUploadLimit();
-            if (transferLimit == -2) {
-                LOG.debug("upload put on hold because manual uploads are activated");
-                upload.hold(this);
-                return;
-            }
-            if (transferLimit >= 0 && upload.getContentLength() >= transferLimit) {
-                LOG.debug("upload aborted because the upload exceeds the transferLimit");
-                upload.hold(this);
-                return;
-            }
+//            int transferLimit = mClient.getUploadLimit();
+//            if (transferLimit == -2) {
+//                LOG.debug("upload put on hold because manual uploads are activated");
+//                upload.hold(this);
+//                return;
+//            }
+//            if (transferLimit >= 0 && upload.getContentLength() >= transferLimit) {
+//                LOG.debug("upload aborted because the upload exceeds the transferLimit");
+//                upload.hold(this);
+//                return;
+//            }
         }
 
         if (upload.getState() == TalkClientUpload.State.COMPLETE) {

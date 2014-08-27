@@ -256,7 +256,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     private boolean uploadExceedsTransferLimit(TalkClientUpload upload) {
         int transferLimit = getXoClient().getUploadLimit();
-        return (transferLimit >= 0 && upload.getContentLength() >= transferLimit);
+        return (transferLimit == -2 || (transferLimit >= 0 && upload.getContentLength() >= transferLimit));
     }
 
     private void validateAndSendComposedMessage() {
