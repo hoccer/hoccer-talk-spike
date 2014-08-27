@@ -6,8 +6,6 @@ import android.widget.ImageView;
 
 public class SquaredImageView extends ImageView {
 
-    private String contentUri;
-
     public SquaredImageView(Context context) {
         super(context);
     }
@@ -20,13 +18,5 @@ public class SquaredImageView extends ImageView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         setMeasuredDimension(getMeasuredWidth(), getMeasuredWidth());
-    }
-
-    public void setContentUri(String contentUri) {
-        this.contentUri = contentUri;
-    }
-
-    public String getContentUri() {
-        return contentUri;
     }
 }
