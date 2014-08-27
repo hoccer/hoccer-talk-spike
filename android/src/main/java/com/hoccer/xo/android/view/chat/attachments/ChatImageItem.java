@@ -23,12 +23,14 @@ import com.squareup.picasso.Transformation;
 
 public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChangeListener {
 
-    private static final double IMAGE_SCALE_FACTOR = 0.7;
+    private static final double WIDTH_SCALE_FACTOR = 0.7;
+    private static final double IMAGE_SCALE_FACTOR = 1;
 
     private Context mContext;
     private int mImageWidth;
     private ImageView mImageView;
     private View mMessageView;
+    private int mMask;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -44,31 +46,23 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     @Override
     public void detachView() {
         mImageView.removeOnLayoutChangeListener(this);
+        Picasso.with(mContext).cancelRequest(mImageView);
     }
 
     @Override
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
 
-        RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
-        int mask;
-        if (mMessage.isIncoming()) {
-            rootView.setGravity(Gravity.LEFT);
-            mask = R.drawable.chat_bubble_incoming;
-        } else {
-            rootView.setGravity(Gravity.RIGHT);
-            mask = R.drawable.chat_bubble_outgoing;
-        }
-
         Picasso picasso = Picasso.with(mContext);
         picasso.setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
-        picasso.setIndicatorsEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
+//        picasso.setIndicatorsEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
 
         LOG.error("Width: " + mImageView.getWidth() + " Height: " + mImageView.getHeight());
-        Picasso.with(mContext).load(mContentObject.getContentUrl())
-//                .fit()
-                .resize(mImageView.getWidth(), mImageView.getHeight())
-//                .transform(new BubbleTransformation(mask))
-                .into((ImageView) mImageView);
+        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
+                .error(R.drawable.ic_img_placeholder_error)
+                .resize((int) (mImageView.getWidth() * IMAGE_SCALE_FACTOR), (int) (mImageView.getHeight() * IMAGE_SCALE_FACTOR))
+                .centerInside()
+                .transform(new BubbleTransformation(mMask))
+                .into(mImageView);
 
         mImageView.removeOnLayoutChangeListener(this);
     }
@@ -111,6 +105,15 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
 
         mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
+        RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        if (mMessage.isIncoming()) {
+            rootView.setGravity(Gravity.LEFT);
+            mMask = R.drawable.chat_bubble_error_incoming;
+        } else {
+            rootView.setGravity(Gravity.RIGHT);
+            mMask = R.drawable.chat_bubble_outgoing;
+        }
+
         // set item as tag for this view
         mMessageView.setTag(this);
         LOG.error("Attach message item: " + mMessage.getClientMessageId() + " from view: " + mMessageView.hashCode());
@@ -144,7 +147,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
 
         @Override
         public String key() {
-            return "square()";
+            return String.valueOf(mask);
         }
     }
 
@@ -176,7 +179,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
 
     private void setRequiredImageWidth() {
         Point size = DisplayUtils.getDisplaySize(mContext);
-        mImageWidth = (int) (size.x * IMAGE_SCALE_FACTOR);
+        mImageWidth = (int) (size.x * WIDTH_SCALE_FACTOR);
     }
 }
 
