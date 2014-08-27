@@ -23,7 +23,8 @@ import com.squareup.picasso.Transformation;
 
 public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChangeListener {
 
-    private static final double IMAGE_SCALE_FACTOR = 0.7;
+    private static final double WIDTH_SCALE_FACTOR = 0.7;
+    private static final double IMAGE_SCALE_FACTOR = 1;
 
     private Context mContext;
     private int mImageWidth;
@@ -53,11 +54,12 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
 
         Picasso picasso = Picasso.with(mContext);
         picasso.setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
-        picasso.setIndicatorsEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
+//        picasso.setIndicatorsEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
 
         LOG.error("Width: " + mImageView.getWidth() + " Height: " + mImageView.getHeight());
         Picasso.with(mContext).load(mContentObject.getContentDataUrl())
-                .resize(mImageView.getWidth() / 2, mImageView.getHeight() / 2)
+                .error(R.drawable.ic_img_placeholder_error)
+                .resize((int) (mImageView.getWidth() * IMAGE_SCALE_FACTOR), (int) (mImageView.getHeight() * IMAGE_SCALE_FACTOR))
                 .centerInside()
                 .transform(new BubbleTransformation(mMask))
                 .into(mImageView);
@@ -133,7 +135,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
             Canvas c = new Canvas(result);
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
-//            c.scale(source.getWidth(), source.getHeight());
             c.drawBitmap(source, 0, 0, null);
             c.drawBitmap(mask, 0, 0, paint);
 
@@ -178,7 +179,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
 
     private void setRequiredImageWidth() {
         Point size = DisplayUtils.getDisplaySize(mContext);
-        mImageWidth = (int) (size.x * IMAGE_SCALE_FACTOR);
+        mImageWidth = (int) (size.x * WIDTH_SCALE_FACTOR);
     }
 }
 
