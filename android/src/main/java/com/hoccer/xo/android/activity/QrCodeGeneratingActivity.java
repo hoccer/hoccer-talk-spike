@@ -24,7 +24,6 @@ import java.util.Map;
 public class QrCodeGeneratingActivity extends Activity implements IXoContactListener {
     private ImageView targetImageView;
     private String mQrString;
-    private int mPairedContact;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +34,6 @@ public class QrCodeGeneratingActivity extends Activity implements IXoContactList
         if (intent != null) {
             mQrString = intent.getExtras().getString("QR");
         }
-        XoApplication.getXoClient().registerContactListener(this);
     }
 
     @Override
@@ -48,12 +46,18 @@ public class QrCodeGeneratingActivity extends Activity implements IXoContactList
         } catch (WriterException e) {
             e.printStackTrace();
         }
+        XoApplication.getXoClient().registerContactListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        XoApplication.getXoClient().unregisterContactListener(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        XoApplication.getXoClient().unregisterContactListener(this);
     }
 
     private static Bitmap encodeAsBitmap(String contents, BarcodeFormat format, int img_width, int img_height)
@@ -97,21 +101,21 @@ public class QrCodeGeneratingActivity extends Activity implements IXoContactList
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        if (!isFinishing() && mPairedContact == contact.getClientContactId()) {
-            final TalkClientContact newContact = contact;
-            final Context context = this;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(context, getResources().getString(R.string.paired_with) + " " + newContact.getName(), Toast.LENGTH_LONG).show();
-                }
-            });
-        }
+        // do nothing
     }
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        mPairedContact = contact.getClientContactId();
+        // we assume that this relationship update is a new friendship via QR code scan
+        if(contact.isClientFriend()) {
+            final Context context = this;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, getResources().getString(R.string.toast_pairing_successful), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 
     @Override

@@ -12,18 +12,16 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.release.R;
 import net.sourceforge.zbar.*;
 
-public class QrScannerActivity extends Activity implements IXoContactListener {
+public class QrScannerActivity extends Activity implements IXoPairingListener {
     private ImageScanner scanner;
     private Camera mCamera;
     private CameraPreview mPreview;
     private Handler autoFocusHandler;
-    private int mPairedContact;
     private boolean hasAutoFocus;
 
     PreviewCallback previewCb = new PreviewCallback() {
@@ -46,7 +44,8 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getContext(), getResources().getString(R.string.pairing_incorrect_code), Toast.LENGTH_LONG).show();
+                                Toast.makeText(getContext(), getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
+                                finish();
                             }
                         });
                     }
@@ -88,13 +87,13 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
         if(hasAutoFocus) {
             autoFocusHandler = new Handler();
         }
-        XoApplication.getXoClient().registerContactListener(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         releaseCamera();
+        XoApplication.getXoClient().unregisterPairingListener(this);
     }
 
     @Override
@@ -109,6 +108,7 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
             }
             preview.addView(mPreview);
         }
+        XoApplication.getXoClient().registerPairingListener(this);
     }
 
     private Context getContext() {
@@ -134,45 +134,28 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-        // do nothing
+    public void onTokenPairingSucceeded(String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getContext(), getResources().getString(R.string.toast_pairing_successful), Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        // do nothing
+    public void onTokenPairingFailed(String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getContext(), getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
     }
 
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-        if (!isFinishing() && mPairedContact == contact.getClientContactId()) {
-            final TalkClientContact newContact = contact;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getContext(), getResources().getString(R.string.paired_with) + " " + newContact.getName(), Toast.LENGTH_LONG).show();
-                    mPreview.restartPreview();
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-        mPairedContact = contact.getClientContactId();
-    }
-
-    @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-        // do nothing
-    }
-
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-        // do nothing
-    }
-
-    public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+        public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
         private SurfaceHolder mHolder;
         private Camera mCamera;
         private PreviewCallback previewCallback;
