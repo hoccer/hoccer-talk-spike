@@ -235,6 +235,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         switchState(State.PAUSED, "cancelling");
     }
 
+    @Override
     public void hold(XoTransferAgent agent) {
         mTransferAgent = agent;
         switchState(State.ON_HOLD, "put on hold");

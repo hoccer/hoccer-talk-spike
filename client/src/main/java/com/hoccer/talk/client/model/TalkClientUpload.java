@@ -50,29 +50,23 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         REGISTERING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(PAUSED, NEW, ON_HOLD);
+                return EnumSet.of(PAUSED, NEW);
             }
         },
         UPLOADING {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(COMPLETE, FAILED, PAUSED, ON_HOLD);
+                return EnumSet.of(COMPLETE, FAILED, PAUSED);
             }
         },
         PAUSED {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(UPLOADING, ON_HOLD);
+                return EnumSet.of(UPLOADING);
             }
         },
         COMPLETE,
-        FAILED,
-        ON_HOLD {
-            @Override
-            public Set<State> possibleFollowUps() {
-                return EnumSet.of(REGISTERING, UPLOADING);
-            }
-        };
+        FAILED;
 
         public Set<State> possibleFollowUps() {
             return EnumSet.noneOf(State.class);
@@ -213,8 +207,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     @Override
     public void hold(XoTransferAgent agent) {
-        mTransferAgent = agent;
-        switchState(State.ON_HOLD);
     }
 
     /**********************************************************************************************/
@@ -250,8 +242,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             case FAILED:
                 doFailedAction();
                 break;
-            case ON_HOLD:
-                doOnHoldAction();
         }
     }
 
@@ -638,8 +628,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 return ContentState.UPLOAD_UPLOADING;
             case PAUSED:
                 return ContentState.UPLOAD_PAUSED;
-            case ON_HOLD:
-                return ContentState.UPLOAD_ON_HOLD;
             default:
                 throw new IllegalArgumentException("Unknown upload state '" + state + "'");
         }

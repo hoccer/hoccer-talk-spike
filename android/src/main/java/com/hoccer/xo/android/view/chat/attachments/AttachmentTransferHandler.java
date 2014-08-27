@@ -109,9 +109,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                 break;
             case UPLOAD_NEW:
             case UPLOAD_PAUSED:
-            case UPLOAD_ON_HOLD:
-                mTransferAction = TransferAction.REQUEST_UPLOAD;
-                break;
             case UPLOAD_REGISTERING:
                 //mContentTransferControl.setEnabled(false); // TODO: is this needed / balanced?
                 break;
@@ -229,16 +226,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         mTransferControl.setMax(length);
                         mTransferControl.setProgressImmediately(progress);
                         mTransferControl.setText(res.getString(R.string.transfer_state_pause));
-                        mTransferControl.pause();
-                        break;
-
-                    case UPLOAD_ON_HOLD:
-                        length = mContent.getTransferLength();
-                        progress = mContent.getTransferProgress();
-                        mTransferControl.setMax(length);
-                        mTransferControl.setProgressImmediately(progress);
-                        fileSize = Formatter.formatShortFileSize(mTransferControl.getContext(), mContent.getContentLength());
-                        mTransferControl.setText(res.getString(R.string.attachment_on_hold_upload_question, fileSize));
                         mTransferControl.pause();
                         break;
 

@@ -365,8 +365,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     public void onUploadStateChanged(TalkClientUpload upload) {
         LOG.info("onUploadStateChanged(id: " + upload.getClientUploadId() + ")");
 
-        if (upload.getState() == TalkClientUpload.State.PAUSED
-                || upload.getState() == TalkClientUpload.State.ON_HOLD) {
+        if (upload.getState() == TalkClientUpload.State.PAUSED) {
             LOG.debug("Upload paused. " + upload.getClientUploadId() + " Removing from queue.");
             deactivateUpload(upload);
         }
