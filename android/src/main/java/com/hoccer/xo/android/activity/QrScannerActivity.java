@@ -1,10 +1,7 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
@@ -14,18 +11,17 @@ import android.os.Handler;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.model.TalkClientContact;
+import android.widget.Toast;
+import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.release.R;
 import net.sourceforge.zbar.*;
 
-public class QrScannerActivity extends Activity implements IXoContactListener {
+public class QrScannerActivity extends Activity implements IXoPairingListener {
     private ImageScanner scanner;
     private Camera mCamera;
     private CameraPreview mPreview;
     private Handler autoFocusHandler;
-    private int mPairedContact;
     private boolean hasAutoFocus;
 
     PreviewCallback previewCb = new PreviewCallback() {
@@ -43,20 +39,13 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
                     String code = sym.getData();
                     if (code.startsWith(XoApplication.getXoClient().getConfiguration().getUrlScheme())) {
                         code = code.replace(XoApplication.getXoClient().getConfiguration().getUrlScheme(), "");
-                        XoApplication.getXoClient().performTokenPairing(code);
+                        XoApplication.getXoClient().performTokenPairing(code, QrScannerActivity.this);
                     } else {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                                builder.setMessage(getBaseContext().getResources().getString(R.string.pairing_incorrect_code))
-                                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                mPreview.restartPreview();
-                                            }
-                                        });
-                                AlertDialog alert = builder.create();
-                                alert.show();
+                                Toast.makeText(QrScannerActivity.this, getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
+                                finish();
                             }
                         });
                     }
@@ -98,7 +87,6 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
         if(hasAutoFocus) {
             autoFocusHandler = new Handler();
         }
-        XoApplication.getXoClient().registerContactListener(this);
     }
 
     @Override
@@ -121,16 +109,6 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        XoApplication.getXoClient().unregisterContactListener(this);
-    }
-
-    private Context getContext() {
-        return this;
-    }
-
     public static Camera getCameraInstance(){
         Camera c = null;
         try {
@@ -150,56 +128,28 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-
+    public void onTokenPairingSucceeded(String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(QrScannerActivity.this, getResources().getString(R.string.toast_pairing_successful), Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-
+    public void onTokenPairingFailed(String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(QrScannerActivity.this, getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
     }
 
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-        if (!isFinishing() && mPairedContact == contact.getClientContactId()) {
-            final TalkClientContact newContact = contact;
-            final Context context = this;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setMessage(getResources().getString(R.string.paired_with) + " " + newContact.getName())
-                            .setCancelable(false)
-                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    Intent contactList = new Intent(context, ContactsActivity.class);
-                                    contactList.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                    context.startActivity(contactList);
-                                }
-                            });
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-        mPairedContact = contact.getClientContactId();
-    }
-
-    @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-
-    }
-
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-
-    }
-
-    public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+        public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
         private SurfaceHolder mHolder;
         private Camera mCamera;
         private PreviewCallback previewCallback;
@@ -215,18 +165,17 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
             mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         }
 
+        @Override
         public void surfaceCreated(SurfaceHolder holder) {
-//            try {
-//                mCamera.setPreviewDisplay(holder);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            // do nothing
         }
 
+        @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-
+            // do nothing
         }
 
+        @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             if (mHolder.getSurface() == null) {
                 return;
@@ -262,6 +211,4 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
             }
         }
     }
-
-
 }

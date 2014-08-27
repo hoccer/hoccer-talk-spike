@@ -90,9 +90,6 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
 
         mQrShowButton = (Button) view.findViewById(R.id.pairing_show_qr);
         mQrShowButton.setOnClickListener(this);
-
-        getXoClient().registerPairingListener(this);
-
         return view;
     }
 
@@ -169,7 +166,6 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     @Override
     public void onDestroy() {
         super.onDestroy();
-        getXoClient().unregisterPairingListener(this);
     }
 
     @Override
@@ -235,7 +231,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         getXoActivity().getBackgroundExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                getXoClient().performTokenPairing(token);
+                getXoClient().performTokenPairing(token, PairingFragment.this);
             }
         });
     }
