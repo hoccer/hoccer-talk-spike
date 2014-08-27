@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.Formatter;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -34,6 +35,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CompositionFragment extends XoFragment implements View.OnClickListener,
         View.OnLongClickListener, MotionGestureListener {
@@ -49,12 +51,11 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private EditText mTextEdit;
     private TextWatcher mTextWatcher;
     private ImageButton mSendButton;
-    private IContentObject mAttachment;
     private TalkClientContact mContact;
     private String mLastMessage = null;
     private ImageButton mAddAttachmentButton;
 
-    private ArrayList<IContentObject> mImages;
+    private ArrayList<IContentObject> mAttachments;
 
     private ContentSelection mAttachmentSelection = null;
 
@@ -94,7 +95,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     if (isComposed()) {
-                        sendComposedMessage();
+                        processMessage();
                     }
                 }
                 return false;
@@ -178,7 +179,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        sendComposedMessage();
+        processMessage();
     }
 
     private void selectAttachment() {
@@ -193,7 +194,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     public void onAttachmentsSelected(ArrayList<IContentObject> contentObjects) {
         LOG.debug("onAttachmentSelected(" + contentObjects.size() + ")");
-        showAttachments(null, contentObjects);
+        setAttachments(contentObjects);
         mSendButton.setEnabled(isComposed());
     }
 
@@ -202,25 +203,21 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private void setAttachment(IContentObject contentObject) {
-        mAttachment = contentObject;
+        mAttachments = new ArrayList<IContentObject>();
+        mAttachments.add(contentObject);
         updateAttachmentButton();
     }
 
-    private void showAttachments(IContentObject contentObject, ArrayList<IContentObject> contentObjects) {
+    private void setAttachments(ArrayList<IContentObject> contentObjects) {
         mAddAttachmentButton.setOnClickListener(new AttachmentOnClickListener());
         if (contentObjects != null) {
-            mAttachment = contentObjects.get(0);
-            if (contentObjects.size() > 1) {
-                mImages = contentObjects;
-            }
-        } else {
-            mAttachment = contentObject;
+            mAttachments = contentObjects;
         }
-        String mediaType = mAttachment.getContentMediaType();
+        String mediaType = mAttachments.get(0).getContentMediaType();
         int imageResource = -1;
         if (mediaType != null) {
             if (mediaType.equals(ContentMediaType.IMAGE)) {
-                if (mImages != null) {
+                if (mAttachments.size() > 1) {
                     imageResource = R.drawable.ic_light_images;
                 } else {
                     imageResource = R.drawable.ic_light_image;
@@ -246,7 +243,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     private void updateAttachmentButton() {
         mAddAttachmentButton.setOnClickListener(new AttachmentOnClickListener());
-        String mediaType = mAttachment.getContentMediaType();
+        String mediaType = mAttachments.get(0).getContentMediaType();
 
         int imageResource = -1;
         if (mediaType != null) {
@@ -276,8 +273,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private boolean isComposed() {
-        boolean composed = (mTextEdit.getText().length() > 0 || mAttachment != null);
-        return composed;
+        return (mTextEdit.getText().length() > 0 || mAttachments != null);
     }
 
     private void clearComposedMessage() {
@@ -289,7 +285,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         mAddAttachmentButton.setOnClickListener(new AddAttachmentOnClickListener());
         mAddAttachmentButton.setBackgroundDrawable(null);
         mAddAttachmentButton.setImageResource(R.drawable.ic_light_content_attachment);
-        mAttachment = null;
+        mAttachments = null;
         updateSendButton();
     }
 
@@ -312,77 +308,82 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         return (mContact != null && mContact.isGroup() && mContact.isEmptyGroup());
     }
 
-    private void sendComposedMessage() {
+    private boolean uploadExceedsTransferLimit(List<IContentObject> uploads) {
+        int transferLimit = getXoClient().getUploadLimit();
+
+        if (transferLimit == -2) {
+            return true;
+        }
+        if (transferLimit == -1) {
+            return false;
+        }
+
+        long fileSize = calculateAttachmentSize(uploads);
+        return (transferLimit >= 0 && fileSize >= transferLimit);
+    }
+
+    private long calculateAttachmentSize(List<IContentObject> attachments) {
+        long fileSize = 0;
+        for (IContentObject upload : attachments) {
+            fileSize += upload.getContentLength();
+        }
+        return fileSize;
+    }
+
+    private void validateAndSendComposedMessage() {
         if (mContact == null) {
             return;
         }
 
-        boolean isAborted = false;
-        if (isBlocked()) {
-            Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
-            isAborted = true;
-        } else if (isEmptyGroup()) {
-            showAlertSendMessageNotPossible();
-            return;
-        }
-
         String messageText = mTextEdit.getText().toString();
-
         if (messageText != null && !messageText.equals("")) {
             mLastMessage = messageText;
         }
 
         TalkClientUpload upload = null;
         ArrayList<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>();
-        if (mImages != null && mImages.size() > 1) {
-            for (IContentObject o : mImages) {
-                uploads.add(SelectedContent.createAttachmentUpload(o));
-            }
-        } else if (mAttachment != null) {
-            upload = SelectedContent.createAttachmentUpload(mAttachment);
-        }
-
-        if (!uploads.isEmpty()) {
-            ArrayList<TalkClientMessage> messages = new ArrayList<TalkClientMessage>();
-            if (messageText != null && !messageText.equals("")) {
-                messages.add(getXoClient().composeClientMessage(mContact, messageText, null));
-            }
-            for (TalkClientUpload u : uploads) {
-                messages.add(getXoClient().composeClientMessage(mContact, "", u));
-            }
-            if (isAborted) {
-                for (TalkClientMessage m : messages) {
-                    getXoClient().markMessagesAsAborted(m);
-                }
-            } else {
-                for (TalkClientMessage m : messages) {
-                    new AsyncTask<TalkClientMessage, Void, TalkClientMessage>() {
-                        @Override
-                        protected TalkClientMessage doInBackground(TalkClientMessage... params) {
-
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            return params[0];
-                        }
-
-                        @Override
-                        protected void onPostExecute(TalkClientMessage message) {
-                            getXoClient().sendMessage(message.getMessageTag());
-                        }
-                    }.execute(m);
-                }
-            }
-        } else {
-            if (isAborted) {
-                TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText, upload);
-                getXoClient().markMessagesAsAborted(message);
-            } else {
-                getXoClient().sendMessage(getXoClient().composeClientMessage(mContact, messageText, upload).getMessageTag());
+        if (mAttachments != null) {
+            for (IContentObject attachment : mAttachments) {
+                uploads.add(SelectedContent.createAttachmentUpload(attachment));
             }
         }
+
+        if (isBlocked()) {
+            Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
+            TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText, upload);
+            getXoClient().markMessagesAsAborted(message);
+            clearComposedMessage();
+            return;
+
+        } else if (isEmptyGroup()) {
+            showAlertSendMessageNotPossible();
+            return;
+        }
+        sendComposedMessage(messageText, uploads);
+    }
+
+    private void processMessage() {
+        if (mAttachments != null && !mAttachments.isEmpty()) {
+            if (uploadExceedsTransferLimit(mAttachments)) {
+                String alertTitle = getString(R.string.attachment_over_limit_title);
+                String fileSize = Formatter.formatShortFileSize(getXoActivity(), calculateAttachmentSize(mAttachments));
+                String alertMessage = getString(R.string.attachment_over_limit_upload_question, fileSize);
+                showAlertTransferLimitExceeded(alertTitle, alertMessage);
+                return;
+            }
+        }
+        validateAndSendComposedMessage();
+    }
+
+    private void sendComposedMessage(String messageText, List<TalkClientUpload> uploads) {
+        List<TalkClientMessage> messages = getXoClient().composeClientMessageWithMultipleAttachments(mContact, messageText, uploads);
+        List<String> messageTags = new ArrayList<String>();
+
+        for (TalkClientMessage message : messages) {
+            messageTags.add(message.getMessageTag());
+        }
+        getXoClient().sendMessages(messageTags);
+
         clearComposedMessage();
     }
 
@@ -397,6 +398,17 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                     }
                 }
         );
+    }
+
+    private void showAlertTransferLimitExceeded(String alertTitle, String alertMessage) {
+        XoDialogs.showPositiveNegativeDialog("TransferLimitExceededDialog",
+                alertTitle,
+                alertMessage,
+                getXoActivity(),
+                R.string.attachment_over_limit_confirm,
+                R.string.common_no,
+                new SendOversizeAttachmentCallbackHandler(),
+                null);
     }
 
     @Override
@@ -419,7 +431,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
         if (isComposed()) {
             XoApplication.getXoSoundPool().playThrowSound();
-            sendComposedMessage();
+            processMessage();
         }
     }
 
@@ -461,6 +473,14 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                     clearAttachment();
                     break;
             }
+        }
+    }
+
+    private class SendOversizeAttachmentCallbackHandler implements DialogInterface.OnClickListener {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+
+            validateAndSendComposedMessage();
         }
     }
 }

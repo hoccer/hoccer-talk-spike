@@ -81,6 +81,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             "inactive", "idle", "connecting", "reconnecting", "registering", "login", "syncing", "active"
     };
 
+    private int mUploadLimit = -1;
+
+    private int mDownloadLimit = -1;
+
     /** Return the name of the given state */
     public static final String stateToString(int state) {
         if(state >= 0 && state < STATE_NAMES.length) {
@@ -1213,6 +1217,17 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
+    public void sendMessages(List<String> messageTags) {
+        for (final String messageTag : messageTags) {
+            mExecutor.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    sendMessage(messageTag);
+                }
+            }, 500, TimeUnit.MILLISECONDS);
+        }
+    }
+
     private void requestDelivery(final TalkClientMessage message) {
         if (mState < STATE_ACTIVE) {
             LOG.info("requestSendAllPendingMessages() - cannot perform delivery in INACTIVE state.");
@@ -1689,6 +1704,19 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return composeClientMessage(contact, messageText, null);
     }
 
+    public List<TalkClientMessage> composeClientMessageWithMultipleAttachments(TalkClientContact contact, String messageText, List<TalkClientUpload> uploads) {
+
+        ArrayList<TalkClientMessage> messages = new ArrayList<TalkClientMessage>();
+        if (messageText != null && !messageText.equals("")) {
+            messages.add(composeClientMessage(contact, messageText, null));
+        }
+
+        for (TalkClientUpload upload : uploads) {
+            messages.add(composeClientMessage(contact, "", upload));
+        }
+        return messages;
+    }
+
     public TalkClientMessage composeClientMessage(TalkClientContact contact, String messageText, TalkClientUpload upload) {
         XoClientDatabase db = getDatabase();
         // construct message and delivery objects
@@ -1736,6 +1764,22 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.debug("created message with id " + clientMessage.getClientMessageId() + " and tag " + message.getMessageTag());
 
         return clientMessage;
+    }
+
+    public int getDownloadLimit() {
+        return mDownloadLimit;
+    }
+
+    public void setDownloadLimit(int downloadLimit) {
+        mDownloadLimit = downloadLimit;
+    }
+
+    public int getUploadLimit() {
+        return mUploadLimit;
+    }
+
+    public void setUploadLimit(int uploadLimit) {
+        mUploadLimit = uploadLimit;
     }
 
     /**
@@ -2917,7 +2961,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("updateClientPresence", e);
         }
         if(avatarDownload != null && wantDownload) {
-            mTransferAgent.startOrRestartDownload(avatarDownload);
+            mTransferAgent.startOrRestartDownload(avatarDownload, true);
         }
 
         final TalkClientContact fContact = clientContact;
@@ -3145,7 +3189,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("SQL Error when saving avatar download", e);
         }
         if(avatarDownload != null) {
-            mTransferAgent.startOrRestartDownload(avatarDownload);
+            mTransferAgent.startOrRestartDownload(avatarDownload, true);
         }
     }
 
@@ -3364,8 +3408,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    public void requestDownload(TalkClientDownload download) {
-        mTransferAgent.startOrRestartDownload(download);
+    public void requestDownload(TalkClientDownload download, boolean forcedDownload) {
+        mTransferAgent.startOrRestartDownload(download, forcedDownload);
     }
 
     public void pauseDownload(TalkClientDownload download) {

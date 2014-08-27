@@ -35,17 +35,40 @@
 
 
     <PreferenceCategory
-            android:title="@string/pref_auto_download">
+            android:title="@string/pref_auto_downloads_mobile">
 
-        <CheckBoxPreference
-                android:key="preference_download_auto_mobile"
-                android:title="@string/pref_auto_downloads_mobile"
-                android:defaultValue="false"/>
+        <ListPreference
+                android:key="preference_upload_limit_mobile"
+                android:title="@string/pref_upload_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
 
-        <CheckBoxPreference
-                android:key="preference_download_auto_wifi"
-                android:title="@string/pref_auto_download_wifi"
-                android:defaultValue="true"/>
+        <ListPreference
+                android:key="preference_download_limit_mobile"
+                android:title="@string/pref_download_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_auto_download_wifi">
+
+        <ListPreference
+                android:key="preference_upload_limit_wifi"
+                android:title="@string/pref_upload_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
+
+        <ListPreference
+                android:key="preference_download_limit_wifi"
+                android:title="@string/pref_download_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
 
     </PreferenceCategory>
 
