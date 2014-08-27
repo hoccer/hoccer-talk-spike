@@ -39,12 +39,12 @@ public class QrScannerActivity extends Activity implements IXoPairingListener {
                     String code = sym.getData();
                     if (code.startsWith(XoApplication.getXoClient().getConfiguration().getUrlScheme())) {
                         code = code.replace(XoApplication.getXoClient().getConfiguration().getUrlScheme(), "");
-                        XoApplication.getXoClient().performTokenPairing(code);
+                        XoApplication.getXoClient().performTokenPairing(code, QrScannerActivity.this);
                     } else {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getContext(), getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
+                                Toast.makeText(QrScannerActivity.this, getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
                                 finish();
                             }
                         });
@@ -93,7 +93,6 @@ public class QrScannerActivity extends Activity implements IXoPairingListener {
     protected void onPause() {
         super.onPause();
         releaseCamera();
-        XoApplication.getXoClient().unregisterPairingListener(this);
     }
 
     @Override
@@ -108,11 +107,6 @@ public class QrScannerActivity extends Activity implements IXoPairingListener {
             }
             preview.addView(mPreview);
         }
-        XoApplication.getXoClient().registerPairingListener(this);
-    }
-
-    private Context getContext() {
-        return this;
     }
 
     public static Camera getCameraInstance(){
@@ -138,7 +132,7 @@ public class QrScannerActivity extends Activity implements IXoPairingListener {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getContext(), getResources().getString(R.string.toast_pairing_successful), Toast.LENGTH_LONG).show();
+                Toast.makeText(QrScannerActivity.this, getResources().getString(R.string.toast_pairing_successful), Toast.LENGTH_LONG).show();
                 finish();
             }
         });
@@ -149,7 +143,7 @@ public class QrScannerActivity extends Activity implements IXoPairingListener {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getContext(), getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
+                Toast.makeText(QrScannerActivity.this, getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
                 finish();
             }
         });

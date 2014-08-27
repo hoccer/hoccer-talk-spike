@@ -23,11 +23,13 @@ import com.hoccer.xo.android.view.SquaredImageView;
 import com.hoccer.xo.android.view.SquaredRelativeLayout;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
+import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 
 public class MultiImagePickerActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final Logger LOG = Logger.getLogger(MultiImagePickerActivity.class);
     private ImageAdapter mAdapter;
     private GridView mImageGridView;
     private HashSet<String> mSelectedImages = new HashSet<String>();
@@ -114,11 +116,12 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
             final View itemLayout = mInflater.inflate(R.layout.item_multi_image_picker, viewGroup, false);
+
             final ViewHolder holder = new ViewHolder();
             holder.squaredRelativeLayout = (SquaredRelativeLayout) itemLayout.findViewById(R.id.squared_rl_selected);
             holder.thumbnailImageView = (SquaredImageView) itemLayout.findViewById(R.id.thumbImage);
-
             itemLayout.setTag(holder);
+
             return itemLayout;
         }
 
@@ -137,12 +140,16 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                 holder.squaredRelativeLayout.setVisibility(View.GONE);
             }
 
-            Picasso.with(mContext)
-                    .load(contentUri)
-                    .placeholder(R.drawable.ic_light_content_picture)
-                    .resize(200, 200)
-                    .centerCrop()
-                    .into(holder.thumbnailImageView);
+            holder.thumbnailImageView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.parse("file://" + dataUri), "image/*");
+                    startActivity(intent);
+                    return true;
+                }
+            });
 
             holder.thumbnailImageView.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -158,16 +165,13 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                 }
             });
 
-            holder.thumbnailImageView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    Intent intent = new Intent();
-                    intent.setAction(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse("file://" + dataUri), "image/*");
-                    startActivity(intent);
-                    return true;
-                }
-            });
+            Picasso.with(mContext)
+                    .load(contentUri)
+                    .placeholder(R.drawable.ic_img_placeholder)
+                    .error(R.drawable.ic_img_placeholder_error)
+                    .resize(200, 200)
+                    .centerCrop()
+                    .into(holder.thumbnailImageView);
         }
 
         @Override

@@ -136,7 +136,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     ScheduledFuture<?> mAutoDisconnectFuture;
     ScheduledFuture<?> mKeepAliveFuture;
 
-    List<IXoPairingListener> mPairingListeners = new ArrayList<IXoPairingListener>();
     List<IXoContactListener> mContactListeners = new ArrayList<IXoContactListener>();
     List<IXoMessageListener> mMessageListeners = new ArrayList<IXoMessageListener>();
     List<IXoStateListener> mStateListeners = new ArrayList<IXoStateListener>();
@@ -437,16 +436,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public synchronized void unregisterTokenListener(IXoTokenListener listener) {
         mTokenListeners.remove(listener);
-    }
-
-    public synchronized void registerPairingListener(IXoPairingListener listener) {
-        if (!mPairingListeners.contains(listener)) {
-            mPairingListeners.add(listener);
-        }
-    }
-
-    public synchronized void unregisterPairingListener(IXoPairingListener listener) {
-        mPairingListeners.remove(listener);
     }
 
     public synchronized void registerAlertListener(IXoAlertListener listener) {
@@ -859,23 +848,26 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void performTokenPairing(final String token) {
+        performTokenPairing(token, null);
+    }
+
+    public void performTokenPairing(final String token, final IXoPairingListener listener) {
         resetIdle();
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-
                 try {
-                    if (mServerRpc.pairByToken(token)) {
-                        for (IXoPairingListener listener : mPairingListeners) {
+                    boolean success = mServerRpc.pairByToken(token);
+
+                    if(listener != null) {
+                        if (success) {
                             listener.onTokenPairingSucceeded(token);
-                        }
-                    } else {
-                        for (IXoPairingListener listener : mPairingListeners) {
+                        } else {
                             listener.onTokenPairingFailed(token);
                         }
                     }
                 } catch (Exception e) {
-                    LOG.error("Error while paring using token: " + token, e);
+                    LOG.error("Error while pairing using token: " + token, e);
                 }
             }
         });
