@@ -51,6 +51,12 @@ public class QrCodeGeneratingActivity extends Activity implements IXoContactList
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        XoApplication.getXoClient().unregisterContactListener(this);
+    }
+
     private static Bitmap encodeAsBitmap(String contents, BarcodeFormat format, int img_width, int img_height)
             throws WriterException {
         if (contents == null) {

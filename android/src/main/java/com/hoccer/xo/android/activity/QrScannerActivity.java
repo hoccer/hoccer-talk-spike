@@ -121,6 +121,12 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        XoApplication.getXoClient().unregisterContactListener(this);
+    }
+
     private Context getContext() {
         return this;
     }
