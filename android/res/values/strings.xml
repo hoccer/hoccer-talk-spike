@@ -100,8 +100,8 @@
     <string name="messaging_loading">Loading…</string>
     <string name="messaging_no_messages">No Messages</string>
     <string name="messaging_invited_join">Join group</string>
-    <string name="menu_copy_attachment">Copy</string>
-    <string name="menu_delete_message">Delete</string>
+    <string name="context_menu_copy_message">Copy</string>
+    <string name="context_menu_delete_message">Delete</string>
 
     <!-- Pairing fragment -->
     <string name="pairing_token_info">Give this token to someone:</string>

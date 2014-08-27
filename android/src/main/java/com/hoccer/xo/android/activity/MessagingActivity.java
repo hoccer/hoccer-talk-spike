@@ -130,18 +130,21 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     public void popupItemSelected(MenuItem item, int messageId, String text) {
         switch (item.getItemId()) {
-            case R.id.menu_copy_attachment:
+            case R.id.menu_copy_message:
                 if (mClipboardAttachment != null) {
                     Clipboard clipboard = Clipboard.get(this);
                     clipboard.storeAttachment(mClipboardAttachment);
                     mClipboardAttachment = null;
                 } else {
                     ClipboardManager clipboardText = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("simple text",text);
+                    ClipData clip = ClipData.newPlainText("simple text", text);
                     clipboardText.setPrimaryClip(clip);
                 }
                 break;
-        }
+            case R.id.menu_delete_message:
+                LOG.debug("Delete single message with id: " + String.valueOf(messageId));
+                break;
+            }
     }
 
     public void setActionBarText(TalkClientContact contact) {

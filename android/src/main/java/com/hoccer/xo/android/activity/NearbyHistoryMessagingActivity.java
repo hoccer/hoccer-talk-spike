@@ -14,13 +14,7 @@ import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
 import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.ListView;
-
-import java.sql.SQLException;
 
 public class NearbyHistoryMessagingActivity extends XoActivity {
     private IContentObject mClipboardAttachment;
@@ -81,7 +75,7 @@ public class NearbyHistoryMessagingActivity extends XoActivity {
 
     public void popupItemSelected(MenuItem item, int messageId, String text) {
         switch (item.getItemId()) {
-            case R.id.menu_copy_attachment:
+            case R.id.menu_copy_message:
                 if (mClipboardAttachment != null) {
                     Clipboard clipboard = Clipboard.get(this);
                     clipboard.storeAttachment(mClipboardAttachment);
