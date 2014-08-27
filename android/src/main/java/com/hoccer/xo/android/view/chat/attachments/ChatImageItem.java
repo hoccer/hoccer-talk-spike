@@ -24,7 +24,7 @@ import com.squareup.picasso.Transformation;
 public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChangeListener {
 
     private static final double WIDTH_SCALE_FACTOR = 0.7;
-    private static final double IMAGE_SCALE_FACTOR = 1;
+    private static final double IMAGE_SCALE_FACTOR = 0.5;
 
     private Context mContext;
     private int mImageWidth;
