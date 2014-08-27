@@ -7,18 +7,23 @@ import android.provider.MediaStore;
 
 public class UriUtils {
 
-    public static String getFilePathByContentUri(Context context, Uri contentUri) {
+    public static String getFilePathByContentUri(Context context, Uri contentUri) throws Exception {
 
         String[] projection = {
                 MediaStore.Images.Media.DATA,
         };
 
         Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
-        cursor.moveToFirst();
 
-        int dataIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-        String filePath = cursor.getString(dataIndex);
+        if (cursor != null) {
+            cursor.moveToFirst();
 
-        return filePath;
+            int dataIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            String filePath = cursor.getString(dataIndex);
+
+            return filePath;
+        } else {
+            throw new Exception("Couldn't find cursor for content uri: " + contentUri);
+        }
     }
 }
