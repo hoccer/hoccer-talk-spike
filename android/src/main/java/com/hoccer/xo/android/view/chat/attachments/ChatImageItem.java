@@ -45,6 +45,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     @Override
     public void detachView() {
         mImageView.removeOnLayoutChangeListener(this);
+        Picasso.with(mContext).cancelRequest(mImageView);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
 
         LOG.error("Width: " + mImageView.getWidth() + " Height: " + mImageView.getHeight());
         Picasso.with(mContext).load(mContentObject.getContentDataUrl())
-                .resize(mImageView.getWidth(), mImageView.getHeight())
+                .resize(mImageView.getWidth() / 2, mImageView.getHeight() / 2)
                 .centerInside()
                 .transform(new BubbleTransformation(mMask))
                 .into(mImageView);
@@ -132,6 +133,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
             Canvas c = new Canvas(result);
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+//            c.scale(source.getWidth(), source.getHeight());
             c.drawBitmap(source, 0, 0, null);
             c.drawBitmap(mask, 0, 0, paint);
 
@@ -144,7 +146,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
 
         @Override
         public String key() {
-            return "square()";
+            return String.valueOf(mask);
         }
     }
 
