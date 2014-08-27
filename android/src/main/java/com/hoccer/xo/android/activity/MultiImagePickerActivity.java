@@ -19,6 +19,8 @@ import android.widget.CursorAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import com.hoccer.xo.android.util.DisplayUtils;
+import com.hoccer.xo.android.view.SquaredImageView;
+import com.hoccer.xo.android.view.SquaredRelativeLayout;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 
@@ -104,8 +106,8 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
         }
 
         class ViewHolder {
-            ImageView imageview;
-            ImageView selectedImage;
+            SquaredRelativeLayout squaredRelativeLayout;
+            ImageView thumbnailImageView;
             int id;
         }
 
@@ -113,8 +115,8 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
         public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
             final View itemLayout = mInflater.inflate(R.layout.item_multi_image_picker, viewGroup, false);
             final ViewHolder holder = new ViewHolder();
-            holder.imageview = (ImageView) itemLayout.findViewById(R.id.thumbImage);
-            holder.selectedImage = (ImageView) itemLayout.findViewById(R.id.itemCheckBox);
+            holder.squaredRelativeLayout = (SquaredRelativeLayout) itemLayout.findViewById(R.id.squared_rl_selected);
+            holder.thumbnailImageView = (SquaredImageView) itemLayout.findViewById(R.id.thumbImage);
 
             itemLayout.setTag(holder);
             return itemLayout;
@@ -128,13 +130,11 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
             final String dataUri = cursor.getString(ImageQuery.DATA);
 
             if (mSelectedImages.contains(contentUri.toString())) {
-                holder.imageview.setSelected(true);
-                holder.imageview.setAlpha(200);
-                holder.selectedImage.setVisibility(View.VISIBLE);
+                holder.squaredRelativeLayout.setSelected(true);
+                holder.squaredRelativeLayout.setVisibility(View.VISIBLE);
             } else {
-                holder.imageview.setSelected(false);
-                holder.imageview.setAlpha(255);
-                holder.selectedImage.setVisibility(View.GONE);
+                holder.squaredRelativeLayout.setSelected(false);
+                holder.squaredRelativeLayout.setVisibility(View.GONE);
             }
 
             Picasso.with(mContext)
@@ -142,25 +142,23 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                     .placeholder(R.drawable.ic_light_content_picture)
                     .resize(200, 200)
                     .centerCrop()
-                    .into(holder.imageview);
+                    .into(holder.thumbnailImageView);
 
-            holder.imageview.setOnClickListener(new View.OnClickListener() {
+            holder.thumbnailImageView.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    if (!holder.imageview.isSelected()) {
-                        holder.imageview.setSelected(true);
+                    if (!holder.squaredRelativeLayout.isSelected()) {
+                        holder.squaredRelativeLayout.setSelected(true);
+                        holder.squaredRelativeLayout.setVisibility(View.VISIBLE);
                         mSelectedImages.add(contentUri.toString());
-                        holder.imageview.setAlpha(200);
-                        holder.selectedImage.setVisibility(View.VISIBLE);
                     } else {
-                        holder.imageview.setSelected(false);
+                        holder.squaredRelativeLayout.setSelected(false);
+                        holder.squaredRelativeLayout.setVisibility(View.GONE);
                         mSelectedImages.remove(contentUri.toString());
-                        holder.imageview.setAlpha(255);
-                        holder.selectedImage.setVisibility(View.GONE);
                     }
                 }
             });
 
-            holder.imageview.setOnLongClickListener(new View.OnLongClickListener() {
+            holder.thumbnailImageView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     Intent intent = new Intent();

@@ -13,7 +13,6 @@
     <color name="xo_app_main_color">#4dbfac</color>
     <color name="xo_presence">#ff0000</color>
     <color name="xo_group_members_divder">#ffbfbfbf</color>
-    <color name="xo_app_main_color">#4dbfac</color>
     <color name="xo_message_failed_color">#ff0000</color>
     <color name="xo_content_description_text">#7e8498</color>
     <color name="xo_tab_color">#ffffff</color>
@@ -22,5 +21,6 @@
     <color name="xo_menu_text">#ffffff</color>
     <color name="xo_media_player_secondary_text">#aaaaaaaa</color>
     <color name="xo_app_attachment_incoming_color">#004ce5</color>
-    <color name="xo_app_attachment_outgoing_color">#004ce5</color>
+    <color name="xo_app_attachment_outgoing_color">#77000000</color>
+    <color name="xo_black_transparency_50_percent">#77000000</color>
 </resources>
