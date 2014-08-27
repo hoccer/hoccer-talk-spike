@@ -2,15 +2,15 @@ package com.hoccer.xo.android.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
-public class SquaredImageView extends ImageView {
+public class SquaredRelativeLayout extends RelativeLayout {
 
-    public SquaredImageView(Context context) {
+    public SquaredRelativeLayout(Context context) {
         super(context);
     }
 
-    public SquaredImageView(Context context, AttributeSet attrs) {
+    public SquaredRelativeLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
