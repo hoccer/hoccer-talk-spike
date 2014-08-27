@@ -1,10 +1,7 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
@@ -14,6 +11,7 @@ import android.os.Handler;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
@@ -48,15 +46,7 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                                builder.setMessage(getBaseContext().getResources().getString(R.string.pairing_incorrect_code))
-                                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                mPreview.restartPreview();
-                                            }
-                                        });
-                                AlertDialog alert = builder.create();
-                                alert.show();
+                                Toast.makeText(getContext(), getResources().getString(R.string.pairing_incorrect_code), Toast.LENGTH_LONG).show();
                             }
                         });
                     }
@@ -121,12 +111,6 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        XoApplication.getXoClient().unregisterContactListener(this);
-    }
-
     private Context getContext() {
         return this;
     }
@@ -151,34 +135,23 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
 
     @Override
     public void onContactAdded(TalkClientContact contact) {
-
+        // do nothing
     }
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-
+        // do nothing
     }
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
         if (!isFinishing() && mPairedContact == contact.getClientContactId()) {
             final TalkClientContact newContact = contact;
-            final Context context = this;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setMessage(getResources().getString(R.string.paired_with) + " " + newContact.getName())
-                            .setCancelable(false)
-                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    Intent contactList = new Intent(context, ContactsActivity.class);
-                                    contactList.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                    context.startActivity(contactList);
-                                }
-                            });
-                    AlertDialog alert = builder.create();
-                    alert.show();
+                    Toast.makeText(getContext(), getResources().getString(R.string.paired_with) + " " + newContact.getName(), Toast.LENGTH_LONG).show();
+                    mPreview.restartPreview();
                 }
             });
         }
@@ -191,12 +164,12 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-
+        // do nothing
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-
+        // do nothing
     }
 
     public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
@@ -215,18 +188,17 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
             mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         }
 
+        @Override
         public void surfaceCreated(SurfaceHolder holder) {
-//            try {
-//                mCamera.setPreviewDisplay(holder);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            // do nothing
         }
 
+        @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-
+            // do nothing
         }
 
+        @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             if (mHolder.getSurface() == null) {
                 return;
@@ -262,6 +234,4 @@ public class QrScannerActivity extends Activity implements IXoContactListener {
             }
         }
     }
-
-
 }
