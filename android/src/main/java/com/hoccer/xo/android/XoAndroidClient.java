@@ -8,18 +8,20 @@ import com.hoccer.talk.client.XoClient;
 
 import org.eclipse.jetty.websocket.WebSocketClient;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 import java.net.URI;
 
-/**
- * Created by jacob on 10.02.14.
- */
 public class XoAndroidClient extends XoClient {
+
+
 
     /**
      * Create a Hoccer Talk client using the given client database
      */
-    public XoAndroidClient(IXoClientHost host, IXoClientConfiguration configuration) {
-        super(host, configuration);
+    public XoAndroidClient(IXoClientHost client_host, XoAndroidClientConfiguration configuration) {
+        super(client_host, configuration);
     }
 
     @Override
@@ -38,5 +40,4 @@ public class XoAndroidClient extends XoClient {
             mConnection.setSendBinaryMessages(true);
         }
     }
-
 }

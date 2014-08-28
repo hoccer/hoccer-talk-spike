@@ -9,12 +9,21 @@
       android:layout_height="match_parent"
       android:scaleType="fitCenter"/>
 
-  <ImageView
-      android:id="@+id/itemCheckBox"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignRight="@+id/thumbImage"
-      android:layout_alignTop="@+id/thumbImage"
-      android:src="@drawable/ic_light_navigation_accept"/>
+  <com.hoccer.xo.android.view.SquaredRelativeLayout
+      android:id="@+id/squared_rl_selected"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:background="@color/xo_black_transparency_50_percent">
+
+    <ImageView
+        android:id="@+id/itemCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_img_select"
+        android:padding="10dp"/>
+  </com.hoccer.xo.android.view.SquaredRelativeLayout>
+
 
 </RelativeLayout>

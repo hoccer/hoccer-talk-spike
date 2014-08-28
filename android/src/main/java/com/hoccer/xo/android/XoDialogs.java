@@ -25,6 +25,39 @@ public class XoDialogs {
 
     private static final Logger LOG = Logger.getLogger(XoDialogs.class);
 
+    public static void showPositiveNegativeDialog(final String tag, final int titleId, final int messageId, final Activity activity, final int positiveButtonTitleId, final int negativeButtonTitleId, final DialogInterface.OnClickListener positiveListener, final DialogInterface.OnClickListener negativeListener) {
+        String title = activity.getString(titleId);
+        String message = activity.getString(messageId);
+        showPositiveNegativeDialog(tag, title, message, activity, positiveButtonTitleId, negativeButtonTitleId, positiveListener, negativeListener);
+    }
+
+    public static void showPositiveNegativeDialog(final String tag, final String title, final String message, final Activity activity, final int positiveButtonTitleId, final int negativeButtonTitleId, final DialogInterface.OnClickListener positiveListener, final DialogInterface.OnClickListener negativeListener) {
+        DialogFragment dialogFragment = new DialogFragment() {
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                LOG.debug("Creating dialog: " + tag);
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setTitle(title);
+                builder.setMessage(message);
+                builder.setPositiveButton(positiveButtonTitleId, positiveListener);
+
+                if(negativeListener != null) {
+                    builder.setNegativeButton(negativeButtonTitleId, negativeListener);
+                } else {
+                    builder.setNegativeButton(negativeButtonTitleId, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do nothing
+                        }
+                    });
+                }
+
+                return builder.create();
+            }
+        };
+        dialogFragment.show(activity.getFragmentManager(), tag);
+    }
+
     public static void showYesNoDialog(final String tag, final int titleId, final int messageId, final Activity activity, final DialogInterface.OnClickListener yesListener) {
         showYesNoDialog(tag, titleId, messageId, activity, yesListener, null);
     }

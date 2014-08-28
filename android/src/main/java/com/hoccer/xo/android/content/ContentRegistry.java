@@ -10,11 +10,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.activity.MapsLocationActivity;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.contentselectors.*;
+import com.hoccer.xo.android.fragment.CompositionFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -87,6 +86,7 @@ public class ContentRegistry {
         mAvatarSelector = new ImageSelector(mContext);
 
         initializeSelector(new ImageSelector(mContext));
+        initializeSelector(new MultiImageSelector(mContext));
         initializeSelector(new VideoSelector(mContext));
         initializeSelector(new MusicSelector(mContext));
         initializeSelector(new ContactSelector(mContext));
@@ -264,7 +264,11 @@ public class ContentRegistry {
                     XoActivity xoActivity = (XoActivity) fragment.getActivity();
                     xoActivity.clipBoardItemSelected(clipboardSelector.selectObjectFromClipboard(xoActivity, intent));
                 } else {
-                    startExternalActivityForResult(fragment, intent, requestCode);
+                    if (selector instanceof MultiImageSelector) {
+                        startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGES_ATTACHMENT);
+                    } else {
+                        startExternalActivityForResult(fragment, intent, requestCode);
+                    }
                 }
             }
         });
@@ -293,6 +297,14 @@ public class ContentRegistry {
         IContentSelector selector = selection.getSelector();
         if (selector != null) {
             return selector.createObjectFromSelectionResult(selection.getActivity(), intent);
+        }
+        return null;
+    }
+
+    public ArrayList<IContentObject> createSelectedImagesAttachment(ContentSelection selection, Intent intent) {
+        MultiImageSelector selector = (MultiImageSelector) selection.getSelector();
+        if(selector != null) {
+            return selector.createObjectsFromSelectionResult(selection.getActivity(), intent);
         }
         return null;
     }

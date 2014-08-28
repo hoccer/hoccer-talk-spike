@@ -1,36 +1,7 @@
 package com.hoccer.xo.android.service;
 
 import android.app.*;
-
-import com.google.android.gcm.GCMRegistrar;
-
-import com.hoccer.talk.android.push.TalkPushService;
-import com.hoccer.talk.client.IXoStateListener;
-import com.hoccer.talk.client.IXoTokenListener;
-import com.hoccer.talk.client.IXoTransferListenerOld;
-import com.hoccer.talk.client.IXoUnseenListener;
-import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoConfiguration;
-import com.hoccer.xo.android.activity.ContactsActivity;
-import com.hoccer.xo.android.activity.MessagingActivity;
-import com.hoccer.xo.android.sms.SmsReceiver;
-import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
-
-import org.apache.log4j.Logger;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
@@ -41,6 +12,17 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import com.google.android.gcm.GCMRegistrar;
+import com.hoccer.talk.android.push.TalkPushService;
+import com.hoccer.talk.client.*;
+import com.hoccer.talk.client.model.*;
+import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.activity.ContactsActivity;
+import com.hoccer.xo.android.activity.MessagingActivity;
+import com.hoccer.xo.android.sms.SmsReceiver;
+import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 import java.net.URI;
 import java.sql.SQLException;
@@ -52,9 +34,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Android service for Hoccer Talk
- *
+ * <p/>
  * This service wraps a Talk client instance for use by Android applications.
- *
+ * <p/>
  * It should be started with startService() and kept alive using keepAlive() RPC calls
  * for as long as it is needed. If not called regularly the service will stop itself.
  */
@@ -62,12 +44,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class XoClientService extends Service {
 
-    /** Delay after which new activities send their first keepalive (seconds) */
-    public static final int SERVICE_KEEPALIVE_PING_DELAY    = 60;
-    /** Interval at which activities send keepalives to the client service (seconds) */
+    /**
+     * Delay after which new activities send their first keepalive (seconds)
+     */
+    public static final int SERVICE_KEEPALIVE_PING_DELAY = 60;
+    /**
+     * Interval at which activities send keepalives to the client service (seconds)
+     */
     public static final int SERVICE_KEEPALIVE_PING_INTERVAL = 600;
-    /** Timeout after which the client service terminates automatically (seconds) */
-    public static final int SERVICE_KEEPALIVE_TIMEOUT       = 1800;
+    /**
+     * Timeout after which the client service terminates automatically (seconds)
+     */
+    public static final int SERVICE_KEEPALIVE_TIMEOUT = 1800;
 
     private static final Logger LOG = Logger.getLogger(XoClientService.class);
 
@@ -78,45 +66,73 @@ public class XoClientService extends Service {
     private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
     private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
 
-    /** Executor for ourselves and the client */
+    private static final String sPreferenceUploadLimitMobileKey = "preference_upload_limit_mobile";
+    private static final String sPreferenceUploadLimitWifiKey = "preference_upload_limit_wifi";
+    private static final String sPreferenceDownloadLimitMobileKey = "preference_download_limit_mobile";
+    private static final String sPreferenceDownloadLimitWifiKey = "preference_download_limit_wifi";
+
+//    private int mUploadLimit = -1;
+//    private int mDownloadLimit = -1;
+
+    /**
+     * Executor for ourselves and the client
+     */
     ScheduledExecutorService mExecutor;
 
-    /** Hoccer client that we serve */
+    /**
+     * Hoccer client that we serve
+     */
     XoClient mClient;
 
-    /** Reference to latest auto-shutdown future */
+    /**
+     * Reference to latest auto-shutdown future
+     */
     ScheduledFuture<?> mShutdownFuture;
 
-    /** All service connections */
+    /**
+     * All service connections
+     */
     ArrayList<Connection> mConnections;
 
-    /** Preferences containing service configuration */
+    /**
+     * Preferences containing service configuration
+     */
     SharedPreferences mPreferences;
 
-    /** Listener for configuration changes */
+    /**
+     * Listener for configuration changes
+     */
     SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener;
 
-    /** Connectivity manager for monitoring */
+    /**
+     * Connectivity manager for monitoring
+     */
     ConnectivityManager mConnectivityManager;
 
-    /** Our connectivity change broadcast receiver */
+    /**
+     * Our connectivity change broadcast receiver
+     */
     ConnectivityReceiver mConnectivityReceiver;
 
-    /** Previous state of connectivity */
-    boolean mPreviousConnectionState = false;
+    /**
+     * Previous state of connectivity
+     */
+    boolean mCurrentConnectionState = false;
 
-    /** Type of previous connection */
-    int mPreviousConnectionType = -1;
+    /**
+     * Type of previous connection
+     */
+    int mCurrentConnectionType = -1;
 
-    /** Notification manager */
+    /**
+     * Notification manager
+     */
     NotificationManager mNotificationManager;
 
-    /** Time of last notification (for cancellation backoff) */
+    /**
+     * Time of last notification (for cancellation backoff)
+     */
     long mNotificationTimestamp;
-
-    boolean mAutoDownloadMobile = false;
-
-    boolean mAutoDownloadWifi = true;
 
     ClientListener mClientListener;
 
@@ -150,15 +166,17 @@ public class XoClientService extends Service {
                 if (key.equals("preference_service_uri")) {
                     configureServiceUri();
                 }
-                if (key.equals("preference_download_auto_mobile")
-                        || key.equals("preference_download_auto_wifi")) {
-                    configureAutoDownloads();
+                if (key.equals(sPreferenceDownloadLimitMobileKey)
+                        || key.equals(sPreferenceDownloadLimitWifiKey)
+                        || key.equals(sPreferenceUploadLimitMobileKey)
+                        || key.equals(sPreferenceUploadLimitWifiKey)) {
+                    configureAutoTransfers();
                 }
             }
         };
         mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesListener);
 
-        configureAutoDownloads();
+        configureAutoTransfers();
 
         doVerifyGcm();
 
@@ -247,19 +265,49 @@ public class XoClientService extends Service {
         mClient.setServiceUri(uri);
     }
 
-    private void configureAutoDownloads() {
-        mAutoDownloadMobile = mPreferences.getBoolean("preference_download_auto_mobile", false);
-        mAutoDownloadWifi = mPreferences.getBoolean("preference_download_auto_wifi", true);
+    private void configureAutoTransfers() {
+        switch (mCurrentConnectionType) {
+            case ConnectivityManager.TYPE_MOBILE:
+            case ConnectivityManager.TYPE_BLUETOOTH:
+            case ConnectivityManager.TYPE_WIMAX:
+                loadPreferences(mPreferences, sPreferenceUploadLimitMobileKey);
+                loadPreferences(mPreferences, sPreferenceDownloadLimitMobileKey);
+                break;
+            case ConnectivityManager.TYPE_ETHERNET:
+            case ConnectivityManager.TYPE_WIFI:
+                loadPreferences(mPreferences, sPreferenceUploadLimitWifiKey);
+                loadPreferences(mPreferences, sPreferenceDownloadLimitWifiKey);
+                break;
+        }
+    }
+
+    private void loadPreferences(SharedPreferences preferences, String key) {
+        if (key != null && key.equals(sPreferenceUploadLimitMobileKey)) {
+            String uploadLimitString = preferences.getString(key, "-1");
+            mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
+        }
+        if (key != null && key.equals(sPreferenceDownloadLimitMobileKey)) {
+            String downloadLimitString = preferences.getString(key, "-1");
+            mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
+        }
+        if (key != null && key.equals(sPreferenceUploadLimitWifiKey)) {
+            String uploadLimitString = preferences.getString(key, "-1");
+            mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
+        }
+        if (key != null && key.equals(sPreferenceDownloadLimitWifiKey)) {
+            String downloadLimitString = preferences.getString(key, "-1");
+            mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
+        }
     }
 
     private void wakeClient() {
-        if (mPreviousConnectionState) {
+        if (mCurrentConnectionState) {
             mClient.wake();
         }
     }
 
     private void wakeClientInBackground() {
-        if (mPreviousConnectionState) {
+        if (mCurrentConnectionState) {
             mClient.wakeInBackground();
         }
     }
@@ -391,8 +439,8 @@ public class XoClientService extends Service {
         if (activeNetwork == null) {
             LOG.debug("connectivity change: no connectivity");
             mClient.deactivate();
-            mPreviousConnectionState = false;
-            mPreviousConnectionType = -1;
+            mCurrentConnectionState = false;
+            mCurrentConnectionType = -1;
         } else {
             LOG.debug("connectivity change:"
                     + " type " + activeNetwork.getTypeName()
@@ -414,13 +462,16 @@ public class XoClientService extends Service {
             }
 
             // TODO: is this check too early ? Last if-statement above deactivates client when network dead.
-            mPreviousConnectionState = activeNetwork.isConnected();
-            mPreviousConnectionType = activeNetwork.getType();
+            mCurrentConnectionState = activeNetwork.isConnected();
+            mCurrentConnectionType = activeNetwork.getType();
+
+            // reset transfer limits on network type change.
+            configureAutoTransfers();
         }
     }
 
     private void updateInvitateNotification(List<TalkClientSmsToken> unconfirmedTokens,
-            boolean notify) {
+                                            boolean notify) {
         LOG.debug("updateInvitateNotification()");
         XoClientDatabase db = mClient.getDatabase();
 
@@ -472,7 +523,7 @@ public class XoClientService extends Service {
 
         // finish up
         Notification notification = null;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             notification = builder.build();
         } else {
             notification = builder.getNotification();
@@ -484,7 +535,7 @@ public class XoClientService extends Service {
     }
 
     private void updateMessageNotification(List<TalkClientMessage> allUnseenMessages,
-            boolean notify) {
+                                           boolean notify) {
         LOG.debug("updateMessageNotification()");
         XoClientDatabase db = mClient.getDatabase();
 
@@ -526,7 +577,7 @@ public class XoClientService extends Service {
                         unseenMessages.add(message);
                     }
                 }
-            }  else {
+            } else {
                 LOG.error("message without contact in unseen messages");
             }
         }
@@ -701,11 +752,11 @@ public class XoClientService extends Service {
                 return;
             }
             if (services.get(0).topActivity.getShortClassName().equalsIgnoreCase(MessagingActivity.class.getName())) {
-                    m_clientIdReceiver.setContactId(unseenMessages.get(0).getConversationContact().getClientContactId());
-                    m_clientIdReceiver.setNotificationData(unseenMessages, notify);
-                    Intent intent = new Intent();
-                    intent.setAction(IntentHelper.ACTION_CHECK_ID_IN_CONVERSATION);
-                    sendBroadcast(intent);
+                m_clientIdReceiver.setContactId(unseenMessages.get(0).getConversationContact().getClientContactId());
+                m_clientIdReceiver.setNotificationData(unseenMessages, notify);
+                Intent intent = new Intent();
+                intent.setAction(IntentHelper.ACTION_CHECK_ID_IN_CONVERSATION);
+                sendBroadcast(intent);
             } else {
                 updateMessageNotification(unseenMessages, notify);
             }
@@ -725,25 +776,7 @@ public class XoClientService extends Service {
         public void onDownloadRegistered(TalkClientDownload download) {
             LOG.debug("onDownloadRegistered(" + download.getClientDownloadId() + ")");
             if (download.isAttachment()) {
-                boolean auto = false;
-                switch (mPreviousConnectionType) {
-                    case ConnectivityManager.TYPE_MOBILE:
-                    case ConnectivityManager.TYPE_BLUETOOTH:
-                    case ConnectivityManager.TYPE_WIMAX:
-                        if (mAutoDownloadMobile) {
-                            auto = true;
-                        }
-                        break;
-                    case ConnectivityManager.TYPE_ETHERNET:
-                    case ConnectivityManager.TYPE_WIFI:
-                        if (mAutoDownloadWifi) {
-                            auto = true;
-                        }
-                        break;
-                }
-                if (auto) {
-                    mClient.requestDownload(download);
-                }
+                mClient.requestDownload(download, false);
             }
         }
 

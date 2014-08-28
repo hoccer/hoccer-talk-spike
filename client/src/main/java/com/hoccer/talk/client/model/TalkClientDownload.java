@@ -52,7 +52,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         NEW {
             @Override
             public Set<State> possibleFollowUps() {
-                return EnumSet.of(DOWNLOADING);
+                return EnumSet.of(DOWNLOADING, ON_HOLD);
             }
         },
         DOWNLOADING {
@@ -85,7 +85,14 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 return EnumSet.of(COMPLETE, FAILED);
             }
         },
-        COMPLETE, FAILED;
+        COMPLETE,
+        FAILED,
+        ON_HOLD {
+            @Override
+            public Set<State> possibleFollowUps() {
+                return EnumSet.of(DOWNLOADING);
+            }
+        };
 
         public Set<State> possibleFollowUps() {
             return EnumSet.noneOf(State.class);
@@ -159,6 +166,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     private HttpGet mDownloadRequest = null;
 
+    /** Only for display purposes, the real content length will be retrieved from server since after encryption this value will differ */
+    @DatabaseField
+    private int transmittedContentLength = -1;
+
     public TalkClientDownload() {
         super(Direction.DOWNLOAD);
         this.state = State.INITIALIZING;
@@ -192,6 +203,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.contentType = attachment.getMimeType();
         this.mediaType = attachment.getMediaType();
         this.aspectRatio = attachment.getAspectRatio();
+        this.transmittedContentLength = attachment.getContentSizeAsInt();
         this.downloadUrl = attachment.getUrl();
         this.downloadFile = id;
         this.decryptedFile = UUID.randomUUID().toString();
@@ -221,6 +233,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     public void cancel(XoTransferAgent agent) {
         mTransferAgent = agent;
         switchState(State.PAUSED, "cancelling");
+    }
+
+    @Override
+    public void hold(XoTransferAgent agent) {
+        mTransferAgent = agent;
+        switchState(State.ON_HOLD, "put on hold");
     }
 
     /**********************************************************************************************/
@@ -266,6 +284,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             case FAILED:
                 doFailedAction();
                 break;
+            case ON_HOLD:
+                doOnHoldAction();
+                break;
         }
     }
 
@@ -293,6 +314,16 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             // TODO: try/catch here? What happens if a listener call produces exception?
             listener.onStateChanged(state);
         }
+    }
+
+    private void doOnHoldAction() {
+        if (mDownloadRequest != null) {
+            mDownloadRequest.abort();
+            mDownloadRequest = null;
+            LOG.debug("aborted current Download request. Download can still resume.");
+        }
+        mTransferAgent.deactivateDownload(this);
+        mTransferAgent.onDownloadStateChanged(this);
     }
 
     private void doDownloadingAction() {
@@ -785,6 +816,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 return ContentState.DOWNLOAD_FAILED;
             case COMPLETE:
                 return ContentState.DOWNLOAD_COMPLETE;
+            case ON_HOLD:
+                return ContentState.DOWNLOAD_ON_HOLD;
             default:
                 throw new RuntimeException("Unknown download state '" + state + "'");
         }
@@ -907,6 +940,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     public void setContentHmac(String hmac) {
         this.contentHmac = hmac;
+    }
+
+    public int getTransmittedContentLength() {
+        return transmittedContentLength;
     }
 
     @Override

@@ -21,32 +21,22 @@ public class ImageFileContentObjectCreator implements IContentCreator {
         Uri contentUri = intent.getData();
 
         // Retrieve image metadata from content database
-        String[] columns = {
+        String[] projection = {
                 MediaStore.Images.Media.MIME_TYPE,
                 MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.SIZE,
-                // TODO: since this fields are not available below API Level 16 we will not use them for now. Comment all following lines in when fully available.
-                // MediaStore.Images.Media.WIDTH,
-                // MediaStore.Images.Media.HEIGHT,
                 MediaStore.Images.Media.TITLE,
         };
 
-        Cursor cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
+        Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
         cursor.moveToFirst();
 
-        int mimeTypeIndex = cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE);
-        int dataIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-        int sizeIndex = cursor.getColumnIndex(MediaStore.Images.Media.SIZE);
-        // int widthIndex = cursor.getColumnIndex(MediaStore.Images.Media.WIDTH);
-        // int heightIndex = cursor.getColumnIndex(MediaStore.Images.Media.HEIGHT);
-        int fileNameIndex = cursor.getColumnIndex(MediaStore.Images.Media.TITLE);
-
-        String mimeType = cursor.getString(mimeTypeIndex);
-        String filePath = cursor.getString(dataIndex);
-        String fileName = cursor.getString(fileNameIndex);
-        int fileSize = cursor.getInt(sizeIndex);
-        int fileWidth = 0; // cursor.getInt(widthIndex);
-        int fileHeight = 0; // cursor.getInt(heightIndex);
+        String mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
+        String filePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+        String fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.TITLE));
+        int fileSize = cursor.getInt(cursor.getColumnIndex(MediaStore.Images.Media.SIZE));
+        int fileWidth = 0;
+        int fileHeight = 0;
         cursor.close();
 
         if (filePath == null) {

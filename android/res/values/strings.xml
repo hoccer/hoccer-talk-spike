@@ -3,7 +3,7 @@
 
     <string name="app_name">Hoccer XO</string>
 
-    <string name="demo_message">Lorem ipsum dolor...</string>
+    <string name="demo_message">Lorem ipsum dolor…</string>
 
     <!-- common strings -->
     <string name="common_ok">OK</string>
@@ -90,8 +90,14 @@
     <string name="dialog_empty_group_title">Can Not Send Message</string>
     <string name="dialog_empty_group_message">You can not send a message to this group because there are no members except you. Please invite friends to this group.</string>
 
+    <string name="attachment_over_limit_title">Really send Message?</string>
+    <string name="attachment_over_limit_upload_question">Attachment size is %1$s. Do you really want to send this message?</string>
+    <string name="attachment_over_limit_confirm">Send</string>
+    <string name="attachment_on_hold_upload_question">Upload %1$s?</string>
+    <string name="attachment_on_hold_download_question">Download %1$s?</string>
+
     <!-- Messaging fragment -->
-    <string name="messaging_loading">Loading...</string>
+    <string name="messaging_loading">Loading…</string>
     <string name="messaging_no_messages">No Messages</string>
     <string name="messaging_invited_join">Join group</string>
     <string name="menu_copy_attachment">Copy</string>
@@ -105,14 +111,14 @@
     <string name="pairing_qr_info">You can also pair using QR codes:</string>
     <string name="pairing_qr_show">Show QR code</string>
     <string name="pairing_qr_scan">Scan QR code</string>
-    <string name="pairing_token_generating">Generating...</string>
+    <string name="pairing_token_generating">Generating…</string>
     <string name="pairing_token_send_sms">Send via SMS</string>
     <string name="pairing_token_send_email">Send via e-mail</string>
     <string name="pairing_success">Pairing succeeded</string>
     <string name="dialog_pairing_failed_title">Pairing failed</string>
     <string name="dialog_pairing_failed_message">The code you have entered is invalid.</string>
-	<string name="paired_with">You successfully paired with </string>
-    <string name="pairing_incorrect_code">Incorrect code, please try again.</string>
+	<string name="toast_pairing_successful">You have successfully paired.</string>
+    <string name="toast_pairing_failed">Incorrect code, please try again.</string>
     <string name="pairing_scanner">QR scanner</string>
     <string name="pairing_generator">QR identifier</string>
 
@@ -160,10 +166,11 @@
     <string name="message_text">Your message text</string>
 
     <!-- Content -->
-    <string name="content_downloading">Downloading...</string>
-    <string name="content_uploading">Uploading...</string>
+    <string name="content_downloading">Downloading…</string>
+    <string name="content_uploading">Uploading…</string>
 
-    <string name="content_images">Photo</string>
+    <string name="content_images">Image</string>
+    <string name="content_multi_images">Multiple images</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Take Photo</string>
     <string name="content_music">Music</string>
@@ -258,10 +265,10 @@
     <string name="profile_name_text">Name</string>
     <string name="profile_key_text">Key</string>
 
-    <string name="transfer_state_encrypting">Encrypting...</string>
-    <string name="transfer_state_decrypting">Decrypting...</string>
-    <string name="transfer_state_downloading">Downloading...</string>
-    <string name="transfer_state_uploading">Uploading...</string>
+    <string name="transfer_state_encrypting">Encrypting…</string>
+    <string name="transfer_state_decrypting">Decrypting…</string>
+    <string name="transfer_state_downloading">Downloading…</string>
+    <string name="transfer_state_uploading">Uploading…</string>
     <string name="transfer_state_pause">Pause</string>
     <string name="dialog_attachment_choose_reselect_option">Choose another Attachment</string>
     <string name="dialog_attachment_choose_discard_option">Remove attachment</string>
@@ -300,9 +307,12 @@
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>
     <string name="preference_keysize_title">RSA Key Size</string>
     <string name="category">Category</string>
-    <string name="pref_auto_downloads_mobile">On mobile networks</string>
-    <string name="pref_auto_download_wifi">On wireless networks</string>
-    <string name="pref_auto_download">Automatic downloads</string>
+
+    <string name="pref_auto_downloads_mobile">Cellular Attachment Transfer</string>
+    <string name="pref_auto_download_wifi">WI-FI Attachment Transfer</string>
+    <string name="pref_upload_limit">Auto Upload limit</string>
+    <string name="pref_download_limit">Auto Download limit</string>
+
     <string name="pref_confirm_messages_seen">Confirm seen messages</string>
     <string name="pref_credentials">Credentials</string>
     <string name="pref_export_credentials">Export credentials</string>
@@ -312,7 +322,10 @@
     <string name="pref_encryption">Encryption</string>
     <string name="pref_crash_report">Send report after app crashed</string>
     <string name="pref_crash_report_switcher">Enable reporting</string>
-    <string name="pref_please_wait">Please wait...</string>
+    <string name="pref_please_wait">Please wait…</string>
+    <string name="pref_up_down_limit">Up/Download Limit</string>
+    <string name="up_down_unlimited_option">unlimited</string>
+    <string name="up_down_manual_option">manual transfer</string>
     <string name="profile_compare_key_description">For extra security compare this fingerprint with
         the fingerprint seen by your friends in your contact card.
     </string>
@@ -347,7 +360,7 @@
 
     <string name="preference_database_title">Local Database</string>
     <string name="placeholder_conversations_text">Invite friends to chat with!</string>
-    <string name="placeholder_nearby_text">Waiting for others %1$s...</string>
+    <string name="placeholder_nearby_text">Waiting for others %1$s…</string>
     <string name="placeholder_nearby_link_text">nearby</string>
     <string name="actionbar_default_title">Hoccer</string>
     <string name="content_audio_caption">Music</string>
