@@ -23,8 +23,6 @@ import java.util.List;
 
 public class BetterContactsAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
 
-
-
     private static final Comparator<BaseContactItem> LATEST_MESSAGE_COMPARATOR = new Comparator<BaseContactItem>() {
         @Override
         public int compare(BaseContactItem o1, BaseContactItem o2) {
@@ -77,9 +75,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
                     mContactItems.add(new NearbyGroupContactItem());
                 }
 
-                if (mOnItemCountChangedListener != null && oldItemCount != getCount()) {
-                    mOnItemCountChangedListener.onItemCountChanged(getCount());
-                }
+                checkItemCountAndNotify(oldItemCount);
 
                 notifyDataSetChanged();
                 reloadFinished();
@@ -91,6 +87,12 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     public void setOnItemCountChangedListener(OnItemCountChangedListener onItemCountChangedListener) {
         mOnItemCountChangedListener = onItemCountChangedListener;
+    }
+
+    private void checkItemCountAndNotify(int oldItemCount) {
+        if (mOnItemCountChangedListener != null && oldItemCount != getCount()) {
+            mOnItemCountChangedListener.onItemCountChanged(getCount());
+        }
     }
 
     @Override
@@ -127,17 +129,15 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     private List<TalkClientContact> filter(List<TalkClientContact> in) {
-        List<TalkClientContact> res = new ArrayList<TalkClientContact>();
         if (mFilter == null) {
-            res = in;
-        } else {
-            for (TalkClientContact contact : in) {
-                if (mFilter.shouldShow(contact)) {
-                    res.add(contact);
-                }
+            return in;
+        }
+        ArrayList<TalkClientContact> res = new ArrayList<TalkClientContact>();
+        for (TalkClientContact contact : in) {
+            if (mFilter.shouldShow(contact)) {
+                res.add(contact);
             }
         }
-
         return res;
     }
 
@@ -191,10 +191,14 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                int oldItemCount = mContactItems.size();
+
                 TalkClientContactItem item = new TalkClientContactItem(contact, mActivity);
                 mContactItems.add(item);
                 refreshTokens(null, false);
                 notifyDataSetChanged();
+
+                checkItemCountAndNotify(oldItemCount);
             }
         });
     }
@@ -204,12 +208,16 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                int oldItemCount = mContactItems.size();
+
                 BaseContactItem item = findContactItemForContent(contact);
                 if (item == null) {
                     return;
                 }
                 mContactItems.remove(item);
                 notifyDataSetChanged();
+
+                checkItemCountAndNotify(oldItemCount);
             }
         });
     }
@@ -238,6 +246,9 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
+                int oldItemCount = mContactItems.size();
+
                 if (relationship.isNone()) {
                     BaseContactItem item = findContactItemForContent(contact);
                     if (item != null) {
@@ -253,6 +264,8 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
                     item.update();
                 }
                 notifyDataSetChanged();
+
+                checkItemCountAndNotify(oldItemCount);
             }
         });
     }
@@ -282,6 +295,9 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
+                int oldItemCount = mContactItems.size();
+
                 BaseContactItem item = findContactItemForContent(contact);
                 if (item == null) {
                     item = new TalkClientContactItem(contact, mActivity);
@@ -293,6 +309,8 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
                         notifyDataSetChanged();
                     }
                 }
+
+                checkItemCountAndNotify(oldItemCount);
             }
         });
     }
