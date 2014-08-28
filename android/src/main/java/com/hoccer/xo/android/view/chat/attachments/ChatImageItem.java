@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
@@ -44,8 +43,11 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
 
     @Override
     public void detachView() {
-        mImageView.removeOnLayoutChangeListener(this);
-        Picasso.with(mContext).cancelRequest(mImageView);
+        // check for null in case display attachment has not yet been called
+        if(mImageView != null) {
+            mImageView.removeOnLayoutChangeListener(this);
+            Picasso.with(mContext).cancelRequest(mImageView);
+        }
     }
 
     @Override

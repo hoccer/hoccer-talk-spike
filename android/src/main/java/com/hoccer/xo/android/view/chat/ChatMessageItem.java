@@ -127,6 +127,12 @@ public class ChatMessageItem implements AttachmentTransferListener {
      * @param view The given layout
      */
     protected void configureViewForMessage(View view) {
+        // if there is an old item attached to this view destroy it now
+        ChatMessageItem item = (ChatMessageItem) view.getTag();
+        if(item != null) {
+            item.detachView();
+        }
+
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.av_message_avatar);
         TextView messageTime = (TextView) view.findViewById(R.id.tv_message_time);
         TextView messageText = (TextView) view.findViewById(R.id.tv_message_text);
@@ -194,12 +200,6 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         mMessageText = messageText;
         configureContextMenu(messageText);
-
-        // if there is an old item attached to this view destroy it now
-        ChatMessageItem item = (ChatMessageItem) view.getTag();
-        if(item != null) {
-            item.detachView();
-        }
 
         // set item as tag for this view
         view.setTag(this);
