@@ -160,6 +160,9 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         }
 
         if(contentObject != null) {
+            // Clipboard only works with TalkClientUpload and TalkClientDownload so we have to create one
+            // unfortunately this Upload object will be a dead entry in the database since the attachment selection recreates the Upoad Object
+            // see CompositionFragment.validateAndSendComposedMessage()
             TalkClientUpload attachmentUpload = SelectedContent.createAttachmentUpload(contentObject);
             try {
                 getXoDatabase().saveClientUpload(attachmentUpload);
@@ -174,11 +177,13 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
     private IContentObject getVideoContentObject(Intent dataIntent) {
         VideoSelector videoSelector = new VideoSelector(this);
+        // a more generic and static way to obtain the ContentObject would be cool
         return videoSelector.createObjectFromSelectionResult(this, dataIntent);
     }
 
     private IContentObject getImageContentObject(Intent dataIntent) {
         ImageSelector imageSelector = new ImageSelector(this);
+        // a more generic and static way to obtain the ContentObject would be cool
         return imageSelector.createObjectFromSelectionResult(this, dataIntent);
     }
 
