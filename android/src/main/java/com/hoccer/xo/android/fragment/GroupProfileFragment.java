@@ -317,6 +317,12 @@ public class GroupProfileFragment extends XoFragment
     }
 
     public void createGroupFromNearby(String[] clientIds) {
+
+        // workaround to prevent contacts list being updated while permanent group is not completely set up.
+        getXoClient().unregisterContactListener(this);
+        getXoClient().unregisterContactListener(mGroupMemberAdapter);
+        // workaround - end
+
         mMode = Mode.EDIT_GROUP;
         mCurrentClientsInGroup.addAll(getCurrentContactsFromGroup(Arrays.asList(clientIds)));
         mContactsToInvite.addAll(mCurrentClientsInGroup);
