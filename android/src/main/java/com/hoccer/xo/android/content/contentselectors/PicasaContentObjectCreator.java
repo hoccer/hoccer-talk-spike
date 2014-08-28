@@ -10,12 +10,15 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.FileUtils;
+import ezvcard.util.org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 
 public class PicasaContentObjectCreator implements IContentCreator {
@@ -26,11 +29,7 @@ public class PicasaContentObjectCreator implements IContentCreator {
     public SelectedContent apply(Context context, Intent intent) {
         final Uri contentUri = intent.getData();
         final String[] projection = {
-                MediaStore.EXTRA_OUTPUT,
-                MediaStore.MediaColumns.DATA,
                 MediaStore.MediaColumns.DISPLAY_NAME,
-                MediaStore.Images.Media.ORIENTATION,
-                MediaStore.Images.Media.PICASA_ID
         };
 
         Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
@@ -38,16 +37,15 @@ public class PicasaContentObjectCreator implements IContentCreator {
         if (cursor != null) {
             cursor.moveToFirst();
             int displayNameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
-            int picasaIdIndex = cursor.getColumnIndex(MediaStore.Images.Media.PICASA_ID);
-            if (displayNameIndex != -1 && picasaIdIndex != -1) {
+            if (displayNameIndex != -1) {
                 String displayName = cursor.getString(displayNameIndex);
-                String picasaId = cursor.getString(picasaIdIndex);
                 InputStream is = null;
                 try {
                     is = context.getContentResolver().openInputStream(contentUri);
                 } catch (FileNotFoundException e) {
                     LOG.error("Error while creating image from Picasa: ", e);
                     e.printStackTrace();
+                    return null;
                 }
 
                 String uriHash = getHashForContentUriPath(contentUri);
