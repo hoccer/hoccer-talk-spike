@@ -96,8 +96,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
         mImageView.getLayoutParams().width = mImageWidth;
         mImageView.getLayoutParams().height = height;
 
-        mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
         RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
         if (mMessage.isIncoming()) {
             rootView.setGravity(Gravity.LEFT);
