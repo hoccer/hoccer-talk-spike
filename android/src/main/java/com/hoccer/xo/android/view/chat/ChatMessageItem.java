@@ -53,8 +53,6 @@ public class ChatMessageItem implements AttachmentTransferListener {
     protected LinearLayout mContentWrapper;
     protected AttachmentTransferControlView mContentTransferControl;
 
-    protected boolean mVisible = false;
-
     public ChatMessageItem(Context context, TalkClientMessage message) {
         super();
         mContext = context;
@@ -105,10 +103,6 @@ public class ChatMessageItem implements AttachmentTransferListener {
      */
     public ChatItemType getType() {
         return ChatItemType.ChatItemWithText;
-    }
-
-    public void setVisibility(boolean visible) {
-        mVisible = visible;
     }
 
     public void detachView() {
@@ -205,9 +199,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
         ChatMessageItem item = (ChatMessageItem) view.getTag();
         if(item != null) {
             item.detachView();
-            view.setTag(null);
-            LOG.error("Detach message item: " + item.mMessage.getClientMessageId() + " from view: " + view.hashCode());
         }
+
+        // set item as tag for this view
+        view.setTag(this);
     }
 
     private void updateIncomingMessageStatus(View view) {

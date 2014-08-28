@@ -29,7 +29,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     private Context mContext;
     private int mImageWidth;
     private ImageView mImageView;
-    private View mMessageView;
     private int mMask;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
@@ -66,7 +65,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     @Override
     protected void configureViewForMessage(View view) {
         super.configureViewForMessage(view);
-        mMessageView = view;
         configureAttachmentViewForMessage(view);
     }
 
@@ -109,10 +107,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
             rootView.setGravity(Gravity.RIGHT);
             mMask = R.drawable.chat_bubble_outgoing;
         }
-
-        // set item as tag for this view
-        mMessageView.setTag(this);
-        LOG.error("Attach message item: " + mMessage.getClientMessageId() + " from view: " + mMessageView.hashCode());
     }
 
     private class BubbleTransformation implements Transformation {
@@ -171,7 +165,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
             e.printStackTrace();
         }
     }
-
 
     private void setRequiredImageWidth() {
         Point size = DisplayUtils.getDisplaySize(mContext);
