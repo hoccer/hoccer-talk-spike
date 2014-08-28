@@ -291,6 +291,9 @@ public abstract class XoActivity extends FragmentActivity {
         // set up database connection
         mDatabase = XoApplication.getXoClient().getDatabase();
 
+        // get the background executor
+        mBackgroundExecutor = XoApplication.getExecutor();
+
         // set layout
         setContentView(getLayoutResource());
 
@@ -306,8 +309,6 @@ public abstract class XoActivity extends FragmentActivity {
 
         mAlertListener = new XoAlertListener(this);
 
-        // get the background executor
-        mBackgroundExecutor = XoApplication.getExecutor();
     }
 
     @Override

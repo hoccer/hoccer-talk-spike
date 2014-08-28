@@ -344,7 +344,12 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        updateInvitationCount();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateInvitationCount();
+            }
+        });
     }
 
     @Override
