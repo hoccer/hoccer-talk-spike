@@ -49,7 +49,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     private WeakListenerArray<IXoUploadListener> mUploadListeners = new WeakListenerArray<IXoUploadListener>();
     private WeakListenerArray<IXoDownloadListener> mDownloadListeners = new WeakListenerArray<IXoDownloadListener>();
-    private WeakListenerArray<IXoMessageListener> mMessageListeners = new WeakListenerArray<IXoMessageListener>();
     private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListeners = new WeakListenerArray<IXoMediaCollectionListener>();
 
 
@@ -139,16 +138,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
         Dao.CreateOrUpdateStatus result = mClientMessages.createOrUpdate(message);
-
-        if(result.isCreated()) {
-            for (IXoMessageListener listener : mMessageListeners) {
-                listener.onMessageCreated(message);
-            }
-        } else {
-            for (IXoMessageListener listener : mMessageListeners) {
-                listener.onMessageUpdated(message);
-            }
-        }
     }
 
     public void saveMessage(TalkMessage message) throws SQLException {
@@ -870,9 +859,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         updateBuilder.update();
 
         TalkClientMessage message = mClientMessages.queryForId(messageId);
-        for (IXoMessageListener listener : mMessageListeners) {
-            listener.onMessageDeleted(message);
-        }
     }
 
     public void deleteAllMessagesFromContactId(int contactId) throws SQLException {
