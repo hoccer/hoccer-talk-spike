@@ -126,13 +126,9 @@
         <activity
                 android:name="com.hoccer.xo.android.activity.MessagingActivity"
                 android:label="@string/actionbar_default_title"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:windowSoftInputMode="stateHidden"
                 android:exported="true"
                 android:configChanges="keyboardHidden|orientation|screenSize">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
         </activity>
 
         <!-- Clipboard activity -->

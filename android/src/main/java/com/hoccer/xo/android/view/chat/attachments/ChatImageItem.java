@@ -52,10 +52,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     @Override
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
 
-        Picasso picasso = Picasso.with(mContext);
-        picasso.setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
-//        picasso.setIndicatorsEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
-
         LOG.error("Width: " + mImageView.getWidth() + " Height: " + mImageView.getHeight());
         Picasso.with(mContext).load(mContentObject.getContentDataUrl())
                 .error(R.drawable.ic_img_placeholder_error)
