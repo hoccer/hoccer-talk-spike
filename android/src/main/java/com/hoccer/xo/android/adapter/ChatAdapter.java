@@ -29,8 +29,7 @@ import java.util.List;
  * <p/>
  * To configure list items it uses instances of ChatMessageItem and its subtypes.
  */
-public class
-        ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListenerOld {
+public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListenerOld {
 
     /**
      * Number of TalkClientMessage objects in a batch

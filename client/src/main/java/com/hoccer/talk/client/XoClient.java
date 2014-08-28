@@ -834,11 +834,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public String generatePairingToken() {
         resetIdle();
-        String tokenPurpose = TalkToken.PURPOSE_PAIRING;
-        int tokenLifetime = 7 * 24 * 3600;
+        final int tokenLifetime = 7 * 24 * 3600;  // valid for one week
+        final int maxTokenUseCount = 50;   // good to invite 50 people with same token
 
         try {
-            String token = mServerRpc.generateToken(tokenPurpose, tokenLifetime);
+            String token = mServerRpc.generatePairingToken(maxTokenUseCount, tokenLifetime);
             LOG.debug("got pairing token " + token);
             return token;
         }  catch (JsonRpcClientException e) {
