@@ -44,7 +44,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
     public static final int REQUEST_SELECT_ATTACHMENT = 42;
-    public static final int REQUEST_SELECT_IMAGES_ATTACHMENT = 43;
+    public static final int REQUEST_SELECT_IMAGE_ATTACHMENTS = 43;
 
     private static final int STRESS_TEST_MESSAGE_COUNT = 15;
 
@@ -135,7 +135,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 } else {
                     showAttachmentSelectionError();
                 }
-            } else if (requestCode == REQUEST_SELECT_IMAGES_ATTACHMENT) {
+            } else if (requestCode == REQUEST_SELECT_IMAGE_ATTACHMENTS) {
                 ArrayList<IContentObject> contentObjects = ContentRegistry.get(getActivity()).createSelectedImagesAttachment(mAttachmentSelection, intent);
                 if (contentObjects != null && !contentObjects.isEmpty()) {
                     onAttachmentsSelected(contentObjects);
