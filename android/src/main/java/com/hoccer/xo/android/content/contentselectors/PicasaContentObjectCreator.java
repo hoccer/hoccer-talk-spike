@@ -50,7 +50,8 @@ public class PicasaContentObjectCreator implements IContentCreator {
                     e.printStackTrace();
                 }
 
-                String filename = picasaId + "_" + displayName;
+                String uriHash = getHashForContentUriPath(contentUri);
+                String filename = uriHash + "_" + displayName;
                 File imageFile = new File(XoApplication.getAttachmentDirectory(), filename);
 
                 try {
@@ -83,6 +84,20 @@ public class PicasaContentObjectCreator implements IContentCreator {
             }
         }
         return null;
+    }
+
+    private String getHashForContentUriPath(Uri contentUri) {
+        String uriHash = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(contentUri.getPath().getBytes());
+            uriHash = new String(Hex.encodeHexString(md.digest()));
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Couldn't generate Hash for content uri path: " + contentUri.getPath());
+            e.printStackTrace();
+        }
+        LOG.info("MD5 Hash for the path of the Picasa URI [" + contentUri.getPath() + "] : " + uriHash);
+        return uriHash;
     }
 
 
