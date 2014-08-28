@@ -144,11 +144,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
                 }
                 break;
             case R.id.menu_delete_message:
-                try {
-                    getXoDatabase().deleteMessageById(messageId);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                    getXoClient().deleteMessage(messageId);
                 break;
             }
     }
