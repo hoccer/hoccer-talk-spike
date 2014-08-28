@@ -15,9 +15,6 @@ import android.widget.SearchView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-/**
- * Created by nico on 22/07/2014.
- */
 public abstract class SearchableListFragment extends ListFragment {
 
     private static final Logger LOG = Logger.getLogger(SearchableListFragment.class);

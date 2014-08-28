@@ -15,7 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-
+import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -29,7 +29,6 @@ import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.content.contentselectors.VideoSelector;
-import com.hoccer.xo.android.fragment.ContactsFragment;
 import com.hoccer.xo.android.fragment.NearbyContactsFragment;
 import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -38,7 +37,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class ContactsActivity extends XoActionbarActivity implements IXoStateListener {
+public class ContactsActivity extends XoActionbarActivity implements IXoStateListener, IXoContactListener {
 
     private final static Logger LOG = Logger.getLogger(ContactsActivity.class);
 
@@ -77,8 +76,6 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         }
 
         SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
-        // TODO: remove, was only for debug purposes to manually active environment updates before there was a UI for that
         SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -107,24 +104,61 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
             showContactConversation(contactId);
         }
 
-        if(getIntent().getAction() == Intent.ACTION_SEND) {
+        if (getIntent().getAction() == Intent.ACTION_SEND) {
             initWithShareIntent();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getXoClient().unregisterStateListener(this);
+
+        // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
+
+        getXoClient().unregisterContactListener(this);
+
+        // TODO: done.
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshEnvironmentUpdater(false);
+        getXoClient().registerStateListener(this);
+
+        // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
+
+        getXoClient().registerContactListener(this);
+        updateInvitationCount();
+        // TODO: done.
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getXoClient().unregisterStateListener(this);
+
+        // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
+
+        getXoClient().unregisterContactListener(this);
+
+        // TODO: done.
     }
 
     private void initWithShareIntent() {
         Clipboard clipboard = Clipboard.get(this);
         Intent intent = getIntent();
         String type = intent.getType();
-        Uri contentUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        Uri contentUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
 
         IContentObject contentObject = null;
-        if(type.startsWith("image/")) {
-            contentObject =  getImageContentObject(contentUri);
-        } else if(type.startsWith("video/")) {
-            contentObject =  getVideoContentObject(contentUri);
+        if (type.startsWith("image/")) {
+            contentObject = getImageContentObject(contentUri);
+        } else if (type.startsWith("video/")) {
+            contentObject = getVideoContentObject(contentUri);
         }
-        if(contentObject != null) {
+        if (contentObject != null) {
             TalkClientUpload attachmentUpload = SelectedContent.createAttachmentUpload(contentObject);
             try {
                 getXoDatabase().saveClientUpload(attachmentUpload);
@@ -150,25 +184,6 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
         ImageSelector imageSelector = new ImageSelector(this);
         return imageSelector.createObjectFromSelectionResult(this, intent);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        getXoClient().unregisterStateListener(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        getXoClient().unregisterStateListener(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        refreshEnvironmentUpdater(false);
-        getXoClient().registerStateListener(this);
     }
 
     private void refreshEnvironmentUpdater(boolean force) {
@@ -291,7 +306,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
     @Override
     public void onClientStateChange(XoClient client, int state) {
-        LOG.debug("onClientStateChange:"+state);
+        LOG.debug("onClientStateChange:" + state);
         if (!client.isAwake()) {
             shutDownNearbySession();
         } else if (client.isActive()) {
@@ -299,4 +314,46 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         }
     }
 
+
+    // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
+
+    private void updateInvitationCount() {
+        int invitationsCount = getXoDatabase().findAllPendingFriendRequests().size();
+        ActionBar.Tab invitationTab = mActionBar.getTabAt(1);
+        String[] tabs = getResources().getStringArray(R.array.tab_names);
+        String tabText = tabs[1];
+
+        if (invitationsCount == 0) {
+            invitationTab.setText(tabText);
+        } else {
+            invitationTab.setText(tabText + " (" + invitationsCount + ")");
+        }
+    }
+
+    @Override
+    public void onContactAdded(TalkClientContact contact) {
+    }
+
+    @Override
+    public void onContactRemoved(TalkClientContact contact) {
+    }
+
+    @Override
+    public void onClientPresenceChanged(TalkClientContact contact) {
+    }
+
+    @Override
+    public void onClientRelationshipChanged(TalkClientContact contact) {
+        updateInvitationCount();
+    }
+
+    @Override
+    public void onGroupPresenceChanged(TalkClientContact contact) {
+    }
+
+    @Override
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+    }
+
+    // TODO: end
 }
