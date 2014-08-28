@@ -70,7 +70,8 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
             mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
         }
 
-        registerForContextMenu(view);
+        ListView contactList = (ListView) view.findViewById(android.R.id.list);
+        registerForContextMenu(contactList);
         return view;
     }
 
