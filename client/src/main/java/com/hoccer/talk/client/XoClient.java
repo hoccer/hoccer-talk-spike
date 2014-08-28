@@ -1220,6 +1220,26 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
+    public void deleteMessage(int messageId) {
+        try {
+            TalkClientMessage message = getDatabase().findMessageById(messageId);
+            deleteMessage(message);
+        } catch (SQLException e) {
+            LOG.error("SQL Error while deleting message with id: " + messageId, e);
+        }
+    }
+
+    public void deleteMessage(TalkClientMessage message) {
+        try {
+            getDatabase().deleteMessageById(message.getClientMessageId());
+            for(IXoMessageListener listener: mMessageListeners) {
+                listener.onMessageDeleted(message);
+            }
+        } catch (SQLException e) {
+            LOG.error("SQL Error while deleting message with id: " + message.getClientMessageId(), e);
+        }
+    }
+
     private void requestDelivery(final TalkClientMessage message) {
         if (mState < STATE_ACTIVE) {
             LOG.info("requestSendAllPendingMessages() - cannot perform delivery in INACTIVE state.");
