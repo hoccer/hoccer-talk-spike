@@ -105,8 +105,8 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, view, menuInfo);
         if(menuInfo != null) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
             Object object = ((BaseContactItem) mAdapter.getItem(info.position)).getContent();
@@ -224,15 +224,15 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
                 ((XoActivity) getActivity()).showContactProfile(contact);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("SQL error while creating group ", e);
         }
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
+    public void onListItemClick(ListView listView, View view, int position, long id) {
+        super.onListItemClick(listView, view, position, id);
 
-        Object item = ((BaseContactItem)l.getItemAtPosition(position)).getContent();
+        Object item = ((BaseContactItem)listView.getItemAtPosition(position)).getContent();
         if (item instanceof TalkClientContact) {
             TalkClientContact contact = (TalkClientContact) item;
             if (contact.isGroup() && contact.isGroupInvited()) {
