@@ -74,9 +74,9 @@ public class MessagingFragment extends XoListFragment
             return;
         }
 
-        mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, getXoActivity(), mCompositionFragment);
-
         createCompositionFragment();
+        
+        mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, getXoActivity(), mCompositionFragment);
     }
 
     @Override
