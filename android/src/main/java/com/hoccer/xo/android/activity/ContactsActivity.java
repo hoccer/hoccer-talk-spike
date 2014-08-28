@@ -110,27 +110,24 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        getXoClient().unregisterStateListener(this);
-
-        // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-
-        getXoClient().unregisterContactListener(this);
-
-        // TODO: done.
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         refreshEnvironmentUpdater(false);
         getXoClient().registerStateListener(this);
 
-        // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-
+        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
         getXoClient().registerContactListener(this);
         updateInvitationCount();
+        // TODO: done.
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getXoClient().unregisterStateListener(this);
+
+        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
+        getXoClient().unregisterContactListener(this);
         // TODO: done.
     }
 
@@ -139,10 +136,8 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         super.onDestroy();
         getXoClient().unregisterStateListener(this);
 
-        // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-
+        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
         getXoClient().unregisterContactListener(this);
-
         // TODO: done.
     }
 
@@ -316,8 +311,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     }
 
 
-    // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-
+    // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
     private void updateInvitationCount() {
         int invitationsCount = getXoDatabase().findAllPendingFriendRequests().size();
         ActionBar.Tab invitationTab = mActionBar.getTabAt(1);
@@ -355,6 +349,5 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
     }
-
     // TODO: end
 }
