@@ -2,13 +2,13 @@ package com.hoccer.xo.android.view.chat.attachments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.*;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
@@ -16,8 +16,8 @@ import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
-import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
@@ -120,6 +120,13 @@ public class ChatAudioItem extends ChatMessageItem {
         mAudioContentObject = contentObject;
         mIsPlayable = mAudioContentObject != null;
         updatePlayPauseView();
+
+        initializeMediaPlayerService();
+    }
+
+    @Override
+    public void detachView() {
+        mMediaPlayerServiceConnector.disconnect();
     }
 
     private void pausePlaying() {
@@ -182,24 +189,5 @@ public class ChatAudioItem extends ChatMessageItem {
                         updatePlayPauseView();
                     }
                 });
-    }
-
-    private void destroyMediaPlayerService(){
-        mMediaPlayerServiceConnector.disconnect();
-    }
-
-    @Override
-    public void setVisibility(boolean visible) {
-        if ( mVisible == visible){
-            return;
-        }
-
-        super.setVisibility(visible);
-
-        if( mVisible){
-            initializeMediaPlayerService();
-        }else{
-            destroyMediaPlayerService();
-        }
     }
 }

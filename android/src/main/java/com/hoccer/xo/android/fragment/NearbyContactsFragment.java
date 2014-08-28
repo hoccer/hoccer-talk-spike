@@ -136,8 +136,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     private void createAdapter() {
         if (mNearbyAdapter == null) {
-            mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity());
-            mNearbyAdapter.retrieveDataFromDb(mCurrentNearbyGroup);
+            mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity(), mCurrentNearbyGroup);
             mNearbyAdapter.registerListeners();
             runOnUiThread(new Runnable() {
                 @Override

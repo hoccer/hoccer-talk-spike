@@ -43,11 +43,13 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     private List<TalkClientContact> mNearbyContacts = new ArrayList<TalkClientContact>();
     private TalkClientContact mCurrentNearbyGroup;
 
-    public NearbyContactsAdapter(XoClientDatabase db, XoActivity xoActivity) {
+    public NearbyContactsAdapter(XoClientDatabase db, XoActivity xoActivity, TalkClientContact group) {
         super();
         mDatabase = db;
         mXoActivity = xoActivity;
         mExecutor = mXoActivity.getBackgroundExecutor();
+
+        retrieveDataFromDb(group);
     }
 
     @Override
@@ -86,7 +88,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         mXoActivity.getXoClient().unregisterMessageListener(this);
     }
 
-    public void retrieveDataFromDb(final TalkClientContact group) {
+    private void retrieveDataFromDb(final TalkClientContact group) {
         if (group == null || mDatabase == null) {
             return;
         }
@@ -292,17 +294,22 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     }
 
     @Override
-    public void onMessageCreated(TalkClientMessage message) {
-        TalkClientContact conversationContact = message.getConversationContact();
-        if (mNearbyContacts.contains(conversationContact)) {
-            mNearbyContacts.remove(conversationContact);
-            int position = 0;
-            if (conversationContact.isClient()) {
-                position = 1;
+    public void onMessageCreated(final TalkClientMessage message) {
+        mXoActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TalkClientContact conversationContact = message.getConversationContact();
+                if (mNearbyContacts.contains(conversationContact)) {
+                    mNearbyContacts.remove(conversationContact);
+                    int position = 0;
+                    if (conversationContact.isClient()) {
+                        position = 1;
+                    }
+                    mNearbyContacts.add(position, conversationContact);
+                }
+                refreshList();
             }
-            mNearbyContacts.add(position, conversationContact);
-        }
-        refreshList();
+        });
     }
 
     @Override
