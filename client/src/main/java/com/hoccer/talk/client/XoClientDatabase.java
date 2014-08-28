@@ -394,6 +394,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return messages;
     }
 
+    public synchronized TalkClientMessage findMessageById(int messageId) throws SQLException {
+        return mClientMessages.queryForId(messageId);
+    }
+
     public synchronized TalkClientMessage findMessageByMessageId(String messageId, boolean create) throws SQLException {
         TalkClientMessage message = null;
 
