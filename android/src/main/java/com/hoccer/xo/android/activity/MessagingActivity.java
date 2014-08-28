@@ -20,6 +20,8 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
+import java.sql.SQLException;
+
 public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
@@ -142,7 +144,11 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
                 }
                 break;
             case R.id.menu_delete_message:
-                LOG.debug("Delete single message with id: " + String.valueOf(messageId));
+                try {
+                    getXoDatabase().deleteMessageById(messageId);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 break;
             }
     }
