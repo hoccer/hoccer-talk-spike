@@ -3494,6 +3494,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     LOG.error("SQL error", e);
                 }
                 notifyUnseenMessages(false);
+
+                for (IXoMessageListener listener : mMessageListeners) {
+                    listener.onMessageUpdated(message);
+                }
             }
         });
     }

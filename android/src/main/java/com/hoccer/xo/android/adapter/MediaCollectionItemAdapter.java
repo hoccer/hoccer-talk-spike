@@ -124,7 +124,7 @@ public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortL
         try {
             super.registerDataSetObserver(observer);
         } catch (IllegalStateException e) {
-
+            LOG.error("Illegal state when registering DataSetObserver", e);
         }
     }
 
