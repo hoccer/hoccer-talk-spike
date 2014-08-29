@@ -4,16 +4,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.Formatter;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -57,6 +55,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private ArrayList<IContentObject> mAttachments;
 
     private ContentSelection mAttachmentSelection = null;
+    private Button mAddAttachmentsButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -110,8 +109,13 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             mSendButton.setLongClickable(true);
         }
 
-        mAddAttachmentButton = (ImageButton) v.findViewById(R.id.btn_messaging_composer_add_attachment);
-        mAddAttachmentButton.setOnClickListener(new AddAttachmentOnClickListener());
+        AddAttachmentOnClickListener listener = new AddAttachmentOnClickListener();
+
+        mAddAttachmentButton = (ImageButton) v.findViewById(R.id.ib_messaging_composer_add_attachment);
+        mAddAttachmentButton.setOnClickListener(listener);
+
+        mAddAttachmentsButton = (Button) v.findViewById(R.id.b_messaging_composer_add_attachments);
+        mAddAttachmentsButton.setOnClickListener(listener);
 
         return v;
     }
@@ -202,13 +206,14 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private void setAttachment(IContentObject contentObject) {
+        mAddAttachmentButton.setOnClickListener(new AttachmentOnClickListener());
         mAttachments = new ArrayList<IContentObject>();
         mAttachments.add(contentObject);
         updateAttachmentButton();
     }
 
     private void setAttachments(ArrayList<IContentObject> contentObjects) {
-        mAddAttachmentButton.setOnClickListener(new AttachmentOnClickListener());
+        mAddAttachmentsButton.setOnClickListener(new AttachmentOnClickListener());
         if (contentObjects != null) {
             mAttachments = contentObjects;
         }
@@ -216,32 +221,49 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private void updateAttachmentButton() {
-        String mediaType = mAttachments.get(0).getContentMediaType();
-        int imageResource = -1;
-        if (mediaType != null) {
-            if (mediaType.equals(ContentMediaType.IMAGE)) {
-                if (mAttachments.size() > 1) {
-                    imageResource = R.drawable.ic_light_images;
-                } else {
-                    imageResource = R.drawable.ic_light_image;
+        if (mAttachments != null && mAttachments.size() > 0) {
+            if (mAttachments.size() > 1) {
+                attachMultipleUploadsButton(mAttachments.size());
+            } else {
+                String mediaType = mAttachments.get(0).getContentMediaType();
+                if (mediaType != null) {
+                    attachAttachmentButtonByMediaType(mediaType);
                 }
-            } else if (mediaType.equals(ContentMediaType.VIDEO)) {
-                imageResource = R.drawable.ic_light_video;
-            } else if (mediaType.equals(ContentMediaType.VCARD)) {
-                imageResource = R.drawable.ic_light_contact;
-            } else if (mediaType.equals(ContentMediaType.LOCATION)) {
-                imageResource = R.drawable.ic_light_location;
-            } else if (mediaType.equals(ContentMediaType.DATA)) {
-                imageResource = R.drawable.ic_light_data;
-            } else if (mediaType.equals(ContentMediaType.AUDIO)) {
-                imageResource = R.drawable.ic_light_video;
             }
+        }
+    }
+
+    private void attachAttachmentButtonByMediaType(String mediaType) {
+        int imageResource;
+        if (mediaType.equals(ContentMediaType.IMAGE)) {
+            imageResource = R.drawable.ic_light_image;
+        } else if (mediaType.equals(ContentMediaType.VIDEO)) {
+            imageResource = R.drawable.ic_light_video;
+        } else if (mediaType.equals(ContentMediaType.VCARD)) {
+            imageResource = R.drawable.ic_light_contact;
+        } else if (mediaType.equals(ContentMediaType.LOCATION)) {
+            imageResource = R.drawable.ic_light_location;
+        } else if (mediaType.equals(ContentMediaType.DATA)) {
+            imageResource = R.drawable.ic_light_data;
+        } else if (mediaType.equals(ContentMediaType.AUDIO)) {
+            imageResource = R.drawable.ic_light_video;
         } else {
             imageResource = android.R.drawable.stat_notify_error;
         }
+        mAddAttachmentButton.setImageDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(getXoActivity(), imageResource, true));
+    }
 
-        mAddAttachmentButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(getXoActivity(), imageResource, true));
-        mAddAttachmentButton.setImageResource(android.R.color.transparent);
+    private void attachMultipleUploadsButton(int count) {
+        mAddAttachmentButton.setVisibility(View.GONE);
+        mAddAttachmentsButton.setVisibility(View.VISIBLE);
+        count = 9999;
+        if (count > 99) {
+            mAddAttachmentsButton.setTextSize(13);
+        }
+        if (count > 999) {
+            mAddAttachmentsButton.setTextSize(10);
+        }
+        mAddAttachmentsButton.setText(String.valueOf(count));
     }
 
     public void updateContact(TalkClientContact contact) {
@@ -261,6 +283,10 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         mAddAttachmentButton.setOnClickListener(new AddAttachmentOnClickListener());
         mAddAttachmentButton.setBackgroundDrawable(null);
         mAddAttachmentButton.setImageResource(R.drawable.ic_light_content_attachment);
+        mAddAttachmentButton.setVisibility(View.VISIBLE);
+        mAddAttachmentsButton.setOnClickListener(new AddAttachmentOnClickListener());
+        mAddAttachmentsButton.setText("");
+        mAddAttachmentsButton.setVisibility(View.GONE);
         mAttachments = null;
         updateSendButton();
     }
