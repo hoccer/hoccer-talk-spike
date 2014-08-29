@@ -12,24 +12,26 @@
             android:layout_height="60dp"
             android:layout_marginRight="@dimen/media_player_layout_margin"
             android:layout_centerVertical="true">
+
         <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/media_cover_art_default"
-                />
+                android:src="@drawable/media_cover_art_default"/>
+
         <ImageView
                 android:id="@+id/iv_artcover"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@android:color/transparent"
-                />
+                android:src="@android:color/transparent"/>
     </FrameLayout>
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="vertical"
-                  android:layout_toRightOf="@+id/fl_artwork"
-                  android:layout_toLeftOf="@+id/iv_playing_status"
-                  android:layout_centerVertical="true">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_toRightOf="@+id/fl_artwork"
+            android:layout_toLeftOf="@+id/iv_playing_status"
+            android:layout_centerVertical="true">
 
         <TextView
                 android:id="@+id/tv_title_name"
@@ -40,6 +42,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:singleLine="true"/>
+
         <TextView
                 android:id="@+id/tv_artist_name"
                 android:text="@string/media_meta_data_unknown_artist"
@@ -56,7 +59,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
+            android:layout_toLeftOf="@+id/list_drag_handle"
+            android:layout_alignWithParentIfMissing="true"
             android:background="@null"
             android:src="@drawable/ic_playing"
             android:visibility="gone"

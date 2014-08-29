@@ -84,7 +84,6 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-//        inflater.inflate(R.menu.fragment_contacts, menu);
         mAddGroupMenuItem = menu.findItem(R.id.menu_new_group);
         mPairWithContactMenuItem = menu.findItem(R.id.menu_pair);
     }
@@ -93,6 +92,12 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
     public void onPause() {
         super.onPause();
         mAdapter.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAdapter.onResume();
     }
 
     @Override

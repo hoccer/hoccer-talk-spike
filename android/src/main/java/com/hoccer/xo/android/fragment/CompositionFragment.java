@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -44,7 +43,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
     public static final int REQUEST_SELECT_ATTACHMENT = 42;
-    public static final int REQUEST_SELECT_IMAGES_ATTACHMENT = 43;
+    public static final int REQUEST_SELECT_IMAGE_ATTACHMENTS = 43;
 
     private static final int STRESS_TEST_MESSAGE_COUNT = 15;
 
@@ -135,7 +134,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 } else {
                     showAttachmentSelectionError();
                 }
-            } else if (requestCode == REQUEST_SELECT_IMAGES_ATTACHMENT) {
+            } else if (requestCode == REQUEST_SELECT_IMAGE_ATTACHMENTS) {
                 ArrayList<IContentObject> contentObjects = ContentRegistry.get(getActivity()).createSelectedImagesAttachment(mAttachmentSelection, intent);
                 if (contentObjects != null && !contentObjects.isEmpty()) {
                     onAttachmentsSelected(contentObjects);
@@ -213,6 +212,10 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         if (contentObjects != null) {
             mAttachments = contentObjects;
         }
+        updateAttachmentButton();
+    }
+
+    private void updateAttachmentButton() {
         String mediaType = mAttachments.get(0).getContentMediaType();
         int imageResource = -1;
         if (mediaType != null) {
@@ -222,33 +225,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 } else {
                     imageResource = R.drawable.ic_light_image;
                 }
-            } else if (mediaType.equals(ContentMediaType.VIDEO)) {
-                imageResource = R.drawable.ic_light_video;
-            } else if (mediaType.equals(ContentMediaType.VCARD)) {
-                imageResource = R.drawable.ic_light_contact;
-            } else if (mediaType.equals(ContentMediaType.LOCATION)) {
-                imageResource = R.drawable.ic_light_location;
-            } else if (mediaType.equals(ContentMediaType.DATA)) {
-                imageResource = R.drawable.ic_light_data;
-            } else if (mediaType.equals(ContentMediaType.AUDIO)) {
-                imageResource = R.drawable.ic_light_video;
-            }
-        } else {
-            imageResource = android.R.drawable.stat_notify_error;
-        }
-
-        mAddAttachmentButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(getXoActivity(), imageResource, true));
-        mAddAttachmentButton.setImageResource(android.R.color.transparent);
-    }
-
-    private void updateAttachmentButton() {
-        mAddAttachmentButton.setOnClickListener(new AttachmentOnClickListener());
-        String mediaType = mAttachments.get(0).getContentMediaType();
-
-        int imageResource = -1;
-        if (mediaType != null) {
-            if (mediaType.equals(ContentMediaType.IMAGE)) {
-                imageResource = R.drawable.ic_light_image;
             } else if (mediaType.equals(ContentMediaType.VIDEO)) {
                 imageResource = R.drawable.ic_light_video;
             } else if (mediaType.equals(ContentMediaType.VCARD)) {

@@ -265,7 +265,7 @@ public class ContentRegistry {
                     xoActivity.clipBoardItemSelected(clipboardSelector.selectObjectFromClipboard(xoActivity, intent));
                 } else {
                     if (selector instanceof MultiImageSelector) {
-                        startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGES_ATTACHMENT);
+                        startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGE_ATTACHMENTS);
                     } else {
                         startExternalActivityForResult(fragment, intent, requestCode);
                     }
