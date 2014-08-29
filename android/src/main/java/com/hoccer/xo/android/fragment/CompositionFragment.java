@@ -256,7 +256,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private void attachMultipleUploadsButton(int count) {
         mAddAttachmentButton.setVisibility(View.GONE);
         mAddAttachmentsButton.setVisibility(View.VISIBLE);
-        count = 9999;
         if (count > 99) {
             mAddAttachmentsButton.setTextSize(13);
         }
