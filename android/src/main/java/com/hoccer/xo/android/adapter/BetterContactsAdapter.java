@@ -298,14 +298,17 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
                 int oldItemCount = mContactItems.size();
 
-                BaseContactItem item = findContactItemForContent(contact);
-                if (item == null) {
-                    item = new TalkClientContactItem(contact, mActivity);
-                    mContactItems.add(item);
-                    notifyDataSetChanged();
-                } else {
-                    if (!contact.isGroupInvolved()) {
+                if (contact.getGroupMember() == null || (contact.getGroupMember().isGroupRemoved())) {
+                    BaseContactItem item = findContactItemForContent(contact);
+                    if (item != null) {
                         mContactItems.remove(item);
+                        notifyDataSetChanged();
+                    }
+                } else {
+                    BaseContactItem item = findContactItemForContent(contact);
+                    if (item == null) {
+                        item = new TalkClientContactItem(contact, mActivity);
+                        mContactItems.add(item);
                         notifyDataSetChanged();
                     }
                 }

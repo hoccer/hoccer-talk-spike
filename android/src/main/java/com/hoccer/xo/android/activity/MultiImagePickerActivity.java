@@ -14,10 +14,7 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CursorAdapter;
-import android.widget.GridView;
-import android.widget.ImageView;
+import android.widget.*;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.SquaredImageView;
 import com.hoccer.xo.android.view.SquaredRelativeLayout;
@@ -33,6 +30,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
     private ImageAdapter mAdapter;
     private GridView mImageGridView;
     private HashSet<String> mSelectedImages = new HashSet<String>();
+    private Button mSelectBtn;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,8 +40,8 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
         mImageGridView.setClipToPadding(false);
         mAdapter = new ImageAdapter(this);
         mImageGridView.setAdapter(mAdapter);
-        Button selectBtn = (Button) findViewById(R.id.selectBtn);
-        selectBtn.setOnClickListener(new View.OnClickListener() {
+        mSelectBtn = (Button) findViewById(R.id.selectBtn);
+        mSelectBtn.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
                 if (!mSelectedImages.isEmpty()) {
@@ -60,6 +58,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                 }
             }
         });
+        mSelectBtn.setText(String.format(getString(R.string.select_count), 0));
         getLoaderManager().initLoader(ImageQuery.QUERY_ID, null, this);
     }
 
@@ -162,6 +161,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                         holder.squaredRelativeLayout.setVisibility(View.GONE);
                         mSelectedImages.remove(contentUri.toString());
                     }
+                    mSelectBtn.setText(String.format(getString(R.string.select_count), mSelectedImages.size()));
                 }
             });
 
