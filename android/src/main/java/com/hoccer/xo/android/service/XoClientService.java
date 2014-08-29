@@ -155,7 +155,7 @@ public class XoClientService extends Service {
             mClientListener = new ClientListener();
             mClient.registerTokenListener(mClientListener);
             mClient.registerStateListener(mClientListener);
-            mClient.registerUnseenListener(mClientListener);
+            mClient.registerMessageListener(mClientListener);
             mClient.registerTransferListener(mClientListener);
         }
 
@@ -200,7 +200,7 @@ public class XoClientService extends Service {
         if (mClientListener != null) {
             mClient.unregisterTokenListener(mClientListener);
             mClient.unregisterStateListener(mClientListener);
-            mClient.unregisterUnseenListener(mClientListener);
+            mClient.unregisterMessageListener(mClientListener);
             mClient.unregisterTransferListener(mClientListener);
             mClientListener = null;
         }
@@ -534,89 +534,105 @@ public class XoClientService extends Service {
         mNotificationManager.notify(NOTIFICATION_UNCONFIRMED_INVITATIONS, notification);
     }
 
-    private void updateMessageNotification(List<TalkClientMessage> allUnseenMessages,
-                                           boolean notify) {
+    private void updateMessageNotification() {
         LOG.debug("updateMessageNotification()");
-        XoClientDatabase db = mClient.getDatabase();
 
-        // we re-collect messages to this to eliminate
-        // messages from deleted contacts that are still in the db (XXX)
-        List<TalkClientMessage> unseenMessages = new ArrayList<TalkClientMessage>();
-
-        // determine where we are in time
-        long now = System.currentTimeMillis();
-        long passed = Math.max(0, now - mNotificationTimestamp);
-
-
-        // do not sound alarms overly often (sound, vibrate)
-        if (passed < NOTIFICATION_ALARM_BACKOFF) {
-            notify = false;
+        XoClientDatabase database = mClient.getDatabase();
+        List<TalkClientMessage> unseenMessages;
+        try {
+            unseenMessages = database.findUnseenMessages();
+        } catch (SQLException e) {
+            LOG.error("SQL Exception while retrieving lit of unseen messages", e);
+            return;
         }
 
-        // we are commited to notifying, update timestamp
-        mNotificationTimestamp = now;
-
-        // collect conversation contacts and sort messages accordingly
-        // also removes messages from deleted clients
-        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
-        Map<Integer, TalkClientContact> contactsById = new HashMap<Integer, TalkClientContact>();
-
-        for (TalkClientMessage message : allUnseenMessages) {
-            TalkClientContact contact = message.getConversationContact();
-            if (contact != null) {
-                int contactId = contact.getClientContactId();
-                if (!contactsById.containsKey(contactId)) {
-                    try {
-                        db.refreshClientContact(contact);
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-                    if (!contact.isDeleted()) {
-                        contactsById.put(contactId, contact);
-                        contacts.add(contact);
-                        unseenMessages.add(message);
-                    }
-                }
-            } else {
-                LOG.error("message without contact in unseen messages");
-            }
-        }
-
-        // if we have no messages after culling then cancel notification
-        if (unseenMessages.isEmpty()) {
-            LOG.debug("no unseen messages");
+        if(unseenMessages.size() == 0) {
             cancelMessageNotification();
             return;
         }
 
-        // for easy reference
-        int numUnseen = unseenMessages.size();
-        int numContacts = contacts.size();
+        // determine where we are in time
+        // do not sound alarms overly often (sound, vibrate)
+        long now = System.currentTimeMillis();
+        long timeSinceLastNotification = Math.max(0, now - mNotificationTimestamp);
+        boolean doAlarm = true;
+        if (timeSinceLastNotification < NOTIFICATION_ALARM_BACKOFF) {
+            doAlarm = false;
+        }
+        mNotificationTimestamp = now;
 
-        // log about what we got
-        LOG.debug("notifying " + numUnseen + " messages from " + numContacts + " contacts");
+        // collect unseen messages by contact and remove messages from deleted clients
+        int unseenMessagesCount = 0;
+        Map<Integer, ContactUnseenMessageHolder> contactsMap = new HashMap<Integer, ContactUnseenMessageHolder>();
+        for (TalkClientMessage message : unseenMessages) {
+            TalkClientContact contact = message.getConversationContact();
+            if (contact != null) {
+                try {
+                    database.refreshClientContact(contact);
+                } catch (SQLException e) {
+                    LOG.error("SQL Exception while retrieving contact", e);
+                    continue;
+                }
+
+                if(contact.isDeleted()) {
+                    continue;
+                }
+
+                if(!contactsMap.containsKey(contact.getClientContactId())) {
+                    ContactUnseenMessageHolder holder = new ContactUnseenMessageHolder(contact);
+                    contactsMap.put(contact.getClientContactId(), holder);
+                }
+
+                ContactUnseenMessageHolder holder = contactsMap.get(contact.getClientContactId());
+                holder.getUnseenMessages().add(message);
+                unseenMessagesCount++;
+            } else {
+                LOG.error("Message without contact in unseen messages found");
+            }
+        }
+
+        // if we have no messages after culling then cancel notification
+        if(unseenMessagesCount == 0) {
+            cancelMessageNotification();
+            return;
+        }
+
+        // log all unseen messages found
+        StringBuilder logMessage = new StringBuilder("Notifying about unseen messages: ");
+        for(ContactUnseenMessageHolder holder : contactsMap.values()) {
+            logMessage.append(holder.getContact().getName()).append("(").append(holder.getUnseenMessages().size()).append(") ");
+        }
+        LOG.debug(logMessage);
 
         // build the notification
         Notification.Builder builder = new Notification.Builder(this);
+
         // always set the small icon (should be different depending on if we have a large one)
         builder.setSmallIcon(R.drawable.ic_notification);
-        // large icon XXX
+
+        // large icon
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
         builder.setLargeIcon(largeIcon);
+
         // determine if alarms should be sounded
-        if (notify) {
+        if (doAlarm) {
             builder.setDefaults(Notification.DEFAULT_ALL);
         }
+
         // set total number of messages of more than one
-        if (numUnseen > 1) {
-            builder.setNumber(numUnseen);
+        if (unseenMessagesCount > 1) {
+            builder.setNumber(unseenMessagesCount);
         }
+
         // fill in content
-        if (contacts.size() == 1) {
-            TalkClientContact singleContact = contacts.get(0);
+        if (contactsMap.size() == 1) {
             // create intent to start the messaging activity for the right contact
+            ContactUnseenMessageHolder holder = contactsMap.values().iterator().next();
+            TalkClientContact contact = holder.getContact();
+
             Intent messagingIntent = new Intent(this, ContactsActivity.class);
-            messagingIntent.putExtra(IntentHelper.EXTRA_CONTACT_ID, singleContact.getClientContactId());
+            messagingIntent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
+
             // make a pending intent with correct back-stack
             PendingIntent pendingIntent;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -629,16 +645,19 @@ public class XoClientService extends Service {
                 pendingIntent = PendingIntent
                         .getActivity(this, 0, messagingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
+
             // add the intent to the notification
             builder.setContentIntent(pendingIntent);
+
             // title is always the contact name
-            builder.setContentTitle(singleContact.getNickname());
+            builder.setContentTitle(contact.getNickname());
+
             // text depends on number of messages
-            if (unseenMessages.size() == 1) {
-                TalkClientMessage singleMessage = unseenMessages.get(0);
+            if (holder.getUnseenMessages().size() == 1) {
+                TalkClientMessage singleMessage = holder.getUnseenMessages().get(0);
                 builder.setContentText(singleMessage.getText());
             } else {
-                builder.setContentText(numUnseen + " new messages");
+                builder.setContentText(holder.getUnseenMessages().size() + " new messages");
             }
         } else {
             // create pending intent
@@ -654,19 +673,16 @@ public class XoClientService extends Service {
                         .getActivity(this, 0, contactsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
             builder.setContentIntent(pendingIntent);
+
             // concatenate contact names
             StringBuilder sb = new StringBuilder();
-            int last = contacts.size() - 1;
-            for (int i = 0; i < contacts.size(); i++) {
-                TalkClientContact contact = contacts.get(i);
-                sb.append(contact.getNickname());
-                if (i < last) {
-                    sb.append(", ");
-                }
+            for(ContactUnseenMessageHolder holder : contactsMap.values()) {
+                sb.append(holder.getContact().getNickname()).append(", ");
             }
+
             // set fields
-            builder.setContentTitle(sb.toString());
-            builder.setContentText(numUnseen + " new messages");
+            builder.setContentTitle(sb.substring(0, sb.length() - 2));
+            builder.setContentText(unseenMessagesCount + " new messages");
         }
 
         // finish up
@@ -678,6 +694,7 @@ public class XoClientService extends Service {
         }
         // log about it
         LOG.debug("message notification " + notification.toString());
+
         // update the notification
         mNotificationManager.notify(NOTIFICATION_UNSEEN_MESSAGES, notification);
     }
@@ -705,7 +722,7 @@ public class XoClientService extends Service {
 
     private class ClientListener implements
             IXoStateListener,
-            IXoUnseenListener,
+            IXoMessageListener,
             IXoTokenListener,
             IXoTransferListenerOld,
             MediaScannerConnection.OnScanCompletedListener {
@@ -724,41 +741,6 @@ public class XoClientService extends Service {
                         doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
                     }
                 });
-            }
-        }
-
-        // XXX
-        //@Override
-        //public void onPushRegistrationRequested() {
-        //    LOG.info("onPushRegistrationRequested()");
-        //    mExecutor.execute(new Runnable() {
-        //        @Override
-        //        public void run() {
-        //            doRegisterGcm(false);
-        //            doUpdateGcm(true);
-        //        }
-        //    });
-        //}
-
-        @Override
-        public void onUnseenMessages(List<TalkClientMessage> unseenMessages, boolean notify) {
-            LOG.debug("onUnseenMessages(" + unseenMessages.size() + "," + notify + ")");
-            ActivityManager activityManager = (ActivityManager) getApplicationContext().
-                    getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningTaskInfo> services = activityManager.getRunningTasks(Integer.MAX_VALUE);
-            if (unseenMessages == null || unseenMessages.isEmpty()) {
-                LOG.debug("no unseen messages");
-                cancelMessageNotification();
-                return;
-            }
-            if (services.get(0).topActivity.getShortClassName().equalsIgnoreCase(MessagingActivity.class.getName())) {
-                m_clientIdReceiver.setContactId(unseenMessages.get(0).getConversationContact().getClientContactId());
-                m_clientIdReceiver.setNotificationData(unseenMessages, notify);
-                Intent intent = new Intent();
-                intent.setAction(IntentHelper.ACTION_CHECK_ID_IN_CONVERSATION);
-                sendBroadcast(intent);
-            } else {
-                updateMessageNotification(unseenMessages, notify);
             }
         }
 
@@ -841,6 +823,37 @@ public class XoClientService extends Service {
             }
             mScanningDownloads.remove(path);
         }
+
+        @Override
+        public void onMessageCreated(TalkClientMessage message) {
+            if(!isMessagingActivityOnTopForContact()) {
+                updateMessageNotification();
+            }
+        }
+
+        @Override
+        public void onMessageUpdated(TalkClientMessage message) {
+            if(!isMessagingActivityOnTopForContact()) {
+                updateMessageNotification();
+            }
+        }
+
+        @Override
+        public void onMessageDeleted(TalkClientMessage message) {
+            if(!isMessagingActivityOnTopForContact()) {
+                updateMessageNotification();
+            }
+        }
+    }
+
+    private boolean isMessagingActivityOnTopForContact() {
+        ActivityManager activityManager = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager.RunningTaskInfo taskInfo = activityManager.getRunningTasks(1).get(0);
+        if(taskInfo == null) {
+            return false;
+        } else {
+            return taskInfo.topActivity.getShortClassName().equalsIgnoreCase(MessagingActivity.class.getName());
+        }
     }
 
     public class Connection extends IXoClientService.Stub {
@@ -874,27 +887,21 @@ public class XoClientService extends Service {
         }
     }
 
-    private class ClientIdReceiver extends BroadcastReceiver {
+    private class ContactUnseenMessageHolder {
+        private TalkClientContact mContact;
+        private List<TalkClientMessage> mUnseenMessages;
 
-
-        private int m_id;
-        private List<TalkClientMessage> m_unseenMessages = new ArrayList<TalkClientMessage>();
-        private boolean m_notify;
-
-        @Override
-        public void onReceive(Context arg0, Intent intent) {
-            if (m_id != intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1)) {
-                updateMessageNotification(m_unseenMessages, m_notify);
-            }
+        public ContactUnseenMessageHolder(TalkClientContact contact) {
+            mContact = contact;
+            mUnseenMessages = new ArrayList<TalkClientMessage>();
         }
 
-        public void setContactId(int clientContactId) {
-            m_id = clientContactId;
+        public TalkClientContact getContact() {
+            return mContact;
         }
 
-        public void setNotificationData(List<TalkClientMessage> unseenMessages, boolean notify) {
-            m_unseenMessages = unseenMessages;
-            m_notify = notify;
+        public List<TalkClientMessage> getUnseenMessages() {
+            return mUnseenMessages;
         }
     }
 }

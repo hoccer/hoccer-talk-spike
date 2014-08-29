@@ -299,6 +299,15 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onMessageCreated(TalkClientMessage message) {
+        updateItemWithMessage(message);
+    }
+
+    @Override
+    public void onMessageDeleted(TalkClientMessage message) {
+        updateItemWithMessage(message);
+    }
+
+    private void updateItemWithMessage(TalkClientMessage message) {
         try {
             if (message.isIncoming()) {
                 TalkClientContact conversationContact = message.getConversationContact();
@@ -324,11 +333,8 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     @Override
-    public void onMessageDeleted(TalkClientMessage message) {
-    }
-
-    @Override
     public void onMessageUpdated(TalkClientMessage message) {
+        updateItemWithMessage(message);
     }
 
     @Override

@@ -139,7 +139,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     List<IXoContactListener> mContactListeners = new ArrayList<IXoContactListener>();
     List<IXoMessageListener> mMessageListeners = new ArrayList<IXoMessageListener>();
     List<IXoStateListener> mStateListeners = new ArrayList<IXoStateListener>();
-    List<IXoUnseenListener> mUnseenListeners = new ArrayList<IXoUnseenListener>();
     List<IXoTokenListener> mTokenListeners = new ArrayList<IXoTokenListener>();
     List<IXoAlertListener> mAlertListeners = new ArrayList<IXoAlertListener>();
 
@@ -410,16 +409,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mMessageListeners.remove(listener);
     }
 
-    public synchronized void registerUnseenListener(IXoUnseenListener listener) {
-        if (!mUnseenListeners.contains(listener)) {
-            mUnseenListeners.add(listener);
-        }
-    }
-
-    public synchronized void unregisterUnseenListener(IXoUnseenListener listener) {
-        mUnseenListeners.remove(listener);
-    }
-
     public synchronized void registerTransferListener(IXoTransferListenerOld listener) {
         mTransferAgent.registerListener(listener);
     }
@@ -446,19 +435,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public synchronized void unregisterAlertListener(IXoAlertListener listener) {
         mAlertListeners.remove(listener);
-    }
-
-    private void notifyUnseenMessages(boolean notify) {
-        LOG.debug("notifyUnseenMessages()");
-        List<TalkClientMessage> unseenMessages = null;
-        try {
-            unseenMessages = mDatabase.findUnseenMessages();
-        } catch (SQLException e) {
-            LOG.error("SQL error", e);
-        }
-        for(IXoUnseenListener listener: mUnseenListeners) {
-            listener.onUnseenMessages(unseenMessages, notify);
-        }
     }
 
     public boolean isIdle() {
@@ -2617,7 +2593,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
             }
 
-            notifyUnseenMessages(newMessage);
             messageFailed = false;
         } catch (GeneralSecurityException e) {
             reason = "decryption problem" + e;
@@ -3513,7 +3488,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 } catch (SQLException e) {
                     LOG.error("SQL error", e);
                 }
-                notifyUnseenMessages(false);
+
+                for(IXoMessageListener listener : mMessageListeners) {
+                    listener.onMessageUpdated(message);
+                }
             }
         });
     }
@@ -3536,9 +3514,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("error while saving a message which will never be sent since the receiver is blocked or the group is empty", e);
         }
 
-        int length = mMessageListeners.size();
-        for(int i = 0; i < length; i++) {
-            mMessageListeners.get(i).onMessageUpdated(message);
+        for(IXoMessageListener listener : mMessageListeners) {
+            listener.onMessageUpdated(message);
         }
     }
 
