@@ -214,6 +214,7 @@
 
     <!-- Multi image selection activity -->
     <string name="select_images_title">Bilder auswählen</string>
+    <string name="select_count">Auswählen (%1$s)</string>
 
     <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Gruppe löschen</string>
