@@ -315,30 +315,37 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         });
     }
 
-    @Override
-    public void onMessageCreated(TalkClientMessage message) {
+    private void updateItemForMessage(TalkClientMessage message) {
         try {
-            if (message.isIncoming()) {
-                TalkClientContact conversationContact = message.getConversationContact();
-                TalkClientContact contact;
-                if (conversationContact.isGroup()) {
-                    contact = mDatabase.findContactByGroupId(conversationContact.getGroupId(), false);
-                } else {
-                    contact = mDatabase.findContactByClientId(conversationContact.getClientId(), false);
-                }
-                if (contact == null) {
-                    return;
-                }
-                TalkClientContactItem item = (TalkClientContactItem) findContactItemForContent(contact);
-                if (item == null) { // the contact is not in our list so we won't update anything
-                    return;
-                }
+            TalkClientContact conversationContact = message.getConversationContact();
+            TalkClientContact contact;
+            if (conversationContact.isGroup()) {
+                contact = mDatabase.findContactByGroupId(conversationContact.getGroupId(), false);
+            } else {
+                contact = mDatabase.findContactByClientId(conversationContact.getClientId(), false);
+            }
+            if (contact == null) {
+                return;
+            }
+            TalkClientContactItem item = (TalkClientContactItem) findContactItemForContent(contact);
+            if (item != null) { // the contact is not in our list so we won't update anything
                 item.update();
-                notifyDataSetChanged();
             }
         } catch (SQLException e) {
             LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);
         }
+    }
+
+    @Override
+    public void onMessageCreated(TalkClientMessage message) {
+        updateItemForMessage(message);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -347,6 +354,14 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onMessageUpdated(TalkClientMessage message) {
+        updateItemForMessage(message);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
