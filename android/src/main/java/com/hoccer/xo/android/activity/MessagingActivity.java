@@ -1,7 +1,9 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.ActionBar;
-import android.content.*;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
@@ -20,7 +22,6 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
-import java.sql.SQLException;
 
 public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
@@ -31,7 +32,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     MessagingFragment mMessagingFragment;
 
     private IContentObject mClipboardAttachment;
-    private ContactIdReceiver mCheckIdReceiver;
 
     @Override
     protected int getLayoutResource() {
@@ -53,18 +53,10 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         // enable up navigation
         enableUpNavigation();
 
-        // register receiver for notification check
-        IntentFilter filter = new IntentFilter(ContactIdReceiver.class.getName());
-        filter.addAction(IntentHelper.ACTION_CHECK_ID_IN_CONVERSATION);
-        mCheckIdReceiver = new ContactIdReceiver();
-        registerReceiver(mCheckIdReceiver, filter);
-
         // handle converse intent
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
-            mCheckIdReceiver.setId(contactId);
-
             if (contactId == -1) {
                 LOG.error("invalid contact id");
             } else {
@@ -80,17 +72,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     @Override
     protected void onResume() {
         super.onResume();
-
-        Intent intent = getIntent();
-
-        // handle converse intent
-        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
-            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
-            mCheckIdReceiver.setId(contactId);
-            if (contactId == -1) {
-                LOG.error("invalid contact id");
-            }
-        }
     }
 
     @Override
@@ -100,7 +81,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(mCheckIdReceiver);
         super.onDestroy();
     }
 
@@ -221,22 +201,4 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         ft.replace(R.id.fl_messaging_fragment_container, fragment);
         ft.commit();
     }
-
-    private class ContactIdReceiver extends BroadcastReceiver {
-        private int mContactId;
-
-        public void setId(int id) {
-            mContactId = id;
-        }
-
-        @Override
-        public void onReceive(Context arg0, Intent arg1) {
-            Intent intent = new Intent();
-            intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
-            intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContactId);
-            sendBroadcast(intent);
-        }
-
-    }
-
 }
