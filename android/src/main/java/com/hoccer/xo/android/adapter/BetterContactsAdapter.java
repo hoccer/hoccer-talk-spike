@@ -330,6 +330,13 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
             TalkClientContactItem item = (TalkClientContactItem) findContactItemForContent(contact);
             if (item != null) { // the contact is not in our list so we won't update anything
                 item.update();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyDataSetChanged();
+                    }
+                });
             }
         } catch (SQLException e) {
             LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);
@@ -339,13 +346,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     @Override
     public void onMessageCreated(TalkClientMessage message) {
         updateItemForMessage(message);
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-            }
-        });
     }
 
     @Override
@@ -355,13 +355,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     @Override
     public void onMessageUpdated(TalkClientMessage message) {
         updateItemForMessage(message);
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-            }
-        });
     }
 
     @Override
