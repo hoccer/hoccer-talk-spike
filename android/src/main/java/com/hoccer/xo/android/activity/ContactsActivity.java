@@ -97,7 +97,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
             startActivity(intent);
         }
 
-        // check wether we should immediatly open the conversation with a contact
+        // check whether we should immediately open the conversation with a contact
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
@@ -110,27 +110,24 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        getXoClient().unregisterStateListener(this);
-
-        // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-
-        getXoClient().unregisterContactListener(this);
-
-        // TODO: done.
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         refreshEnvironmentUpdater(false);
         getXoClient().registerStateListener(this);
 
-        // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-
+        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
         getXoClient().registerContactListener(this);
         updateInvitationCount();
+        // TODO: done.
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getXoClient().unregisterStateListener(this);
+
+        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
+        getXoClient().unregisterContactListener(this);
         // TODO: done.
     }
 
@@ -139,29 +136,37 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         super.onDestroy();
         getXoClient().unregisterStateListener(this);
 
-        // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-
+        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
         getXoClient().unregisterContactListener(this);
-
         // TODO: done.
     }
 
     private void initWithShareIntent() {
-        Clipboard clipboard = Clipboard.get(this);
-        Intent intent = getIntent();
-        String type = intent.getType();
-        Uri contentUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
 
+        Intent shareIntent = getIntent();
+        String type = shareIntent.getType();
+        Uri contentUri = (Uri) shareIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+        // Factory method in IContentSelector expects content to  be in intent extra field 'data'
+        Intent dataIntent = new Intent();
+        dataIntent.setData(contentUri);
+
+        // Use selector mechanism to create IContentObject from share intent
         IContentObject contentObject = null;
-        if (type.startsWith("image/")) {
-            contentObject = getImageContentObject(contentUri);
-        } else if (type.startsWith("video/")) {
-            contentObject = getVideoContentObject(contentUri);
+        if(type.startsWith("image/")) {
+            contentObject =  getImageContentObject(dataIntent);
+        } else if(type.startsWith("video/")) {
+            contentObject =  getVideoContentObject(dataIntent);
         }
-        if (contentObject != null) {
+
+        if(contentObject != null) {
+            // Clipboard only works with TalkClientUpload and TalkClientDownload so we have to create one
+            // unfortunately this Upload object will be a dead entry in the database since the attachment selection recreates the Upoad Object
+            // see CompositionFragment.validateAndSendComposedMessage()
             TalkClientUpload attachmentUpload = SelectedContent.createAttachmentUpload(contentObject);
             try {
                 getXoDatabase().saveClientUpload(attachmentUpload);
+                Clipboard clipboard = Clipboard.get(this);
                 clipboard.storeAttachment(attachmentUpload);
                 Toast.makeText(this, getString(R.string.toast_stored_external_file_to_clipboard), Toast.LENGTH_LONG).show();
             } catch (SQLException e) {
@@ -170,20 +175,16 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         }
     }
 
-    private IContentObject getVideoContentObject(Uri uri) {
-        Intent intent = new Intent();
-        intent.setData(uri);
-
+    private IContentObject getVideoContentObject(Intent dataIntent) {
         VideoSelector videoSelector = new VideoSelector(this);
-        return videoSelector.createObjectFromSelectionResult(this, intent);
+        // a more generic and static way to obtain the ContentObject would be cool
+        return videoSelector.createObjectFromSelectionResult(this, dataIntent);
     }
 
-    private IContentObject getImageContentObject(Uri uri) {
-        Intent intent = new Intent();
-        intent.setData(uri);
-
+    private IContentObject getImageContentObject(Intent dataIntent) {
         ImageSelector imageSelector = new ImageSelector(this);
-        return imageSelector.createObjectFromSelectionResult(this, intent);
+        // a more generic and static way to obtain the ContentObject would be cool
+        return imageSelector.createObjectFromSelectionResult(this, dataIntent);
     }
 
     private void refreshEnvironmentUpdater(boolean force) {
@@ -315,8 +316,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     }
 
 
-    // TODO: remove this as soon as possible. THis is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-
+    // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
     private void updateInvitationCount() {
         int invitationsCount = getXoDatabase().findAllPendingFriendRequests().size();
         ActionBar.Tab invitationTab = mActionBar.getTabAt(1);
@@ -344,7 +344,12 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        updateInvitationCount();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateInvitationCount();
+            }
+        });
     }
 
     @Override
@@ -354,6 +359,5 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
     }
-
     // TODO: end
 }

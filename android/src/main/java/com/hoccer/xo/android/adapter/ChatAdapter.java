@@ -53,7 +53,6 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     protected List<ChatMessageItem> mChatMessageItems;
 
     private ListView mListView;
-    private List<Integer> mLastVisibleViews = new ArrayList<Integer>();
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
@@ -147,11 +146,6 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         super.onDestroy();
         getXoClient().unregisterMessageListener(this);
         getXoClient().unregisterTransferListener(this);
-
-        for (int i = 0; i < mLastVisibleViews.size(); ++i) {
-            int viewIndex = mLastVisibleViews.get(i);
-            getItem(viewIndex).setVisibility(false);
-        }
     }
 
     @Override
@@ -175,7 +169,6 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-
         ChatMessageItem chatItem = getItem(position);
 
         if (!chatItem.getMessage().isSeen()) {
@@ -187,8 +180,6 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         } else {
             convertView = chatItem.recycleViewForMessage(convertView);
         }
-
-        chatItem.setVisibility(true);
 
         return convertView;
     }

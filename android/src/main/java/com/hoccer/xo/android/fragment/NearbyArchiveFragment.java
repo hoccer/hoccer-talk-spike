@@ -21,49 +21,41 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-/**
- * Created by nico on 08/08/2014.
- */
+
 public class NearbyArchiveFragment extends ListFragment {
 
     static final Logger LOG = Logger.getLogger(NearbyArchiveFragment.class);
 
-    private AdapterView.OnItemClickListener mItemClickListener;
-    private DataSetObserver mDataSetObserver;
     private NearbyChatAdapter mAdapter;
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        mItemClickListener = setupOnItemClickListener();
-        mDataSetObserver = setupDataSetObserver(activity);
-    }
+    private DataSetObserver mDataSetObserver = new DataSetObserver() {
+        @Override
+        public void onChanged() {
+            super.onChanged();
+            if (mAdapter.getCount() == 0) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    Intent upIntent = getActivity().getParentActivityIntent();
+                    if (upIntent != null) {
+                        if (getActivity().shouldUpRecreateTask(upIntent)) {
+                            TaskStackBuilder.create(getActivity()).addNextIntentWithParentStack(upIntent).startActivities();
+                        } else {
+                            getActivity().navigateUpTo(upIntent);
+                        }
+                    } else {
+                        getActivity().onBackPressed();
+                    }
+                } else {
+                    getActivity().onBackPressed();
+                }
+            }
+        }
+    };
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getListView().setStackFromBottom(true);
-        getListView().setOnItemClickListener(mItemClickListener);
-        mAdapter = new NearbyChatAdapter(getListView(), (XoActivity) getActivity());
-        setListAdapter(mAdapter);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        getListAdapter().registerDataSetObserver(mDataSetObserver);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        getListAdapter().unregisterDataSetObserver(mDataSetObserver);
-        mDataSetObserver = null;
-        mAdapter = null;
-    }
-
-    private AdapterView.OnItemClickListener setupOnItemClickListener() {
-        return new AdapterView.OnItemClickListener() {
+        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (view.getTag().equals(TalkClientMessage.TYPE_SEPARATOR)) {
@@ -93,31 +85,21 @@ public class NearbyArchiveFragment extends ListFragment {
                             }, null);
                 }
             }
-        };
+        });
+
+        mAdapter = new NearbyChatAdapter(getListView(), (XoActivity) getActivity());
+        setListAdapter(mAdapter);
     }
 
-    private DataSetObserver setupDataSetObserver(final Activity activity) {
-        return new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                if (mAdapter.getCount() == 0) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        Intent upIntent = activity.getParentActivityIntent();
-                        if (upIntent != null) {
-                            if (activity.shouldUpRecreateTask(upIntent)) {
-                                TaskStackBuilder.create(getActivity()).addNextIntentWithParentStack(upIntent).startActivities();
-                            } else {
-                                activity.navigateUpTo(upIntent);
-                            }
-                        } else {
-                            activity.onBackPressed();
-                        }
-                    } else {
-                        activity.onBackPressed();
-                    }
-                }
-            }
-        };
+    @Override
+    public void onResume() {
+        super.onResume();
+        getListAdapter().registerDataSetObserver(mDataSetObserver);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getListAdapter().unregisterDataSetObserver(mDataSetObserver);
     }
 }
