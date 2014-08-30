@@ -58,7 +58,6 @@ public class GroupProfileFragment extends XoFragment
     private TextView mGroupNameText;
     private EditText mGroupNameEdit;
     private Button mGroupCreateButton;
-    private Button mMakePermanentButton;
     private LinearLayout mGroupMembersContainer;
     private TextView mGroupMembersTitle;
     private ListView mGroupMembersList;
@@ -118,14 +117,6 @@ public class GroupProfileFragment extends XoFragment
             }
         });
 
-        mMakePermanentButton = (Button) view.findViewById(R.id.profile_group_button_make_permanent);
-        mMakePermanentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mMakePermanentButton.setVisibility(View.GONE);
-                createGroupFromNearby(mGroupMemberAdapter.getMembersIds());
-            }
-        });
         mGroupMembersContainer = (LinearLayout) view.findViewById(R.id.profile_group_members_container);
         mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
         mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
@@ -240,17 +231,20 @@ public class GroupProfileFragment extends XoFragment
         MenuItem rejectInvitationItem = menu.findItem(R.id.menu_group_profile_reject_invitation);
         MenuItem joinGroupItem = menu.findItem(R.id.menu_group_profile_join);
         MenuItem leaveGroupItem = menu.findItem(R.id.menu_group_profile_leave);
+        MenuItem permanentGroupItem = menu.findItem(R.id.menu_group_profile_create_permanent_group);
 
         editGroupItem.setVisible(false);
         rejectInvitationItem.setVisible(false);
         joinGroupItem.setVisible(false);
         leaveGroupItem.setVisible(false);
+        permanentGroupItem.setVisible(false);
 
         if (mMode == Mode.CREATE_GROUP) {
             editGroupItem.setVisible(false);
-
         } else {
-            if (mGroup.getGroupPresence() != null && !mGroup.getGroupPresence().isTypeNearby()) {
+            if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
+                permanentGroupItem.setVisible(true);
+            } else {
                 if (mGroup.isEditable()) {
                     editGroupItem.setVisible(true);
                 } else {
@@ -311,6 +305,9 @@ public class GroupProfileFragment extends XoFragment
                             }
                         });
                 break;
+            case R.id.menu_group_profile_create_permanent_group:
+                createGroupFromNearby(mGroupMemberAdapter.getMembersIds());
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -320,6 +317,12 @@ public class GroupProfileFragment extends XoFragment
     }
 
     public void createGroupFromNearby(String[] clientIds) {
+
+        // workaround to prevent contacts list being updated while permanent group is not completely set up.
+        getXoClient().unregisterContactListener(this);
+        getXoClient().unregisterContactListener(mGroupMemberAdapter);
+        // workaround - end
+
         mMode = Mode.EDIT_GROUP;
         mCurrentClientsInGroup.addAll(getCurrentContactsFromGroup(Arrays.asList(clientIds)));
         mContactsToInvite.addAll(mCurrentClientsInGroup);
@@ -415,7 +418,6 @@ public class GroupProfileFragment extends XoFragment
 
         if(this.mGroup.getGroupPresence() != null && this.mGroup.getGroupPresence().isTypeNearby()) {
             mGroupNameText.setText(R.string.nearby_text);
-            mMakePermanentButton.setVisibility(View.VISIBLE);
         } else {
             mGroupNameText.setText(name);
         }

@@ -240,6 +240,8 @@
     <string name="menu_group_profile_reject_invitation">Einladung ablehnen</string>
     <string name="menu_group_profile_join">Gruppe beitreten</string>
     <string name="menu_group_profile_leave">Gruppe verlassen</string>
+    <string name="menu_group_profile_permanent">Permanente Gruppe erstellen</string>
+
     <string name="location">Standort</string>
     <string name="video">Video</string>
     <string name="show_location_instruction">Standort anzeigen</string>
