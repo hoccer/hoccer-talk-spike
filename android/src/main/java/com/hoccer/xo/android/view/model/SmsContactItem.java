@@ -14,6 +14,8 @@ import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
+import java.util.Date;
+
 public class SmsContactItem extends BaseContactItem implements SearchAdapter.Searchable{
 
     private static final Logger LOG = Logger.getLogger(SmsContactItem.class);
@@ -82,7 +84,12 @@ public class SmsContactItem extends BaseContactItem implements SearchAdapter.Sea
     }
 
     @Override
-    public long getTimeStamp() {
+    public long getMessageTimeStamp() {
+        return 0;
+    }
+
+    @Override
+    public long getContactCreationTimeStamp() {
         return 0;
     }
 

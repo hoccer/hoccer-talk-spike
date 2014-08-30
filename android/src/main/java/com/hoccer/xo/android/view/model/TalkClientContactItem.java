@@ -14,6 +14,7 @@ import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
+import com.j256.ormlite.field.DatabaseField;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +33,7 @@ public class TalkClientContactItem extends BaseContactItem implements SearchAdap
     private Date mLastMessageTimeStamp = null;
     private String mLastMessageText;
     private long mUnseenMessageCount = 0;
+    private Date mContactCreationTimeStamp = null;
 
     public TalkClientContactItem(TalkClientContact contact, Context context) {
         mContact = contact;
@@ -63,6 +65,11 @@ public class TalkClientContactItem extends BaseContactItem implements SearchAdap
             if (message != null) {
                 mLastMessageTimeStamp = message.getTimestamp();
                 updateLastMessageText(message);
+            }
+            TalkClientContact contact = XoApplication.getXoClient().getDatabase().findContactById(mContact.getClientContactId());
+            if (contact != null) {
+                mContact = contact;
+                mContactCreationTimeStamp = contact.getCreatedTimeStamp();
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
@@ -146,11 +153,19 @@ public class TalkClientContactItem extends BaseContactItem implements SearchAdap
     }
 
     @Override
-    public long getTimeStamp() {
+    public long getMessageTimeStamp() {
         if (mLastMessageTimeStamp == null) {
             return 0;
         }
         return mLastMessageTimeStamp.getTime();
+    }
+
+    @Override
+    public long getContactCreationTimeStamp() {
+        if (mContactCreationTimeStamp == null) {
+            return 0;
+        }
+        return mContactCreationTimeStamp.getTime();
     }
 
     @Override
