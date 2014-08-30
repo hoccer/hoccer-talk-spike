@@ -65,7 +65,7 @@ public class MessagingFragment extends XoListFragment
             }
 
             // log error if the contact was not found
-            if(mContact == null) {
+            if (mContact == null) {
                 LOG.error("Client contact with id '" + clientContactId + "' does not exist");
                 return;
             }
@@ -75,7 +75,7 @@ public class MessagingFragment extends XoListFragment
         }
 
         createCompositionFragment();
-        
+
         mMotionInterpreter = new MotionInterpreter(Gestures.Transaction.SHARE, getXoActivity(), mCompositionFragment);
     }
 
@@ -172,12 +172,18 @@ public class MessagingFragment extends XoListFragment
 
         // select client/group profile entry for appropriate icon
         if (mContact != null) {
+            getActivity().getActionBar().setTitle(mContact.getNickname());
+
             MenuItem clientItem = menu.findItem(R.id.menu_profile_single);
             clientItem.setVisible(mContact.isClient());
             MenuItem groupItem = menu.findItem(R.id.menu_profile_group);
             groupItem.setVisible(mContact.isGroup());
-            menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
-            getActivity().getActionBar().setTitle(mContact.getNickname());
+            MenuItem musicItem = menu.findItem(R.id.menu_audio_attachment_list);
+            musicItem.setVisible(true);
+
+            MenuItem permanentGroupItem = menu.findItem(R.id.menu_group_profile_create_permanent_group);
+            boolean shouldShow = (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby());
+            permanentGroupItem.setVisible(shouldShow);
         }
     }
 
@@ -185,22 +191,28 @@ public class MessagingFragment extends XoListFragment
     public boolean onOptionsItemSelected(MenuItem item) {
         LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
 
-        IMessagingFragmentManager mgr = (IMessagingFragmentManager) getActivity();
+        IMessagingFragmentManager messagingFragmentManager = (IMessagingFragmentManager) getActivity();
         switch (item.getItemId()) {
             case R.id.menu_profile_single:
-                if (mContact != null && mgr != null) {
-                    mgr.showSingleProfileFragment(mContact.getClientContactId());
+                if (mContact != null && messagingFragmentManager != null) {
+                    messagingFragmentManager.showSingleProfileFragment(mContact.getClientContactId());
                 }
                 break;
             case R.id.menu_profile_group:
-                if (mContact != null && mgr != null) {
-                    mgr.showGroupProfileFragment(mContact.getClientContactId());
+                if (mContact != null && messagingFragmentManager != null) {
+                    messagingFragmentManager.showGroupProfileFragment(mContact.getClientContactId());
                 }
                 break;
             case R.id.menu_audio_attachment_list:
                 if (mContact != null) {
                     showAudioAttachmentList();
                 }
+                break;
+            case R.id.menu_group_profile_create_permanent_group:
+                if (mContact != null && messagingFragmentManager != null) {
+                    messagingFragmentManager.showGroupProfileFragment(mContact.getClientContactId(), true);
+                }
+                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -234,7 +246,7 @@ public class MessagingFragment extends XoListFragment
     public void configureMotionInterpreterForContact(TalkClientContact contact) {
         // react on gestures only when contact is nearby
         if (contact != null && (contact.isNearby() ||
-            (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()))) {
+                (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()))) {
             mMotionInterpreter.activate();
         } else {
             mMotionInterpreter.deactivate();
