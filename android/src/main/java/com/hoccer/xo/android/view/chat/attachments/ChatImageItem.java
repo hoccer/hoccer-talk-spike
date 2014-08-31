@@ -23,13 +23,11 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     private static final double WIDTH_SCALE_FACTOR = 0.8;
     private static final double IMAGE_SCALE_FACTOR = 0.3;
 
-    private Context mContext;
     private int mImageWidth;
     private RelativeLayout mRootView;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
         super(context, message);
-        mContext = context;
 
         setRequiredImageWidth();
     }
