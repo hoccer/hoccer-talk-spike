@@ -61,7 +61,7 @@ public class XoClientService extends Service {
 
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
-    private static final long NOTIFICATION_ALARM_BACKOFF = 5000;
+    private static final long NOTIFICATION_ALARM_BACKOFF = 10000;
     private static final long NOTIFICATION_CANCEL_BACKOFF = 2000;
     private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
     private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
@@ -132,7 +132,7 @@ public class XoClientService extends Service {
     /**
      * Time of last notification (for cancellation backoff)
      */
-    long mNotificationTimestamp;
+    long mTimeOfLastAlarm;
 
     ClientListener mClientListener;
 
@@ -556,11 +556,10 @@ public class XoClientService extends Service {
         // determine where we are in time
         // do not sound alarms overly often (sound, vibrate)
         long now = System.currentTimeMillis();
-        long timeSinceLastNotification = Math.max(0, now - mNotificationTimestamp);
+        long timeSinceLastNotification = Math.max(0, now - mTimeOfLastAlarm);
         if (timeSinceLastNotification < NOTIFICATION_ALARM_BACKOFF) {
             doAlarm = false;
         }
-        mNotificationTimestamp = now;
 
         // collect unseen messages by contact
         Map<Integer, ContactUnseenMessageHolder> contactsMap = new HashMap<Integer, ContactUnseenMessageHolder>();
@@ -627,6 +626,8 @@ public class XoClientService extends Service {
         // determine if alarms should be sounded
         if (doAlarm) {
             builder.setDefaults(Notification.DEFAULT_ALL);
+            long now = System.currentTimeMillis();
+            mTimeOfLastAlarm = now;
         }
 
         // set total number of messages of more than one
@@ -724,7 +725,7 @@ public class XoClientService extends Service {
 
     private void cancelMessageNotification() {
         long now = System.currentTimeMillis();
-        long cancelTime = mNotificationTimestamp + NOTIFICATION_CANCEL_BACKOFF;
+        long cancelTime = mTimeOfLastAlarm + NOTIFICATION_CANCEL_BACKOFF;
         long delay = Math.max(0, cancelTime - now);
         mExecutor.schedule(new Runnable() {
             @Override
