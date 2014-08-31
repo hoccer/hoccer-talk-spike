@@ -70,9 +70,6 @@ public class XoClientService extends Service {
     private static final String sPreferenceDownloadLimitMobileKey = "preference_download_limit_mobile";
     private static final String sPreferenceDownloadLimitWifiKey = "preference_download_limit_wifi";
 
-//    private int mUploadLimit = -1;
-//    private int mDownloadLimit = -1;
-
     /**
      * Executor for ourselves and the client
      */
@@ -205,7 +202,8 @@ public class XoClientService extends Service {
             mClient.unregisterTransferListener(mClientListener);
             mClientListener = null;
         }
-        // XXX unregister client listeners
+
+        // unregister client listeners
         if (mPreferencesListener != null) {
             mPreferences.unregisterOnSharedPreferenceChangeListener(mPreferencesListener);
             mPreferencesListener = null;
@@ -390,11 +388,11 @@ public class XoClientService extends Service {
 
     private void doShutdown() {
         LOG.info("shutting down");
-        // command the client to deactivate
+
         if (mClient.isActivated()) {
             mClient.deactivateNow();
         }
-        // stop ourselves
+
         stopSelf();
     }
 
@@ -471,33 +469,29 @@ public class XoClientService extends Service {
         }
     }
 
-    private void updateInvitateNotification(List<TalkClientSmsToken> unconfirmedTokens,
-                                            boolean notify) {
-        LOG.debug("updateInvitateNotification()");
-        XoClientDatabase db = mClient.getDatabase();
-
+    private void updateInvitateNotification(List<TalkClientSmsToken> unconfirmedTokens, boolean doAlarm) {
         // cancel present notification if everything has been seen
         // we back off here to prevent interruption of any in-progress alarms
         if (unconfirmedTokens == null || unconfirmedTokens.isEmpty()) {
-            LOG.debug("no unconfirmed tokens");
             mNotificationManager.cancel(NOTIFICATION_UNCONFIRMED_INVITATIONS);
             return;
         }
 
-        int numUnconfirmed = unconfirmedTokens.size();
+        createInvitationNotification(unconfirmedTokens.size(), doAlarm);
+    }
 
-        // log about what we got
-        LOG.debug("notifying " + numUnconfirmed + " invitations ");
-
+    private void createInvitationNotification(int numUnconfirmed, boolean doAlarm) {
         // build the notification
         Notification.Builder builder = new Notification.Builder(this);
+
         // always set the small icon (should be different depending on if we have a large one)
         builder.setSmallIcon(R.drawable.ic_notification);
-        // large icon XXX
+
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
         builder.setLargeIcon(largeIcon);
+
         // determine if alarms should be sounded
-        if (notify) {
+        if (doAlarm) {
             builder.setDefaults(Notification.DEFAULT_ALL);
         }
         // set total number of messages of more than one
@@ -531,6 +525,7 @@ public class XoClientService extends Service {
         }
         // log about it
         LOG.debug("invite notification " + notification.toString());
+
         // update the notification
         mNotificationManager.notify(NOTIFICATION_UNCONFIRMED_INVITATIONS, notification);
     }
@@ -547,8 +542,9 @@ public class XoClientService extends Service {
             return;
         }
 
+        // if we have no messages cancel notification
         if (unseenMessages.size() == 0) {
-            cancelMessageNotification();
+            mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
             return;
         }
 
@@ -589,9 +585,9 @@ public class XoClientService extends Service {
             }
         }
 
-        // if we have no messages after culling then cancel notification
+        // if we have no messages after culling cancel notification
         if (contactsMap.size() == 0) {
-            cancelMessageNotification();
+            mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
             return;
         }
 
@@ -720,15 +716,6 @@ public class XoClientService extends Service {
             }
         }
         return false;
-    }
-
-    private void cancelMessageNotification() {
-        mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
-            }
-        }, 0, TimeUnit.MILLISECONDS);
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
