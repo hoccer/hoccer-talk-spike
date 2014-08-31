@@ -37,29 +37,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     }
 
     @Override
-    public void detachView() {
-        // check for null in case display attachment has not yet been called
-        if (mRootView != null) {
-            mRootView.removeOnLayoutChangeListener(this);
-            ImageView targetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
-            if (targetView != null) {
-                Picasso.with(mContext).cancelRequest(targetView);
-            }
-        }
-    }
-
-    @Override
-    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        ImageView targetView = (ImageView) v.findViewById(R.id.iv_picture);
-        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
-                .error(R.drawable.ic_img_placeholder_error)
-                .resize((int) (targetView.getWidth() * IMAGE_SCALE_FACTOR), (int) (targetView.getHeight() * IMAGE_SCALE_FACTOR))
-                .centerInside()
-                .into(targetView);
-        v.removeOnLayoutChangeListener(this);
-    }
-
-    @Override
     protected void configureViewForMessage(View view) {
         super.configureViewForMessage(view);
         configureAttachmentViewForMessage(view);
@@ -79,7 +56,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
         mContentWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayImage(contentObject);
+                openImage(contentObject);
             }
         });
 
@@ -104,7 +81,30 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
         }
     }
 
-    private void displayImage(IContentObject contentObject) {
+    @Override
+    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+        ImageView targetView = (ImageView) v.findViewById(R.id.iv_picture);
+        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
+                .error(R.drawable.ic_img_placeholder_error)
+                .resize((int) (targetView.getWidth() * IMAGE_SCALE_FACTOR), (int) (targetView.getHeight() * IMAGE_SCALE_FACTOR))
+                .centerInside()
+                .into(targetView);
+        v.removeOnLayoutChangeListener(this);
+    }
+
+    @Override
+    public void detachView() {
+        // check for null in case display attachment has not yet been called
+        if (mRootView != null) {
+            mRootView.removeOnLayoutChangeListener(this);
+            ImageView targetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
+            if (targetView != null) {
+                Picasso.with(mContext).cancelRequest(targetView);
+            }
+        }
+    }
+
+    private void openImage(IContentObject contentObject) {
         if (contentObject.getContentDataUrl() == null) {
             return;
         }
