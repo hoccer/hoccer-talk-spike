@@ -531,8 +531,6 @@ public class XoClientService extends Service {
     }
 
     private void updateMessageNotification(boolean doAlarm) {
-        LOG.debug("updateMessageNotification()");
-
         XoClientDatabase database = mClient.getDatabase();
         List<TalkClientMessage> unseenMessages;
         try {
@@ -602,13 +600,6 @@ public class XoClientService extends Service {
         }
 
         buildMessageNotification(contactsMap, doAlarm);
-
-        // log all unseen messages found
-        StringBuilder logMessage = new StringBuilder("Notifying about unseen messages: ");
-        for (ContactUnseenMessageHolder holder : contactsMap.values()) {
-            logMessage.append(holder.getContact().getNickname()).append("(").append(holder.getUnseenMessages().size()).append(") ");
-        }
-        LOG.debug(logMessage);
     }
 
     private void buildMessageNotification(Map<Integer, ContactUnseenMessageHolder> contactsMap, boolean doAlarm) {
@@ -708,11 +699,16 @@ public class XoClientService extends Service {
         } else {
             notification = builder.getNotification();
         }
-        // log about it
-        LOG.debug("message notification " + notification.toString());
 
         // update the notification
         mNotificationManager.notify(NOTIFICATION_UNSEEN_MESSAGES, notification);
+
+        // log all unseen messages found
+        StringBuilder logMessage = new StringBuilder("Notifying about unseen messages: ");
+        for (ContactUnseenMessageHolder holder : contactsMap.values()) {
+            logMessage.append(holder.getContact().getNickname()).append("(").append(holder.getUnseenMessages().size()).append(") ");
+        }
+        LOG.debug(logMessage);
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
