@@ -536,7 +536,7 @@ public class XoClientService extends Service {
         mNotificationManager.notify(NOTIFICATION_UNCONFIRMED_INVITATIONS, notification);
     }
 
-    private void updateMessageNotification() {
+    private void updateMessageNotification(boolean doAlarm) {
         LOG.debug("updateMessageNotification()");
 
         XoClientDatabase database = mClient.getDatabase();
@@ -557,7 +557,6 @@ public class XoClientService extends Service {
         // do not sound alarms overly often (sound, vibrate)
         long now = System.currentTimeMillis();
         long timeSinceLastNotification = Math.max(0, now - mNotificationTimestamp);
-        boolean doAlarm = true;
         if (timeSinceLastNotification < NOTIFICATION_ALARM_BACKOFF) {
             doAlarm = false;
         }
@@ -851,21 +850,21 @@ public class XoClientService extends Service {
         @Override
         public void onMessageCreated(TalkClientMessage message) {
             if (!message.isOutgoing()) {
-                updateMessageNotification();
+                updateMessageNotification(true);
             }
         }
 
         @Override
         public void onMessageUpdated(TalkClientMessage message) {
             if (!message.isOutgoing()) {
-                updateMessageNotification();
+                updateMessageNotification(false);
             }
         }
 
         @Override
         public void onMessageDeleted(TalkClientMessage message) {
             if (!message.isOutgoing()) {
-                updateMessageNotification();
+                updateMessageNotification(false);
             }
         }
     }
