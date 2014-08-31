@@ -7,7 +7,7 @@
       android:id="@+id/selectBtn"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:text="Select"
+      android:text="@string/select_count"
       android:layout_alignParentBottom="true"
       android:layout_centerHorizontal="true"/>
 

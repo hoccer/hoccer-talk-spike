@@ -15,7 +15,6 @@
     <string name="common_accept">Accept</string>
     <string name="common_delete">Delete</string>
 
-
     <!-- Menu entries -->
     <string name="menu_my_profile">My profile</string>
     <string name="menu_pair">Pair with someone</string>
@@ -201,7 +200,8 @@
     <!-- Attachment type selection dialog -->
     <string name="selectattachment_title">Select attachment</string>
 
-    <!-- Name setting dialog -->
+
+  <!-- Name setting dialog -->
     <string name="setname_title">Change your name</string>
 
     <!-- Contact deletion dialog -->
@@ -228,10 +228,11 @@
     <!-- Location selection activity -->
     <string name="selectlocation_title">Select location</string>
 
-    <!-- Location selection activity -->
+    <!-- Multi image selection activity -->
     <string name="select_images_title">Select images</string>
+    <string name="select_count">Select (%1$s)</string>
 
-  <!-- Group leave dialog -->
+    <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Delete group</string>
     <string name="dialog_delete_group_message">Are you sure you want to delete this group?</string>
     <string name="dialog_reject_group_invitation_title">Reject invitation</string>
@@ -407,5 +408,6 @@
     <string name="attachment_failed">Error while downloading File.</string>
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
     <string name="toast_stored_external_file_to_clipboard">Your file has been stored in the clipboard.</string>
+
 
 </resources>
