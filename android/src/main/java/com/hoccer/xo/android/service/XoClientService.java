@@ -62,7 +62,6 @@ public class XoClientService extends Service {
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
     private static final long NOTIFICATION_ALARM_BACKOFF = 10000;
-    private static final long NOTIFICATION_CANCEL_BACKOFF = 2000;
     private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
     private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
 
@@ -724,15 +723,12 @@ public class XoClientService extends Service {
     }
 
     private void cancelMessageNotification() {
-        long now = System.currentTimeMillis();
-        long cancelTime = mTimeOfLastAlarm + NOTIFICATION_CANCEL_BACKOFF;
-        long delay = Math.max(0, cancelTime - now);
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
             }
-        }, delay, TimeUnit.MILLISECONDS);
+        }, 0, TimeUnit.MILLISECONDS);
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
