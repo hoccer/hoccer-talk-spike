@@ -45,7 +45,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     @Override
     protected void displayAttachment(final IContentObject contentObject) {
         super.displayAttachment(contentObject);
-        mAttachmentView.setPadding(0, 0, 0, 0);
+
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -60,6 +60,7 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
             }
         });
 
+        mAttachmentView.setPadding(0, 0, 0, 0);
         mAttachmentView.setBackgroundDrawable(null);
 
         double aspectRatio = contentObject.getContentAspectRatio();
@@ -71,7 +72,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
         mRootView.getLayoutParams().height = height;
 
         ImageView overlayView = (ImageView) mRootView.findViewById(R.id.iv_picture_overlay);
-
         if (mMessage.isIncoming()) {
             mRootView.setGravity(Gravity.LEFT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));

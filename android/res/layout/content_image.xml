@@ -15,7 +15,8 @@
       android:layout_alignParentBottom="true"
       android:adjustViewBounds="true"/>
 
-  <ImageView android:id="@+id/iv_picture_overlay" android:layout_width="match_parent"
+  <ImageView android:id="@+id/iv_picture_overlay"
+             android:layout_width="match_parent"
              android:layout_height="match_parent"/>
 
 </RelativeLayout>
