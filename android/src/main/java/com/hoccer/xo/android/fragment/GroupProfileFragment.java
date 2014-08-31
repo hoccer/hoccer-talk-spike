@@ -27,6 +27,7 @@ import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -63,6 +64,7 @@ public class GroupProfileFragment extends XoFragment
     private LinearLayout mGroupMembersContainer;
     private TextView mGroupMembersTitle;
     private ListView mGroupMembersList;
+    @Nullable
     private ContactsAdapter mGroupMemberAdapter;
 
     private TalkClientContact mGroup;
@@ -74,6 +76,7 @@ public class GroupProfileFragment extends XoFragment
     private ArrayList<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteToGroup = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
+    private ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -484,28 +487,6 @@ public class GroupProfileFragment extends XoFragment
         });
     }
 
-    private void updateInviteButton() {
-        if(mInviteAllButton.getVisibility() == View.VISIBLE) {
-            Boolean invited = (Boolean) mInviteAllButton.getTag();
-            String buttonText = "";
-            if(invited) {
-                int numberOfInvitedClients = mContactsToInviteAsFriend.size();
-                buttonText = String.format(getString(R.string.nearby_disinvite_all), numberOfInvitedClients);
-            } else {
-                List<TalkClientContact> clientContacts = getCurrentContactsFromGroup(Arrays.asList(mGroupMemberAdapter.getMembersIds()));
-                int clientsInGroup = 0;
-                for(TalkClientContact contact : clientContacts) {
-                    TalkRelationship relationship = contact.getClientRelationship();
-                    if(relationship != null && !relationship.isRelated()) {
-                        clientsInGroup++;
-                    }
-                }
-                buttonText = String.format(getString(R.string.nearby_invite_all), clientsInGroup);
-            }
-            mInviteAllButton.setText(buttonText);
-        }
-    }
-
     private void createGroup() {
         mMode = Mode.CREATE_GROUP;
 
@@ -568,7 +549,6 @@ public class GroupProfileFragment extends XoFragment
     public void onContactAdded(TalkClientContact contact) {
         LOG.debug("onContactAdded");
         if (isCurrentGroup(contact)) {
-
             saveEditedGroup();
 
             final GroupProfileFragment fragment = this;
@@ -594,6 +574,22 @@ public class GroupProfileFragment extends XoFragment
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
+        if (mGroupMemberAdapter == null) {
+            return;
+        }
+
+        if(mContactsToDisinviteAsFriend.contains(contact)) {
+            TalkRelationship relationship = contact.getClientRelationship();
+            if(relationship != null && relationship.isFriend()) {
+                mContactsToDisinviteAsFriend.remove(contact);
+            }
+        }
+        getXoActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateInviteButton();
+            }
+        });
     }
 
     @Override
@@ -604,6 +600,7 @@ public class GroupProfileFragment extends XoFragment
                 public void run() {
                     refreshContact(contact);
                     updateActionBar();
+                    updateInviteButton();
                 }
             });
         }
@@ -617,6 +614,7 @@ public class GroupProfileFragment extends XoFragment
                 public void run() {
                     refreshContact(contact);
                     updateActionBar();
+                    updateInviteButton();
                 }
             });
         }
@@ -629,42 +627,67 @@ public class GroupProfileFragment extends XoFragment
                 enterAvatarEditMode();
                 break;
             case R.id.profile_group_button_invite_all:
-                Boolean isInviting = (Boolean) mInviteAllButton.getTag();
-                if(isInviting) {
-                    disinviteAllMemberAsFriends();
-                } else {
+                if(mContactsToDisinviteAsFriend.isEmpty()) {
                     inviteAllMemberAsFriends();
+                } else {
+                    disinviteAllMemberAsFriends();
                 }
                 break;
         }
     }
 
-    private void inviteAllMemberAsFriends() {
+    private void updateInviteButton() {
+        if(mGroupMemberAdapter == null) {
+            return;
+        }
+        updateContactsToInviteAsFriend();
+        if(mInviteAllButton.getVisibility() == View.VISIBLE) {
+            String buttonText = "";
+            if(mContactsToDisinviteAsFriend.isEmpty()) {
+                int numberOfClients = mContactsToInviteAsFriend.size();
+                buttonText = String.format(getString(R.string.nearby_invite_all), numberOfClients);
+            } else {
+                int numberOfInvitedClients = mContactsToDisinviteAsFriend.size();
+                buttonText = String.format(getString(R.string.nearby_disinvite_all), numberOfInvitedClients);
+            }
+            mInviteAllButton.setText(buttonText);
+        }
+    }
+
+    private void updateContactsToInviteAsFriend() {
         mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
+        if(mGroupMemberAdapter == null) {
+            return;
+        }
         List<TalkClientContact> nearbyContacts = getCurrentContactsFromGroup(Arrays.asList(mGroupMemberAdapter.getMembersIds()));
         int length = nearbyContacts.size();
         for (int i = 0; i <length; i++) {
             TalkClientContact contact = nearbyContacts.get(i);
             TalkRelationship relationship = contact.getClientRelationship();
-            if(relationship != null && !relationship.isRelated()) {
+            if(relationship == null || !relationship.isRelated()) {
                 mContactsToInviteAsFriend.add(contact);
-                getXoClient().inviteFriend(contact);
             }
         }
-        mInviteAllButton.setTag(Boolean.TRUE);
+    }
+
+    private void inviteAllMemberAsFriends() {
+        if(mContactsToInviteAsFriend.isEmpty()) {
+            return;
+        }
+        mContactsToDisinviteAsFriend.clear();
+        mContactsToDisinviteAsFriend.addAll(mContactsToInviteAsFriend);
+        for(TalkClientContact contact : mContactsToInviteAsFriend) {
+            getXoClient().inviteFriend(contact);
+        }
         updateInviteButton();
     }
 
     private void disinviteAllMemberAsFriends() {
-        for(TalkClientContact contact : mContactsToInviteAsFriend) {
+        for(TalkClientContact contact : mContactsToDisinviteAsFriend) {
             getXoClient().disinviteFriend(contact);
         }
-        mContactsToInviteAsFriend.clear();
-        mInviteAllButton.setTag(Boolean.FALSE);
+        mContactsToDisinviteAsFriend.clear();
         updateInviteButton();
-    }
-
-    private void inviteOrDisinviteAllMembers() {
     }
 
     private void enterAvatarEditMode() {
