@@ -568,8 +568,18 @@ public class XoClientService extends Service {
                     continue;
                 }
 
-                // ignore unseen messages from deleted clients, non-friend clients and clients we are currently conversing with
-                if (contact.isDeleted() || !contact.isClientFriend() || mCurrentConversationContactId == contact.getClientContactId()) {
+                // ignore unseen messages from deleted contacts and contacts we are currently conversing with
+                if (contact.isDeleted() || mCurrentConversationContactId == contact.getClientContactId()) {
+                    continue;
+                }
+
+                // ignore clients with whom we are not befriended
+                if(contact.isClient() && !contact.isClientFriend()) {
+                    continue;
+                }
+
+                // ignore groups which we are not joined with yet
+                if(contact.isGroup() && !contact.isGroupJoined()) {
                     continue;
                 }
 
