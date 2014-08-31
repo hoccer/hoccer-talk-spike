@@ -126,7 +126,7 @@ public class XoClientService extends Service {
     NotificationManager mNotificationManager;
 
     /**
-     * Time of last notification (for cancellation backoff)
+     * Time of last notification
      */
     long mTimeOfLastAlarm;
 
@@ -569,7 +569,7 @@ public class XoClientService extends Service {
                 }
 
                 // ignore unseen messages from deleted clients, non-friend clients and clients we are currently conversing with
-                if (contact.isDeleted() || !contact.isClientFriend() || isUserConversingWithContact(contact.getClientContactId())) {
+                if (contact.isDeleted() || !contact.isClientFriend() || mCurrentConversationContactId == contact.getClientContactId()) {
                     continue;
                 }
 
@@ -703,19 +703,6 @@ public class XoClientService extends Service {
 
         // update the notification
         mNotificationManager.notify(NOTIFICATION_UNSEEN_MESSAGES, notification);
-    }
-
-    private boolean isUserConversingWithContact(int contactId) {
-        if (mCurrentConversationContactId == contactId) {
-            // check if the messaging activity is actually on top
-            ActivityManager activityManager = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-            ActivityManager.RunningTaskInfo taskInfo = activityManager.getRunningTasks(1).get(0);
-            if (taskInfo != null) {
-                String className = taskInfo.topActivity.getShortClassName();
-                return className.equalsIgnoreCase(MessagingActivity.class.getName());
-            }
-        }
-        return false;
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
