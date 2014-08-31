@@ -77,8 +77,6 @@ public class ContactOperations {
         context.startActivity(intent);
     }
 
-
-
     public static void sendEMail(Context context, String subject, String message, String[] recipients) {
         LOG.debug("Sending EMail with message: " + message);
 

@@ -15,7 +15,6 @@
     <string name="common_accept">Accept</string>
     <string name="common_delete">Delete</string>
 
-
     <!-- Menu entries -->
     <string name="menu_my_profile">My profile</string>
     <string name="menu_pair">Pair with someone</string>
@@ -154,7 +153,6 @@
     <string name="group_name_hint">Group name</string>
     <string name="profile_group_members_title">Members</string>
     <string name="profile_group_create_button">Create group</string>
-    <string name="profile_group_permanent_button">Create permanent group</string>
     <string name="profile_group_join_button">Join group</string>
     <string name="profile_group_invite_button">Invite users to this Group</string>
     <string name="profile_group_leave_button">Leave this Group</string>
@@ -228,10 +226,11 @@
     <!-- Location selection activity -->
     <string name="selectlocation_title">Select location</string>
 
-    <!-- Location selection activity -->
+    <!-- Multi image selection activity -->
     <string name="select_images_title">Select images</string>
+    <string name="select_count">Select (%1$s)</string>
 
-  <!-- Group leave dialog -->
+    <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Delete group</string>
     <string name="dialog_delete_group_message">Are you sure you want to delete this group?</string>
     <string name="dialog_reject_group_invitation_title">Reject invitation</string>
@@ -257,6 +256,8 @@
     <string name="menu_group_profile_reject_invitation">Reject invitation</string>
     <string name="menu_group_profile_join">Join group</string>
     <string name="menu_group_profile_leave">Leave group</string>
+    <string name="menu_group_profile_permanent">Create permanent group</string>
+
     <string name="location">Location</string>
     <string name="video">Video</string>
     <string name="show_location_instruction">Use button to show on map</string>

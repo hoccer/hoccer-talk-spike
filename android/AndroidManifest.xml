@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.hoccer.xo.release"
 
-          android:versionCode="74"
+          android:versionCode="75"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -189,6 +189,7 @@
                 android:name="com.hoccer.xo.android.activity.SingleProfileActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait"
+                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:windowSoftInputMode="stateHidden">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
@@ -200,17 +201,12 @@
                 android:name="com.hoccer.xo.android.activity.GroupProfileActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:windowSoftInputMode="stateHidden">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
         </activity>
 
         <!-- Pairing activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.PairingActivity"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait">
             <intent-filter>
@@ -233,11 +229,7 @@
         <activity
                 android:name="com.hoccer.xo.android.activity.XoPreferenceActivity"
                 android:label="@string/actionbar_default_title"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:screenOrientation="portrait">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
         </activity>
 
         <!--Legal Imprint activity-->

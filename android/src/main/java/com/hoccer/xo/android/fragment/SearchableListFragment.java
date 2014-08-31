@@ -15,6 +15,9 @@ import android.widget.SearchView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
+/**
+ * Base class providing list search support.
+ */
 public abstract class SearchableListFragment extends ListFragment {
 
     private static final Logger LOG = Logger.getLogger(SearchableListFragment.class);
@@ -45,7 +48,9 @@ public abstract class SearchableListFragment extends ListFragment {
     @Override
     public void onPause() {
         super.onPause();
-        mSearchMenuItem.collapseActionView();
+        if(mSearchMenuItem != null) {
+            mSearchMenuItem.collapseActionView();
+        }
         leaveSearchMode();
     }
 

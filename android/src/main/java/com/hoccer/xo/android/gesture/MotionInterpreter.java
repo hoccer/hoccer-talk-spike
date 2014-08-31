@@ -125,9 +125,11 @@ public class MotionInterpreter implements SensorEventListener {
     private void handleGesture(long pTimestamp, int pGesture) {
         if (pGesture != Gestures.NO_GESTURE
                 && (pTimestamp - mLastGestureTime > GESTURE_EXCLUSION_TIMESPAN)) {
-
-            mListener.onMotionGesture(pGesture);
             LOG.debug(LOG_TAG + " Gesture detected: " + Gestures.GESTURE_NAMES.get(pGesture));
+
+            if(mListener != null) {
+                mListener.onMotionGesture(pGesture);
+            }
 
             mLastGestureTime = pTimestamp;
             mFeatureHistory.clear();

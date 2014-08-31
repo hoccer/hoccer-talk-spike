@@ -282,7 +282,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
                         database.findClientMessageByTalkClientUploadId(transfer.getUploadOrDownloadId()) :
                         database.findClientMessageByTalkClientDownloadId(transfer.getUploadOrDownloadId());
 
-                if(message == null || !mContact.equals(message.getConversationContact())) {
+                if(message == null || !mContact.equals(message.getSenderContact())) {
                     return false;
                 }
             } catch (SQLException e) {
