@@ -75,7 +75,7 @@
     <string name="dialog_confirm_nearby_deletion_message">Do you really want to delete messages from this group?</string>
 
     <!-- Invitation dialog -->
-    <string name="dialog_invite">Invite</string>
+    <string name="multi_invitation_button">continue</string>
     <string name="dialog_cancel">Cancel</string>
 
     <!-- Contact list items -->
