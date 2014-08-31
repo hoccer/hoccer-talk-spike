@@ -3506,7 +3506,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    public void markMessagesAsAborted(TalkClientMessage message) {
+    public void markMessageAsAborted(TalkClientMessage message) {
         message.getOutgoingDelivery().setState(TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
         try {
             mDatabase.saveDelivery(message.getOutgoingDelivery());
