@@ -153,7 +153,6 @@
     <string name="group_name_hint">Group name</string>
     <string name="profile_group_members_title">Members</string>
     <string name="profile_group_create_button">Create group</string>
-    <string name="profile_group_permanent_button">Make permanent</string>
     <string name="profile_group_join_button">Join group</string>
     <string name="profile_group_invite_button">Invite users to this Group</string>
     <string name="profile_group_leave_button">Leave this Group</string>
@@ -200,8 +199,7 @@
     <!-- Attachment type selection dialog -->
     <string name="selectattachment_title">Select attachment</string>
 
-
-  <!-- Name setting dialog -->
+    <!-- Name setting dialog -->
     <string name="setname_title">Change your name</string>
 
     <!-- Contact deletion dialog -->
@@ -258,6 +256,8 @@
     <string name="menu_group_profile_reject_invitation">Reject invitation</string>
     <string name="menu_group_profile_join">Join group</string>
     <string name="menu_group_profile_leave">Leave group</string>
+    <string name="menu_group_profile_permanent">Create permanent group</string>
+
     <string name="location">Location</string>
     <string name="video">Video</string>
     <string name="show_location_instruction">Use button to show on map</string>
@@ -408,6 +408,10 @@
     <string name="attachment_failed">Error while downloading File.</string>
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
     <string name="toast_stored_external_file_to_clipboard">Your file has been stored in the clipboard.</string>
+
+    <!-- Nearby all invite texts -->
+    <string name="nearby_invite_all">invite %1$d group members as friend</string>
+    <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
 
 
 </resources>

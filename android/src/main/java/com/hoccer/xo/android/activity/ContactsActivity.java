@@ -153,13 +153,13 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
         // Use selector mechanism to create IContentObject from share intent
         IContentObject contentObject = null;
-        if(type.startsWith("image/")) {
-            contentObject =  getImageContentObject(dataIntent);
-        } else if(type.startsWith("video/")) {
-            contentObject =  getVideoContentObject(dataIntent);
+        if (type.startsWith("image/")) {
+            contentObject = getImageContentObject(dataIntent);
+        } else if (type.startsWith("video/")) {
+            contentObject = getVideoContentObject(dataIntent);
         }
 
-        if(contentObject != null) {
+        if (contentObject != null) {
             // Clipboard only works with TalkClientUpload and TalkClientDownload so we have to create one
             // unfortunately this Upload object will be a dead entry in the database since the attachment selection recreates the Upoad Object
             // see CompositionFragment.validateAndSendComposedMessage()
@@ -318,16 +318,24 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
     // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
     private void updateInvitationCount() {
-        int invitationsCount = getXoDatabase().findAllPendingFriendRequests().size();
-        ActionBar.Tab invitationTab = mActionBar.getTabAt(1);
-        String[] tabs = getResources().getStringArray(R.array.tab_names);
-        String tabText = tabs[1];
+        final int invitationsCount = getXoDatabase().findAllPendingFriendRequests().size();
 
-        if (invitationsCount == 0) {
-            invitationTab.setText(tabText);
-        } else {
-            invitationTab.setText(tabText + " (" + invitationsCount + ")");
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                ActionBar.Tab invitationTab = mActionBar.getTabAt(1);
+                String[] tabs = getResources().getStringArray(R.array.tab_names);
+                String tabText = tabs[1];
+
+                if (invitationsCount == 0) {
+                    invitationTab.setText(tabText);
+                } else {
+                    invitationTab.setText(tabText + " (" + invitationsCount + ")");
+                }
+            }
+        });
+
     }
 
     @Override
@@ -344,12 +352,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                updateInvitationCount();
-            }
-        });
+        updateInvitationCount();
     }
 
     @Override

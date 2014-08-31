@@ -573,7 +573,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         messageQb
                 .orderBy("timestamp", false)
                 .where()
-                .eq("conversationContact_id", contactId);
+                .eq("senderContact_id", contactId);
 
         QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
         downloadQb.where()
@@ -590,7 +590,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         messageQb
                 .orderBy("timestamp", false)
                 .where()
-                .eq("conversationContact_id", contactId);
+                .eq("senderContact_id", contactId);
 
         QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
         downloadQb.where()
