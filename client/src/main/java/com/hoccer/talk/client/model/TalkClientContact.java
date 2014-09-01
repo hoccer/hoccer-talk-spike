@@ -106,7 +106,7 @@ public class TalkClientContact implements Serializable {
     @DatabaseField
     private String nickname;
 
-    @DatabaseField
+    @DatabaseField(canBeNull = true)
     private Date createdTimeStamp;
 
     public TalkClientContact() {
