@@ -75,7 +75,7 @@
     <string name="dialog_confirm_nearby_deletion_message">Do you really want to delete messages from this group?</string>
 
     <!-- Invitation dialog -->
-    <string name="dialog_invite">Invite</string>
+    <string name="multi_invitation_button">continue</string>
     <string name="dialog_cancel">Cancel</string>
 
     <!-- Contact list items -->
@@ -199,8 +199,7 @@
     <!-- Attachment type selection dialog -->
     <string name="selectattachment_title">Select attachment</string>
 
-
-  <!-- Name setting dialog -->
+    <!-- Name setting dialog -->
     <string name="setname_title">Change your name</string>
 
     <!-- Contact deletion dialog -->
@@ -409,6 +408,10 @@
     <string name="attachment_failed">Error while downloading File.</string>
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
     <string name="toast_stored_external_file_to_clipboard">Your file has been stored in the clipboard.</string>
+
+    <!-- Nearby all invite texts -->
+    <string name="nearby_invite_all">invite %1$d group members as friend</string>
+    <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
 
 
 </resources>

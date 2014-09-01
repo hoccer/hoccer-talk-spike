@@ -307,7 +307,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
                 int oldItemCount = mContactItems.size();
 
-                if (contact.getGroupMember() == null || (contact.getGroupMember().isGroupRemoved())) {
+                if (contact.getGroupMember() == null || contact.getGroupMember().isGroupRemoved() || !contact.getGroupMember().isInvolved()) {
                     BaseContactItem item = findContactItemForContent(contact);
                     if (item != null) {
                         mContactItems.remove(item);
