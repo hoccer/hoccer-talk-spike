@@ -28,12 +28,10 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     private static final Comparator<BaseContactItem> LATEST_ITEM_COMPARATOR = new Comparator<BaseContactItem>() {
         @Override
-        public int compare(BaseContactItem o1, BaseContactItem o2) {
+        public int compare(BaseContactItem contactItem1, BaseContactItem contactItem2) {
 
-            long value1 = Math.max(o1.getMessageTimeStamp(), o1.getContactCreationTimeStamp());
-            long value2 = Math.max(o2.getMessageTimeStamp(), o2.getContactCreationTimeStamp());
-
-            LOG.warn(value1 + " -- " + value2);
+            long value1 = Math.max(contactItem1.getMessageTimeStamp(), contactItem1.getContactCreationTimeStamp());
+            long value2 = Math.max(contactItem2.getMessageTimeStamp(), contactItem2.getContactCreationTimeStamp());
 
             if (value1 == value2) {
                 return 0;
