@@ -109,6 +109,8 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                 break;
             case UPLOAD_NEW:
             case UPLOAD_PAUSED:
+                mTransferAction = TransferAction.REQUEST_UPLOAD;
+                break;
             case UPLOAD_REGISTERING:
                 //mContentTransferControl.setEnabled(false); // TODO: is this needed / balanced?
                 break;
