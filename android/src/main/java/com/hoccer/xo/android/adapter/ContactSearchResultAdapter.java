@@ -20,9 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by nico on 03/07/2014.
- */
+
 public class ContactSearchResultAdapter extends ContactsAdapter {
 
     private List<TalkClientContact> mFoundContacts = new ArrayList<TalkClientContact>();
