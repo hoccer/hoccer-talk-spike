@@ -152,7 +152,7 @@
 
     <!-- Messages -->
     <string name="message_text">Deine Nachricht</string>
-    <string name="unseen_messages_notification_text"> neue Nachrichten</string>
+    <string name="unseen_messages_notification_text">\u0020neue Nachrichten</string>
 
     <!-- Content -->
     <string name="content_downloading">Downloading…</string>
