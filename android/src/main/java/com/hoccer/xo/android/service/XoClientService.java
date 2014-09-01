@@ -69,6 +69,8 @@ public class XoClientService extends Service {
     private static final String sPreferenceDownloadLimitMobileKey = "preference_download_limit_mobile";
     private static final String sPreferenceDownloadLimitWifiKey = "preference_download_limit_wifi";
 
+    public static final String CONTACT_DELIMETER = ", ";
+
     /**
      * Executor for ourselves and the client
      */
@@ -683,7 +685,7 @@ public class XoClientService extends Service {
             // concatenate contact names
             StringBuilder sb = new StringBuilder();
             for (ContactUnseenMessageHolder holder : contactsMap.values()) {
-                sb.append(holder.getContact().getNickname()).append(", ");
+                sb.append(holder.getContact().getNickname()).append(CONTACT_DELIMETER);
             }
 
             // set fields
