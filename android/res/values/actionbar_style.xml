@@ -19,10 +19,6 @@
         <item name="android:textColor">@color/xo_actionbar_tabtext_color</item>
     </style>
 
-    <style name="PopupMenu.AppBaseTheme" parent="@android:style/Widget.Holo.ListPopupWindow">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_appbasetheme</item>
-    </style>
-
     <style name="DropDownListView.AppBaseTheme" parent="@android:style/Widget.Holo.ListView.DropDown">
         <item name="android:listSelector">@drawable/selectable_background_appbasetheme</item>
     </style>
