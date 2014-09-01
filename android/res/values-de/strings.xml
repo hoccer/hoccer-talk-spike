@@ -148,6 +148,7 @@
     <string name="profile_group_kick_button">User aus der Gruppe entfernen</string>
     <string name="profile_group_disband_button">Gruppe auflösen</string>
     <string name="profile_group_delete_button">Gruppe löschen</string>
+    <string name="profile_group_permanent_nearby">Permanent nearby</string>
 
     <!-- Messages -->
     <string name="message_text">Deine Nachricht</string>

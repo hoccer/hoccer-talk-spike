@@ -137,7 +137,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
                     mClipboardAttachment = null;
                 } else {
                     ClipboardManager clipboardText = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("simple text",text);
+                    ClipData clip = ClipData.newPlainText("simple text", text);
                     clipboardText.setPrimaryClip(clip);
                 }
                 break;
@@ -197,24 +197,41 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     }
 
     @Override
-    public void showGroupProfileFragment(int grouContactId) {
+    public void showGroupProfileFragment(int groupContactId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, grouContactId);
+        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
 
         GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
         groupProfileFragment.setArguments(bundle);
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
-        ft.commit();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void showGroupProfileFragment(int groupContactId, boolean cloneProfile) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
+
+        if (cloneProfile) {
+            bundle.putBoolean(GroupProfileFragment.ARG_CLONE_CURRENT_GROUP, true);
+        }
+
+        GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
+        groupProfileFragment.setArguments(bundle);
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
+        fragmentTransaction.commit();
     }
 
     private void showNearbyArchiveFragment() {
         NearbyArchiveFragment fragment = new NearbyArchiveFragment();
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_messaging_fragment_container, fragment);
-        ft.commit();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
+        fragmentTransaction.commit();
     }
 
     private class ContactIdReceiver extends BroadcastReceiver {

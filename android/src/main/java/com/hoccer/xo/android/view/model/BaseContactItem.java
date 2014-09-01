@@ -8,6 +8,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import java.util.Date;
+
 
 public abstract class BaseContactItem<T> {
 
@@ -25,5 +27,7 @@ public abstract class BaseContactItem<T> {
 
     public abstract T getContent();
 
-    public abstract long getTimeStamp();
+    public abstract long getMessageTimeStamp();
+
+    public abstract long getContactCreationTimeStamp();
 }
