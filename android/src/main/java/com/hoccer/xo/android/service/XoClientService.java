@@ -18,7 +18,6 @@ import com.hoccer.talk.client.*;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ContactsActivity;
-import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.sms.SmsReceiver;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
@@ -664,7 +663,7 @@ public class XoClientService extends Service {
                 TalkClientMessage singleMessage = holder.getUnseenMessages().get(0);
                 builder.setContentText(singleMessage.getText());
             } else {
-                builder.setContentText(holder.getUnseenMessages().size() + " new messages");
+                builder.setContentText(holder.getUnseenMessages().size() + getResources().getString(R.string.unseen_messages_notification_text));
             }
         } else {
             // create pending intent
@@ -689,7 +688,7 @@ public class XoClientService extends Service {
 
             // set fields
             builder.setContentTitle(sb.substring(0, sb.length() - 2));
-            builder.setContentText(unseenMessagesCount + " new messages");
+            builder.setContentText(unseenMessagesCount + getResources().getString(R.string.unseen_messages_notification_text));
         }
 
         // finish up

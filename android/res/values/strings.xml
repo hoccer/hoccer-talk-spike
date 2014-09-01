@@ -162,6 +162,7 @@
 
     <!-- Messages -->
     <string name="message_text">Your message text</string>
+    <string name="unseen_messages_notification_text"> new messages</string>
 
     <!-- Content -->
     <string name="content_downloading">Downloading…</string>
