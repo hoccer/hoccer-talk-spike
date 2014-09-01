@@ -205,6 +205,7 @@ public class AttachmentListFragment extends SearchableListFragment {
 
     @Override
     protected void onSearchModeDisabled() {
+        // do nothing
     }
 
     private void bindToMediaPlayerService(Intent intent) {

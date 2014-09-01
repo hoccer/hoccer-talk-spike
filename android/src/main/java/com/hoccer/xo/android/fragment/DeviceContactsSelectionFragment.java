@@ -1,16 +1,12 @@
 package com.hoccer.xo.android.fragment;
 
-import android.app.ListFragment;
-import android.app.SearchManager;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.view.*;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.SearchView;
+import android.widget.ListAdapter;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.DeviceContactsAdapter;
 import com.hoccer.xo.android.util.ContactOperations;
@@ -23,7 +19,7 @@ import java.util.*;
 /**
  * Shows device contacts via a DeviceContactsAdapter and manages search queries.
  */
-public class DeviceContactsSelectionFragment extends ListFragment {
+public class DeviceContactsSelectionFragment extends SearchableListFragment {
 
     private final static Logger LOG = Logger.getLogger(DeviceContactsSelectionFragment.class);
 
@@ -53,14 +49,9 @@ public class DeviceContactsSelectionFragment extends ListFragment {
     final static int PHONE_NUMBER_FIELD = 3;
     final static int EMAIL_ADDRESS_FIELD = 4;
 
-    private MenuItem mSearchMenuItem;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setHasOptionsMenu(true);
-
         mIsSmsInvitation = getActivity().getIntent().getBooleanExtra(EXTRA_IS_SMS_INVITATION, true);
         mToken = getActivity().getIntent().getStringExtra(EXTRA_TOKEN);
     }
@@ -135,10 +126,19 @@ public class DeviceContactsSelectionFragment extends ListFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_searchable_list, menu);
-        setupSearchWidget(menu);
+    protected ListAdapter searchInAdapter(String query) {
+        mAdapter.setQuery(query);
+        return mAdapter;
+    }
+
+    @Override
+    protected void onSearchModeEnabled() {
+        // do nothing
+    }
+
+    @Override
+    protected void onSearchModeDisabled() {
+        mAdapter.setQuery(null);
     }
 
     private void composeInviteSms(String[] phoneNumbers) {
@@ -156,55 +156,4 @@ public class DeviceContactsSelectionFragment extends ListFragment {
         ContactOperations.sendEMail(getActivity(), subject, message, eMailAddresses);
     }
 
-    private void setupSearchWidget(Menu menu) {
-        SearchActionHandler handler = new SearchActionHandler();
-
-        mSearchMenuItem = menu.findItem(R.id.menu_search);
-        mSearchMenuItem.setOnActionExpandListener(handler);
-
-        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) mSearchMenuItem.getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
-        searchView.setIconifiedByDefault(false);
-        searchView.setOnQueryTextListener(handler);
-    }
-
-    private void toggleSoftKeyboard() {
-        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-    }
-
-    private class SearchActionHandler implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
-
-        @Override
-        public boolean onQueryTextSubmit(String query) {
-            toggleSoftKeyboard();
-            return true;
-        }
-
-        @Override
-        public boolean onQueryTextChange(final String query) {
-            // only set query if we are in search mode
-            if(mAdapter.getQuery() != null) {
-                mAdapter.setQuery(query);
-            }
-            return false;
-        }
-
-        @Override
-        public boolean onMenuItemActionExpand(MenuItem item) {
-            if (item.getItemId() == R.id.menu_search) {
-                mAdapter.setQuery("");
-            }
-            return true;
-        }
-
-        @Override
-        public boolean onMenuItemActionCollapse(MenuItem item) {
-            if (item.getItemId() == R.id.menu_search) {
-                mAdapter.setQuery(null);
-            }
-            return true;
-        }
-    }
 }
