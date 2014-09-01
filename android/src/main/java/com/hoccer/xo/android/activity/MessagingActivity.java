@@ -175,10 +175,10 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         SingleProfileFragment singleProfileFragment = new SingleProfileFragment();
         singleProfileFragment.setArguments(bundle);
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_messaging_fragment_container, singleProfileFragment);
-        ft.addToBackStack(null);
-        ft.commit();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, singleProfileFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -191,6 +191,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 
@@ -208,6 +209,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 
@@ -216,6 +218,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 }
