@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -76,76 +78,127 @@ public class CaptureSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        boolean isValidIntent = isValidIntent(context, intent);
-        if (!isValidIntent) {
-            return null;
+
+        File imageFile;
+        File tempImageFile = null;
+        String contentUriString = null;
+        int orientation;
+
+        if (intent != null && intent.getData() != null) {
+            LOG.error("Intent data path: " + intent.getData().getPath());
+            orientation = ImageContentHelper.retrieveOrientation(context, intent.getData(), intent.getData().getPath());
+            imageFile = new File(intent.getData().getPath());
+            LOG.error("Path: " + imageFile.getPath());
+        } else {
+            tempImageFile = new File(mFileUri.getPath());
+            imageFile = tempImageFile;
+            orientation = ImageContentHelper.retrieveOrientation(context, null, imageFile.getPath());
         }
 
+        // Correct rotation if wrong and insert image into MediaStore
+        if (orientation > 0) {
+            Bitmap bitmap = correctImageRotation(imageFile, orientation);
+            contentUriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, imageFile.getName(), imageFile.getName());
+        } else {
+            try {
+                contentUriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), imageFile.getPath(), imageFile.getName(), imageFile.getName());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // delete temporary image file
+        if (tempImageFile != null && tempImageFile.exists()) {
+            tempImageFile.delete();
+        }
+
+        // get new file path from content resolver
+        Uri contentUri = Uri.parse(contentUriString);
         String[] projection = {
                 MediaStore.Images.Media.DATA
         };
-
-        File file = new File(mFileUri.getPath());
-
-        ExifInterface exif = null;
-        try {
-            exif = new ExifInterface(file.getAbsolutePath());
-        } catch (IOException e) {
-            e.printStackTrace();
+        Cursor cursor = context.getContentResolver().query(
+                contentUri, projection, null, null, null);
+        cursor.moveToFirst();
+        int dataIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+        String filePath = cursor.getString(dataIndex);
+        cursor.close();
+        if (filePath == null) {
+            return null;
         }
+        imageFile = new File(filePath);
+
+        // create content object
+        SelectedContent contentObject = new SelectedContent(imageFile.getPath(), "file://" + imageFile.getPath());
+        contentObject.setFileName(imageFile.getName());
+        contentObject.setContentMediaType(ContentMediaType.IMAGE);
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
         int imageHeight = options.outHeight;
         int imageWidth = options.outWidth;
         String imageType = options.outMimeType;
 
-        options.inJustDecodeBounds = false;
-        Bitmap bitmap;
-        int exifOrientation = Integer.parseInt(exif.getAttribute(ExifInterface.TAG_ORIENTATION));
-        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
-            options.inSampleSize = 2;
-            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-            Matrix matrix = new Matrix();
-            matrix.postRotate(90);
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0,
-                    bitmap.getWidth(), bitmap.getHeight(),
-                    matrix, true);
-            imageWidth = bitmap.getWidth();
-            imageHeight = bitmap.getHeight();
-        } else {
-            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-        }
-        Uri contentUri;
-        String contentUriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, file.getName(), file.getName());
+        LOG.error("Name: " + imageFile.getName());
+        LOG.error("Height: " + options.outHeight);
+        LOG.error("Width: " + options.outWidth);
+        LOG.error("Image type: " + options.outMimeType);
 
-        contentUri = Uri.parse(contentUriString);
-
-        Cursor cursor = context.getContentResolver().query(
-                contentUri, projection, null, null, null);
-        cursor.moveToFirst();
-        int dataIndex = cursor.getColumnIndex(projection[0]);
-        String filePath = cursor.getString(dataIndex);
-        cursor.close();
-
-        if (filePath == null) {
-            return null;
-        }
-        File imageFile = new File(filePath);
-
-        SelectedContent contentObject = new SelectedContent(contentUriString, "file://" + filePath);
-        contentObject.setFileName(imageFile.getName());
-        contentObject.setContentMediaType(ContentMediaType.IMAGE);
         contentObject.setContentType(imageType);
         contentObject.setContentLength((int) imageFile.length());
-        contentObject.setContentAspectRatio(((float) imageWidth) / ((float) imageHeight));
 
-        if (file.exists()) {
-            file.delete();
-        }
+        orientation = ImageContentHelper.retrieveOrientation(context, contentUri, imageFile.getPath());
+        double aspectRatio = ImageContentHelper.calculateAspectRatio(imageWidth, imageHeight, orientation);
+
+        LOG.error("Image orientation: " + orientation);
+        LOG.error("Image aspectRatio: " + aspectRatio);
+
+        contentObject.setContentAspectRatio(aspectRatio);
 
         return contentObject;
+    }
+
+    private Bitmap correctImageRotation(File tempFile, int orientation) {
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(tempFile.getAbsolutePath(), options);
+        options.inSampleSize = calculateInSampleSize(options);
+        options.inJustDecodeBounds = false;
+        Bitmap bitmap = BitmapFactory.decodeFile(tempFile.getAbsolutePath(), options);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(orientation);
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        return bitmap;
+    }
+
+    private int calculateInSampleSize(BitmapFactory.Options options) {
+
+        Point size = DisplayUtils.getDisplaySize(mContext);
+        int reqWidth = size.x;
+        int reqHeight = size.y;
+
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 
     @Override
