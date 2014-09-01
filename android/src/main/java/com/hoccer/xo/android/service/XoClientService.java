@@ -827,24 +827,21 @@ public class XoClientService extends Service {
 
         @Override
         public void onMessageCreated(TalkClientMessage message) {
-            if (!message.isOutgoing()) {
-                updateMessageNotification(true);
+            if (message.isIncoming()) {
                 updateUnseenMessageNotification(true);
             }
         }
 
         @Override
         public void onMessageUpdated(TalkClientMessage message) {
-            if (!message.isOutgoing()) {
-                updateMessageNotification(false);
+            if (message.isIncoming()) {
                 updateUnseenMessageNotification(false);
             }
         }
 
         @Override
         public void onMessageDeleted(TalkClientMessage message) {
-            if (!message.isOutgoing()) {
-                updateMessageNotification(false);
+            if (message.isIncoming()) {
                 updateUnseenMessageNotification(false);
             }
         }
