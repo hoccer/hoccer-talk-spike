@@ -153,7 +153,10 @@
 
     <!-- Messages -->
     <string name="message_text">Deine Nachricht</string>
+
+    <!-- Notifications -->
     <string name="unseen_messages_notification_text">\u0020neue Nachrichten</string>
+    <string name="unconfirmed_invitations_notification_text">\u0020unbestätigte Einladungen</string>
 
     <!-- Content -->
     <string name="content_downloading">Downloading…</string>

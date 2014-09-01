@@ -163,7 +163,10 @@
 
     <!-- Messages -->
     <string name="message_text">Your message text</string>
+
+    <!-- Notifications -->
     <string name="unseen_messages_notification_text">\u0020new messages</string>
+    <string name="unconfirmed_invitations_notification_text">\u0020unconfirmed invitations</string>
 
     <!-- Content -->
     <string name="content_downloading">Downloading…</string>

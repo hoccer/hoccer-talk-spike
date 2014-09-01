@@ -512,9 +512,9 @@ public class XoClientService extends Service {
         builder.setContentIntent(pendingIntent);
         // set fields
         if (numUnconfirmed > 1) {
-            builder.setContentTitle(numUnconfirmed + " unconfirmed invitations");
+            builder.setContentTitle(numUnconfirmed + getResources().getString(R.string.unconfirmed_invitations_notification_text));
         } else {
-            builder.setContentTitle(numUnconfirmed + " unconfirmed invitation");
+            builder.setContentTitle(numUnconfirmed + getResources().getString(R.string.unconfirmed_invitations_notification_text));
         }
 
         // finish up
