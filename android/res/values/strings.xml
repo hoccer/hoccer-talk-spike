@@ -159,6 +159,7 @@
     <string name="profile_group_kick_button">Kick user from this Group</string>
     <string name="profile_group_disband_button">Disband this Group</string>
     <string name="profile_group_delete_button">Delete this Group</string>
+    <string name="profile_group_permanent_nearby">Permanent nearby</string>
 
     <!-- Messages -->
     <string name="message_text">Your message text</string>
@@ -412,6 +413,5 @@
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">invite %1$d group members as friend</string>
     <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
-
 
 </resources>
