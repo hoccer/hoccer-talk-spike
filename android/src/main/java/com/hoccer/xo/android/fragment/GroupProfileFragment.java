@@ -851,7 +851,7 @@ public class GroupProfileFragment extends XoFragment
                 String newGroupName = mGroupNameEdit.getText().toString();
                 if (mGroup != null && !mGroup.isGroupRegistered()) {
                     if (newGroupName.isEmpty()) {
-                        newGroupName = "Permanent nearby";
+                        newGroupName = getString(R.string.profile_group_permanent_nearby);
                     }
                     if (mGroup.getGroupPresence() != null) {
                         mGroup.getGroupPresence().setGroupName(newGroupName);
