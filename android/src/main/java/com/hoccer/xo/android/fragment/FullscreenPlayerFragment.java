@@ -120,7 +120,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     public void onResume() {
         super.onResume();
 
-        if (mMediaPlayerService != null) {
+        if (mMediaPlayerService != null && mMediaPlayerService.getCurrentMediaItem() != null) {
             updateTrackData();
             updatePlayState();
         }

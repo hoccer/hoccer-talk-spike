@@ -23,13 +23,11 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     private static final double WIDTH_SCALE_FACTOR = 0.8;
     private static final double IMAGE_SCALE_FACTOR = 0.3;
 
-    private Context mContext;
     private int mImageWidth;
     private RelativeLayout mRootView;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
         super(context, message);
-        mContext = context;
 
         setRequiredImageWidth();
     }
@@ -39,14 +37,47 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     }
 
     @Override
-    public void detachView() {
-        // check for null in case display attachment has not yet been called
-        if (mRootView != null) {
-            mRootView.removeOnLayoutChangeListener(this);
-            ImageView targetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
-            if (targetView != null) {
-                Picasso.with(mContext).cancelRequest(targetView);
+    protected void configureViewForMessage(View view) {
+        super.configureViewForMessage(view);
+        configureAttachmentViewForMessage(view);
+    }
+
+    @Override
+    protected void displayAttachment(final IContentObject contentObject) {
+        super.displayAttachment(contentObject);
+
+        // add view lazily
+        if (mContentWrapper.getChildCount() == 0) {
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            RelativeLayout imageLayout = (RelativeLayout) inflater.inflate(R.layout.content_image, null);
+            mContentWrapper.addView(imageLayout);
+        }
+
+        mContentWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openImage(contentObject);
             }
+        });
+
+        mAttachmentView.setPadding(0, 0, 0, 0);
+        mAttachmentView.setBackgroundDrawable(null);
+
+        double aspectRatio = contentObject.getContentAspectRatio();
+        int height = (int) (mImageWidth / aspectRatio);
+
+        mRootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        mRootView.addOnLayoutChangeListener(this);
+        mRootView.getLayoutParams().width = mImageWidth;
+        mRootView.getLayoutParams().height = height;
+
+        ImageView overlayView = (ImageView) mRootView.findViewById(R.id.iv_picture_overlay);
+        if (mMessage.isIncoming()) {
+            mRootView.setGravity(Gravity.LEFT);
+            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
+        } else {
+            mRootView.setGravity(Gravity.RIGHT);
+            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
     }
 
@@ -62,51 +93,18 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     }
 
     @Override
-    protected void configureViewForMessage(View view) {
-        super.configureViewForMessage(view);
-        configureAttachmentViewForMessage(view);
-    }
-
-    @Override
-    protected void displayAttachment(final IContentObject contentObject) {
-        super.displayAttachment(contentObject);
-        mAttachmentView.setPadding(0, 0, 0, 0);
-        // add view lazily
-        if (mContentWrapper.getChildCount() == 0) {
-            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            RelativeLayout imageLayout = (RelativeLayout) inflater.inflate(R.layout.content_image, null);
-            mContentWrapper.addView(imageLayout);
-        }
-
-        mContentWrapper.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                displayImage(contentObject);
+    public void detachView() {
+        // check for null in case display attachment has not yet been called
+        if (mRootView != null) {
+            mRootView.removeOnLayoutChangeListener(this);
+            ImageView targetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
+            if (targetView != null) {
+                Picasso.with(mContext).cancelRequest(targetView);
             }
-        });
-
-        mAttachmentView.setBackgroundDrawable(null);
-
-        double aspectRatio = contentObject.getContentAspectRatio();
-        int height = (int) (mImageWidth / aspectRatio);
-
-        mRootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
-        mRootView.addOnLayoutChangeListener(this);
-        mRootView.getLayoutParams().width = mImageWidth;
-        mRootView.getLayoutParams().height = height;
-
-        ImageView overlayView = (ImageView) mRootView.findViewById(R.id.iv_picture_overlay);
-
-        if (mMessage.isIncoming()) {
-            mRootView.setGravity(Gravity.LEFT);
-            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
-        } else {
-            mRootView.setGravity(Gravity.RIGHT);
-            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
     }
 
-    private void displayImage(IContentObject contentObject) {
+    private void openImage(IContentObject contentObject) {
         if (contentObject.getContentDataUrl() == null) {
             return;
         }

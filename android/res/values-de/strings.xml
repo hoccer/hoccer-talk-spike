@@ -149,6 +149,7 @@
     <string name="profile_group_kick_button">User aus der Gruppe entfernen</string>
     <string name="profile_group_disband_button">Gruppe auflösen</string>
     <string name="profile_group_delete_button">Gruppe löschen</string>
+    <string name="profile_group_permanent_nearby">Permanent nearby</string>
 
     <!-- Messages -->
     <string name="message_text">Deine Nachricht</string>
@@ -344,7 +345,7 @@
     <string name="pref_privacy_title">Privatspähre</string>
     <string name="error_send_message_empty_group">Diese Gruppe ist leer.</string>
     <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
-    <string name="dialog_invite">Einladen</string>
+    <string name="multi_invitation_button">weiter</string>
 
     <string-array name="tab_names">
         <item>CHATS</item>
