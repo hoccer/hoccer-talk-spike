@@ -8,9 +8,11 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Point;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.UserDictionary;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +24,7 @@ import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.util.HashSet;
 
 public class MultiImagePickerActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -73,6 +76,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
             // vertical
             mImageGridView.setNumColumns(3);
         }
+
     }
 
     @Override
@@ -82,8 +86,14 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        String[] projection = {MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA, MediaStore.Images.Media.DATE_ADDED};
-        return new CursorLoader(this, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Images.Media.DATE_ADDED + " DESC");
+
+        String[] projection = {
+                MediaStore.Images.Thumbnails._ID,
+                MediaStore.Images.Thumbnails.DATA,
+                MediaStore.Images.Thumbnails.IMAGE_ID,
+        };
+
+        return new CursorLoader(this, MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, projection, null, null, "image_id DESC");
     }
 
     @Override
@@ -127,11 +137,15 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
             final ViewHolder holder = (ViewHolder) view.getTag();
-            final String id = cursor.getString(ImageQuery.ID);
-            final String contentUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "" + id).toString();
-            final String dataUri = cursor.getString(ImageQuery.DATA);
 
-            if (mSelectedImages.contains(contentUri.toString())) {
+            final Uri thumbPath = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.DATA)));
+            LOG.error("Path of thumbnail image: " + thumbPath);
+
+            String originalImageId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.IMAGE_ID));
+            final Uri dataUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "" + originalImageId);
+            LOG.error("Data Uri of original image: " + dataUri);
+
+            if (mSelectedImages.contains(thumbPath.toString())) {
                 holder.squaredRelativeLayout.setSelected(true);
                 holder.squaredRelativeLayout.setVisibility(View.VISIBLE);
             } else {
@@ -144,7 +158,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                 public boolean onLongClick(View v) {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse("file://" + dataUri), "image/*");
+                    intent.setDataAndType(dataUri, "image/*");
                     startActivity(intent);
                     return true;
                 }
@@ -155,22 +169,23 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                     if (!holder.squaredRelativeLayout.isSelected()) {
                         holder.squaredRelativeLayout.setSelected(true);
                         holder.squaredRelativeLayout.setVisibility(View.VISIBLE);
-                        mSelectedImages.add(contentUri.toString());
+                        mSelectedImages.add(thumbPath.toString());
                     } else {
                         holder.squaredRelativeLayout.setSelected(false);
                         holder.squaredRelativeLayout.setVisibility(View.GONE);
-                        mSelectedImages.remove(contentUri.toString());
+                        mSelectedImages.remove(thumbPath.toString());
                     }
                     mSelectBtn.setText(String.format(getString(R.string.select_count), mSelectedImages.size()));
                 }
             });
 
+            Picasso.with(mContext).cancelRequest(holder.thumbnailImageView);
             Picasso.with(mContext)
-                    .load(contentUri)
+                    .load("file://" + thumbPath)
                     .placeholder(R.drawable.ic_img_placeholder)
                     .error(R.drawable.ic_img_placeholder_error)
-                    .resize(200, 200)
                     .centerCrop()
+                    .fit()
                     .into(holder.thumbnailImageView);
         }
 
