@@ -173,7 +173,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         ScheduledFuture<?> future = mDownloadExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                startOrRestartDownload(download, false);
+                startOrRestartDownload(download, true);
             }
         }, delay, TimeUnit.SECONDS);
         mDownloadRetryQueue.put(download.getClientDownloadId(), future);

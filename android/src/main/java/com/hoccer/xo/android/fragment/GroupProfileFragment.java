@@ -347,11 +347,8 @@ public class GroupProfileFragment extends XoFragment
         TalkGroup groupPresence = new TalkGroup();
         groupPresence.setGroupTag(mGroup.getGroupTag());
         groupPresence.setGroupType(TalkGroup.GROUP_TYPE_USER);
-        groupPresence.setGroupName(getString(R.string.profile_group_permanent_nearby));
         mGroup.updateGroupPresence(groupPresence);
 
-        // FIXME: we need to do this since EDIT_GROUP mode is just hijacked for this purpose.
-        mGroupNameEdit.setText(groupPresence.getGroupName());
         update();
         mFromNearby = true;
 
