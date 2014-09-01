@@ -137,6 +137,12 @@ public class MessagingFragment extends XoListFragment
 
         configureMotionInterpreterForContact(mContact);
         XoApplication.getXoClient().registerContactListener(this);
+
+        // send intent to XoClientService that we are conversing with the contact
+        Intent intent = new Intent();
+        intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
+        getActivity().sendBroadcast(intent);
     }
 
     @Override
@@ -146,6 +152,12 @@ public class MessagingFragment extends XoListFragment
         mMotionInterpreter.deactivate();
         XoApplication.getXoClient().unregisterContactListener(this);
         ImageLoader.getInstance().clearMemoryCache();
+
+        // send intent to XoClientService that we are not conversing any longer
+        Intent intent = new Intent();
+        intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+        getActivity().sendBroadcast(intent);
     }
 
     @Override

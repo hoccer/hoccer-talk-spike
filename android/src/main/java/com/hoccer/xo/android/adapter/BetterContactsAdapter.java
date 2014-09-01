@@ -325,6 +325,16 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         });
     }
 
+    @Override
+    public void onMessageCreated(TalkClientMessage message) {
+        updateItemForMessage(message);
+    }
+
+    @Override
+    public void onMessageDeleted(TalkClientMessage message) {
+        updateItemForMessage(message);
+    }
+
     private void updateItemForMessage(TalkClientMessage message) {
         try {
             TalkClientContact conversationContact = message.getConversationContact();
@@ -351,15 +361,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         } catch (SQLException e) {
             LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);
         }
-    }
-
-    @Override
-    public void onMessageCreated(TalkClientMessage message) {
-        updateItemForMessage(message);
-    }
-
-    @Override
-    public void onMessageDeleted(TalkClientMessage message) {
     }
 
     @Override
