@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
@@ -18,8 +19,10 @@ import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
@@ -297,13 +300,16 @@ public class SingleProfileFragment extends XoFragment
 
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        boolean isSelectionHandled;
         switch (item.getItemId()) {
             case R.id.menu_profile_block:
                 blockContact();
-                return true;
+                isSelectionHandled = true;
+                break;
             case R.id.menu_profile_unblock:
                 unblockContact();
-                return true;
+                isSelectionHandled = true;
+                break;
             case R.id.menu_profile_delete:
                 if (mContact != null) {
                     XoDialogs.showYesNoDialog("ContactDeleteDialog",
@@ -324,12 +330,23 @@ public class SingleProfileFragment extends XoFragment
                                 }
                             });
                 }
-                return true;
+
+                isSelectionHandled = true;
+                break;
             case R.id.menu_profile_edit:
                 getActivity().startActionMode(this);
-                return true;
+                isSelectionHandled = true;
+                break;
+            case R.id.menu_audio_attachment_list:
+                Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
+                intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
+                startActivity(intent);
+                isSelectionHandled = true;
+                break;
+            default:
+                isSelectionHandled = super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+        return isSelectionHandled;
     }
 
 
