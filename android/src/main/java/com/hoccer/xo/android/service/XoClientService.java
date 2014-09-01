@@ -531,7 +531,7 @@ public class XoClientService extends Service {
         mNotificationManager.notify(NOTIFICATION_UNCONFIRMED_INVITATIONS, notification);
     }
 
-    private void updateMessageNotification(boolean doAlarm) {
+    private void updateUnseenMessageNotification(boolean doAlarm) {
         XoClientDatabase database = mClient.getDatabase();
         List<TalkClientMessage> unseenMessages;
         try {
@@ -600,10 +600,10 @@ public class XoClientService extends Service {
             return;
         }
 
-        buildMessageNotification(contactsMap, doAlarm);
+        createUnseenMessageNotification(contactsMap, doAlarm);
     }
 
-    private void buildMessageNotification(Map<Integer, ContactUnseenMessageHolder> contactsMap, boolean doAlarm) {
+    private void createUnseenMessageNotification(Map<Integer, ContactUnseenMessageHolder> contactsMap, boolean doAlarm) {
         // sum up all unseen messages
         int unseenMessagesCount = 0;
         for (ContactUnseenMessageHolder holder : contactsMap.values()) {
@@ -829,6 +829,7 @@ public class XoClientService extends Service {
         public void onMessageCreated(TalkClientMessage message) {
             if (!message.isOutgoing()) {
                 updateMessageNotification(true);
+                updateUnseenMessageNotification(true);
             }
         }
 
@@ -836,6 +837,7 @@ public class XoClientService extends Service {
         public void onMessageUpdated(TalkClientMessage message) {
             if (!message.isOutgoing()) {
                 updateMessageNotification(false);
+                updateUnseenMessageNotification(false);
             }
         }
 
@@ -843,6 +845,7 @@ public class XoClientService extends Service {
         public void onMessageDeleted(TalkClientMessage message) {
             if (!message.isOutgoing()) {
                 updateMessageNotification(false);
+                updateUnseenMessageNotification(false);
             }
         }
     }
