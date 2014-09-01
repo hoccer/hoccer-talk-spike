@@ -43,11 +43,6 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
      */
     private static final int AUTO_SCROLL_LIMIT = 5;
 
-    /**
-     * Set to false to override auto scrolling behavior
-     */
-    private boolean shouldAutoScroll = true;
-
     protected TalkClientContact mContact;
 
     protected List<ChatMessageItem> mChatMessageItems;
@@ -269,16 +264,6 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     }
 
     @Override
-    public void notifyDataSetChanged() {
-        super.notifyDataSetChanged();
-        if (shouldAutoScroll) {
-            if (mListView.getLastVisiblePosition() >= getCount() - AUTO_SCROLL_LIMIT) {
-                mListView.smoothScrollToPosition(getCount() - 1);
-            }
-        }
-    }
-
-    @Override
     public void onReloadRequest() {
         super.onReloadRequest();
         initialize();
@@ -289,23 +274,21 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     public void onMessageCreated(final TalkClientMessage message) {
         LOG.debug("onMessageCreated()");
         if (message.getConversationContact() == mContact && isValidMessage(message)) {
-            for (int i = 0; i < mChatMessageItems.size(); i++) {
-                ChatMessageItem chatMessageItem = mChatMessageItems.get(i);
-                if (chatMessageItem == null) {
-                    continue;
-                }
-                if (message.getClientMessageId() == chatMessageItem.getMessage().getClientMessageId()) {
-                    LOG.warn("tried to add a \"new\" message which was already added!");
-                    return;
-                }
-            }
-
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     ChatMessageItem messageItem = getItemForMessage(message);
-                    mChatMessageItems.add(messageItem);
-                    notifyDataSetChanged();
+                    if(!mChatMessageItems.contains(messageItem)) {
+                        mChatMessageItems.add(messageItem);
+                        notifyDataSetChanged();
+
+                        // autoscroll to new item
+                        if (mListView.getLastVisiblePosition() >= getCount() - AUTO_SCROLL_LIMIT) {
+                            mListView.smoothScrollToPosition(getCount() - 1);
+                        }
+                    } else {
+                        LOG.warn("tried to add a new message which was already added!");
+                    }
                 }
             });
         }
@@ -333,15 +316,6 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ChatMessageItem item = new ChatMessageItem(mActivity, message);
-                    if (mChatMessageItems.contains(item)) {
-                        int position = mChatMessageItems.indexOf(item);
-                        ChatMessageItem originalItem = mChatMessageItems.get(position);
-                        originalItem.setMessage(message);
-                    } else {
-                        ChatMessageItem chatMessageItem = new ChatMessageItem(mActivity, message);
-                        mChatMessageItems.add(chatMessageItem);
-                    }
                     notifyDataSetChanged();
                 }
             });
@@ -379,9 +353,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    shouldAutoScroll = false;
                     notifyDataSetChanged();
-                    shouldAutoScroll = true;
                 }
             });
         }
@@ -413,9 +385,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    shouldAutoScroll = false;
                     notifyDataSetChanged();
-                    shouldAutoScroll = true;
                 }
             });
         }

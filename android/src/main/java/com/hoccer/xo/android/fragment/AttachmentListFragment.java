@@ -287,7 +287,7 @@ public class AttachmentListFragment extends SearchableListFragment {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.context_menu_fragment_messaging, menu);
+            inflater.inflate(R.menu.context_menu_attachment_list, menu);
 
             return true;
         }

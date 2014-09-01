@@ -88,7 +88,8 @@
     <string name="messaging_loading">Lädt…</string>
     <string name="messaging_no_messages">Keine Nachrichten</string>
     <string name="messaging_invited_join">Gruppe beitreten</string>
-    <string name="menu_copy_attachment">Kopieren</string>
+    <string name="context_menu_copy_message">Kopieren</string>
+    <string name="context_menu_delete_message">Löschen</string>
 
     <!-- Pairing fragment -->
     <string name="pairing_token_info">Gib diesen Code einem Freund</string>
@@ -152,6 +153,7 @@
 
     <!-- Messages -->
     <string name="message_text">Deine Nachricht</string>
+    <string name="unseen_messages_notification_text">\u0020neue Nachrichten</string>
 
     <!-- Content -->
     <string name="content_downloading">Downloading…</string>
