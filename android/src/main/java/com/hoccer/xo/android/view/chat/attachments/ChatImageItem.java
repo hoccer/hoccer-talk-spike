@@ -21,15 +21,13 @@ import com.squareup.picasso.Picasso;
 public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChangeListener {
 
     private static final double WIDTH_SCALE_FACTOR = 0.8;
-    private static final double IMAGE_SCALE_FACTOR = 0.3;
+    private static final double IMAGE_SCALE_FACTOR = 0.5;
 
     private int mImageWidth;
     private RelativeLayout mRootView;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
         super(context, message);
-
-        setRequiredImageWidth();
     }
 
     public ChatItemType getType() {
@@ -46,6 +44,9 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     protected void displayAttachment(final IContentObject contentObject) {
         super.displayAttachment(contentObject);
 
+        setRequiredImageWidth();
+
+        mAttachmentView.setPadding(0, 0, 0, 0);
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -82,17 +83,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     }
 
     @Override
-    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        ImageView targetView = (ImageView) v.findViewById(R.id.iv_picture);
-        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
-                .error(R.drawable.ic_img_placeholder_error)
-                .resize((int) (targetView.getWidth() * IMAGE_SCALE_FACTOR), (int) (targetView.getHeight() * IMAGE_SCALE_FACTOR))
-                .centerInside()
-                .into(targetView);
-        v.removeOnLayoutChangeListener(this);
-    }
-
-    @Override
     public void detachView() {
         // check for null in case display attachment has not yet been called
         if (mRootView != null) {
@@ -102,6 +92,19 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
                 Picasso.with(mContext).cancelRequest(targetView);
             }
         }
+    }
+
+    @Override
+    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+        ImageView targetView = (ImageView) v.findViewById(R.id.iv_picture);
+        Picasso.with(mContext).setLoggingEnabled(true);
+        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
+                .error(R.drawable.ic_img_placeholder_error)
+                .resize((int) (targetView.getWidth() * IMAGE_SCALE_FACTOR), (int) (targetView.getHeight() * IMAGE_SCALE_FACTOR))
+                .centerInside()
+                .into(targetView);
+        v.removeOnLayoutChangeListener(this);
+        LOG.error(Picasso.with(mContext).getSnapshot().toString());
     }
 
     private void openImage(IContentObject contentObject) {
