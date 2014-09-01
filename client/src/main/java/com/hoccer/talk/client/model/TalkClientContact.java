@@ -106,6 +106,8 @@ public class TalkClientContact implements Serializable {
     @DatabaseField
     private String nickname;
 
+    @DatabaseField
+    private Date createdTimeStamp;
 
     public TalkClientContact() {
         //System.out.println("TalkClientContact(): this="+this);
@@ -409,6 +411,14 @@ public class TalkClientContact implements Serializable {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public Date getCreatedTimeStamp() {
+        return createdTimeStamp;
+    }
+
+    public void setCreatedTimeStamp(Date createdTimeStamp) {
+        this.createdTimeStamp = createdTimeStamp;
     }
 
     @SelfMethodOnly
