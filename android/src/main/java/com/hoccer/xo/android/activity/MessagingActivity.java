@@ -1,7 +1,9 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.ActionBar;
-import android.content.*;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
@@ -20,6 +22,7 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
+
 public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
@@ -29,7 +32,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     MessagingFragment mMessagingFragment;
 
     private IContentObject mClipboardAttachment;
-    private ContactIdReceiver mCheckIdReceiver;
 
     @Override
     protected int getLayoutResource() {
@@ -51,18 +53,10 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         // enable up navigation
         enableUpNavigation();
 
-        // register receiver for notification check
-        IntentFilter filter = new IntentFilter(ContactIdReceiver.class.getName());
-        filter.addAction(IntentHelper.ACTION_CHECK_ID_IN_CONVERSATION);
-        mCheckIdReceiver = new ContactIdReceiver();
-        registerReceiver(mCheckIdReceiver, filter);
-
         // handle converse intent
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
-            mCheckIdReceiver.setId(contactId);
-
             if (contactId == -1) {
                 LOG.error("invalid contact id");
             } else {
@@ -78,17 +72,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     @Override
     protected void onResume() {
         super.onResume();
-
-        Intent intent = getIntent();
-
-        // handle converse intent
-        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
-            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
-            mCheckIdReceiver.setId(contactId);
-            if (contactId == -1) {
-                LOG.error("invalid contact id");
-            }
-        }
     }
 
     @Override
@@ -98,7 +81,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(mCheckIdReceiver);
         super.onDestroy();
     }
 
@@ -130,18 +112,21 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     public void popupItemSelected(MenuItem item, int messageId, String text) {
         switch (item.getItemId()) {
-            case R.id.menu_copy_attachment:
+            case R.id.menu_copy_message:
                 if (mClipboardAttachment != null) {
                     Clipboard clipboard = Clipboard.get(this);
                     clipboard.storeAttachment(mClipboardAttachment);
                     mClipboardAttachment = null;
                 } else {
                     ClipboardManager clipboardText = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("simple text",text);
+                    ClipData clip = ClipData.newPlainText("simple text", text);
                     clipboardText.setPrimaryClip(clip);
                 }
                 break;
-        }
+            case R.id.menu_delete_message:
+                    getXoClient().deleteMessage(messageId);
+                break;
+            }
     }
 
     public void setActionBarText(TalkClientContact contact) {
@@ -197,41 +182,40 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     }
 
     @Override
-    public void showGroupProfileFragment(int grouContactId) {
+    public void showGroupProfileFragment(int groupContactId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, grouContactId);
+        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
 
         GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
         groupProfileFragment.setArguments(bundle);
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
-        ft.commit();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void showGroupProfileFragment(int groupContactId, boolean cloneProfile) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
+
+        if (cloneProfile) {
+            bundle.putBoolean(GroupProfileFragment.ARG_CLONE_CURRENT_GROUP, true);
+        }
+
+        GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
+        groupProfileFragment.setArguments(bundle);
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
+        fragmentTransaction.commit();
     }
 
     private void showNearbyArchiveFragment() {
         NearbyArchiveFragment fragment = new NearbyArchiveFragment();
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_messaging_fragment_container, fragment);
-        ft.commit();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
+        fragmentTransaction.commit();
     }
-
-    private class ContactIdReceiver extends BroadcastReceiver {
-        private int mContactId;
-
-        public void setId(int id) {
-            mContactId = id;
-        }
-
-        @Override
-        public void onReceive(Context arg0, Intent arg1) {
-            Intent intent = new Intent();
-            intent.setAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
-            intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContactId);
-            sendBroadcast(intent);
-        }
-
-    }
-
 }

@@ -88,7 +88,8 @@
     <string name="messaging_loading">Lädt…</string>
     <string name="messaging_no_messages">Keine Nachrichten</string>
     <string name="messaging_invited_join">Gruppe beitreten</string>
-    <string name="menu_copy_attachment">Kopieren</string>
+    <string name="context_menu_copy_message">Kopieren</string>
+    <string name="context_menu_delete_message">Löschen</string>
 
     <!-- Pairing fragment -->
     <string name="pairing_token_info">Gib diesen Code einem Freund</string>
@@ -141,15 +142,18 @@
     <string name="group_name_hint">Gruppenname</string>
     <string name="profile_group_members_title">Mitglieder</string>
     <string name="profile_group_create_button">Gruppe erstellen</string>
+    <string name="profile_group_permanent_button">Permanente Gruppe erstellen</string>
     <string name="profile_group_join_button">Gruppe beitreten</string>
     <string name="profile_group_invite_button">Mitglieder einladen</string>
     <string name="profile_group_leave_button">Gruppe verlassen</string>
     <string name="profile_group_kick_button">User aus der Gruppe entfernen</string>
     <string name="profile_group_disband_button">Gruppe auflösen</string>
     <string name="profile_group_delete_button">Gruppe löschen</string>
+    <string name="profile_group_permanent_nearby">Permanent nearby</string>
 
     <!-- Messages -->
     <string name="message_text">Deine Nachricht</string>
+    <string name="unseen_messages_notification_text">\u0020neue Nachrichten</string>
 
     <!-- Content -->
     <string name="content_downloading">Downloading…</string>
@@ -341,7 +345,7 @@
     <string name="pref_privacy_title">Privatspähre</string>
     <string name="error_send_message_empty_group">Diese Gruppe ist leer.</string>
     <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
-    <string name="dialog_invite">Einladen</string>
+    <string name="multi_invitation_button">weiter</string>
 
     <string-array name="tab_names">
         <item>CHATS</item>
@@ -383,5 +387,9 @@
     <string name="attachment_failed">Beim Herunterladen ist ein Fehler aufgetreten.</string>
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
     <string name="toast_stored_external_file_to_clipboard">Die Datei wurde in der Zwischenablage gespeichert.</string>
+
+    <!-- Nearby all invite texts -->
+    <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
+    <string name="nearby_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
 
 </resources>

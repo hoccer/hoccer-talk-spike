@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -352,7 +351,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         if (isBlocked()) {
             Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
             TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText, upload);
-            getXoClient().markMessagesAsAborted(message);
+            getXoClient().markMessageAsAborted(message);
             clearComposedMessage();
             return;
 

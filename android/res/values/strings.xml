@@ -75,7 +75,7 @@
     <string name="dialog_confirm_nearby_deletion_message">Do you really want to delete messages from this group?</string>
 
     <!-- Invitation dialog -->
-    <string name="dialog_invite">Invite</string>
+    <string name="multi_invitation_button">continue</string>
     <string name="dialog_cancel">Cancel</string>
 
     <!-- Contact list items -->
@@ -99,8 +99,8 @@
     <string name="messaging_loading">Loading…</string>
     <string name="messaging_no_messages">No Messages</string>
     <string name="messaging_invited_join">Join group</string>
-    <string name="menu_copy_attachment">Copy</string>
-    <string name="menu_delete_message">Delete</string>
+    <string name="context_menu_copy_message">Copy</string>
+    <string name="context_menu_delete_message">Delete</string>
 
     <!-- Pairing fragment -->
     <string name="pairing_token_info">Give this token to someone:</string>
@@ -159,9 +159,11 @@
     <string name="profile_group_kick_button">Kick user from this Group</string>
     <string name="profile_group_disband_button">Disband this Group</string>
     <string name="profile_group_delete_button">Delete this Group</string>
+    <string name="profile_group_permanent_nearby">Permanent nearby</string>
 
     <!-- Messages -->
     <string name="message_text">Your message text</string>
+    <string name="unseen_messages_notification_text">\u0020new messages</string>
 
     <!-- Content -->
     <string name="content_downloading">Downloading…</string>
@@ -199,8 +201,7 @@
     <!-- Attachment type selection dialog -->
     <string name="selectattachment_title">Select attachment</string>
 
-
-  <!-- Name setting dialog -->
+    <!-- Name setting dialog -->
     <string name="setname_title">Change your name</string>
 
     <!-- Contact deletion dialog -->
@@ -410,5 +411,8 @@
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
     <string name="toast_stored_external_file_to_clipboard">Your file has been stored in the clipboard.</string>
 
+    <!-- Nearby all invite texts -->
+    <string name="nearby_invite_all">invite %1$d group members as friend</string>
+    <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
 
 </resources>

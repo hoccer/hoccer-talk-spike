@@ -139,7 +139,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     List<IXoContactListener> mContactListeners = new ArrayList<IXoContactListener>();
     List<IXoMessageListener> mMessageListeners = new ArrayList<IXoMessageListener>();
     List<IXoStateListener> mStateListeners = new ArrayList<IXoStateListener>();
-    List<IXoUnseenListener> mUnseenListeners = new ArrayList<IXoUnseenListener>();
     List<IXoTokenListener> mTokenListeners = new ArrayList<IXoTokenListener>();
     List<IXoAlertListener> mAlertListeners = new ArrayList<IXoAlertListener>();
 
@@ -410,16 +409,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mMessageListeners.remove(listener);
     }
 
-    public synchronized void registerUnseenListener(IXoUnseenListener listener) {
-        if (!mUnseenListeners.contains(listener)) {
-            mUnseenListeners.add(listener);
-        }
-    }
-
-    public synchronized void unregisterUnseenListener(IXoUnseenListener listener) {
-        mUnseenListeners.remove(listener);
-    }
-
     public synchronized void registerTransferListener(IXoTransferListenerOld listener) {
         mTransferAgent.registerListener(listener);
     }
@@ -446,19 +435,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public synchronized void unregisterAlertListener(IXoAlertListener listener) {
         mAlertListeners.remove(listener);
-    }
-
-    private void notifyUnseenMessages(boolean notify) {
-        LOG.debug("notifyUnseenMessages()");
-        List<TalkClientMessage> unseenMessages = null;
-        try {
-            unseenMessages = mDatabase.findUnseenMessages();
-        } catch (SQLException e) {
-            LOG.error("SQL error", e);
-        }
-        for(IXoUnseenListener listener: mUnseenListeners) {
-            listener.onUnseenMessages(unseenMessages, notify);
-        }
     }
 
     public boolean isIdle() {
@@ -1017,6 +993,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     member.setGroupId(groupId);
                     groupContact.updateGroupId(groupId);
                     groupContact.updateGroupPresence(groupPresence);   // was missing
+                    groupContact.setCreatedTimeStamp(new Date());
 
                     try {
                         mDatabase.saveGroupMember(member);
@@ -1101,6 +1078,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     member.setGroupId(createdGroup.getGroupId());
                     groupContact.updateGroupId(createdGroup.getGroupId());
                     groupContact.updateGroupPresence(groupPresence);
+                    groupContact.setCreatedTimeStamp(new Date());
 
                     try {
                         mDatabase.saveGroupMember(member);
@@ -1217,6 +1195,26 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     sendMessage(messageTag);
                 }
             }, 500, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void deleteMessage(int messageId) {
+        try {
+            TalkClientMessage message = getDatabase().findMessageById(messageId);
+            deleteMessage(message);
+        } catch (SQLException e) {
+            LOG.error("SQL Error while deleting message with id: " + messageId, e);
+        }
+    }
+
+    public void deleteMessage(TalkClientMessage message) {
+        try {
+            getDatabase().deleteMessageById(message.getClientMessageId());
+            for(IXoMessageListener listener: mMessageListeners) {
+                listener.onMessageDeleted(message);
+            }
+        } catch (SQLException e) {
+            LOG.error("SQL Error while deleting message with id: " + message.getClientMessageId(), e);
         }
     }
 
@@ -2597,7 +2595,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
             }
 
-            notifyUnseenMessages(newMessage);
             messageFailed = false;
         } catch (GeneralSecurityException e) {
             reason = "decryption problem" + e;
@@ -2905,9 +2902,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void updateClientPresence(TalkPresence presence, Set<String> fields) {
         LOG.debug("updateClientPresence(" + presence.getClientId() + ")");
+        boolean newContact = false;
         TalkClientContact clientContact = null;
         try {
-            clientContact = mDatabase.findContactByClientId(presence.getClientId(), true);
+            clientContact = mDatabase.findContactByClientId(presence.getClientId(), false);
+            if (clientContact == null) {
+                clientContact = mDatabase.findContactByClientId(presence.getClientId(), true);
+                newContact = true;
+            }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
             return;
@@ -2926,6 +2928,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             clientContact.updatePresence(presence);
         } else {
             clientContact.modifyPresence(presence, fields);
+        }
+
+        if (clientContact.getCreatedTimeStamp() == null) {
+            clientContact.setCreatedTimeStamp(new Date());
         }
 
         boolean wantDownload = false;
@@ -3086,11 +3092,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void updateGroupPresence(TalkGroup group) {
         LOG.info("updateGroupPresence(" + group.getGroupId() + ")");
 
+        boolean newGroup = false;
+        boolean newContact = false;
         TalkClientContact groupContact = null;
         try {
             groupContact = mDatabase.findContactByGroupTag(group.getGroupTag());
             if(groupContact == null) {
                 groupContact = mDatabase.findContactByGroupId(group.getGroupId(), true);
+                newGroup = true;
             }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -3100,6 +3109,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         if(groupContact == null) {
             LOG.warn("gp update for unknown group " + group.getGroupId());
             return;
+        }
+
+        if (groupContact.getCreatedTimeStamp() == null) {
+            groupContact.setCreatedTimeStamp(new Date());
         }
 
         groupContact.updateGroupPresence(group);
@@ -3238,13 +3251,19 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             return;
         }
 
+        if (groupContact.getCreatedTimeStamp() == null) {
+            groupContact.setCreatedTimeStamp(new Date());
+        }
+        if (clientContact.getCreatedTimeStamp() == null) {
+            clientContact.setCreatedTimeStamp(new Date());
+        }
+
         // if this concerns our own membership
         if (clientContact.isSelf()) {
             LOG.info("groupMember is about us, decrypting group key");
             try {
                 groupContact.updateGroupMember(member);
-                TalkClientMembership membership = mDatabase.findMembershipByContacts(
-                        groupContact.getClientContactId(), clientContact.getClientContactId(), true);
+                TalkClientMembership membership = mDatabase.findMembershipByContacts(groupContact.getClientContactId(), clientContact.getClientContactId(), true);
                 membership.updateGroupMember(member);
 
                 decryptGroupKey(groupContact, member);
@@ -3493,9 +3512,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 } catch (SQLException e) {
                     LOG.error("SQL error", e);
                 }
-                notifyUnseenMessages(false);
 
-                for (IXoMessageListener listener : mMessageListeners) {
+                for(IXoMessageListener listener : mMessageListeners) {
                     listener.onMessageUpdated(message);
                 }
             }
@@ -3512,7 +3530,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    public void markMessagesAsAborted(TalkClientMessage message) {
+    public void markMessageAsAborted(TalkClientMessage message) {
         message.getOutgoingDelivery().setState(TalkDelivery.STATE_ABORTED); // TODO: ABORTED OR ABORTED_ACKNOWLEDGED?
         try {
             mDatabase.saveDelivery(message.getOutgoingDelivery());
@@ -3520,9 +3538,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("error while saving a message which will never be sent since the receiver is blocked or the group is empty", e);
         }
 
-        int length = mMessageListeners.size();
-        for(int i = 0; i < length; i++) {
-            mMessageListeners.get(i).onMessageUpdated(message);
+        for(IXoMessageListener listener : mMessageListeners) {
+            listener.onMessageUpdated(message);
         }
     }
 

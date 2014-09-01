@@ -165,6 +165,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
             @Override
             public void run() {
                 mContactList.setVisibility(View.GONE);
+                mPlaceholderImageFrame.setVisibility(View.VISIBLE);
                 mPlaceholderImage.setVisibility(View.VISIBLE);
                 mPlaceholderText.setVisibility(View.VISIBLE);
             }

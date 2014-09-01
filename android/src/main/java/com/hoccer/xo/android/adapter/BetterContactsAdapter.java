@@ -12,6 +12,7 @@ import com.hoccer.xo.android.view.model.BaseContactItem;
 import com.hoccer.xo.android.view.model.NearbyGroupContactItem;
 import com.hoccer.xo.android.view.model.SmsContactItem;
 import com.hoccer.xo.android.view.model.TalkClientContactItem;
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
@@ -23,12 +24,18 @@ import java.util.List;
 
 public class BetterContactsAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
 
-    private static final Comparator<BaseContactItem> LATEST_MESSAGE_COMPARATOR = new Comparator<BaseContactItem>() {
+    private static final Logger LOG = Logger.getLogger(BetterContactsAdapter.class);
+
+    private static final Comparator<BaseContactItem> LATEST_ITEM_COMPARATOR = new Comparator<BaseContactItem>() {
         @Override
-        public int compare(BaseContactItem o1, BaseContactItem o2) {
-            if (o1.getTimeStamp() == o2.getTimeStamp()) {
+        public int compare(BaseContactItem contactItem1, BaseContactItem contactItem2) {
+
+            long value1 = Math.max(contactItem1.getMessageTimeStamp(), contactItem1.getContactCreationTimeStamp());
+            long value2 = Math.max(contactItem2.getMessageTimeStamp(), contactItem2.getContactCreationTimeStamp());
+
+            if (value1 == value2) {
                 return 0;
-            } else if (o1.getTimeStamp() > o2.getTimeStamp()) {
+            } else if (value1 > value2) {
                 return -1;
             }
             return 1;
@@ -153,7 +160,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void notifyDataSetChanged() {
-        Collections.sort(mContactItems, LATEST_MESSAGE_COMPARATOR);
+        Collections.sort(mContactItems, LATEST_ITEM_COMPARATOR);
         super.notifyDataSetChanged();
     }
 
@@ -298,7 +305,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
                 int oldItemCount = mContactItems.size();
 
-                if (contact.getGroupMember() == null || (contact.getGroupMember().isGroupRemoved())) {
+                if (contact.getGroupMember() == null || contact.getGroupMember().isGroupRemoved() || !contact.getGroupMember().isInvolved()) {
                     BaseContactItem item = findContactItemForContent(contact);
                     if (item != null) {
                         mContactItems.remove(item);
@@ -316,6 +323,16 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
                 checkItemCountAndNotify(oldItemCount);
             }
         });
+    }
+
+    @Override
+    public void onMessageCreated(TalkClientMessage message) {
+        updateItemForMessage(message);
+    }
+
+    @Override
+    public void onMessageDeleted(TalkClientMessage message) {
+        updateItemForMessage(message);
     }
 
     private void updateItemForMessage(TalkClientMessage message) {
@@ -344,15 +361,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         } catch (SQLException e) {
             LOG.error("Error while retrieving contacts for message " + message.getMessageId(), e);
         }
-    }
-
-    @Override
-    public void onMessageCreated(TalkClientMessage message) {
-        updateItemForMessage(message);
-    }
-
-    @Override
-    public void onMessageDeleted(TalkClientMessage message) {
     }
 
     @Override

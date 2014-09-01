@@ -16,17 +16,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_alignBottom="@+id/lv_address_book_dialog"
             android:layout_alignParentBottom="true">
 
         <Button
-                android:id="@+id/bt_invite"
+                android:id="@+id/bt_continue"
                 android:layout_height="60dp"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_weight="1"
-                android:text="@string/dialog_invite"
+                android:text="@string/multi_invitation_button"
                 android:textSize="18sp"
-                style="@style/AppBaseTheme.Group.CreateButton"
-                android:layout_toRightOf="@+id/bt_cancel"/>
+                style="@style/AppBaseTheme.Group.CreateButton"/>
     </LinearLayout>
 </RelativeLayout>

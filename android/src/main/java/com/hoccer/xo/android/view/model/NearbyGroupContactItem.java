@@ -74,9 +74,15 @@ public class NearbyGroupContactItem extends BaseContactItem implements SearchAda
     }
 
     @Override
-    public long getTimeStamp() {
+    public long getMessageTimeStamp() {
         return -1000;
     }
+
+    @Override
+    public long getContactCreationTimeStamp() {
+        return 0;
+    }
+
 
     private void setLastMessageTime(TextView lastMessageTime) {
         if (mLastMessageTimeStamp != null) {

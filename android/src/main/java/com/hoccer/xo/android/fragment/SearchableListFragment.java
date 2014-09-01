@@ -85,12 +85,7 @@ public abstract class SearchableListFragment extends ListFragment {
     protected abstract void onSearchModeDisabled();
 
     public void leaveSearchMode() {
-        mIsSearchModeEnabled = false;
-        if (mCachedListAdapter != null) {
-            setListAdapter(mCachedListAdapter);
-        }
-
-        onSearchModeDisabled();
+        mSearchMenuItem.collapseActionView();
     }
 
     private class SearchActionHandler implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
@@ -146,7 +141,12 @@ public abstract class SearchableListFragment extends ListFragment {
         @Override
         public boolean onMenuItemActionCollapse(MenuItem item) {
             if (item.getItemId() == R.id.menu_search) {
-                leaveSearchMode();
+                mIsSearchModeEnabled = false;
+                if (mCachedListAdapter != null) {
+                    setListAdapter(mCachedListAdapter);
+                }
+
+                onSearchModeDisabled();
             }
 
             return true;
