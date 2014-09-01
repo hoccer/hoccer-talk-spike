@@ -38,7 +38,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AttachmentListFragment extends ListFragment {
+public class AttachmentListFragment extends SearchableListFragment {
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
     public static final String ARG_CONTENT_MEDIA_TYPE = "com.hoccer.xo.android.fragment.ARG_CONTENT_MEDIA_TYPE";
@@ -58,9 +58,7 @@ public class AttachmentListFragment extends ListFragment {
     private SectionedListAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
-    private MenuItem mSearchMenuItem;
     private String mContentMediaTypeFilter = ContentMediaType.AUDIO;
-    private boolean mInSearchMode = false;
     private XoClientDatabase mDatabase;
     private ActionMode mCurrentActionMode;
 
@@ -109,13 +107,7 @@ public class AttachmentListFragment extends ListFragment {
         }
 
         mSearchContactsAdapter.onResume();
-
-        if (mSearchMenuItem != null && mSearchMenuItem.isActionViewExpanded()) {
-            toggleSearchMode(true);
-            setListAdapter(mResultsAdapter);
-        } else {
-            setListAdapter(mAttachmentAdapter);
-        }
+        setListAdapter(mAttachmentAdapter);
 
         getActivity().getActionBar().setTitle(R.string.menu_music_viewer);
     }
@@ -123,9 +115,7 @@ public class AttachmentListFragment extends ListFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_searchable_list, menu);
         menu.findItem(R.id.menu_collections).setVisible(true);
-        setupSearchWidget(menu);
     }
 
     @Override
@@ -138,11 +128,6 @@ public class AttachmentListFragment extends ListFragment {
     public void onStop() {
         super.onStop();
         getActivity().unbindService(mConnection);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     @Override
@@ -190,6 +175,38 @@ public class AttachmentListFragment extends ListFragment {
         mCurrentActionMode.finish();
     }
 
+    @Override
+    protected ListAdapter searchInAdapter(String query) {
+        mResultsAdapter.clear();
+
+        mSearchContactsAdapter.searchForContactsByName(query);
+        if (mSearchContactsAdapter.getCount() > 0) {
+            mResultsAdapter.addSection(getString(R.string.search_section_caption_contacts),
+                    mSearchContactsAdapter);
+        }
+
+        mSearchAttachmentAdapter.query(query);
+        if (mSearchAttachmentAdapter.getCount() > 0) {
+            mResultsAdapter.addSection(getString(R.string.search_section_caption_audio_files),
+                    mSearchAttachmentAdapter);
+        }
+
+        return mResultsAdapter;
+    }
+
+    @Override
+    protected void onSearchModeEnabled() {
+        if (mResultsAdapter == null) {
+            mResultsAdapter = new SectionedListAdapter();
+        }
+
+        mSearchAttachmentAdapter = new AttachmentSearchResultAdapter(mAttachmentAdapter.getItems());
+    }
+
+    @Override
+    protected void onSearchModeDisabled() {
+    }
+
     private void bindToMediaPlayerService(Intent intent) {
         mConnection = new ServiceConnection() {
             @Override
@@ -205,62 +222,6 @@ public class AttachmentListFragment extends ListFragment {
         };
 
         getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    private void setupSearchWidget(Menu menu) {
-
-        SearchActionHandler handler = new SearchActionHandler();
-
-        mSearchMenuItem = menu.findItem(R.id.menu_search);
-        mSearchMenuItem.setOnActionExpandListener(handler);
-
-        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) mSearchMenuItem.getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
-        searchView.setIconifiedByDefault(false);
-        searchView.setOnQueryTextListener(handler);
-
-    }
-
-    private void searchAttachmentList(final String query) {
-        if (mInSearchMode) {
-            mResultsAdapter.clear();
-
-                mSearchContactsAdapter.searchForContactsByName(query);
-                if (mSearchContactsAdapter.getCount() > 0) {
-                    mResultsAdapter.addSection(getString(R.string.search_section_caption_contacts),
-                            mSearchContactsAdapter);
-                }
-
-            mSearchAttachmentAdapter.query(query);
-            if (mSearchAttachmentAdapter.getCount() > 0) {
-                mResultsAdapter.addSection(getString(R.string.search_section_caption_audio_files),
-                        mSearchAttachmentAdapter);
-            }
-        }
-    }
-
-    private void toggleSoftKeyboard() {
-        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-    }
-
-    private void toggleSearchMode(boolean toggle) {
-        if (toggle) {
-            mInSearchMode = true;
-            if (mResultsAdapter == null) {
-                mResultsAdapter = new SectionedListAdapter();
-            }
-
-            setListAdapter(mResultsAdapter);
-
-            mSearchAttachmentAdapter = new AttachmentSearchResultAdapter(mAttachmentAdapter.getItems());
-
-        } else {
-            mInSearchMode = false;
-            mResultsAdapter = null;
-            mSearchAttachmentAdapter = null;
-        }
     }
 
     private void retrieveCollectionAndAddSelectedAttachments(Integer mediaCollectionId) {
@@ -280,6 +241,17 @@ public class AttachmentListFragment extends ListFragment {
         }
     }
 
+    private void deleteSelectedAttachments() {
+        List<XoTransfer> selectedObjects = mAttachmentAdapter.getSelectedItems();
+        for(XoTransfer item : selectedObjects) {
+            try {
+                XoApplication.getXoClient().getDatabase().deleteTransferAndMessage(item);
+            } catch (SQLException e) {
+                LOG.error(e);
+            }
+        }
+    }
+
     private class ListInteractionHandler implements AdapterView.OnItemClickListener, AbsListView.MultiChoiceModeListener {
 
         @Override
@@ -289,7 +261,7 @@ public class AttachmentListFragment extends ListFragment {
             if (selectedItem instanceof XoTransfer) {
                 XoTransfer transfer = (XoTransfer)selectedItem;
 
-                MediaPlaylist playlist = mInSearchMode ?
+                MediaPlaylist playlist = isSearchModeEnabled() ?
                         new SingleItemPlaylist(mDatabase, transfer) :
                         new UserPlaylist(mDatabase, mAttachmentAdapter.getContact());
 
@@ -297,10 +269,8 @@ public class AttachmentListFragment extends ListFragment {
 
                 getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else if (selectedItem instanceof TalkClientContact) {
-                toggleSearchMode(false);
-                mSearchMenuItem.collapseActionView();
+                leaveSearchMode();
                 mAttachmentAdapter.setContact((TalkClientContact) selectedItem);
-                setListAdapter(mAttachmentAdapter);
             }
         }
 
@@ -359,57 +329,6 @@ public class AttachmentListFragment extends ListFragment {
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             mAttachmentAdapter.deselectAllItems();
-        }
-    }
-
-    private class SearchActionHandler implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
-
-        @Override
-        public boolean onQueryTextSubmit(String query) {
-            toggleSoftKeyboard();
-
-            return true;
-        }
-
-        @Override
-        public boolean onQueryTextChange(final String query) {
-            if (mInSearchMode) {
-                searchAttachmentList(query);
-            }
-
-            return false;
-        }
-
-        @Override
-        public boolean onMenuItemActionExpand(MenuItem item) {
-            if (item.getItemId() == R.id.menu_search) {
-                toggleSearchMode(true);
-                SearchView searchView = (SearchView) item.getActionView();
-                searchAttachmentList(searchView.getQuery().toString());
-            }
-
-            return true;
-        }
-
-        @Override
-        public boolean onMenuItemActionCollapse(MenuItem item) {
-            if (item.getItemId() == R.id.menu_search) {
-                toggleSearchMode(false);
-                setListAdapter(mAttachmentAdapter);
-            }
-
-            return true;
-        }
-    }
-
-    private void deleteSelectedAttachments() {
-        List<XoTransfer> selectedObjects = mAttachmentAdapter.getSelectedItems();
-        for(XoTransfer item : selectedObjects) {
-            try {
-                XoApplication.getXoClient().getDatabase().deleteTransferAndMessage(item);
-            } catch (SQLException e) {
-                LOG.error(e);
-            }
         }
     }
 }
