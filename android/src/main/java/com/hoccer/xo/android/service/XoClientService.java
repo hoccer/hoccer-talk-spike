@@ -765,17 +765,6 @@ public class XoClientService extends Service {
 
         @Override
         public void onDownloadStateChanged(TalkClientDownload download) {
-            if (download.isAttachment() && download.isContentAvailable()
-                    && download.getContentUrl() == null) {
-                String[] path = new String[]{download.getDataFile()};
-                String[] ctype = new String[]{download.getContentType()};
-                LOG.debug("requesting media scan of " + ctype[0] + " at " + path[0]);
-                mScanningDownloads.put(path[0], download);
-                MediaScannerConnection.scanFile(
-                        XoClientService.this,
-                        path, ctype, this
-                );
-            }
         }
 
         @Override
@@ -788,6 +777,17 @@ public class XoClientService extends Service {
 
         @Override
         public void onDownloadFinished(TalkClientDownload download) {
+            if (download.isAttachment() && download.isContentAvailable()
+                    && download.getContentUrl() == null) {
+                String[] path = new String[]{download.getDataFile()};
+                String[] ctype = new String[]{download.getContentType()};
+                LOG.debug("requesting media scan of " + ctype[0] + " at " + path[0]);
+                mScanningDownloads.put(path[0], download);
+                MediaScannerConnection.scanFile(
+                        XoClientService.this,
+                        path, ctype, this
+                );
+            }
         }
 
         @Override
