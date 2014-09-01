@@ -8,15 +8,16 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Point;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.UserDictionary;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.CursorAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.SquaredImageView;
 import com.hoccer.xo.android.view.SquaredRelativeLayout;
@@ -24,7 +25,6 @@ import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
 import java.util.HashSet;
 
 public class MultiImagePickerActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
