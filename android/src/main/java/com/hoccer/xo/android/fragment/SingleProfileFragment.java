@@ -1,13 +1,12 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.*;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -23,17 +22,6 @@ import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
-
-import android.content.DialogInterface;
-import android.view.ActionMode;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -57,6 +45,8 @@ public class SingleProfileFragment extends XoFragment
     private Mode mMode;
 
     private TextView mNameText;
+
+    private RelativeLayout mKeyContainer;
 
     private TextView mKeyText;
 
@@ -90,6 +80,7 @@ public class SingleProfileFragment extends XoFragment
         View v = inflater.inflate(R.layout.fragment_single_profile, container, false);
         mAvatarImage = (ImageView) v.findViewById(R.id.profile_avatar_image);
         mNameText = (TextView) v.findViewById(R.id.tv_profile_name);
+        mKeyContainer = (RelativeLayout) v.findViewById(R.id.inc_profile_key);
         mKeyText = (TextView) v.findViewById(R.id.tv_profile_key);
         mEditName = (EditText) v.findViewById(R.id.et_profile_name);
         mNicknameEditButton = (ImageButton) v.findViewById(R.id.ib_profile_nickname_edit);
@@ -418,6 +409,7 @@ public class SingleProfileFragment extends XoFragment
     private void createSelf() {
         LOG.debug("createSelf()");
         mMode = Mode.CREATE_SELF;
+        mKeyContainer.setVisibility(View.GONE);
         mContact = getXoClient().getSelfContact();
         if (mContact.getPublicKey() == null) {
             isRegistered = false;

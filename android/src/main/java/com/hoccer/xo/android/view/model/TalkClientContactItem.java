@@ -170,7 +170,7 @@ public class TalkClientContactItem extends BaseContactItem implements SearchAdap
 
     @Override
     public boolean matches(String query) {
-        return mContact.getName().toLowerCase().startsWith(query.toLowerCase()) || mContact.getNickname().toLowerCase()
-                .startsWith(query.toLowerCase());
+        return mContact.getName().toLowerCase().contains(query.toLowerCase()) || mContact.getNickname().toLowerCase()
+                .contains(query.toLowerCase());
     }
 }

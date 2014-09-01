@@ -24,9 +24,6 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
     private static final String DB_TYPE_BOOLEAN = "BOOLEAN";
     private static final String DB_TYPE_INTEGER = "INTEGER";
 
-
-
-
     private static String DATABASE_NAME = "hoccer-talk.db";
 
     private static final int DATABASE_VERSION = 21;
