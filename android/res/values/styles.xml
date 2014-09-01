@@ -25,6 +25,8 @@
         <item name="android:buttonStyle">@style/ButtonAppBaseTheme</item>
         <item name="android:imageButtonStyle">@style/ImageButtonAppBaseTheme</item>
 
+        <item name="android:itemTextAppearance">@style/CustomMenuTextAppearance</item>
+
     </style>
 
     <style name="CheckBoxAppBaseTheme" parent="android:Widget.CompoundButton.CheckBox">
@@ -51,6 +53,11 @@
     <style name="searchTextHiglight">
         <item name="android:textColor">#FF33B5E5</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CustomMenuTextAppearance" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
+        <item name="android:textColor">@android:color/primary_text_dark</item>
+        <item name="android:textSize">16dp</item>
     </style>
 
 </resources>
