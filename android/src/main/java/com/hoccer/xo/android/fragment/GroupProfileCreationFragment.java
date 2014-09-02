@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -27,6 +29,7 @@ import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
+import com.sun.org.apache.bcel.internal.generic.FALOAD;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +45,6 @@ import java.util.List;
 public class GroupProfileCreationFragment extends XoFragment implements IXoContactListener, View.OnClickListener, AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileCreationFragment.class);
-    private boolean mFromNearby = false;
     public static final String ARG_CREATE_GROUP = "ARG_CREATE_GROUP";
     public static final String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
     public static final String ARG_CLONE_CURRENT_GROUP = "ARG_CLONE_CURRENT_GROUP";
@@ -50,7 +52,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     private TextView mGroupNameText;
     private EditText mGroupNameEdit;
     private Button mGroupCreateButton;
-    private LinearLayout mGroupMembersContainer;
     private TextView mGroupMembersTitle;
     private ListView mGroupMembersList;
     @Nullable
@@ -63,6 +64,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     private ArrayList<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteToGroup = new ArrayList<TalkClientContact>();
 
+    private boolean mCloneGroupContact = false;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -70,7 +73,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         view.setFocusableInTouchMode(true);
 
         mAvatarImage = (ImageView) view.findViewById(R.id.profile_group_profile_image);
-        mGroupMembersContainer = (LinearLayout) view.findViewById(R.id.profile_group_members_container);
+        LinearLayout mGroupMembersContainer = (LinearLayout) view.findViewById(R.id.profile_group_members_container);
         mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
         mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
         mGroupCreateButton = (Button) view.findViewById(R.id.profile_group_button_create);
@@ -121,6 +124,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             createGroup(null);
 
         } else if (arguments.getBoolean(ARG_CLONE_CURRENT_GROUP)) {
+            mCloneGroupContact = true;
             if (arguments.getInt(ARG_CLIENT_CONTACT_ID) == 0) {
                 LOG.error("Cloning a group without valid id is not supported.");
             }
@@ -209,6 +213,13 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         menuInflater.inflate(R.menu.fragment_group_profile_create, menu);
         MenuItem listAttachmentsItem = menu.findItem(R.id.menu_audio_attachment_list);
         listAttachmentsItem.setVisible(true);
+
+        MenuItem addPerson = menu.findItem(R.id.menu_group_profile_add_person);
+        if (mContactsToInviteToGroup.isEmpty()) {
+            addPerson.setVisible(false);
+        } else {
+            addPerson.setVisible(true);
+        }
     }
 
     @Override
@@ -219,6 +230,10 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
                 intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mGroup.getClientContactId());
                 startActivity(intent);
+                isSelectionHandled = true;
+                break;
+            case R.id.menu_group_profile_add_person:
+                manageGroupMembers();
                 isSelectionHandled = true;
                 break;
             default:
@@ -260,7 +275,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 mCurrentClientsInGroup.addAll(getCurrentContactsFromGroup(clientIds));
                 mContactsToInviteToGroup.addAll(mCurrentClientsInGroup);
             }
-            mFromNearby = (group.getGroupPresence() != null && group.getGroupPresence().isTypeNearby());
+//            mFromNearby = (group.getGroupPresence() != null && group.getGroupPresence().isTypeNearby());
         }
 
         mGroup = TalkClientContact.createGroupContact();
@@ -276,9 +291,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         if (newGroupName.isEmpty()) {
             newGroupName = "";
         }
-        mGroupNameText.setText(newGroupName);
-        mGroupNameText.setVisibility(View.VISIBLE);
-        mGroupNameEdit.setVisibility(View.GONE);
+
         updateActionBar();
 
         if (mGroup != null && !mGroup.isGroupRegistered()) {
@@ -349,7 +362,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         if (mCurrentClientsInGroup.isEmpty()) {
             mCurrentClientsInGroup.addAll(getCurrentContactsFromGroup(Arrays.asList(mGroupMemberAdapter.getMembersIds())));
         }
-        GroupManageDialog dialog = new GroupManageDialog(mGroup, mCurrentClientsInGroup, mContactsToInviteToGroup, mFromNearby);
+        GroupManageDialog dialog = new GroupManageDialog(mGroup, mCurrentClientsInGroup, mContactsToInviteToGroup, mCloneGroupContact);
         dialog.setTargetFragment(this, 0);
         dialog.show(getActivity().getSupportFragmentManager(), "GroupManageDialog");
     }
@@ -455,12 +468,10 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     @Override
     public void onContactAdded(TalkClientContact contact) {
         if (isCurrentGroup(contact)) {
-
             if (!mContactsToInviteToGroup.isEmpty()) {
                 addMembersToGroup();
             }
-            // TODO: load edit fragment.
-//            getActivity().finish();
+            getActivity().finish();
         }
     }
 
