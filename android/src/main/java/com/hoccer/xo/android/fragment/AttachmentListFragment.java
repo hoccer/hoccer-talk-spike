@@ -74,7 +74,7 @@ public class AttachmentListFragment extends SearchableListFragment {
             int contactId = getActivity().getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
             if (contactId >= 0) {
                 try {
-                    setFilterContact(mDatabase.findClientContactById(contactId));
+                    mFilterContact = mDatabase.findClientContactById(contactId);
                 } catch (SQLException e) {
                     LOG.warn("Contact with ID " + contactId + " not found");
                 }
@@ -190,10 +190,6 @@ public class AttachmentListFragment extends SearchableListFragment {
             }
         }
         mCurrentActionMode.finish();
-    }
-
-    protected void setFilterContact(TalkClientContact filterContact) {
-        mFilterContact = filterContact;
     }
 
     @Override
