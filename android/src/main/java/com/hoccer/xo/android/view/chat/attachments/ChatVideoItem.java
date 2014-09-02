@@ -136,6 +136,7 @@ public class ChatVideoItem extends ChatMessageItem implements View.OnLayoutChang
 
     @Override
     public void detachView() {
+        LOG.debug("Detach view for: " + "file://" + (mThumbnailPath == null ? "null" : mThumbnailPath));
         // check for null in case display attachment has not yet been called
         if (mRootView != null) {
             mRootView.removeOnLayoutChangeListener(this);
@@ -148,6 +149,7 @@ public class ChatVideoItem extends ChatMessageItem implements View.OnLayoutChang
 
     @Override
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+        LOG.debug("Picasso loads: " + "file://" + (mThumbnailPath == null ? "null" : mThumbnailPath));
         ImageView targetView = (ImageView) v.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
         Picasso.with(mContext).load("file://" + mThumbnailPath)
