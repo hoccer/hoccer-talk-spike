@@ -675,7 +675,13 @@ public class GroupProfileFragment extends XoFragment
             if(mContactsToDisinviteAsFriend.isEmpty()) {
                 int numberOfClients = mContactsToInviteAsFriend.size();
                 buttonText = String.format(getString(R.string.nearby_invite_all), numberOfClients);
+                if(numberOfClients > 0) {
+                    mInviteAllButton.setEnabled(true);
+                } else {
+                    mInviteAllButton.setEnabled(false);
+                }
             } else {
+                mInviteAllButton.setEnabled(true);
                 int numberOfInvitedClients = mContactsToDisinviteAsFriend.size();
                 buttonText = String.format(getString(R.string.nearby_disinvite_all), numberOfInvitedClients);
             }
