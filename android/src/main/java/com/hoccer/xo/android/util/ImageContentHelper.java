@@ -2,9 +2,13 @@ package com.hoccer.xo.android.util;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import org.apache.log4j.Logger;
 
@@ -69,5 +73,29 @@ public class ImageContentHelper {
             aspectRatio = (double) fileHeight / (double) fileWidth;
         }
         return aspectRatio;
+    }
+
+    public void encodeBitmap(final String inPath, final String outPath, final int imageSize, final int imageQuality,
+                             final Runnable callback) {
+        new AsyncTask() {
+
+            @Override
+            protected Object doInBackground(Object[] params) {
+                Bitmap original = BitmapFactory.decodeFile(inPath);
+
+                long originalSize = original.getDensity() * original.getHeight() * original.getWidth();
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inBitmap = original;
+                options.outHeight = 0;
+                options.outWidth = 0;
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Object o) {
+                super.onPostExecute(o);
+                callback.run();
+            }
+        };
     }
 }
