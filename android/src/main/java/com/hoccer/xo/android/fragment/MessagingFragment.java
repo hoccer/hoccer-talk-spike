@@ -15,6 +15,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ChatAdapter;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
+import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
@@ -203,16 +204,16 @@ public class MessagingFragment extends XoListFragment
     public boolean onOptionsItemSelected(MenuItem item) {
         LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
 
-        IMessagingFragmentManager messagingFragmentManager = (IMessagingFragmentManager) getActivity();
+        IProfileFragmentManager profileFragmentManager = (IProfileFragmentManager) getActivity();
         switch (item.getItemId()) {
             case R.id.menu_profile_single:
-                if (mContact != null && messagingFragmentManager != null) {
-                    messagingFragmentManager.showSingleProfileFragment(mContact.getClientContactId());
+                if (mContact != null && profileFragmentManager != null) {
+                    profileFragmentManager.showSingleProfileFragment(mContact.getClientContactId());
                 }
                 break;
             case R.id.menu_profile_group:
-                if (mContact != null && messagingFragmentManager != null) {
-                    messagingFragmentManager.showGroupProfileFragment(mContact.getClientContactId());
+                if (mContact != null && profileFragmentManager != null) {
+                    profileFragmentManager.showGroupProfileFragment(mContact.getClientContactId(), false);
                 }
                 break;
             case R.id.menu_audio_attachment_list:
@@ -221,8 +222,8 @@ public class MessagingFragment extends XoListFragment
                 }
                 break;
             case R.id.menu_group_profile_create_permanent_group:
-                if (mContact != null && messagingFragmentManager != null) {
-                    messagingFragmentManager.showGroupProfileFragment(mContact.getClientContactId(), true);
+                if (mContact != null && profileFragmentManager != null) {
+                    profileFragmentManager.showGroupProfileCreationFragment(mContact.getClientContactId(), true);
                 }
                 break;
             default:

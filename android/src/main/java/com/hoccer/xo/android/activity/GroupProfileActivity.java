@@ -3,14 +3,18 @@ package com.hoccer.xo.android.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.base.XoFragment;
+import com.hoccer.xo.android.fragment.GroupProfileCreationFragment;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
+import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.release.R;
 
 /**
  * Activity wrapping a group profile fragment
  */
-public class GroupProfileActivity extends XoActionbarActivity {
+public class GroupProfileActivity extends XoActionbarActivity implements IProfileFragmentManager {
 
     /* use this extra to open in "client registration" mode */
     public static final String EXTRA_CLIENT_CREATE_GROUP = "clientCreateGroup";
@@ -18,8 +22,6 @@ public class GroupProfileActivity extends XoActionbarActivity {
     /* use this extra to show the given contact */
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
     public static final String EXTRA_MAKE_FROM_NEARBY = "fromNearby";
-
-    GroupProfileFragment mGroupProfileFragment;
 
     @Override
     protected int getLayoutResource() {
@@ -42,17 +44,17 @@ public class GroupProfileActivity extends XoActionbarActivity {
 
         if (intent != null) {
             if (intent.hasExtra(EXTRA_CLIENT_CREATE_GROUP)) {
-                showCreateGroupProfileFragment();
+                showCreateGroupProfileFragment(null);
             } else if (intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
                 int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
                 if (contactId == -1) {
                     LOG.error("invalid contact id");
                 } else {
-                    showGroupProfileFragment(contactId);
+                    showGroupProfileFragment(contactId, false);
                 }
             } else if (intent.hasExtra(EXTRA_MAKE_FROM_NEARBY)) {
                 String[] clientIds = intent.getStringArrayExtra(EXTRA_MAKE_FROM_NEARBY);
-                mGroupProfileFragment.createGroupFromNearby(clientIds);
+                showCreateGroupProfileFragment(clientIds);
             }
         }
 
@@ -71,27 +73,59 @@ public class GroupProfileActivity extends XoActionbarActivity {
         super.onPause();
     }
 
-    private void showGroupProfileFragment(int contactId) {
+    private void showCreateGroupProfileFragment(String[] clientIds) {
         Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, contactId);
+        bundle.putBoolean(GroupProfileCreationFragment.ARG_CREATE_GROUP, true);
 
-        mGroupProfileFragment = new GroupProfileFragment();
-        mGroupProfileFragment.setArguments(bundle);
+        GroupProfileCreationFragment groupProfileFragment = new GroupProfileCreationFragment();
+        groupProfileFragment.setArguments(bundle);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_group_profile_fragment_container, mGroupProfileFragment);
+        ft.replace(R.id.fl_group_profile_fragment_container, groupProfileFragment);
         ft.commit();
     }
 
-    private void showCreateGroupProfileFragment() {
+    @Override
+    public void showSingleProfileFragment(int clientContactId) {
         Bundle bundle = new Bundle();
-        bundle.putBoolean(GroupProfileFragment.ARG_CREATE_GROUP, true);
+        bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, clientContactId);
 
-        mGroupProfileFragment = new GroupProfileFragment();
-        mGroupProfileFragment.setArguments(bundle);
+        SingleProfileFragment singleProfileFragment = new SingleProfileFragment();
+        singleProfileFragment.setArguments(bundle);
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_group_profile_fragment_container, mGroupProfileFragment);
-        ft.commit();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_group_profile_fragment_container, singleProfileFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void showGroupProfileFragment(int groupContactId, boolean isFollowUp) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
+
+        GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
+        groupProfileFragment.setArguments(bundle);
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_group_profile_fragment_container, groupProfileFragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void showGroupProfileCreationFragment(int groupContactId, boolean cloneProfile) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(GroupProfileCreationFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
+
+        if (cloneProfile) {
+            bundle.putBoolean(GroupProfileCreationFragment.ARG_CLONE_CURRENT_GROUP, true);
+        }
+
+        GroupProfileCreationFragment groupProfileCreationFragment = new GroupProfileCreationFragment();
+        groupProfileCreationFragment.setArguments(bundle);
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_group_profile_fragment_container, groupProfileCreationFragment);
+        fragmentTransaction.commit();
     }
 }

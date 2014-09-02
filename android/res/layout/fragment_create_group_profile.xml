@@ -59,6 +59,15 @@
             android:visibility="gone"
             style="@style/AppBaseTheme.Group.Name"/>
 
+    <Button
+            android:id="@+id/profile_group_button_create"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:text="@string/profile_group_create_button"
+            style="@style/AppBaseTheme.Group.CreateButton"/>
+
     <LinearLayout
             android:id="@+id/profile_group_members_container"
             android:orientation="vertical"
@@ -84,14 +93,5 @@
                 android:layout_height="wrap_content"
                 style="@style/AppBaseTheme.Group.List"/>
     </LinearLayout>
-
-    <Button
-            android:id="@+id/profile_group_button_invite_all"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="visible"
-            android:text="@string/nearby_invite_all"
-            style="@style/AppBaseTheme.Group.CreateButton"/>
 
 </LinearLayout>
