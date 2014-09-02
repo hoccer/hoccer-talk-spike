@@ -1,24 +1,20 @@
-package com.hoccer.xo.android.content.contentselectors;
+package com.hoccer.xo.android.util;
 
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 
 public class ImageContentHelper {
 
     private static Logger LOG = Logger.getLogger(ImageContentHelper.class);
 
-    static int retrieveOrientation(Context context, Uri contentUri, String filePath) {
+    public static int retrieveOrientation(Context context, Uri contentUri, String filePath) {
         String[] columns = {
                 MediaStore.Images.Media.ORIENTATION
         };
@@ -65,7 +61,7 @@ public class ImageContentHelper {
         }
     }
 
-    static double calculateAspectRatio(int fileWidth, int fileHeight, int orientation) {
+    public static double calculateAspectRatio(int fileWidth, int fileHeight, int orientation) {
         double aspectRatio;
         if (orientation == 0 || orientation == 180) {
             aspectRatio = (double) fileWidth / (double) fileHeight;

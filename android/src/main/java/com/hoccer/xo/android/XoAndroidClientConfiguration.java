@@ -86,4 +86,8 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     public boolean isLoggingToLogcatEnabled() {
         return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.log.to.logcat", "true"));
     }
+
+    public SharedPreferences getSharedPreferences() {
+        return mPreferences;
+    }
 }
