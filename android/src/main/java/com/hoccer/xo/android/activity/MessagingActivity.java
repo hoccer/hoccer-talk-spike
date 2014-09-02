@@ -14,10 +14,7 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.fragment.GroupProfileFragment;
-import com.hoccer.xo.android.fragment.MessagingFragment;
-import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
-import com.hoccer.xo.android.fragment.SingleProfileFragment;
+import com.hoccer.xo.android.fragment.*;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
@@ -204,7 +201,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
             bundle.putBoolean(GroupProfileFragment.ARG_CLONE_CURRENT_GROUP, true);
         }
 
-        GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
+        GroupProfileCreationFragment groupProfileFragment = new GroupProfileCreationFragment();
         groupProfileFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();

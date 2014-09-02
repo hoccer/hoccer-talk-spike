@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.base.XoFragment;
+import com.hoccer.xo.android.fragment.GroupProfileCreationFragment;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
 import com.hoccer.xo.release.R;
 
@@ -19,7 +21,7 @@ public class GroupProfileActivity extends XoActionbarActivity {
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
     public static final String EXTRA_MAKE_FROM_NEARBY = "fromNearby";
 
-    GroupProfileFragment mGroupProfileFragment;
+    XoFragment mGroupProfileFragment;
 
     @Override
     protected int getLayoutResource() {
@@ -42,7 +44,7 @@ public class GroupProfileActivity extends XoActionbarActivity {
 
         if (intent != null) {
             if (intent.hasExtra(EXTRA_CLIENT_CREATE_GROUP)) {
-                showCreateGroupProfileFragment();
+                showCreateGroupProfileFragment(null);
             } else if (intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
                 int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
                 if (contactId == -1) {
@@ -52,7 +54,7 @@ public class GroupProfileActivity extends XoActionbarActivity {
                 }
             } else if (intent.hasExtra(EXTRA_MAKE_FROM_NEARBY)) {
                 String[] clientIds = intent.getStringArrayExtra(EXTRA_MAKE_FROM_NEARBY);
-                mGroupProfileFragment.createGroupFromNearby(clientIds);
+                showCreateGroupProfileFragment(clientIds);
             }
         }
 
@@ -83,11 +85,11 @@ public class GroupProfileActivity extends XoActionbarActivity {
         ft.commit();
     }
 
-    private void showCreateGroupProfileFragment() {
+    private void showCreateGroupProfileFragment(String[] clientIds) {
         Bundle bundle = new Bundle();
-        bundle.putBoolean(GroupProfileFragment.ARG_CREATE_GROUP, true);
+        bundle.putBoolean(GroupProfileCreationFragment.ARG_CREATE_GROUP, true);
 
-        mGroupProfileFragment = new GroupProfileFragment();
+        mGroupProfileFragment = new GroupProfileCreationFragment();
         mGroupProfileFragment.setArguments(bundle);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
