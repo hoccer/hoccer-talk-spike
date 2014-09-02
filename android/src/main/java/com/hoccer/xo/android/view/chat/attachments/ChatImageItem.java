@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
@@ -46,7 +47,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
 
         setRequiredImageWidth();
 
-        mAttachmentView.setPadding(0, 0, 0, 0);
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -97,14 +97,14 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     @Override
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
         ImageView targetView = (ImageView) v.findViewById(R.id.iv_picture);
-        Picasso.with(mContext).setLoggingEnabled(true);
+        Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
         Picasso.with(mContext).load(mContentObject.getContentDataUrl())
                 .error(R.drawable.ic_img_placeholder_error)
                 .resize((int) (targetView.getWidth() * IMAGE_SCALE_FACTOR), (int) (targetView.getHeight() * IMAGE_SCALE_FACTOR))
                 .centerInside()
                 .into(targetView);
         v.removeOnLayoutChangeListener(this);
-        LOG.error(Picasso.with(mContext).getSnapshot().toString());
+        LOG.trace(Picasso.with(mContext).getSnapshot().toString());
     }
 
     private void openImage(IContentObject contentObject) {
