@@ -26,8 +26,8 @@ public class ImageSelector implements IContentSelector {
 
     private Logger LOG = Logger.getLogger(ImageSelector.class);
 
-    private String mName;
-    private Drawable mIcon;
+    protected String mName;
+    protected Drawable mIcon;
 
     public ImageSelector(Context context) {
         mName = context.getResources().getString(R.string.content_images);
@@ -69,7 +69,7 @@ public class ImageSelector implements IContentSelector {
         return creator.apply(context, intent);
     }
 
-    private IContentCreator findContentObjectCreator(Uri selectedContent) {
+    protected IContentCreator findContentObjectCreator(Uri selectedContent) {
         String contentString = selectedContent.toString();
         if (isPicasaContent(contentString)) {
             return new PicasaContentObjectCreator();
