@@ -188,13 +188,15 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         return mContactItems.get(position).getView(convertView, parent);
     }
 
-
     /**
      * ******************************* LISTENER IMPLEMENTATIONS ******************************
      */
 
     @Override
     public void onContactAdded(final TalkClientContact contact) {
+        if (contact.getClientPresence() == null) {
+            return;
+        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -212,6 +214,9 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onContactRemoved(final TalkClientContact contact) {
+        if (contact.getClientPresence() == null) {
+            return;
+        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -231,6 +236,9 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onClientPresenceChanged(final TalkClientContact contact) {
+        if (contact.getClientPresence() == null) {
+            return;
+        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -246,8 +254,11 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onClientRelationshipChanged(final TalkClientContact contact) {
+        if (contact.getClientPresence() == null) {
+            return;
+        }
         final TalkRelationship relationship = contact.getClientRelationship();
-        if (relationship == null) {
+        if (relationship == null)  {
             return;
         }
         runOnUiThread(new Runnable() {
@@ -279,7 +290,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onGroupPresenceChanged(final TalkClientContact contact) {
-        if (contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept())) {
+        if (contact.getGroupPresence() == null || (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept())) {
             return;
         }
         runOnUiThread(new Runnable() {
@@ -296,7 +307,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onGroupMembershipChanged(final TalkClientContact contact) {
-        if (contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept())) {
+        if (contact.getGroupPresence() == null || (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept())) {
             return;
         }
         runOnUiThread(new Runnable() {

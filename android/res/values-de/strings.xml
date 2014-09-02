@@ -123,8 +123,7 @@
     <string name="profile_status_edit">Hallo!</string>
     <string name="profile_status_set_button">Neuen Status auswählen</string>
     <string name="profile_self_register_button">Registrieren</string>
-    <string name="profile_user_block_status">Dieser User ist geblockt. Bitte entblockieren, um Nachrichten zu empfangen.
-    </string>
+    <string name="profile_user_block_status">Dieser User ist geblockt. Bitte entblockieren, um Nachrichten zu empfangen.</string>
     <string name="profile_user_block_button">User blockieren</string>
     <string name="profile_user_unblock_button">User entblockieren</string>
     <string name="profile_user_depair_button">Verbindung aufheben</string>
@@ -150,10 +149,16 @@
     <string name="profile_group_disband_button">Gruppe auflösen</string>
     <string name="profile_group_delete_button">Gruppe löschen</string>
     <string name="profile_group_permanent_nearby">Permanent nearby</string>
+    <string name="profile_group_empty_name_title">Gruppenname ungültig</string>
+    <string name="profile_group_empty_name_message">Please enter a group name</string>
+
 
     <!-- Messages -->
     <string name="message_text">Deine Nachricht</string>
+
+    <!-- Notifications -->
     <string name="unseen_messages_notification_text">\u0020neue Nachrichten</string>
+    <string name="unconfirmed_invitations_notification_text">\u0020unbestätigte Einladungen</string>
 
     <!-- Content -->
     <string name="content_downloading">Downloading…</string>
@@ -341,6 +346,7 @@
     <string name="placeholder_nearby_link_text">in der Nähe</string>
     <string name="actionbar_default_title">Hoccer</string>
     <string name="content_audio_caption">Musik</string>
+    <string name="content_audio_by_contact_caption">Musik von %1$s</string>
     <string name="nearby_info_usercount">%1$d Benutzer in der Nähe</string>
     <string name="profile_nickname_text">Anzeigename</string>
     <string name="nearby_text">Alle in der Nähe</string>

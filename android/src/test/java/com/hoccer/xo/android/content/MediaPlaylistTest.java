@@ -436,6 +436,7 @@ public class MediaPlaylistTest {
             // create message for user and link download
             TalkClientMessage message = new TalkClientMessage();
             message.setAttachmentDownload(result);
+            message.setSenderContact(user);
             message.setConversationContact(user);
 
             mDatabase.saveClientMessage(message);

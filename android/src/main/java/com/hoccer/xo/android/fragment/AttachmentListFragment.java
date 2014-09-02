@@ -29,6 +29,7 @@ import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.ContactOperations;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -46,8 +47,6 @@ public class AttachmentListFragment extends SearchableListFragment {
     public static final int SELECT_COLLECTION_REQUEST = 1;
     public static final int SELECT_CONTACT_REQUEST = 2;
 
-    public static final int ALL_CONTACTS_ID = -1;
-
     private MediaPlayerService mMediaPlayerService;
 
     private final static Logger LOG = Logger.getLogger(AttachmentListFragment.class);
@@ -59,6 +58,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
     private String mContentMediaTypeFilter = ContentMediaType.AUDIO;
+    private TalkClientContact mFilterContact = null;
     private XoClientDatabase mDatabase;
     private ActionMode mCurrentActionMode;
 
@@ -69,7 +69,19 @@ public class AttachmentListFragment extends SearchableListFragment {
         mDatabase = XoApplication.getXoClient().getDatabase();
 
         setHasOptionsMenu(true);
-        mAttachmentAdapter = new AttachmentListAdapter(null, mContentMediaTypeFilter);
+
+        if (getActivity().getIntent().hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+            int contactId = getActivity().getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+            if (contactId >= 0) {
+                try {
+                    setFilterContact(mDatabase.findClientContactById(contactId));
+                } catch (SQLException e) {
+                    LOG.warn("Contact with ID " + contactId + " not found");
+                }
+            }
+        }
+
+        mAttachmentAdapter = new AttachmentListAdapter(mFilterContact, mContentMediaTypeFilter);
 
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
         mSearchContactsAdapter.onCreate();
@@ -109,7 +121,12 @@ public class AttachmentListFragment extends SearchableListFragment {
         mSearchContactsAdapter.onResume();
         setListAdapter(mAttachmentAdapter);
 
-        getActivity().getActionBar().setTitle(R.string.menu_music_viewer);
+        if (mFilterContact != null) {
+            getActivity().getActionBar().setTitle(getResources().getString(R.string.content_audio_by_contact_caption,
+                    mFilterContact.getNickname()));
+        } else {
+            getActivity().getActionBar().setTitle(R.string.content_audio_caption);
+        }
     }
 
     @Override
@@ -173,6 +190,10 @@ public class AttachmentListFragment extends SearchableListFragment {
             }
         }
         mCurrentActionMode.finish();
+    }
+
+    protected void setFilterContact(TalkClientContact filterContact) {
+        mFilterContact = filterContact;
     }
 
     @Override
@@ -271,7 +292,11 @@ public class AttachmentListFragment extends SearchableListFragment {
                 getActivity().startActivity(new Intent(getActivity(), FullscreenPlayerActivity.class));
             } else if (selectedItem instanceof TalkClientContact) {
                 leaveSearchMode();
+                mFilterContact = (TalkClientContact) selectedItem;
                 mAttachmentAdapter.setContact((TalkClientContact) selectedItem);
+                final String newActionBarTitle = getResources().getString(R.string.content_audio_by_contact_caption,
+                        mFilterContact.getNickname());
+                getActivity().getActionBar().setTitle(newActionBarTitle);
             }
         }
 
