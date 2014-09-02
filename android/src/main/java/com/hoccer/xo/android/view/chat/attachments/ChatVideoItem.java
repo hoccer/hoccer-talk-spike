@@ -114,9 +114,11 @@ public class ChatVideoItem extends ChatMessageItem implements View.OnLayoutChang
 
         // register layout change listener and resize thumbnail view
         mRootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        mRootView.addOnLayoutChangeListener(this);
         mRootView.getLayoutParams().width = width;
         mRootView.getLayoutParams().height = height;
-        mRootView.addOnLayoutChangeListener(this);
+        mRootView.requestLayout();
+        
         mRootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,7 +159,7 @@ public class ChatVideoItem extends ChatMessageItem implements View.OnLayoutChang
                 .resize(targetView.getWidth(), targetView.getHeight())
                 .centerInside()
                 .into(targetView);
-        mRootView.removeOnLayoutChangeListener(this);
+        v.removeOnLayoutChangeListener(this);
     }
 
 
