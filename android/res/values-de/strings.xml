@@ -123,8 +123,7 @@
     <string name="profile_status_edit">Hallo!</string>
     <string name="profile_status_set_button">Neuen Status auswählen</string>
     <string name="profile_self_register_button">Registrieren</string>
-    <string name="profile_user_block_status">Dieser User ist geblockt. Bitte entblockieren, um Nachrichten zu empfangen.
-    </string>
+    <string name="profile_user_block_status">Dieser User ist geblockt. Bitte entblockieren, um Nachrichten zu empfangen.</string>
     <string name="profile_user_block_button">User blockieren</string>
     <string name="profile_user_unblock_button">User entblockieren</string>
     <string name="profile_user_depair_button">Verbindung aufheben</string>
@@ -150,6 +149,9 @@
     <string name="profile_group_disband_button">Gruppe auflösen</string>
     <string name="profile_group_delete_button">Gruppe löschen</string>
     <string name="profile_group_permanent_nearby">Permanent nearby</string>
+    <string name="profile_group_empty_name_title">Gruppenname ungültig</string>
+    <string name="profile_group_empty_name_message">Please enter a group name</string>
+
 
     <!-- Messages -->
     <string name="message_text">Deine Nachricht</string>
