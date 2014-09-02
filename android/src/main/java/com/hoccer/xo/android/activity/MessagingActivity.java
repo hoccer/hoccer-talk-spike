@@ -12,6 +12,7 @@ import android.widget.PopupMenu;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
+import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.fragment.*;
@@ -20,7 +21,7 @@ import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
 
-public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
+public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager, IProfileFragmentManager {
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
@@ -159,9 +160,9 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         mMessagingFragment = new MessagingFragment();
         mMessagingFragment.setArguments(bundle);
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_messaging_fragment_container, mMessagingFragment);
-        ft.commit();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mMessagingFragment);
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -179,7 +180,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     }
 
     @Override
-    public void showGroupProfileFragment(int groupContactId) {
+    public void showGroupProfileFragment(int groupContactId, boolean isFollowUp) {
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
 
@@ -188,7 +189,10 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
-        fragmentTransaction.addToBackStack(null);
+
+        if (!isFollowUp) {
+            fragmentTransaction.addToBackStack(null);
+        }
         fragmentTransaction.commit();
     }
 

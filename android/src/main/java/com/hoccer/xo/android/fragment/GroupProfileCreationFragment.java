@@ -20,8 +20,10 @@ import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
+import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
+import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
@@ -471,7 +473,13 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             if (!mContactsToInviteToGroup.isEmpty()) {
                 addMembersToGroup();
             }
-            getActivity().finish();
+
+            try {
+                IProfileFragmentManager profileFragmentManager = (IProfileFragmentManager) getActivity();
+                profileFragmentManager.showGroupProfileFragment(mGroup.getClientContactId(), true);
+            } catch (ClassCastException e) {
+                LOG.error("Activity does not implement interface IProfileFragmentManager ", e);
+            }
         }
     }
 
