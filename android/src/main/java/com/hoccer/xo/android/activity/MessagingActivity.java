@@ -193,19 +193,19 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     }
 
     @Override
-    public void showGroupProfileFragment(int groupContactId, boolean cloneProfile) {
+    public void showGroupProfileCreationFragment(int groupContactId, boolean cloneProfile) {
         Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
+        bundle.putInt(GroupProfileCreationFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
 
         if (cloneProfile) {
-            bundle.putBoolean(GroupProfileFragment.ARG_CLONE_CURRENT_GROUP, true);
+            bundle.putBoolean(GroupProfileCreationFragment.ARG_CLONE_CURRENT_GROUP, true);
         }
 
-        GroupProfileCreationFragment groupProfileFragment = new GroupProfileCreationFragment();
-        groupProfileFragment.setArguments(bundle);
+        GroupProfileCreationFragment groupProfileCreationFragment = new GroupProfileCreationFragment();
+        groupProfileCreationFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileCreationFragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }

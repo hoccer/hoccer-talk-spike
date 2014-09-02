@@ -222,7 +222,7 @@ public class MessagingFragment extends XoListFragment
                 break;
             case R.id.menu_group_profile_create_permanent_group:
                 if (mContact != null && messagingFragmentManager != null) {
-                    messagingFragmentManager.showGroupProfileFragment(mContact.getClientContactId(), true);
+                    messagingFragmentManager.showGroupProfileCreationFragment(mContact.getClientContactId(), true);
                 }
                 break;
             default:

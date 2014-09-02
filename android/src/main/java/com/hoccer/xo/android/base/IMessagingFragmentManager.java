@@ -8,5 +8,5 @@ public interface IMessagingFragmentManager {
 
     void showGroupProfileFragment(int groupContactId);
 
-    void showGroupProfileFragment(int groupContactId, boolean cloneProfile);
+    void showGroupProfileCreationFragment(int groupContactId, boolean cloneProfile);
 }
