@@ -29,6 +29,7 @@ import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.ContactOperations;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -69,10 +70,27 @@ public class AttachmentListFragment extends SearchableListFragment {
         mDatabase = XoApplication.getXoClient().getDatabase();
 
         setHasOptionsMenu(true);
-        mAttachmentAdapter = new AttachmentListAdapter(null, mContentMediaTypeFilter);
+        TalkClientContact filteredContact = null;
+        if (getActivity().getIntent().hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+            int contactId = getActivity().getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+            if (contactId >= 0) {
+                try {
+                    filteredContact = mDatabase.findClientContactById(contactId);
+                } catch (SQLException e) {
+                    LOG.warn("Contact ID " + contactId + " not found");
+                }
+            }
+        }
+        
+        mAttachmentAdapter = new AttachmentListAdapter(filteredContact, mContentMediaTypeFilter);
 
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
         mSearchContactsAdapter.onCreate();
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override

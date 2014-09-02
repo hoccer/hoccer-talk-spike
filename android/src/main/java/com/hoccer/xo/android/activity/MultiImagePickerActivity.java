@@ -30,6 +30,9 @@ import java.util.HashSet;
 public class MultiImagePickerActivity extends Activity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final Logger LOG = Logger.getLogger(MultiImagePickerActivity.class);
+
+    public static final String EXTRA_IMAGES = "IMAGES";
+
     private ImageAdapter mAdapter;
     private GridView mImageGridView;
     private HashSet<String> mSelectedImages = new HashSet<String>();
@@ -55,7 +58,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                     }
                     Intent intent = new Intent();
                     intent.setData(Uri.EMPTY);
-                    intent.putExtra("IMAGES", images);
+                    intent.putExtra(EXTRA_IMAGES, images);
                     setResult(RESULT_OK, intent);
                     finish();
                 }
@@ -80,11 +83,6 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
 
         String[] projection = {
@@ -106,7 +104,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
         mAdapter.swapCursor(null);
     }
 
-    class ImageAdapter extends CursorAdapter {
+    private class ImageAdapter extends CursorAdapter {
         private LayoutInflater mInflater;
         private Context mContext;
 
@@ -139,11 +137,11 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
             final ViewHolder holder = (ViewHolder) view.getTag();
 
             final Uri thumbPath = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.DATA)));
-            LOG.error("Path of thumbnail image: " + thumbPath);
+            LOG.info("Path of thumbnail image: " + thumbPath);
 
             String originalImageId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.IMAGE_ID));
             final Uri dataUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "" + originalImageId);
-            LOG.error("Data Uri of original image: " + dataUri);
+            LOG.info("Data Uri of original image: " + dataUri);
 
             if (mSelectedImages.contains(thumbPath.toString())) {
                 holder.squaredRelativeLayout.setSelected(true);
@@ -169,11 +167,11 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                     if (!holder.squaredRelativeLayout.isSelected()) {
                         holder.squaredRelativeLayout.setSelected(true);
                         holder.squaredRelativeLayout.setVisibility(View.VISIBLE);
-                        mSelectedImages.add(thumbPath.toString());
+                        mSelectedImages.add(dataUri.toString());
                     } else {
                         holder.squaredRelativeLayout.setSelected(false);
                         holder.squaredRelativeLayout.setVisibility(View.GONE);
-                        mSelectedImages.remove(thumbPath.toString());
+                        mSelectedImages.remove(dataUri.toString());
                     }
                     mSelectBtn.setText(String.format(getString(R.string.select_count), mSelectedImages.size()));
                 }

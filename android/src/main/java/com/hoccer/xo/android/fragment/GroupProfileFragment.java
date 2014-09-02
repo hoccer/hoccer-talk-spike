@@ -2,6 +2,7 @@ package com.hoccer.xo.android.fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -19,11 +20,13 @@ import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
@@ -254,6 +257,7 @@ public class GroupProfileFragment extends XoFragment
         MenuItem rejectInvitationItem = menu.findItem(R.id.menu_group_profile_reject_invitation);
         MenuItem joinGroupItem = menu.findItem(R.id.menu_group_profile_join);
         MenuItem leaveGroupItem = menu.findItem(R.id.menu_group_profile_leave);
+        MenuItem listAttachmentsItem = menu.findItem(R.id.menu_audio_attachment_list);
 
         editGroupItem.setVisible(false);
         rejectInvitationItem.setVisible(false);
@@ -266,6 +270,7 @@ public class GroupProfileFragment extends XoFragment
             if (mGroup.getGroupPresence() != null && !mGroup.getGroupPresence().isTypeNearby()) {
                 if (mGroup.isEditable()) {
                     editGroupItem.setVisible(true);
+                    listAttachmentsItem.setVisible(true);
                 } else {
                     editGroupItem.setVisible(false);
                     if (mGroup.isGroupInvited()) {
@@ -273,6 +278,7 @@ public class GroupProfileFragment extends XoFragment
                         joinGroupItem.setVisible(true);
                     } else if (mGroup.isGroupJoined()) {
                         leaveGroupItem.setVisible(true);
+                        listAttachmentsItem.setVisible(true);
                     }
                 }
             }
@@ -281,9 +287,11 @@ public class GroupProfileFragment extends XoFragment
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        boolean isSelectionHandled;
         switch (item.getItemId()) {
             case R.id.menu_group_profile_edit:
                 getActivity().startActionMode(this);
+                isSelectionHandled = true;
                 break;
             case R.id.menu_group_profile_reject_invitation:
                 XoDialogs.showYesNoDialog("RejectGroupInvitationDialog",
@@ -302,9 +310,11 @@ public class GroupProfileFragment extends XoFragment
                             public void onClick(DialogInterface dialog, int id) {
                             }
                         });
+                isSelectionHandled = true;
                 break;
             case R.id.menu_group_profile_join:
                 joinGroup();
+                isSelectionHandled = true;
                 break;
             case R.id.menu_group_profile_leave:
                 XoDialogs.showYesNoDialog("LeaveGroupDialog",
@@ -323,9 +333,18 @@ public class GroupProfileFragment extends XoFragment
                             public void onClick(DialogInterface dialog, int id) {
                             }
                         });
+                isSelectionHandled = true;
                 break;
+            case R.id.menu_audio_attachment_list:
+                Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
+                intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mGroup.getClientContactId());
+                startActivity(intent);
+                isSelectionHandled = true;
+                break;
+            default:
+                isSelectionHandled = super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+        return isSelectionHandled;
     }
 
     public TalkClientContact getContact() {
