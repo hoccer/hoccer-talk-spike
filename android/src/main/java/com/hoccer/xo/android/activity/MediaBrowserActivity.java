@@ -12,10 +12,6 @@ import com.hoccer.xo.release.R;
 
 public class MediaBrowserActivity extends XoActionbarActivity {
 
-    private AttachmentListFragment mAttachmentListFragment;
-    private MediaCollectionListFragment mCollectionListFragment;
-
-    private Integer mContactId;
 
     @Override
     protected int getLayoutResource() {
@@ -32,11 +28,6 @@ public class MediaBrowserActivity extends XoActionbarActivity {
         super.onCreate(savedInstanceState);
 
         enableUpNavigation();
-
-        mContactId = -1;
-        if (getIntent() != null) {
-            mContactId = getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, mContactId);
-        }
 
         showAudioAttachmentListFragment();
     }
@@ -64,22 +55,18 @@ public class MediaBrowserActivity extends XoActionbarActivity {
     }
 
     private void showAudioAttachmentListFragment() {
-        Bundle bundle = new Bundle();
-        bundle.putInt(AttachmentListFragment.ARG_CLIENT_CONTACT_ID, mContactId);
-
-        mAttachmentListFragment = new AttachmentListFragment();
-        mAttachmentListFragment.setArguments(bundle);
+        AttachmentListFragment attachmentListFragment = new AttachmentListFragment();
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_fragment_container, mAttachmentListFragment);
+        ft.replace(R.id.fl_fragment_container, attachmentListFragment);
         ft.commit();
     }
 
     private void showCollectionListFragment() {
-        mCollectionListFragment = new MediaCollectionListFragment();
+        MediaCollectionListFragment mediaCollectionListFragment = new MediaCollectionListFragment();
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_fragment_container, mCollectionListFragment);
+        ft.replace(R.id.fl_fragment_container, mediaCollectionListFragment);
         ft.addToBackStack(null);
         ft.commit();
     }
