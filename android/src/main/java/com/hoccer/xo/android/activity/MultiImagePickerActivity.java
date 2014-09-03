@@ -143,7 +143,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
             final Uri dataUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "" + originalImageId);
             LOG.info("Data Uri of original image: " + dataUri);
 
-            if (mSelectedImages.contains(thumbPath.toString())) {
+            if (mSelectedImages.contains(dataUri.toString())) {
                 holder.squaredRelativeLayout.setSelected(true);
                 holder.squaredRelativeLayout.setVisibility(View.VISIBLE);
             } else {
