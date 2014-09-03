@@ -84,6 +84,9 @@ public class NearbyHistoryMessagingActivity extends XoActivity {
                     clipboardText.setPrimaryClip(clip);
                 }
                 break;
+            case R.id.menu_delete_message:
+                getXoClient().deleteMessage(messageId);
+                break;
         }
     }
 }
