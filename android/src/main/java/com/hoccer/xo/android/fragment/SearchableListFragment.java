@@ -85,7 +85,9 @@ public abstract class SearchableListFragment extends ListFragment {
     protected abstract void onSearchModeDisabled();
 
     public void leaveSearchMode() {
-        mSearchMenuItem.collapseActionView();
+        if(mSearchMenuItem != null) {
+            mSearchMenuItem.collapseActionView();
+        }
     }
 
     private class SearchActionHandler implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
