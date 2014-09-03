@@ -5,10 +5,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.base.XoActionbarActivity;
-import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.fragment.GroupProfileCreationFragment;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
-import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.release.R;
 
 /**
@@ -87,16 +85,6 @@ public class GroupProfileActivity extends XoActionbarActivity implements IProfil
 
     @Override
     public void showSingleProfileFragment(int clientContactId) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, clientContactId);
-
-        SingleProfileFragment singleProfileFragment = new SingleProfileFragment();
-        singleProfileFragment.setArguments(bundle);
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_group_profile_fragment_container, singleProfileFragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
     }
 
     @Override
