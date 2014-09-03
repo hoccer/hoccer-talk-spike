@@ -12,13 +12,16 @@ import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.*;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
@@ -29,13 +32,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 
-public class ChatVideoItem extends ChatMessageItem implements View.OnLayoutChangeListener {
+public class ChatVideoItem extends ChatMessageItem {
 
     private static final double WIDTH_SCALE_FACTOR = 0.8;
-    private static final double HEIGHT_SCALE_FACTOR = 0.7;
+    private static final double HEIGHT_SCALE_FACTOR = 0.6;
 
     private RelativeLayout mRootView;
     private String mThumbnailPath;
+    private ImageView mTargetView;
 
     public ChatVideoItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -81,44 +85,25 @@ public class ChatVideoItem extends ChatMessageItem implements View.OnLayoutChang
         int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * HEIGHT_SCALE_FACTOR);
         int height = maxHeight;
 
+        // retrieve thumbnail path if not set already
         if(mThumbnailPath == null) {
-            long videoId = getVideoId(contentObject.getContentDataUrl());
-            if (videoId > 0) {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(mContext.getContentResolver(), videoId, MediaStore.Video.Thumbnails.MINI_KIND, options);
-                mThumbnailPath = saveToThumbnailDirectory(thumbnail, contentObject.getContentDataUrl().substring(contentObject.getContentDataUrl().lastIndexOf(File.separator) + 1));
-            }
+            mThumbnailPath = retrieveThumbnailPath(Uri.parse(contentObject.getContentDataUrl()));
         }
 
-        // adjust width/height based on thumbnail size
+        // adjust width/height based on thumbnail size if it exists
         if(mThumbnailPath != null) {
             // calc image aspect ratio
-            Point imageSize = getImageSize(mThumbnailPath);
-            double aspectRatio = (double) imageSize.x / (double) imageSize.y;
-
-            // calc view size according to aspect ratio
-            if(aspectRatio > 1.0) {
-                height = (int) (width / aspectRatio);
-                if(height > maxHeight) {
-                    width = (int)(maxHeight * aspectRatio);
-                    height = maxHeight;
-                }
-            } else {
-                width = (int)(maxHeight * aspectRatio);
-                if(width > maxWidth) {
-                    width = maxWidth;
-                    height = (int)(maxWidth / aspectRatio);
-                }
-            }
+            Point imageSize = ImageUtils.getImageSize(mThumbnailPath);
+            double aspectRatio = (double)imageSize.x / (double)imageSize.y;
+            Point boundImageSize = ImageUtils.getImageSizeInBounds(aspectRatio, maxWidth, maxHeight);
+            width = boundImageSize.x;
+            height = boundImageSize.y;
         }
 
         // register layout change listener and resize thumbnail view
         mRootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
-        mRootView.addOnLayoutChangeListener(this);
         mRootView.getLayoutParams().width = width;
         mRootView.getLayoutParams().height = height;
-        mRootView.requestLayout();
-        
         mRootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -126,43 +111,104 @@ public class ChatVideoItem extends ChatMessageItem implements View.OnLayoutChang
             }
         });
 
-        ImageView overlayView = (ImageView) mContentWrapper.findViewById(R.id.iv_picture_overlay);
+        // load thumbnail with picasso
+        mTargetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
+        Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
+        Picasso.with(mContext).load("file://" + mThumbnailPath)
+                .error(R.drawable.ic_img_placeholder_error)
+                .resize(width, height)
+                .centerInside()
+                .into(mTargetView);
+
+        // set gravity and message bubble mask
+        ImageView bubbleMaskView = (ImageView) mContentWrapper.findViewById(R.id.iv_picture_overlay);
         if (mMessage.isIncoming()) {
             mContentWrapper.setGravity(Gravity.LEFT);
-            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
+            bubbleMaskView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
         } else {
             mContentWrapper.setGravity(Gravity.RIGHT);
-            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
+            bubbleMaskView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
+
     }
 
     @Override
     public void detachView() {
-        LOG.debug("Detach view for: " + "file://" + (mThumbnailPath == null ? "null" : mThumbnailPath));
         // check for null in case display attachment has not yet been called
-        if (mRootView != null) {
-            mRootView.removeOnLayoutChangeListener(this);
-            ImageView targetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
-            if (targetView != null) {
-                Picasso.with(mContext).cancelRequest(targetView);
-            }
+        if (mTargetView != null) {
+            // cancel image loading request
+            Picasso.with(mContext).cancelRequest(mTargetView);
         }
     }
 
-    @Override
-    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        LOG.debug("Picasso loads: " + "file://" + (mThumbnailPath == null ? "null" : mThumbnailPath));
-        ImageView targetView = (ImageView) v.findViewById(R.id.iv_picture);
-        Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
-        Picasso.with(mContext).load("file://" + mThumbnailPath)
-                .error(R.drawable.ic_img_placeholder_error)
-                .resize(targetView.getWidth(), targetView.getHeight())
-                .centerInside()
-                .into(targetView);
-        v.removeOnLayoutChangeListener(this);
+    /*
+     * Checks whether a thumbnail image file for the given video exists in the hoccer thumbnail directory.
+     * If it does its uri is returned.
+     * If it does not the method tries to retrieve the video id from media store and the thumbnail as bitmap.
+     * This bitmap is then stored as thumbnail file in the thumbnail directory.
+     * Returns null if the video cannot be found in the media store database.
+     */
+    private String retrieveThumbnailPath(Uri videoUri) {
+        String videoFilename = videoUri.getLastPathSegment();
+        String thumbnailFileName = videoFilename + "_mini.jpg";
+        String thumbnailDestination = XoApplication.getThumbnailDirectory() + File.separator + thumbnailFileName;
+
+        // return thumbnail path if the thumbnail file already exists
+        File file = new File(thumbnailDestination);
+        if (file.exists()) {
+            return thumbnailDestination;
+        }
+
+        // try to create the video thumbnail
+        if (createVideoThumbnail(videoUri.toString(), thumbnailDestination)) {
+            return thumbnailDestination;
+        } else {
+            return null;
+        }
     }
 
+    /*
+     * Tries to retrieve a thumbnail bitmap for the given video and stores it as JPEG file at the given thumbnailPath
+     */
+    private boolean createVideoThumbnail(String videoPath, String thumbnailPath) {
+        long videoId = getVideoId(videoPath);
+        if (videoId > 0) {
+            Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(mContext.getContentResolver(), videoId, MediaStore.Video.Thumbnails.MINI_KIND, new BitmapFactory.Options());
+            try {
+                thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(thumbnailPath));
+                return true;
+            } catch (FileNotFoundException e) {
+                LOG.error("Error while saving thumbnail bitmap: " + thumbnailPath, e);
+            }
+        }
 
+        return false;
+    }
+
+    /*
+     * Returns the media store video id of the video at the given path or -1 if the video is unknown.
+     */
+    private long getVideoId(String videoPath) {
+        long videoId = -1;
+
+        Uri videosUri = MediaStore.Video.Media.getContentUri("external");
+        String[] projection = {
+                MediaStore.Video.VideoColumns._ID
+        };
+        Cursor cursor = mContext.getContentResolver().query(videosUri, projection, MediaStore.Video.VideoColumns.DATA + " LIKE ?", new String[]{videoPath.substring(7)}, null);
+
+        // if we have found a database entry for the video file
+        if (cursor.moveToFirst()) {
+            videoId = cursor.getLong(0);
+        }
+        cursor.close();
+
+        return videoId;
+    }
+
+    /*
+     * Sends an intent to open the video contained in contentObject.
+     */
     private void openVideo(IContentObject contentObject) {
         if (contentObject.isContentAvailable()) {
             String url = contentObject.getContentUrl();
@@ -181,124 +227,5 @@ public class ChatVideoItem extends ChatMessageItem implements View.OnLayoutChang
                 }
             }
         }
-    }
-
-    // private String getThumbnailUri(String videoUri) {
-    //    if(mThumbnailUri != null) {
-    //        return mThumbnailUri;
-    //    }
-
-
-        //String thumbnailName = videoUri.substring(videoUri.lastIndexOf(File.separator) + 1) + ".png";
-        //String thumbnailPath = XoApplication.getThumbnailDirectory() + File.separator + thumbnailName;
-
-
-    //    String[] projection = new String[] {
-    //            MediaStore.Video.Media._ID, // 0
-    //            MediaStore.Video.Media.DATA, // 1 from android.provider.MediaStore.Video
-
-    //    };
-
-        //Uri contentUri = MediaStore.Video.Thumbnails.getContentUri("external");
-
-        //long videoId = getVideoThumbnailUri(videoUri);
-        //Uri dataUri = Uri.withAppendedPath(MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI, String.valueOf(videoId));
-
-//        String thumbFilePath = null;
-//        Cursor c = mContext.getContentResolver().query(dataUri, projection, null, null, null);
-//        if ((c != null) && c.moveToFirst()) {
-//            thumbFilePath = c.getString(1);
-//        }
-
-//        File file = mContext.getFileStreamPath(thumbnailPath);
-//        if (!file.exists()) {
-//            Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(getRealPathFromURI(Uri.parse(videoUri)), MediaStore.Images.Thumbnails.MINI_KIND);
-//            try {
-//                thumbnail.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(thumbnailPath));
-//            } catch (FileNotFoundException e) {
-//                LOG.error("Error while saving thumbnail bitmap: " + thumbnailPath, e);
-//            }
-//        }
-
-    //    return Uri.parse(thumbFilePath).getPath();
-    //}
-
-    private String getRealPathFromURI(Uri contentURI) {
-        String result = "";
-        Cursor cursor = mContext.getContentResolver().query(contentURI, null, null, null, null);
-        if (cursor == null) {
-            result = contentURI.getPath();
-        } else {
-            if (cursor.moveToFirst()) {
-                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-                result = cursor.getString(idx);
-                cursor.close();
-            }
-        }
-        return result;
-    }
-
-    private long getVideoId(String videoPath) {
-        long videoId = 0;
-
-        Uri videosUri = MediaStore.Video.Media.getContentUri("external");
-        String[] projection = {
-                MediaStore.Video.VideoColumns._ID
-        };
-        Cursor cursor = mContext.getContentResolver().query(videosUri, projection, MediaStore.Video.VideoColumns.DATA + " LIKE ?", new String[]{videoPath.substring(7)}, null);
-
-        // if we have found a database entry for the video file
-        if (cursor.moveToFirst()) {
-            videoId = cursor.getLong(0);
-        }
-        cursor.close();
-
-        return videoId;
-    }
-
-    private String getVideoThumbnailUri(String videoPath) {
-        long videoId = 0;
-
-        Uri videosUri = MediaStore.Video.Media.getContentUri("external");
-        String[] projection = {MediaStore.Video.VideoColumns._ID, MediaStore.Video.VideoColumns.DATA};
-        Cursor cursor = mContext.getContentResolver().query(videosUri, projection, MediaStore.Video.VideoColumns.DATA + " LIKE ?", new String[] {videoPath.substring(7)}, null);
-
-        // if we have found a database entry for the video file
-        if(cursor.moveToFirst()) {
-            videoId = cursor.getLong(0);
-        }
-        cursor.close();
-
-        // retrieve thumbnail for video
-        String thumbnailUri = "";
-        if(videoId > 0) {
-            Uri thumbnailsUri = MediaStore.Video.Thumbnails.getContentUri("external");
-            String[] projection2 = {MediaStore.Video.Thumbnails.DATA};
-            Cursor cursor2 = mContext.getContentResolver().query(thumbnailsUri, projection2, MediaStore.Video.Thumbnails.VIDEO_ID + " LIKE ?", new String[]{String.valueOf(videoId)}, null);
-            if(cursor2.moveToFirst()) {
-                thumbnailUri = cursor2.getString(0);
-            }
-            cursor2.close();
-        }
-
-        return thumbnailUri;
-    }
-
-    private String saveToThumbnailDirectory(Bitmap bitmap, String filename) {
-        String destination = XoApplication.getThumbnailDirectory() + File.separator + filename + "_mini.jpg";
-        try {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(destination));
-        } catch (FileNotFoundException e) {
-            LOG.error("Error while saving thumbnail bitmap: " + destination, e);
-        }
-
-        return destination;
-    }
-
-    private Point getImageSize(String imagePath) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imagePath, options);
-        return new Point(options.outWidth, options.outHeight);
     }
 }
