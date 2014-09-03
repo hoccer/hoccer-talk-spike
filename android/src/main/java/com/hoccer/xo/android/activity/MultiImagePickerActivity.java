@@ -167,11 +167,11 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                     if (!holder.squaredRelativeLayout.isSelected()) {
                         holder.squaredRelativeLayout.setSelected(true);
                         holder.squaredRelativeLayout.setVisibility(View.VISIBLE);
-                        mSelectedImages.add(dataUri.toString());
+                        mSelectedImages.add(thumbPath.toString());
                     } else {
                         holder.squaredRelativeLayout.setSelected(false);
                         holder.squaredRelativeLayout.setVisibility(View.GONE);
-                        mSelectedImages.remove(dataUri.toString());
+                        mSelectedImages.remove(thumbPath.toString());
                     }
                     mSelectBtn.setText(String.format(getString(R.string.select_count), mSelectedImages.size()));
                 }
