@@ -306,7 +306,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     private void addMembersToGroup() {
         for (TalkClientContact contact : mContactsToInviteToGroup) {
-            ((XoActivity) getActivity()).getXoClient().inviteClientToGroup(mGroup.getGroupId(), contact.getClientId());
+            getXoActivity().getXoClient().inviteClientToGroup(mGroup.getGroupId(), contact.getClientId());
         }
     }
 
