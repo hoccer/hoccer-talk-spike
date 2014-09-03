@@ -474,12 +474,17 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 addMembersToGroup();
             }
 
-            try {
-                IProfileFragmentManager profileFragmentManager = (IProfileFragmentManager) getActivity();
-                profileFragmentManager.showGroupProfileFragment(mGroup.getClientContactId(), true);
-            } catch (ClassCastException e) {
-                LOG.error("Activity does not implement interface IProfileFragmentManager ", e);
-            }
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        IProfileFragmentManager profileFragmentManager = (IProfileFragmentManager) getActivity();
+                        profileFragmentManager.showGroupProfileFragment(mGroup.getClientContactId(), true);
+                    } catch (ClassCastException e) {
+                        LOG.error("Activity does not implement interface IProfileFragmentManager ", e);
+                    }
+                }
+            });
         }
     }
 
