@@ -194,11 +194,13 @@ public class ChatVideoItem extends ChatMessageItem {
         long videoId = getVideoId(videoPath);
         if (videoId > 0) {
             Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(mContext.getContentResolver(), videoId, MediaStore.Video.Thumbnails.MINI_KIND, new BitmapFactory.Options());
-            try {
-                thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(thumbnailPath));
-                return true;
-            } catch (FileNotFoundException e) {
-                LOG.error("Error while saving thumbnail bitmap: " + thumbnailPath, e);
+            if(thumbnail != null) {
+                try {
+                    thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(thumbnailPath));
+                    return true;
+                } catch (FileNotFoundException e) {
+                    LOG.error("Error while saving thumbnail bitmap: " + thumbnailPath, e);
+                }
             }
         }
 
