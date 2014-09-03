@@ -1,8 +1,6 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.Intent;
+import android.content.*;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,8 +19,9 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.DisplayUtils;
+import com.hoccer.xo.android.util.ImageUtils;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
@@ -40,6 +39,7 @@ public class ChatVideoItem extends ChatMessageItem {
     private RelativeLayout mRootView;
     private String mThumbnailPath;
     private ImageView mTargetView;
+    private MediaScannedReceiver mMediaScannedReceiver;
 
     public ChatVideoItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -98,6 +98,9 @@ public class ChatVideoItem extends ChatMessageItem {
             Point boundImageSize = ImageUtils.getImageSizeInBounds(aspectRatio, maxWidth, maxHeight);
             width = boundImageSize.x;
             height = boundImageSize.y;
+        } else {
+            // register an intent listener in case the image is currently scanned and will be finished soon
+            listenToMediaScannedIntent(true);
         }
 
         // register layout change listener and resize thumbnail view
@@ -132,6 +135,22 @@ public class ChatVideoItem extends ChatMessageItem {
 
     }
 
+    private void listenToMediaScannedIntent(boolean doListen) {
+        if(doListen) {
+            if (mMediaScannedReceiver == null) {
+                IntentFilter filter = new IntentFilter(MediaScannedReceiver.class.getName());
+                filter.addAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
+                mMediaScannedReceiver = new MediaScannedReceiver();
+                mContext.registerReceiver(mMediaScannedReceiver, filter);
+            }
+        } else {
+            if(mMediaScannedReceiver != null) {
+                mContext.unregisterReceiver(mMediaScannedReceiver);
+                mMediaScannedReceiver = null;
+            }
+        }
+    }
+
     @Override
     public void detachView() {
         // check for null in case display attachment has not yet been called
@@ -139,6 +158,7 @@ public class ChatVideoItem extends ChatMessageItem {
             // cancel image loading request
             Picasso.with(mContext).cancelRequest(mTargetView);
         }
+        listenToMediaScannedIntent(false);
     }
 
     /*
@@ -225,6 +245,22 @@ public class ChatVideoItem extends ChatMessageItem {
                     Toast.makeText(mContext, R.string.error_no_videoplayer, Toast.LENGTH_LONG).show();
                     LOG.error("Exception while starting external activity ", exception);
                 }
+            }
+        }
+    }
+
+    private void onMediaScanned(String uri) {
+        if(uri.equals(mContentObject.getContentUrl())) {
+            displayAttachment(mContentObject);
+        }
+    }
+
+    private class MediaScannedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context arg0, Intent intent) {
+            String uri = intent.getStringExtra(IntentHelper.EXTRA_MEDIA_URI);
+            if(uri != null) {
+                onMediaScanned(uri);
             }
         }
     }
