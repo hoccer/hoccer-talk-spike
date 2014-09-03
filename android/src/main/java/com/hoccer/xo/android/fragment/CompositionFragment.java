@@ -436,21 +436,22 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         }
 
         final File inBitmap = new File(dataUri);
-        final File outBitmap = new File(XoApplication.getCacheStorage(), inBitmap.getName());
+        final File outBitmap = new File(XoApplication.getAttachmentDirectory(), "resized_"+inBitmap.getName());
         final Bitmap.CompressFormat format = getXoClient().getUploadLimit() != -1 ? Bitmap.CompressFormat.JPEG :
                 Bitmap.CompressFormat.PNG;
 
         SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), outBitmap.toURI().getPath());
         newContent.setFileName(inBitmap.getName());
         newContent.setContentMediaType(contentObject.getContentMediaType());
-        LOG.debug("BAZINGA mime type: image/"+format.name());
-        newContent.setContentType("image/"+format.name());
+        newContent.setContentType("image/"+format.name().toLowerCase());
         newContent.setContentLength(contentObject.getContentLength());
         newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
 
+        int rotation = ImageContentHelper.retrieveOrientation(getActivity(), null, outBitmap.getPath());
+
         ImageContentHelper.encodeBitmap(inBitmap, outBitmap, getXoClient().getImageUploadMaxPixelCount(),
-                getXoClient().getImageUploadEncodingQuality(), format,
-                new ImageEncodingCallback(SelectedContent.createAttachmentUpload(newContent)),
+                getXoClient().getImageUploadEncodingQuality(), format, rotation,
+                new ImageEncodingCallback(newContent, outBitmap),
                 new ImageEncodingErrorCallback());
     }
 
@@ -529,15 +530,18 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     private class ImageEncodingCallback implements Runnable {
 
-        private IContentObject mEncodedContent;
+        private SelectedContent mEncodedContent;
+        private File mEncodedFile;
 
-        ImageEncodingCallback(IContentObject contentObject) {
+        ImageEncodingCallback(SelectedContent contentObject, File encodedFile) {
             mEncodedContent = contentObject;
+            mEncodedFile = encodedFile;
         }
 
         @Override
         public void run() {
-            setAttachment(mEncodedContent);
+            mEncodedContent.setContentLength((int) mEncodedFile.length());
+            setAttachment(SelectedContent.createAttachmentUpload(mEncodedContent));
             mSendButton.setEnabled(isComposed());
         }
     }

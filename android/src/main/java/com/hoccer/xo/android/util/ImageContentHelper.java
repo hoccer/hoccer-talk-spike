@@ -80,7 +80,7 @@ public class ImageContentHelper {
     }
 
     public static void encodeBitmap(final File in, final File out, final int maxPixelCount, final int imageQuality,
-                             final Bitmap.CompressFormat format, final Runnable successCallback,
+                             final Bitmap.CompressFormat format, int rotation, final Runnable successCallback,
                              final Runnable errorCallback) {
         AsyncTask<Void, Void, Boolean> encodingTask = new AsyncTask<Void, Void, Boolean>() {
 
@@ -89,12 +89,9 @@ public class ImageContentHelper {
                 boolean encodingSuccessful = false;
                 FileOutputStream outStream = null;
                 try {
-                    LOG.debug("BAZINGA start decoding original for bounds ");
                     BitmapFactory.Options encodingOptions = new BitmapFactory.Options();
                     encodingOptions.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(in.getAbsolutePath(), encodingOptions);
-                    LOG.debug("BAZINGA decoding original finished");
-                    LOG.debug("BAZINGA preparing options");
 
                     long originalPixelCount = encodingOptions.outWidth * encodingOptions.outHeight;
                     if (maxPixelCount < originalPixelCount) {
@@ -105,11 +102,10 @@ public class ImageContentHelper {
                     }
 
                     encodingOptions.inJustDecodeBounds = false;
-                    LOG.debug("BAZINGA decode final bitmap");
                     Bitmap encodedImage = BitmapFactory.decodeFile(in.getAbsolutePath(), encodingOptions);
                     outStream = new FileOutputStream(out);
 
-                    LOG.debug("BAZINGA compress final bitmap");
+
                     encodingSuccessful = encodedImage.compress(format, imageQuality, outStream);
                 } catch (FileNotFoundException e) {
                     LOG.error("Fatal error in creating temporary file " + out.getPath(), e);
