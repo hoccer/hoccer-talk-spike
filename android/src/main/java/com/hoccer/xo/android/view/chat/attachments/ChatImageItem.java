@@ -78,10 +78,10 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
 
         ImageView overlayView = (ImageView) mRootView.findViewById(R.id.iv_picture_overlay);
         if (mMessage.isIncoming()) {
-            mRootView.setGravity(Gravity.LEFT);
+            mContentWrapper.setGravity(Gravity.LEFT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
         } else {
-            mRootView.setGravity(Gravity.RIGHT);
+            mContentWrapper.setGravity(Gravity.RIGHT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
     }
