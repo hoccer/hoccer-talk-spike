@@ -295,7 +295,6 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
 
     @Override
     public void onGroupMembershipChanged(final TalkClientContact contact) {
-        LOG.error("BetterContactsAdapter::onGroupMembershipChanged");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
