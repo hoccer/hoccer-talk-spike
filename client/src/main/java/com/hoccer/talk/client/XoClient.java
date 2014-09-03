@@ -1037,6 +1037,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     // end of error checking section
 
                 } catch (JsonRpcClientException e) {
+                    LOG.error("JSON RPC error while creating group: ", e);
+                } catch (Exception e) {
                     LOG.error("Error while creating group: ", e);
                 }
             }
@@ -1122,6 +1124,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     // end of error checking section
 
                 } catch (JsonRpcClientException e) {
+                    LOG.error("JSON RPC error while creating group: ", e);
+                }  catch (Exception e) {
                     LOG.error("Error while creating group: ", e);
                 }
             }
