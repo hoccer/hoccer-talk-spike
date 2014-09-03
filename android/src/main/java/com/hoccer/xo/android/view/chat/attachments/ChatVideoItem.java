@@ -33,7 +33,6 @@ import java.io.FileOutputStream;
 
 public class ChatVideoItem extends ChatMessageItem {
 
-    private static final double WIDTH_SCALE_FACTOR = 0.8;
     private static final double HEIGHT_SCALE_FACTOR = 0.6;
 
     private RelativeLayout mRootView;
@@ -80,7 +79,8 @@ public class ChatVideoItem extends ChatMessageItem {
         mAttachmentView.setBackgroundDrawable(null);
 
         // calc default view size
-        int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * WIDTH_SCALE_FACTOR);
+        double width_scale_factor = mAvatarView.getVisibility() == View.VISIBLE ? 0.7 : 0.8;
+        int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * width_scale_factor);
         int width = maxWidth;
         int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * HEIGHT_SCALE_FACTOR);
         int height = maxHeight;
