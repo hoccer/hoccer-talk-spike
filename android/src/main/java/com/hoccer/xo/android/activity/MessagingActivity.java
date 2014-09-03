@@ -166,6 +166,15 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     }
 
     @Override
+    public void showNearbyArchiveFragment() {
+        NearbyArchiveFragment fragment = new NearbyArchiveFragment();
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
     public void showSingleProfileFragment(int clientContactId) {
         Bundle bundle = new Bundle();
         bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, clientContactId);
@@ -210,15 +219,6 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileCreationFragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
-    }
-
-    private void showNearbyArchiveFragment() {
-        NearbyArchiveFragment fragment = new NearbyArchiveFragment();
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }

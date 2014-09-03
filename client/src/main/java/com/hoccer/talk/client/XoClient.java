@@ -855,30 +855,35 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    contact.markAsDeleted();
 
                     try {
-                        mDatabase.saveContact(contact);
-                    } catch (SQLException e) {
-                        LOG.error("SQL error", e);
-                    }
+                        contact.markAsDeleted();
 
-                    for (int i = 0; i < mContactListeners.size(); i++) {
-                        IXoContactListener listener = mContactListeners.get(i);
-                        listener.onContactRemoved(contact);
-                    }
-
-                    if(contact.isClient() && contact.isClientRelated()) {
-                        mServerRpc.depairClient(contact.getClientId());
-                    }
-
-                    if(contact.isGroup()) {
-                        if(contact.isGroupJoined() && !(contact.isGroupExisting() && contact.isGroupAdmin())) {
-                            mServerRpc.leaveGroup(contact.getGroupId());
+                        try {
+                            mDatabase.saveContact(contact);
+                        } catch (SQLException e) {
+                            LOG.error("SQL error", e);
                         }
-                        if(contact.isGroupExisting() && contact.isGroupAdmin()) {
-                            mServerRpc.deleteGroup(contact.getGroupId());
+
+                        for (int i = 0; i < mContactListeners.size(); i++) {
+                            IXoContactListener listener = mContactListeners.get(i);
+                            listener.onContactRemoved(contact);
                         }
+
+                        if (contact.isClient() && contact.isClientRelated()) {
+                            mServerRpc.depairClient(contact.getClientId());
+                        }
+
+                        if (contact.isGroup()) {
+                            if (contact.isGroupJoined() && !(contact.isGroupExisting() && contact.isGroupAdmin())) {
+                                mServerRpc.leaveGroup(contact.getGroupId());
+                            }
+                            if (contact.isGroupExisting() && contact.isGroupAdmin()) {
+                                mServerRpc.deleteGroup(contact.getGroupId());
+                            }
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Exception while deleting contact ", e);
                     }
                 }
             });
