@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -26,9 +28,13 @@ import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.ImageContentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -190,14 +196,26 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     public void onAttachmentSelected(IContentObject contentObject) {
-        setAttachment(contentObject);
-        mSendButton.setEnabled(isComposed());
+        if (contentObject.getContentMediaType().equals(ContentMediaType.IMAGE) && getXoClient().isEncodingNecessary()) {
+            encodeImageAttachment(contentObject);
+        } else {
+            setAttachment(contentObject);
+            mSendButton.setEnabled(isComposed());
+        }
     }
 
     public void onAttachmentsSelected(ArrayList<IContentObject> contentObjects) {
-        LOG.debug("onAttachmentSelected(" + contentObjects.size() + ")");
-        setAttachments(contentObjects);
-        mSendButton.setEnabled(isComposed());
+        LOG.debug("onAttachmentsSelected(" + contentObjects.size() + ")");
+        if (getXoClient().isEncodingNecessary()) {
+            for (IContentObject attachment : contentObjects) {
+                if (attachment.getContentMediaType().equals(ContentMediaType.IMAGE)) {
+                    encodeImageAttachment(attachment);
+                }
+            }
+        } else {
+            setAttachments(contentObjects);
+            mSendButton.setEnabled(isComposed());
+        }
     }
 
     private void showAttachmentSelectionError() {
@@ -411,6 +429,31 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 null);
     }
 
+    private void encodeImageAttachment(IContentObject contentObject) {
+        String dataUri = contentObject.getContentDataUrl();
+        if (dataUri.startsWith("file://")) {
+            dataUri = dataUri.substring(7);
+        }
+
+        final File inBitmap = new File(dataUri);
+        final File outBitmap = new File(XoApplication.getCacheStorage(), inBitmap.getName());
+        final Bitmap.CompressFormat format = getXoClient().getUploadLimit() != -1 ? Bitmap.CompressFormat.JPEG :
+                Bitmap.CompressFormat.PNG;
+
+        SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), outBitmap.toURI().getPath());
+        newContent.setFileName(inBitmap.getName());
+        newContent.setContentMediaType(contentObject.getContentMediaType());
+        LOG.debug("BAZINGA mime type: image/"+format.name());
+        newContent.setContentType("image/"+format.name());
+        newContent.setContentLength(contentObject.getContentLength());
+        newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
+
+        ImageContentHelper.encodeBitmap(inBitmap, outBitmap, getXoClient().getImageUploadMaxPixelCount(),
+                getXoClient().getImageUploadEncodingQuality(), format,
+                new ImageEncodingCallback(SelectedContent.createAttachmentUpload(newContent)),
+                new ImageEncodingErrorCallback());
+    }
+
     @Override
     public boolean onLongClick(View v) {
         boolean longPressHandled = false;
@@ -481,6 +524,31 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         public void onClick(DialogInterface dialogInterface, int i) {
 
             validateAndSendComposedMessage();
+        }
+    }
+
+    private class ImageEncodingCallback implements Runnable {
+
+        private IContentObject mEncodedContent;
+
+        ImageEncodingCallback(IContentObject contentObject) {
+            mEncodedContent = contentObject;
+        }
+
+        @Override
+        public void run() {
+            setAttachment(mEncodedContent);
+            mSendButton.setEnabled(isComposed());
+        }
+    }
+
+    private class ImageEncodingErrorCallback implements Runnable {
+
+        @Override
+        public void run() {
+            // TODO error handling - really important
+            LOG.error("Error encoding bitmap for upload.");
+            Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
         }
     }
 }

@@ -94,6 +94,7 @@
     <string name="attachment_over_limit_confirm">Send</string>
     <string name="attachment_on_hold_upload_question">Upload %1$s?</string>
     <string name="attachment_on_hold_download_question">Download %1$s?</string>
+    <string name="attachment_encoding_error">Error while encoding file. Cannot send attachment.</string>
 
     <!-- Messaging fragment -->
     <string name="messaging_loading">Loading…</string>
