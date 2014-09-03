@@ -86,19 +86,9 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-
-//        String[] projection = {
-//                MediaStore.Images.Thumbnails._ID,
-//                MediaStore.Images.Thumbnails.DATA,
-//                MediaStore.Images.Thumbnails.IMAGE_ID,
-//        };
-//
-//        return new CursorLoader(this, MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, projection, null, null, "image_id DESC");
-//
         String[] projection = {
                 MediaStore.Images.Media._ID,
                 MediaStore.Images.Media.DATA,
-                MediaStore.Images.Media.MINI_THUMB_MAGIC
         };
         return new CursorLoader(this, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Images.Media.DATE_ADDED + " DESC");
     }
