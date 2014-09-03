@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.service.IXoClientService;
@@ -25,12 +26,12 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
 
     private XoActivity mActivity;
 
-    public XoClient getXoClient() {
-        return XoApplication.getXoClient();
-    }
-
     public XoActivity getXoActivity() {
         return mActivity;
+    }
+
+    public XoAndroidClient getXoClient() {
+        return XoApplication.getXoClient();
     }
 
     public XoClientDatabase getXoDatabase() {
