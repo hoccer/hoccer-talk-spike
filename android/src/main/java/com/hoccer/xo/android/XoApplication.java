@@ -58,7 +58,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     /** global xo host */
     private static IXoClientHost CLIENT_HOST = null;
     /** global xo client (initialized in onCreate) */
-    private static XoClient CLIENT = null;
+    private static XoAndroidClient CLIENT = null;
     /** global xo configuration (initialized in onCreate) */
     private static XoAndroidClientConfiguration CONFIGURATION = null;
     /** global xo sound pool for system sounds (initialized in onCreate) */
@@ -70,6 +70,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static File EXTERNAL_STORAGE = null;
     /** root of app-private storage (initialized in onCreate) */
     private static File INTERNAL_STORAGE = null;
+    /** root of app-private cache storage (initialized in onCreate) */
+    private static File INTERNAL_CACHE_STORAGE = null;
     /** uncaught exception handler for the client and us */
     private static Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER = null;
     private static DisplayImageOptions CONTENT_IMAGE_OPTIONS = null;
@@ -78,7 +80,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return EXECUTOR;
     }
     /** @return the xo client */
-    public static XoClient getXoClient() {
+    public static XoAndroidClient getXoClient() {
         return CLIENT;
     }
     /** @return the xo configuration */
@@ -114,6 +116,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
      */
     public static File getInternalStorage() {
         return INTERNAL_STORAGE;
+    }
+
+    /**
+     * @return internal cache directory
+     */
+    public static File getCacheStorage() {
+        return INTERNAL_CACHE_STORAGE;
     }
 
     private Thread.UncaughtExceptionHandler mPreviousHandler;
@@ -189,6 +198,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // initialize storage roots (do so early for log files)
         EXTERNAL_STORAGE = Environment.getExternalStorageDirectory();
         INTERNAL_STORAGE = this.getFilesDir();
+        INTERNAL_CACHE_STORAGE = this.getCacheDir();
 
         // Initialize configuration
         CONFIGURATION = new XoAndroidClientConfiguration(this);
@@ -272,7 +282,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // create client instance
         LOG.info("creating client");
         CLIENT_HOST = new XoAndroidClientHost(this);
-        XoClient client = new XoAndroidClient(CLIENT_HOST, CONFIGURATION);
+        XoAndroidClient client = new XoAndroidClient(CLIENT_HOST, CONFIGURATION);
         client.setAvatarDirectory(getAvatarDirectory().toString());
         client.setAttachmentDirectory(getAttachmentDirectory().toString());
         client.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());

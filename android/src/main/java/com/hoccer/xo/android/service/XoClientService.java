@@ -16,6 +16,7 @@ import com.google.android.gcm.GCMRegistrar;
 import com.hoccer.talk.android.push.TalkPushService;
 import com.hoccer.talk.client.*;
 import com.hoccer.talk.client.model.*;
+import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ContactsActivity;
 import com.hoccer.xo.android.sms.SmsReceiver;
@@ -56,6 +57,8 @@ public class XoClientService extends Service {
      */
     public static final int SERVICE_KEEPALIVE_TIMEOUT = 1800;
 
+    public static final String CONTACT_DELIMETER = ", ";
+
     private static final Logger LOG = Logger.getLogger(XoClientService.class);
 
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
@@ -64,12 +67,18 @@ public class XoClientService extends Service {
     private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
     private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
 
+    private static final String DEFAULT_TRANSFER_LIMIT = "-1";
+
+    private static final int DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT = -1;
+    private static final int DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY = 100;
+
     private static final String sPreferenceUploadLimitMobileKey = "preference_upload_limit_mobile";
     private static final String sPreferenceUploadLimitWifiKey = "preference_upload_limit_wifi";
     private static final String sPreferenceDownloadLimitMobileKey = "preference_download_limit_mobile";
     private static final String sPreferenceDownloadLimitWifiKey = "preference_download_limit_wifi";
-
-    public static final String CONTACT_DELIMETER = ", ";
+    private static final String sPreferenceImageUploadPixelCountKey = "preference_image_encoding_size";
+    private static final String sPreferenceImageUploadQualityKey = "preference_image_encoding_quality";
+    private static final String sPreferenceServiceUriKey = "preference_service_uri";
 
     /**
      * Executor for ourselves and the client
@@ -79,7 +88,7 @@ public class XoClientService extends Service {
     /**
      * Hoccer client that we serve
      */
-    XoClient mClient;
+    XoAndroidClient mClient;
 
     /**
      * Reference to latest auto-shutdown future
@@ -164,17 +173,22 @@ public class XoClientService extends Service {
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if (key.equals("preference_service_uri")) {
                     configureServiceUri();
-                }
-                if (key.equals(sPreferenceDownloadLimitMobileKey)
+                } else if (key.equals(sPreferenceDownloadLimitMobileKey)
                         || key.equals(sPreferenceDownloadLimitWifiKey)
                         || key.equals(sPreferenceUploadLimitMobileKey)
                         || key.equals(sPreferenceUploadLimitWifiKey)) {
                     configureAutoTransfers();
+                } else if (key.equals(sPreferenceImageUploadPixelCountKey)) {
+                    loadPreference(mPreferences, sPreferenceImageUploadPixelCountKey);
+                } else if (key.equals(sPreferenceImageUploadQualityKey)) {
+                    loadPreference(mPreferences, sPreferenceImageUploadQualityKey);
                 }
             }
         };
         mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesListener);
 
+        loadPreference(mPreferences, sPreferenceImageUploadPixelCountKey);
+        loadPreference(mPreferences, sPreferenceImageUploadQualityKey);
         configureAutoTransfers();
 
         doVerifyGcm();
@@ -257,7 +271,7 @@ public class XoClientService extends Service {
     }
 
     private void configureServiceUri() {
-        String uriString = mPreferences.getString("preference_service_uri", "");
+        String uriString = mPreferences.getString(sPreferenceServiceUriKey, "");
         if (uriString.isEmpty()) {
             uriString = XoApplication.getXoClient().getConfiguration().getServerUri();
         }
@@ -270,33 +284,40 @@ public class XoClientService extends Service {
             case ConnectivityManager.TYPE_MOBILE:
             case ConnectivityManager.TYPE_BLUETOOTH:
             case ConnectivityManager.TYPE_WIMAX:
-                loadPreferences(mPreferences, sPreferenceUploadLimitMobileKey);
-                loadPreferences(mPreferences, sPreferenceDownloadLimitMobileKey);
+                loadPreference(mPreferences, sPreferenceUploadLimitMobileKey);
+                loadPreference(mPreferences, sPreferenceDownloadLimitMobileKey);
                 break;
             case ConnectivityManager.TYPE_ETHERNET:
             case ConnectivityManager.TYPE_WIFI:
-                loadPreferences(mPreferences, sPreferenceUploadLimitWifiKey);
-                loadPreferences(mPreferences, sPreferenceDownloadLimitWifiKey);
+                loadPreference(mPreferences, sPreferenceUploadLimitWifiKey);
+                loadPreference(mPreferences, sPreferenceDownloadLimitWifiKey);
                 break;
         }
     }
 
-    private void loadPreferences(SharedPreferences preferences, String key) {
-        if (key != null && key.equals(sPreferenceUploadLimitMobileKey)) {
-            String uploadLimitString = preferences.getString(key, "-1");
-            mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
-        }
-        if (key != null && key.equals(sPreferenceDownloadLimitMobileKey)) {
-            String downloadLimitString = preferences.getString(key, "-1");
-            mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
-        }
-        if (key != null && key.equals(sPreferenceUploadLimitWifiKey)) {
-            String uploadLimitString = preferences.getString(key, "-1");
-            mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
-        }
-        if (key != null && key.equals(sPreferenceDownloadLimitWifiKey)) {
-            String downloadLimitString = preferences.getString(key, "-1");
-            mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
+    private void loadPreference(SharedPreferences preferences, String key) {
+        if (key != null) {
+            if (key.equals(sPreferenceUploadLimitMobileKey)) {
+                String uploadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
+            } else if (key.equals(sPreferenceDownloadLimitMobileKey)) {
+                String downloadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
+            } else if (key.equals(sPreferenceUploadLimitWifiKey)) {
+                String uploadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
+            } else if (key.equals(sPreferenceDownloadLimitWifiKey)) {
+                String downloadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
+            } else if (key.equals(sPreferenceImageUploadPixelCountKey)) {
+                String maxPixelCount = mPreferences.getString(sPreferenceImageUploadPixelCountKey,
+                        Integer.toString(DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT));
+                mClient.setImageUploadMaxPixelCount(Integer.parseInt(maxPixelCount));
+            } else if (key.equals(sPreferenceImageUploadQualityKey)) {
+                String imageQuality = mPreferences.getString(sPreferenceImageUploadQualityKey,
+                        Integer.toString(DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY));
+                mClient.setImageUploadEncodingQuality(Integer.parseInt(imageQuality));
+            }
         }
     }
 

@@ -17,8 +17,10 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     private final SharedPreferences mPreferences;
     private final Properties mProperties;
 
+
     public XoAndroidClientConfiguration(Context context) {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
         mProperties = new Properties();
 
         try {
@@ -85,9 +87,5 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     public boolean isLoggingToLogcatEnabled() {
         return Boolean.parseBoolean(mProperties.getProperty("hoccer.android.log.to.logcat", "true"));
-    }
-
-    public SharedPreferences getSharedPreferences() {
-        return mPreferences;
     }
 }
