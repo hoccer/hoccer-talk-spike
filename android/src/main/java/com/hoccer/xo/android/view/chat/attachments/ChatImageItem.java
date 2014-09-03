@@ -14,6 +14,7 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
+import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
@@ -22,9 +23,9 @@ import com.squareup.picasso.Picasso;
 public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChangeListener {
 
     private static final double WIDTH_SCALE_FACTOR = 0.8;
+    private static final double HEIGHT_SCALE_FACTOR = 0.6;
     private static final double IMAGE_SCALE_FACTOR = 0.5;
 
-    private int mImageWidth;
     private RelativeLayout mRootView;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
@@ -45,8 +46,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     protected void displayAttachment(final IContentObject contentObject) {
         super.displayAttachment(contentObject);
 
-        setRequiredImageWidth();
-
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -64,12 +63,17 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
         mAttachmentView.setPadding(0, 0, 0, 0);
         mAttachmentView.setBackgroundDrawable(null);
 
+        // calc view size
+        int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * WIDTH_SCALE_FACTOR);
+        int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * HEIGHT_SCALE_FACTOR);
         double aspectRatio = contentObject.getContentAspectRatio();
-        int height = (int) (mImageWidth / aspectRatio);
+        Point boundImageSize = ImageUtils.getImageSizeInBounds(aspectRatio, maxWidth, maxHeight);
+        int width = boundImageSize.x;
+        int height = boundImageSize.y;
 
         mRootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
         mRootView.addOnLayoutChangeListener(this);
-        mRootView.getLayoutParams().width = mImageWidth;
+        mRootView.getLayoutParams().width = width;
         mRootView.getLayoutParams().height = height;
 
         ImageView overlayView = (ImageView) mRootView.findViewById(R.id.iv_picture_overlay);
@@ -119,11 +123,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
         } catch (ClassCastException e) {
             e.printStackTrace();
         }
-    }
-
-    private void setRequiredImageWidth() {
-        Point size = DisplayUtils.getDisplaySize(mContext);
-        mImageWidth = (int) (size.x * WIDTH_SCALE_FACTOR);
     }
 }
 
