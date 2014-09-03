@@ -14,14 +14,12 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ChatAdapter;
-import com.hoccer.xo.android.base.IMessagingFragmentManager;
 import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.android.util.ThumbnailManager;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -168,7 +166,6 @@ public class MessagingFragment extends XoListFragment
             mAdapter.onDestroy();
             mAdapter = null;
         }
-        ThumbnailManager.getInstance(getXoActivity()).clearCache();
 
         // Ensure that all items receive the detach call
         for (int i = 0; i < mMessageListView.getChildCount(); i++) {

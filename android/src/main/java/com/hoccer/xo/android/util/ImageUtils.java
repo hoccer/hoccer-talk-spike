@@ -1,24 +1,22 @@
-package com.hoccer.xo.android.content.contentselectors;
+package com.hoccer.xo.android.util;
 
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 
-public class ImageContentHelper {
+public class ImageUtils {
 
-    private static Logger LOG = Logger.getLogger(ImageContentHelper.class);
+    private static Logger LOG = Logger.getLogger(ImageUtils.class);
 
-    static int retrieveOrientation(Context context, Uri contentUri, String filePath) {
+    public static int retrieveOrientation(Context context, Uri contentUri, String filePath) {
         String[] columns = {
                 MediaStore.Images.Media.ORIENTATION
         };
@@ -65,7 +63,7 @@ public class ImageContentHelper {
         }
     }
 
-    static double calculateAspectRatio(int fileWidth, int fileHeight, int orientation) {
+    public static double calculateAspectRatio(int fileWidth, int fileHeight, int orientation) {
         double aspectRatio;
         if (orientation == 0 || orientation == 180) {
             aspectRatio = (double) fileWidth / (double) fileHeight;
@@ -73,5 +71,25 @@ public class ImageContentHelper {
             aspectRatio = (double) fileHeight / (double) fileWidth;
         }
         return aspectRatio;
+    }
+
+    public static Point getImageSize(String imagePath) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(imagePath, options);
+        return new Point(options.outWidth, options.outHeight);
+    }
+
+    /*
+     * Returns the calculated size within the given bounds.
+     */
+    public static Point getImageSizeInBounds(double aspectRatio, int maxWidth, int maxHeight) {
+        Point result = new Point(maxWidth, (int) (maxWidth / aspectRatio));
+
+        if (result.y > maxHeight) {
+            result.x = (int) (maxHeight * aspectRatio);
+            result.y = maxHeight;
+        }
+        return result;
     }
 }
