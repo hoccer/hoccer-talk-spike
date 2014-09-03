@@ -2,7 +2,6 @@ package com.hoccer.xo.android.util;
 
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,11 +11,16 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ImageContentHelper {
 
-    private static Logger LOG = Logger.getLogger(ImageContentHelper.class);
+    private static final Logger LOG = Logger.getLogger(ImageContentHelper.class);
 
     public static int retrieveOrientation(Context context, Uri contentUri, String filePath) {
         String[] columns = {
@@ -75,27 +79,66 @@ public class ImageContentHelper {
         return aspectRatio;
     }
 
-    public void encodeBitmap(final String inPath, final String outPath, final int imageSize, final int imageQuality,
-                             final Runnable callback) {
-        new AsyncTask() {
+    public static void encodeBitmap(final File in, final File out, final int maxPixelCount, final int imageQuality,
+                             final Bitmap.CompressFormat format, final Runnable successCallback,
+                             final Runnable errorCallback) {
+        AsyncTask<Void, Void, Boolean> encodingTask = new AsyncTask<Void, Void, Boolean>() {
 
             @Override
-            protected Object doInBackground(Object[] params) {
-                Bitmap original = BitmapFactory.decodeFile(inPath);
+            protected Boolean doInBackground(Void[] params) {
+                boolean encodingSuccessful = false;
+                FileOutputStream outStream = null;
+                try {
+                    LOG.debug("BAZINGA start decoding original for bounds ");
+                    BitmapFactory.Options encodingOptions = new BitmapFactory.Options();
+                    encodingOptions.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(in.getAbsolutePath(), encodingOptions);
+                    LOG.debug("BAZINGA decoding original finished");
+                    LOG.debug("BAZINGA preparing options");
 
-                long originalSize = original.getDensity() * original.getHeight() * original.getWidth();
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inBitmap = original;
-                options.outHeight = 0;
-                options.outWidth = 0;
-                return null;
+                    long originalPixelCount = encodingOptions.outWidth * encodingOptions.outHeight;
+                    if (maxPixelCount < originalPixelCount) {
+                        double resizeRatio = Math.sqrt(originalPixelCount / maxPixelCount);
+                        encodingOptions.inSampleSize = (int) resizeRatio + 1;
+                        encodingOptions.outWidth = (int) (encodingOptions.outWidth / resizeRatio);
+                        encodingOptions.outHeight = (int) (encodingOptions.outHeight / resizeRatio);
+                    }
+
+                    encodingOptions.inJustDecodeBounds = false;
+                    LOG.debug("BAZINGA decode final bitmap");
+                    Bitmap encodedImage = BitmapFactory.decodeFile(in.getAbsolutePath(), encodingOptions);
+                    outStream = new FileOutputStream(out);
+
+                    LOG.debug("BAZINGA compress final bitmap");
+                    encodingSuccessful = encodedImage.compress(format, imageQuality, outStream);
+                } catch (FileNotFoundException e) {
+                    LOG.error("Fatal error in creating temporary file " + out.getPath(), e);
+                } finally {
+                    try {
+                        if (outStream != null) {
+                            outStream.close();
+                        }
+                    } catch (IOException e) {
+                        LOG.error("Fatal error while closing output stream for " + out.getPath(), e);
+                    }
+                }
+
+                return encodingSuccessful;
             }
 
             @Override
-            protected void onPostExecute(Object o) {
-                super.onPostExecute(o);
-                callback.run();
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
+                LOG.debug("Encoding finished");
+
+                if (result) {
+                    successCallback.run();
+                } else {
+                    errorCallback.run();
+                }
             }
         };
+
+        encodingTask.execute();
     }
 }
