@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -17,12 +16,12 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.DisplayUtils;
+import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -86,13 +85,13 @@ public class CaptureSelector implements IContentSelector {
 
         if (intent != null && intent.getData() != null) {
             LOG.error("Intent data path: " + intent.getData().getPath());
-            orientation = ImageContentHelper.retrieveOrientation(context, intent.getData(), intent.getData().getPath());
+            orientation = ImageUtils.retrieveOrientation(context, intent.getData(), intent.getData().getPath());
             imageFile = new File(intent.getData().getPath());
             LOG.error("Path: " + imageFile.getPath());
         } else {
             tempImageFile = new File(mFileUri.getPath());
             imageFile = tempImageFile;
-            orientation = ImageContentHelper.retrieveOrientation(context, null, imageFile.getPath());
+            orientation = ImageUtils.retrieveOrientation(context, null, imageFile.getPath());
         }
 
         // Correct rotation if wrong and insert image into MediaStore
@@ -148,8 +147,8 @@ public class CaptureSelector implements IContentSelector {
         contentObject.setContentType(imageType);
         contentObject.setContentLength((int) imageFile.length());
 
-        orientation = ImageContentHelper.retrieveOrientation(context, contentUri, imageFile.getPath());
-        double aspectRatio = ImageContentHelper.calculateAspectRatio(imageWidth, imageHeight, orientation);
+        orientation = ImageUtils.retrieveOrientation(context, contentUri, imageFile.getPath());
+        double aspectRatio = ImageUtils.calculateAspectRatio(imageWidth, imageHeight, orientation);
 
         LOG.error("Image orientation: " + orientation);
         LOG.error("Image aspectRatio: " + aspectRatio);
