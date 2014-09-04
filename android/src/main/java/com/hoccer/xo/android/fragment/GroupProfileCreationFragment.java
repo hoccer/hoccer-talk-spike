@@ -249,15 +249,15 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     public List<String> getMembersIdsFromGroupContacts(List<TalkClientContact> groupContacts) {
-        List<String> ids = new ArrayList<String>(groupContacts.size());
+        List<String> memberIds = new ArrayList<String>();
         for (TalkClientContact contact : groupContacts) {
-            ids.add(contact.getClientId());
+            memberIds.add(contact.getClientId());
         }
-        return ids;
+        return memberIds;
     }
 
     private List<String> getMembersRoles() {
-        List<String> roles = new ArrayList<String>(mContactsToInviteToGroup.size());
+        List<String> roles = new ArrayList<String>();
         roles.add(TalkGroupMember.ROLE_MEMBER);
         return roles;
     }
@@ -277,7 +277,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 mCurrentClientsInGroup.addAll(getCurrentContactsFromGroup(clientIds));
                 mContactsToInviteToGroup.addAll(mCurrentClientsInGroup);
             }
-//            mFromNearby = (group.getGroupPresence() != null && group.getGroupPresence().isTypeNearby());
         }
 
         mGroup = TalkClientContact.createGroupContact();
@@ -299,14 +298,10 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         if (mGroup != null && !mGroup.isGroupRegistered()) {
             if (mGroup.getGroupPresence() != null) {
                 mGroup.getGroupPresence().setGroupName(newGroupName);
-                getXoClient().createGroup(mGroup);
+                String[] memberIds = getMembersIdsFromGroupContacts(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
+                String[] memberRoles = getMembersRoles().toArray(new String[mContactsToInviteToGroup.size()]);
+                getXoClient().createGroupWithContacts(mGroup, memberIds, memberRoles);
             }
-        }
-    }
-
-    private void addMembersToGroup() {
-        for (TalkClientContact contact : mContactsToInviteToGroup) {
-            getXoActivity().getXoClient().inviteClientToGroup(mGroup.getGroupId(), contact.getClientId());
         }
     }
 
@@ -470,9 +465,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     @Override
     public void onContactAdded(TalkClientContact contact) {
         if (isCurrentGroup(contact)) {
-            if (!mContactsToInviteToGroup.isEmpty()) {
-                addMembersToGroup();
-            }
             openGroupProfileFragment();
         }
     }
