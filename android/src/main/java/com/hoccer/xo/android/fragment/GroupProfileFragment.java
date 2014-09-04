@@ -219,8 +219,13 @@ public class GroupProfileFragment extends XoFragment
         rejectInvitationItem.setVisible(false);
         joinGroupItem.setVisible(false);
         leaveGroupItem.setVisible(false);
-        listAttachmentsItem.setVisible(false);
-        createPermanentGroupItem.setVisible(false);
+
+        if (listAttachmentsItem != null) {
+            listAttachmentsItem.setVisible(false);
+        }
+        if (createPermanentGroupItem != null) {
+            createPermanentGroupItem.setVisible(false);
+        }
 
         if (mGroup.getGroupPresence() != null && !mGroup.getGroupPresence().isTypeNearby()) {
             if (mGroup.isEditable()) {
