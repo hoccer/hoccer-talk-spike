@@ -27,7 +27,7 @@
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
     <string name="menu_about">Über Hoccer XO</string>
-    <string name="menu_music_viewer">Musik</string>
+    <string name="menu_music_viewer">Medien</string>
     <string name="menu_reconnect">erneut verbinden</string>
     <string name="menu_quit">schließen</string>
     <string name="menu_clear_conversation">Chat löschen</string>
@@ -168,7 +168,7 @@
     <string name="content_multi_images">Mehrere Bilder</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Foto aufnehmen</string>
-    <string name="content_music">Musik</string>
+    <string name="content_music">Andere Medien</string>
     <string name="content_ringtone">Klingelton</string>
     <string name="content_contact">Kontakt</string>
     <string name="content_location">Ort</string>
@@ -342,8 +342,8 @@
     <string name="placeholder_nearby_text">Warten auf Kontakte %1$s…</string>
     <string name="placeholder_nearby_link_text">in der Nähe</string>
     <string name="actionbar_default_title">Hoccer</string>
-    <string name="content_audio_caption">Musik</string>
-    <string name="content_audio_by_contact_caption">Musik von %1$s</string>
+    <string name="content_audio_caption">Medien</string>
+    <string name="content_audio_by_contact_caption">Medien von %1$s</string>
     <string name="nearby_info_usercount">%1$d Benutzer in der Nähe</string>
     <string name="profile_nickname_text">Anzeigename</string>
     <string name="nearby_text">Alle in der Nähe</string>

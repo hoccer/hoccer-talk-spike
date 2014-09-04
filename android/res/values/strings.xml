@@ -25,7 +25,7 @@
     <string name="menu_add_attachment">Add attachment</string>
     <string name="menu_profile">Profile</string>
     <string name="menu_settings">Settings</string>
-    <string name="menu_music_viewer">Music</string>
+    <string name="menu_music_viewer">Media</string>
     <string name="menu_about">About Hoccer XO</string>
     <string name="menu_faq">FAQ</string>
     <string name="menu_tutorial">Tutorial</string>
@@ -178,7 +178,7 @@
     <string name="content_multi_images">Multiple images</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Take Photo</string>
-    <string name="content_music">Music</string>
+    <string name="content_music">Further media</string>
     <string name="content_ringtone">Ringtone</string>
     <string name="content_contact">Contact</string>
     <string name="content_location">Location</string>
@@ -371,8 +371,8 @@
     <string name="placeholder_nearby_text">Waiting for others %1$s…</string>
     <string name="placeholder_nearby_link_text">nearby</string>
     <string name="actionbar_default_title">Hoccer</string>
-    <string name="content_audio_caption">Music</string>
-    <string name="content_audio_by_contact_caption">Music from %1$s</string>
+    <string name="content_audio_caption">Media</string>
+    <string name="content_audio_by_contact_caption">Media from %1$s</string>
     <string name="nearby_info_usercount">%1$d Users are Nearby</string>
     <string name="profile_nickname_text">Nickname</string>
     <string name="nearby_text">All nearby</string>
