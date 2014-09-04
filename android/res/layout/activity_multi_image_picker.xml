@@ -16,7 +16,7 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:numColumns="3"
-      android:scrollbars="none"
+      android:scrollbars="vertical"
       android:scrollbarStyle="insideOverlay"
       android:layout_above="@id/selectBtn"
       android:horizontalSpacing="2dp"

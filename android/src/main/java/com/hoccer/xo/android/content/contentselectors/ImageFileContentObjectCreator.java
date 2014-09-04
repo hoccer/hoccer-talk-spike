@@ -30,6 +30,12 @@ public class ImageFileContentObjectCreator implements IContentCreator {
         };
 
         Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
+
+        if (cursor == null) {
+            LOG.error("Query failed! Could not resolve cursor for content uri: " + contentUri);
+            return null;
+        }
+
         cursor.moveToFirst();
 
         String mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
