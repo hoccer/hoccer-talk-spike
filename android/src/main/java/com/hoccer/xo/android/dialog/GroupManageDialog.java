@@ -14,7 +14,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupManagementContactsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.fragment.GroupProfileFragment;
+import com.hoccer.xo.android.fragment.GroupProfileCreationFragment;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -30,16 +30,16 @@ public class GroupManageDialog extends DialogFragment {
     private ArrayList<TalkClientContact> mContactsToInvite;
     private ArrayList<TalkClientContact> mContactsToKick;
     private ArrayList<TalkClientContact> mCurrentContactsInGroup = new ArrayList<TalkClientContact>();
-    private boolean mFromNearby = false;
+    private boolean mCloneGroupContact = false;
 
-    public GroupManageDialog(TalkClientContact group, ArrayList<TalkClientContact> currentContactsInGroup, ArrayList<TalkClientContact> contactsFromNearbyToInvite, boolean fromNearby) {
+    public GroupManageDialog(TalkClientContact group, ArrayList<TalkClientContact> currentContactsInGroup, ArrayList<TalkClientContact> contactsFromNearbyToInvite, boolean cloneGroupContact) {
         super();
         mGroup = group;
         mContactsToInvite = new ArrayList();
         mContactsToKick = new ArrayList();
         mCurrentContactsInGroup.addAll(currentContactsInGroup);
         mContactsToInvite.addAll(contactsFromNearbyToInvite);
-        mFromNearby = fromNearby;
+        mCloneGroupContact = cloneGroupContact;
     }
 
     @Override
@@ -115,8 +115,8 @@ public class GroupManageDialog extends DialogFragment {
     }
 
     private void updateMemberships() {
-        if (mFromNearby) {
-            ((GroupProfileFragment) getTargetFragment()).updateContactList(mContactsToInvite);
+        if (mCloneGroupContact) {
+            ((GroupProfileCreationFragment) getTargetFragment()).updateContactList(mContactsToInvite);
         } else {
             for (TalkClientContact contact : mContactsToInvite) {
                 ((XoActivity) getActivity()).getXoClient().inviteClientToGroup(mGroup.getGroupId(), contact.getClientId());

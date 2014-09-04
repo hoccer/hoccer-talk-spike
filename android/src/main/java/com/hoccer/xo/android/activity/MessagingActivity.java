@@ -12,18 +12,16 @@ import android.widget.PopupMenu;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
+import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.fragment.GroupProfileFragment;
-import com.hoccer.xo.android.fragment.MessagingFragment;
-import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
-import com.hoccer.xo.android.fragment.SingleProfileFragment;
+import com.hoccer.xo.android.fragment.*;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
 
-public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager {
+public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager, IProfileFragmentManager {
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
@@ -134,7 +132,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         if (contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
             title = getResources().getString(R.string.nearby_text);
         } else {
-            title = contact.getName();
+            title = contact.getNickname();
         }
         mActionBar.setTitle(title);
     }
@@ -162,9 +160,18 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         mMessagingFragment = new MessagingFragment();
         mMessagingFragment.setArguments(bundle);
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_messaging_fragment_container, mMessagingFragment);
-        ft.commit();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mMessagingFragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void showNearbyArchiveFragment() {
+        NearbyArchiveFragment fragment = new NearbyArchiveFragment();
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -182,7 +189,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     }
 
     @Override
-    public void showGroupProfileFragment(int groupContactId) {
+    public void showGroupProfileFragment(int groupContactId, boolean isFollowUp) {
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
 
@@ -191,33 +198,27 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
-        fragmentTransaction.addToBackStack(null);
+
+        if (!isFollowUp) {
+            fragmentTransaction.addToBackStack(null);
+        }
         fragmentTransaction.commit();
     }
 
     @Override
-    public void showGroupProfileFragment(int groupContactId, boolean cloneProfile) {
+    public void showGroupProfileCreationFragment(int groupContactId, boolean cloneProfile) {
         Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
+        bundle.putInt(GroupProfileCreationFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
 
         if (cloneProfile) {
-            bundle.putBoolean(GroupProfileFragment.ARG_CLONE_CURRENT_GROUP, true);
+            bundle.putBoolean(GroupProfileCreationFragment.ARG_CLONE_CURRENT_GROUP, true);
         }
 
-        GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
-        groupProfileFragment.setArguments(bundle);
+        GroupProfileCreationFragment groupProfileCreationFragment = new GroupProfileCreationFragment();
+        groupProfileCreationFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
-    }
-
-    private void showNearbyArchiveFragment() {
-        NearbyArchiveFragment fragment = new NearbyArchiveFragment();
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileCreationFragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }

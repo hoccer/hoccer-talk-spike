@@ -4,9 +4,5 @@ public interface IMessagingFragmentManager {
 
     void showMessageFragment(int contactId);
 
-    void showSingleProfileFragment(int clientContactId);
-
-    void showGroupProfileFragment(int groupContactId);
-
-    void showGroupProfileFragment(int groupContactId, boolean cloneProfile);
+    void showNearbyArchiveFragment();
 }

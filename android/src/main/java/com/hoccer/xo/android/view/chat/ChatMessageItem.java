@@ -56,6 +56,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     protected RelativeLayout mAttachmentView;
     protected LinearLayout mContentWrapper;
     protected AttachmentTransferControlView mContentTransferControl;
+    protected AvatarView mAvatarView;
 
     public ChatMessageItem(Context context, TalkClientMessage message) {
         super();
@@ -137,19 +138,19 @@ public class ChatMessageItem implements AttachmentTransferListener {
             item.detachView();
         }
 
-        AvatarView avatarView = (AvatarView) view.findViewById(R.id.av_message_avatar);
+        mAvatarView = (AvatarView) view.findViewById(R.id.av_message_avatar);
         TextView messageTime = (TextView) view.findViewById(R.id.tv_message_time);
         TextView messageText = (TextView) view.findViewById(R.id.tv_message_text);
         TextView messageContactInfo = (TextView) view.findViewById(R.id.tv_message_contact_info);
         TextView messageDeliveryInfo = (TextView) view.findViewById(R.id.tv_message_delivery_info);
 
         // Adjust layout for incoming / outgoing message
-        setAvatar(avatarView, mMessage.getSenderContact());
+        setAvatar(mAvatarView, mMessage.getSenderContact());
         if (mMessage.isIncoming()) {
             if (mMessage.getConversationContact().isGroup()) {
-                avatarView.setVisibility(View.VISIBLE);
+                mAvatarView.setVisibility(View.VISIBLE);
             } else {
-                avatarView.setVisibility(View.GONE);
+                mAvatarView.setVisibility(View.GONE);
             }
             updateIncomingMessageStatus(view);
 
@@ -176,7 +177,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
             messageText.setLayoutParams(layoutParams);
 
         } else {
-            avatarView.setVisibility(View.GONE);
+            mAvatarView.setVisibility(View.GONE);
             updateOutgoingMessageStatus(view);
 
             messageContactInfo.setVisibility(View.GONE);

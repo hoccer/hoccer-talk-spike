@@ -844,6 +844,12 @@ public class XoClientService extends Service {
                 download.provideContentUrl(mClient.getTransferAgent(), uri.toString());
             }
             mScanningDownloads.remove(path);
+
+            // send an intent
+            Intent intent = new Intent();
+            intent.setAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
+            intent.putExtra(IntentHelper.EXTRA_MEDIA_URI, uri.toString());
+            sendBroadcast(intent);
         }
 
         @Override

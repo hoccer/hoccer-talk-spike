@@ -450,7 +450,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         for (TalkClientMessage message : messages) {
             TalkClientContact conversationContact = message.getConversationContact();
             if (conversationContact != null && conversationContact.getContactType() != null) {
-                if (conversationContact.getContactType().equals("group")) {
+                if (conversationContact.isGroup()) {
                     TalkGroup groupPresence = conversationContact.getGroupPresence();
                     if (groupPresence != null && groupPresence.isTypeNearby()) {
                         nearbyMessages.add(message);
@@ -573,7 +573,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         messageQb
                 .orderBy("timestamp", false)
                 .where()
-                .eq("senderContact_id", contactId);
+                .eq("senderContact_id", contactId)
+                .or()
+                .eq("conversationContact_id", contactId);
 
         QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
         downloadQb.where()
@@ -590,7 +592,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         messageQb
                 .orderBy("timestamp", false)
                 .where()
-                .eq("senderContact_id", contactId);
+                .eq("senderContact_id", contactId)
+                .or()
+                .eq("conversationContact_id", contactId);
 
         QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
         downloadQb.where()

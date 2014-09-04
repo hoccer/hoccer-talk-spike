@@ -64,7 +64,10 @@ public class MultiImageSelector extends ImageSelector {
             }
             Intent dataIntent = new Intent();
             dataIntent.setDataAndType(Uri.parse(uri), "image/*");
-            selected.add(creator.apply(context, dataIntent));
+            SelectedContent selectedContent = creator.apply(context, dataIntent);
+            if (selectedContent != null) {
+                selected.add(selectedContent);
+            }
         }
         return selected;
     }

@@ -27,7 +27,7 @@ import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.util.ImageContentHelper;
+import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -441,10 +441,10 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), outBitmap.getPath());
         newContent.setFileName(inBitmap.getName());
         newContent.setContentMediaType(contentObject.getContentMediaType());
-        newContent.setContentType(ImageContentHelper.MIME_TYPE_IMAGE_PREFIX + format.name().toLowerCase());
+        newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + format.name().toLowerCase());
         newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
 
-        ImageContentHelper.encodeBitmap(inBitmap, outBitmap, getXoClient().getImageUploadMaxPixelCount(),
+        ImageUtils.encodeBitmap(inBitmap, outBitmap, getXoClient().getImageUploadMaxPixelCount(),
                 getXoClient().getImageUploadEncodingQuality(), format,
                 new ImageEncodingCallback(newContent, outBitmap),
                 new ImageEncodingErrorCallback());
@@ -537,6 +537,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         public void run() {
             mEncodedContent.setContentLength((int) mEncodedFile.length());
             setAttachment(mEncodedContent);
+            addAttachment(mEncodedContent);
             mSendButton.setEnabled(isComposed());
         }
     }

@@ -82,7 +82,7 @@ public abstract class SearchableListFragment extends ListFragment {
     protected abstract void onSearchModeDisabled();
 
     public void leaveSearchMode() {
-        if (mSearchMenuItem != null) {
+        if(mSearchMenuItem != null) {
             mSearchMenuItem.collapseActionView();
         }
     }

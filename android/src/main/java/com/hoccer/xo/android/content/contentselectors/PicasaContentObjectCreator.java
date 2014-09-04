@@ -10,7 +10,7 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.FileUtils;
-import com.hoccer.xo.android.util.ImageContentHelper;
+import com.hoccer.xo.android.util.ImageUtils;
 import ezvcard.util.org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 
@@ -68,8 +68,8 @@ public class PicasaContentObjectCreator implements IContentCreator {
                 int fileWidth = options.outWidth;
                 int fileHeight = options.outHeight;
 
-                int orientation = ImageContentHelper.retrieveOrientation(context, contentUri, imageFile.getAbsolutePath());
-                double aspectRatio = ImageContentHelper.calculateAspectRatio(fileWidth, fileHeight, orientation);
+                int orientation = ImageUtils.retrieveOrientation(context, contentUri, imageFile.getAbsolutePath());
+                double aspectRatio = ImageUtils.calculateAspectRatio(fileWidth, fileHeight, orientation);
 
                 LOG.debug("Aspect ratio: " + fileWidth + " x " + fileHeight + " @ " + aspectRatio + " / " + orientation + "°");
 

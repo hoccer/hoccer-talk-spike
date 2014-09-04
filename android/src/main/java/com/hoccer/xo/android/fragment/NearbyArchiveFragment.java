@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.fragment;
 
-import android.app.Activity;
 import android.app.TaskStackBuilder;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -88,6 +87,7 @@ public class NearbyArchiveFragment extends ListFragment {
         });
 
         mAdapter = new NearbyChatAdapter(getListView(), (XoActivity) getActivity());
+        mAdapter.onCreate();
         setListAdapter(mAdapter);
     }
 
@@ -101,5 +101,11 @@ public class NearbyArchiveFragment extends ListFragment {
     public void onPause() {
         super.onPause();
         getListAdapter().unregisterDataSetObserver(mDataSetObserver);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mAdapter.onDestroy();
     }
 }

@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.util.ImageContentHelper;
+import com.hoccer.xo.android.util.ImageUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -30,6 +30,12 @@ public class ImageFileContentObjectCreator implements IContentCreator {
         };
 
         Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
+
+        if (cursor == null) {
+            LOG.error("Query failed! Could not resolve cursor for content uri: " + contentUri);
+            return null;
+        }
+
         cursor.moveToFirst();
 
         String mimeType = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
@@ -62,8 +68,8 @@ public class ImageFileContentObjectCreator implements IContentCreator {
         fileHeight = options.outHeight;
         //}
 
-        int orientation = ImageContentHelper.retrieveOrientation(context, contentUri, filePath);
-        double aspectRatio = ImageContentHelper.calculateAspectRatio(fileWidth, fileHeight, orientation);
+        int orientation = ImageUtils.retrieveOrientation(context, contentUri, filePath);
+        double aspectRatio = ImageUtils.calculateAspectRatio(fileWidth, fileHeight, orientation);
 
         LOG.debug("Aspect ratio: " + fileWidth + " x " + fileHeight + " @ " + aspectRatio + " / " + orientation + "°");
 
