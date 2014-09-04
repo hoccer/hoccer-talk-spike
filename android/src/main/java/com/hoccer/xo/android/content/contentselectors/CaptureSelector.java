@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -67,8 +68,8 @@ public class CaptureSelector implements IContentSelector {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String fileName = String.format("hoccer_%s", timestamp);
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), fileName);
+            String fileName = String.format("hoccer_%s.jpg", timestamp);
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), fileName);
             return Uri.fromFile(file);
         } else {
             throw new ExternalStorageNotMountedException("External storage is not mounted.");
@@ -80,52 +81,24 @@ public class CaptureSelector implements IContentSelector {
 
         File imageFile;
         File tempImageFile = null;
-        String contentUriString = null;
         int orientation;
 
         if (intent != null && intent.getData() != null) {
             LOG.error("Intent data path: " + intent.getData().getPath());
-            orientation = ImageUtils.retrieveOrientation(context, intent.getData(), intent.getData().getPath());
             imageFile = new File(intent.getData().getPath());
             LOG.error("Path: " + imageFile.getPath());
         } else {
             tempImageFile = new File(mFileUri.getPath());
             imageFile = tempImageFile;
-            orientation = ImageUtils.retrieveOrientation(context, null, imageFile.getPath());
+            MediaScannerConnection.scanFile(mContext, new String[]{imageFile.getPath()},
+                     new String[]{ContentMediaType.IMAGE}, new MediaScannerConnection.OnScanCompletedListener() {
+                        @Override
+                        public void onScanCompleted(String path, Uri uri) {
+                            LOG.error("ScanCompleted: " + path + ", " + uri);
+                        }
+                    }
+            );
         }
-
-        // Correct rotation if wrong and insert image into MediaStore
-        if (orientation > 0) {
-            Bitmap bitmap = correctImageRotation(imageFile, orientation);
-            contentUriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, imageFile.getName(), imageFile.getName());
-        } else {
-            try {
-                contentUriString = MediaStore.Images.Media.insertImage(context.getContentResolver(), imageFile.getPath(), imageFile.getName(), imageFile.getName());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // delete temporary image file
-        if (tempImageFile != null && tempImageFile.exists()) {
-            tempImageFile.delete();
-        }
-
-        // get new file path from content resolver
-        Uri contentUri = Uri.parse(contentUriString);
-        String[] projection = {
-                MediaStore.Images.Media.DATA
-        };
-        Cursor cursor = context.getContentResolver().query(
-                contentUri, projection, null, null, null);
-        cursor.moveToFirst();
-        int dataIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-        String filePath = cursor.getString(dataIndex);
-        cursor.close();
-        if (filePath == null) {
-            return null;
-        }
-        imageFile = new File(filePath);
 
         // create content object
         SelectedContent contentObject = new SelectedContent(imageFile.getPath(), "file://" + imageFile.getPath());
@@ -134,70 +107,28 @@ public class CaptureSelector implements IContentSelector {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+        BitmapFactory.decodeFile(tempImageFile.getAbsolutePath(), options);
         int imageHeight = options.outHeight;
         int imageWidth = options.outWidth;
         String imageType = options.outMimeType;
 
-        LOG.error("Name: " + imageFile.getName());
-        LOG.error("Height: " + options.outHeight);
-        LOG.error("Width: " + options.outWidth);
-        LOG.error("Image type: " + options.outMimeType);
+        LOG.info("Name: " + imageFile.getName());
+        LOG.info("Height: " + imageHeight);
+        LOG.info("Width: " + options.outWidth);
+        LOG.info("Image type: " + options.outMimeType);
 
         contentObject.setContentType(imageType);
         contentObject.setContentLength((int) imageFile.length());
 
-        orientation = ImageUtils.retrieveOrientation(context, contentUri, imageFile.getPath());
+        orientation = ImageUtils.retrieveOrientation(context, null, imageFile.getPath());
         double aspectRatio = ImageUtils.calculateAspectRatio(imageWidth, imageHeight, orientation);
 
-        LOG.error("Image orientation: " + orientation);
-        LOG.error("Image aspectRatio: " + aspectRatio);
+        LOG.info("Image orientation: " + orientation);
+        LOG.info("Image aspectRatio: " + aspectRatio);
 
         contentObject.setContentAspectRatio(aspectRatio);
 
         return contentObject;
-    }
-
-    private Bitmap correctImageRotation(File tempFile, int orientation) {
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(tempFile.getAbsolutePath(), options);
-        options.inSampleSize = calculateInSampleSize(options);
-        options.inJustDecodeBounds = false;
-        Bitmap bitmap = BitmapFactory.decodeFile(tempFile.getAbsolutePath(), options);
-        Matrix matrix = new Matrix();
-        matrix.postRotate(orientation);
-        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-
-        return bitmap;
-    }
-
-    private int calculateInSampleSize(BitmapFactory.Options options) {
-
-        Point size = DisplayUtils.getDisplaySize(mContext);
-        int reqWidth = size.x;
-        int reqHeight = size.y;
-
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight
-                    && (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
     }
 
     @Override
