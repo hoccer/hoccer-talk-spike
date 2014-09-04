@@ -255,7 +255,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         });
     }
 
-    private boolean isValidMessage(TalkClientMessage message) {
+    protected boolean isMessageValid(TalkClientMessage message) {
         if (message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
             return true;
         }
@@ -272,10 +272,15 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         notifyDataSetChanged();
     }
 
+    // Returns whether the given message is relevant for this adapter or not
+    protected boolean isMessageRelevant(TalkClientMessage message) {
+        return (message.getConversationContact() == mContact);
+    }
+
     @Override
     public void onMessageCreated(final TalkClientMessage message) {
         LOG.debug("onMessageCreated()");
-        if ((mContact == null || message.getConversationContact() == mContact) && isValidMessage(message)) {
+        if (isMessageRelevant(message) && isMessageValid(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -299,7 +304,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageDeleted(final TalkClientMessage message) {
         LOG.debug("onMessageDeleted()");
-        if (mContact == null || message.getConversationContact() == mContact) {
+        if (isMessageRelevant(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -314,7 +319,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageUpdated(final TalkClientMessage message) {
         LOG.debug("onMessageUpdated()");
-        if (mContact == null || message.getConversationContact() == mContact && isValidMessage(message)) {
+        if (isMessageRelevant(message) && isMessageValid(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

@@ -33,8 +33,6 @@ import java.io.FileOutputStream;
 
 public class ChatVideoItem extends ChatMessageItem {
 
-    private static final double HEIGHT_SCALE_FACTOR = 0.6;
-
     private RelativeLayout mRootView;
     private String mThumbnailPath;
     private ImageView mTargetView;
@@ -79,10 +77,10 @@ public class ChatVideoItem extends ChatMessageItem {
         mAttachmentView.setBackgroundDrawable(null);
 
         // calc default view size
-        double width_scale_factor = mAvatarView.getVisibility() == View.VISIBLE ? 0.7 : 0.8;
+        double width_scale_factor = mAvatarView.getVisibility() == View.VISIBLE ? ChatImageItem.WIDTH_AVATAR_SCALE_FACTOR : ChatImageItem.WIDTH_SCALE_FACTOR;
         int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * width_scale_factor);
         int width = maxWidth;
-        int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * HEIGHT_SCALE_FACTOR);
+        int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * ChatImageItem.HEIGHT_SCALE_FACTOR);
         int height = maxHeight;
 
         // retrieve thumbnail path if not set already
@@ -132,7 +130,6 @@ public class ChatVideoItem extends ChatMessageItem {
             mContentWrapper.setGravity(Gravity.RIGHT);
             bubbleMaskView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
-
     }
 
     private void listenToMediaScannedIntent(boolean doListen) {
@@ -171,17 +168,17 @@ public class ChatVideoItem extends ChatMessageItem {
     private String retrieveThumbnailPath(Uri videoUri) {
         String videoFilename = videoUri.getLastPathSegment();
         String thumbnailFileName = videoFilename + "_mini.jpg";
-        String thumbnailDestination = XoApplication.getThumbnailDirectory() + File.separator + thumbnailFileName;
+        Uri thumbnailDestination = Uri.parse(XoApplication.getThumbnailDirectory() + File.separator + thumbnailFileName);
 
         // return thumbnail path if the thumbnail file already exists
-        File file = new File(thumbnailDestination);
+        File file = new File(thumbnailDestination.toString());
         if (file.exists()) {
-            return thumbnailDestination;
+            return thumbnailDestination.toString();
         }
 
         // try to create the video thumbnail
-        if (createVideoThumbnail(videoUri.toString(), thumbnailDestination)) {
-            return thumbnailDestination;
+        if (createVideoThumbnail(videoUri, thumbnailDestination)) {
+            return thumbnailDestination.toString();
         } else {
             return null;
         }
@@ -190,16 +187,16 @@ public class ChatVideoItem extends ChatMessageItem {
     /*
      * Tries to retrieve a thumbnail bitmap for the given video and stores it as JPEG file at the given thumbnailPath
      */
-    private boolean createVideoThumbnail(String videoPath, String thumbnailPath) {
-        long videoId = getVideoId(videoPath);
+    private boolean createVideoThumbnail(Uri videoUri, Uri thumbnailUri) {
+        long videoId = getVideoId(videoUri);
         if (videoId > 0) {
             Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(mContext.getContentResolver(), videoId, MediaStore.Video.Thumbnails.MINI_KIND, new BitmapFactory.Options());
             if(thumbnail != null) {
                 try {
-                    thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(thumbnailPath));
+                    thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(thumbnailUri.toString()));
                     return true;
                 } catch (FileNotFoundException e) {
-                    LOG.error("Error while saving thumbnail bitmap: " + thumbnailPath, e);
+                    LOG.error("Error while saving thumbnail bitmap: " + thumbnailUri, e);
                 }
             }
         }
@@ -210,14 +207,14 @@ public class ChatVideoItem extends ChatMessageItem {
     /*
      * Returns the media store video id of the video at the given path or -1 if the video is unknown.
      */
-    private long getVideoId(String videoPath) {
+    private long getVideoId(Uri videoUri) {
         long videoId = -1;
 
         Uri videosUri = MediaStore.Video.Media.getContentUri("external");
         String[] projection = {
                 MediaStore.Video.VideoColumns._ID
         };
-        Cursor cursor = mContext.getContentResolver().query(videosUri, projection, MediaStore.Video.VideoColumns.DATA + " LIKE ?", new String[]{videoPath.substring(7)}, null);
+        Cursor cursor = mContext.getContentResolver().query(videosUri, projection, MediaStore.Video.VideoColumns.DATA + " LIKE ?", new String[]{videoUri.getPath()}, null);
 
         // if we have found a database entry for the video file
         if (cursor.moveToFirst()) {
@@ -252,8 +249,11 @@ public class ChatVideoItem extends ChatMessageItem {
     }
 
     private void onMediaScanned(String uri) {
+        // call display attachment again assuming that the file is now known
+        // be aware that this callback is invoked on every scan of the target file as long as thumbnail could be created
         if(uri.equals(mContentObject.getContentUrl())) {
             displayAttachment(mContentObject);
+            listenToMediaScannedIntent(false);
         }
     }
 

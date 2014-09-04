@@ -6,7 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
@@ -64,7 +66,17 @@ public class NearbyChatAdapter extends ChatAdapter {
     }
 
     @Override
-    public void onReloadRequest() {
-        super.onReloadRequest();
+    protected boolean isMessageRelevant(TalkClientMessage message) {
+        TalkClientContact conversationContact = message.getConversationContact();
+        if (conversationContact != null && conversationContact.getContactType() != null) {
+            if (conversationContact.isGroup()) {
+                TalkGroup groupPresence = conversationContact.getGroupPresence();
+                if (groupPresence != null && groupPresence.isTypeNearby()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
