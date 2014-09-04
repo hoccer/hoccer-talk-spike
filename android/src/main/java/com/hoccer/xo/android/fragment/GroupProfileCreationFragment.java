@@ -256,9 +256,11 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         return memberIds;
     }
 
-    private List<String> getMembersRoles() {
+    private List<String> getMembersRoles(List<TalkClientContact> groupContacts) {
         List<String> roles = new ArrayList<String>();
-        roles.add(TalkGroupMember.ROLE_MEMBER);
+        for (TalkClientContact contact : groupContacts) {
+            roles.add(TalkGroupMember.ROLE_MEMBER);
+        }
         return roles;
     }
 
@@ -299,7 +301,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             if (mGroup.getGroupPresence() != null) {
                 mGroup.getGroupPresence().setGroupName(newGroupName);
                 String[] memberIds = getMembersIdsFromGroupContacts(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
-                String[] memberRoles = getMembersRoles().toArray(new String[mContactsToInviteToGroup.size()]);
+                String[] memberRoles = getMembersRoles(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
                 getXoClient().createGroupWithContacts(mGroup, memberIds, memberRoles);
             }
         }
