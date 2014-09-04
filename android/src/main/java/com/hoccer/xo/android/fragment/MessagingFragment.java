@@ -191,9 +191,9 @@ public class MessagingFragment extends XoListFragment
             MenuItem musicItem = menu.findItem(R.id.menu_audio_attachment_list);
             musicItem.setVisible(true);
 
-            MenuItem permanentGroupItem = menu.findItem(R.id.menu_group_profile_create_permanent_group);
+            MenuItem createPermanentGroupItem = menu.findItem(R.id.menu_group_profile_create_permanent_group);
             boolean shouldShow = (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby());
-            permanentGroupItem.setVisible(shouldShow);
+            createPermanentGroupItem.setVisible(shouldShow);
         }
     }
 
