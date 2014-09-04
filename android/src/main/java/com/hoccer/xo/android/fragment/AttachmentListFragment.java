@@ -189,7 +189,10 @@ public class AttachmentListFragment extends SearchableListFragment {
                     break;
             }
         }
-        mCurrentActionMode.finish();
+
+        if(mCurrentActionMode != null) {
+            mCurrentActionMode.finish();
+        }
     }
 
     @Override
