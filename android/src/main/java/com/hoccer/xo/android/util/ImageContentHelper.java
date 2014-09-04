@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ImageContentHelper {
 
+    public static final String MIME_TYPE_IMAGE_PREFIX = "image/";
+
     private static final Logger LOG = Logger.getLogger(ImageContentHelper.class);
 
     public static int retrieveOrientation(Context context, Uri contentUri, String filePath) {
@@ -100,13 +102,26 @@ public class ImageContentHelper {
                         encodingOptions.outWidth = (int) (encodingOptions.outWidth / resizeRatio);
                         encodingOptions.outHeight = (int) (encodingOptions.outHeight / resizeRatio);
                     }
-
                     encodingOptions.inJustDecodeBounds = false;
                     Bitmap encodedImage = BitmapFactory.decodeFile(in.getAbsolutePath(), encodingOptions);
                     outStream = new FileOutputStream(out);
 
+                    Bitmap.CompressFormat compressFormat = getFormatByMimeType(encodingOptions.outMimeType);
 
-                    encodingSuccessful = encodedImage.compress(format, imageQuality, outStream);
+                    boolean shallCopyExif = false;
+                    if (compressFormat == null) {
+                        compressFormat = format;
+                    } else {
+                        if (compressFormat == Bitmap.CompressFormat.JPEG){
+                            shallCopyExif = true;
+                        }
+                    }
+
+                    encodingSuccessful = encodedImage.compress(compressFormat, imageQuality, outStream);
+
+                    if (shallCopyExif) {
+                        copyExifData(in.getAbsolutePath(), out.getAbsolutePath());
+                    }
                 } catch (FileNotFoundException e) {
                     LOG.error("Fatal error in creating temporary file " + out.getPath(), e);
                 } finally {
@@ -125,7 +140,6 @@ public class ImageContentHelper {
             @Override
             protected void onPostExecute(Boolean result) {
                 super.onPostExecute(result);
-                LOG.debug("Encoding finished");
 
                 if (result) {
                     successCallback.run();
@@ -136,5 +150,36 @@ public class ImageContentHelper {
         };
 
         encodingTask.execute();
+    }
+
+    public static Bitmap.CompressFormat getFormatByMimeType(String mimeType) {
+        Bitmap.CompressFormat format = null;
+        if (mimeType != null || !mimeType.isEmpty()) {
+            if (mimeType.equalsIgnoreCase(MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.JPEG.name())) {
+                format = Bitmap.CompressFormat.JPEG;
+            } else if (mimeType.equalsIgnoreCase(MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.PNG.name())) {
+                format = Bitmap.CompressFormat.PNG;
+            } else if (mimeType.equalsIgnoreCase(MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.WEBP.name())) {
+                format = Bitmap.CompressFormat.WEBP;
+            }
+        }
+
+        return format;
+    }
+
+    public static boolean copyExifData(String inPath, String outPath) {
+        boolean success = false;
+        try {
+            ExifInterface exifIn = new ExifInterface(inPath);
+            ExifInterface exifOut = new ExifInterface(outPath);
+            if (exifIn != null && exifOut != null) {
+                exifOut.setAttribute(ExifInterface.TAG_ORIENTATION, exifIn.getAttribute(ExifInterface.TAG_ORIENTATION));
+                exifOut.saveAttributes();
+            }
+        } catch (IOException e) {
+            LOG.error("Error loading Exif data", e);
+        }
+
+        return success;
     }
 }
