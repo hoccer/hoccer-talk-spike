@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
@@ -98,7 +99,9 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
         ImageView targetView = (ImageView) v.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
-        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
+        Uri dataUri = Uri.parse(mContentObject.getContentUrl() != null && !mContentObject.getContentUrl().isEmpty() ?
+                mContentObject.getContentUrl() : mContentObject.getContentDataUrl());
+        Picasso.with(mContext).load(dataUri)
                 .error(R.drawable.ic_img_placeholder_error)
                 .resize((int) (targetView.getWidth() * IMAGE_SCALE_FACTOR), (int) (targetView.getHeight() * IMAGE_SCALE_FACTOR))
                 .centerInside()
@@ -108,11 +111,14 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     }
 
     private void openImage(IContentObject contentObject) {
-        if (contentObject.getContentDataUrl() == null) {
+        if (contentObject.getContentDataUrl() == null && contentObject.getContentUrl() == null) {
             return;
         }
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.parse(contentObject.getContentDataUrl()), "image/*");
+        Uri dataUri = Uri.parse(contentObject.getContentUrl() != null && !contentObject.getContentUrl().isEmpty() ?
+                contentObject.getContentUrl() : contentObject.getContentDataUrl());
+        intent.setDataAndType(dataUri, "image/*");
         try {
             XoActivity activity = (XoActivity) mContext;
             activity.startExternalActivity(intent);
