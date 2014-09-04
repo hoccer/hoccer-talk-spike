@@ -29,6 +29,7 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.ImageContentHelper;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -430,20 +431,20 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private void encodeImageAttachment(IContentObject contentObject) {
-        String dataUri = contentObject.getContentDataUrl();
-        if (dataUri.startsWith("file://")) {
-            dataUri = dataUri.substring(7);
+        String dataPath = contentObject.getContentDataUrl();
+        if (dataPath.startsWith(UriUtils.FILE_URI_PREFIX)) {
+            dataPath = dataPath.substring(UriUtils.FILE_URI_PREFIX.length());
         }
 
-        final File inBitmap = new File(dataUri);
-        final File outBitmap = new File(XoApplication.getAttachmentDirectory(), "resized_"+inBitmap.getName());
+        final File inBitmap = new File(dataPath);
+        final File outBitmap = new File(XoApplication.getCacheStorage(), inBitmap.getName());
         final Bitmap.CompressFormat format = getXoClient().getUploadLimit() != -1 ? Bitmap.CompressFormat.JPEG :
                 Bitmap.CompressFormat.PNG;
 
-        SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), outBitmap.toURI().getPath());
+        SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), outBitmap.getPath());
         newContent.setFileName(inBitmap.getName());
         newContent.setContentMediaType(contentObject.getContentMediaType());
-        newContent.setContentType("image/"+format.name().toLowerCase());
+        newContent.setContentType(ImageContentHelper.MIME_TYPE_IMAGE_PREFIX + format.name().toLowerCase());
         newContent.setContentLength(contentObject.getContentLength());
         newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
 
@@ -458,7 +459,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     @Override
     public boolean onLongClick(View v) {
         boolean longPressHandled = false;
-        if (mLastMessage != null && !mLastMessage.equals("")) {
+        if (mLastMessage != null && !mLastMessage.isEmpty()) {
             for (int i = 0; i < STRESS_TEST_MESSAGE_COUNT; i++) {
                 getXoClient().sendMessage(getXoClient().composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
             }
@@ -541,7 +542,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         @Override
         public void run() {
             mEncodedContent.setContentLength((int) mEncodedFile.length());
-            setAttachment(SelectedContent.createAttachmentUpload(mEncodedContent));
+            setAttachment(mEncodedContent);
             mSendButton.setEnabled(isComposed());
         }
     }

@@ -7,7 +7,14 @@ import android.provider.MediaStore;
 
 public class UriUtils {
 
-    public static String getFilePathByContentUri(Context context, Uri contentUri) throws Exception {
+    public static final String CONTENT_URI_PREFIX = "content://";
+    public static final String FILE_URI_PREFIX = "file://";
+
+    public static boolean isContentUri(String contentUri) {
+        return contentUri.startsWith(CONTENT_URI_PREFIX);
+    }
+
+    public static String getFilePathByContentUri(Context context, Uri contentUri) throws CursorNotFoundException {
 
         String[] projection = {
                 MediaStore.Images.Media.DATA,
@@ -23,7 +30,13 @@ public class UriUtils {
 
             return filePath;
         } else {
-            throw new Exception("Couldn't find cursor for content uri: " + contentUri);
+            throw new CursorNotFoundException("Couldn't find cursor for content uri: " + contentUri);
+        }
+    }
+
+    public static class CursorNotFoundException extends Throwable {
+        public CursorNotFoundException(String message) {
+            super(message);
         }
     }
 }
