@@ -24,6 +24,7 @@ import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.SquaredImageView;
 import com.hoccer.xo.android.view.SquaredRelativeLayout;
 import com.hoccer.xo.release.R;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
@@ -119,6 +120,22 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
             AsyncTask thumbnailTask;
         }
 
+        private String getThumbnailPathByImageId(String imageId) {
+            String thumbnailPath = null;
+
+            long start = System.currentTimeMillis();
+
+            String[] projection = {MediaStore.Images.Thumbnails.DATA};
+            Cursor thumbCursor = getContentResolver().query(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, projection, MediaStore.Images.Thumbnails.IMAGE_ID + " LIKE ?", new String[]{imageId}, null);
+            if (thumbCursor != null && thumbCursor.moveToFirst()) {
+                thumbnailPath = thumbCursor.getString(thumbCursor.getColumnIndex(MediaStore.Images.Thumbnails.DATA));
+            }
+            LOG.trace("Path of thumbnail image: " + thumbnailPath);
+            LOG.trace("Duration: " + (System.currentTimeMillis() - start));
+
+            return thumbnailPath;
+        }
+
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
             final View itemLayout = mInflater.inflate(R.layout.item_multi_image_picker, viewGroup, false);
@@ -143,6 +160,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
             LOG.info("File path of image: " + imagePath);
             LOG.info("Uri of image: " + imageUri);
 
+            Picasso.with(mContext).cancelRequest(holder.thumbnailImageView);
             holder.thumbnailImageView.setImageBitmap(null);
             if (holder.thumbnailTask != null) {
                 holder.thumbnailTask.cancel(true);
@@ -155,15 +173,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                     String imageId = (String) params[0];
                     String imagePath = (String) params[1];
 
-                    String thumbnailPath = null;
-
-                    String[] projection = {MediaStore.Images.Thumbnails.DATA};
-                    Cursor thumbCursor = getContentResolver().query(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, projection, MediaStore.Images.Thumbnails.IMAGE_ID + " LIKE ?", new String[]{imageId}, null);
-                    if (thumbCursor != null && thumbCursor.moveToFirst()) {
-                        thumbnailPath = thumbCursor.getString(thumbCursor.getColumnIndex(MediaStore.Images.Thumbnails.DATA));
-                    }
-                    LOG.info("Path of thumbnail image: " + thumbnailPath);
-
+                    String thumbnailPath = getThumbnailPathByImageId(imageId);
                     if (thumbnailPath == null || thumbnailPath.isEmpty()) {
                         thumbnailPath = imagePath;
                     }
@@ -173,16 +183,22 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
 
                 @Override
                 protected void onPostExecute(String thumbnailPath) {
-                    super.onPostExecute(thumbnailPath);
-                    Picasso.with(mContext).cancelRequest(holder.thumbnailImageView);
                     Picasso.with(mContext)
                             .load("file://" + thumbnailPath)
                             .placeholder(R.drawable.ic_img_placeholder)
                             .error(R.drawable.ic_img_placeholder_error)
                             .centerCrop()
                             .fit()
-                            .into(holder.thumbnailImageView);
-                    holder.thumbnailImageView.setEnabled(true);
+                            .into(holder.thumbnailImageView, new Callback() {
+                                @Override
+                                public void onSuccess() {
+                                    holder.thumbnailImageView.setEnabled(true);
+                                }
+
+                                @Override
+                                public void onError() {
+                                }
+                            });
                 }
             };
             holder.thumbnailTask.execute(imageId, imagePath);
@@ -200,6 +216,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                 public boolean onLongClick(View v) {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_VIEW);
+                    LOG.info("imageUri: " + imageUri);
                     intent.setDataAndType(imageUri, "image/*");
                     startActivity(intent);
                     return true;
@@ -213,7 +230,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                         holder.squaredRelativeLayout.setVisibility(View.VISIBLE);
                         mSelectedImages.add(imageUri.toString());
                         if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
-                            LOG.error("Selected image path: " + imagePath);
+                            LOG.info("Selected image path: " + imagePath);
                         }
                     } else {
                         holder.squaredRelativeLayout.setSelected(false);
