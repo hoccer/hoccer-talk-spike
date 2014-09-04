@@ -1197,13 +1197,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void sendMessages(List<String> messageTags) {
+        int delayMultiplier = 1;
         for (final String messageTag : messageTags) {
             mExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
                     sendMessage(messageTag);
                 }
-            }, 500, TimeUnit.MILLISECONDS);
+            }, 1000 * delayMultiplier, TimeUnit.MILLISECONDS);
+            delayMultiplier++;
         }
     }
 
