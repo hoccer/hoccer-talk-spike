@@ -96,6 +96,8 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
      * @param offset Index of the first TalkClientMessage object
      */
     public synchronized void loadNextMessages(int offset) {
+        // we disabled the batching option for message loading to avoid some common errors like double messages
+        // TODO: enable batch loading of messages and see if double messages still occur
         if (true) {
             return;
         }
