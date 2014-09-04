@@ -89,7 +89,9 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
     }
 
     private void setPlaceholderText() {
-        String link = "<a href=\"" + getResources().getString(R.string.link_tutorial) + "#nearby\">" + getResources().getString(R.string.placeholder_nearby_link_text) + "</a>";
+        String anchorName = getString(R.string.tutorial_nearby_anchor);
+        String link = "<a href=\"" + getResources().getString(R.string.link_tutorial) + "#" + anchorName + "\">" +
+                getResources().getString(R.string.placeholder_nearby_link_text) + "</a>";
         String text = String.format(getString(R.string.placeholder_nearby_text), link);
         mPlaceholderText.setText(Html.fromHtml(text));
     }
