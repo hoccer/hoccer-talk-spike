@@ -178,6 +178,7 @@ public class GroupProfileFragment extends XoFragment
         getXoClient().registerContactListener(this);
 
         updateInviteButton();
+        updateActionBar();
     }
 
     @Override
