@@ -220,9 +220,6 @@ public class GroupProfileFragment extends XoFragment
         joinGroupItem.setVisible(false);
         leaveGroupItem.setVisible(false);
 
-        if (listAttachmentsItem != null) {
-            listAttachmentsItem.setVisible(false);
-        }
         if (createPermanentGroupItem != null) {
             createPermanentGroupItem.setVisible(false);
         }
