@@ -1,28 +1,25 @@
 package com.hoccer.xo.android.activity;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.*;
+import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.*;
 import android.view.*;
+import android.widget.Toast;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.service.MediaPlayerService;
-import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.XoImportExportUtils;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.release.R;
-
 import net.hockeyapp.android.CrashManager;
-
 import org.apache.log4j.Logger;
-
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.graphics.drawable.ColorDrawable;
-import android.widget.Toast;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -40,9 +37,6 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private Dialog mWaitingDialog;
 
-    private Menu mMenu;
-    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -56,26 +50,29 @@ public class XoPreferenceActivity extends PreferenceActivity
             addPreferencesFromResource(R.xml.preferences);
         }
         getListView().setBackgroundColor(Color.WHITE);
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(this);
-        mMediaPlayerServiceConnector.connect(
-                IntentHelper.ACTION_PLAYER_STATE_CHANGED,
-                new MediaPlayerServiceConnector.Listener() {
-                    @Override
-                    public void onConnected(MediaPlayerService service) {
-                        updateActionBarIcons();
-                    }
-
-                    @Override
-                    public void onDisconnected() {
-                    }
-
-                    @Override
-                    public void onAction(String action, MediaPlayerService service) {
-                        updateActionBarIcons();
-                    }
-                }
-        );
         initDataImportPreferences();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkForCrashesIfEnabled();
     }
 
     private void initDataImportPreferences() {
@@ -104,37 +101,6 @@ public class XoPreferenceActivity extends PreferenceActivity
                 });
             }
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        checkForCrashesIfEnabled();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        boolean result = super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.common, menu);
-
-        mMenu = menu;
-        updateActionBarIcons();
-
-        return result;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            case R.id.menu_media_player:
-                openFullScreenPlayer();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private void checkForCrashesIfEnabled() {
@@ -209,7 +175,6 @@ public class XoPreferenceActivity extends PreferenceActivity
         if (mSpinner != null) {
             mSpinner.completeAndGone();
         }
-        mMediaPlayerServiceConnector.disconnect();
         super.onDestroy();
     }
 
@@ -384,24 +349,4 @@ public class XoPreferenceActivity extends PreferenceActivity
         intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_LICENSES);
         startActivity(intent);
     }
-
-    private void openFullScreenPlayer(){
-        Intent resultIntent = new Intent(this, FullscreenPlayerActivity.class);
-        startActivity(resultIntent);
-    }
-
-    private void updateActionBarIcons() {
-        if (mMediaPlayerServiceConnector.isConnected() && mMenu != null) {
-            MenuItem mediaPlayerItem = mMenu.findItem(R.id.menu_media_player);
-
-            MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            if (service.isStopped() || service.isPaused()) {
-                mediaPlayerItem.setVisible(false);
-            } else {
-                mediaPlayerItem.setVisible(true);
-            }
-        }
-    }
-
-
 }
