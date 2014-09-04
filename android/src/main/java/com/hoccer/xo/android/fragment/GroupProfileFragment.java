@@ -96,7 +96,6 @@ public class GroupProfileFragment extends XoFragment
 
         mInviteAllButton = (Button) view.findViewById(R.id.profile_group_button_invite_all);
         mInviteAllButton.setOnClickListener(this);
-        mInviteAllButton.setTag(Boolean.FALSE);
         mGroupMembersContainer = (LinearLayout) view.findViewById(R.id.profile_group_members_container);
         mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
         mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
@@ -416,7 +415,7 @@ public class GroupProfileFragment extends XoFragment
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                getActivity().getActionBar().setTitle(mGroup.getName());
+                getActivity().getActionBar().setTitle(mGroup.getNickname());
             }
         });
     }
@@ -550,23 +549,21 @@ public class GroupProfileFragment extends XoFragment
             return;
         }
         updateContactsToInviteAsFriend();
-        if (mInviteAllButton.getVisibility() == View.VISIBLE) {
-            String buttonText = "";
-            if (mContactsToDisinviteAsFriend.isEmpty()) {
-                int numberOfClients = mContactsToInviteAsFriend.size();
-                buttonText = String.format(getString(R.string.nearby_invite_all), numberOfClients);
-                if(numberOfClients > 0) {
-                    mInviteAllButton.setEnabled(true);
-                } else {
-                    mInviteAllButton.setEnabled(false);
-                }
-            } else {
+        String buttonText = "";
+        if (mContactsToDisinviteAsFriend.isEmpty()) {
+            int numberOfClients = mContactsToInviteAsFriend.size();
+            buttonText = String.format(getString(R.string.nearby_invite_all), numberOfClients);
+            if(numberOfClients > 0) {
                 mInviteAllButton.setEnabled(true);
-                int numberOfInvitedClients = mContactsToDisinviteAsFriend.size();
-                buttonText = String.format(getString(R.string.nearby_disinvite_all), numberOfInvitedClients);
+            } else {
+                mInviteAllButton.setEnabled(false);
             }
-            mInviteAllButton.setText(buttonText);
+        } else {
+            mInviteAllButton.setEnabled(true);
+            int numberOfInvitedClients = mContactsToDisinviteAsFriend.size();
+            buttonText = String.format(getString(R.string.nearby_disinvite_all), numberOfInvitedClients);
         }
+        mInviteAllButton.setText(buttonText);
     }
 
     private void updateContactsToInviteAsFriend() {

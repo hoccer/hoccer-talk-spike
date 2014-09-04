@@ -350,7 +350,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                getActivity().getActionBar().setTitle(mGroup.getName());
+                getActivity().getActionBar().setTitle(mGroup.getNickname());
             }
         });
     }
