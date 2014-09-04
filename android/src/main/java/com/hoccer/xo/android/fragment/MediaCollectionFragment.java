@@ -200,7 +200,9 @@ public class MediaCollectionFragment extends SearchableListFragment {
     };
 
     private void updateActionBarTitle() {
-        getActivity().getActionBar().setTitle(mCollection.getName());
+        if(mCollection != null) {
+            getActivity().getActionBar().setTitle(mCollection.getName());
+        }
     }
 
     private TalkClientContact retrieveContactById(Integer contactId) {
