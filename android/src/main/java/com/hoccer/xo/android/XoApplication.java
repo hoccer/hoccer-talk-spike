@@ -12,13 +12,11 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
-import com.hoccer.xo.android.util.ThumbnailManager;
-import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
-import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -310,8 +308,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        LOG.warn("Received onTrimMemory(" + level + "). Will trim ThumbnailManager.");
-        ThumbnailManager.getInstance(this).clearCache();
+        LOG.warn("Received onTrimMemory(" + level + ").");
     }
 
     @Override

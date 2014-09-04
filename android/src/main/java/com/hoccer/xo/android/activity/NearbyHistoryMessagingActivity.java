@@ -9,7 +9,6 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.adapter.NearbyChatAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.util.ThumbnailManager;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
@@ -49,7 +48,6 @@ public class NearbyHistoryMessagingActivity extends XoActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ThumbnailManager.getInstance(this).clearCache();
     }
 
     @Override
@@ -85,6 +83,9 @@ public class NearbyHistoryMessagingActivity extends XoActivity {
                     ClipData clip = ClipData.newPlainText("simple text",text);
                     clipboardText.setPrimaryClip(clip);
                 }
+                break;
+            case R.id.menu_delete_message:
+                getXoClient().deleteMessage(messageId);
                 break;
         }
     }

@@ -14,17 +14,17 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
+import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 
 
-public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChangeListener {
+public class ChatImageItem extends ChatMessageItem {
 
-    private static final double WIDTH_SCALE_FACTOR = 0.8;
+    private static final double HEIGHT_SCALE_FACTOR = 0.6;
     private static final double IMAGE_SCALE_FACTOR = 0.5;
 
-    private int mImageWidth;
     private RelativeLayout mRootView;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
@@ -45,8 +45,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
     protected void displayAttachment(final IContentObject contentObject) {
         super.displayAttachment(contentObject);
 
-        setRequiredImageWidth();
-
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -64,47 +62,47 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
         mAttachmentView.setPadding(0, 0, 0, 0);
         mAttachmentView.setBackgroundDrawable(null);
 
+        // calc view size
+        double width_scale_factor = mAvatarView.getVisibility() == View.VISIBLE ? 0.7 : 0.8;
+        int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * width_scale_factor);
+        int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * HEIGHT_SCALE_FACTOR);
         double aspectRatio = contentObject.getContentAspectRatio();
-        int height = (int) (mImageWidth / aspectRatio);
+        Point boundImageSize = ImageUtils.getImageSizeInBounds(aspectRatio, maxWidth, maxHeight);
+        int width = boundImageSize.x;
+        int height = boundImageSize.y;
 
         mRootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
-        mRootView.addOnLayoutChangeListener(this);
-        mRootView.getLayoutParams().width = mImageWidth;
+        mRootView.getLayoutParams().width = width;
         mRootView.getLayoutParams().height = height;
 
         ImageView overlayView = (ImageView) mRootView.findViewById(R.id.iv_picture_overlay);
         if (mMessage.isIncoming()) {
-            mRootView.setGravity(Gravity.LEFT);
+            mContentWrapper.setGravity(Gravity.LEFT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
         } else {
-            mRootView.setGravity(Gravity.RIGHT);
+            mContentWrapper.setGravity(Gravity.RIGHT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
+
+        ImageView targetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
+        Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
+        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
+                .error(R.drawable.ic_img_placeholder_error)
+                .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
+                .centerInside()
+                .into(targetView);
+        LOG.trace(Picasso.with(mContext).getSnapshot().toString());
     }
 
     @Override
     public void detachView() {
         // check for null in case display attachment has not yet been called
         if (mRootView != null) {
-            mRootView.removeOnLayoutChangeListener(this);
             ImageView targetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
             if (targetView != null) {
                 Picasso.with(mContext).cancelRequest(targetView);
             }
         }
-    }
-
-    @Override
-    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        ImageView targetView = (ImageView) v.findViewById(R.id.iv_picture);
-        Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
-        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
-                .error(R.drawable.ic_img_placeholder_error)
-                .resize((int) (targetView.getWidth() * IMAGE_SCALE_FACTOR), (int) (targetView.getHeight() * IMAGE_SCALE_FACTOR))
-                .centerInside()
-                .into(targetView);
-        v.removeOnLayoutChangeListener(this);
-        LOG.trace(Picasso.with(mContext).getSnapshot().toString());
     }
 
     private void openImage(IContentObject contentObject) {
@@ -119,11 +117,6 @@ public class ChatImageItem extends ChatMessageItem implements View.OnLayoutChang
         } catch (ClassCastException e) {
             e.printStackTrace();
         }
-    }
-
-    private void setRequiredImageWidth() {
-        Point size = DisplayUtils.getDisplaySize(mContext);
-        mImageWidth = (int) (size.x * WIDTH_SCALE_FACTOR);
     }
 }
 

@@ -17,11 +17,8 @@ import java.util.List;
 
 public class NearbyChatAdapter extends ChatAdapter {
 
-    private XoActivity mXoActivity;
-
     public NearbyChatAdapter(ListView listView, XoActivity activity) {
         super(listView, activity, null);
-        mXoActivity = activity;
     }
 
     @Override
