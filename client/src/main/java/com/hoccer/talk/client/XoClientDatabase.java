@@ -450,7 +450,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         for (TalkClientMessage message : messages) {
             TalkClientContact conversationContact = message.getConversationContact();
             if (conversationContact != null && conversationContact.getContactType() != null) {
-                if (conversationContact.getContactType().equals("group")) {
+                if (conversationContact.isGroup()) {
                     TalkGroup groupPresence = conversationContact.getGroupPresence();
                     if (groupPresence != null && groupPresence.isTypeNearby()) {
                         nearbyMessages.add(message);
