@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -34,8 +33,6 @@ import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -445,13 +442,10 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         newContent.setFileName(inBitmap.getName());
         newContent.setContentMediaType(contentObject.getContentMediaType());
         newContent.setContentType(ImageContentHelper.MIME_TYPE_IMAGE_PREFIX + format.name().toLowerCase());
-        newContent.setContentLength(contentObject.getContentLength());
         newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
 
-        int rotation = ImageContentHelper.retrieveOrientation(getActivity(), null, outBitmap.getPath());
-
         ImageContentHelper.encodeBitmap(inBitmap, outBitmap, getXoClient().getImageUploadMaxPixelCount(),
-                getXoClient().getImageUploadEncodingQuality(), format, rotation,
+                getXoClient().getImageUploadEncodingQuality(), format,
                 new ImageEncodingCallback(newContent, outBitmap),
                 new ImageEncodingErrorCallback());
     }

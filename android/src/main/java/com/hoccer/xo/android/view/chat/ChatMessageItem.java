@@ -587,7 +587,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
                         try {
                             XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
                             boolean isDeleted = fileToDelete.delete();
-                            LOG.trace("Cached file is deleted " + isDeleted);
+                            LOG.debug("Cached file is deleted " + isDeleted);
                         } catch (SQLException e) {
                             LOG.error("Error updating upload with new file path " + filePath);
                         }

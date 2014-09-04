@@ -82,7 +82,7 @@ public class ImageContentHelper {
     }
 
     public static void encodeBitmap(final File in, final File out, final int maxPixelCount, final int imageQuality,
-                             final Bitmap.CompressFormat format, int rotation, final Runnable successCallback,
+                             final Bitmap.CompressFormat format, final Runnable successCallback,
                              final Runnable errorCallback) {
         AsyncTask<Void, Void, Boolean> encodingTask = new AsyncTask<Void, Void, Boolean>() {
 
