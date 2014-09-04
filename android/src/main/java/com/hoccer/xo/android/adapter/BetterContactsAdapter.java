@@ -62,7 +62,7 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
         loadContacts();
     }
 
-    private void loadContacts() {
+    public void loadContacts() {
         synchronized (this) {
             int oldItemCount = mContactItems.size();
             mContactItems.clear();
@@ -103,8 +103,8 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
+    public void onResume() {
+        super.onResume();
         getXoClient().registerContactListener(this);
         getXoClient().registerTokenListener(this);
         getXoClient().registerTransferListener(this);
@@ -112,8 +112,8 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onPause() {
+        super.onPause();
         getXoClient().unregisterContactListener(this);
         getXoClient().unregisterTokenListener(this);
         getXoClient().unregisterTransferListener(this);

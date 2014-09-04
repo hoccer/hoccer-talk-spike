@@ -60,7 +60,7 @@ public abstract class XoAdapter extends BaseAdapter {
     private boolean mNeedsReload = false;
     private long mNotifyTimestamp;
 
-    public XoAdapter(@Nullable XoActivity activity) {
+    public XoAdapter(XoActivity activity) {
         LOG = Logger.getLogger(getClass());
 
         if (activity != null) {
@@ -69,6 +69,8 @@ public abstract class XoAdapter extends BaseAdapter {
             mInflater = mActivity.getLayoutInflater();
             mResources = mActivity.getResources();
             mExecutor = mActivity.getBackgroundExecutor();
+        } else {
+            throw new NullPointerException("Activity cannot be null.");
         }
     }
 

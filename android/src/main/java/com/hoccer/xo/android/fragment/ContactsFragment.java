@@ -91,13 +91,18 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
     @Override
     public void onPause() {
         super.onPause();
-        mAdapter.onPause();
+        if (mAdapter != null) {
+            mAdapter.onPause();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mAdapter.onResume();
+        if (mAdapter != null) {
+            mAdapter.onResume();
+            mAdapter.loadContacts();
+        }
     }
 
     @Override
@@ -217,7 +222,7 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
         };
 
         mAdapter = new BetterContactsAdapter((XoActivity) getActivity(), filter);
-        mAdapter.onCreate();
+        mAdapter.onResume();
         mAdapter.setOnItemCountChangedListener(this);
     }
 
