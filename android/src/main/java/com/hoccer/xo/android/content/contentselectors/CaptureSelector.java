@@ -79,53 +79,41 @@ public class CaptureSelector implements IContentSelector {
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
 
-        File imageFile;
-        File tempImageFile = null;
+        File imageFile = new File(mFileUri.getPath());;
         int orientation;
 
-        if (intent != null && intent.getData() != null) {
-            LOG.error("Intent data path: " + intent.getData().getPath());
-            imageFile = new File(intent.getData().getPath());
-            LOG.error("Path: " + imageFile.getPath());
-        } else {
-            tempImageFile = new File(mFileUri.getPath());
-            imageFile = tempImageFile;
-            MediaScannerConnection.scanFile(mContext, new String[]{imageFile.getPath()},
-                     new String[]{ContentMediaType.IMAGE}, new MediaScannerConnection.OnScanCompletedListener() {
-                        @Override
-                        public void onScanCompleted(String path, Uri uri) {
-                            LOG.error("ScanCompleted: " + path + ", " + uri);
-                        }
+        MediaScannerConnection.scanFile(mContext, new String[]{imageFile.getPath()},
+                new String[]{ContentMediaType.IMAGE}, new MediaScannerConnection.OnScanCompletedListener() {
+                    @Override
+                    public void onScanCompleted(String path, Uri uri) {
+                        LOG.error("ScanCompleted: " + path + ", " + uri);
                     }
-            );
-        }
-
-        // create content object
-        SelectedContent contentObject = new SelectedContent(imageFile.getPath(), "file://" + imageFile.getPath());
-        contentObject.setFileName(imageFile.getName());
-        contentObject.setContentMediaType(ContentMediaType.IMAGE);
+                }
+        );
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(tempImageFile.getAbsolutePath(), options);
+        BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
         int imageHeight = options.outHeight;
         int imageWidth = options.outWidth;
         String imageType = options.outMimeType;
+
+        orientation = ImageUtils.retrieveOrientation(context, null, imageFile.getPath());
+        double aspectRatio = ImageUtils.calculateAspectRatio(imageWidth, imageHeight, orientation);
 
         LOG.info("Name: " + imageFile.getName());
         LOG.info("Height: " + imageHeight);
         LOG.info("Width: " + options.outWidth);
         LOG.info("Image type: " + options.outMimeType);
-
-        contentObject.setContentType(imageType);
-        contentObject.setContentLength((int) imageFile.length());
-
-        orientation = ImageUtils.retrieveOrientation(context, null, imageFile.getPath());
-        double aspectRatio = ImageUtils.calculateAspectRatio(imageWidth, imageHeight, orientation);
-
         LOG.info("Image orientation: " + orientation);
         LOG.info("Image aspectRatio: " + aspectRatio);
 
+        // create content object
+        SelectedContent contentObject = new SelectedContent(imageFile.getPath(), "file://" + imageFile.getPath());
+        contentObject.setFileName(imageFile.getName());
+        contentObject.setContentMediaType(ContentMediaType.IMAGE);
+        contentObject.setContentType(imageType);
+        contentObject.setContentLength((int) imageFile.length());
         contentObject.setContentAspectRatio(aspectRatio);
 
         return contentObject;
