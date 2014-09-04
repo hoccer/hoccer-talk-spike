@@ -96,6 +96,8 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
      * @param offset Index of the first TalkClientMessage object
      */
     public synchronized void loadNextMessages(int offset) {
+        // we disabled the batching option for message loading to avoid some common errors like double messages
+        // TODO: enable batch loading of messages and see if double messages still occur
         if (true) {
             return;
         }
@@ -273,7 +275,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageCreated(final TalkClientMessage message) {
         LOG.debug("onMessageCreated()");
-        if (message.getConversationContact() == mContact && isValidMessage(message)) {
+        if ((mContact == null || message.getConversationContact() == mContact) && isValidMessage(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -297,7 +299,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageDeleted(final TalkClientMessage message) {
         LOG.debug("onMessageDeleted()");
-        if (message.getConversationContact() == mContact) {
+        if (mContact == null || message.getConversationContact() == mContact) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -312,7 +314,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageUpdated(final TalkClientMessage message) {
         LOG.debug("onMessageUpdated()");
-        if (message.getConversationContact() == mContact && isValidMessage(message)) {
+        if (mContact == null || message.getConversationContact() == mContact && isValidMessage(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
