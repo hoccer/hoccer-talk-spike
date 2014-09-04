@@ -102,6 +102,60 @@ public class ImageUtils {
         return result;
     }
 
+    public static boolean compressImageFile(File input, File output, int maxPixelCount, int imageQuality, Bitmap.CompressFormat format) {
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(input.getAbsolutePath(), options);
+
+        long originalPixelCount = options.outWidth * options.outHeight;
+        if (maxPixelCount < originalPixelCount) {
+            double resizeRatio = Math.sqrt(originalPixelCount / maxPixelCount);
+            options.inSampleSize = (int) resizeRatio + 1;
+            options.outWidth = (int) (options.outWidth / resizeRatio);
+            options.outHeight = (int) (options.outHeight / resizeRatio);
+        }
+        options.inJustDecodeBounds = false;
+
+        // TODO: too big images cause out of memory exceptions !!!!!!!!!!!!!!!!
+        Bitmap encodedBitmap = BitmapFactory.decodeFile(input.getAbsolutePath(), options);
+
+        Bitmap.CompressFormat compressFormat = getFormatByMimeType(options.outMimeType);
+
+        boolean shallCopyExif = false;
+        if (compressFormat == null) {
+            compressFormat = format;
+        } else if (compressFormat == Bitmap.CompressFormat.JPEG) {
+            shallCopyExif = true;
+        }
+
+        FileOutputStream os = null;
+        try {
+            os = new FileOutputStream(output);
+            if (encodedBitmap.compress(compressFormat, imageQuality, os)) {
+                if (shallCopyExif) {
+                    copyExifData(input.getAbsolutePath(), output.getAbsolutePath());
+                }
+                return true;
+            }
+            ;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+//        } catch (FileNotFoundException e) {
+//            LOG.error("Fatal error in creating temporary file " + out.getPath(), e);
+//        } finally {
+//            try {
+//                if (outStream != null) {
+//                    outStream.close();
+//                }
+//            } catch (IOException e) {
+//                LOG.error("Fatal error while closing output stream for " + out.getPath(), e);
+//            }
+//        }
+        return false;
+    }
+
 
     public static void encodeBitmap(final ArrayList<File> input, final File out, final int maxPixelCount, final int imageQuality,
                                     final Bitmap.CompressFormat format, final EncodingCompleteCallback callback) {

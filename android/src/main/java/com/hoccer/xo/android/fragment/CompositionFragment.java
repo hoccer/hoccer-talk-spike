@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -55,7 +56,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private String mLastMessage = null;
     private ImageButton mAddAttachmentButton;
 
-    private ArrayList<IContentObject> mAttachments;
+    private List<IContentObject> mAttachments;
 
     private ContentSelection mAttachmentSelection = null;
     private Button mAddAttachmentsButton;
@@ -205,11 +206,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     public void onAttachmentsSelected(ArrayList<IContentObject> contentObjects) {
         LOG.debug("onAttachmentsSelected(" + contentObjects.size() + ")");
         if (getXoClient().isEncodingNecessary()) {
-            for (IContentObject attachment : contentObjects) {
-                if (attachment.getContentMediaType().equals(ContentMediaType.IMAGE)) {
-                    encodeImageAttachment(attachment);
-                }
-            }
+            encodeAndSetImageAttachments(contentObjects);
         } else {
             setAttachments(contentObjects);
             mSendButton.setEnabled(isComposed());
@@ -227,7 +224,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         updateAttachmentButton();
     }
 
-    private void setAttachments(ArrayList<IContentObject> contentObjects) {
+    private void setAttachments(List<IContentObject> contentObjects) {
         mAddAttachmentsButton.setOnClickListener(new AttachmentOnClickListener());
         if (contentObjects != null) {
             mAttachments = contentObjects;
@@ -427,27 +424,81 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 null);
     }
 
-    private void encodeImageAttachment(IContentObject contentObject) {
-        String dataPath = contentObject.getContentDataUrl();
-        if (dataPath.startsWith(UriUtils.FILE_URI_PREFIX)) {
-            dataPath = dataPath.substring(UriUtils.FILE_URI_PREFIX.length());
-        }
+    private void encodeAndSetImageAttachments(ArrayList<IContentObject> contentObjects) {
+        AsyncTask asyncTask = new AsyncTask<Object, Void, List<IContentObject>>() {
 
-        final File inBitmap = new File(dataPath);
-        final File outBitmap = new File(XoApplication.getCacheStorage(), inBitmap.getName());
-        final Bitmap.CompressFormat format = getXoClient().getUploadLimit() != -1 ? Bitmap.CompressFormat.JPEG :
-                Bitmap.CompressFormat.PNG;
+            @Override
+            protected List<IContentObject> doInBackground(Object... objects) {
 
-        SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), outBitmap.getPath());
-        newContent.setFileName(inBitmap.getName());
-        newContent.setContentMediaType(contentObject.getContentMediaType());
-        newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + format.name().toLowerCase());
-        newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
+                List<IContentObject> contentObjects = (List<IContentObject>) objects[0];
 
-        ImageUtils.encodeBitmap(inBitmap, outBitmap, getXoClient().getImageUploadMaxPixelCount(),
-                getXoClient().getImageUploadEncodingQuality(), format,
-                new ImageEncodingCallback(newContent, outBitmap),
-                new ImageEncodingErrorCallback());
+                List<IContentObject> result = new ArrayList<IContentObject>();
+                for (IContentObject contentObject : contentObjects) {
+
+                    if (contentObject.getContentMediaType().equals(ContentMediaType.IMAGE)) {
+
+                        String dataPath = contentObject.getContentDataUrl();
+                        if (dataPath.startsWith(UriUtils.FILE_URI_PREFIX)) {
+                            dataPath = dataPath.substring(UriUtils.FILE_URI_PREFIX.length());
+                        }
+
+                        final File inBitmap = new File(dataPath);
+                        final File outBitmap = new File(XoApplication.getCacheStorage(), inBitmap.getName());
+                        final Bitmap.CompressFormat format = getXoClient().getUploadLimit() != -1 ? Bitmap.CompressFormat.JPEG :
+                                Bitmap.CompressFormat.PNG;
+
+                        boolean success = ImageUtils.compressImageFile(inBitmap,
+                                outBitmap,
+                                getXoClient().getImageUploadMaxPixelCount(),
+                                getXoClient().getImageUploadEncodingQuality(),
+                                format);
+
+                        if (success) {
+                            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), outBitmap.getPath());
+                            newContent.setFileName(outBitmap.getName()); //TODO inBitmap ?
+                            newContent.setContentMediaType(contentObject.getContentMediaType());
+                            newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + format.name().toLowerCase());
+                            newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
+                            newContent.setContentLength((int) outBitmap.length());
+
+                            result.add(newContent);
+                        } else {
+                            LOG.error("Error encoding bitmap for upload.");
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+                    } else {
+                        // TODO check ContentMediaType.IMAGE before adding them to async task
+                        result.add(contentObject);
+                    }
+                }
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(List<IContentObject> result) {
+                setAttachments(result);
+                mSendButton.setEnabled(isComposed());
+            }
+
+            @Override
+            protected void onCancelled() {
+                LOG.error("Error encoding bitmap(s) for upload.");
+                Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
+            }
+        };
+        asyncTask.execute(contentObjects);
+    }
+
+    private void encodeImageAttachment(final IContentObject contentObject) {
+
+        encodeAndSetImageAttachments(new ArrayList<IContentObject>() {{
+            add(contentObject);
+        }});
     }
 
     @Override
@@ -520,35 +571,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         public void onClick(DialogInterface dialogInterface, int i) {
 
             validateAndSendComposedMessage();
-        }
-    }
-
-    private class ImageEncodingCallback implements Runnable {
-
-        private SelectedContent mEncodedContent;
-        private File mEncodedFile;
-
-        ImageEncodingCallback(SelectedContent contentObject, File encodedFile) {
-            mEncodedContent = contentObject;
-            mEncodedFile = encodedFile;
-        }
-
-        @Override
-        public void run() {
-            mEncodedContent.setContentLength((int) mEncodedFile.length());
-            setAttachment(mEncodedContent);
-            addAttachment(mEncodedContent);
-            mSendButton.setEnabled(isComposed());
-        }
-    }
-
-    private class ImageEncodingErrorCallback implements Runnable {
-
-        @Override
-        public void run() {
-            // TODO error handling - really important
-            LOG.error("Error encoding bitmap for upload.");
-            Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
         }
     }
 }
