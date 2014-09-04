@@ -22,8 +22,10 @@ import com.squareup.picasso.Picasso;
 
 public class ChatImageItem extends ChatMessageItem {
 
-    private static final double HEIGHT_SCALE_FACTOR = 0.6;
-    private static final double IMAGE_SCALE_FACTOR = 0.5;
+    public static final double HEIGHT_SCALE_FACTOR = 0.6;
+    public static final double WIDTH_SCALE_FACTOR = 0.85;
+    public static final double WIDTH_AVATAR_SCALE_FACTOR = 0.7;
+    public static final double IMAGE_SCALE_FACTOR = 0.5;
 
     private RelativeLayout mRootView;
 
@@ -63,7 +65,7 @@ public class ChatImageItem extends ChatMessageItem {
         mAttachmentView.setBackgroundDrawable(null);
 
         // calc view size
-        double widthScaleFactor = mAvatarView.getVisibility() == View.VISIBLE ? 0.7 : 0.8;
+        double widthScaleFactor = mAvatarView.getVisibility() == View.VISIBLE ? WIDTH_AVATAR_SCALE_FACTOR : WIDTH_SCALE_FACTOR;
         int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * widthScaleFactor);
         int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * HEIGHT_SCALE_FACTOR);
         double aspectRatio = contentObject.getContentAspectRatio();
