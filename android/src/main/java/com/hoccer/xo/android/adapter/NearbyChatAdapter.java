@@ -23,29 +23,12 @@ public class NearbyChatAdapter extends ChatAdapter {
 
     @Override
     protected void initialize() {
-        int totalMessageCount = 0;
         try {
-            totalMessageCount = (int) mDatabase.getNearbyMessageCount();
-        } catch (SQLException e) {
-            LOG.error("SQLException while loading message count in nearby ");
-        }
-        mChatMessageItems = new ArrayList<ChatMessageItem>(totalMessageCount);
-        for (int i = 0; i < totalMessageCount; i++) {
-            mChatMessageItems.add(null);
-        }
-        loadNextMessages(mChatMessageItems.size() - (int) BATCH_SIZE);
-    }
-
-    @Override
-    public synchronized void loadNextMessages(int offset) {
-        try {
-            if (offset < 0) {
-                offset = 0;
-            }
-            final List<TalkClientMessage> messagesBatch = mDatabase.findNearbyMessages(BATCH_SIZE, offset);
-            for (int i = 0; i < messagesBatch.size(); i++) {
-                ChatMessageItem messageItem = getItemForMessage(messagesBatch.get(i));
-                mChatMessageItems.set(offset + i, messageItem);
+            List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
+            mChatMessageItems = new ArrayList<ChatMessageItem>(messages.size());
+            for (int i = 0; i < messages.size(); i++) {
+                ChatMessageItem messageItem = getItemForMessage(messages.get(i));
+                mChatMessageItems.add(messageItem);
             }
             runOnUiThread(new Runnable() {
                 @Override

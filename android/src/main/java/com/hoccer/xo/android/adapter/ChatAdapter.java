@@ -273,7 +273,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageCreated(final TalkClientMessage message) {
         LOG.debug("onMessageCreated()");
-        if (message.getConversationContact() == mContact && isValidMessage(message)) {
+        if ((mContact == null || message.getConversationContact() == mContact) && isValidMessage(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -297,7 +297,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageDeleted(final TalkClientMessage message) {
         LOG.debug("onMessageDeleted()");
-        if (message.getConversationContact() == mContact) {
+        if (mContact == null || message.getConversationContact() == mContact) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -312,7 +312,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
     @Override
     public void onMessageUpdated(final TalkClientMessage message) {
         LOG.debug("onMessageUpdated()");
-        if (message.getConversationContact() == mContact && isValidMessage(message)) {
+        if (mContact == null || message.getConversationContact() == mContact && isValidMessage(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
