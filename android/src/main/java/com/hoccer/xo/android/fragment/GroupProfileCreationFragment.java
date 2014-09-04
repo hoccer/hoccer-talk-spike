@@ -300,9 +300,14 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         if (mGroup != null && !mGroup.isGroupRegistered()) {
             if (mGroup.getGroupPresence() != null) {
                 mGroup.getGroupPresence().setGroupName(newGroupName);
-                String[] memberIds = getMembersIdsFromGroupContacts(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
-                String[] memberRoles = getMembersRoles(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
-                getXoClient().createGroupWithContacts(mGroup, memberIds, memberRoles);
+
+                if (mContactsToInviteToGroup.isEmpty()) {
+                    getXoClient().createGroup(mGroup);
+                } else {
+                    String[] memberIds = getMembersIdsFromGroupContacts(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
+                    String[] memberRoles = getMembersRoles(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
+                    getXoClient().createGroupWithContacts(mGroup, memberIds, memberRoles);
+                }
             }
         }
     }
