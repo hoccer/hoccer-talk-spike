@@ -73,14 +73,15 @@ public class ChatVideoItem extends ChatMessageItem {
             }
         });
 
-        mAttachmentView.setPadding(0, 0, 0, 0);
-        mAttachmentView.setBackgroundDrawable(null);
-        mAttachmentView.setOnClickListener(new View.OnClickListener() {
+        mContentWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openVideo(contentObject);
             }
         });
+
+        mAttachmentView.setPadding(0, 0, 0, 0);
+        mAttachmentView.setBackgroundDrawable(null);
 
         // calc default view size
         double width_scale_factor = mAvatarView.getVisibility() == View.VISIBLE ? ChatImageItem.WIDTH_AVATAR_SCALE_FACTOR : ChatImageItem.WIDTH_SCALE_FACTOR;
