@@ -752,9 +752,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 break;
             }
         }
-
-        LOG.warn("äää created filename " + newFileName + " for image " + downloadFile);
-
         return newFileName + extension;
     }
 
