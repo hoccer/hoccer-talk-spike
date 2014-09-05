@@ -50,7 +50,6 @@
             android:maxLines="1"
             android:singleLine="true"
             android:layout_marginRight="45dp"
-            android:text="Max Mustermann"
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"/>
 
 
