@@ -75,6 +75,12 @@ public class ChatVideoItem extends ChatMessageItem {
 
         mAttachmentView.setPadding(0, 0, 0, 0);
         mAttachmentView.setBackgroundDrawable(null);
+        mAttachmentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openVideo(contentObject);
+            }
+        });
 
         // calc default view size
         double width_scale_factor = mAvatarView.getVisibility() == View.VISIBLE ? ChatImageItem.WIDTH_AVATAR_SCALE_FACTOR : ChatImageItem.WIDTH_SCALE_FACTOR;
@@ -105,12 +111,6 @@ public class ChatVideoItem extends ChatMessageItem {
         mRootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
         mRootView.getLayoutParams().width = width;
         mRootView.getLayoutParams().height = height;
-        mRootView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openVideo(contentObject);
-            }
-        });
 
         // load thumbnail with picasso
         mTargetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
