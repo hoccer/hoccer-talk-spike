@@ -8,16 +8,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.provider.MediaStore;
-import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class ImageUtils {
 
@@ -102,7 +99,7 @@ public class ImageUtils {
         return result;
     }
 
-    public static boolean compressImageFile(File input, File output, int maxPixelCount, int imageQuality, Bitmap.CompressFormat format) {
+    public static Bitmap resizeImageWithinBounds(File input, int maxPixelCount) {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -118,134 +115,26 @@ public class ImageUtils {
         options.inJustDecodeBounds = false;
 
         // TODO: too big images cause out of memory exceptions !!!!!!!!!!!!!!!!
-        Bitmap encodedBitmap = BitmapFactory.decodeFile(input.getAbsolutePath(), options);
-
-        Bitmap.CompressFormat compressFormat = getFormatByMimeType(options.outMimeType);
-
-        boolean shallCopyExif = false;
-        if (compressFormat == null) {
-            compressFormat = format;
-        } else if (compressFormat == Bitmap.CompressFormat.JPEG) {
-            shallCopyExif = true;
+        Bitmap encodedBitmap = null;
+        try {
+            encodedBitmap = BitmapFactory.decodeFile(input.getAbsolutePath(), options);
+        } catch (OutOfMemoryError error) {
+            LOG.error(error);
+            return encodedBitmap;
         }
 
-        FileOutputStream os = null;
+        return encodedBitmap;
+    }
+
+    public static boolean compressBitmapToFile(Bitmap srcBitmap, File destFile, int imageQuality, Bitmap.CompressFormat format) {
+        FileOutputStream os;
         try {
-            os = new FileOutputStream(output);
-            if (encodedBitmap.compress(compressFormat, imageQuality, os)) {
-                if (shallCopyExif) {
-                    copyExifData(input.getAbsolutePath(), output.getAbsolutePath());
-                }
-                return true;
-            }
-            ;
+            os = new FileOutputStream(destFile);
+            return srcBitmap.compress(format, imageQuality, os);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-//        } catch (FileNotFoundException e) {
-//            LOG.error("Fatal error in creating temporary file " + out.getPath(), e);
-//        } finally {
-//            try {
-//                if (outStream != null) {
-//                    outStream.close();
-//                }
-//            } catch (IOException e) {
-//                LOG.error("Fatal error while closing output stream for " + out.getPath(), e);
-//            }
-//        }
         return false;
-    }
-
-
-    public static void encodeBitmap(final ArrayList<File> input, final File out, final int maxPixelCount, final int imageQuality,
-                                    final Bitmap.CompressFormat format, final EncodingCompleteCallback callback) {
-
-
-        AsyncTask<Void, Void, Boolean> encodingTask = new AsyncTask<Void, Void, Boolean>() {
-
-            @Override
-            protected Boolean doInBackground(Void[] params) {
-                boolean encodingSuccessful = false;
-
-                for (File in : input) {
-                    FileOutputStream outStream = null;
-
-                    try {
-                        BitmapFactory.Options encodingOptions = new BitmapFactory.Options();
-                        encodingOptions.inJustDecodeBounds = true;
-                        BitmapFactory.decodeFile(in.getAbsolutePath(), encodingOptions);
-
-                        long originalPixelCount = encodingOptions.outWidth * encodingOptions.outHeight;
-                        if (maxPixelCount < originalPixelCount) {
-                            double resizeRatio = Math.sqrt(originalPixelCount / maxPixelCount);
-                            encodingOptions.inSampleSize = (int) resizeRatio + 1;
-                            encodingOptions.outWidth = (int) (encodingOptions.outWidth / resizeRatio);
-                            encodingOptions.outHeight = (int) (encodingOptions.outHeight / resizeRatio);
-                        }
-                        encodingOptions.inJustDecodeBounds = false;
-                        Bitmap encodedImage = BitmapFactory.decodeFile(in.getAbsolutePath(), encodingOptions);
-                        outStream = new FileOutputStream(out);
-
-                        Bitmap.CompressFormat compressFormat = getFormatByMimeType(encodingOptions.outMimeType);
-
-                        boolean shallCopyExif = false;
-                        if (compressFormat == null) {
-                            compressFormat = format;
-                        } else {
-                            if (compressFormat == Bitmap.CompressFormat.JPEG) {
-                                shallCopyExif = true;
-                            }
-                        }
-
-                        encodingSuccessful = encodedImage.compress(compressFormat, imageQuality, outStream);
-
-                        if (shallCopyExif) {
-                            copyExifData(in.getAbsolutePath(), out.getAbsolutePath());
-                        }
-
-                    } catch (FileNotFoundException e) {
-                        LOG.error("Fatal error in creating temporary file " + out.getPath(), e);
-                    } finally {
-                        try {
-                            if (outStream != null) {
-                                outStream.close();
-                            }
-                        } catch (IOException e) {
-                            LOG.error("Fatal error while closing output stream for " + out.getPath(), e);
-                        }
-                    }
-                }
-                return encodingSuccessful;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                super.onPostExecute(result);
-
-                if (result) {
-                    callback.onSuccessfulEncoding(null);
-                } else {
-                    callback.onError();
-                }
-            }
-        };
-
-        encodingTask.execute();
-    }
-
-    public static Bitmap.CompressFormat getFormatByMimeType(String mimeType) {
-        Bitmap.CompressFormat format = null;
-        if (mimeType != null || !mimeType.isEmpty()) {
-            if (mimeType.equalsIgnoreCase(MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.JPEG.name())) {
-                format = Bitmap.CompressFormat.JPEG;
-            } else if (mimeType.equalsIgnoreCase(MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.PNG.name())) {
-                format = Bitmap.CompressFormat.PNG;
-            } else if (mimeType.equalsIgnoreCase(MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.WEBP.name())) {
-                format = Bitmap.CompressFormat.WEBP;
-            }
-        }
-
-        return format;
     }
 
     public static boolean copyExifData(String inPath, String outPath) {
@@ -262,11 +151,5 @@ public class ImageUtils {
         }
 
         return success;
-    }
-
-    public interface EncodingCompleteCallback {
-        public void onSuccessfulEncoding(ArrayList<File> files);
-
-        public void onError();
     }
 }
