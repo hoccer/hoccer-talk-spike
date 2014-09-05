@@ -47,8 +47,8 @@ public class GroupProfileFragment extends XoFragment
 
     private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
     private boolean mBackPressed = false;
-    public static final String ARG_CREATE_GROUP = "ARG_CREATE_GROUP";
     public static final String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
+    public static final String ARG_START_IN_ACTION_MODE = "ARG_START_IN_ACTION_MODE";
 
     public enum Mode {
         PROFILE,
@@ -102,22 +102,29 @@ public class GroupProfileFragment extends XoFragment
 
         Bundle arguments = getArguments();
         if (arguments != null) {
-            int clientContactId = arguments.getInt(ARG_CLIENT_CONTACT_ID);
-            try {
-                mGroup = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
-            } catch (SQLException e) {
-                LOG.error("SQL error while retrieving group contact ", e);
-            }
-            if (mGroup != null) {
-                if (!mGroup.isGroup()) {
-                    LOG.error("The given contact is not a group.");
+            if (arguments.containsKey(ARG_CLIENT_CONTACT_ID)) {
+                int clientContactId = arguments.getInt(ARG_CLIENT_CONTACT_ID);
+                try {
+                    mGroup = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                } catch (SQLException e) {
+                    LOG.error("SQL error while retrieving group contact ", e);
                 }
-
-                mMode = Mode.PROFILE;
-                refreshContact(mGroup);
+                if (mGroup != null) {
+                    if (!mGroup.isGroup()) {
+                        LOG.error("The given contact is not a group.");
+                    }
+                    mMode = Mode.PROFILE;
+                    refreshContact(mGroup);
+                }
+            } else {
+                LOG.error("Creating GroupProfileFragment without arguments is not supported.");
             }
-        } else {
-            LOG.error("Creating GroupProfileFragment without arguments is not supported.");
+
+            if (arguments.containsKey(ARG_START_IN_ACTION_MODE)) {
+                if (arguments.getBoolean(ARG_START_IN_ACTION_MODE)) {
+                    getActivity().startActionMode(this);
+                }
+            }
         }
 
         return view;
