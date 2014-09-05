@@ -193,6 +193,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.type = Type.AVATAR;
         this.downloadUrl = url;
         this.downloadFile = id + "-" + timestamp.getTime();
+        this.fileName = this.downloadFile;
         switchState(State.NEW, "new avatar");
     }
 
@@ -751,6 +752,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 break;
             }
         }
+
+        LOG.warn("äää created filename " + newFileName + " for image " + downloadFile);
+
         return newFileName + extension;
     }
 
