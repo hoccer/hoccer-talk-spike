@@ -195,22 +195,14 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     public void onAttachmentSelected(IContentObject contentObject) {
-        if (contentObject.getContentMediaType().equals(ContentMediaType.IMAGE) && getXoClient().isEncodingNecessary()) {
-            encodeImageAttachment(contentObject);
-        } else {
-            setAttachment(contentObject);
-            mSendButton.setEnabled(isComposed());
-        }
+        setAttachment(contentObject);
+        mSendButton.setEnabled(isComposed());
     }
 
     public void onAttachmentsSelected(ArrayList<IContentObject> contentObjects) {
         LOG.debug("onAttachmentsSelected(" + contentObjects.size() + ")");
-        if (getXoClient().isEncodingNecessary()) {
-            encodeAndSetImageAttachments(contentObjects);
-        } else {
-            setAttachments(contentObjects);
-            mSendButton.setEnabled(isComposed());
-        }
+        setAttachments(contentObjects);
+        mSendButton.setEnabled(isComposed());
     }
 
     private void showAttachmentSelectionError() {
@@ -376,16 +368,27 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private void processMessage() {
+        if (getXoClient().isEncodingNecessary()) {
+            compressAndSendImageAttachments(mAttachments);
+        } else {
+            if (handleTransferLimit()) {
+                return;
+            }
+            validateAndSendComposedMessage();
+        }
+    }
+
+    private boolean handleTransferLimit() {
         if (mAttachments != null && !mAttachments.isEmpty()) {
             if (uploadExceedsTransferLimit(mAttachments)) {
                 String alertTitle = getString(R.string.attachment_over_limit_title);
                 String fileSize = Formatter.formatShortFileSize(getXoActivity(), calculateAttachmentSize(mAttachments));
                 String alertMessage = getString(R.string.attachment_over_limit_upload_question, fileSize);
                 showAlertTransferLimitExceeded(alertTitle, alertMessage);
-                return;
+                return true;
             }
         }
-        validateAndSendComposedMessage();
+        return false;
     }
 
     private void sendComposedMessage(String messageText, List<TalkClientUpload> uploads) {
@@ -424,7 +427,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 null);
     }
 
-    private void encodeAndSetImageAttachments(ArrayList<IContentObject> contentObjects) {
+    private void compressAndSendImageAttachments(List<IContentObject> contentObjects) {
         AsyncTask asyncTask = new AsyncTask<Object, Void, List<IContentObject>>() {
 
             @Override
@@ -441,26 +444,28 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                         if (dataPath.startsWith(UriUtils.FILE_URI_PREFIX)) {
                             dataPath = dataPath.substring(UriUtils.FILE_URI_PREFIX.length());
                         }
+                        final File imageFile = new File(dataPath);
+                        final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
 
-                        final File inBitmap = new File(dataPath);
-                        final File outBitmap = new File(XoApplication.getCacheStorage(), inBitmap.getName());
-                        final Bitmap.CompressFormat format = getXoClient().getUploadLimit() != -1 ? Bitmap.CompressFormat.JPEG :
-                                Bitmap.CompressFormat.PNG;
+                        // TODO ask nico
+//                        final Bitmap.CompressFormat format = getXoClient().getUploadLimit() != -1 ? Bitmap.CompressFormat.JPEG :
+//                                Bitmap.CompressFormat.PNG;
 
-                        boolean success = ImageUtils.compressImageFile(inBitmap,
-                                outBitmap,
-                                getXoClient().getImageUploadMaxPixelCount(),
-                                getXoClient().getImageUploadEncodingQuality(),
-                                format);
+                        boolean success = false;
+                        Bitmap bitmap = ImageUtils.resizeImageWithinBounds(imageFile, getXoClient().getImageUploadMaxPixelCount());
+                        if (bitmap != null) {
+                            success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, getXoClient().getImageUploadEncodingQuality(), Bitmap.CompressFormat.JPEG);
+                        }
+
+                        ImageUtils.copyExifData(imageFile.getAbsolutePath(), compressedImageFile.getAbsolutePath());
 
                         if (success) {
-                            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), outBitmap.getPath());
-                            newContent.setFileName(outBitmap.getName()); //TODO inBitmap ?
+                            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), compressedImageFile.getPath());
+                            newContent.setFileName(compressedImageFile.getName()); //TODO imageFile ?
                             newContent.setContentMediaType(contentObject.getContentMediaType());
-                            newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + format.name().toLowerCase());
+                            newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.JPEG.name().toLowerCase());
                             newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
-                            newContent.setContentLength((int) outBitmap.length());
-
+                            newContent.setContentLength((int) compressedImageFile.length());
                             result.add(newContent);
                         } else {
                             LOG.error("Error encoding bitmap for upload.");
@@ -481,8 +486,11 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
             @Override
             protected void onPostExecute(List<IContentObject> result) {
-                setAttachments(result);
-                mSendButton.setEnabled(isComposed());
+                mAttachments = result;
+                if (handleTransferLimit()) {
+                    return;
+                }
+                validateAndSendComposedMessage();
             }
 
             @Override
@@ -492,13 +500,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             }
         };
         asyncTask.execute(contentObjects);
-    }
-
-    private void encodeImageAttachment(final IContentObject contentObject) {
-
-        encodeAndSetImageAttachments(new ArrayList<IContentObject>() {{
-            add(contentObject);
-        }});
     }
 
     @Override
