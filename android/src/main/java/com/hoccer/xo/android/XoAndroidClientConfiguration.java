@@ -17,8 +17,10 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     private final SharedPreferences mPreferences;
     private final Properties mProperties;
 
+
     public XoAndroidClientConfiguration(Context context) {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
         mProperties = new Properties();
 
         try {

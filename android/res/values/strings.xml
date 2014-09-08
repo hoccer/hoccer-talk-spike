@@ -94,6 +94,7 @@
     <string name="attachment_over_limit_confirm">Send</string>
     <string name="attachment_on_hold_upload_question">Upload %1$s?</string>
     <string name="attachment_on_hold_download_question">Download %1$s?</string>
+    <string name="attachment_encoding_error">Error while encoding file. Cannot send attachment.</string>
 
     <!-- Messaging fragment -->
     <string name="messaging_loading">Loading…</string>
@@ -314,8 +315,11 @@
     <string name="preference_keysize_title">RSA Key Size</string>
     <string name="category">Category</string>
 
-    <string name="pref_auto_downloads_mobile">Cellular Attachment Transfer</string>
-    <string name="pref_auto_download_wifi">WI-FI Attachment Transfer</string>
+    <string name="pref_category_image_encoding">Image Attachment Compression</string>
+    <string name="pref_image_size">Image size</string>
+    <string name="pref_image_quality">Image quality</string>
+    <string name="pref_category_transfer_mobile">Cellular Attachment Transfer</string>
+    <string name="pref_category_transfer_wifi">WI-FI Attachment Transfer</string>
     <string name="pref_upload_limit">Auto Upload limit</string>
     <string name="pref_download_limit">Auto Download limit</string>
 

@@ -1229,7 +1229,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void requestDelivery(final TalkClientMessage message) {
+    protected void requestDelivery(final TalkClientMessage message) {
         if (mState < STATE_ACTIVE) {
             LOG.info("requestSendAllPendingMessages() - cannot perform delivery in INACTIVE state.");
             return;

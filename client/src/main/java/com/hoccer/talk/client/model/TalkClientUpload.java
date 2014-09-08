@@ -375,7 +375,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private void doUploadingAction() {
-        String filename = this.dataFile;
+        String filename = getContentDataUrl();
         if (filename == null || filename.isEmpty()) {
             LOG.error("filename was empty");
             switchState(State.PAUSED);
@@ -673,6 +673,10 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             }
         }
         return null;
+    }
+
+    public void setContentDataUrl(String dataUrl) {
+        dataFile = dataUrl;
     }
 
     @Override

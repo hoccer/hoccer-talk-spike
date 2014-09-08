@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
@@ -108,11 +109,14 @@ public class ChatImageItem extends ChatMessageItem {
     }
 
     private void openImage(IContentObject contentObject) {
-        if (contentObject.getContentDataUrl() == null) {
+        if (contentObject.getContentDataUrl() == null && contentObject.getContentUrl() == null) {
             return;
         }
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.parse(contentObject.getContentDataUrl()), "image/*");
+        Uri dataUri = Uri.parse(contentObject.getContentUrl() != null && !contentObject.getContentUrl().isEmpty() ?
+                contentObject.getContentUrl() : contentObject.getContentDataUrl());
+        intent.setDataAndType(dataUri, "image/*");
         try {
             XoActivity activity = (XoActivity) mContext;
             activity.startExternalActivity(intent);

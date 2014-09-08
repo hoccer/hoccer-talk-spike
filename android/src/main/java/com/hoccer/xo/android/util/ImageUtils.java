@@ -3,6 +3,7 @@ package com.hoccer.xo.android.util;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.media.ExifInterface;
@@ -10,9 +11,14 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class ImageUtils {
+
+    public static final String MIME_TYPE_IMAGE_PREFIX = "image/";
 
     private static Logger LOG = Logger.getLogger(ImageUtils.class);
 
@@ -91,5 +97,58 @@ public class ImageUtils {
             result.y = maxHeight;
         }
         return result;
+    }
+
+    public static Bitmap resizeImageToMaxPixelCount(File input, int maxPixelCount) {
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(input.getAbsolutePath(), options);
+
+        long originalPixelCount = options.outWidth * options.outHeight;
+        if (maxPixelCount < originalPixelCount) {
+            double resizeRatio = Math.sqrt(originalPixelCount / maxPixelCount);
+            options.inSampleSize = (int) resizeRatio + 1;
+            options.outWidth = (int) (options.outWidth / resizeRatio);
+            options.outHeight = (int) (options.outHeight / resizeRatio);
+        }
+        options.inJustDecodeBounds = false;
+
+        Bitmap encodedBitmap;
+        try {
+            encodedBitmap = BitmapFactory.decodeFile(input.getAbsolutePath(), options);
+        } catch (OutOfMemoryError error) {
+            LOG.error(error);
+            return null;
+        }
+
+        return encodedBitmap;
+    }
+
+    public static boolean compressBitmapToFile(Bitmap srcBitmap, File destFile, int imageQuality, Bitmap.CompressFormat format) {
+        FileOutputStream os;
+        try {
+            os = new FileOutputStream(destFile);
+            return srcBitmap.compress(format, imageQuality, os);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean copyExifData(String inPath, String outPath) {
+        boolean success = false;
+        try {
+            ExifInterface exifIn = new ExifInterface(inPath);
+            ExifInterface exifOut = new ExifInterface(outPath);
+            if (exifIn != null && exifOut != null) {
+                exifOut.setAttribute(ExifInterface.TAG_ORIENTATION, exifIn.getAttribute(ExifInterface.TAG_ORIENTATION));
+                exifOut.saveAttributes();
+            }
+        } catch (IOException e) {
+            LOG.error("Error loading Exif data", e);
+        }
+
+        return success;
     }
 }

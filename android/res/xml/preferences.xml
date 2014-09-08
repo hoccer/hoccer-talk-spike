@@ -34,7 +34,26 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/pref_auto_downloads_mobile">
+            android:title="@string/pref_category_image_encoding" >
+
+        <ListPreference
+            android:key="preference_image_encoding_size"
+            android:title="@string/pref_image_size"
+            android:entries="@array/image_transfer_size_options"
+            android:entryValues="@array/image_transfer_size_options_values"
+            android:defaultValue="-1"/>
+
+        <ListPreference
+            android:key="preference_image_encoding_quality"
+            android:title="@string/pref_image_quality"
+            android:entries="@array/image_transfer_quality_options"
+            android:entryValues="@array/image_transfer_quality_options_values"
+            android:defaultValue="100"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_category_transfer_mobile">
 
         <ListPreference
                 android:key="preference_upload_limit_mobile"
@@ -53,7 +72,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/pref_auto_download_wifi">
+            android:title="@string/pref_category_transfer_wifi">
 
         <ListPreference
                 android:key="preference_upload_limit_wifi"

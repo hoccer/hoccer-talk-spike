@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -26,9 +28,12 @@ import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.ImageUtils;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +56,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private String mLastMessage = null;
     private ImageButton mAddAttachmentButton;
 
-    private ArrayList<IContentObject> mAttachments;
+    private List<IContentObject> mAttachments;
 
     private ContentSelection mAttachmentSelection = null;
     private Button mAddAttachmentsButton;
@@ -195,7 +200,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     public void onAttachmentsSelected(ArrayList<IContentObject> contentObjects) {
-        LOG.debug("onAttachmentSelected(" + contentObjects.size() + ")");
+        LOG.debug("onAttachmentsSelected(" + contentObjects.size() + ")");
         setAttachments(contentObjects);
         mSendButton.setEnabled(isComposed());
     }
@@ -211,7 +216,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         updateAttachmentButton();
     }
 
-    private void setAttachments(ArrayList<IContentObject> contentObjects) {
+    private void setAttachments(List<IContentObject> contentObjects) {
         mAddAttachmentsButton.setOnClickListener(new AttachmentOnClickListener());
         if (contentObjects != null) {
             mAttachments = contentObjects;
@@ -363,16 +368,27 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private void processMessage() {
+        if (getXoClient().isEncodingNecessary()) {
+            compressAndSendImageAttachments(mAttachments);
+        } else {
+            if (handleTransferLimit()) {
+                return;
+            }
+            validateAndSendComposedMessage();
+        }
+    }
+
+    private boolean handleTransferLimit() {
         if (mAttachments != null && !mAttachments.isEmpty()) {
             if (uploadExceedsTransferLimit(mAttachments)) {
                 String alertTitle = getString(R.string.attachment_over_limit_title);
                 String fileSize = Formatter.formatShortFileSize(getXoActivity(), calculateAttachmentSize(mAttachments));
                 String alertMessage = getString(R.string.attachment_over_limit_upload_question, fileSize);
                 showAlertTransferLimitExceeded(alertTitle, alertMessage);
-                return;
+                return true;
             }
         }
-        validateAndSendComposedMessage();
+        return false;
     }
 
     private void sendComposedMessage(String messageText, List<TalkClientUpload> uploads) {
@@ -411,10 +427,92 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 null);
     }
 
+    private void compressAndSendImageAttachments(List<IContentObject> contentObjects) {
+        AsyncTask asyncTask = new AsyncTask<Object, Void, List<IContentObject>>() {
+
+            @Override
+            protected List<IContentObject> doInBackground(Object... objects) {
+
+                List<IContentObject> contentObjects = (List<IContentObject>) objects[0];
+
+                List<IContentObject> result = new ArrayList<IContentObject>();
+                for (IContentObject contentObject : contentObjects) {
+
+                    if (contentObject.getContentMediaType().equals(ContentMediaType.IMAGE)) {
+
+                        String dataPath = contentObject.getContentDataUrl();
+                        if (dataPath.startsWith(UriUtils.FILE_URI_PREFIX)) {
+                            dataPath = dataPath.substring(UriUtils.FILE_URI_PREFIX.length());
+                        }
+                        final File imageFile = new File(dataPath);
+                        final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
+
+                        boolean success = false;
+                        Bitmap bitmap = ImageUtils.resizeImageToMaxPixelCount(imageFile, getXoClient().getImageUploadMaxPixelCount());
+                        if (bitmap != null) {
+                            int imageQuality = getActualCompressionValue(getXoClient().getImageUploadEncodingQuality());
+                            LOG.error(imageQuality);
+                            success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, imageQuality, Bitmap.CompressFormat.JPEG);
+                        }
+
+                        ImageUtils.copyExifData(imageFile.getAbsolutePath(), compressedImageFile.getAbsolutePath());
+
+                        if (success) {
+                            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), compressedImageFile.getPath());
+                            newContent.setFileName(imageFile.getName());
+                            newContent.setContentMediaType(contentObject.getContentMediaType());
+                            newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.JPEG.name().toLowerCase());
+                            newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
+                            newContent.setContentLength((int) compressedImageFile.length());
+                            result.add(newContent);
+                        } else {
+                            LOG.error("Error encoding bitmap for upload.");
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+                    } else {
+                        result.add(contentObject);
+                    }
+                }
+                return result;
+            }
+
+            private int getActualCompressionValue(int imageUploadEncodingQuality) {
+                int[] values = getResources().getIntArray(R.array.image_compression_values);
+                int index = imageUploadEncodingQuality / 10 - 1;
+                if (index > 0) {
+                    return values[index];
+                } else {
+                    return values[0];
+                }
+            }
+
+            @Override
+            protected void onPostExecute(List<IContentObject> result) {
+                mAttachments = result;
+                if (handleTransferLimit()) {
+                    return;
+                }
+                validateAndSendComposedMessage();
+            }
+
+            @Override
+            protected void onCancelled() {
+                LOG.error("Error encoding bitmap(s) for upload.");
+                Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
+            }
+        };
+        asyncTask.execute(contentObjects);
+    }
+
     @Override
     public boolean onLongClick(View v) {
         boolean longPressHandled = false;
-        if (mLastMessage != null && !mLastMessage.equals("")) {
+        if (mLastMessage != null && !mLastMessage.isEmpty()) {
             for (int i = 0; i < STRESS_TEST_MESSAGE_COUNT; i++) {
                 getXoClient().sendMessage(getXoClient().composeClientMessage(mContact, mLastMessage + " " + Integer.toString(i)).getMessageTag());
             }

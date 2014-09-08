@@ -78,19 +78,23 @@ public class SingleProfileFragment extends XoFragment
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_single_profile, container, false);
-        mAvatarImage = (ImageView) v.findViewById(R.id.profile_avatar_image);
-        mNameText = (TextView) v.findViewById(R.id.tv_profile_name);
-        mKeyContainer = (RelativeLayout) v.findViewById(R.id.inc_profile_key);
-        mKeyText = (TextView) v.findViewById(R.id.tv_profile_key);
-        mEditName = (EditText) v.findViewById(R.id.et_profile_name);
-        mNicknameEditButton = (ImageButton) v.findViewById(R.id.ib_profile_nickname_edit);
-        mNicknameTextView = (TextView) v.findViewById(R.id.tv_profile_nickname);
-        mNicknameEditText = (EditText) v.findViewById(R.id.et_profile_nickname);
-        mInviteButtonContainer = (LinearLayout) v.findViewById(R.id.inc_profile_request);
-        return v;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_single_profile, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mAvatarImage = (ImageView) view.findViewById(R.id.profile_avatar_image);
+        mNameText = (TextView) view.findViewById(R.id.tv_profile_name);
+        mKeyContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_key);
+        mKeyText = (TextView) view.findViewById(R.id.tv_profile_key);
+        mEditName = (EditText) view.findViewById(R.id.et_profile_name);
+        mNicknameEditButton = (ImageButton) view.findViewById(R.id.ib_profile_nickname_edit);
+        mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
+        mNicknameEditText = (EditText) view.findViewById(R.id.et_profile_nickname);
+        mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
     }
 
     private void showNicknameEdit() {

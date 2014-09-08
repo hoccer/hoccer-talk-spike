@@ -3,6 +3,7 @@ package com.hoccer.xo.android.view.chat;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
@@ -24,11 +25,14 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.android.view.chat.attachments.*;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -556,6 +560,43 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     @Override
     public void onAttachmentTransferComplete(IContentObject contentObject) {
+        if (contentObject instanceof TalkClientUpload) {
+            // check for previously cached files and replace them with the original
+            TalkClientUpload upload = (TalkClientUpload) contentObject;
+            if (upload.getContentDataUrl().contains(XoApplication.getCacheStorage().getPath())) {
+
+                String filePath = null;
+                String contentUri = upload.getContentUrl();
+                if (UriUtils.isContentUri(contentUri)) {
+                    try {
+                        filePath = UriUtils.getFilePathByContentUri(mContext, Uri.parse(contentUri));
+                    } catch (UriUtils.CursorNotFoundException e) {
+                        LOG.error("", e);
+                    }
+                } else if (contentUri.startsWith(UriUtils.FILE_URI_PREFIX)) {
+                    filePath = contentUri.substring(UriUtils.FILE_URI_PREFIX.length());
+                } else if (contentUri.startsWith("/")) {
+                    filePath = contentUri;
+                }
+
+                if (filePath != null) {
+                    File fileToDelete = new File(upload.getDataFile());
+
+                    File master = new File(filePath);
+                    if (master.exists()) {
+                        upload.setContentDataUrl(UriUtils.FILE_URI_PREFIX + filePath);
+                        try {
+                            XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
+                            boolean isDeleted = fileToDelete.delete();
+                            LOG.debug("Cached file is deleted " + isDeleted);
+                        } catch (SQLException e) {
+                            LOG.error("Error updating upload with new file path " + filePath);
+                        }
+                    }
+                }
+            }
+        }
+
         displayAttachment(contentObject);
     }
 
