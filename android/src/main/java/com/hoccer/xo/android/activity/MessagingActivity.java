@@ -193,6 +193,12 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
 
+        if(isFollowUp) {
+            bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, true);
+        } else {
+            bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, false);
+        }
+
         GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
         groupProfileFragment.setArguments(bundle);
 

@@ -73,6 +73,13 @@ public class ChatVideoItem extends ChatMessageItem {
             }
         });
 
+        mContentWrapper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openVideo(contentObject);
+            }
+        });
+
         mAttachmentView.setPadding(0, 0, 0, 0);
         mAttachmentView.setBackgroundDrawable(null);
 
@@ -105,12 +112,6 @@ public class ChatVideoItem extends ChatMessageItem {
         mRootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
         mRootView.getLayoutParams().width = width;
         mRootView.getLayoutParams().height = height;
-        mRootView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openVideo(contentObject);
-            }
-        });
 
         // load thumbnail with picasso
         mTargetView = (ImageView) mRootView.findViewById(R.id.iv_picture);

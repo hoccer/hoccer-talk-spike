@@ -196,6 +196,9 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         setHasOptionsMenu(true);
 
         getXoClient().registerContactListener(this);
+
+        // request focus
+        mGroupNameEdit.requestFocus();
     }
 
     @Override

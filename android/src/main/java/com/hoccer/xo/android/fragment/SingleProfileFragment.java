@@ -672,8 +672,6 @@ public class SingleProfileFragment extends XoFragment
         mNameText.setVisibility(View.INVISIBLE);
         if (isRegistered) {
             mEditName.setText(mNameText.getText());
-        } else {
-            mEditName.setText(getResources().getString(R.string.profile_self_initial_name));
         }
         mAvatarImage.setOnClickListener(this);
         return true;

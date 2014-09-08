@@ -6,21 +6,22 @@ import android.graphics.drawable.Drawable;
 import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.release.R;
 
+import java.util.HashMap;
+
 public abstract class ColorSchemeManager{
 
-    public static Drawable getRepaintedDrawable(Context activity, int bgId, boolean primaryColor) {
+    private static HashMap<Integer, Drawable> mRepaintedIncomingDrawable = new HashMap<Integer, Drawable>();
+    private static HashMap<Integer, Drawable> mRepaintedOutgoingDrawable = new HashMap<Integer, Drawable>();
 
+    public static Drawable getRepaintedDrawable(Context activity, int bgId, boolean primaryColor) {
         int custom_color = (primaryColor) ? activity.getResources().getColor(R.color.xo_app_main_color) : activity.getResources().getColor(R.color.xo_app_incoming_message_color);
 
         Drawable myBG = activity.getResources().getDrawable(bgId);
-
         myBG.setColorFilter(custom_color, PorterDuff.Mode.MULTIPLY);
-
         return myBG;
     }
 
     public static Drawable getRepaintedOutgoingMessageDrawable(Context activity, int bgId, String currentState){
-
         int custom_color = activity.getResources().getColor(R.color.xo_app_main_color);
 
         if(currentState == null) {
@@ -38,20 +39,34 @@ public abstract class ColorSchemeManager{
         }
 
         Drawable myBG = activity.getResources().getDrawable(bgId);
-
         myBG.setColorFilter(custom_color, PorterDuff.Mode.MULTIPLY);
-
         return myBG;
     }
 
     public static Drawable getRepaintedAttachmentDrawable(Context activity, int bgId, boolean isIncoming) {
+        Drawable result;
+        if(isIncoming) {
+            result = mRepaintedIncomingDrawable.get(bgId);
+            if(result == null) {
+                result = activity.getResources().getDrawable(bgId).mutate();
 
-        int custom_color = (isIncoming) ? activity.getResources().getColor(R.color.xo_app_attachment_incoming_color) : activity.getResources().getColor(R.color.xo_app_attachment_outgoing_color);
+                // set color filter
+                int custom_color = activity.getResources().getColor(R.color.xo_app_attachment_incoming_color);
+                result.setColorFilter(custom_color, PorterDuff.Mode.MULTIPLY);
+                mRepaintedIncomingDrawable.put(bgId, result);
+            }
+        } else {
+            result = mRepaintedOutgoingDrawable.get(bgId);
+            if(result == null) {
+                result = activity.getResources().getDrawable(bgId).mutate();
 
-        Drawable myBG = activity.getResources().getDrawable(bgId);
+                // set color filter
+                int custom_color = activity.getResources().getColor(R.color.xo_app_attachment_outgoing_color);
+                result.setColorFilter(custom_color, PorterDuff.Mode.MULTIPLY);
+                mRepaintedOutgoingDrawable.put(bgId, result);
+            }
+        }
 
-        myBG.setColorFilter(custom_color, PorterDuff.Mode.MULTIPLY);
-
-        return myBG;
+        return result;
     }
 }

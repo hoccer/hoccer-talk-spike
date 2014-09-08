@@ -53,6 +53,7 @@ public class NearbyArchiveFragment extends ListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        view.setBackgroundResource(R.color.xo_main_background);
         getListView().setStackFromBottom(true);
         getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

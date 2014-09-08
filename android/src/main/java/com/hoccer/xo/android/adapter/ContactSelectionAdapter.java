@@ -58,9 +58,13 @@ public class ContactSelectionAdapter extends BaseAdapter {
         }
 
         TalkClientContact contact = mContacts.get(position);
-
         viewHolder.contactAvatarView.setContact(contact);
-        viewHolder.checkedtNameTextView.setText(contact.getName());
+
+        if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
+            viewHolder.checkedtNameTextView.setText(R.string.nearby_text);
+        } else {
+            viewHolder.checkedtNameTextView.setText(contact.getName());
+        }
 
         return convertView;
     }
