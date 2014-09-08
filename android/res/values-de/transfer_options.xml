@@ -10,8 +10,7 @@
   </string-array>
 
   <string-array name="image_transfer_quality_options">
-    <item>0 (gering)</item>
-    <item>1</item>
+    <item>1 (gering)</item>
     <item>2</item>
     <item>3</item>
     <item>4</item>
@@ -20,6 +19,6 @@
     <item>7</item>
     <item>8</item>
     <item>9</item>
-    <item>10 (hoch)</item>
+    <item>10 (original)</item>
   </string-array>
 </resources>
