@@ -86,7 +86,7 @@ public class CaptureSelector implements IContentSelector {
                 new String[]{ContentMediaType.IMAGE}, new MediaScannerConnection.OnScanCompletedListener() {
                     @Override
                     public void onScanCompleted(String path, Uri uri) {
-                        LOG.error("ScanCompleted: " + path + ", " + uri);
+                        LOG.debug("ScanCompleted: " + path + ", " + uri);
                     }
                 }
         );
