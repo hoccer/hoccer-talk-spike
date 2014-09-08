@@ -38,7 +38,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     @Override
     protected int getMenuResource() {
-        return R.menu.fragment_messaging;
+        return -1;
     }
 
     @Override
