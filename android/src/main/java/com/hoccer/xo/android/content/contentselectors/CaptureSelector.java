@@ -109,7 +109,7 @@ public class CaptureSelector implements IContentSelector {
         LOG.info("Image aspectRatio: " + aspectRatio);
 
         // create content object
-        SelectedContent contentObject = new SelectedContent(imageFile.getPath(), "file://" + imageFile.getPath());
+        SelectedContent contentObject = new SelectedContent("file://" + imageFile.getPath(), "file://" + imageFile.getPath());
         contentObject.setFileName(imageFile.getName());
         contentObject.setContentMediaType(ContentMediaType.IMAGE);
         contentObject.setContentType(imageType);
