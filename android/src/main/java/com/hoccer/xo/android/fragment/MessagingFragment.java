@@ -180,14 +180,18 @@ public class MessagingFragment extends XoListFragment
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
+        inflater.inflate(R.menu.fragment_messaging, menu);
+
         // select client/group profile entry for appropriate icon
         if (mContact != null) {
             getActivity().getActionBar().setTitle(mContact.getNickname());
 
             MenuItem clientItem = menu.findItem(R.id.menu_profile_single);
             clientItem.setVisible(mContact.isClient());
+
             MenuItem groupItem = menu.findItem(R.id.menu_profile_group);
             groupItem.setVisible(mContact.isGroup());
+
             MenuItem musicItem = menu.findItem(R.id.menu_audio_attachment_list);
             musicItem.setVisible(true);
 
