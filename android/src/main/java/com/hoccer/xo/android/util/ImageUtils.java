@@ -118,7 +118,7 @@ public class ImageUtils {
         try {
             encodedBitmap = BitmapFactory.decodeFile(input.getAbsolutePath(), options);
         } catch (OutOfMemoryError error) {
-            LOG.error(error);
+            LOG.error(error.getMessage(), error);
             return null;
         }
 

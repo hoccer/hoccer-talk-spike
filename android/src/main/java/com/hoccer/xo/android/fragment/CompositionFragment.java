@@ -450,9 +450,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                         boolean success = false;
                         Bitmap bitmap = ImageUtils.resizeImageToMaxPixelCount(imageFile, getXoClient().getImageUploadMaxPixelCount());
                         if (bitmap != null) {
-                            int imageQuality = getActualCompressionValue(getXoClient().getImageUploadEncodingQuality());
-                            LOG.error(imageQuality);
-                            success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, imageQuality, Bitmap.CompressFormat.JPEG);
+                            LOG.error(getXoClient().getImageUploadEncodingQuality());
+                            success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, getXoClient().getImageUploadEncodingQuality(), Bitmap.CompressFormat.JPEG);
                         }
 
                         ImageUtils.copyExifData(imageFile.getAbsolutePath(), compressedImageFile.getAbsolutePath());
@@ -479,16 +478,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                     }
                 }
                 return result;
-            }
-
-            private int getActualCompressionValue(int imageUploadEncodingQuality) {
-                int[] values = getResources().getIntArray(R.array.image_compression_values);
-                int index = imageUploadEncodingQuality / 10 - 1;
-                if (index > 0) {
-                    return values[index];
-                } else {
-                    return values[0];
-                }
             }
 
             @Override

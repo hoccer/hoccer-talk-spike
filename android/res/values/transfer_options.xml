@@ -42,8 +42,7 @@
     </string-array>
 
     <string-array name="image_transfer_quality_options">
-      <item>0 (low)</item>
-      <item>1</item>
+      <item>1 (low)</item>
       <item>2</item>
       <item>3</item>
       <item>4</item>
@@ -52,16 +51,15 @@
       <item>7</item>
       <item>8</item>
       <item>9</item>
-      <item>10 (high)</item>
+      <item>10 (original)</item>
     </string-array>
 
     <string-array name="image_transfer_quality_options_values">
-      <item>0</item>
-      <item>10</item>
-      <item>20</item>
       <item>30</item>
-      <item>40</item>
-      <item>50</item>
+      <item>36</item>
+      <item>42</item>
+      <item>46</item>
+      <item>52</item>
       <item>60</item>
       <item>70</item>
       <item>80</item>
