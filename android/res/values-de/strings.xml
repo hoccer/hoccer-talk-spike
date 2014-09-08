@@ -149,9 +149,6 @@
     <string name="profile_group_disband_button">Gruppe auflösen</string>
     <string name="profile_group_delete_button">Gruppe löschen</string>
     <string name="profile_group_permanent_nearby">Neue Gruppe</string>
-    <string name="profile_group_empty_name_title">Gruppenname ungültig</string>
-    <string name="profile_group_empty_name_message">Please enter a group name</string>
-
 
     <!-- Messages -->
     <string name="message_text">Deine Nachricht</string>

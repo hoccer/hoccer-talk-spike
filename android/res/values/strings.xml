@@ -160,8 +160,6 @@
     <string name="profile_group_disband_button">Disband this Group</string>
     <string name="profile_group_delete_button">Delete this Group</string>
     <string name="profile_group_permanent_nearby">New Group</string>
-    <string name="profile_group_empty_name_title">Group name invalid</string>
-    <string name="profile_group_empty_name_message">Please enter a group name</string>
 
     <!-- Messages -->
     <string name="message_text">Your message text</string>
