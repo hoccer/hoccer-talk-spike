@@ -99,7 +99,7 @@ public class ImageUtils {
         return result;
     }
 
-    public static Bitmap resizeImageWithinBounds(File input, int maxPixelCount) {
+    public static Bitmap resizeImageToMaxPixelCount(File input, int maxPixelCount) {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -114,13 +114,12 @@ public class ImageUtils {
         }
         options.inJustDecodeBounds = false;
 
-        // TODO: too big images cause out of memory exceptions !!!!!!!!!!!!!!!!
-        Bitmap encodedBitmap = null;
+        Bitmap encodedBitmap;
         try {
             encodedBitmap = BitmapFactory.decodeFile(input.getAbsolutePath(), options);
         } catch (OutOfMemoryError error) {
             LOG.error(error);
-            return encodedBitmap;
+            return null;
         }
 
         return encodedBitmap;
