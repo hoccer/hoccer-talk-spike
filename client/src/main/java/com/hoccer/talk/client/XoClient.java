@@ -1879,6 +1879,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         @Override
+        public void settingsChanged(String setting, String value, String message) {
+            LOG.debug("server: settingsChanged()");
+        }
+
+
+        @Override
         public void pushNotRegistered() {
             LOG.debug("server: pushNotRegistered()");
             // XXX

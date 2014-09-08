@@ -716,4 +716,31 @@ public class UpdateAgent extends NotificationDeferrer {
         queueOrExecute(context, notificationGenerator);
     }
 
+    public void requestSettingUpdate(final String clientId, final String setting, final String value, final StaticSystemMessage.Message message) {
+        Runnable notificationGenerator = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final TalkRpcConnection conn = mServer.getClientConnection(clientId);
+                    if (conn == null || !conn.isConnected()) {
+                        return;
+                    }
+                    TalkClient talkClient = mDatabase.findClientById(clientId);
+                    if (talkClient == null) {
+                        return;
+                    }
+                    TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(talkClient.getClientId());
+                    String messageString = new StaticSystemMessage(talkClient, clientHostInfo, message).generateMessage();
+                    //String messageString = "setting '"+setting+"' should be updated to value '"+value+"'";
+                    LOG.info("requestSettingUpdate");
+                    conn.getClientRpc().settingsChanged(setting, value, messageString);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
+            }
+        };
+
+        queueOrExecute(context, notificationGenerator);
+    }
+
 }

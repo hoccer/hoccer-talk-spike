@@ -179,6 +179,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
         requireIsNotOutdated();
 
+        // keep disabled until issues with Apple are resolved - no call ist actually made right now, the following is just for testing purposes
+        if ("iPhone OS".equals(clientInfo.getSystemName()) && clientInfo.getClientBuildNumber() >= 14528 && false) {
+            mServer.getUpdateAgent().requestSettingUpdate(mConnection.getClientId(), "mpMediaAccess", "0", StaticSystemMessage.Message.UPDATE_SETTING_ENABLE_MP_MEDIA_ACCESS);
+            //mServer.getUpdateAgent().requestSettingUpdate(mConnection.getClientId(), "mpMediaAccess", "1", StaticSystemMessage.Message.UPDATE_SETTING_ENABLE_MP_MEDIA_ACCESS);
+        }
+
         return serverInfo;
     }
 

@@ -59,6 +59,9 @@ public interface ITalkRpcClient {
     @JsonRpcNotification
     void alertUser(String message);
 
+    @JsonRpcNotification
+    void settingsChanged(String setting, String value, String message);
+
     /**
      * Sent on login if the client has no push config
      * @talk.preconditions Client is logged in
