@@ -189,11 +189,11 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     }
 
     @Override
-    public void showGroupProfileFragment(int groupContactId, boolean isFollowUp) {
+    public void showGroupProfileFragment(int groupContactId, boolean startInActionMode, boolean addToBackStack) {
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
 
-        if(isFollowUp) {
+        if(startInActionMode) {
             bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, true);
         } else {
             bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, false);
@@ -205,7 +205,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
 
-        if (!isFollowUp) {
+        if (addToBackStack) {
             fragmentTransaction.addToBackStack(null);
         }
         fragmentTransaction.commit();
