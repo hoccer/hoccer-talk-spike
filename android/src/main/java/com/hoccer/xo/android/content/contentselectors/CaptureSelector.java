@@ -18,6 +18,7 @@ import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -109,7 +110,7 @@ public class CaptureSelector implements IContentSelector {
         LOG.info("Image aspectRatio: " + aspectRatio);
 
         // create content object
-        SelectedContent contentObject = new SelectedContent("file://" + imageFile.getPath(), "file://" + imageFile.getPath());
+        SelectedContent contentObject = new SelectedContent(UriUtils.FILE_URI_PREFIX + imageFile.getPath(), UriUtils.FILE_URI_PREFIX + imageFile.getPath());
         contentObject.setFileName(imageFile.getName());
         contentObject.setContentMediaType(ContentMediaType.IMAGE);
         contentObject.setContentType(imageType);

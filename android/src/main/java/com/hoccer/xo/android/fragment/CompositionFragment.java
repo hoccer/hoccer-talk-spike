@@ -369,7 +369,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
 
     private void processMessage() {
         if (getXoClient().isEncodingNecessary()) {
-            compressAndSendImageAttachments(mAttachments);
+            compressAndSendAttachments(mAttachments);
         } else {
             if (handleTransferLimit()) {
                 return;
@@ -427,7 +427,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 null);
     }
 
-    private void compressAndSendImageAttachments(List<IContentObject> contentObjects) {
+    private void compressAndSendAttachments(List<IContentObject> contentObjects) {
         AsyncTask asyncTask = new AsyncTask<Object, Void, List<IContentObject>>() {
 
             @Override
@@ -439,39 +439,9 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 for (IContentObject contentObject : contentObjects) {
 
                     if (contentObject.getContentMediaType().equals(ContentMediaType.IMAGE)) {
-
-                        String dataPath = contentObject.getContentDataUrl();
-                        if (dataPath.startsWith(UriUtils.FILE_URI_PREFIX)) {
-                            dataPath = dataPath.substring(UriUtils.FILE_URI_PREFIX.length());
-                        }
-                        final File imageFile = new File(dataPath);
-                        final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
-
-                        boolean success = false;
-                        Bitmap bitmap = ImageUtils.resizeImageToMaxPixelCount(imageFile, getXoClient().getImageUploadMaxPixelCount());
-                        if (bitmap != null) {
-                            LOG.error(getXoClient().getImageUploadEncodingQuality());
-                            success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, getXoClient().getImageUploadEncodingQuality(), Bitmap.CompressFormat.JPEG);
-                        }
-
-                        ImageUtils.copyExifData(imageFile.getAbsolutePath(), compressedImageFile.getAbsolutePath());
-
-                        if (success) {
-                            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), compressedImageFile.getPath());
-                            newContent.setFileName(imageFile.getName());
-                            newContent.setContentMediaType(contentObject.getContentMediaType());
-                            newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.JPEG.name().toLowerCase());
-                            newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
-                            newContent.setContentLength((int) compressedImageFile.length());
-                            result.add(newContent);
-                        } else {
-                            LOG.error("Error encoding bitmap for upload.");
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
-                                }
-                            });
+                        IContentObject compressedImageAttachment = compressImageAttachment(contentObject);
+                        if (compressedImageAttachment != null) {
+                            result.add(compressedImageAttachment);
                         }
                     } else {
                         result.add(contentObject);
@@ -496,6 +466,45 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             }
         };
         asyncTask.execute(contentObjects);
+    }
+
+    private IContentObject compressImageAttachment(IContentObject contentObject) {
+        IContentObject result = null;
+        String dataPath = contentObject.getContentDataUrl();
+        if (dataPath.startsWith(UriUtils.FILE_URI_PREFIX)) {
+            dataPath = dataPath.substring(UriUtils.FILE_URI_PREFIX.length());
+        }
+        final File imageFile = new File(dataPath);
+        final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
+
+        boolean success = false;
+        Bitmap bitmap = ImageUtils.resizeImageToMaxPixelCount(imageFile, getXoClient().getImageUploadMaxPixelCount());
+        if (bitmap != null) {
+            LOG.error(getXoClient().getImageUploadEncodingQuality());
+            success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, getXoClient().getImageUploadEncodingQuality(), Bitmap.CompressFormat.JPEG);
+        }
+
+        ImageUtils.copyExifData(imageFile.getAbsolutePath(), compressedImageFile.getAbsolutePath());
+
+        if (success) {
+            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), compressedImageFile.getPath());
+            newContent.setFileName(imageFile.getName());
+            newContent.setContentMediaType(contentObject.getContentMediaType());
+            newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.JPEG.name().toLowerCase());
+            newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
+            newContent.setContentLength((int) compressedImageFile.length());
+            result = newContent;
+        } else {
+            LOG.error("Error encoding bitmap for upload.");
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+        return result;
     }
 
     @Override
