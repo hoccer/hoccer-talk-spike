@@ -142,27 +142,27 @@ public class ImageUtils {
             ExifInterface exifIn = new ExifInterface(inPath);
             ExifInterface exifOut = new ExifInterface(outPath);
             if (exifIn != null && exifOut != null) {
-                exifOut.setAttribute(ExifInterface.TAG_APERTURE, exifIn.getAttribute(ExifInterface.TAG_APERTURE));
-                exifOut.setAttribute(ExifInterface.TAG_DATETIME, exifIn.getAttribute(ExifInterface.TAG_DATETIME));
-                exifOut.setAttribute(ExifInterface.TAG_EXPOSURE_TIME, exifIn.getAttribute(ExifInterface.TAG_EXPOSURE_TIME));
-                exifOut.setAttribute(ExifInterface.TAG_FLASH, exifIn.getAttribute(ExifInterface.TAG_FLASH));
-                exifOut.setAttribute(ExifInterface.TAG_FOCAL_LENGTH, exifIn.getAttribute(ExifInterface.TAG_FOCAL_LENGTH));
-                exifOut.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, exifIn.getAttribute(ExifInterface.TAG_GPS_ALTITUDE));
-                exifOut.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, exifIn.getAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF));
-                exifOut.setAttribute(ExifInterface.TAG_GPS_DATESTAMP, exifIn.getAttribute(ExifInterface.TAG_GPS_DATESTAMP));
-                exifOut.setAttribute(ExifInterface.TAG_GPS_LATITUDE, exifIn.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
-                exifOut.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, exifIn.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF));
-                exifOut.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, exifIn.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
-                exifOut.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, exifIn.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF));
-                exifOut.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, exifIn.getAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD));
-                exifOut.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exifIn.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP));
-                exifOut.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, exifIn.getAttribute(ExifInterface.TAG_IMAGE_LENGTH));
-                exifOut.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, exifIn.getAttribute(ExifInterface.TAG_IMAGE_WIDTH));
-                exifOut.setAttribute(ExifInterface.TAG_ISO, exifIn.getAttribute(ExifInterface.TAG_ISO));
-                exifOut.setAttribute(ExifInterface.TAG_MAKE, exifIn.getAttribute(ExifInterface.TAG_MAKE));
-                exifOut.setAttribute(ExifInterface.TAG_MODEL, exifIn.getAttribute(ExifInterface.TAG_MODEL));
-                exifOut.setAttribute(ExifInterface.TAG_ORIENTATION, exifIn.getAttribute(ExifInterface.TAG_ORIENTATION));
-                exifOut.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exifIn.getAttribute(ExifInterface.TAG_WHITE_BALANCE));
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_APERTURE);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_DATETIME);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_EXPOSURE_TIME);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_FLASH);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_FOCAL_LENGTH);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_ALTITUDE);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_ALTITUDE_REF);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_DATESTAMP);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LATITUDE);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LATITUDE_REF);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LONGITUDE);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_LONGITUDE_REF);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_PROCESSING_METHOD);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_GPS_TIMESTAMP);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_IMAGE_LENGTH);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_IMAGE_WIDTH);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_ISO);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_MAKE);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_MODEL);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_ORIENTATION);
+                copyExifAttribute(exifIn, exifOut, ExifInterface.TAG_WHITE_BALANCE);
                 exifOut.saveAttributes();
             }
         } catch (IOException e) {
@@ -170,5 +170,12 @@ public class ImageUtils {
         }
 
         return success;
+    }
+
+    private static void copyExifAttribute(ExifInterface in, ExifInterface out, String tag) {
+        String value = in.getAttribute(tag);
+        if (value != null && !value.isEmpty()) {
+            out.setAttribute(tag, value);
+        }
     }
 }
