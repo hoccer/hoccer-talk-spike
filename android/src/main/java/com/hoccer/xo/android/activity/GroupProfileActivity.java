@@ -48,7 +48,7 @@ public class GroupProfileActivity extends XoActionbarActivity implements IProfil
                 if (contactId == -1) {
                     LOG.error("invalid contact id");
                 } else {
-                    showGroupProfileFragment(contactId, false, true);
+                    showGroupProfileFragment(contactId, false, false);
                 }
             } else if (intent.hasExtra(EXTRA_MAKE_FROM_NEARBY)) {
                 String[] clientIds = intent.getStringArrayExtra(EXTRA_MAKE_FROM_NEARBY);
