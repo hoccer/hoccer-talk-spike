@@ -48,7 +48,7 @@ public class GroupProfileActivity extends XoActionbarActivity implements IProfil
                 if (contactId == -1) {
                     LOG.error("invalid contact id");
                 } else {
-                    showGroupProfileFragment(contactId, false);
+                    showGroupProfileFragment(contactId, false, false);
                 }
             } else if (intent.hasExtra(EXTRA_MAKE_FROM_NEARBY)) {
                 String[] clientIds = intent.getStringArrayExtra(EXTRA_MAKE_FROM_NEARBY);
@@ -88,11 +88,11 @@ public class GroupProfileActivity extends XoActionbarActivity implements IProfil
     }
 
     @Override
-    public void showGroupProfileFragment(int groupContactId, boolean isFollowUp) {
+    public void showGroupProfileFragment(int groupContactId, boolean startInActionMode, boolean addToBackStack) {
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
 
-        if(isFollowUp) {
+        if(startInActionMode) {
             bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, true);
         } else {
             bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, false);
@@ -104,7 +104,7 @@ public class GroupProfileActivity extends XoActionbarActivity implements IProfil
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_group_profile_fragment_container, groupProfileFragment);
 
-        if (!isFollowUp) {
+        if (addToBackStack) {
             fragmentTransaction.addToBackStack(null);
         }
         fragmentTransaction.commit();

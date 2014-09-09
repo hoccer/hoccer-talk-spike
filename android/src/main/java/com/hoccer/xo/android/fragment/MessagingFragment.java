@@ -214,7 +214,7 @@ public class MessagingFragment extends XoListFragment
                 break;
             case R.id.menu_profile_group:
                 if (mContact != null && profileFragmentManager != null) {
-                    profileFragmentManager.showGroupProfileFragment(mContact.getClientContactId(), false);
+                    profileFragmentManager.showGroupProfileFragment(mContact.getClientContactId(), false, true);
                 }
                 break;
             case R.id.menu_audio_attachment_list:

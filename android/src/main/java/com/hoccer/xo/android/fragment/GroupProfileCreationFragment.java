@@ -485,7 +485,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             public void run() {
                 try {
                     IProfileFragmentManager profileFragmentManager = (IProfileFragmentManager) getActivity();
-                    profileFragmentManager.showGroupProfileFragment(mGroup.getClientContactId(), true);
+                    profileFragmentManager.showGroupProfileFragment(mGroup.getClientContactId(), true, false);
                 } catch (ClassCastException e) {
                     LOG.error("Activity does not implement interface IProfileFragmentManager ", e);
                 }

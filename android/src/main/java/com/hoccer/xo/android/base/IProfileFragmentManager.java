@@ -14,9 +14,10 @@ public interface IProfileFragmentManager {
      * Displays the GroupProfileFragment with a given client contact id.
      *
      * @param groupContactId The contact id of the group contact to display
-     * @param isFollowUp     Set to true if the dialog is displayed after a GroupProfileCreationFragment.
+     * @param startInActionMode Set to true if the dialog should be shown with action mode enabled
+     * @param addToBackStack Set to true to add the fragment transition to the back stack
      */
-    void showGroupProfileFragment(int groupContactId, boolean isFollowUp);
+    void showGroupProfileFragment(int groupContactId, boolean startInActionMode, boolean addToBackStack);
 
     /**
      * Displays the GroupProfileCreationFragment with a given client contact id.
