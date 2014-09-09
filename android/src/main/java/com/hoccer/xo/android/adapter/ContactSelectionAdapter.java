@@ -63,7 +63,7 @@ public class ContactSelectionAdapter extends BaseAdapter {
         if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
             viewHolder.checkedtNameTextView.setText(R.string.nearby_text);
         } else {
-            viewHolder.checkedtNameTextView.setText(contact.getName());
+            viewHolder.checkedtNameTextView.setText(contact.getNickname());
         }
 
         return convertView;
