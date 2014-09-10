@@ -5,6 +5,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,7 +28,7 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     ActionBar mActionBar;
 
-    MessagingFragment mMessagingFragment;
+    Fragment mCurrentFragment;
 
     private IContentObject mClipboardAttachment;
 
@@ -122,9 +123,9 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
                 }
                 break;
             case R.id.menu_delete_message:
-                    getXoClient().deleteMessage(messageId);
+                getXoClient().deleteMessage(messageId);
                 break;
-            }
+        }
     }
 
     public void setActionBarText(TalkClientContact contact) {
@@ -139,71 +140,70 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     @Override
     public void clipBoardItemSelected(IContentObject contentObject) {
-        if (mMessagingFragment != null) {
-            mMessagingFragment.onAttachmentSelected(contentObject);
+        if (mCurrentFragment instanceof MessagingFragment) {
+            ((MessagingFragment) mCurrentFragment).onAttachmentSelected(contentObject);
         }
     }
 
     @Override
     protected void applicationWillEnterBackground() {
         super.applicationWillEnterBackground();
-        if (mMessagingFragment != null) {
-            mMessagingFragment.applicationWillEnterBackground();
+        if (mCurrentFragment instanceof MessagingFragment) {
+            ((MessagingFragment) mCurrentFragment).applicationWillEnterBackground();
         }
     }
 
     @Override
     public void showMessageFragment(int contactId) {
+        mCurrentFragment = new MessagingFragment();
+
         Bundle bundle = new Bundle();
         bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, contactId);
-
-        mMessagingFragment = new MessagingFragment();
-        mMessagingFragment.setArguments(bundle);
+        mCurrentFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mMessagingFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
         fragmentTransaction.commit();
     }
 
     @Override
     public void showNearbyArchiveFragment() {
-        NearbyArchiveFragment fragment = new NearbyArchiveFragment();
+        mCurrentFragment = new NearbyArchiveFragment();
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, fragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
         fragmentTransaction.commit();
     }
 
     @Override
     public void showSingleProfileFragment(int clientContactId) {
+        mCurrentFragment = new SingleProfileFragment();
+
         Bundle bundle = new Bundle();
         bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, clientContactId);
-
-        SingleProfileFragment singleProfileFragment = new SingleProfileFragment();
-        singleProfileFragment.setArguments(bundle);
+        mCurrentFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, singleProfileFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 
     @Override
     public void showGroupProfileFragment(int groupContactId, boolean startInActionMode, boolean addToBackStack) {
+        mCurrentFragment = new GroupProfileFragment();
+
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
-
-        if(startInActionMode) {
+        if (startInActionMode) {
             bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, true);
         } else {
             bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, false);
         }
-
-        GroupProfileFragment groupProfileFragment = new GroupProfileFragment();
-        groupProfileFragment.setArguments(bundle);
+        mCurrentFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
 
         if (addToBackStack) {
             fragmentTransaction.addToBackStack(null);
@@ -213,18 +213,17 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
 
     @Override
     public void showGroupProfileCreationFragment(int groupContactId, boolean cloneProfile) {
+        mCurrentFragment = new GroupProfileCreationFragment();
+
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileCreationFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
-
         if (cloneProfile) {
             bundle.putBoolean(GroupProfileCreationFragment.ARG_CLONE_CURRENT_GROUP, true);
         }
-
-        GroupProfileCreationFragment groupProfileCreationFragment = new GroupProfileCreationFragment();
-        groupProfileCreationFragment.setArguments(bundle);
+        mCurrentFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileCreationFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
