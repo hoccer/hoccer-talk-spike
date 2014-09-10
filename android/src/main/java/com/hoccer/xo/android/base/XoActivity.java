@@ -313,7 +313,7 @@ public abstract class XoActivity extends FragmentActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        LOG.debug("onActivityResult(" + requestCode + "," + resultCode);
+        LOG.debug("onActivityResult(" + requestCode + "," + resultCode + ")");
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (intent == null) {
