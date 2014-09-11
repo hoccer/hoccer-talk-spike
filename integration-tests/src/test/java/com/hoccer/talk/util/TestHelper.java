@@ -88,17 +88,17 @@ public class TestHelper {
 
     public static void inviteToGroup(XoClient invitingClient, XoClient invitedClient, String groupId) throws SQLException, InterruptedException {
         await("invitingClient knows group via groupId").untilCall(to(invitingClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
-
         invitingClient.inviteClientToGroup(groupId, invitedClient.getSelfContact().getClientId());
 
         await("invitedClient knows group via groupId").untilCall(to(invitedClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
-
         TalkClientContact groupContactOfInvitedClient = invitedClient.getDatabase().findContactByGroupId(groupId, false);
+
+        await("invitedClient has received group member update").untilCall(to(groupContactOfInvitedClient).getGroupMember(), notNullValue());
         assertTrue("invitedClient is invited to group", groupContactOfInvitedClient.getGroupMember().isInvited());
-        assertEquals("invited client membership is actually the invitedClient", groupContactOfInvitedClient.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
+        assertEquals("invitedClient membership is actually the invitedClient", groupContactOfInvitedClient.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
 
         // only when the invited client has received the shared group key, it is safe to proceed, e.g. to join the group
-        await("invited client has a group key").untilCall(to(groupContactOfInvitedClient.getGroupMember()).getSharedKeyId(), notNullValue());
+        await("invitedClient has a group key").untilCall(to(groupContactOfInvitedClient.getGroupMember()).getSharedKeyId(), notNullValue());
     }
 
     public static void joinGroup(final XoClient joiningClient, final String groupId) {
