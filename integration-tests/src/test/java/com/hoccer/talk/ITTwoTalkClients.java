@@ -34,59 +34,58 @@ public class ITTwoTalkClients extends IntegrationTest {
         firstServer.shutdown();
     }
 
-  @Test
-  public void clientPairTest() throws Exception {
-      // create two clients
-      final XoClient c1 = createTalkClient(firstServer);
-      c1.wake();
-      final XoClient c2 = createTalkClient(firstServer);
-      c2.wake();
+    @Test
+    public void clientPairTest() throws Exception {
+        // create two clients
+        final XoClient c1 = createTalkClient(firstServer);
+        c1.wake();
+        final XoClient c2 = createTalkClient(firstServer);
+        c2.wake();
 
-      waitOrTimeout(new Condition() {
-          @Override
-          public boolean isSatisfied() {
-              return XoClient.STATE_ACTIVE == c1.getState();
-          }
-      }, Timeout.timeout(seconds(2)));
-      waitOrTimeout(new Condition() {
-          @Override
-          public boolean isSatisfied() {
-              return XoClient.STATE_ACTIVE == c2.getState();
-          }
-      }, Timeout.timeout(seconds(2)));
+        waitOrTimeout(new Condition() {
+            @Override
+            public boolean isSatisfied() {
+                return XoClient.STATE_ACTIVE == c1.getState();
+            }
+        }, Timeout.timeout(seconds(2)));
+        waitOrTimeout(new Condition() {
+            @Override
+            public boolean isSatisfied() {
+                return XoClient.STATE_ACTIVE == c2.getState();
+            }
+        }, Timeout.timeout(seconds(2)));
 
-      String token = c1.generatePairingToken();
-      assertNotNull("Pairing token must not be null", token);
-      c2.performTokenPairing(token);
+        String token = c1.generatePairingToken();
+        assertNotNull("Pairing token must not be null", token);
+        c2.performTokenPairing(token);
 
-      final String c1Id = c1.getSelfContact().getClientId();
-      final String c2Id = c2.getSelfContact().getClientId();
+        final String c1Id = c1.getSelfContact().getClientId();
+        final String c2Id = c2.getSelfContact().getClientId();
 
-      // ensure c1 is paired with c2
-      waitOrTimeout(new Condition() {
-          @Override
-          public boolean isSatisfied()  {
-              try {
-                  return c1.getDatabase().findContactByClientId(c2Id, false) != null;
-              } catch (SQLException e) {
-                  return false;
-              }
-          }
-      }, Timeout.timeout(seconds(2)));
+        // ensure c1 is paired with c2
+        waitOrTimeout(new Condition() {
+            @Override
+            public boolean isSatisfied() {
+                try {
+                    return c1.getDatabase().findContactByClientId(c2Id, false) != null;
+                } catch (SQLException e) {
+                    return false;
+                }
+            }
+        }, Timeout.timeout(seconds(2)));
 
-      // ensure c2 is paired with c1
-      waitOrTimeout(new Condition() {
-          @Override
-          public boolean isSatisfied()  {
-              try {
-                  return c2.getDatabase().findContactByClientId(c1Id, false) != null;
-              } catch (SQLException e) {
-                  return false;
-              }
-          }
-      }, Timeout.timeout(seconds(2)));
+        // ensure c2 is paired with c1
+        waitOrTimeout(new Condition() {
+            @Override
+            public boolean isSatisfied() {
+                try {
+                    return c2.getDatabase().findContactByClientId(c1Id, false) != null;
+                } catch (SQLException e) {
+                    return false;
+                }
+            }
+        }, Timeout.timeout(seconds(2)));
 
-  }
+    }
 
 }
-
