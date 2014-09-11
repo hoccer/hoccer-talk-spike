@@ -80,9 +80,9 @@ public class TestHelper {
 
         client.createGroup(newGroup);
         await("client knows about created group").untilCall(to(client.getDatabase()).findContactByGroupTag(groupTag), notNullValue());
-        final String groupId = client.getDatabase().findContactByGroupTag(groupTag).getGroupId();
-        assertNotNull(groupId);
+        await("created group has a group id").untilCall(to(client.getDatabase().findContactByGroupTag(groupTag)).getGroupId(), notNullValue());
 
+        final String groupId = client.getDatabase().findContactByGroupTag(groupTag).getGroupId();
         return groupId;
     }
 
