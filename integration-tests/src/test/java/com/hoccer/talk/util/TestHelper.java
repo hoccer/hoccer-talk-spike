@@ -94,9 +94,6 @@ public class TestHelper {
         await("invitedClient knows group via groupId").untilCall(to(invitedClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
 
         TalkClientContact groupContact = invitedClient.getDatabase().findContactByGroupId(groupId, false);
-
-        await("invitedClient groupMember is available").untilCall(to(groupContact).getGroupMember(), notNullValue());
-
         assertTrue("invitedClient is invited to group", groupContact.getGroupMember().isInvited());
         assertEquals("invited client membership is actually the invitedClient", groupContact.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
 
