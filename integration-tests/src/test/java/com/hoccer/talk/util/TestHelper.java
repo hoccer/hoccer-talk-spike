@@ -93,13 +93,12 @@ public class TestHelper {
 
         await("invitedClient knows group via groupId").untilCall(to(invitedClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
 
-        TalkClientContact groupContact = invitedClient.getDatabase().findContactByGroupId(groupId, false);
-        assertTrue("invitedClient is invited to group", groupContact.getGroupMember().isInvited());
-        assertEquals("invited client membership is actually the invitedClient", groupContact.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
+        TalkClientContact groupContactOfInvitedClient = invitedClient.getDatabase().findContactByGroupId(groupId, false);
+        assertTrue("invitedClient is invited to group", groupContactOfInvitedClient.getGroupMember().isInvited());
+        assertEquals("invited client membership is actually the invitedClient", groupContactOfInvitedClient.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
 
-        // TODO: There are some currently unknown conditions missing that ensure that the invitation actually properly occured
-        // removing this sleep leads to some failures, esp. involving the group key generation by members (instead of admins)
-        Thread.sleep(2000);
+        // only when the invited client has received the shared group key, it is safe to proceed, e.g. to join the group
+        await("invited client has a group key").untilCall(to(groupContactOfInvitedClient.getGroupMember()).getSharedKeyId(), notNullValue());
     }
 
     public static void joinGroup(final XoClient joiningClient, final String groupId) {
