@@ -25,6 +25,7 @@
     <module>filecache</module>
     <module>tool</module>
     <module>android</module>
+    <module>android-test</module>
     <module>integration-tests</module>
   </modules>
 
