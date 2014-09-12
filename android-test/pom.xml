@@ -94,6 +94,56 @@
       <type>apklib</type>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.j256.ormlite</groupId>
+      <artifactId>ormlite-core</artifactId>
+      <version>${ormlite.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.j256.ormlite</groupId>
+      <artifactId>ormlite-android</artifactId>
+      <version>${ormlite.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.j256.ormlite</groupId>
+      <artifactId>ormlite-jdbc</artifactId>
+      <version>${ormlite.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>net.hockeyapp.android</groupId>
+      <artifactId>HockeySDK</artifactId>
+      <version>3.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.android.support</groupId>
+      <artifactId>support-v4</artifactId>
+      <version>${android.supportv4.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!--<dependency>-->
+      <!--<groupId>com.google.android.gms</groupId>-->
+      <!--<artifactId>google-play-services</artifactId>-->
+      <!--<version>${android.gms.version}</version>-->
+      <!--<type>apklib</type>-->
+    <!--</dependency>-->
+    <dependency>
+      <groupId>com.google.android.gms</groupId>
+      <artifactId>google-play-services</artifactId>
+      <version>${android.gms.version}</version>
+      <type>jar</type>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -132,6 +182,7 @@
             <skip>false</skip>
             <configs>
               <config>${project.basedir}/proguard.cfg</config>
+              <config>${project.basedir}/../android/environments/development/proguard.cfg</config>
               <config>${project.basedir}/../android/proguard.cfg</config>
               <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
             </configs>
