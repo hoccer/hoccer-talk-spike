@@ -279,7 +279,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
         public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.menu_delete_attachment:
-                    XoDialogs.showSingleChoiceDialog("RemoveAttachment",
+                    XoDialogs.showRadioSingleChoiceDialog("RemoveAttachment",
                             R.string.dialog_attachment_delete_title,
                             getResources().getStringArray(R.array.delete_options),
                             getActivity(),

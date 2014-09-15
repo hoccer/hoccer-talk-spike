@@ -260,7 +260,7 @@ public class XoDialogs {
         public void onClick(DialogInterface dialog, int id, int selectedItem);
     }
 
-    public static void showSingleChoiceDialog(final String tag, final int titleId, final String[] items, final Activity activity, final OnSingleSelectionFinishedListener listener) {
+    public static void showRadioSingleChoiceDialog(final String tag, final int titleId, final String[] items, final Activity activity, final OnSingleSelectionFinishedListener listener) {
         DialogFragment dialogFragment = new DialogFragment() {
             @Override
             public Dialog onCreateDialog(Bundle savedInstanceState) {
