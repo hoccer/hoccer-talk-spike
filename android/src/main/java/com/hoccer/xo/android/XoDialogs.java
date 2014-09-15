@@ -287,6 +287,40 @@ public class XoDialogs {
         dialogFragment.show(activity.getFragmentManager(), tag);
     }
 
+    public static void showSingleChoiceDialog(final String tag, final int titleId, final String[] items, final Activity activity, final OnSingleSelectionFinishedListener selectionListener) {
+        showSingleChoiceDialog(tag, titleId, items, activity, selectionListener, null);
+    }
+
+    public static void showSingleChoiceDialog(final String tag, final int titleId, final String[] items, final Activity activity, final OnSingleSelectionFinishedListener selectionListener, final DialogInterface.OnClickListener cancelListener) {
+        DialogFragment dialogFragment = new DialogFragment() {
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                LOG.debug("Creating dialog: " + tag);
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setTitle(titleId);
+
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        selectionListener.onClick(dialog, id, id);
+                    }
+                });
+
+                builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        if (cancelListener != null) {
+                            cancelListener.onClick(dialog, id);
+                        }
+                    }
+                });
+
+                return builder.create();
+            }
+        };
+        dialogFragment.show(activity.getFragmentManager(), tag);
+    }
+
     // extended the onClick listener providing the selected items
     public interface OnMultiSelectionFinishedListener {
         public void onClick(DialogInterface dialog, int id, boolean[] selectionStates);
