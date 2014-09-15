@@ -216,7 +216,7 @@
 
         <!-- Invitation activity -->
         <activity
-                android:name="com.hoccer.xo.android.activity.DeviceContactsSelectionActivity"
+                android:name="com.hoccer.xo.android.activity.DeviceContactsInvitationActivity"
                 android:label="@string/actionbar_default_title">
         </activity>
 

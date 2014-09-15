@@ -3,7 +3,7 @@ package com.hoccer.xo.android.activity;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.release.R;
 
-public class DeviceContactsSelectionActivity extends XoActionbarActivity {
+public class DeviceContactsInvitationActivity extends XoActionbarActivity {
 
     @Override
     protected int getLayoutResource() {

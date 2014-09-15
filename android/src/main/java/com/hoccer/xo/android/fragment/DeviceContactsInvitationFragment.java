@@ -19,9 +19,9 @@ import java.util.*;
 /**
  * Shows device contacts via a DeviceContactsAdapter and manages search queries.
  */
-public class DeviceContactsSelectionFragment extends SearchableListFragment {
+public class DeviceContactsInvitationFragment extends SearchableListFragment {
 
-    private final static Logger LOG = Logger.getLogger(DeviceContactsSelectionFragment.class);
+    private final static Logger LOG = Logger.getLogger(DeviceContactsInvitationFragment.class);
 
     public static final String EXTRA_IS_SMS_INVITATION = "com.hoccer.xo.android.extra.IS_SMS_INVITATION";
     public static final String EXTRA_TOKEN = "com.hoccer.xo.android.extra.TOKEN";

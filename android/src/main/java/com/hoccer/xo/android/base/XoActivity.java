@@ -14,9 +14,7 @@ import android.net.Uri;
 import android.os.*;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.provider.Telephony;
 import android.support.v4.app.FragmentActivity;
-import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -36,7 +34,7 @@ import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
-import com.hoccer.xo.android.fragment.DeviceContactsSelectionFragment;
+import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -746,16 +744,16 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     private void pairBySMS() {
-        Intent intent = new Intent(this, DeviceContactsSelectionActivity.class);
-        intent.putExtra(DeviceContactsSelectionFragment.EXTRA_IS_SMS_INVITATION, true);
-        intent.putExtra(DeviceContactsSelectionFragment.EXTRA_TOKEN, "cafebabe");
+        Intent intent = new Intent(this, DeviceContactsInvitationActivity.class);
+        intent.putExtra(DeviceContactsInvitationFragment.EXTRA_IS_SMS_INVITATION, true);
+        intent.putExtra(DeviceContactsInvitationFragment.EXTRA_TOKEN, "cafebabe");
         startActivity(intent);
     }
 
     private void pairByMail() {
-        Intent intent = new Intent(this, DeviceContactsSelectionActivity.class);
-        intent.putExtra(DeviceContactsSelectionFragment.EXTRA_IS_SMS_INVITATION, false);
-        intent.putExtra(DeviceContactsSelectionFragment.EXTRA_TOKEN, "cafebabe");
+        Intent intent = new Intent(this, DeviceContactsInvitationActivity.class);
+        intent.putExtra(DeviceContactsInvitationFragment.EXTRA_IS_SMS_INVITATION, false);
+        intent.putExtra(DeviceContactsInvitationFragment.EXTRA_TOKEN, "cafebabe");
         startActivity(intent);
     }
 
