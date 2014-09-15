@@ -432,7 +432,7 @@ public class SingleProfileFragment extends XoFragment
         mMode = Mode.CREATE_SELF;
         mKeyContainer.setVisibility(View.GONE);
         mContact = getXoClient().getSelfContact();
-        if (mContact.getPublicKey() == null) {
+        if (mContact.getSelf().isRegistrationConfirmed()) {
             isRegistered = false;
             getActivity().startActionMode(this);
         }
