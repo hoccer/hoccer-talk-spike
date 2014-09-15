@@ -111,6 +111,11 @@
     <string name="pairing_scanner">QR-Scanner</string>
     <string name="pairing_generator">QR-Code</string>
 
+    <string name="dialog_select_invite_method_title">Einladen per</string>
+    <string name="dialog_select_invite_method_sms_item">SMS</string>
+    <string name="dialog_select_invite_method_mail_item">E-Mail</string>
+    <string name="dialog_select_invite_method_code_item">Code</string>
+
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Mein Bild ändern</string>
     <string name="dialog_avatar_options_title">Avatar Optionen</string>

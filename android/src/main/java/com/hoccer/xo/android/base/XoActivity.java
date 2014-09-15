@@ -30,11 +30,13 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
+import com.hoccer.xo.android.fragment.DeviceContactsSelectionFragment;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -716,7 +718,45 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void showPairing() {
         LOG.debug("showPairing()");
-        startActivity(new Intent(this, PairingActivity.class));
+        XoDialogs.showSingleChoiceDialog(
+                "SelectPairingMethod",
+                R.string.dialog_select_invite_method_title,
+                new String[]{
+                        getResources().getString(R.string.dialog_select_invite_method_sms_item),
+                        getResources().getString(R.string.dialog_select_invite_method_mail_item),
+                        getResources().getString(R.string.dialog_select_invite_method_code_item)
+                },
+                this,
+                new XoDialogs.OnSingleSelectionFinishedListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id, int selectedItem) {
+                        switch (selectedItem) {
+                            case 0:
+                                pairBySMS();
+                                break;
+                            case 1:
+                                pairByMail();
+                                break;
+                            case 2:
+                                scanBarcode();
+                                break;
+                        }
+                    }
+                });
+    }
+
+    private void pairBySMS() {
+        Intent intent = new Intent(this, DeviceContactsSelectionActivity.class);
+        intent.putExtra(DeviceContactsSelectionFragment.EXTRA_IS_SMS_INVITATION, true);
+        intent.putExtra(DeviceContactsSelectionFragment.EXTRA_TOKEN, "cafebabe");
+        startActivity(intent);
+    }
+
+    private void pairByMail() {
+        Intent intent = new Intent(this, DeviceContactsSelectionActivity.class);
+        intent.putExtra(DeviceContactsSelectionFragment.EXTRA_IS_SMS_INVITATION, false);
+        intent.putExtra(DeviceContactsSelectionFragment.EXTRA_TOKEN, "cafebabe");
+        startActivity(intent);
     }
 
     public void showFullscreenPlayer() {
