@@ -60,17 +60,19 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_device_contacts_selection, container, false);
         Button inviteButton = (Button) view.findViewById(R.id.bt_continue);
+
         inviteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String[] selectedContacts = mAdapter.getSelectedData();
+
                 if (mIsSmsInvitation) {
                     composeInviteSms(selectedContacts);
-                    getActivity().finish();
                 } else {
                     composeInviteEmail(selectedContacts);
-                    getActivity().finish();
                 }
+
+                getActivity().finish();
             }
         });
 
