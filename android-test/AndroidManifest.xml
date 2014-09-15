@@ -21,17 +21,7 @@
   the package of com.hoccer.xo.release.tests.  To run the tests use the command:
   "adb shell am instrument -w com.hoccer.xo.release.tests.tests/android.test.InstrumentationTestRunner"
   -->
-
-  <!--
-        The instrumentation element tells Android to use instrumentation to run this package.
-        The target Android package 'com.example.android.notepad' is loaded along with the
-        test package 'com.example.android.notepad.tests'. Android then starts the class
-        'android.test.InstrumentationTestRunner', which loads the test case classes in the package.
-    -->
-  <instrumentation android:name="android.test.InstrumentationTestRunner"
-                   android:targetPackage="com.hoccer.xo.release"/>
-
-  <!--<instrumentation-->
-      <!--android:name="com.google.android.apps.common.testing.testrunner.InstrumentationTestRunner"-->
-      <!--android:targetPackage="com.hoccer.xo.release"/>-->
+  <instrumentation
+      android:name="com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+      android:targetPackage="com.hoccer.xo.release"/>
 </manifest>
