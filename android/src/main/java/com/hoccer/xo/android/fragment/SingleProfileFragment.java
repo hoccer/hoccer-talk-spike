@@ -61,8 +61,6 @@ public class SingleProfileFragment extends XoFragment
 
     private EditText mEditName;
 
-    private boolean isRegistered = true;
-
     private ImageButton mNicknameEditButton;
 
     private TextView mNicknameTextView;
@@ -432,10 +430,7 @@ public class SingleProfileFragment extends XoFragment
         mMode = Mode.CREATE_SELF;
         mKeyContainer.setVisibility(View.GONE);
         mContact = getXoClient().getSelfContact();
-        if (mContact.getSelf().isRegistrationConfirmed()) {
-            isRegistered = false;
-            getActivity().startActionMode(this);
-        }
+        getActivity().startActionMode(this);
         update();
         updateActionBar();
         finishActivityIfContactDeleted();
@@ -529,7 +524,7 @@ public class SingleProfileFragment extends XoFragment
 
     public String getFingerprint() {
         String keyId = "";
-        if (isRegistered) {
+        if (mMode != Mode.CREATE_SELF) {
             keyId = mContact.getPublicKey().getKeyId();
         } else {
             return "";
@@ -670,9 +665,7 @@ public class SingleProfileFragment extends XoFragment
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
         mEditName.setVisibility(View.VISIBLE);
         mNameText.setVisibility(View.INVISIBLE);
-        if (isRegistered) {
-            mEditName.setText(mNameText.getText());
-        }
+        mEditName.setText(mNameText.getText());
         mAvatarImage.setOnClickListener(this);
         return true;
     }
@@ -692,7 +685,7 @@ public class SingleProfileFragment extends XoFragment
         mNameText.setVisibility(View.VISIBLE);
         mAvatarImage.setOnClickListener(null);
 
-        if (!isRegistered) {
+        if (mMode == Mode.CREATE_SELF) {
             mContact.getSelf().setRegistrationName(newUserName);
             mContact.updateSelfConfirmed();
             getXoClient().register();
