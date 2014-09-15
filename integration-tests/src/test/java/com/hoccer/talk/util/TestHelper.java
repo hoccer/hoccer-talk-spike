@@ -62,11 +62,11 @@ public class TestHelper {
         final String client1Id = client1.getSelfContact().getClientId();
         final String client2Id = client2.getSelfContact().getClientId();
 
-        await("client 1 is paired with client 2").untilCall(to(client1.getDatabase()).findContactByClientId(client1Id, false), notNullValue());
-        await("client 1 has client 2's pubkey").untilCall(to(client1.getDatabase().findContactByClientId(client1Id, false)).getPublicKey(), notNullValue());
+        await("client 1 is paired with client 2").untilCall(to(client1.getDatabase()).findContactByClientId(client2Id, false), notNullValue());
+        await("client 1 has client 2's pubkey").untilCall(to(client1.getDatabase().findContactByClientId(client2Id, false)).getPublicKey(), notNullValue());
 
-        await("client 2 is paired with client 1").untilCall(to(client2.getDatabase()).findContactByClientId(client2Id, false), notNullValue());
-        await("client 2 has client 1's pubkey").untilCall(to(client2.getDatabase().findContactByClientId(client2Id, false)).getPublicKey(), notNullValue());
+        await("client 2 is paired with client 1").untilCall(to(client2.getDatabase()).findContactByClientId(client1Id, false), notNullValue());
+        await("client 2 has client 1's pubkey").untilCall(to(client2.getDatabase().findContactByClientId(client1Id, false)).getPublicKey(), notNullValue());
     }
 
     public static String createGroup(XoClient client) throws SQLException {
