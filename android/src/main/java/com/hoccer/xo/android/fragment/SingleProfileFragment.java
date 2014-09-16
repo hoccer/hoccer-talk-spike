@@ -93,6 +93,22 @@ public class SingleProfileFragment extends XoFragment
         mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
         mNicknameEditText = (EditText) view.findViewById(R.id.et_profile_nickname);
         mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
+
+        if (getArguments() != null) {
+            if (getArguments().getBoolean(ARG_CREATE_SELF)) {
+                createSelf();
+            } else {
+                int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
+                try {
+                    mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                    showProfile();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            LOG.error("Creating SingleProfileFragment without arguments is not supported.");
+        }
     }
 
     private void showNicknameEdit() {
@@ -210,26 +226,6 @@ public class SingleProfileFragment extends XoFragment
             });
         } else {
             declineButton.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (getArguments() != null) {
-            if (getArguments().getBoolean(ARG_CREATE_SELF)) {
-                createSelf();
-            } else {
-                int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-                try {
-                    mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
-                    showProfile();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            LOG.error("Creating SingleProfileFragment without arguments is not supported.");
         }
     }
 
