@@ -123,11 +123,6 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
     public void onStart() {
         super.onStart();
 
