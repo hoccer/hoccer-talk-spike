@@ -32,6 +32,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
 
     private boolean mIsSmsInvitation;
     private DeviceContactsAdapter mAdapter;
+    private RelativeLayout mProgressOverlay;
 
     final static Uri CONTENT_URI = ContactsContract.Data.CONTENT_URI;
 
@@ -62,13 +63,12 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_device_contacts_selection, container, false);
         final Button inviteButton = (Button) view.findViewById(R.id.bt_continue);
-        final RelativeLayout progressOverlay = (RelativeLayout) view.findViewById(R.id.rl_progress_overlay);
+        mProgressOverlay = (RelativeLayout) view.findViewById(R.id.rl_progress_overlay);
 
         inviteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                progressOverlay.setVisibility(View.VISIBLE);
-                enableOptionsMenu(false);
+                showProgressOverlay(true);
 
                 XoApplication.getExecutor().execute(new Runnable() {
                     @Override
@@ -82,8 +82,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    progressOverlay.setVisibility(View.GONE);
-                                    enableOptionsMenu(true);
+                                    showProgressOverlay(false);
 
                                     XoDialogs.showOkDialog(
                                             "MissingPairingToken",
@@ -101,6 +100,11 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
         });
 
         return view;
+    }
+
+    private void showProgressOverlay(boolean visible) {
+        mProgressOverlay.setVisibility(visible ? View.VISIBLE : View.GONE);
+        enableOptionsMenu(!visible);
     }
 
     private void enableOptionsMenu(boolean enabled) {
