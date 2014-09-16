@@ -68,11 +68,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
             @Override
             public void onClick(View view) {
                 progressOverlay.setVisibility(View.VISIBLE);
-
-                setMenuVisibility(false);
-                if (getActivity() instanceof XoActivity) {
-                    ((XoActivity)getActivity()).setOptionsMenuEnabled(false);
-                }
+                enableOptionsMenu(false);
 
                 XoApplication.getExecutor().execute(new Runnable() {
                     @Override
@@ -87,11 +83,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
                                 @Override
                                 public void run() {
                                     progressOverlay.setVisibility(View.GONE);
-
-                                    setMenuVisibility(true);
-                                    if (getActivity() instanceof XoActivity) {
-                                        ((XoActivity)getActivity()).setOptionsMenuEnabled(true);
-                                    }
+                                    enableOptionsMenu(true);
 
                                     XoDialogs.showOkDialog(
                                             "MissingPairingToken",
@@ -109,6 +101,13 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
         });
 
         return view;
+    }
+
+    private void enableOptionsMenu(boolean enabled) {
+        setMenuVisibility(enabled);
+        if (getActivity() instanceof XoActivity) {
+            ((XoActivity)getActivity()).setOptionsMenuEnabled(enabled);
+        }
     }
 
     @Override
