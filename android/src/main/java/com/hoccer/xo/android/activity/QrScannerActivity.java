@@ -84,7 +84,7 @@ public class QrScannerActivity extends Activity implements IXoPairingListener {
         scanner = new ImageScanner();
         scanner.setConfig(0, Config.X_DENSITY, 3);
         scanner.setConfig(0, Config.Y_DENSITY, 3);
-        if(hasAutoFocus) {
+        if (hasAutoFocus) {
             autoFocusHandler = new Handler();
         }
     }
@@ -109,7 +109,7 @@ public class QrScannerActivity extends Activity implements IXoPairingListener {
         }
     }
 
-    public static Camera getCameraInstance(){
+    public static Camera getCameraInstance() {
         Camera c = null;
         try {
             c = Camera.open();
@@ -149,7 +149,7 @@ public class QrScannerActivity extends Activity implements IXoPairingListener {
         });
     }
 
-        public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+    public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
         private SurfaceHolder mHolder;
         private Camera mCamera;
         private PreviewCallback previewCallback;
@@ -181,7 +181,7 @@ public class QrScannerActivity extends Activity implements IXoPairingListener {
                 return;
             }
             try {
-                if(hasAutoFocus) {
+                if (hasAutoFocus) {
                     mCamera.cancelAutoFocus();
                 }
                 mCamera.setPreviewCallback(null);
@@ -194,7 +194,7 @@ public class QrScannerActivity extends Activity implements IXoPairingListener {
                 mCamera.setPreviewDisplay(mHolder);
                 mCamera.setPreviewCallback(previewCallback);
                 mCamera.startPreview();
-                if(hasAutoFocus) {
+                if (hasAutoFocus) {
                     mCamera.autoFocus(autoFocusCallback);
                 }
             } catch (Exception e) {
