@@ -746,14 +746,12 @@ public abstract class XoActivity extends FragmentActivity {
     private void pairBySMS() {
         Intent intent = new Intent(this, DeviceContactsInvitationActivity.class);
         intent.putExtra(DeviceContactsInvitationFragment.EXTRA_IS_SMS_INVITATION, true);
-        intent.putExtra(DeviceContactsInvitationFragment.EXTRA_TOKEN, "cafebabe");
         startActivity(intent);
     }
 
     private void pairByMail() {
         Intent intent = new Intent(this, DeviceContactsInvitationActivity.class);
         intent.putExtra(DeviceContactsInvitationFragment.EXTRA_IS_SMS_INVITATION, false);
-        intent.putExtra(DeviceContactsInvitationFragment.EXTRA_TOKEN, "cafebabe");
         startActivity(intent);
     }
 

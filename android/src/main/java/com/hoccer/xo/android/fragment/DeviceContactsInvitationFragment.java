@@ -8,6 +8,7 @@ import android.view.*;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.DeviceContactsAdapter;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.DeviceContact;
@@ -24,7 +25,6 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     private final static Logger LOG = Logger.getLogger(DeviceContactsInvitationFragment.class);
 
     public static final String EXTRA_IS_SMS_INVITATION = "com.hoccer.xo.android.extra.IS_SMS_INVITATION";
-    public static final String EXTRA_TOKEN = "com.hoccer.xo.android.extra.TOKEN";
 
     private String mToken;
     private boolean mIsSmsInvitation;
@@ -53,7 +53,6 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mIsSmsInvitation = getActivity().getIntent().getBooleanExtra(EXTRA_IS_SMS_INVITATION, true);
-        mToken = getActivity().getIntent().getStringExtra(EXTRA_TOKEN);
     }
 
     @Override
@@ -64,19 +63,40 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
         inviteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String[] selectedContacts = mAdapter.getSelectedData();
-
-                if (mIsSmsInvitation) {
-                    composeInviteSms(selectedContacts);
+                if (mToken != null) {
+                    composeInvitation();
+                    getActivity().finish();
                 } else {
-                    composeInviteEmail(selectedContacts);
+                    XoDialogs.showOkDialog(
+                            "MissingPairingToken",
+                            R.string.dialog_missing_pairing_token_title,
+                            R.string.dialog_missing_pairing_token_message,
+                            getActivity(),
+                            null
+                    );
                 }
-
-                getActivity().finish();
             }
         });
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        XoApplication.getExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                mToken = XoApplication.getXoClient().generatePairingToken();
+            }
+        });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mToken = null;
     }
 
     @Override
@@ -141,6 +161,16 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     @Override
     protected void onSearchModeDisabled() {
         mAdapter.setQuery(null);
+    }
+
+    private void composeInvitation() {
+        String[] selectedContacts = mAdapter.getSelectedData();
+
+        if (mIsSmsInvitation) {
+            composeInviteSms(selectedContacts);
+        } else {
+            composeInviteEmail(selectedContacts);
+        }
     }
 
     private void composeInviteSms(String[] phoneNumbers) {

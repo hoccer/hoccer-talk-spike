@@ -116,6 +116,9 @@
     <string name="dialog_select_invite_method_mail_item">E-Mail</string>
     <string name="dialog_select_invite_method_code_item">Code</string>
 
+    <string name="dialog_missing_pairing_token_title">Einladung kann nicht erzeugt werden</string>
+    <string name="dialog_missing_pairing_token_message">Bitte versuche es später noch einmal.</string>
+
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Mein Bild ändern</string>
     <string name="dialog_avatar_options_title">Avatar Optionen</string>

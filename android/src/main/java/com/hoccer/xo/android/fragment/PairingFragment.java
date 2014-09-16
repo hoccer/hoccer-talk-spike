@@ -182,14 +182,12 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
             LOG.debug("onClick(smsSend)");
             Intent addressBook = new Intent(getActivity(), DeviceContactsInvitationActivity.class);
             addressBook.putExtra(DeviceContactsInvitationFragment.EXTRA_IS_SMS_INVITATION, true);
-            addressBook.putExtra(DeviceContactsInvitationFragment.EXTRA_TOKEN, mTokenText.getText().toString());
             getActivity().startActivity(addressBook);
         }
         if (v == mTokenSendEmail) {
             LOG.debug("onClick(smsSend)");
             Intent addressBook = new Intent(getActivity(), DeviceContactsInvitationActivity.class);
             addressBook.putExtra(DeviceContactsInvitationFragment.EXTRA_IS_SMS_INVITATION, false);
-            addressBook.putExtra(DeviceContactsInvitationFragment.EXTRA_TOKEN, mTokenText.getText().toString());
             getActivity().startActivity(addressBook);
         }
     }
