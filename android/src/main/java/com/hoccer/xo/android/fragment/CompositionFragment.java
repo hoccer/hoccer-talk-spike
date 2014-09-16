@@ -368,7 +368,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private void processMessage() {
-        if (getXoClient().isEncodingNecessary()) {
+        if (mAttachments != null && !mAttachments.isEmpty() && getXoClient().isEncodingNecessary()) {
             compressAndSendAttachments(mAttachments);
         } else {
             if (handleTransferLimit()) {
