@@ -527,12 +527,6 @@ public abstract class XoActivity extends FragmentActivity {
             case R.id.menu_new_group:
                 showNewGroup();
                 break;
-            case R.id.menu_scan_code:
-                scanBarcode();
-                break;
-            case R.id.menu_show_code:
-                showBarcode();
-                break;
             case R.id.menu_settings:
                 showPreferences();
                 break;
