@@ -33,6 +33,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     private boolean mIsSmsInvitation;
     private DeviceContactsAdapter mAdapter;
     private RelativeLayout mProgressOverlay;
+    private boolean mCancelled;
 
     final static Uri CONTENT_URI = ContactsContract.Data.CONTENT_URI;
 
@@ -69,30 +70,33 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
             @Override
             public void onClick(View view) {
                 showProgressOverlay(true);
+                mCancelled = false;
 
                 XoApplication.getExecutor().execute(new Runnable() {
                     @Override
                     public void run() {
                         String token = XoApplication.getXoClient().generatePairingToken();
 
-                        if (token != null) {
-                            composeInvitation(token);
-                            getActivity().finish();
-                        } else {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    showProgressOverlay(false);
+                        if (!mCancelled) {
+                            if (token != null) {
+                                composeInvitation(token);
+                                getActivity().finish();
+                            } else {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showProgressOverlay(false);
 
-                                    XoDialogs.showOkDialog(
-                                            "MissingPairingToken",
-                                            R.string.dialog_missing_pairing_token_title,
-                                            R.string.dialog_missing_pairing_token_message,
-                                            getActivity(),
-                                            null
-                                    );
-                                }
-                            });
+                                        XoDialogs.showOkDialog(
+                                                "MissingPairingToken",
+                                                R.string.dialog_missing_pairing_token_title,
+                                                R.string.dialog_missing_pairing_token_message,
+                                                getActivity(),
+                                                null
+                                        );
+                                    }
+                                });
+                            }
                         }
                     }
                 });
@@ -160,6 +164,18 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
 
         mAdapter = new DeviceContactsAdapter(contacts, getActivity());
         setListAdapter(mAdapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        showProgressOverlay(false);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mCancelled = true;
     }
 
     @Override
