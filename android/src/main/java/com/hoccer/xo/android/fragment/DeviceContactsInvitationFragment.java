@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,9 +8,12 @@ import android.provider.ContactsContract;
 import android.view.*;
 import android.widget.Button;
 import android.widget.ListAdapter;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.DeviceContactsAdapter;
+import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.DeviceContact;
 import com.hoccer.xo.release.R;
@@ -26,7 +30,6 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
 
     public static final String EXTRA_IS_SMS_INVITATION = "com.hoccer.xo.android.extra.IS_SMS_INVITATION";
 
-    private String mToken;
     private boolean mIsSmsInvitation;
     private DeviceContactsAdapter mAdapter;
 
@@ -58,45 +61,54 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_device_contacts_selection, container, false);
-        Button inviteButton = (Button) view.findViewById(R.id.bt_continue);
+        final Button inviteButton = (Button) view.findViewById(R.id.bt_continue);
+        final RelativeLayout progressOverlay = (RelativeLayout) view.findViewById(R.id.rl_progress_overlay);
 
         inviteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mToken != null) {
-                    composeInvitation();
-                    getActivity().finish();
-                } else {
-                    XoDialogs.showOkDialog(
-                            "MissingPairingToken",
-                            R.string.dialog_missing_pairing_token_title,
-                            R.string.dialog_missing_pairing_token_message,
-                            getActivity(),
-                            null
-                    );
+                progressOverlay.setVisibility(View.VISIBLE);
+
+                setMenuVisibility(false);
+                if (getActivity() instanceof XoActivity) {
+                    ((XoActivity)getActivity()).setOptionsMenuEnabled(false);
                 }
+
+                XoApplication.getExecutor().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        String token = XoApplication.getXoClient().generatePairingToken();
+
+                        if (token != null) {
+                            composeInvitation(token);
+                            getActivity().finish();
+                        } else {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progressOverlay.setVisibility(View.GONE);
+
+                                    setMenuVisibility(true);
+                                    if (getActivity() instanceof XoActivity) {
+                                        ((XoActivity)getActivity()).setOptionsMenuEnabled(true);
+                                    }
+
+                                    XoDialogs.showOkDialog(
+                                            "MissingPairingToken",
+                                            R.string.dialog_missing_pairing_token_title,
+                                            R.string.dialog_missing_pairing_token_message,
+                                            getActivity(),
+                                            null
+                                    );
+                                }
+                            });
+                        }
+                    }
+                });
             }
         });
 
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        XoApplication.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                mToken = XoApplication.getXoClient().generatePairingToken();
-            }
-        });
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mToken = null;
     }
 
     @Override
@@ -163,28 +175,28 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
         mAdapter.setQuery(null);
     }
 
-    private void composeInvitation() {
+    private void composeInvitation(String token) {
         String[] selectedContacts = mAdapter.getSelectedData();
 
         if (mIsSmsInvitation) {
-            composeInviteSms(selectedContacts);
+            composeInviteSms(selectedContacts, token);
         } else {
-            composeInviteEmail(selectedContacts);
+            composeInviteEmail(selectedContacts, token);
         }
     }
 
-    private void composeInviteSms(String[] phoneNumbers) {
+    private void composeInviteSms(String[] phoneNumbers, String token) {
         String urlScheme = XoApplication.getXoClient().getConfiguration().getUrlScheme();
         String selfName = XoApplication.getXoClient().getSelfContact().getName();
-        String message = String.format(getString(R.string.sms_invitation_text), urlScheme, mToken, selfName);
+        String message = String.format(getString(R.string.sms_invitation_text), urlScheme, token, selfName);
         ContactOperations.sendSMS(getActivity(), message, phoneNumbers);
     }
 
-    private void composeInviteEmail(String[] eMailAddresses) {
+    private void composeInviteEmail(String[] eMailAddresses, String token) {
         String urlScheme = XoApplication.getXoClient().getConfiguration().getUrlScheme();
         String selfName = XoApplication.getXoClient().getSelfContact().getName();
         String subject = getString(R.string.email_invitation_subject);
-        String message = String.format(getString(R.string.email_invitation_text), urlScheme, mToken, selfName);
+        String message = String.format(getString(R.string.email_invitation_text), urlScheme, token, selfName);
         ContactOperations.sendEMail(getActivity(), subject, message, eMailAddresses);
     }
 
