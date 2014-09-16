@@ -447,5 +447,4 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     public interface Filter {
         public boolean shouldShow(TalkClientContact contact);
     }
-
 }
