@@ -114,6 +114,7 @@ public abstract class XoActivity extends FragmentActivity {
     private ScreenReceiver mScreenListener;
     private XoAlertListener mAlertListener;
 
+    private boolean mOptionsMenuEnabled = true;
 
 
     public XoActivity() {
@@ -486,12 +487,24 @@ public abstract class XoActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         LOG.debug("onCreateOptionsMenu()");
-        getMenuInflater().inflate(R.menu.common, menu);
-        int activityMenu = getMenuResource();
-        if (activityMenu >= 0) {
-            getMenuInflater().inflate(activityMenu, menu);
+
+        if (mOptionsMenuEnabled) {
+            getMenuInflater().inflate(R.menu.common, menu);
+
+            int activityMenu = getMenuResource();
+            if (activityMenu >= 0) {
+                getMenuInflater().inflate(activityMenu, menu);
+            }
+
+            return true;
         }
-        return true;
+
+        return false;
+    }
+
+    public void setOptionsMenuEnabled(boolean optionsMenuEnabled) {
+        mOptionsMenuEnabled = optionsMenuEnabled;
+        invalidateOptionsMenu();
     }
 
     @Override
