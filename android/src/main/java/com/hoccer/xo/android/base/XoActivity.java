@@ -778,13 +778,13 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     public void scanBarcode() {
-        LOG.debug("showBarcode()");
+        LOG.debug("scanBarcode()");
         Intent qrScanner = new Intent(this, QrScannerActivity.class);
         startActivity(qrScanner);
     }
 
     public void showBarcode() {
-        LOG.debug("scanBarcode()");
+        LOG.debug("showBarcode()");
 
         XoApplication.getExecutor().execute(new Runnable() {
             @Override
