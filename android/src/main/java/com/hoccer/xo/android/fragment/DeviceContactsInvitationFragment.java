@@ -75,28 +75,32 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
                 XoApplication.getExecutor().execute(new Runnable() {
                     @Override
                     public void run() {
-                        String token = XoApplication.getXoClient().generatePairingToken();
+                        try {
+                            String token = XoApplication.getXoClient().generatePairingToken();
 
-                        if (!mCancelled) {
-                            if (token != null) {
-                                composeInvitation(token);
-                                getActivity().finish();
-                            } else {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        showProgressOverlay(false);
+                            if (!mCancelled) {
+                                if (token != null) {
+                                    composeInvitation(token);
+                                    getActivity().finish();
+                                } else {
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            showProgressOverlay(false);
 
-                                        XoDialogs.showOkDialog(
-                                                "MissingPairingToken",
-                                                R.string.dialog_missing_pairing_token_title,
-                                                R.string.dialog_missing_pairing_token_message,
-                                                getActivity(),
-                                                null
-                                        );
-                                    }
-                                });
+                                            XoDialogs.showOkDialog(
+                                                    "MissingPairingToken",
+                                                    R.string.dialog_missing_pairing_token_title,
+                                                    R.string.dialog_missing_pairing_token_message,
+                                                    getActivity(),
+                                                    null
+                                            );
+                                        }
+                                    });
+                                }
                             }
+                        } catch (Throwable t) {
+                            LOG.error("Error while inviting contacts", t);
                         }
                     }
                 });
