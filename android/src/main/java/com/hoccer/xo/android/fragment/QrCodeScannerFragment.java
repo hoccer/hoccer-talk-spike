@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -63,6 +64,7 @@ public class QrCodeScannerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         mQrCodeScanner.setConfig(0, Config.X_DENSITY, 3);
         mQrCodeScanner.setConfig(0, Config.Y_DENSITY, 3);
@@ -71,6 +73,25 @@ public class QrCodeScannerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_qr_code_scanner, null);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_qr_code_scanner, menu);
+
+        MenuItem generateQrCodeItem = menu.findItem(R.id.menu_generate_qr_code);
+
+        generateQrCodeItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.replace(R.id.fl_fragment_container, new QrCodeGeneratorFragment());
+                transaction.addToBackStack(null);
+                transaction.commit();
+                return true;
+            }
+        });
     }
 
     @Override
