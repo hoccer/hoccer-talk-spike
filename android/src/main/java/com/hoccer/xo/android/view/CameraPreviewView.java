@@ -20,6 +20,7 @@ public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Call
         mPreviewCallback = previewCallback;
         mAutoFocus = autoFocus;
 
+        setFocusableInTouchMode(true);
         getHolder().addCallback(this);
     }
 
