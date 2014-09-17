@@ -16,9 +16,7 @@ public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Call
         mPreviewCallback = previewCallback;
         mAutoFocus = autoFocus;
 
-        SurfaceHolder holder = getHolder();
-        holder.addCallback(this);
-        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        getHolder().addCallback(this);
     }
 
     @Override
