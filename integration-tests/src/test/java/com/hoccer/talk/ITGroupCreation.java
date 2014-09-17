@@ -40,19 +40,6 @@ public class ITGroupCreation extends IntegrationTest {
     @Test
     public void createGroupTest() throws Exception {
         XoClient client = clients.get("client1");
-
-        /* TODO: ideally this new group and presence creation stuff and eventually calling createGroup should be more graceful in the clients and disappear form this test entirely */
-        TalkClientContact newGroup = TalkClientContact.createGroupContact();
-        final String groupTag = newGroup.getGroupTag();
-
-        TalkGroup groupPresence = new TalkGroup();
-        groupPresence.setGroupTag(newGroup.getGroupTag());
-        newGroup.updateGroupPresence(groupPresence);
-
-        client.createGroup(newGroup);
-        await("client knows about created group").untilCall(to(client.getDatabase()).findContactByGroupTag(groupTag), notNullValue());
-        final String groupId = client.getDatabase().findContactByGroupTag(groupTag).getGroupId();
-        assertNotNull(groupId);
+        TestHelper.createGroup(client);
     }
-
 }

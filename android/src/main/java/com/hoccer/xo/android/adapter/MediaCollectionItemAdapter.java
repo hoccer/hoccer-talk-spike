@@ -17,7 +17,7 @@ import java.util.List;
 
 public class MediaCollectionItemAdapter extends BaseAdapter implements DragSortListView.DropListener, TalkClientMediaCollection.Listener {
 
-    protected Logger LOG = Logger.getLogger(AttachmentListAdapter.class);
+    protected Logger LOG = Logger.getLogger(MediaCollectionItemAdapter.class);
 
     private List<Integer> mSelectedItemIds = new ArrayList<Integer>();
 

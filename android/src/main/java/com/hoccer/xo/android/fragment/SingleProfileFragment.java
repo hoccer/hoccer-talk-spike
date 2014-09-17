@@ -61,8 +61,6 @@ public class SingleProfileFragment extends XoFragment
 
     private EditText mEditName;
 
-    private boolean isRegistered = true;
-
     private ImageButton mNicknameEditButton;
 
     private TextView mNicknameTextView;
@@ -95,6 +93,22 @@ public class SingleProfileFragment extends XoFragment
         mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
         mNicknameEditText = (EditText) view.findViewById(R.id.et_profile_nickname);
         mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
+
+        if (getArguments() != null) {
+            if (getArguments().getBoolean(ARG_CREATE_SELF)) {
+                createSelf();
+            } else {
+                int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
+                try {
+                    mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                    showProfile();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            LOG.error("Creating SingleProfileFragment without arguments is not supported.");
+        }
     }
 
     private void showNicknameEdit() {
@@ -212,26 +226,6 @@ public class SingleProfileFragment extends XoFragment
             });
         } else {
             declineButton.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (getArguments() != null) {
-            if (getArguments().getBoolean(ARG_CREATE_SELF)) {
-                createSelf();
-            } else {
-                int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-                try {
-                    mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
-                    showProfile();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            LOG.error("Creating SingleProfileFragment without arguments is not supported.");
         }
     }
 
@@ -432,10 +426,7 @@ public class SingleProfileFragment extends XoFragment
         mMode = Mode.CREATE_SELF;
         mKeyContainer.setVisibility(View.GONE);
         mContact = getXoClient().getSelfContact();
-        if (mContact.getPublicKey() == null) {
-            isRegistered = false;
-            getActivity().startActionMode(this);
-        }
+        getActivity().startActionMode(this);
         update();
         updateActionBar();
         finishActivityIfContactDeleted();
@@ -529,7 +520,7 @@ public class SingleProfileFragment extends XoFragment
 
     public String getFingerprint() {
         String keyId = "";
-        if (isRegistered) {
+        if (mMode != Mode.CREATE_SELF) {
             keyId = mContact.getPublicKey().getKeyId();
         } else {
             return "";
@@ -670,9 +661,7 @@ public class SingleProfileFragment extends XoFragment
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
         mEditName.setVisibility(View.VISIBLE);
         mNameText.setVisibility(View.INVISIBLE);
-        if (isRegistered) {
-            mEditName.setText(mNameText.getText());
-        }
+        mEditName.setText(mNameText.getText());
         mAvatarImage.setOnClickListener(this);
         return true;
     }
@@ -692,7 +681,7 @@ public class SingleProfileFragment extends XoFragment
         mNameText.setVisibility(View.VISIBLE);
         mAvatarImage.setOnClickListener(null);
 
-        if (!isRegistered) {
+        if (mMode == Mode.CREATE_SELF) {
             mContact.getSelf().setRegistrationName(newUserName);
             mContact.updateSelfConfirmed();
             getXoClient().register();

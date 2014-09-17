@@ -20,7 +20,7 @@ import java.util.List;
 
 public class NearbyGroupContactItem extends BaseContactItem implements SearchAdapter.Searchable{
 
-    private static final Logger LOG = Logger.getLogger(TalkClientContactItem.class);
+    private static final Logger LOG = Logger.getLogger(NearbyGroupContactItem.class);
 
     @Nullable
     private List<TalkClientMessage> mNearbyMessages;

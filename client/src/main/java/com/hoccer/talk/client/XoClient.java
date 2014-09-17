@@ -2185,7 +2185,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void ensureSelfKey(TalkClientContact contact) throws SQLException {
+    private synchronized void ensureSelfKey(TalkClientContact contact) throws SQLException {
         LOG.debug("ensureSelfKey()");
         TalkKey publicKey = contact.getPublicKey();
         TalkPrivateKey privateKey = contact.getPrivateKey();

@@ -24,22 +24,22 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
     private static final String DB_TYPE_BOOLEAN = "BOOLEAN";
     private static final String DB_TYPE_INTEGER = "INTEGER";
 
-    private static String DATABASE_NAME = "hoccer-talk.db";
-
     private static final int DATABASE_VERSION = 21;
 
-    private static AndroidTalkDatabase INSTANCE = null;
+    private static String mDatabaseName = "hoccer-talk.db";
+
+    private static AndroidTalkDatabase mInstance = null;
 
     public static AndroidTalkDatabase getInstance(Context applicationContext) {
-        if (INSTANCE == null) {
-            INSTANCE = new AndroidTalkDatabase(applicationContext);
+        if (mInstance == null) {
+            mInstance = new AndroidTalkDatabase(applicationContext);
         }
-        return INSTANCE;
+        return mInstance;
     }
 
     private AndroidTalkDatabase(Context context) {
         super(context, PreferenceManager.getDefaultSharedPreferences(context).getString("preference_database", "hoccer-talk.db"), null, DATABASE_VERSION);
-        DATABASE_NAME = PreferenceManager.getDefaultSharedPreferences(context).getString("preference_database", "hoccer-talk.db");
+        mDatabaseName = PreferenceManager.getDefaultSharedPreferences(context).getString("preference_database", "hoccer-talk.db");
     }
 
     @Override
