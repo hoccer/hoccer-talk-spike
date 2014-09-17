@@ -117,8 +117,6 @@
     <string name="dialog_pairing_failed_message">The code you have entered is invalid.</string>
     <string name="toast_pairing_successful">You have successfully paired.</string>
     <string name="toast_pairing_failed">Incorrect code, please try again.</string>
-    <string name="pairing_scanner">QR scanner</string>
-    <string name="pairing_generator">QR identifier</string>
 
     <string name="dialog_select_invite_method_title">Invite via</string>
     <string name="dialog_select_invite_method_sms_item">SMS</string>

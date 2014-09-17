@@ -261,16 +261,10 @@
                 android:label="@string/select_images_title">
         </activity>
 
-        <!-- Test Qr generator activity -->
+        <!-- QR code activity -->
         <activity
-                android:name="com.hoccer.xo.android.activity.QrCodeGeneratingActivity"
-                android:label="@string/pairing_generator">
-        </activity>
-
-        <!-- Test Qr scanner activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.QrScannerActivity"
-                android:label="@string/pairing_scanner"
+                android:name="com.hoccer.xo.android.activity.QrCodeActivity"
+                android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait">
         </activity>
 

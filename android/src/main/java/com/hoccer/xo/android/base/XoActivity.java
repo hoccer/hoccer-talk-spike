@@ -743,7 +743,7 @@ public abstract class XoActivity extends FragmentActivity {
                                 pairByMail();
                                 break;
                             case 2:
-                                scanBarcode();
+                                pairByCode();
                                 break;
                         }
                     }
@@ -762,6 +762,12 @@ public abstract class XoActivity extends FragmentActivity {
         startActivity(intent);
     }
 
+    public void pairByCode() {
+        LOG.debug("pairByCode()");
+        Intent intent = new Intent(this, QrCodeActivity.class);
+        startActivity(intent);
+    }
+
     public void showFullscreenPlayer() {
         LOG.debug("showFullscreenPlayer()");
         startActivity(new Intent(this, FullscreenPlayerActivity.class));
@@ -775,35 +781,6 @@ public abstract class XoActivity extends FragmentActivity {
     public void selectAvatar() {
         LOG.debug("selectAvatar()");
         mAvatarSelection = ContentRegistry.get(this).selectAvatar(this, REQUEST_SELECT_AVATAR);
-    }
-
-    public void scanBarcode() {
-        LOG.debug("scanBarcode()");
-        Intent qrScanner = new Intent(this, QrScannerActivity.class);
-        startActivity(qrScanner);
-    }
-
-    public void showBarcode() {
-        LOG.debug("showBarcode()");
-
-        XoApplication.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-
-                final String qrString = getXoClient().getConfiguration().getUrlScheme() + getXoClient().generatePairingToken();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        Intent qr = new Intent(XoActivity.this, QrCodeGeneratingActivity.class);
-                        qr.putExtra("QR", qrString);
-                        startActivity(qr);
-
-                    }
-                });
-
-            }
-        });
     }
 
     public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {

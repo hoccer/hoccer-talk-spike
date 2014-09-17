@@ -172,11 +172,11 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onClick(View v) {
         if (v == mQrShowButton) {
             LOG.debug("onClick(qrShow)");
-            getXoActivity().showBarcode();
+            // getXoActivity().showBarcode();
         }
         if (v == mQrScanButton) {
             LOG.debug("onClick(qrScan)");
-            getXoActivity().scanBarcode();
+            getXoActivity().pairByCode();
         }
         if (v == mTokenSendSms) {
             LOG.debug("onClick(smsSend)");

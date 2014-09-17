@@ -106,8 +106,6 @@
     <string name="dialog_pairing_failed_message">Der eingegebene Code ist ungültig.</string>
     <string name="toast_pairing_successful">Du hast dich erfolgreich befreundet.</string>
     <string name="toast_pairing_failed">Ungültiger Code. Bitte versuche es erneut.</string>
-    <string name="pairing_scanner">QR-Scanner</string>
-    <string name="pairing_generator">QR-Code</string>
 
     <string name="dialog_select_invite_method_title">Einladen per</string>
     <string name="dialog_select_invite_method_sms_item">SMS</string>
