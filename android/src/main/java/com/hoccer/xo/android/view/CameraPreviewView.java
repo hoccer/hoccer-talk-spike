@@ -8,13 +8,13 @@ import android.view.SurfaceView;
 public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Callback {
     private final Camera mCamera;
     private final Camera.PreviewCallback mPreviewCallback;
-    private final Camera.AutoFocusCallback mAutoFocusCallback;
+    private final boolean mAutoFocus;
 
-    public CameraPreviewView(Context context, Camera camera, Camera.PreviewCallback previewCallback, Camera.AutoFocusCallback autoFocusCallback) {
+    public CameraPreviewView(Context context, Camera camera, Camera.PreviewCallback previewCallback, boolean autoFocus) {
         super(context);
         mCamera = camera;
         mPreviewCallback = previewCallback;
-        mAutoFocusCallback = autoFocusCallback;
+        mAutoFocus = autoFocus;
 
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
@@ -38,7 +38,7 @@ public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Call
         }
 
         try {
-            if (mAutoFocusCallback != null) {
+            if (mAutoFocus) {
                 mCamera.cancelAutoFocus();
             }
 
@@ -54,8 +54,8 @@ public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Call
             mCamera.setPreviewCallback(mPreviewCallback);
             mCamera.startPreview();
 
-            if (mAutoFocusCallback != null) {
-                mCamera.autoFocus(mAutoFocusCallback);
+            if (mAutoFocus) {
+                mCamera.autoFocus(null);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Fragment;
+import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.*;
@@ -82,7 +83,8 @@ public class QrCodeScannerFragment extends Fragment {
         super.onResume();
         mCamera = openCamera();
 
-        CameraPreviewView cameraPreview = new CameraPreviewView(getActivity(), mCamera, mPreviewCallback, null);
+        boolean autoFocus = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS);
+        CameraPreviewView cameraPreview = new CameraPreviewView(getActivity(), mCamera, mPreviewCallback, autoFocus);
         mCameraPreviewLayout.addView(cameraPreview);
     }
 
