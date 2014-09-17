@@ -23,12 +23,8 @@
   -->
 
   <!-- Espresso requires GoogleInstrumentationTestRunner -->
-  <!--<instrumentation-->
-      <!--android:name="com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"-->
-      <!--android:targetPackage="com.hoccer.xo.release"/>-->
-
   <instrumentation
-      android:name="android.test.InstrumentationTestRunner"
+      android:name="com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
       android:targetPackage="com.hoccer.xo.release"/>
 
 </manifest>
