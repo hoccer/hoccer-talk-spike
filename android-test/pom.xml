@@ -22,84 +22,6 @@
   <dependencies>
 
     <dependency>
-      <groupId>com.google.android</groupId>
-      <artifactId>espresso</artifactId>
-      <version>1.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.squareup.dagger</groupId>
-      <artifactId>dagger</artifactId>
-      <version>1.1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.squareup.dagger</groupId>
-      <artifactId>dagger-compiler</artifactId>
-      <version>1.1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>14.0.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-core</artifactId>
-      <version>1.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-integration</artifactId>
-      <version>1.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-library</artifactId>
-      <version>1.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.squareup</groupId>
-      <artifactId>javawriter</artifactId>
-      <version>2.1.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-      <version>1.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>1.3.9</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.android.apps.common.testing</groupId>
-      <artifactId>testrunner</artifactId>
-      <version>1.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.android.apps.common.testing</groupId>
-      <artifactId>testrunner-runtime</artifactId>
-      <version>1.1</version>
-    </dependency>
-
-    <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>
       <version>${android.platform.version}</version>
@@ -113,6 +35,7 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- apk that it will run the tests against -->
     <dependency>
       <groupId>hoccer</groupId>
       <artifactId>hoccer-talk-android</artifactId>
@@ -120,6 +43,7 @@
       <version>2.3.0-SNAPSHOT</version>
     </dependency>
 
+    <!-- enable the compiler to find your java classes from the main project-->
     <dependency>
       <groupId>hoccer</groupId>
       <artifactId>hoccer-talk-android</artifactId>
@@ -128,15 +52,88 @@
       <version>2.3.0-SNAPSHOT</version>
     </dependency>
 
-    <!-- exclude "normal" non-android log4j -->
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>${log4j.version}</version>
-      <scope>provided</scope>
-    </dependency>
+    <!--&lt;!&ndash; espresso &ndash;&gt;-->
+    <!--<dependency>-->
+      <!--<groupId>com.google.android</groupId>-->
+      <!--<artifactId>espresso</artifactId>-->
+      <!--<version>1.1</version>-->
+    <!--</dependency>-->
 
-    <!-- exclude dependencies that are already included in the android apk -->
+    <!--&lt;!&ndash; espresso dependencies &ndash;&gt;-->
+    <!--<dependency>-->
+      <!--<groupId>com.google.android.apps.common.testing</groupId>-->
+      <!--<artifactId>testrunner</artifactId>-->
+      <!--<version>1.1</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>com.google.android.apps.common.testing</groupId>-->
+      <!--<artifactId>testrunner-runtime</artifactId>-->
+      <!--<version>1.1</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>com.squareup.dagger</groupId>-->
+      <!--<artifactId>dagger</artifactId>-->
+      <!--<version>1.1.0</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>com.squareup.dagger</groupId>-->
+      <!--<artifactId>dagger-compiler</artifactId>-->
+      <!--<version>1.1.0</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>com.google.guava</groupId>-->
+      <!--<artifactId>guava</artifactId>-->
+      <!--<version>18.0</version>-->
+      <!--<scope>provided</scope>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>org.hamcrest</groupId>-->
+      <!--<artifactId>hamcrest-core</artifactId>-->
+      <!--<version>1.1</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>org.hamcrest</groupId>-->
+      <!--<artifactId>hamcrest-integration</artifactId>-->
+      <!--<version>1.1</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>org.hamcrest</groupId>-->
+      <!--<artifactId>hamcrest-library</artifactId>-->
+      <!--<version>1.1</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>com.squareup</groupId>-->
+      <!--<artifactId>javawriter</artifactId>-->
+      <!--<version>2.1.1</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>javax.annotation</groupId>-->
+      <!--<artifactId>javax.annotation-api</artifactId>-->
+      <!--<version>1.2</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>javax.inject</groupId>-->
+      <!--<artifactId>javax.inject</artifactId>-->
+      <!--<version>1</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>com.google.code.findbugs</groupId>-->
+      <!--<artifactId>jsr305</artifactId>-->
+      <!--<version>1.3.9</version>-->
+    <!--</dependency>-->
+
+    <!-- exclude (provide) dependencies that are already included in the android apk to prevent duplication error -->
     <dependency>
       <groupId>hoccer</groupId>
       <artifactId>hoccer-talk-client</artifactId>
@@ -155,13 +152,6 @@
       <groupId>ufwa-common</groupId>
       <artifactId>log4j-android</artifactId>
       <version>${log4j-android.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.squareup.picasso</groupId>
-      <artifactId>picasso</artifactId>
-      <version>2.3.3</version>
       <scope>provided</scope>
     </dependency>
 
@@ -202,23 +192,72 @@
     </dependency>
 
     <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>${log4j.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.android.gms</groupId>
+      <artifactId>google-play-services</artifactId>
+      <version>${android.gms.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.android.maps</groupId>
+      <artifactId>maps</artifactId>
+      <version>${android.gmaps.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.googlecode.ez-vcard</groupId>
+      <artifactId>ez-vcard</artifactId>
+      <version>${ez-vcard.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.nostra13.universalimageloader</groupId>
+      <artifactId>universal-image-loader</artifactId>
+      <version>${universal.image.loader.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup.picasso</groupId>
+      <artifactId>picasso</artifactId>
+      <version>2.3.3</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>${commons-codec.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>com.android.support</groupId>
       <artifactId>support-v4</artifactId>
       <version>${android.supportv4.version}</version>
       <scope>provided</scope>
     </dependency>
 
-    <!--<dependency>-->
-      <!--<groupId>com.google.android.gms</groupId>-->
-      <!--<artifactId>google-play-services</artifactId>-->
-      <!--<version>${android.gms.version}</version>-->
-      <!--<type>apklib</type>-->
-    <!--</dependency>-->
     <dependency>
-      <groupId>com.google.android.gms</groupId>
-      <artifactId>google-play-services</artifactId>
-      <version>${android.gms.version}</version>
-      <type>jar</type>
+      <groupId>com.google.zxing</groupId>
+      <artifactId>core</artifactId>
+      <version>3.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>inter.nal.barcodescanner</groupId>
+      <artifactId>zbar</artifactId>
+      <version>1.0</version>
       <scope>provided</scope>
     </dependency>
 

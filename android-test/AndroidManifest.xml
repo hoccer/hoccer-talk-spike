@@ -21,7 +21,14 @@
   the package of com.hoccer.xo.release.tests.  To run the tests use the command:
   "adb shell am instrument -w com.hoccer.xo.release.tests.tests/android.test.InstrumentationTestRunner"
   -->
+
+  <!-- Espresso requires GoogleInstrumentationTestRunner -->
+  <!--<instrumentation-->
+      <!--android:name="com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"-->
+      <!--android:targetPackage="com.hoccer.xo.release"/>-->
+
   <instrumentation
-      android:name="com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+      android:name="android.test.InstrumentationTestRunner"
       android:targetPackage="com.hoccer.xo.release"/>
+
 </manifest>

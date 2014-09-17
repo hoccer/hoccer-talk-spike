@@ -93,6 +93,14 @@
       <version>1.4.179</version>
       <scope>test</scope>
     </dependency>
+
+    <!--&lt;!&ndash;Guava&ndash;&gt;-->
+    <!--<dependency>-->
+      <!--<groupId>com.google.guava</groupId>-->
+      <!--<artifactId>guava</artifactId>-->
+      <!--<version>18.0</version>-->
+    <!--</dependency>-->
+
   </dependencies>
 
   <build>
