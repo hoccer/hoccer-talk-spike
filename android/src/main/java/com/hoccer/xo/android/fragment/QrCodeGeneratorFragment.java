@@ -93,19 +93,19 @@ public class QrCodeGeneratorFragment extends Fragment {
         }
     }
 
-    private static Bitmap createQrCode(String contents, int img_width, int img_height) {
+    private static Bitmap createQrCode(String contents, int preferredWidth, int preferredHeight) {
         if (contents == null) {
             return null;
         }
 
-        Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
-        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
         MultiFormatWriter writer = new MultiFormatWriter();
-
         BitMatrix bitMatrix;
 
+        Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
+        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+
         try {
-            bitMatrix = writer.encode(contents, BarcodeFormat.QR_CODE, img_width, img_height, hints);
+            bitMatrix = writer.encode(contents, BarcodeFormat.QR_CODE, preferredWidth, preferredHeight, hints);
         } catch (IllegalArgumentException e) {
             return null;
         } catch (WriterException e) {
