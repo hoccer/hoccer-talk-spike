@@ -6,8 +6,9 @@
               android:orientation="vertical"
               android:background="@color/xo_main_background">
 
-    <FrameLayout
-            android:id="@+id/fl_camera_preview"
+    <LinearLayout
+            android:id="@+id/ll_camera_preview"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"/>

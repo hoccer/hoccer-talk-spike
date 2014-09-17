@@ -5,7 +5,7 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.*;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.CameraPreviewView;
@@ -20,7 +20,7 @@ public class QrCodeScannerFragment extends Fragment {
     private static final Logger LOG = Logger.getLogger(QrCodeScannerFragment.class);
 
     private Camera mCamera;
-    private FrameLayout mCameraPreviewLayout;
+    private LinearLayout mCameraPreviewLayout;
 
     private final ImageScanner mQrCodeScanner = new ImageScanner();
     private final HashSet<String> mScannedCodes = new HashSet<String>();
@@ -75,7 +75,7 @@ public class QrCodeScannerFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        mCameraPreviewLayout = (FrameLayout)view.findViewById(R.id.fl_camera_preview);
+        mCameraPreviewLayout = (LinearLayout)view.findViewById(R.id.ll_camera_preview);
     }
 
     @Override
