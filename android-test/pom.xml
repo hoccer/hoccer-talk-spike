@@ -182,6 +182,10 @@
 
   </dependencies>
 
+  <properties>
+    <android.enableIntegrationTest>false</android.enableIntegrationTest>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
