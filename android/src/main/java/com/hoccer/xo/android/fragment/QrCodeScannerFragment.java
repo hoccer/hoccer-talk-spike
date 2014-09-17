@@ -81,21 +81,19 @@ public class QrCodeScannerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mCamera = openCamera();
+        openCamera();
 
-        boolean autoFocus = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS);
-        CameraPreviewView cameraPreview = new CameraPreviewView(getActivity(), mCamera, mPreviewCallback, autoFocus);
+        boolean useAutoFocus = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS);
+        CameraPreviewView cameraPreview = new CameraPreviewView(getActivity(), mCamera, mPreviewCallback, useAutoFocus);
         mCameraPreviewLayout.addView(cameraPreview);
     }
 
-    private Camera openCamera() {
+    private void openCamera() {
         try {
-            return Camera.open();
+            mCamera = Camera.open();
         } catch (Exception e) {
             LOG.error("Error opening camera", e);
         }
-
-        return null;
     }
 
     @Override
@@ -103,12 +101,12 @@ public class QrCodeScannerFragment extends Fragment {
         super.onPause();
         mCameraPreviewLayout.removeAllViews();
 
-        closeCamera(mCamera);
-        mCamera = null;
+        closeCamera();
     }
 
-    private void closeCamera(Camera camera) {
-        camera.setPreviewCallback(null);
-        camera.release();
+    private void closeCamera() {
+        mCamera.setPreviewCallback(null);
+        mCamera.release();
+        mCamera = null;
     }
 }
