@@ -7,9 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.*;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -26,6 +24,7 @@ public class QrCodeGeneratorFragment extends Fragment {
     private ImageView mQrCodeView;
     private TextView mPairingTokenView;
     private ProgressBar mProgressBar;
+    private LinearLayout mErrorLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -33,13 +32,22 @@ public class QrCodeGeneratorFragment extends Fragment {
         mQrCodeView = (ImageView)view.findViewById(R.id.iv_qr_code);
         mPairingTokenView = (TextView)view.findViewById(R.id.tv_pairing_token);
         mProgressBar = (ProgressBar)view.findViewById(R.id.pb_generating_pairing_token);
+        mErrorLayout = (LinearLayout)view.findViewById(R.id.ll_error);
+
+        Button retryButton = (Button)view.findViewById(R.id.btn_retry);
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                generateToken();
+            }
+        });
 
         generateToken();
         return view;
     }
 
     private void generateToken() {
-        updateViews(null);
+        resetViews();
 
         XoApplication.getExecutor().execute(new Runnable() {
             @Override
@@ -58,10 +66,18 @@ public class QrCodeGeneratorFragment extends Fragment {
         });
     }
 
+    private void resetViews() {
+        mPairingTokenView.setText("");
+        mQrCodeView.setVisibility(View.INVISIBLE);
+        mErrorLayout.setVisibility(View.INVISIBLE);
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
+
     private void updateViews(String pairingToken) {
+        mProgressBar.setVisibility(View.INVISIBLE);
+
         if (pairingToken != null) {
             mPairingTokenView.setText(pairingToken);
-            mProgressBar.setVisibility(View.INVISIBLE);
 
             String invitationUrl = XoApplication.getXoClient().getConfiguration().getUrlScheme() + pairingToken;
             Bitmap qrCode = createQrCode(invitationUrl, 400, 400);
@@ -69,11 +85,11 @@ public class QrCodeGeneratorFragment extends Fragment {
             if (qrCode != null) {
                 mQrCodeView.setVisibility(View.VISIBLE);
                 mQrCodeView.setImageBitmap(qrCode);
+            } else {
+                mErrorLayout.setVisibility(View.VISIBLE);
             }
         } else {
-            mPairingTokenView.setText("");
-            mProgressBar.setVisibility(View.VISIBLE);
-            mQrCodeView.setVisibility(View.INVISIBLE);
+            mErrorLayout.setVisibility(View.VISIBLE);
         }
     }
 

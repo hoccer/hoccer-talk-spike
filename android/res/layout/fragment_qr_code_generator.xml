@@ -25,6 +25,28 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"/>
 
+        <LinearLayout
+                android:id="@+id/ll_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_centerInParent="true"
+                android:visibility="invisible">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@android:style/TextAppearance.DeviceDefault.Medium"
+                    android:text="@string/pairing_token_generation_failed"/>
+
+            <Button
+                    android:id="@+id/btn_retry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pairing_token_generation_retry"/>
+        </LinearLayout>
+
     </RelativeLayout>
 
     <TextView
