@@ -24,8 +24,6 @@ public class SingleProfileActivity extends XoActionbarActivity {
 
     /* use this extra to show the given contact */
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
-
-    Mode mMode;
     public static final String SINGLE_PROFILE_FRAGMENT = "SINGLE_PROFILE_FRAGMENT";
 
     ActionBar mActionBar;
@@ -69,16 +67,6 @@ public class SingleProfileActivity extends XoActionbarActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    @Override
-    protected void onResume() {
-        LOG.debug("onResume()");
-        super.onResume();
-
-        if (mMode == Mode.CREATE_SELF) {
-            getActionBar().setDisplayHomeAsUpEnabled(false);
-        }
-    }
-
     private void showSingleProfileFragment(int contactId) {
         Bundle bundle = new Bundle();
         bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, contactId);
@@ -102,11 +90,4 @@ public class SingleProfileActivity extends XoActionbarActivity {
         ft.replace(R.id.fl_single_profile_fragment_container, mSingleProfileFragment, SINGLE_PROFILE_FRAGMENT);
         ft.commit();
     }
-
-    public enum Mode {
-        PROFILE,
-        CREATE_SELF,
-        CONFIRM_SELF
-    }
-
 }
