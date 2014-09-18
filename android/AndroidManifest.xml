@@ -265,7 +265,8 @@
         <activity
                 android:name="com.hoccer.xo.android.activity.QrCodeActivity"
                 android:label="@string/actionbar_default_title"
-                android:screenOrientation="portrait">
+                android:screenOrientation="portrait"
+                android:windowSoftInputMode="adjustResize">
         </activity>
 
         <!-- Connection and delivery service -->
