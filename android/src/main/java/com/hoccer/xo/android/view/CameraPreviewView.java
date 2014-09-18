@@ -51,21 +51,6 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         }
     }
 
-    public void switchCamera(Camera camera) {
-        setCamera(camera);
-        try {
-            camera.setPreviewDisplay(mHolder);
-        } catch (IOException exception) {
-            LOG.error("IOException caused by setPreviewDisplay()", exception);
-        }
-
-        Camera.Parameters parameters = camera.getParameters();
-        parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
-        requestLayout();
-
-        camera.setParameters(parameters);
-    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // We purposely disregard child measurements because act as a
