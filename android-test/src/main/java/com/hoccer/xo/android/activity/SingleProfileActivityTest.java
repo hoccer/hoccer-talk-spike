@@ -80,4 +80,16 @@ public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<
         assertEquals(expectedName, XoApplication.getXoClient().getSelfContact().getSelf().getRegistrationName());
         assertTrue(activity.isFinishing());
     }
+
+    @UiThreadTest
+    public void testOnDestroyActionModeWithoutName() {
+        final String expectedName = getActivity().getString(com.hoccer.xo.release.R.string.profile_self_initial_name);
+
+        int closeButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
+        final View closeButton = getActivity().findViewById(closeButtonId);
+        closeButton.performClick();
+
+        assertEquals(expectedName, XoApplication.getXoClient().getSelfContact().getSelf().getRegistrationName());
+        assertTrue(activity.isFinishing());
+    }
 }
