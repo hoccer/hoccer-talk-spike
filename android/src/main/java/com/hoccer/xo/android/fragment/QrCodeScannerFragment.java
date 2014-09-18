@@ -24,7 +24,6 @@ public class QrCodeScannerFragment extends PagerFragment {
     private Camera mCamera;
     private CameraPreviewView mCameraPreviewView;
     private EditText mPairingTokenEditText;
-    private boolean mIsPreviewEnabled;
 
     private final ImageScanner mQrCodeScanner = new ImageScanner();
     private final HashSet<String> mScannedCodes = new HashSet<String>();
@@ -117,7 +116,7 @@ public class QrCodeScannerFragment extends PagerFragment {
     }
 
     private void startPreview() {
-        if (mIsPreviewEnabled && mCameraPreviewView != null) {
+        if (mCameraPreviewView != null) {
             mCameraPreviewView.startPreview();
         }
     }
@@ -148,7 +147,10 @@ public class QrCodeScannerFragment extends PagerFragment {
     }
 
     private void enableAndStartPreview() {
-        mIsPreviewEnabled = true;
+        if (mCameraPreviewView != null) {
+            mCameraPreviewView.setEnabled(true);
+        }
+
         startPreview();
     }
 
@@ -163,7 +165,10 @@ public class QrCodeScannerFragment extends PagerFragment {
 
     private void stopAndDisablePreview() {
         stopPreview();
-        mIsPreviewEnabled = false;
+
+        if (mCameraPreviewView != null) {
+            mCameraPreviewView.setEnabled(false);
+        }
     }
 
     @Override
