@@ -54,6 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             style="@android:style/TextAppearance.DeviceDefault.Large"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:textIsSelectable="true"/>
 
 </LinearLayout>
