@@ -47,6 +47,8 @@ public class SingleProfileFragment extends XoFragment
 
     private Mode mMode;
 
+    private ActionMode mActionMode;
+
     private TextView mNameText;
 
     private RelativeLayout mKeyContainer;
@@ -426,7 +428,9 @@ public class SingleProfileFragment extends XoFragment
         mMode = Mode.CREATE_SELF;
         mKeyContainer.setVisibility(View.GONE);
         mContact = getXoClient().getSelfContact();
-        getActivity().startActionMode(this);
+        if (mActionMode == null) {
+            mActionMode = getActivity().startActionMode(this);
+        }
         update();
         updateActionBar();
         finishActivityIfContactDeleted();
@@ -673,6 +677,9 @@ public class SingleProfileFragment extends XoFragment
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {
+
+        mActionMode = null;
+
         String nameString = mEditName.getText().toString();
         String newUserName = nameString.isEmpty() ? getResources().getString(R.string.profile_self_initial_name) : nameString;
 
