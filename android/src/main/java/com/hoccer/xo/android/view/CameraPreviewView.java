@@ -12,13 +12,13 @@ public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Call
 
     private final Camera mCamera;
     private final Camera.PreviewCallback mPreviewCallback;
-    private final boolean mAutoFocus;
+    private final boolean mUseAutoFocus;
 
-    public CameraPreviewView(Context context, Camera camera, Camera.PreviewCallback previewCallback, boolean autoFocus) {
+    public CameraPreviewView(Context context, Camera camera, Camera.PreviewCallback previewCallback, boolean useAutoFocus) {
         super(context);
         mCamera = camera;
         mPreviewCallback = previewCallback;
-        mAutoFocus = autoFocus;
+        mUseAutoFocus = useAutoFocus;
 
         setFocusableInTouchMode(true);
         getHolder().addCallback(this);
@@ -43,7 +43,7 @@ public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Call
         }
 
         try {
-            if (mAutoFocus) {
+            if (mUseAutoFocus) {
                 mCamera.cancelAutoFocus();
             }
 
@@ -59,7 +59,7 @@ public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Call
             mCamera.setPreviewCallback(mPreviewCallback);
             mCamera.startPreview();
 
-            if (mAutoFocus) {
+            if (mUseAutoFocus) {
                 mCamera.autoFocus(null);
             }
         } catch (Exception e) {
