@@ -112,8 +112,6 @@
     <string name="dialog_select_invite_method_mail_item">E-Mail</string>
     <string name="dialog_select_invite_method_code_item">Code</string>
 
-    <string name="menu_generate_qr_code">Zeige QR-Code</string>
-
     <string name="dialog_missing_pairing_token_title">Einladung kann nicht erzeugt werden</string>
     <string name="dialog_missing_pairing_token_message">Bitte versuche es später noch einmal.</string>
 

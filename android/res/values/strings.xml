@@ -123,8 +123,6 @@
     <string name="dialog_select_invite_method_mail_item">E-Mail</string>
     <string name="dialog_select_invite_method_code_item">Code</string>
 
-    <string name="menu_generate_qr_code">Show QR code</string>
-
     <string name="dialog_missing_pairing_token_title">Cannot create invitation</string>
     <string name="dialog_missing_pairing_token_message">Please try again later.</string>
 
