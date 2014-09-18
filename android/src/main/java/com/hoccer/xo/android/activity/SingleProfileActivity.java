@@ -26,6 +26,7 @@ public class SingleProfileActivity extends XoActionbarActivity {
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
 
     Mode mMode;
+    public static final String SINGLE_PROFILE_FRAGMENT = "SINGLE_PROFILE_FRAGMENT";
 
     ActionBar mActionBar;
 
@@ -98,7 +99,7 @@ public class SingleProfileActivity extends XoActionbarActivity {
         mSingleProfileFragment.setArguments(bundle);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_single_profile_fragment_container, mSingleProfileFragment);
+        ft.replace(R.id.fl_single_profile_fragment_container, mSingleProfileFragment, SINGLE_PROFILE_FRAGMENT);
         ft.commit();
     }
 
