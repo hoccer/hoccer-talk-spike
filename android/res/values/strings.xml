@@ -373,6 +373,11 @@
         <item>NEARBY</item>
     </string-array>
 
+    <string-array name="qr_code_tab_names">
+        <item>SCAN</item>
+        <item>GENERATE</item>
+    </string-array>
+
     <string name="about_url">http://www.hoccer.com/xo-about-view</string>
 
     <string name="preference_database_title">Local Database</string>

@@ -1,9 +1,9 @@
 package com.hoccer.xo.android.fragment;
 
-import android.app.Fragment;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.*;
 import android.widget.LinearLayout;
 import android.widget.Toast;
