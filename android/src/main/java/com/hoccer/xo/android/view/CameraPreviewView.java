@@ -2,6 +2,7 @@ package com.hoccer.xo.android.view;
 
 import android.content.Context;
 import android.hardware.Camera;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -30,6 +31,18 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
     private boolean mIsPortraitModeEnabled;
     private boolean mIsEnabled;
     private boolean mIsSurfaceCreated;
+
+    private Camera.AutoFocusCallback mAutoFocusCallback = new Camera.AutoFocusCallback() {
+        @Override
+        public void onAutoFocus(boolean success, final Camera camera) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    camera.autoFocus(mAutoFocusCallback);
+                }
+            }, 1000);
+        }
+    };
 
     public CameraPreviewView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
@@ -181,11 +194,13 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
             }
 
             mCamera.startPreview();
+            mCamera.autoFocus(mAutoFocusCallback);
         }
     }
 
     public void stopPreview() {
         if (mCamera != null) {
+            mCamera.cancelAutoFocus();
             mCamera.stopPreview();
         }
     }
