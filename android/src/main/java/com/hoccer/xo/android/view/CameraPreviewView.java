@@ -27,12 +27,15 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
     Camera.Size mPreviewSize;
     List<Camera.Size> mSupportedPreviewSizes;
     Camera mCamera;
+    boolean mIsInPortraitMode;
 
     public CameraPreviewView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
 
         mSurfaceView = new SurfaceView(context);
         addView(mSurfaceView);
+
+        mIsInPortraitMode = attributeSet.getAttributeBooleanValue(null, "portrait", false);
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -73,7 +76,11 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         setMeasuredDimension(width, height);
 
         if (mSupportedPreviewSizes != null) {
-            mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, width, height);
+            if (mIsInPortraitMode) {
+                mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, height, width);
+            } else {
+                mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, width, height);
+            }
         }
     }
 
@@ -90,6 +97,12 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
             if (mPreviewSize != null) {
                 previewWidth = mPreviewSize.width;
                 previewHeight = mPreviewSize.height;
+            }
+
+            if (mIsInPortraitMode) {
+                int temp = previewHeight;
+                previewHeight = previewWidth;
+                previewWidth = temp;
             }
 
             // Center the child SurfaceView within the parent.
@@ -164,6 +177,10 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         Camera.Parameters parameters = mCamera.getParameters();
         parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
         requestLayout();
+
+        if (mIsInPortraitMode) {
+            mCamera.setDisplayOrientation(90);
+        }
 
         mCamera.setParameters(parameters);
         mCamera.startPreview();
