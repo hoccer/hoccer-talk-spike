@@ -3,6 +3,7 @@ package com.hoccer.xo.android.activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.UiThreadTest;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -55,26 +56,15 @@ public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<
         assertEquals(editName.getText().toString(), "");
     }
 
+    @UiThreadTest
     public void testOnDestroyActionMode() {
         final EditText editName = (EditText) singleProfileFragment.getView().findViewById(com.hoccer.xo.release.R.id.et_profile_name);
         final String expectedName = "myName";
-        getInstrumentation().runOnMainSync(new Runnable() {
-            @Override
-            public void run() {
-                editName.setText(expectedName);
-
-            }
-        });
+        editName.setText(expectedName);
 
         int closeButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
         final View closeButton = getActivity().findViewById(closeButtonId);
-        getInstrumentation().runOnMainSync(new Runnable() {
-            @Override
-            public void run() {
-                closeButton.performClick();
-
-            }
-        });
+        closeButton.performClick();
 
         assertEquals(expectedName, editName.getText().toString());
         assertEquals(expectedName, XoApplication.getXoClient().getSelfContact().getSelf().getRegistrationName());
