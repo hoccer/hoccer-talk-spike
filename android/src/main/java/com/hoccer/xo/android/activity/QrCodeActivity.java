@@ -62,25 +62,19 @@ public class QrCodeActivity extends XoActionbarActivity {
 
     private class QrCodePageChangeListener implements ViewPager.OnPageChangeListener {
         @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-        }
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
         @Override
         public void onPageSelected(int position) {
+            ActionBar actionBar = getActionBar();
 
+            if (actionBar.getSelectedNavigationIndex() != mViewPager.getCurrentItem()) {
+                getActionBar().setSelectedNavigationItem(mViewPager.getCurrentItem());
+            }
         }
 
         @Override
-        public void onPageScrollStateChanged(int state) {
-            if (state == ViewPager.SCROLL_STATE_IDLE) {
-                ActionBar actionBar = getActionBar();
-
-                if (actionBar.getSelectedNavigationIndex() != mViewPager.getCurrentItem()) {
-                    getActionBar().setSelectedNavigationItem(mViewPager.getCurrentItem());
-                }
-            }
-        }
+        public void onPageScrollStateChanged(int state) {}
     }
 
     private class QrCodeTabListener implements ActionBar.TabListener {
@@ -90,13 +84,9 @@ public class QrCodeActivity extends XoActionbarActivity {
         }
 
         @Override
-        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-
-        }
+        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {}
 
         @Override
-        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-
-        }
+        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
     }
 }
