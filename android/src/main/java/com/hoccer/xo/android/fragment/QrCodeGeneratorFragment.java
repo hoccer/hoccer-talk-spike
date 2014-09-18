@@ -3,7 +3,6 @@ package com.hoccer.xo.android.fragment;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,7 @@ import com.hoccer.xo.release.R;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class QrCodeGeneratorFragment extends Fragment {
+public class QrCodeGeneratorFragment extends PagerFragment {
 
     private ImageView mQrCodeView;
     private TextView mPairingTokenView;
@@ -28,7 +27,13 @@ public class QrCodeGeneratorFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_qr_code_generator, null);
+        return inflater.inflate(R.layout.fragment_qr_code_generator, null);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         mQrCodeView = (ImageView)view.findViewById(R.id.iv_qr_code);
         mPairingTokenView = (TextView)view.findViewById(R.id.tv_pairing_token);
         mProgressBar = (ProgressBar)view.findViewById(R.id.pb_generating_pairing_token);
@@ -41,9 +46,17 @@ public class QrCodeGeneratorFragment extends Fragment {
                 generateToken();
             }
         });
+    }
 
-        generateToken();
-        return view;
+    @Override
+    public void onPageSelected() {
+        if (!isTokenGenerated()) {
+            generateToken();
+        }
+    }
+
+    private boolean isTokenGenerated() {
+        return mQrCodeView.getVisibility() == View.VISIBLE;
     }
 
     private void generateToken() {

@@ -3,7 +3,6 @@ package com.hoccer.xo.android.fragment;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.*;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -15,7 +14,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 
-public class QrCodeScannerFragment extends Fragment {
+public class QrCodeScannerFragment extends PagerFragment {
 
     private static final Logger LOG = Logger.getLogger(QrCodeScannerFragment.class);
 

@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.fragment.PagerFragment;
 import com.hoccer.xo.android.fragment.QrCodeGeneratorFragment;
 import com.hoccer.xo.android.fragment.QrCodeScannerFragment;
 import com.hoccer.xo.release.R;
@@ -14,6 +15,7 @@ import com.hoccer.xo.release.R;
 public class QrCodeActivity extends XoActionbarActivity {
 
     private ViewPager mViewPager;
+    private PagerFragment[] mFragments;
 
     @Override
     protected int getLayoutResource() {
@@ -31,7 +33,7 @@ public class QrCodeActivity extends XoActionbarActivity {
         enableUpNavigation();
 
         final String[] tabs = getResources().getStringArray(R.array.qr_code_tab_names);
-        final Fragment[] fragments = new Fragment[]{
+        mFragments = new PagerFragment[]{
                 new QrCodeScannerFragment(),
                 new QrCodeGeneratorFragment()
         };
@@ -40,7 +42,7 @@ public class QrCodeActivity extends XoActionbarActivity {
         mViewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
-                return fragments[position];
+                return mFragments[position];
             }
 
             @Override
@@ -80,11 +82,16 @@ public class QrCodeActivity extends XoActionbarActivity {
     private class QrCodeTabListener implements ActionBar.TabListener {
         @Override
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-            mViewPager.setCurrentItem(tab.getPosition());
+            int position = tab.getPosition();
+            mViewPager.setCurrentItem(position);
+            mFragments[position].onPageSelected();
         }
 
         @Override
-        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {}
+        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+            int position = tab.getPosition();
+            mFragments[position].onPageUnselected();
+        }
 
         @Override
         public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
