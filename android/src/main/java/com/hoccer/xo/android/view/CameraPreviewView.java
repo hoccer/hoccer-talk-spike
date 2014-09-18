@@ -13,12 +13,14 @@ public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Call
     private final Camera mCamera;
     private final Camera.PreviewCallback mPreviewCallback;
     private final boolean mUseAutoFocus;
+    private boolean mIsPreviewActive;
 
     public CameraPreviewView(Context context, Camera camera, Camera.PreviewCallback previewCallback, boolean useAutoFocus) {
         super(context);
         mCamera = camera;
         mPreviewCallback = previewCallback;
         mUseAutoFocus = useAutoFocus;
+        mIsPreviewActive = false;
 
         setFocusableInTouchMode(true);
         getHolder().addCallback(this);
@@ -27,32 +29,26 @@ public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Call
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         LOG.debug("surfaceCreated()");
+        startPreview(holder);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         LOG.debug("surfaceDestroyed()");
+        stopPreview();
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         LOG.debug("surfaceChanged()");
 
-        if (holder.getSurface() == null) {
-            return;
+        if (mIsPreviewActive) {
+            stopPreview();
+            startPreview(holder);
         }
+    }
 
-        try {
-            if (mUseAutoFocus) {
-                mCamera.cancelAutoFocus();
-            }
-
-            mCamera.setPreviewCallback(null);
-            mCamera.stopPreview();
-        } catch (Exception e) {
-            LOG.error("Error stopping camera preview", e);
-        }
-
+    private void startPreview(SurfaceHolder holder) {
         try {
             mCamera.setDisplayOrientation(90);
             mCamera.setPreviewDisplay(holder);
@@ -62,8 +58,25 @@ public class CameraPreviewView extends SurfaceView implements SurfaceHolder.Call
             if (mUseAutoFocus) {
                 mCamera.autoFocus(null);
             }
+
+            mIsPreviewActive = true;
         } catch (Exception e) {
             LOG.error("Error starting camera preview", e);
+        }
+    }
+
+    private void stopPreview() {
+        try {
+            if (mUseAutoFocus) {
+                mCamera.cancelAutoFocus();
+            }
+
+            mCamera.setPreviewCallback(null);
+            mCamera.stopPreview();
+
+            mIsPreviewActive = false;
+        } catch (Exception e) {
+            LOG.error("Error stopping camera preview", e);
         }
     }
 }
