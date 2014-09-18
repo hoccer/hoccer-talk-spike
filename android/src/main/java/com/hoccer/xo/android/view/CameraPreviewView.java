@@ -118,6 +118,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         }
     }
 
+    @Override
     public void surfaceCreated(SurfaceHolder holder) {
         // The Surface has been created, acquire the camera and tell it where
         // to draw.
@@ -130,6 +131,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         }
     }
 
+    @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         // Surface will be destroyed when we return, so stop the preview.
         if (mCamera != null) {
@@ -171,6 +173,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         return optimalSize;
     }
 
+    @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         // Now that the size is known, set up the camera parameters and begin
         // the preview.
