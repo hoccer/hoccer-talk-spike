@@ -1,10 +1,13 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.Toast;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.CameraPreviewView;
@@ -20,6 +23,7 @@ public class QrCodeScannerFragment extends PagerFragment {
 
     private Camera mCamera;
     private CameraPreviewView mCameraPreviewView;
+    private EditText mPairingTokenEditText;
     private boolean mIsPreviewEnabled;
 
     private final ImageScanner mQrCodeScanner = new ImageScanner();
@@ -76,6 +80,21 @@ public class QrCodeScannerFragment extends PagerFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mCameraPreviewView = (CameraPreviewView)view.findViewById(R.id.cpv_camera_preview);
+        mPairingTokenEditText = (EditText)view.findViewById(R.id.et_pairing_token);
+
+        mPairingTokenEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    hideSoftKeyboard();
+                }
+            }
+        });
+    }
+
+    private void hideSoftKeyboard() {
+        InputMethodManager inputMethodManager = (InputMethodManager)getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(getView().getWindowToken(), 0);
     }
 
     @Override
@@ -136,6 +155,10 @@ public class QrCodeScannerFragment extends PagerFragment {
     @Override
     public void onPageUnselected() {
         stopAndDisablePreview();
+
+        if (mPairingTokenEditText != null) {
+            mPairingTokenEditText.clearFocus();
+        }
     }
 
     private void stopAndDisablePreview() {
