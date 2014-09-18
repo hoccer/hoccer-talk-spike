@@ -5,8 +5,11 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.hoccer.xo.android.XoApplication;
@@ -24,6 +27,7 @@ public class QrCodeScannerFragment extends PagerFragment {
     private Camera mCamera;
     private CameraPreviewView mCameraPreviewView;
     private EditText mPairingTokenEditText;
+    private Button mConfirmCodeButton;
 
     private final ImageScanner mQrCodeScanner = new ImageScanner();
     private final HashSet<String> mScannedCodes = new HashSet<String>();
@@ -80,12 +84,43 @@ public class QrCodeScannerFragment extends PagerFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mCameraPreviewView = (CameraPreviewView)view.findViewById(R.id.cpv_camera_preview);
         mPairingTokenEditText = (EditText)view.findViewById(R.id.et_pairing_token);
+        mConfirmCodeButton = (Button)view.findViewById(R.id.b_confirm_code);
 
         mPairingTokenEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     hideSoftKeyboard();
+                }
+            }
+        });
+
+
+        mPairingTokenEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!mPairingTokenEditText.getText().toString().isEmpty()) {
+                    mConfirmCodeButton.setEnabled(true);
+                } else {
+                    mConfirmCodeButton.setEnabled(false);
+                }
+            }
+        });
+
+        mConfirmCodeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String pairingToken = mPairingTokenEditText.getText().toString();
+                if (pairingToken != null && !pairingToken.isEmpty()) {
+                    XoApplication.getXoClient().performTokenPairing(pairingToken);
                 }
             }
         });

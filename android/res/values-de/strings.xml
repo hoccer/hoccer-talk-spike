@@ -118,6 +118,9 @@
     <string name="pairing_token_generation_failed">QR-Code konnte nicht erzeugt werden.</string>
     <string name="pairing_token_generation_retry">Erneut versuchen</string>
 
+    <!-- QR code scanner fragment -->
+    <string name="or_insert_code">Oder Code eingeben</string>
+
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Mein Bild ändern</string>
     <string name="dialog_avatar_options_title">Avatar Optionen</string>

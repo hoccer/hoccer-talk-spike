@@ -16,12 +16,33 @@
             android:clickable="true"
             portrait="true"/>
 
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/or_insert_code"  />
+
+  <RelativeLayout android:layout_width="match_parent" android:layout_height="60dp">
+
+    <Button
+        android:id="@+id/b_confirm_code"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:text="@string/common_ok"
+        android:enabled="false"
+        />
+
     <EditText
-            android:id="@+id/et_pairing_token"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            style="@android:style/TextAppearance.DeviceDefault.Large"
-            android:gravity="center"
-            android:inputType="textNoSuggestions"/>
+        android:id="@+id/et_pairing_token"
+        android:layout_toLeftOf="@id/b_confirm_code"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:inputType="textNoSuggestions"
+        style="@android:style/TextAppearance.DeviceDefault.Large"/>
+
+  </RelativeLayout>
+
 
 </LinearLayout>

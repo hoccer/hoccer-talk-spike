@@ -129,6 +129,9 @@
     <string name="pairing_token_generation_failed">Failed to generate QR code.</string>
     <string name="pairing_token_generation_retry">Retry</string>
 
+    <!-- QR code scanner fragment -->
+    <string name="or_insert_code">Or insert code</string>
+
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Change my image</string>
     <string name="dialog_avatar_options_title">Avatar options</string>
