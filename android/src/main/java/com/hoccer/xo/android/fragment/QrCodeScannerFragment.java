@@ -87,6 +87,7 @@ public class QrCodeScannerFragment extends PagerFragment {
     private void openCamera() {
         try {
             mCamera = Camera.open();
+            mCamera.setPreviewCallback(mPreviewCallback);
             mCameraPreviewView.setCamera(mCamera);
         } catch (Exception e) {
             LOG.error("Error opening camera", e);
@@ -96,7 +97,6 @@ public class QrCodeScannerFragment extends PagerFragment {
     @Override
     public void onPause() {
         super.onPause();
-
         closeCamera();
     }
 
