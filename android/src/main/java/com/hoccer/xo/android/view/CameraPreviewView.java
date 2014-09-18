@@ -27,7 +27,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
     private Camera.Size mPreviewSize;
     private List<Camera.Size> mSupportedPreviewSizes;
     private Camera mCamera;
-    private boolean mIsInPortraitMode;
+    private boolean mIsPortraitModeEnabled;
     private boolean mIsSurfaceCreated;
 
     public CameraPreviewView(Context context, AttributeSet attributeSet) {
@@ -36,7 +36,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         mSurfaceView = new SurfaceView(context);
         addView(mSurfaceView);
 
-        mIsInPortraitMode = attributeSet.getAttributeBooleanValue(null, "portrait", false);
+        mIsPortraitModeEnabled = attributeSet.getAttributeBooleanValue(null, "portrait", false);
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -62,7 +62,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         setMeasuredDimension(width, height);
 
         if (mSupportedPreviewSizes != null) {
-            if (mIsInPortraitMode) {
+            if (mIsPortraitModeEnabled) {
                 mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, height, width);
             } else {
                 mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, width, height);
@@ -125,7 +125,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
                 previewHeight = mPreviewSize.height;
             }
 
-            if (mIsInPortraitMode) {
+            if (mIsPortraitModeEnabled) {
                 int temp = previewHeight;
                 previewHeight = previewWidth;
                 previewWidth = temp;
@@ -173,7 +173,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
             parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
             mCamera.setParameters(parameters);
 
-            if (mIsInPortraitMode) {
+            if (mIsPortraitModeEnabled) {
                 mCamera.setDisplayOrientation(90);
             }
 
