@@ -147,40 +147,36 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         mIsSurfaceCreated = true;
-
-        try {
-            if (mCamera != null) {
-                mCamera.setPreviewDisplay(holder);
-            }
-        } catch (IOException exception) {
-            LOG.error("IOException caused by setPreviewDisplay()", exception);
-        }
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        stopPreview();
         mIsSurfaceCreated = false;
+        stopPreview();
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        // Now that the size is known, set up the camera parameters and begin
-        // the preview.
-        Camera.Parameters parameters = mCamera.getParameters();
-        parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
-        mCamera.setParameters(parameters);
-
-        if (mIsInPortraitMode) {
-            mCamera.setDisplayOrientation(90);
-        }
-
         requestLayout();
         startPreview();
     }
 
     public void startPreview() {
         if (mIsSurfaceCreated && mCamera != null) {
+            try {
+                mCamera.setPreviewDisplay(mHolder);
+            } catch (IOException e) {
+                LOG.error("IOException caused by setPreviewDisplay()", e);
+            }
+
+            Camera.Parameters parameters = mCamera.getParameters();
+            parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+            mCamera.setParameters(parameters);
+
+            if (mIsInPortraitMode) {
+                mCamera.setDisplayOrientation(90);
+            }
+
             mCamera.startPreview();
         }
     }
