@@ -107,13 +107,13 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
 
             // Center the child SurfaceView within the parent.
             if (width * previewHeight > height * previewWidth) {
-                final int scaledChildWidth = previewWidth * height / previewHeight;
-                child.layout((width - scaledChildWidth) / 2, 0,
-                        (width + scaledChildWidth) / 2, height);
-            } else {
                 final int scaledChildHeight = previewHeight * width / previewWidth;
                 child.layout(0, (height - scaledChildHeight) / 2,
                         width, (height + scaledChildHeight) / 2);
+            } else {
+                final int scaledChildWidth = previewWidth * height / previewHeight;
+                child.layout((width - scaledChildWidth) / 2, 0,
+                        (width + scaledChildWidth) / 2, height);
             }
         }
     }
