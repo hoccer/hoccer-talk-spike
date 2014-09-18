@@ -6,9 +6,8 @@
               android:orientation="vertical"
               android:background="@color/xo_main_background">
 
-    <LinearLayout
-            android:id="@+id/ll_camera_preview"
-            android:orientation="vertical"
+    <com.hoccer.xo.android.view.CameraPreviewView
+            android:id="@+id/cpv_camera_preview"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"/>

@@ -4,7 +4,6 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.*;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.CameraPreviewView;
@@ -19,7 +18,7 @@ public class QrCodeScannerFragment extends PagerFragment {
     private static final Logger LOG = Logger.getLogger(QrCodeScannerFragment.class);
 
     private Camera mCamera;
-    private LinearLayout mCameraPreviewLayout;
+    private CameraPreviewView mCameraPreviewView;
 
     private final ImageScanner mQrCodeScanner = new ImageScanner();
     private final HashSet<String> mScannedCodes = new HashSet<String>();
@@ -74,7 +73,7 @@ public class QrCodeScannerFragment extends PagerFragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        mCameraPreviewLayout = (LinearLayout)view.findViewById(R.id.ll_camera_preview);
+        mCameraPreviewView = (CameraPreviewView)view.findViewById(R.id.cpv_camera_preview);
     }
 
     @Override
@@ -83,13 +82,12 @@ public class QrCodeScannerFragment extends PagerFragment {
         openCamera();
 
         boolean useAutoFocus = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS);
-        CameraPreviewView cameraPreview = new CameraPreviewView(getActivity(), mCamera, mPreviewCallback, useAutoFocus);
-        mCameraPreviewLayout.addView(cameraPreview);
     }
 
     private void openCamera() {
         try {
             mCamera = Camera.open();
+            mCameraPreviewView.setCamera(mCamera);
         } catch (Exception e) {
             LOG.error("Error opening camera", e);
         }
@@ -98,12 +96,12 @@ public class QrCodeScannerFragment extends PagerFragment {
     @Override
     public void onPause() {
         super.onPause();
-        mCameraPreviewLayout.removeAllViews();
 
         closeCamera();
     }
 
     private void closeCamera() {
+        mCameraPreviewView.setCamera(null);
         mCamera.setPreviewCallback(null);
         mCamera.release();
         mCamera = null;
