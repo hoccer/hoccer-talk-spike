@@ -50,13 +50,17 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mDatabase = XoApplication.getXoClient().getDatabase();
-        initContactListAdapter();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_contacts, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_contacts, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
         mPlaceholderImage= (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
@@ -69,16 +73,12 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
             mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
         }
 
+        initContactListAdapter();
         ListView contactList = (ListView) view.findViewById(android.R.id.list);
         registerForContextMenu(contactList);
-        return view;
-    }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        // initial update
         onItemCountChanged(mAdapter.getCount());
-        setListAdapter(mAdapter);
     }
 
     @Override
@@ -224,6 +224,7 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
         mAdapter = new BetterContactsAdapter((XoActivity) getActivity(), filter);
         mAdapter.onResume();
         mAdapter.setOnItemCountChangedListener(this);
+        setListAdapter(mAdapter);
     }
 
     public void onGroupCreationSucceeded(int contactId) {
