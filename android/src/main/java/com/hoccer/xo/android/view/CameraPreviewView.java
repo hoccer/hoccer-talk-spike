@@ -22,12 +22,12 @@ import java.util.List;
 public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callback {
     private static final Logger LOG = Logger.getLogger(CameraPreviewView.class);
 
-    SurfaceView mSurfaceView;
-    SurfaceHolder mHolder;
-    Camera.Size mPreviewSize;
-    List<Camera.Size> mSupportedPreviewSizes;
-    Camera mCamera;
-    boolean mIsInPortraitMode;
+    private SurfaceView mSurfaceView;
+    private SurfaceHolder mHolder;
+    private Camera.Size mPreviewSize;
+    private List<Camera.Size> mSupportedPreviewSizes;
+    private Camera mCamera;
+    private boolean mIsInPortraitMode;
 
     public CameraPreviewView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
