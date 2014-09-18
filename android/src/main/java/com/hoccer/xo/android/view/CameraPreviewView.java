@@ -28,6 +28,7 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
     private List<Camera.Size> mSupportedPreviewSizes;
     private Camera mCamera;
     private boolean mIsInPortraitMode;
+    private boolean mIsSurfaceCreated;
 
     public CameraPreviewView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
@@ -145,8 +146,8 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        // The Surface has been created, acquire the camera and tell it where
-        // to draw.
+        mIsSurfaceCreated = true;
+
         try {
             if (mCamera != null) {
                 mCamera.setPreviewDisplay(holder);
@@ -158,10 +159,8 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        // Surface will be destroyed when we return, so stop the preview.
-        if (mCamera != null) {
-            mCamera.stopPreview();
-        }
+        stopPreview();
+        mIsSurfaceCreated = false;
     }
 
     @Override
@@ -170,13 +169,25 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
         // the preview.
         Camera.Parameters parameters = mCamera.getParameters();
         parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
-        requestLayout();
+        mCamera.setParameters(parameters);
 
         if (mIsInPortraitMode) {
             mCamera.setDisplayOrientation(90);
         }
 
-        mCamera.setParameters(parameters);
-        mCamera.startPreview();
+        requestLayout();
+        startPreview();
+    }
+
+    public void startPreview() {
+        if (mIsSurfaceCreated && mCamera != null) {
+            mCamera.startPreview();
+        }
+    }
+
+    public void stopPreview() {
+        if (mCamera != null) {
+            mCamera.stopPreview();
+        }
     }
 }

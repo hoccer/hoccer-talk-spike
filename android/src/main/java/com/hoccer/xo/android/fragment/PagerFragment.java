@@ -6,4 +6,6 @@ public class PagerFragment extends Fragment {
 
     public void onPageSelected() {}
     public void onPageUnselected() {}
+
+    public void onPageScrollStateChanged(int state) {}
 }

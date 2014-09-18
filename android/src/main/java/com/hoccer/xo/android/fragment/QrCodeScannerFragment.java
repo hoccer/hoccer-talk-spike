@@ -3,6 +3,7 @@ package com.hoccer.xo.android.fragment;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.view.*;
 import android.widget.Toast;
 import com.hoccer.xo.android.XoApplication;
@@ -19,6 +20,7 @@ public class QrCodeScannerFragment extends PagerFragment {
 
     private Camera mCamera;
     private CameraPreviewView mCameraPreviewView;
+    private boolean mIsPreviewEnabled;
 
     private final ImageScanner mQrCodeScanner = new ImageScanner();
     private final HashSet<String> mScannedCodes = new HashSet<String>();
@@ -80,6 +82,7 @@ public class QrCodeScannerFragment extends PagerFragment {
     public void onResume() {
         super.onResume();
         openCamera();
+        startPreview();
 
         boolean useAutoFocus = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS);
     }
@@ -94,10 +97,23 @@ public class QrCodeScannerFragment extends PagerFragment {
         }
     }
 
+    private void startPreview() {
+        if (mIsPreviewEnabled && mCameraPreviewView != null) {
+            mCameraPreviewView.startPreview();
+        }
+    }
+
     @Override
     public void onPause() {
         super.onPause();
+        stopPreview();
         closeCamera();
+    }
+
+    private void stopPreview() {
+        if (mCameraPreviewView != null) {
+            mCameraPreviewView.stopPreview();
+        }
     }
 
     private void closeCamera() {
@@ -105,5 +121,34 @@ public class QrCodeScannerFragment extends PagerFragment {
         mCamera.setPreviewCallback(null);
         mCamera.release();
         mCamera = null;
+    }
+
+    @Override
+    public void onPageSelected() {
+        enableAndStartPreview();
+    }
+
+    private void enableAndStartPreview() {
+        mIsPreviewEnabled = true;
+        startPreview();
+    }
+
+    @Override
+    public void onPageUnselected() {
+        stopAndDisablePreview();
+    }
+
+    private void stopAndDisablePreview() {
+        stopPreview();
+        mIsPreviewEnabled = false;
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+        if (state == ViewPager.SCROLL_STATE_IDLE) {
+            enableAndStartPreview();
+        } else {
+            stopAndDisablePreview();
+        }
     }
 }

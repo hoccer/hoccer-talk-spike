@@ -76,7 +76,9 @@ public class QrCodeActivity extends XoActionbarActivity {
         }
 
         @Override
-        public void onPageScrollStateChanged(int state) {}
+        public void onPageScrollStateChanged(int state) {
+            mFragments[mViewPager.getCurrentItem()].onPageScrollStateChanged(state);
+        }
     }
 
     private class QrCodeTabListener implements ActionBar.TabListener {
