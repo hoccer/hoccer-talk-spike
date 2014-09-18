@@ -235,7 +235,9 @@ public class SingleProfileFragment extends XoFragment
     public void onResume() {
         LOG.debug("onResume()");
         super.onResume();
-        getXoClient().registerContactListener(this);
+        if (mMode != Mode.CREATE_SELF) {
+            getXoClient().registerContactListener(this);
+        }
         setHasOptionsMenu(true);
     }
 
@@ -243,7 +245,9 @@ public class SingleProfileFragment extends XoFragment
     public void onPause() {
         LOG.debug("onPause()");
         super.onPause();
-        getXoClient().unregisterContactListener(this);
+        if (mMode != Mode.CREATE_SELF) {
+            getXoClient().unregisterContactListener(this);
+        }
     }
 
     @Override
