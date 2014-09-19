@@ -14,3 +14,9 @@ Take a look at [SingleProfileActivityTest.java](../blob/develop/android-test/src
 
 1. The name of your test class should be *Test
 1. The name of your test methodes should be test*˘
+
+
+## IntelliJ Run Configuration
+
+Run > Edit Configurations > + > Android Tests > Enter name and choose module: hoccer-talk-android-test > Choose target device > OK
+
