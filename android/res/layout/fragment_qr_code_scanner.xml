@@ -16,33 +16,40 @@
             android:clickable="true"
             portrait="true"/>
 
-  <TextView
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="@string/or_insert_code"  />
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:textColor="@color/common_signin_btn_light_text_disabled"
+            android:textSize="8pt"
+            android:text="@string/or_insert_code"/>
 
-  <RelativeLayout android:layout_width="match_parent" android:layout_height="60dp">
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/xo_main_background">
 
-    <Button
-        android:id="@+id/b_confirm_code"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:text="@string/common_ok"
-        android:enabled="false"
-        />
+        <EditText
+                android:id="@+id/et_pairing_token"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:layout_marginLeft="5dp"
+                android:layout_marginBottom="5dp"
+                android:inputType="textNoSuggestions"
+                style="@android:style/TextAppearance.DeviceDefault.Large"/>
 
-    <EditText
-        android:id="@+id/et_pairing_token"
-        android:layout_toLeftOf="@id/b_confirm_code"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:gravity="center"
-        android:inputType="textNoSuggestions"
-        style="@android:style/TextAppearance.DeviceDefault.Large"/>
+        <Button
+                android:id="@+id/b_confirm_code"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginRight="5dp"
+                android:layout_marginBottom="5dp"
+                android:text="@string/common_ok"
+                android:enabled="false"/>
 
-  </RelativeLayout>
-
+    </LinearLayout>
 
 </LinearLayout>

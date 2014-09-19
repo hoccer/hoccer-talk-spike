@@ -115,8 +115,10 @@
     <string name="dialog_missing_pairing_token_title">Einladung kann nicht erzeugt werden</string>
     <string name="dialog_missing_pairing_token_message">Bitte versuche es später noch einmal.</string>
 
+    <!-- QR code generator fragment -->
     <string name="pairing_token_generation_failed">QR-Code konnte nicht erzeugt werden.</string>
     <string name="pairing_token_generation_retry">Erneut versuchen</string>
+    <string name="scan_or_copy_code">Scanne oder kopiere diesen Code</string>
 
     <!-- QR code scanner fragment -->
     <string name="or_insert_code">Oder Code eingeben</string>

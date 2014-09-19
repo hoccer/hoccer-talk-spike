@@ -52,9 +52,18 @@
     <TextView
             android:id="@+id/tv_pairing_token"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             style="@android:style/TextAppearance.DeviceDefault.Large"
             android:gravity="center"
             android:textIsSelectable="true"/>
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="60dp"
+            android:gravity="center"
+            android:textColor="@color/common_signin_btn_light_text_disabled"
+            android:textSize="8pt"
+            android:text="@string/scan_or_copy_code"  />
 
 </LinearLayout>
