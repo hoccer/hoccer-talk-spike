@@ -106,8 +106,6 @@ public abstract class XoActivity extends FragmentActivity {
 
     private ActionBar mActionBar;
 
-    private String mBarcodeToken = null;
-
     private AttachmentTransferControlView mSpinner;
     private Handler mDialogDismisser;
     private Dialog mDialog;
@@ -806,11 +804,6 @@ public abstract class XoActivity extends FragmentActivity {
             }
             for (IXoFragment fragment : mTalkFragments) {
                 fragment.onServiceConnected();
-            }
-            if (mBarcodeToken != null) {
-                // XXX perform token pairing with callback
-                getXoClient().performTokenPairing(mBarcodeToken);
-                mBarcodeToken = null;
             }
         }
 
