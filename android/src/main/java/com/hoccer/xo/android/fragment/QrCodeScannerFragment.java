@@ -32,6 +32,11 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
     private EditText mPairingTokenEditText;
     private Button mConfirmCodeButton;
 
+    static {
+        // required by zbar
+        System.loadLibrary("iconv");
+    }
+
     private final ImageScanner mQrCodeScanner = new ImageScanner();
     private final HashSet<String> mScannedCodes = new HashSet<String>();
 
