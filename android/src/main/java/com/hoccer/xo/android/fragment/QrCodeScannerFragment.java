@@ -8,9 +8,11 @@ import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.*;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
@@ -115,19 +117,35 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
             }
         });
 
+        mPairingTokenEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    performTokenPairing();
+                    return true;
+                }
+
+                return false;
+            }
+        });
+
         mConfirmCodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String pairingToken = mPairingTokenEditText.getText().toString();
-
-                if (pairingToken != null && !pairingToken.isEmpty()) {
-                    mConfirmCodeButton.setEnabled(false);
-                    mPairingTokenEditText.clearFocus();
-                    XoApplication.getXoClient().performTokenPairing(pairingToken, QrCodeScannerFragment.this);
-                    hideSoftKeyboard();
-                }
+                performTokenPairing();
             }
         });
+    }
+
+    private void performTokenPairing() {
+        String pairingToken = mPairingTokenEditText.getText().toString();
+
+        if (pairingToken != null && !pairingToken.isEmpty()) {
+            mConfirmCodeButton.setEnabled(false);
+            mPairingTokenEditText.clearFocus();
+            XoApplication.getXoClient().performTokenPairing(pairingToken, this);
+            hideSoftKeyboard();
+        }
     }
 
     private void hideSoftKeyboard() {
