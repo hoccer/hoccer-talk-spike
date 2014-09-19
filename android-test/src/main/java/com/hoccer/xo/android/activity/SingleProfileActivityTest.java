@@ -66,7 +66,6 @@ public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<
         final View closeButton = getActivity().findViewById(closeButtonId);
         closeButton.performClick();
 
-        assertEquals(expectedName, editName.getText().toString());
         assertEquals(expectedName, XoApplication.getXoClient().getSelfContact().getSelf().getRegistrationName());
         assertTrue(activity.isFinishing());
     }
