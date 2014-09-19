@@ -12,6 +12,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.CameraPreviewView;
 import com.hoccer.xo.release.R;
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 
-public class QrCodeScannerFragment extends PagerFragment {
+public class QrCodeScannerFragment extends PagerFragment implements IXoPairingListener {
 
     private static final Logger LOG = Logger.getLogger(QrCodeScannerFragment.class);
 
@@ -50,7 +51,7 @@ public class QrCodeScannerFragment extends PagerFragment {
                     if (!mScannedCodes.contains(code)) {
                         if (code.startsWith(XoApplication.getXoClient().getConfiguration().getUrlScheme())) {
                             String pairingToken = code.replace(XoApplication.getXoClient().getConfiguration().getUrlScheme(), "");
-                            XoApplication.getXoClient().performTokenPairing(pairingToken);
+                            XoApplication.getXoClient().performTokenPairing(pairingToken, QrCodeScannerFragment.this);
                         } else {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -120,7 +121,7 @@ public class QrCodeScannerFragment extends PagerFragment {
             public void onClick(View v) {
                 String pairingToken = mPairingTokenEditText.getText().toString();
                 if (pairingToken != null && !pairingToken.isEmpty()) {
-                    XoApplication.getXoClient().performTokenPairing(pairingToken);
+                    XoApplication.getXoClient().performTokenPairing(pairingToken, QrCodeScannerFragment.this);
                 }
             }
         });
@@ -214,4 +215,29 @@ public class QrCodeScannerFragment extends PagerFragment {
             stopAndDisablePreview();
         }
     }
+
+    @Override
+    public void onTokenPairingSucceeded(String token) {
+        final Activity activity = getActivity();
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(activity, getResources().getString(R.string.toast_pairing_successful), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public void onTokenPairingFailed(String token) {
+        final Activity activity = getActivity();
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getActivity(), getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
 }
