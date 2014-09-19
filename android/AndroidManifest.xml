@@ -103,7 +103,9 @@
                 android:name="com.hoccer.xo.android.activity.ContactsActivity"
                 android:label="@string/actionbar_default_title"
                 android:configChanges="keyboardHidden|orientation|screenSize"
-                android:screenOrientation="portrait">
+                android:screenOrientation="portrait"
+                android:launchMode="singleTask">
+
             <!-- Show in launcher -->
             <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.MAIN"/>
@@ -118,6 +120,12 @@
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="video/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="${hoccer.invitation.uri.scheme}"/>
             </intent-filter>
         </activity>
 
@@ -198,21 +206,6 @@
                 android:screenOrientation="portrait"
                 android:windowSoftInputMode="stateHidden">
         </activity>
-
-        <!-- Pairing activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.PairingActivity"
-                android:label="@string/actionbar_default_title"
-                android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="${hoccer.invitation.uri.scheme}"/>
-            </intent-filter>
-        </activity>
-
 
         <!-- Invitation activity -->
         <activity

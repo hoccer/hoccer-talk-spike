@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -37,9 +38,10 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class ContactsActivity extends XoActionbarActivity implements IXoStateListener, IXoContactListener {
+public class ContactsActivity extends XoActionbarActivity implements IXoStateListener, IXoContactListener, IXoPairingListener {
 
     private final static Logger LOG = Logger.getLogger(ContactsActivity.class);
+    private static final String ACTION_ALREADY_HANDLED = "com.hoccer.xo.android.intent.action.ALREADY_HANDLED";
 
     private ViewPager mViewPager;
     private ActionBar mActionBar;
@@ -47,6 +49,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
     private boolean mEnvironmentUpdatesEnabled;
     private boolean mNoUserInput = false;
+    private String mPairingToken;
 
     @Override
     protected int getLayoutResource() {
@@ -110,10 +113,17 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleTokenPairingIntent(intent);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         refreshEnvironmentUpdater(false);
         getXoClient().registerStateListener(this);
+        handleTokenPairingIntent(getIntent());
 
         // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
         getXoClient().registerContactListener(this);
@@ -173,6 +183,48 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
                 e.printStackTrace();
             }
         }
+    }
+
+    private void handleTokenPairingIntent(Intent intent) {
+        if (intent.getAction() == Intent.ACTION_VIEW) {
+            String token = intent.getData().toString();
+            intent.setAction(ACTION_ALREADY_HANDLED);
+
+            if (getXoClient().isActive()) {
+                performTokenPairing(token);
+            } else {
+                mPairingToken = token;
+            }
+        }
+    }
+
+    private void performTokenPairing(final String token) {
+        getBackgroundExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                getXoClient().performTokenPairing(token, ContactsActivity.this);
+            }
+        });
+    }
+
+    @Override
+    public void onTokenPairingSucceeded(String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(ContactsActivity.this, R.string.toast_pairing_successful, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public void onTokenPairingFailed(String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(ContactsActivity.this, R.string.toast_pairing_failed, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private IContentObject getVideoContentObject(Intent dataIntent) {
@@ -312,9 +364,13 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
             shutDownNearbySession();
         } else if (client.isActive()) {
             refreshEnvironmentUpdater(true);
+
+            if (mPairingToken != null) {
+                performTokenPairing(mPairingToken);
+                mPairingToken = null;
+            }
         }
     }
-
 
     // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
     private void updateInvitationCount() {
