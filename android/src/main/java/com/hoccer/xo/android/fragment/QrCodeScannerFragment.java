@@ -96,7 +96,6 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
             }
         });
 
-
         mPairingTokenEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -120,8 +119,12 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
             @Override
             public void onClick(View v) {
                 String pairingToken = mPairingTokenEditText.getText().toString();
+
                 if (pairingToken != null && !pairingToken.isEmpty()) {
+                    mConfirmCodeButton.setEnabled(false);
+                    mPairingTokenEditText.clearFocus();
                     XoApplication.getXoClient().performTokenPairing(pairingToken, QrCodeScannerFragment.this);
+                    hideSoftKeyboard();
                 }
             }
         });
@@ -224,6 +227,9 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
             @Override
             public void run() {
                 Toast.makeText(activity, getResources().getString(R.string.toast_pairing_successful), Toast.LENGTH_LONG).show();
+
+                mPairingTokenEditText.setText("");
+                mConfirmCodeButton.setEnabled(true);
             }
         });
     }
@@ -236,6 +242,8 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
             @Override
             public void run() {
                 Toast.makeText(getActivity(), getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
+
+                mConfirmCodeButton.setEnabled(true);
             }
         });
     }
