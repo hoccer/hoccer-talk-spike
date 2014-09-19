@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,8 +8,12 @@ import android.provider.ContactsContract;
 import android.view.*;
 import android.widget.Button;
 import android.widget.ListAdapter;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.DeviceContactsAdapter;
+import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.DeviceContact;
 import com.hoccer.xo.release.R;
@@ -19,16 +24,16 @@ import java.util.*;
 /**
  * Shows device contacts via a DeviceContactsAdapter and manages search queries.
  */
-public class DeviceContactsSelectionFragment extends SearchableListFragment {
+public class DeviceContactsInvitationFragment extends SearchableListFragment {
 
-    private final static Logger LOG = Logger.getLogger(DeviceContactsSelectionFragment.class);
+    private final static Logger LOG = Logger.getLogger(DeviceContactsInvitationFragment.class);
 
     public static final String EXTRA_IS_SMS_INVITATION = "com.hoccer.xo.android.extra.IS_SMS_INVITATION";
-    public static final String EXTRA_TOKEN = "com.hoccer.xo.android.extra.TOKEN";
 
-    private String mToken;
     private boolean mIsSmsInvitation;
     private DeviceContactsAdapter mAdapter;
+    private RelativeLayout mProgressOverlay;
+    private boolean mCancelled;
 
     final static Uri CONTENT_URI = ContactsContract.Data.CONTENT_URI;
 
@@ -53,39 +58,11 @@ public class DeviceContactsSelectionFragment extends SearchableListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mIsSmsInvitation = getActivity().getIntent().getBooleanExtra(EXTRA_IS_SMS_INVITATION, true);
-        mToken = getActivity().getIntent().getStringExtra(EXTRA_TOKEN);
+        mAdapter = createAdapter();
+        setListAdapter(mAdapter);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_device_contacts_selection, container, false);
-        Button inviteButton = (Button) view.findViewById(R.id.bt_continue);
-        inviteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String[] selectedContacts = mAdapter.getSelectedData();
-                if (mIsSmsInvitation) {
-                    composeInviteSms(selectedContacts);
-                    getActivity().finish();
-                } else {
-                    composeInviteEmail(selectedContacts);
-                    getActivity().finish();
-                }
-            }
-        });
-
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
+    private DeviceContactsAdapter createAdapter() {
         // query all phone numbers or email addresses and aggregate DeviceContacts
         List<DeviceContact> contacts = new ArrayList<DeviceContact>();
         Cursor cursor;
@@ -121,8 +98,83 @@ public class DeviceContactsSelectionFragment extends SearchableListFragment {
             } while (cursor.moveToNext());
         }
 
-        mAdapter = new DeviceContactsAdapter(contacts, getActivity());
-        setListAdapter(mAdapter);
+        return new DeviceContactsAdapter(contacts, getActivity());
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_device_contacts_selection, container, false);
+        mProgressOverlay = (RelativeLayout) view.findViewById(R.id.rl_progress_overlay);
+
+        final Button inviteButton = (Button) view.findViewById(R.id.bt_continue);
+        inviteButton.setOnClickListener(new InviteButtonClickListener());
+
+        return view;
+    }
+
+    private class InviteButtonClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            showProgressOverlay(true);
+            mCancelled = false;
+
+            XoApplication.getExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String token = XoApplication.getXoClient().generatePairingToken();
+
+                        if (!mCancelled) {
+                            if (token != null) {
+                                composeInvitation(token);
+                                getActivity().finish();
+                            } else {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showProgressOverlay(false);
+
+                                        XoDialogs.showOkDialog(
+                                                "MissingPairingToken",
+                                                R.string.dialog_missing_pairing_token_title,
+                                                R.string.dialog_missing_pairing_token_message,
+                                                getActivity(),
+                                                null
+                                        );
+                                    }
+                                });
+                            }
+                        }
+                    } catch (Throwable t) {
+                        LOG.error("Error while inviting contacts", t);
+                    }
+                }
+            });
+        }
+    }
+
+    private void showProgressOverlay(boolean visible) {
+        mProgressOverlay.setVisibility(visible ? View.VISIBLE : View.GONE);
+        enableOptionsMenu(!visible);
+    }
+
+    private void enableOptionsMenu(boolean enabled) {
+        setMenuVisibility(enabled);
+        if (getActivity() instanceof XoActivity) {
+            ((XoActivity)getActivity()).setOptionsMenuEnabled(enabled);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        showProgressOverlay(false);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mCancelled = true;
     }
 
     @Override
@@ -141,19 +193,28 @@ public class DeviceContactsSelectionFragment extends SearchableListFragment {
         mAdapter.setQuery(null);
     }
 
-    private void composeInviteSms(String[] phoneNumbers) {
+    private void composeInvitation(String token) {
+        String[] selectedContacts = mAdapter.getSelectedData();
+
+        if (mIsSmsInvitation) {
+            composeInviteSms(selectedContacts, token);
+        } else {
+            composeInviteEmail(selectedContacts, token);
+        }
+    }
+
+    private void composeInviteSms(String[] phoneNumbers, String token) {
         String urlScheme = XoApplication.getXoClient().getConfiguration().getUrlScheme();
         String selfName = XoApplication.getXoClient().getSelfContact().getName();
-        String message = String.format(getString(R.string.sms_invitation_text), urlScheme, mToken, selfName);
+        String message = String.format(getString(R.string.sms_invitation_text), urlScheme, token, selfName);
         ContactOperations.sendSMS(getActivity(), message, phoneNumbers);
     }
 
-    private void composeInviteEmail(String[] eMailAddresses) {
+    private void composeInviteEmail(String[] eMailAddresses, String token) {
         String urlScheme = XoApplication.getXoClient().getConfiguration().getUrlScheme();
         String selfName = XoApplication.getXoClient().getSelfContact().getName();
         String subject = getString(R.string.email_invitation_subject);
-        String message = String.format(getString(R.string.email_invitation_text), urlScheme, mToken, selfName);
+        String message = String.format(getString(R.string.email_invitation_text), urlScheme, token, selfName);
         ContactOperations.sendEMail(getActivity(), subject, message, eMailAddresses);
     }
-
 }

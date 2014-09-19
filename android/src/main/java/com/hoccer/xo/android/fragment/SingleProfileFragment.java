@@ -345,7 +345,7 @@ public class SingleProfileFragment extends XoFragment
         if (v.getId() == R.id.profile_avatar_image) {
             if (mContact != null && mContact.isEditable()) {
                 if (mContact.getAvatarContentUrl() != null) {
-                    XoDialogs.showSingleChoiceDialog("AvatarSelection",
+                    XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                             R.string.dialog_avatar_options_title,
                             new String[]{
                                     getResources().getString(R.string.dialog_set_avatar_option),

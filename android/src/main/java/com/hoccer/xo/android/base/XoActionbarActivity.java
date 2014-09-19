@@ -55,8 +55,12 @@ public abstract class XoActionbarActivity extends XoActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean result = super.onCreateOptionsMenu(menu);
 
-        mMenu = menu;
-        updateActionBarIcons();
+        if (result) {
+            mMenu = menu;
+            updateActionBarIcons();
+        } else {
+            mMenu = null;
+        }
 
         return result;
     }

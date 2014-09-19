@@ -5,8 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
@@ -613,7 +611,7 @@ public class GroupProfileFragment extends XoFragment
     private void enterAvatarEditMode() {
         if (mGroup != null && mGroup.isEditable()) {
             if (mGroup.getAvatarContentUrl() != null) {
-                XoDialogs.showSingleChoiceDialog("AvatarSelection",
+                XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                         R.string.dialog_avatar_options_title,
                         new String[]{
                                 getResources().getString(R.string.dialog_set_avatar_option),

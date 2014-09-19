@@ -1,9 +1,10 @@
 package com.hoccer.xo.android.activity;
 
+import android.os.Bundle;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.release.R;
 
-public class DeviceContactsSelectionActivity extends XoActionbarActivity {
+public class DeviceContactsInvitationActivity extends XoActionbarActivity {
 
     @Override
     protected int getLayoutResource() {
@@ -13,5 +14,11 @@ public class DeviceContactsSelectionActivity extends XoActionbarActivity {
     @Override
     protected int getMenuResource() {
         return -1;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        enableUpNavigation();
     }
 }

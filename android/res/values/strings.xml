@@ -20,8 +20,6 @@
     <string name="menu_pair">Pair with someone</string>
     <string name="menu_group_profile_add_person">Add person</string>
     <string name="menu_new_group">Create group</string>
-    <string name="menu_scan_code">Scan code</string>
-    <string name="menu_show_code">Show code</string>
     <string name="menu_add_attachment">Add attachment</string>
     <string name="menu_profile">Profile</string>
     <string name="menu_settings">Settings</string>
@@ -117,10 +115,24 @@
     <string name="pairing_success">Pairing succeeded</string>
     <string name="dialog_pairing_failed_title">Pairing failed</string>
     <string name="dialog_pairing_failed_message">The code you have entered is invalid.</string>
-	<string name="toast_pairing_successful">You have successfully paired.</string>
+    <string name="toast_pairing_successful">You have successfully paired.</string>
     <string name="toast_pairing_failed">Incorrect code, please try again.</string>
-    <string name="pairing_scanner">QR scanner</string>
-    <string name="pairing_generator">QR identifier</string>
+
+    <string name="dialog_select_invite_method_title">Invite via</string>
+    <string name="dialog_select_invite_method_sms_item">SMS</string>
+    <string name="dialog_select_invite_method_mail_item">E-Mail</string>
+    <string name="dialog_select_invite_method_code_item">Code</string>
+
+    <string name="dialog_missing_pairing_token_title">Cannot create invitation</string>
+    <string name="dialog_missing_pairing_token_message">Please try again later.</string>
+
+    <!-- QR code generator fragment -->
+    <string name="pairing_token_generation_failed">Failed to generate QR code.</string>
+    <string name="pairing_token_generation_retry">Retry</string>
+    <string name="scan_or_copy_code">Scan or copy this code</string>
+
+    <!-- QR code scanner fragment -->
+    <string name="or_insert_code">Or insert code</string>
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Change my image</string>
@@ -364,6 +376,11 @@
         <item>CHATS</item>
         <item>INVITATIONS</item>
         <item>NEARBY</item>
+    </string-array>
+
+    <string-array name="qr_code_tab_names">
+        <item>SCAN</item>
+        <item>GENERATE</item>
     </string-array>
 
     <string name="about_url">http://www.hoccer.com/xo-about-view</string>
