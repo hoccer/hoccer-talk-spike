@@ -33,18 +33,19 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
     private boolean mIsSurfaceCreated;
 
     private Handler mAutoFocusHandler = new Handler();
-    private Runnable mAutoFocusRunnable;
+
+    private Runnable mAutoFocusRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mCamera != null) {
+                mCamera.autoFocus(mAutoFocusCallback);
+            }
+        }
+    };
 
     private Camera.AutoFocusCallback mAutoFocusCallback = new Camera.AutoFocusCallback() {
         @Override
         public void onAutoFocus(boolean success, final Camera camera) {
-            mAutoFocusRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    camera.autoFocus(mAutoFocusCallback);
-                }
-            };
-
             mAutoFocusHandler.postDelayed(mAutoFocusRunnable, 1000);
         }
     };
