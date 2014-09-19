@@ -20,3 +20,19 @@ Take a look at [SingleProfileActivityTest.java](../blob/develop/android-test/src
 
 Run > Edit Configurations > + > Android Tests > Enter name and choose module: hoccer-talk-android-test > Choose target device > OK
 
+
+## Maven configuration
+
+When adding a new dependency to the target project pom file (hoccer-talk-android) the same dependency must be added to the android-test pom. 
+In this case the scope must be 'provided'.
+
+Example:
+
+```xml
+<dependency>
+   <groupId>log4j</groupId>
+   <artifactId>log4j</artifactId>
+   <version>${log4j.version}</version>
+   <scope>provided</scope>
+ </dependency>
+```
