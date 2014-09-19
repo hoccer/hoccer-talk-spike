@@ -187,7 +187,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
 
     private void handleTokenPairingIntent(Intent intent) {
         if (intent.getAction() == Intent.ACTION_VIEW) {
-            String token = intent.getData().toString();
+            String token = intent.getData().getHost();
             intent.setAction(ACTION_ALREADY_HANDLED);
 
             if (getXoClient().isActive()) {
