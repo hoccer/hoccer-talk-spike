@@ -101,28 +101,17 @@
     <string name="context_menu_copy_message">Copy</string>
     <string name="context_menu_delete_message">Delete</string>
 
-    <!-- Pairing fragment -->
-    <string name="pairing_token_info">Give this token to someone:</string>
-    <string name="pairing_code_info">Enter a code given to you here:</string>
-    <string name="pairing_code_hint">Enter code</string>
-    <string name="pairing_token_pair">Pair using token</string>
-    <string name="pairing_qr_info">You can also pair using QR codes:</string>
-    <string name="pairing_qr_show">Show QR code</string>
-    <string name="pairing_qr_scan">Scan QR code</string>
-    <string name="pairing_token_generating">Generating…</string>
-    <string name="pairing_token_send_sms">Send via SMS</string>
-    <string name="pairing_token_send_email">Send via e-mail</string>
-    <string name="pairing_success">Pairing succeeded</string>
-    <string name="dialog_pairing_failed_title">Pairing failed</string>
-    <string name="dialog_pairing_failed_message">The code you have entered is invalid.</string>
+    <!-- Pairing toast messages -->
     <string name="toast_pairing_successful">You have successfully paired.</string>
     <string name="toast_pairing_failed">Incorrect code, please try again.</string>
 
+    <!-- Invitation dialog -->
     <string name="dialog_select_invite_method_title">Invite via</string>
     <string name="dialog_select_invite_method_sms_item">SMS</string>
     <string name="dialog_select_invite_method_mail_item">E-Mail</string>
     <string name="dialog_select_invite_method_code_item">Code</string>
 
+    <!-- SMS/E-Mail invitation -->
     <string name="dialog_missing_pairing_token_title">Cannot create invitation</string>
     <string name="dialog_missing_pairing_token_message">Please try again later.</string>
 
