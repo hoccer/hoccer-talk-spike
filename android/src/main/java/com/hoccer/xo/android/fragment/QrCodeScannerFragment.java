@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -163,8 +162,6 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
         super.onResume();
         openCamera();
         startPreview();
-
-        boolean useAutoFocus = getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS);
     }
 
     private void openCamera() {
