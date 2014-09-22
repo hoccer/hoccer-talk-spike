@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.fragment;
 
-import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,7 +7,6 @@ import android.provider.ContactsContract;
 import android.view.*;
 import android.widget.Button;
 import android.widget.ListAdapter;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -33,7 +31,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     private boolean mIsSmsInvitation;
     private DeviceContactsAdapter mAdapter;
     private RelativeLayout mProgressOverlay;
-    private boolean mCancelled;
+    private boolean mIsInvitationCancelled;
 
     final static Uri CONTENT_URI = ContactsContract.Data.CONTENT_URI;
 
@@ -77,7 +75,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
         @Override
         public void onClick(View view) {
             showProgressOverlay(true);
-            mCancelled = false;
+            mIsInvitationCancelled = false;
 
             XoApplication.getExecutor().execute(new Runnable() {
                 @Override
@@ -85,7 +83,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
                     try {
                         String token = XoApplication.getXoClient().generatePairingToken();
 
-                        if (!mCancelled) {
+                        if (!mIsInvitationCancelled) {
                             if (token != null) {
                                 composeInvitation(token);
                                 getActivity().finish();
@@ -158,7 +156,10 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     }
 
     private void enableOptionsMenu(boolean enabled) {
+        // toggle fragment options menu
         setMenuVisibility(enabled);
+
+        // toggle activity options menu
         if (getActivity() instanceof XoActivity) {
             ((XoActivity)getActivity()).setOptionsMenuEnabled(enabled);
         }
@@ -173,7 +174,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     @Override
     public void onPause() {
         super.onPause();
-        mCancelled = true;
+        mIsInvitationCancelled = true;
     }
 
     @Override
