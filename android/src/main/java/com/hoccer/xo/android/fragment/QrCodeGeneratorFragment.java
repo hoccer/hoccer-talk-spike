@@ -12,13 +12,15 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.release.R;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-public class QrCodeGeneratorFragment extends PagerFragment {
+public class QrCodeGeneratorFragment extends PagerFragment implements IXoContactListener {
 
     private ImageView mQrCodeView;
     private TextView mPairingTokenView;
@@ -53,6 +55,13 @@ public class QrCodeGeneratorFragment extends PagerFragment {
         if (!isTokenGenerated()) {
             generateToken();
         }
+
+        XoApplication.getXoClient().registerContactListener(this);
+    }
+
+    @Override
+    public void onPageUnselected() {
+        XoApplication.getXoClient().unregisterContactListener(this);
     }
 
     private boolean isTokenGenerated() {
@@ -140,4 +149,32 @@ public class QrCodeGeneratorFragment extends PagerFragment {
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
         return bitmap;
     }
+
+    @Override
+    public void onContactAdded(TalkClientContact contact) {}
+
+    @Override
+    public void onContactRemoved(TalkClientContact contact) {}
+
+    @Override
+    public void onClientPresenceChanged(TalkClientContact contact) {}
+
+    @Override
+    public void onClientRelationshipChanged(TalkClientContact contact) {
+        // we assume that this relationship update is a new friendship via QR code scan
+        if(contact.isClientFriend()) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getActivity(), getResources().getString(R.string.toast_pairing_successful), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onGroupPresenceChanged(TalkClientContact contact) {}
+
+    @Override
+    public void onGroupMembershipChanged(TalkClientContact contact) {}
 }

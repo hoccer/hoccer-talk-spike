@@ -62,6 +62,18 @@ public class QrCodeActivity extends XoActionbarActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mFragments[mViewPager.getCurrentItem()].onPageSelected();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mFragments[mViewPager.getCurrentItem()].onPageUnselected();
+    }
+
     private class QrCodePageChangeListener implements ViewPager.OnPageChangeListener {
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
