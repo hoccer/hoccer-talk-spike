@@ -55,61 +55,22 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     final static int EMAIL_ADDRESS_FIELD = 4;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mIsSmsInvitation = getActivity().getIntent().getBooleanExtra(EXTRA_IS_SMS_INVITATION, true);
-        mAdapter = createAdapter();
-        setListAdapter(mAdapter);
-    }
-
-    private DeviceContactsAdapter createAdapter() {
-        // query all phone numbers or email addresses and aggregate DeviceContacts
-        List<DeviceContact> contacts = new ArrayList<DeviceContact>();
-        Cursor cursor;
-        if (mIsSmsInvitation) {
-            cursor = getActivity().getContentResolver().query(CONTENT_URI, PROJECTION, SELECTION_WITH_PHONES, null, ContactsContract.Contacts.SORT_KEY_PRIMARY);
-        } else {
-            cursor = getActivity().getContentResolver().query(CONTENT_URI, PROJECTION, SELECTION_WITH_EMAILS, null, ContactsContract.Contacts.SORT_KEY_PRIMARY);
-        }
-
-        LOG.debug("Number of entries: " + cursor.getCount());
-
-        // create a DeviceContact instance for every individual contact encountered keeping the order
-        if(cursor.moveToFirst()) {
-            DeviceContact currentContact = null;
-            do {
-                String lookupKey = cursor.getString(LOOKUP_KEY_FIELD);
-
-                if (currentContact == null || !currentContact.getLookupKey().equals(lookupKey)) {
-                    String displayName = cursor.getString(DISPLAY_NAME_FIELD);
-                    String thumbnailUri = cursor.getString(THUMBNAIL_URI_FIELD);
-                    currentContact = new DeviceContact(lookupKey, displayName);
-                    currentContact.setThumbnailUri(thumbnailUri);
-                    contacts.add(currentContact);
-                }
-
-                String dataItem;
-                if (mIsSmsInvitation) {
-                    dataItem = cursor.getString(PHONE_NUMBER_FIELD);
-                } else {
-                    dataItem = cursor.getString(EMAIL_ADDRESS_FIELD);
-                }
-                currentContact.addDataItem(dataItem);
-            } while (cursor.moveToNext());
-        }
-
-        return new DeviceContactsAdapter(contacts, getActivity());
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_device_contacts_selection, container, false);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_device_contacts_selection, container, false);
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mIsSmsInvitation = getActivity().getIntent().getBooleanExtra(EXTRA_IS_SMS_INVITATION, true);
         mProgressOverlay = (RelativeLayout) view.findViewById(R.id.rl_progress_overlay);
 
         final Button inviteButton = (Button) view.findViewById(R.id.bt_continue);
         inviteButton.setOnClickListener(new InviteButtonClickListener());
 
-        return view;
+        mAdapter = createAdapter();
+        setListAdapter(mAdapter);
     }
 
     private class InviteButtonClickListener implements View.OnClickListener {
@@ -151,6 +112,45 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
                 }
             });
         }
+    }
+
+    private DeviceContactsAdapter createAdapter() {
+        // query all phone numbers or email addresses and aggregate DeviceContacts
+        List<DeviceContact> contacts = new ArrayList<DeviceContact>();
+        Cursor cursor;
+        if (mIsSmsInvitation) {
+            cursor = getActivity().getContentResolver().query(CONTENT_URI, PROJECTION, SELECTION_WITH_PHONES, null, ContactsContract.Contacts.SORT_KEY_PRIMARY);
+        } else {
+            cursor = getActivity().getContentResolver().query(CONTENT_URI, PROJECTION, SELECTION_WITH_EMAILS, null, ContactsContract.Contacts.SORT_KEY_PRIMARY);
+        }
+
+        LOG.debug("Number of entries: " + cursor.getCount());
+
+        // create a DeviceContact instance for every individual contact encountered keeping the order
+        if(cursor.moveToFirst()) {
+            DeviceContact currentContact = null;
+            do {
+                String lookupKey = cursor.getString(LOOKUP_KEY_FIELD);
+
+                if (currentContact == null || !currentContact.getLookupKey().equals(lookupKey)) {
+                    String displayName = cursor.getString(DISPLAY_NAME_FIELD);
+                    String thumbnailUri = cursor.getString(THUMBNAIL_URI_FIELD);
+                    currentContact = new DeviceContact(lookupKey, displayName);
+                    currentContact.setThumbnailUri(thumbnailUri);
+                    contacts.add(currentContact);
+                }
+
+                String dataItem;
+                if (mIsSmsInvitation) {
+                    dataItem = cursor.getString(PHONE_NUMBER_FIELD);
+                } else {
+                    dataItem = cursor.getString(EMAIL_ADDRESS_FIELD);
+                }
+                currentContact.addDataItem(dataItem);
+            } while (cursor.moveToNext());
+        }
+
+        return new DeviceContactsAdapter(contacts, getActivity());
     }
 
     private void showProgressOverlay(boolean visible) {
