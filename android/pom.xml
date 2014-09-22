@@ -200,6 +200,7 @@
         </property>
       </activation>
       <properties>
+        <android.release>true</android.release>
         <apk.signing.skip>true</apk.signing.skip>
         <apk.signing.postfix>unsigned</apk.signing.postfix>
       </properties>
