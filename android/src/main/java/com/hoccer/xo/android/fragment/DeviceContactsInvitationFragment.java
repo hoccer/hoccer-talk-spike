@@ -99,8 +99,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
                                                 "MissingPairingToken",
                                                 R.string.dialog_missing_pairing_token_title,
                                                 R.string.dialog_missing_pairing_token_message,
-                                                getActivity(),
-                                                null
+                                                getActivity()
                                         );
                                     }
                                 });
