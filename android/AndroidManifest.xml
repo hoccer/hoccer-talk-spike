@@ -98,9 +98,9 @@
                 android:name="com.google.android.maps.v2.API_KEY"
                 android:value="${google.maps.api.key}"/>
 
-        <!-- Contact list - our main activity -->
+        <!-- Chat list - our main activity -->
         <activity
-                android:name="com.hoccer.xo.android.activity.ContactsActivity"
+                android:name="com.hoccer.xo.android.activity.ChatsActivity"
                 android:label="@string/actionbar_default_title"
                 android:configChanges="keyboardHidden|orientation|screenSize"
                 android:screenOrientation="portrait"
@@ -153,14 +153,14 @@
         <!-- MediaBrowserActivity activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MediaBrowserActivity"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
+                android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
                 android:screenOrientation="portrait"
                 android:windowSoftInputMode="stateHidden"
                 android:exported="true">
 
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
+                    android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
         </activity>
 
         <!-- MediaCollectionSelection activity -->

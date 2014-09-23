@@ -24,13 +24,13 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.adapter.ContactsPageAdapter;
+import com.hoccer.xo.android.adapter.ChatsPageAdapter;
 import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.content.contentselectors.VideoSelector;
-import com.hoccer.xo.android.fragment.NearbyContactsFragment;
+import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
@@ -38,14 +38,14 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class ContactsActivity extends XoActionbarActivity implements IXoStateListener, IXoContactListener, IXoPairingListener {
+public class ChatsActivity extends XoActionbarActivity implements IXoStateListener, IXoContactListener, IXoPairingListener {
 
-    private final static Logger LOG = Logger.getLogger(ContactsActivity.class);
+    private final static Logger LOG = Logger.getLogger(ChatsActivity.class);
     private static final String ACTION_ALREADY_HANDLED = "com.hoccer.xo.android.intent.action.ALREADY_HANDLED";
 
     private ViewPager mViewPager;
     private ActionBar mActionBar;
-    private ContactsPageAdapter mAdapter;
+    private ChatsPageAdapter mAdapter;
 
     private boolean mEnvironmentUpdatesEnabled;
     private boolean mNoUserInput = false;
@@ -70,7 +70,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         mViewPager.setOnPageChangeListener(new ConversationsPageListener());
 
         mActionBar = getActionBar();
-        mAdapter = new ContactsPageAdapter(getSupportFragmentManager(), tabs.length);
+        mAdapter = new ChatsPageAdapter(getSupportFragmentManager(), tabs.length);
         mViewPager.setAdapter(mAdapter);
         mActionBar.setHomeButtonEnabled(false);
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -202,7 +202,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         getBackgroundExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                getXoClient().performTokenPairing(token, ContactsActivity.this);
+                getXoClient().performTokenPairing(token, ChatsActivity.this);
             }
         });
     }
@@ -212,7 +212,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(ContactsActivity.this, R.string.toast_pairing_successful, Toast.LENGTH_LONG).show();
+                Toast.makeText(ChatsActivity.this, R.string.toast_pairing_successful, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -222,7 +222,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(ContactsActivity.this, R.string.toast_pairing_failed, Toast.LENGTH_LONG).show();
+                Toast.makeText(ChatsActivity.this, R.string.toast_pairing_failed, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -243,7 +243,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         LOG.debug("refreshEnvironmentUpdater");
         int position = mViewPager.getCurrentItem();
         Fragment fragment = mAdapter.getItem(position);
-        if (fragment instanceof NearbyContactsFragment) {
+        if (fragment instanceof NearbyChatListFragment) {
             if (mEnvironmentUpdatesEnabled) {
                 if (isLocationServiceEnabled()) {
                     LOG.debug("refreshEnvironmentUpdater:startNearbySession");
@@ -258,8 +258,8 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     private void shutDownNearbySession() {
         LOG.debug("shutDownNearbySession");
         XoApplication.stopNearbySession();
-        NearbyContactsFragment nearbyContactsFragment = (NearbyContactsFragment) mAdapter.getItem(2);
-        nearbyContactsFragment.shutdownNearbyChat();
+        NearbyChatListFragment nearbyChatListFragment = (NearbyChatListFragment) mAdapter.getItem(2);
+        nearbyChatListFragment.shutdownNearbyChat();
     }
 
     private boolean isLocationServiceEnabled() {

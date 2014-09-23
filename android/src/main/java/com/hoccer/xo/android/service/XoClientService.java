@@ -18,7 +18,7 @@ import com.hoccer.talk.client.*;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.ContactsActivity;
+import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.sms.SmsReceiver;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
@@ -521,7 +521,7 @@ public class XoClientService extends Service {
             builder.setNumber(numUnconfirmed);
         }
         // create pending intent
-        Intent contactsIntent = new Intent(this, ContactsActivity.class);
+        Intent contactsIntent = new Intent(this, ChatsActivity.class);
         PendingIntent pendingIntent = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             pendingIntent = TaskStackBuilder.create(this).addNextIntent(contactsIntent)
@@ -659,7 +659,7 @@ public class XoClientService extends Service {
             ContactUnseenMessageHolder holder = contactsMap.values().iterator().next();
             TalkClientContact contact = holder.getContact();
 
-            Intent messagingIntent = new Intent(this, ContactsActivity.class);
+            Intent messagingIntent = new Intent(this, ChatsActivity.class);
             messagingIntent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
 
             // make a pending intent with correct back-stack
@@ -667,7 +667,7 @@ public class XoClientService extends Service {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 pendingIntent =
                         TaskStackBuilder.create(this)
-                                .addParentStack(ContactsActivity.class)
+                                .addParentStack(ChatsActivity.class)
                                 .addNextIntentWithParentStack(messagingIntent)
                                 .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
             } else {
@@ -690,7 +690,7 @@ public class XoClientService extends Service {
             }
         } else {
             // create pending intent
-            Intent contactsIntent = new Intent(this, ContactsActivity.class);
+            Intent contactsIntent = new Intent(this, ChatsActivity.class);
             PendingIntent pendingIntent;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 pendingIntent =

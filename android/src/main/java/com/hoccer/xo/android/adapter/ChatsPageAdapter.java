@@ -3,30 +3,30 @@ package com.hoccer.xo.android.adapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import com.hoccer.xo.android.fragment.ContactsFragment;
+import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.FriendRequestFragment;
-import com.hoccer.xo.android.fragment.NearbyContactsFragment;
+import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 
-public class ContactsPageAdapter extends FragmentPagerAdapter {
+public class ChatsPageAdapter extends FragmentPagerAdapter {
     private int mCount;
-    private ContactsFragment mContactsFragment;
+    private ChatListFragment mChatListFragment;
     private FriendRequestFragment mFriendRequestFragment;
-    private NearbyContactsFragment mNearbyChatFragment;
+    private NearbyChatListFragment mNearbyChatFragment;
 
-    public ContactsPageAdapter(FragmentManager fm, int count) {
+    public ChatsPageAdapter(FragmentManager fm, int count) {
         super(fm);
         mCount = count;
 
-        mContactsFragment = new ContactsFragment();
+        mChatListFragment = new ChatListFragment();
         mFriendRequestFragment = new FriendRequestFragment();
-        mNearbyChatFragment = new NearbyContactsFragment();
+        mNearbyChatFragment = new NearbyChatListFragment();
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return mContactsFragment;
+                return mChatListFragment;
             case 1:
                 return mFriendRequestFragment;
             case 2:

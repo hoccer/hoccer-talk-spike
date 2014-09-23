@@ -12,7 +12,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.xo.android.adapter.NearbyContactsAdapter;
+import com.hoccer.xo.android.adapter.NearbyChatsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.util.ColorSchemeManager;
@@ -23,10 +23,10 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.SQLException;
 
 
-public class NearbyContactsFragment extends XoListFragment implements IXoContactListener {
-    private static final Logger LOG = Logger.getLogger(NearbyContactsFragment.class);
+public class NearbyChatListFragment extends XoListFragment implements IXoContactListener {
+    private static final Logger LOG = Logger.getLogger(NearbyChatListFragment.class);
 
-    private NearbyContactsAdapter mNearbyAdapter;
+    private NearbyChatsAdapter mNearbyAdapter;
     private TalkClientContact mCurrentNearbyGroup;
     private ListView mContactList;
     private ImageView mPlaceholderImageFrame;
@@ -138,7 +138,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     private void createAdapter() {
         if (mNearbyAdapter == null) {
-            mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity(), mCurrentNearbyGroup);
+            mNearbyAdapter = new NearbyChatsAdapter(getXoDatabase(), getXoActivity(), mCurrentNearbyGroup);
             mNearbyAdapter.registerListeners();
             runOnUiThread(new Runnable() {
                 @Override

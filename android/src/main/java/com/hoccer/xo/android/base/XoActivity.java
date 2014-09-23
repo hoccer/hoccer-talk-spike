@@ -254,7 +254,7 @@ public abstract class XoActivity extends FragmentActivity {
 
     @Override
     public void onBackPressed() {
-        if (!(this instanceof ContactsActivity)) {
+        if (!(this instanceof ChatsActivity)) {
             isBackPressed = true;
         }
         super.onBackPressed();

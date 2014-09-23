@@ -29,9 +29,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class NearbyContactsAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
+public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
 
-    private static final Logger LOG = Logger.getLogger(NearbyContactsAdapter.class);
+    private static final Logger LOG = Logger.getLogger(NearbyChatsAdapter.class);
     private static final long RATE_LIMIT_MSECS = 1000;
 
     private XoClientDatabase mDatabase;
@@ -43,7 +43,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
     private List<TalkClientContact> mNearbyContacts = new ArrayList<TalkClientContact>();
     private TalkClientContact mCurrentNearbyGroup;
 
-    public NearbyContactsAdapter(XoClientDatabase db, XoActivity xoActivity, TalkClientContact group) {
+    public NearbyChatsAdapter(XoClientDatabase db, XoActivity xoActivity, TalkClientContact group) {
         super();
         mDatabase = db;
         mXoActivity = xoActivity;
@@ -168,13 +168,13 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
         if (delta < RATE_LIMIT_MSECS) {
             long delay = RATE_LIMIT_MSECS - delta;
 
-            LOG.debug("Scheduling update of NearbyContactsAdapter with delay " + delay);
+            LOG.debug("Scheduling update of NearbyChatsAdapter with delay " + delay);
             mNotifyFuture = mExecutor.schedule(
                     new Runnable() {
                         @Override
                         public void run() {
                             mNotifyTimestamp = System.currentTimeMillis();
-                            LOG.debug("Executing scheduled update of NearbyContactsAdapter.");
+                            LOG.debug("Executing scheduled update of NearbyChatsAdapter.");
                             updateFromDatabase(group);
                         }
                     },
@@ -182,7 +182,7 @@ public class NearbyContactsAdapter extends BaseAdapter implements IXoContactList
                     TimeUnit.MILLISECONDS);
         } else {
             mNotifyTimestamp = System.currentTimeMillis();
-            LOG.debug("Updating NearbyContactsAdapter right away.");
+            LOG.debug("Updating NearbyChatsAdapter right away.");
             updateFromDatabase(group);
         }
     }
