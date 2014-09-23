@@ -4,9 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import com.hoccer.xo.release.R;
 
-/**
- * Created by nico on 27/06/2014.
- */
+
 public class LegalImprintActivity extends Activity {
 
     public static final String DISPLAY_MODE = "xo_legal_imprint_display_mode";
