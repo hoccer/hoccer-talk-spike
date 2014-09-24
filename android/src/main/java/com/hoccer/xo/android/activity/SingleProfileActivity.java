@@ -3,21 +3,15 @@ package com.hoccer.xo.android.activity;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Menu;
-import android.view.MenuItem;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkRelationship;
-import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.release.R;
 
 /**
  * Activity wrapping a single profile fragment
  */
-public class SingleProfileActivity extends XoActionbarActivity {
+public class SingleProfileActivity extends ComposableActivity {
 
     /* use this extra to open in "client registration" mode */
     public static final String EXTRA_CLIENT_CREATE_SELF = "clientCreateSelf";
@@ -29,6 +23,11 @@ public class SingleProfileActivity extends XoActionbarActivity {
     ActionBar mActionBar;
 
     SingleProfileFragment mSingleProfileFragment;
+
+    @Override
+    protected ActivityComponent[] createComponents() {
+        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+    }
 
     @Override
     protected int getLayoutResource() {

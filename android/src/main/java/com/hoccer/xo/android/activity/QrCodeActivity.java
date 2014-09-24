@@ -6,13 +6,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.fragment.PagerFragment;
 import com.hoccer.xo.android.fragment.QrCodeGeneratorFragment;
 import com.hoccer.xo.android.fragment.QrCodeScannerFragment;
 import com.hoccer.xo.release.R;
 
-public class QrCodeActivity extends XoActionbarActivity {
+public class QrCodeActivity extends ComposableActivity {
 
     private ViewPager mViewPager;
     private PagerFragment[] mFragments;
@@ -25,6 +25,11 @@ public class QrCodeActivity extends XoActionbarActivity {
     @Override
     protected int getMenuResource() {
         return -1;
+    }
+
+    @Override
+    protected ActivityComponent[] createComponents() {
+        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
     }
 
     @Override
