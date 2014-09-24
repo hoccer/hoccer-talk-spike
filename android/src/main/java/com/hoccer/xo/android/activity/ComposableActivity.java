@@ -2,13 +2,14 @@ package com.hoccer.xo.android.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import com.hoccer.xo.android.base.XoActivity;
 
 
 /**
  * Base class for activities composed of ActivityComponents
  * This class is part of the component based design pattern to favor composition over inheritance in some cases.
  */
-public abstract class ComposableActivity extends FragmentActivity{
+public abstract class ComposableActivity extends XoActivity {
 
     private ActivityComponent[] mComponents;
 
