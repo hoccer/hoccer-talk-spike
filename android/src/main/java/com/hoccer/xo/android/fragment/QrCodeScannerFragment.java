@@ -148,7 +148,6 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
             mConfirmCodeButton.setEnabled(false);
             mPairingTokenEditText.clearFocus();
             XoApplication.getXoClient().performTokenPairing(pairingToken, this);
-            hideSoftKeyboard();
         }
     }
 
