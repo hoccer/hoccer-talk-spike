@@ -2,6 +2,8 @@ package com.hoccer.xo.android.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import com.hoccer.xo.android.base.XoActivity;
 
 
@@ -45,6 +47,42 @@ public abstract class ComposableActivity extends XoActivity {
         for(final ActivityComponent component : mComponents) {
             component.onResume();
         }
+    }
+
+    /*
+     * Returns false if one of the components returns false.
+     * Returns base class return value otherwise.
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean result = super.onCreateOptionsMenu(menu);
+
+        if(result) {
+            for (final ActivityComponent component : mComponents) {
+                if (!component.onCreateOptionsMenu(menu)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        boolean isConsumed = super.onOptionsItemSelected(item);
+
+        if(!isConsumed) {
+            for (final ActivityComponent component : mComponents) {
+                if (component.onOptionsItemSelected(item)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return true;
     }
 
     @Override

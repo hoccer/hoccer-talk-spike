@@ -25,4 +25,12 @@ public abstract class ActivityComponent {
 
     public void onDestroy() {
     }
+
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        return false;
+    }
 }
