@@ -40,6 +40,13 @@
         <item name="android:textColor">#ffffff</item>
     </style>
 
+    <style name="ButtonGrayAppBaseTheme" parent="android:Widget.Button">
+        <item name="android:background">@drawable/appbasetheme_btn_default_gray_holo_light</item>
+        <item name="android:minHeight">48dip</item>
+        <item name="android:minWidth">64dip</item>
+        <item name="android:textColor">#ffffff</item>
+    </style>
+
     <style name="ImageButtonAppBaseTheme" parent="android:Widget.ImageButton">
         <item name="android:background">@drawable/appbasetheme_btn_default_holo_light</item>
     </style>

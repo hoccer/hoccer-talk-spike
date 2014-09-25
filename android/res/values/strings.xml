@@ -30,12 +30,14 @@
     <string name="menu_reconnect">Reconnect</string>
     <string name="menu_quit">Quit</string>
     <string name="menu_clear_conversation">Clear conversation</string>
+    <string name="menu_contacts">Contacts</string>
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://hoccer.com/hoccer-xo-tutorial/</string>
     <string name="link_faq">http://hoccer.com/hoccer-xo-faq/</string>
 
     <!-- Contacts fragment -->
+    <string name="contacts_title">Contacts</string>
     <string name="contacts_category_friends">Friends</string>
     <string name="contacts_category_groups">Groups</string>
     <string name="contacts_empty_info">You have no contacts.</string>
@@ -44,9 +46,9 @@
     <string name="contacts_sms_invitation_description">has sent you an invitation via SMS.
         Do you wish to accept?
     </string>
+    <string name="message_and_attachment_count_info">%1$d messages | %2$d attachments</string>
 
     <!-- Deleting attachments -->
-
     <string name="dialog_attachment_delete_title">Delete Attachment</string>
     <string name="dialog_attachment_delete_message">Delete selected attachments and related chat messages?</string>
 
@@ -365,6 +367,11 @@
         <item>CHATS</item>
         <item>INVITATIONS</item>
         <item>NEARBY</item>
+    </string-array>
+
+    <string-array name="contacts_tab_names">
+      <item>FRIENDS</item>
+      <item>GROUPS</item>
     </string-array>
 
     <string-array name="qr_code_tab_names">

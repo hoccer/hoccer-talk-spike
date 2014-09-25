@@ -29,12 +29,14 @@
     <string name="menu_reconnect">erneut verbinden</string>
     <string name="menu_quit">schließen</string>
     <string name="menu_clear_conversation">Chat löschen</string>
+    <string name="menu_contacts">Kontakte</string>
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://hoccer.com/hoccer-xo-anleitung/</string>
     <string name="link_faq">http://hoccer.com/hoccer-xo-fragen-antworten/</string>
 
     <!-- Contacts fragment -->
+    <string name="contacts_title">Kontakte</string>
     <string name="contacts_category_friends">Freunde</string>
     <string name="contacts_category_groups">Gruppen</string>
     <string name="contacts_empty_info">Du hast noch keine Kontakte hinzugefügt</string>
@@ -43,6 +45,7 @@
     <string name="contacts_sms_invitation_description">hat dir eine SMS-Einladung geschickt.
         Möchtest du die Einladung annehmen?
     </string>
+    <string name="message_and_attachment_count_info">%1$d Nachrichten | %2$d Anhänge</string>
 
     <!-- Deleting attachments -->
     <string name="dialog_attachment_delete_title">Anhang Löschen</string>
@@ -362,6 +365,11 @@
         <item>IN DER NÄHE</item>
     </string-array>
 
+    <string-array name="contacts_tab_names">
+      <item>FREUNDE</item>
+      <item>GRUPPEN</item>
+    </string-array>
+
     <string-array name="qr_code_tab_names">
         <item>SCANNEN</item>
         <item>GENERIEREN</item>
@@ -405,5 +413,6 @@
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
     <string name="nearby_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
+
 
 </resources>
