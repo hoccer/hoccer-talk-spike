@@ -13,6 +13,7 @@ import com.hoccer.talk.server.database.migrations.DatabaseMigrationManager;
 import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
 import com.hoccer.talk.server.cryptoutils.*;
 import com.hoccer.talk.servlets.CertificateInfoServlet;
+import com.hoccer.talk.servlets.InvitationServlet;
 import com.hoccer.talk.servlets.ServerInfoServlet;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -112,12 +113,18 @@ public class TalkServerMain {
         serverInfoContextHandler.addServlet(ServerInfoServlet.class, "/info");
         serverInfoContextHandler.addServlet(CertificateInfoServlet.class, "/certificates");
 
+        // handler for invitation landing pages
+        ServletContextHandler invitationContextHandler = new ServletContextHandler();
+        invitationContextHandler.setContextPath("/invite");
+        invitationContextHandler.addServlet(InvitationServlet.class, "/*");
+
         // handler for talk websocket connections
         WebSocketHandler clientHandler = new TalkRpcConnectionHandler(talkServer);
 
         // set server handlers
         HandlerCollection handlerCollection = new HandlerCollection();
         handlerCollection.addHandler(clientHandler);
+        handlerCollection.addHandler(invitationContextHandler);
         handlerCollection.addHandler(serverInfoContextHandler);
         handlerCollection.addHandler(metricsContextHandler);
         server.setHandler(handlerCollection);
