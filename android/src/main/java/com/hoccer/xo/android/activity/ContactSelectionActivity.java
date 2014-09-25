@@ -6,6 +6,7 @@ import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 import com.hoccer.xo.release.R;

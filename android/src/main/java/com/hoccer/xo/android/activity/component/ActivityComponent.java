@@ -1,7 +1,7 @@
-package com.hoccer.xo.android.activity;
+package com.hoccer.xo.android.activity.component;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -10,13 +10,13 @@ import android.view.MenuItem;
  */
 public abstract class ActivityComponent {
 
-    private final Activity mActivity;
+    private final FragmentActivity mActivity;
 
-    protected ActivityComponent(final Activity activity) {
+    protected ActivityComponent(final FragmentActivity activity) {
         mActivity = activity;
     }
 
-    public Activity getActivity() {
+    public FragmentActivity getActivity() {
         return mActivity;
     }
 

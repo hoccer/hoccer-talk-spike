@@ -1,11 +1,10 @@
 package com.hoccer.xo.android.activity.component;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.hoccer.xo.android.activity.ActivityComponent;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
@@ -21,7 +20,7 @@ public class MediaPlayerActivityComponent extends ActivityComponent {
     private Menu mMenu;
     private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
 
-    public MediaPlayerActivityComponent(final Activity activity) {
+    public MediaPlayerActivityComponent(final FragmentActivity activity) {
         super(activity);
     }
 

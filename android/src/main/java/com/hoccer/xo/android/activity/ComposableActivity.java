@@ -1,9 +1,9 @@
 package com.hoccer.xo.android.activity;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.base.XoActivity;
 
 
