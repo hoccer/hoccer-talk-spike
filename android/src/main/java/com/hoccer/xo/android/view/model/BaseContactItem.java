@@ -18,7 +18,7 @@ public abstract class BaseContactItem<T> {
 
     public View getView(View view, ViewGroup parent) {
         if(view == null) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact_client, null);
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_client, null);
         }
         return configure(parent.getContext(), view);
     }

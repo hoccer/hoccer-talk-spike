@@ -59,7 +59,7 @@ public class FriendRequestAdapter extends XoAdapter {
         TalkClientContact contact = getItem(i);
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.item_contact_client, null);
+            view = inflater.inflate(R.layout.item_chat_client, null);
         }
 
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);

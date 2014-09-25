@@ -41,12 +41,12 @@ public class RichContactsAdapter extends ContactsAdapter {
 
     @Override
     protected int getClientLayout() {
-        return R.layout.item_contact_client;
+        return R.layout.item_chat_client;
     }
 
     @Override
     protected int getGroupLayout() {
-        return R.layout.item_contact_client;
+        return R.layout.item_chat_client;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class RichContactsAdapter extends ContactsAdapter {
 
     @Override
     protected int getNearbyHistoryLayout() {
-        return R.layout.item_contact_client;
+        return R.layout.item_chat_client;
     }
 
     @Override

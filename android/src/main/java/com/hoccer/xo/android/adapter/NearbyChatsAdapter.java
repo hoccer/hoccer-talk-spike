@@ -70,7 +70,7 @@ public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListene
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact_client, null);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_client, null);
         }
         updateContact(convertView, (TalkClientContact) getItem(position));
         return convertView;
