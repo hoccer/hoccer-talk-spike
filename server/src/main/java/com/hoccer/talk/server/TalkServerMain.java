@@ -19,7 +19,9 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
@@ -118,6 +120,12 @@ public class TalkServerMain {
         invitationContextHandler.setContextPath("/invite");
         invitationContextHandler.addServlet(InvitationServlet.class, "/*");
 
+        // handler for static files
+        ContextHandler staticHandler = new ContextHandler("/static");
+        ResourceHandler staticResourceHandler = new ResourceHandler();
+        staticResourceHandler.setResourceBase(getClass().getResource("/static").toExternalForm());
+        staticHandler.setHandler(staticResourceHandler);
+
         // handler for talk websocket connections
         WebSocketHandler clientHandler = new TalkRpcConnectionHandler(talkServer);
 
@@ -125,6 +133,7 @@ public class TalkServerMain {
         HandlerCollection handlerCollection = new HandlerCollection();
         handlerCollection.addHandler(clientHandler);
         handlerCollection.addHandler(invitationContextHandler);
+        handlerCollection.addHandler(staticHandler);
         handlerCollection.addHandler(serverInfoContextHandler);
         handlerCollection.addHandler(metricsContextHandler);
         server.setHandler(handlerCollection);
