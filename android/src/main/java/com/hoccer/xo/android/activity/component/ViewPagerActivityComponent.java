@@ -15,7 +15,7 @@ import com.hoccer.xo.android.fragment.IPagerFragment;
 public class ViewPagerActivityComponent extends ActivityComponent {
 
     private ViewPager mViewPager;
-    private final IPagerFragment[] mFragments;
+    private final Fragment[] mFragments;
     private final int mViewPagerId;
     private final int mTabNamesId;
 
@@ -37,7 +37,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         mViewPager.setAdapter(new FragmentPagerAdapter(getActivity().getSupportFragmentManager()) {
             @Override
             public Fragment getItem(final int position) {
-                return (Fragment)mFragments[position];
+                return mFragments[position];
             }
 
             @Override
@@ -60,13 +60,13 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     @Override
     public void onResume() {
         super.onResume();
-        mFragments[mViewPager.getCurrentItem()].onPageSelected();
+        ((IPagerFragment)mFragments[mViewPager.getCurrentItem()]).onPageSelected();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mFragments[mViewPager.getCurrentItem()].onPageUnselected();
+        ((IPagerFragment)mFragments[mViewPager.getCurrentItem()]).onPageUnselected();
     }
 
     @Override
@@ -89,7 +89,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
 
         @Override
         public void onPageScrollStateChanged(final int state) {
-            mFragments[mViewPager.getCurrentItem()].onPageScrollStateChanged(state);
+            ((IPagerFragment)mFragments[mViewPager.getCurrentItem()]).onPageScrollStateChanged(state);
         }
     }
 
@@ -98,13 +98,13 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         public void onTabSelected(final ActionBar.Tab tab, final FragmentTransaction ft) {
             final int position = tab.getPosition();
             mViewPager.setCurrentItem(position);
-            mFragments[position].onPageSelected();
+            ((IPagerFragment)mFragments[position]).onPageSelected();
         }
 
         @Override
         public void onTabUnselected(final ActionBar.Tab tab, final FragmentTransaction ft) {
             final int position = tab.getPosition();
-            mFragments[position].onPageUnselected();
+            ((IPagerFragment)mFragments[position]).onPageUnselected();
         }
 
         @Override
