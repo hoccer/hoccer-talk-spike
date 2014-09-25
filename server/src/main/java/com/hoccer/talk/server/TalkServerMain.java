@@ -10,6 +10,8 @@ import com.hoccer.scm.GitInfo;
 import com.hoccer.talk.server.database.JongoDatabase;
 import com.hoccer.talk.server.database.OrmliteDatabase;
 import com.hoccer.talk.server.database.migrations.DatabaseMigrationManager;
+import com.hoccer.talk.server.push.ApnsConfiguration;
+import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
 import com.hoccer.talk.server.cryptoutils.*;
 import com.hoccer.talk.servlets.CertificateInfoServlet;
@@ -27,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -76,19 +79,21 @@ public class TalkServerMain {
     private void checkApnsCertificateExpirationStatus(TalkServerConfiguration config) {
         // report APNS expiry
         if (config.isApnsEnabled()) {
-            final P12CertificateChecker p12ProductionVerifier = new P12CertificateChecker(
-                    config.getApnsCertProductionPath(),
-                    config.getApnsCertProductionPassword());
-            final P12CertificateChecker p12SandboxVerifier = new P12CertificateChecker(
-                    config.getApnsCertProductionPath(),
-                    config.getApnsCertProductionPassword());
-            try {
-                LOG.info("APNS production cert expiryDate is: " + p12ProductionVerifier.getCertificateExpiryDate());
-                LOG.info("APNS production cert expiration status: " + p12ProductionVerifier.isExpired());
-                LOG.info("APNS sandbox cert expiryDate is: " + p12SandboxVerifier.getCertificateExpiryDate());
-                LOG.info("APNS sandbox cert expiration status: " + p12SandboxVerifier.isExpired());
-            } catch (IOException e) {
-                e.printStackTrace();
+            for (Map.Entry<String, ApnsConfiguration> entry : config.getApnsConfigurations().entrySet()) {
+                String clientName = entry.getKey();
+                ApnsConfiguration apnsConfiguration = entry.getValue();
+
+                for (PushAgent.APNS_SERVICE_TYPE type : PushAgent.APNS_SERVICE_TYPE.values()) {
+                    ApnsConfiguration.Certificate cert = apnsConfiguration.getCertificate(type);
+                    final P12CertificateChecker checker = new P12CertificateChecker(cert.getPath(), cert.getPassword());
+
+                    try {
+                        LOG.info("APNS " + type + " cert expiryDate is: " + checker.getCertificateExpiryDate());
+                        LOG.info("APNS " + type + " cert expiration status: " + checker.isExpired());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }

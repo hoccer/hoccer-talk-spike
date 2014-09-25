@@ -44,21 +44,23 @@ public class PushMessage {
     }
 
     private void performApns() {
-        LOG.info("performApns: to clientId: '" + mClient.getClientId() + "', message: '" + mMessage + "'");
+        boolean useSandbox = mClientHostInfo != null && "debug".equals(mClientHostInfo.getClientBuildVariant());
+        String clientName = mClientHostInfo != null ? mClientHostInfo.getClientName() : mConfig.getApnsDefaultClientName();
 
-        // We use the production service as default in all cases, even if no client host info is present,
-        // sandbox will only be used if buildVariant of host info is 'debug'
-        ApnsService apnsService = mAgent.getApnsService(PushAgent.APNS_SERVICE_TYPE.PRODUCTION);
-        if (mClientHostInfo != null && "debug".equals(mClientHostInfo.getClientBuildVariant())) {
-            LOG.info("  * using sandbox apns service");
-            apnsService = mAgent.getApnsService(PushAgent.APNS_SERVICE_TYPE.SANDBOX);
+        PushAgent.APNS_SERVICE_TYPE type = useSandbox ? PushAgent.APNS_SERVICE_TYPE.SANDBOX : PushAgent.APNS_SERVICE_TYPE.PRODUCTION;
+        ApnsService apnsService = mAgent.getApnsService(clientName, type);
+
+        if (apnsService != null) {
+            LOG.info("performApns: to clientId: '" + mClient.getClientId() + "', destination: '" + type + "', message: '" + mMessage + "'");
+
+            PayloadBuilder b = APNS.newPayload();
+
+            b.alertBody(mMessage);
+            b.sound("default");
+            apnsService.push(mClient.getApnsToken(), b.build());
+        } else {
+            LOG.error("performApns: skipped, no service configured for clientName '" + clientName + "'");
         }
-
-        PayloadBuilder b = APNS.newPayload();
-
-        b.alertBody(mMessage);
-        b.sound("default");
-        apnsService.push(mClient.getApnsToken(), b.build());
     }
 
     private void performGcm() {
