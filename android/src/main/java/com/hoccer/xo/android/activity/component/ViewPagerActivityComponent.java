@@ -55,7 +55,6 @@ public class ViewPagerActivityComponent extends ActivityComponent {
                     .setTabListener(new TabListener());
             actionBar.addTab(tab);
         }
-
     }
 
     @Override
