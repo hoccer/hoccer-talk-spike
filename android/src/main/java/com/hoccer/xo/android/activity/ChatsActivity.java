@@ -58,7 +58,7 @@ public class ChatsActivity extends XoActionbarActivity implements IXoStateListen
 
     @Override
     protected int getMenuResource() {
-        return R.menu.fragment_contacts;
+        return R.menu.menu_activity_chats;
     }
 
     @Override
@@ -291,6 +291,8 @@ public class ChatsActivity extends XoActionbarActivity implements IXoStateListen
         super.onCreateOptionsMenu(menu);
         menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
 
+
+
         return true;
     }
 
@@ -301,6 +303,9 @@ public class ChatsActivity extends XoActionbarActivity implements IXoStateListen
             case R.id.menu_audio_attachment_list:
                 startMediaBrowserActivity();
                 break;
+            case R.id.menu_contacts:
+                startContactsActivity();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -308,6 +313,11 @@ public class ChatsActivity extends XoActionbarActivity implements IXoStateListen
 
     public void startMediaBrowserActivity() {
         Intent intent = new Intent(this, MediaBrowserActivity.class);
+        startActivity(intent);
+    }
+
+    private void startContactsActivity() {
+        Intent intent = new Intent(this, ContactsActivity.class);
         startActivity(intent);
     }
 

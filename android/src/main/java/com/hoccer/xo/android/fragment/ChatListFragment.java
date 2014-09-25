@@ -10,6 +10,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.activity.ContactsActivity;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.ChatsAdapter;
 import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
@@ -43,8 +44,8 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
 
     private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
-    private MenuItem mPairWithContactMenuItem;
-    private MenuItem mAddGroupMenuItem;
+    private MenuItem mMyProfileMenuItem;
+    private MenuItem mContactsMenuItem;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,8 +85,8 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        mAddGroupMenuItem = menu.findItem(R.id.menu_new_group);
-        mPairWithContactMenuItem = menu.findItem(R.id.menu_pair);
+        mContactsMenuItem = menu.findItem(R.id.menu_contacts);
+        mMyProfileMenuItem = menu.findItem(R.id.menu_my_profile);
     }
 
     @Override
@@ -148,8 +149,8 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
 
     @Override
     protected void onSearchModeEnabled() {
-        mAddGroupMenuItem.setVisible(false);
-        mPairWithContactMenuItem.setVisible(false);
+        mContactsMenuItem.setVisible(false);
+        mMyProfileMenuItem.setVisible(false);
         if (mSearchAdapterReference.get() == null) {
             mSearchAdapterReference = new WeakReference<SearchAdapter>(new SearchAdapter(mAdapter));
 
@@ -158,12 +159,12 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
 
     @Override
     protected void onSearchModeDisabled() {
-        if (mAddGroupMenuItem != null) {
-            mAddGroupMenuItem.setVisible(true);
+        if (mContactsMenuItem != null) {
+            mContactsMenuItem.setVisible(true);
         }
 
-        if (mPairWithContactMenuItem != null) {
-            mPairWithContactMenuItem.setVisible(true);
+        if (mMyProfileMenuItem != null) {
+            mMyProfileMenuItem.setVisible(true);
         }
     }
 
