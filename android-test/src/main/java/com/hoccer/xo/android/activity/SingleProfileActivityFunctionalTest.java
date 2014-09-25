@@ -13,14 +13,14 @@ import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import org.apache.log4j.Logger;
 
 
-public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<SingleProfileActivity> {
+public class SingleProfileActivityFunctionalTest extends ActivityInstrumentationTestCase2<SingleProfileActivity> {
 
     private static final Logger LOG = Logger.getLogger(SingleProfileActivity.class);
 
     private SingleProfileActivity activity;
     private SingleProfileFragment singleProfileFragment;
 
-    public SingleProfileActivityTest() {
+    public SingleProfileActivityFunctionalTest() {
         super(SingleProfileActivity.class);
     }
 
@@ -36,7 +36,7 @@ public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<
                 findFragmentByTag(SingleProfileActivity.SINGLE_PROFILE_FRAGMENT);
     }
 
-    public void testPreConditions() {
+    public void testPreconditions() {
         assertTrue(activity.getIntent().hasExtra(SingleProfileActivity.EXTRA_CLIENT_CREATE_SELF));
         assertNotNull(singleProfileFragment);
         assertTrue(singleProfileFragment.isAdded());
