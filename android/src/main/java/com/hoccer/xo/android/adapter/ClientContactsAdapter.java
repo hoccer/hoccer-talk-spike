@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.adapter;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -137,7 +139,8 @@ public class ClientContactsAdapter extends BaseAdapter implements IXoContactList
             e.printStackTrace();
         }
         sortTalkClientContacts();
-        notifyDataSetChanged();
+
+        refreshView();
     }
 
     @Override
@@ -175,5 +178,15 @@ public class ClientContactsAdapter extends BaseAdapter implements IXoContactList
         invitedMeContacts.addAll(invitedContacts);
 
         mClientContactList = invitedMeContacts;
+    }
+
+    private void refreshView() {
+        Handler guiHandler = new Handler(Looper.getMainLooper());
+        guiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 }
