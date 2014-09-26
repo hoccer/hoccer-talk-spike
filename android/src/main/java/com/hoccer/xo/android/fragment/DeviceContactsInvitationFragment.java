@@ -204,17 +204,17 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     }
 
     private void composeInviteSms(String[] phoneNumbers, String token) {
-        String urlScheme = XoApplication.getXoClient().getConfiguration().getUrlScheme();
+        String invitationServerUri = XoApplication.getConfiguration().getInvitationServerUri();
         String selfName = XoApplication.getXoClient().getSelfContact().getName();
-        String message = String.format(getString(R.string.sms_invitation_text), urlScheme, token, selfName);
+        String message = String.format(getString(R.string.sms_invitation_text), invitationServerUri, token, selfName);
         ContactOperations.sendSMS(getActivity(), message, phoneNumbers);
     }
 
     private void composeInviteEmail(String[] eMailAddresses, String token) {
-        String urlScheme = XoApplication.getXoClient().getConfiguration().getUrlScheme();
+        String invitationServerUri = XoApplication.getConfiguration().getInvitationServerUri();
         String selfName = XoApplication.getXoClient().getSelfContact().getName();
         String subject = getString(R.string.email_invitation_subject);
-        String message = String.format(getString(R.string.email_invitation_text), urlScheme, token, selfName);
+        String message = String.format(getString(R.string.email_invitation_text), invitationServerUri, token, selfName);
         ContactOperations.sendEMail(getActivity(), subject, message, eMailAddresses);
     }
 }
