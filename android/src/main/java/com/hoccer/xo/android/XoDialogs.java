@@ -89,6 +89,10 @@ public class XoDialogs {
         dialogFragment.show(activity.getFragmentManager(), tag);
     }
 
+    public static void showOkDialog(final String tag, final int titleId, final int messageId, final Activity activity) {
+        showOkDialog(tag, titleId, messageId, activity, null);
+    }
+
     public static void showOkDialog(final String tag, final int titleId, final int messageId, final Activity activity, final DialogInterface.OnClickListener okListener) {
         DialogFragment dialogFragment = new DialogFragment() {
             @Override

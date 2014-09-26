@@ -47,7 +47,7 @@ public class QrCodeActivity extends XoActionbarActivity {
 
             @Override
             public int getCount() {
-                return tabs.length;
+                return mFragments.length;
             }
         });
         mViewPager.setOnPageChangeListener(new QrCodePageChangeListener());

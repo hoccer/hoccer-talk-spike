@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.fragment;
 
-import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,7 +7,6 @@ import android.provider.ContactsContract;
 import android.view.*;
 import android.widget.Button;
 import android.widget.ListAdapter;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -33,7 +31,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     private boolean mIsSmsInvitation;
     private DeviceContactsAdapter mAdapter;
     private RelativeLayout mProgressOverlay;
-    private boolean mCancelled;
+    private boolean mIsInvitationCancelled;
 
     final static Uri CONTENT_URI = ContactsContract.Data.CONTENT_URI;
 
@@ -55,11 +53,62 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     final static int EMAIL_ADDRESS_FIELD = 4;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_device_contacts_selection, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         mIsSmsInvitation = getActivity().getIntent().getBooleanExtra(EXTRA_IS_SMS_INVITATION, true);
+        mProgressOverlay = (RelativeLayout) view.findViewById(R.id.rl_progress_overlay);
+
+        final Button inviteButton = (Button) view.findViewById(R.id.bt_continue);
+        inviteButton.setOnClickListener(new InviteButtonClickListener());
+
         mAdapter = createAdapter();
         setListAdapter(mAdapter);
+    }
+
+    private class InviteButtonClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            showProgressOverlay(true);
+            mIsInvitationCancelled = false;
+
+            XoApplication.getExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String token = XoApplication.getXoClient().generatePairingToken();
+
+                        if (!mIsInvitationCancelled) {
+                            if (token != null) {
+                                composeInvitation(token);
+                                getActivity().finish();
+                            } else {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showProgressOverlay(false);
+
+                                        XoDialogs.showOkDialog(
+                                                "MissingPairingToken",
+                                                R.string.dialog_missing_pairing_token_title,
+                                                R.string.dialog_missing_pairing_token_message,
+                                                getActivity()
+                                        );
+                                    }
+                                });
+                            }
+                        }
+                    } catch (Throwable t) {
+                        LOG.error("Error while inviting contacts", t);
+                    }
+                }
+            });
+        }
     }
 
     private DeviceContactsAdapter createAdapter() {
@@ -101,65 +150,16 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
         return new DeviceContactsAdapter(contacts, getActivity());
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_device_contacts_selection, container, false);
-        mProgressOverlay = (RelativeLayout) view.findViewById(R.id.rl_progress_overlay);
-
-        final Button inviteButton = (Button) view.findViewById(R.id.bt_continue);
-        inviteButton.setOnClickListener(new InviteButtonClickListener());
-
-        return view;
-    }
-
-    private class InviteButtonClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            showProgressOverlay(true);
-            mCancelled = false;
-
-            XoApplication.getExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String token = XoApplication.getXoClient().generatePairingToken();
-
-                        if (!mCancelled) {
-                            if (token != null) {
-                                composeInvitation(token);
-                                getActivity().finish();
-                            } else {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        showProgressOverlay(false);
-
-                                        XoDialogs.showOkDialog(
-                                                "MissingPairingToken",
-                                                R.string.dialog_missing_pairing_token_title,
-                                                R.string.dialog_missing_pairing_token_message,
-                                                getActivity(),
-                                                null
-                                        );
-                                    }
-                                });
-                            }
-                        }
-                    } catch (Throwable t) {
-                        LOG.error("Error while inviting contacts", t);
-                    }
-                }
-            });
-        }
-    }
-
     private void showProgressOverlay(boolean visible) {
         mProgressOverlay.setVisibility(visible ? View.VISIBLE : View.GONE);
         enableOptionsMenu(!visible);
     }
 
     private void enableOptionsMenu(boolean enabled) {
+        // toggle fragment options menu
         setMenuVisibility(enabled);
+
+        // toggle activity options menu
         if (getActivity() instanceof XoActivity) {
             ((XoActivity)getActivity()).setOptionsMenuEnabled(enabled);
         }
@@ -174,7 +174,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
     @Override
     public void onPause() {
         super.onPause();
-        mCancelled = true;
+        mIsInvitationCancelled = true;
     }
 
     @Override
