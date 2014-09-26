@@ -24,8 +24,9 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.component.ActivityComponent;
+import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.adapter.ChatsPageAdapter;
-import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class ChatsActivity extends XoActionbarActivity implements IXoStateListener, IXoContactListener, IXoPairingListener {
+public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoContactListener, IXoPairingListener {
 
     private final static Logger LOG = Logger.getLogger(ChatsActivity.class);
     private static final String ACTION_ALREADY_HANDLED = "com.hoccer.xo.android.intent.action.ALREADY_HANDLED";
@@ -50,6 +51,11 @@ public class ChatsActivity extends XoActionbarActivity implements IXoStateListen
     private boolean mEnvironmentUpdatesEnabled;
     private boolean mNoUserInput = false;
     private String mPairingToken;
+
+    @Override
+    protected ActivityComponent[] createComponents() {
+        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+    }
 
     @Override
     protected int getLayoutResource() {

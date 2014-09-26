@@ -4,14 +4,18 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.activity.component.ActivityComponent;
+import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.fragment.AttachmentListFragment;
 import com.hoccer.xo.android.fragment.MediaCollectionListFragment;
-import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 
-public class MediaBrowserActivity extends XoActionbarActivity {
+public class MediaBrowserActivity extends ComposableActivity {
 
+    @Override
+    protected ActivityComponent[] createComponents() {
+        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+    }
 
     @Override
     protected int getLayoutResource() {

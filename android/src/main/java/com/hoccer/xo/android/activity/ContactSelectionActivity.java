@@ -6,13 +6,14 @@ import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.activity.component.ActivityComponent;
+import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
 import com.hoccer.xo.release.R;
 
 import java.util.ArrayList;
 
-public class ContactSelectionActivity extends XoActionbarActivity implements ContactSelectionFragment.IContactSelectionListener {
+public class ContactSelectionActivity extends ComposableActivity implements ContactSelectionFragment.IContactSelectionListener {
 
     public static final String EXTRA_SELECTED_CONTACT_IDS = "com.hoccer.xo.android.extra.SELECTED_CONTACT_IDS";
 
@@ -20,6 +21,11 @@ public class ContactSelectionActivity extends XoActionbarActivity implements Con
     private ContactSelectionFragment mContactSelectionFragment;
 
     private Menu mMenu;
+
+    @Override
+    protected ActivityComponent[] createComponents() {
+        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+    }
 
     @Override
     protected int getLayoutResource() {
