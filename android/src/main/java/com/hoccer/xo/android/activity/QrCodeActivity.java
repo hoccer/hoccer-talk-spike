@@ -28,7 +28,8 @@ public class QrCodeActivity extends ComposableActivity {
                         R.id.pager,
                         R.array.qr_code_tab_names,
                         new QrCodeScannerFragment(),
-                        new QrCodeGeneratorFragment())};
+                        new QrCodeGeneratorFragment())
+        };
     }
 
     @Override
