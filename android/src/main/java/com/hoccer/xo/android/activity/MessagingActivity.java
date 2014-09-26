@@ -12,9 +12,10 @@ import android.view.View;
 import android.widget.PopupMenu;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.activity.component.ActivityComponent;
+import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
 import com.hoccer.xo.android.base.IProfileFragmentManager;
-import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.fragment.*;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -22,7 +23,7 @@ import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
 
-public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager, IProfileFragmentManager {
+public class MessagingActivity extends ComposableActivity implements IMessagingFragmentManager, IProfileFragmentManager {
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
@@ -31,6 +32,11 @@ public class MessagingActivity extends XoActionbarActivity implements IMessaging
     Fragment mCurrentFragment;
 
     private IContentObject mClipboardAttachment;
+
+    @Override
+    protected ActivityComponent[] createComponents() {
+        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+    }
 
     @Override
     protected int getLayoutResource() {

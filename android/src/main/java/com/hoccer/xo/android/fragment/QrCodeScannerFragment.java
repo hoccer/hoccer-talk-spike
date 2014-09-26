@@ -3,10 +3,14 @@ package com.hoccer.xo.android.fragment;
 import android.app.Activity;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.*;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -22,7 +26,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 
-public class QrCodeScannerFragment extends PagerFragment implements IXoPairingListener {
+public class QrCodeScannerFragment extends Fragment implements IPagerFragment, IXoPairingListener {
 
     private static final Logger LOG = Logger.getLogger(QrCodeScannerFragment.class);
 
@@ -39,24 +43,24 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
     private final ImageScanner mQrCodeScanner = new ImageScanner();
     private final HashSet<String> mScannedCodes = new HashSet<String>();
 
-    private Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
-        public void onPreviewFrame(byte[] data, Camera camera) {
-            Camera.Parameters parameters = camera.getParameters();
-            Camera.Size size = parameters.getPreviewSize();
+    private final Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
+        public void onPreviewFrame(final byte[] data, final Camera camera) {
+            final Camera.Parameters parameters = camera.getParameters();
+            final Camera.Size size = parameters.getPreviewSize();
 
-            Image image = new Image(size.width, size.height, "Y800");
+            final Image image = new Image(size.width, size.height, "Y800");
             image.setData(data);
 
-            int result = mQrCodeScanner.scanImage(image);
+            final int result = mQrCodeScanner.scanImage(image);
             if (result != 0) {
-                SymbolSet symbols = mQrCodeScanner.getResults();
+                final SymbolSet symbols = mQrCodeScanner.getResults();
 
-                for (Symbol symbol : symbols) {
-                    String code = symbol.getData();
+                for (final Symbol symbol : symbols) {
+                    final String code = symbol.getData();
 
                     if (!mScannedCodes.contains(code)) {
                         if (code.startsWith(XoApplication.getXoClient().getConfiguration().getUrlScheme())) {
-                            String pairingToken = code.replace(XoApplication.getXoClient().getConfiguration().getUrlScheme(), "");
+                            final String pairingToken = code.replace(XoApplication.getXoClient().getConfiguration().getUrlScheme(), "");
                             XoApplication.getXoClient().performTokenPairing(pairingToken, QrCodeScannerFragment.this);
                         } else {
                             getActivity().runOnUiThread(new Runnable() {
@@ -75,7 +79,7 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
     };
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mQrCodeScanner.setConfig(0, Config.X_DENSITY, 3);
@@ -83,12 +87,12 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_qr_code_scanner, null);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(final View view, final Bundle savedInstanceState) {
         mCameraPreviewView = (CameraPreviewView)view.findViewById(R.id.cpv_camera_preview);
         mPairingTokenEditText = (EditText)view.findViewById(R.id.et_pairing_token);
         mConfirmCodeButton = (Button)view.findViewById(R.id.b_confirm_code);
@@ -104,15 +108,15 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
 
         mPairingTokenEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(final Editable s) {
                 if (!mPairingTokenEditText.getText().toString().isEmpty()) {
                     mConfirmCodeButton.setEnabled(true);
                 } else {
@@ -142,7 +146,7 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
     }
 
     private void performTokenPairing() {
-        String pairingToken = mPairingTokenEditText.getText().toString();
+        final String pairingToken = mPairingTokenEditText.getText().toString();
 
         if (pairingToken != null && !pairingToken.isEmpty()) {
             mConfirmCodeButton.setEnabled(false);
@@ -152,7 +156,7 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
     }
 
     private void hideSoftKeyboard() {
-        InputMethodManager inputMethodManager = (InputMethodManager)getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        final InputMethodManager inputMethodManager = (InputMethodManager)getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(getView().getWindowToken(), 0);
     }
 
@@ -168,7 +172,7 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
             mCamera = Camera.open();
             mCamera.setPreviewCallback(mPreviewCallback);
             mCameraPreviewView.setCamera(mCamera);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("Error opening camera", e);
         }
     }
@@ -230,7 +234,7 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
     }
 
     @Override
-    public void onPageScrollStateChanged(int state) {
+    public void onPageScrollStateChanged(final int state) {
         if (state == ViewPager.SCROLL_STATE_IDLE) {
             enableAndStartPreview();
         } else {
@@ -239,7 +243,7 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
     }
 
     @Override
-    public void onTokenPairingSucceeded(String token) {
+    public void onTokenPairingSucceeded(final String token) {
         final Activity activity = getActivity();
 
         activity.runOnUiThread(new Runnable() {
@@ -254,7 +258,7 @@ public class QrCodeScannerFragment extends PagerFragment implements IXoPairingLi
     }
 
     @Override
-    public void onTokenPairingFailed(String token) {
+    public void onTokenPairingFailed(final String token) {
         final Activity activity = getActivity();
 
         activity.runOnUiThread(new Runnable() {
