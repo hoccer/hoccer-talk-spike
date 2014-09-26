@@ -74,6 +74,24 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         super.onDestroy();
     }
 
+    public Fragment getSelectedFragment() {
+        return mFragments[mViewPager.getCurrentItem()];
+    }
+
+    /*
+     * Returns the first fragment of the given type or null.
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends Fragment> T getFragment(final Class<T> clazz) {
+        for(final Fragment fragment : mFragments) {
+            if(clazz.equals(fragment.getClass())) {
+                return (T)fragment;
+            }
+        }
+
+        return null;
+    }
+
     private class PageChangeListener implements ViewPager.OnPageChangeListener {
         @Override
         public void onPageScrolled(final int position, final float positionOffset, final int positionOffsetPixels) {}
