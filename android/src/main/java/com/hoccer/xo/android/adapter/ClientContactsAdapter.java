@@ -13,12 +13,15 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClientContactsAdapter extends BaseAdapter implements IXoContactListener {
+
+    private static Logger LOG = Logger.getLogger(ClientContactsAdapter.class);
 
     private List<TalkClientContact> mClientContactList = new ArrayList<TalkClientContact>();
 
@@ -139,7 +142,7 @@ public class ClientContactsAdapter extends BaseAdapter implements IXoContactList
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        // show online status ?
+        LOG.info(contact);
     }
 
     @Override
