@@ -5,7 +5,7 @@ import android.support.v4.app.ListFragment;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.ClientContactsAdapter;
 
-public class ClientListFragment extends ListFragment {
+public class ClientListFragment extends ListFragment implements IPagerFragment {
 
     ClientContactsAdapter mClientContactsAdapter;
 
@@ -26,5 +26,20 @@ public class ClientListFragment extends ListFragment {
     public void onPause() {
         super.onPause();
         XoApplication.getXoClient().unregisterContactListener(mClientContactsAdapter);
+    }
+
+    @Override
+    public void onPageSelected() {
+
+    }
+
+    @Override
+    public void onPageUnselected() {
+
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 }

@@ -1,6 +1,22 @@
 package com.hoccer.xo.android.fragment;
 
-public class GroupListFragment extends PagerFragment {
+import android.support.v4.app.ListFragment;
+
+public class GroupListFragment extends ListFragment implements IPagerFragment {
 
 
+    @Override
+    public void onPageSelected() {
+
+    }
+
+    @Override
+    public void onPageUnselected() {
+
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+    }
 }
