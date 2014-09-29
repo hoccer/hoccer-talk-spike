@@ -108,6 +108,22 @@ public class TalkServerConfiguration {
                 PropertyTypes.STRING,
                 "password"),
 
+        APNS_CLIENT_NAME_3(PROPERTY_PREFIX + ".apns.3.client.name",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_3(PROPERTY_PREFIX + ".apns.3.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_3(PROPERTY_PREFIX + ".apns.3.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_3(PROPERTY_PREFIX + ".apns.3.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_3(PROPERTY_PREFIX + ".apns.3.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
         // GCM
         GCM_ENABLED(PROPERTY_PREFIX + ".gcm.enabled",
                 PropertyTypes.BOOLEAN,
@@ -330,6 +346,15 @@ public class TalkServerConfiguration {
                     (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_2.value,
                     (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_2.value,
                     (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_2.value));
+        }
+
+        String clientName3 = (String) ConfigurableProperties.APNS_CLIENT_NAME_3.value;
+        if (!clientName3.isEmpty()) {
+            mApnsConfigurations.put(clientName3, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_3.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_3.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_3.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_3.value));
         }
     }
 
