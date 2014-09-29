@@ -44,6 +44,19 @@ public class InvitationServlet extends HttpServlet {
     private Engine mEngine = new Engine();
     private String mTemplate;
 
+    private static Map<String, Object> loadMessages(String filename) {
+        Properties properties = new Properties();
+
+        try {
+            InputStream inputStream = InvitationServlet.class.getResourceAsStream("/messages/" + filename);
+            properties.load(inputStream);
+        } catch (IOException e) {
+            LOG.error("Error loading localized messages", e);
+        }
+
+        return (Map)properties;
+    }
+
     @Override
     public void init() throws ServletException {
         mTemplate = loadTemplate("inviteTemplate.html");
@@ -52,7 +65,7 @@ public class InvitationServlet extends HttpServlet {
         mConfig = server.getConfiguration();
     }
 
-    private String loadTemplate(String name) {
+    private static String loadTemplate(String name) {
         InputStream stream = InvitationServlet.class.getResourceAsStream("/templates/" + name);
 
         try {
@@ -94,19 +107,6 @@ public class InvitationServlet extends HttpServlet {
         }
 
         return null;
-    }
-
-    private static Map<String, Object> loadMessages(String filename) {
-        Properties properties = new Properties();
-
-        try {
-            InputStream inputStream = InvitationServlet.class.getResourceAsStream("/messages/" + filename);
-            properties.load(inputStream);
-        } catch (IOException e) {
-            LOG.error("Error loading localized messages", e);
-        }
-
-        return (Map)properties;
     }
 
     private static String determineLanguage(Locale locale, String defaultLanguage) {
