@@ -26,7 +26,6 @@ public class QrCodeActivity extends ComposableActivity {
                 new MediaPlayerActivityComponent(this),
                 new ViewPagerActivityComponent(this,
                         R.id.pager,
-                        R.array.qr_code_tab_names,
                         new QrCodeScannerFragment(),
                         new QrCodeGeneratorFragment())
         };

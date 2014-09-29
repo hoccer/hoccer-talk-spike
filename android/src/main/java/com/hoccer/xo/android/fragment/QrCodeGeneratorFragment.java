@@ -1,5 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -17,6 +19,7 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.release.R;
+import sun.security.util.Resources_sv;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -49,6 +52,16 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
                 generateToken();
             }
         });
+    }
+
+    @Override
+    public View getCustomTabView(final Context context) {
+        return null;
+    }
+
+    @Override
+    public String getTabName(final Resources resources) {
+        return resources.getString(R.string.qr_code_tab_generate);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -201,6 +203,16 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
         mCamera.setPreviewCallback(null);
         mCamera.release();
         mCamera = null;
+    }
+
+    @Override
+    public View getCustomTabView(final Context context) {
+        return null;
+    }
+
+    @Override
+    public String getTabName(final Resources resources) {
+        return resources.getString(R.string.qr_code_tab_scan);
     }
 
     @Override

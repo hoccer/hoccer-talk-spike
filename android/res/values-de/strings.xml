@@ -362,10 +362,8 @@
         <item>IN DER NÄHE</item>
     </string-array>
 
-    <string-array name="qr_code_tab_names">
-        <item>SCANNEN</item>
-        <item>GENERIEREN</item>
-    </string-array>
+    <string name="qr_code_tab_scan">SCANNEN</string>
+    <string name="qr_code_tab_generate">GENERIEREN</string>
 
     <string name="search_section_caption_contacts">Kontakte</string>
     <string name="search_section_caption_files">Dateien</string>

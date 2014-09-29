@@ -7,7 +7,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.View;
 import com.hoccer.xo.android.fragment.IPagerFragment;
+import org.apache.log4j.Logger;
 
 /**
  * Adds and manages an activity ViewPager.
@@ -17,22 +19,21 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     private ViewPager mViewPager;
     private final Fragment[] mFragments;
     private final int mViewPagerId;
-    private final int mTabNamesId;
 
-    public <T extends Fragment & IPagerFragment> ViewPagerActivityComponent(final FragmentActivity activity, final int viewPagerId, final int tabNamesId, final T... fragments) {
+    private static final Logger LOG = Logger.getLogger(ViewPagerActivityComponent.class);
+
+    public <T extends Fragment & IPagerFragment> ViewPagerActivityComponent(final FragmentActivity activity, final int viewPagerId, final T... fragments) {
         super(activity);
 
         mFragments = fragments;
         mViewPagerId = viewPagerId;
-        mTabNamesId = tabNamesId;
     }
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final String[] tabs = getActivity().getResources().getStringArray(mTabNamesId);
-
+        // create view pager
         mViewPager = (ViewPager)getActivity().findViewById(mViewPagerId);
         mViewPager.setAdapter(new FragmentPagerAdapter(getActivity().getSupportFragmentManager()) {
             @Override
@@ -42,19 +43,31 @@ public class ViewPagerActivityComponent extends ActivityComponent {
 
             @Override
             public int getCount() {
-                return tabs.length;
+                return mFragments.length;
             }
         });
         mViewPager.setOnPageChangeListener(new PageChangeListener());
 
         final ActionBar actionBar = getActivity().getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        for (final String tabName : tabs) {
-            final ActionBar.Tab tab = actionBar.newTab()
-                    .setText(tabName)
-                    .setTabListener(new TabListener());
+
+        for(final Fragment fragment : mFragments) {
+            final ActionBar.Tab tab = actionBar.newTab();
+
+            final View tabView = ((IPagerFragment)fragment).getCustomTabView(getActivity());
+            if(tabView != null) {
+                tab.setCustomView(tabView);
+            } else {
+                tab.setText(((IPagerFragment)fragment).getTabName(getActivity().getResources()));
+            }
+            tab.setTabListener(new TabListener());
             actionBar.addTab(tab);
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
