@@ -15,12 +15,15 @@ import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
 import com.hoccer.talk.server.cryptoutils.*;
 import com.hoccer.talk.servlets.CertificateInfoServlet;
+import com.hoccer.talk.servlets.InvitationServlet;
 import com.hoccer.talk.servlets.ServerInfoServlet;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
@@ -117,12 +120,26 @@ public class TalkServerMain {
         serverInfoContextHandler.addServlet(ServerInfoServlet.class, "/info");
         serverInfoContextHandler.addServlet(CertificateInfoServlet.class, "/certificates");
 
+        // handler for invitation landing pages
+        ServletContextHandler invitationContextHandler = new ServletContextHandler();
+        invitationContextHandler.setContextPath("/invite");
+        invitationContextHandler.setAttribute("server", talkServer);
+        invitationContextHandler.addServlet(InvitationServlet.class, "/*");
+
+        // handler for static files
+        ContextHandler staticHandler = new ContextHandler("/static");
+        ResourceHandler staticResourceHandler = new ResourceHandler();
+        staticResourceHandler.setResourceBase(getClass().getResource("/static").toExternalForm());
+        staticHandler.setHandler(staticResourceHandler);
+
         // handler for talk websocket connections
         WebSocketHandler clientHandler = new TalkRpcConnectionHandler(talkServer);
 
         // set server handlers
         HandlerCollection handlerCollection = new HandlerCollection();
         handlerCollection.addHandler(clientHandler);
+        handlerCollection.addHandler(invitationContextHandler);
+        handlerCollection.addHandler(staticHandler);
         handlerCollection.addHandler(serverInfoContextHandler);
         handlerCollection.addHandler(metricsContextHandler);
         server.setHandler(handlerCollection);

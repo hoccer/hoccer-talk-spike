@@ -3,6 +3,7 @@ package com.hoccer.xo.android.fragment;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,7 @@ import com.hoccer.xo.release.R;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class QrCodeGeneratorFragment extends PagerFragment implements IXoContactListener {
+public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment, IXoContactListener {
 
     private ImageView mQrCodeView;
     private TextView mPairingTokenView;
@@ -28,12 +29,12 @@ public class QrCodeGeneratorFragment extends PagerFragment implements IXoContact
     private LinearLayout mErrorLayout;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_qr_code_generator, null);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(final View view, final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         mQrCodeView = (ImageView)view.findViewById(R.id.iv_qr_code);
@@ -41,7 +42,7 @@ public class QrCodeGeneratorFragment extends PagerFragment implements IXoContact
         mProgressBar = (ProgressBar)view.findViewById(R.id.pb_generating_pairing_token);
         mErrorLayout = (LinearLayout)view.findViewById(R.id.ll_error);
 
-        Button retryButton = (Button)view.findViewById(R.id.btn_retry);
+        final Button retryButton = (Button)view.findViewById(R.id.btn_retry);
         retryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,6 +63,10 @@ public class QrCodeGeneratorFragment extends PagerFragment implements IXoContact
     @Override
     public void onPageUnselected() {
         XoApplication.getXoClient().unregisterContactListener(this);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(final int state) {
     }
 
     private boolean isTokenGenerated() {
@@ -95,14 +100,14 @@ public class QrCodeGeneratorFragment extends PagerFragment implements IXoContact
         mProgressBar.setVisibility(View.VISIBLE);
     }
 
-    private void updateViews(String pairingToken) {
+    private void updateViews(final String pairingToken) {
         mProgressBar.setVisibility(View.INVISIBLE);
 
         if (pairingToken != null) {
             mPairingTokenView.setText(pairingToken);
 
-            String invitationUrl = XoApplication.getXoClient().getConfiguration().getUrlScheme() + pairingToken;
-            Bitmap qrCode = createQrCode(invitationUrl, 400, 400);
+            final String invitationUrl = XoApplication.getXoClient().getConfiguration().getUrlScheme() + pairingToken;
+            final Bitmap qrCode = createQrCode(invitationUrl, 400, 400);
 
             if (qrCode != null) {
                 mQrCodeView.setVisibility(View.VISIBLE);
@@ -115,15 +120,15 @@ public class QrCodeGeneratorFragment extends PagerFragment implements IXoContact
         }
     }
 
-    private static Bitmap createQrCode(String contents, int preferredWidth, int preferredHeight) {
+    private static Bitmap createQrCode(final String contents, final int preferredWidth, final int preferredHeight) {
         if (contents == null) {
             return null;
         }
 
-        MultiFormatWriter writer = new MultiFormatWriter();
-        BitMatrix bitMatrix;
+        final MultiFormatWriter writer = new MultiFormatWriter();
+        final BitMatrix bitMatrix;
 
-        Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
+        final Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
 
         try {
@@ -134,33 +139,33 @@ public class QrCodeGeneratorFragment extends PagerFragment implements IXoContact
             return null;
         }
 
-        int width = bitMatrix.getWidth();
-        int height = bitMatrix.getHeight();
-        int[] pixels = new int[width * height];
+        final int width = bitMatrix.getWidth();
+        final int height = bitMatrix.getHeight();
+        final int[] pixels = new int[width * height];
 
         for (int y = 0; y < height; y++) {
-            int offset = y * width;
+            final int offset = y * width;
             for (int x = 0; x < width; x++) {
                 pixels[offset + x] = bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE;
             }
         }
 
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
         return bitmap;
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {}
+    public void onContactAdded(final TalkClientContact contact) {}
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {}
+    public void onContactRemoved(final TalkClientContact contact) {}
 
     @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {}
+    public void onClientPresenceChanged(final TalkClientContact contact) {}
 
     @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
+    public void onClientRelationshipChanged(final TalkClientContact contact) {
         // we assume that this relationship update is a new friendship via QR code scan
         if(contact.isClientFriend()) {
             getActivity().runOnUiThread(new Runnable() {
@@ -173,8 +178,8 @@ public class QrCodeGeneratorFragment extends PagerFragment implements IXoContact
     }
 
     @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {}
+    public void onGroupPresenceChanged(final TalkClientContact contact) {}
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {}
+    public void onGroupMembershipChanged(final TalkClientContact contact) {}
 }

@@ -94,7 +94,7 @@ public class TalkServerConfiguration {
 
         APNS_CLIENT_NAME_2(PROPERTY_PREFIX + ".apns.2.client.name",
                 PropertyTypes.STRING,
-                "Hoccer Classic"),
+                "Hoccer"),
         APNS_PRODUCTION_CERTIFICATE_PATH_2(PROPERTY_PREFIX + ".apns.2.cert.production.path",
                 PropertyTypes.STRING,
                 "apns_production.p12"),
@@ -164,6 +164,11 @@ public class TalkServerConfiguration {
         FILECACHE_DOWNLOAD_BASE(PROPERTY_PREFIX + ".filecache.downloadBase",
                 PropertyTypes.STRING,
                 "http://localhost:8081/download/"),
+
+        // INVITATIONS
+        INVITATION_ALLOWED_URI_SCHEMES(PROPERTY_PREFIX + ".invitation.allowed.uri.schemes",
+                PropertyTypes.STRING,
+                "hxo, hxod"),
 
         // MISC
         SUPPORT_TAG(PROPERTY_PREFIX + ".support.tag",
@@ -283,6 +288,8 @@ public class TalkServerConfiguration {
         builder.append(MessageFormat.format("\n   * filecache control url:                ''{0}''", this.getFilecacheControlUrl()));
         builder.append(MessageFormat.format("\n   * filecache upload base url:            ''{0}''", this.getFilecacheUploadBase()));
         builder.append(MessageFormat.format("\n   * filecache download base url:          ''{0}''", this.getFilecacheDownloadBase()));
+        builder.append(                      "\n - Invitation Configuration:");
+        builder.append(MessageFormat.format("\n   * allowed invitation URI schemes:     {0}", this.getAllowedInviteUriSchemes()));
         builder.append(                     "\n - Other:");
         builder.append(MessageFormat.format("\n   * support tag:                          ''{0}''", this.getSupportTag()));
         builder.append(                     "\n - Threads:");
@@ -428,6 +435,11 @@ public class TalkServerConfiguration {
 
     public void setFilecacheDownloadBase(String mFilecacheDownloadBase) {
         ConfigurableProperties.FILECACHE_DOWNLOAD_BASE.setValue(mFilecacheDownloadBase);
+    }
+
+    public List<String> getAllowedInviteUriSchemes() {
+        String schemesString = (String) ConfigurableProperties.INVITATION_ALLOWED_URI_SCHEMES.value;
+        return Arrays.asList(schemesString.replace(" ", "").split(","));
     }
 
     public String getSupportTag() {

@@ -1,10 +1,16 @@
 package com.hoccer.xo.android.activity;
 
 import android.view.Menu;
-import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.activity.component.ActivityComponent;
+import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.release.R;
 
-public class MediaCollectionSelectionActivity extends XoActionbarActivity {
+public class MediaCollectionSelectionActivity extends ComposableActivity {
+
+    @Override
+    protected ActivityComponent[] createComponents() {
+        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+    }
 
     @Override
     protected int getLayoutResource() {
