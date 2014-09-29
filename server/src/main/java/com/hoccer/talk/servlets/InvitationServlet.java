@@ -72,20 +72,28 @@ public class InvitationServlet extends HttpServlet {
         HashMap<String, Object> model = new HashMap<String, Object>();
         model.put("messages", LANGUAGES.get(language));
         model.put("downloadLink", DOWNLOAD_LINKS.get(platform));
-
-        String[] components = request.getPathInfo().split("/");
-        String scheme = components.length > 1 ? components[1] : null;
-        String token = components.length > 2 ? components[2] : null;
-
-        if (scheme != null && token != null && mConfig.getInviteUriSchemes().contains(scheme)) {
-            model.put("inviteLink", scheme + "://" + token);
-        }
+        model.put("inviteLink", extractInviteLink(request.getPathInfo()));
 
         String body = mEngine.transform(mTemplate, model);
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("text/html; charset=UTF-8");
         response.getWriter().println(body);
+    }
+
+    private String extractInviteLink(String pathInfo) {
+        String[] components = pathInfo.split("/");
+
+        if (components.length > 2) {
+            String scheme = components[1];
+            String token = components[2];
+
+            if (mConfig.getInviteUriSchemes().contains(scheme)) {
+                return scheme + "://" + token;
+            }
+        }
+
+        return null;
     }
 
     private static Map<String, Object> loadMessages(String filename) {
