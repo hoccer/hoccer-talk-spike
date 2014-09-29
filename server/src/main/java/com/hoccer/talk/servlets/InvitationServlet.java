@@ -13,11 +13,20 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
 public class InvitationServlet extends HttpServlet {
 
     private static final Logger LOG = Logger.getLogger(InvitationServlet.class);
     private TalkServerConfiguration mConfig;
+
+    private static final HashMap<String, Map<String, Object>> LANGUAGES = new HashMap<String, Map<String, Object>>();
+    static {
+        LANGUAGES.put("en", loadMessages("messages-en.properties"));
+        LANGUAGES.put("de", loadMessages("messages-de.properties"));
+    }
 
     private enum Platform {
         IOS,
@@ -33,13 +42,11 @@ public class InvitationServlet extends HttpServlet {
     }
 
     private Engine mEngine = new Engine();
-    private String mInviteTemplate;
-    private String mErrorTemplate;
+    private String mTemplate;
 
     @Override
     public void init() throws ServletException {
-        mInviteTemplate = loadTemplate("inviteTemplate.html");
-        mErrorTemplate = loadTemplate("inviteErrorTemplate.html");
+        mTemplate = loadTemplate("inviteTemplate.html");
 
         TalkServer server = (TalkServer)getServletContext().getAttribute("server");
         mConfig = server.getConfiguration();
@@ -60,34 +67,48 @@ public class InvitationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String userAgent = request.getHeader("User-Agent");
         Platform platform = determinePlatform(userAgent);
+        String language = determineLanguage(request.getLocale(), "en");
+
+        HashMap<String, Object> model = new HashMap<String, Object>();
+        model.put("messages", LANGUAGES.get(language));
+        model.put("downloadLink", DOWNLOAD_LINKS.get(platform));
 
         String[] components = request.getPathInfo().split("/");
         String scheme = components.length > 1 ? components[1] : null;
         String token = components.length > 2 ? components[2] : null;
 
-        String body;
         if (scheme != null && token != null && mConfig.getInviteUriSchemes().contains(scheme)) {
-            body = renderInviteTemplate(platform, scheme, token);
-        } else {
-            body = renderErrorTemplate(platform);
+            model.put("inviteLink", scheme + "://" + token);
         }
+
+        String body = mEngine.transform(mTemplate, model);
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("text/html; charset=UTF-8");
         response.getWriter().println(body);
     }
 
-    private String renderInviteTemplate(Platform platform, String scheme, String token) throws IOException {
-        HashMap<String, Object> model = new HashMap<String, Object>();
-        model.put("downloadLink", DOWNLOAD_LINKS.get(platform));
-        model.put("inviteLink", scheme + "://" + token);
-        return mEngine.transform(mInviteTemplate, model);
+    private static Map<String, Object> loadMessages(String filename) {
+        Properties properties = new Properties();
+
+        try {
+            InputStream inputStream = InvitationServlet.class.getResourceAsStream("/messages/" + filename);
+            properties.load(inputStream);
+        } catch (IOException e) {
+            LOG.error("Error loading localized messages", e);
+        }
+
+        return (Map)properties;
     }
 
-    private String renderErrorTemplate(Platform platform) {
-        HashMap<String, Object> model = new HashMap<String, Object>();
-        model.put("downloadLink", DOWNLOAD_LINKS.get(platform));
-        return mEngine.transform(mErrorTemplate, model);
+    private static String determineLanguage(Locale locale, String defaultLanguage) {
+        String language = locale.getLanguage();
+
+        if (language.isEmpty() || !LANGUAGES.containsKey(language)) {
+            language = defaultLanguage;
+        }
+
+        return language;
     }
 
     private static Platform determinePlatform(String userAgent) {
