@@ -94,7 +94,7 @@ public class TalkServerConfiguration {
 
         APNS_CLIENT_NAME_2(PROPERTY_PREFIX + ".apns.2.client.name",
                 PropertyTypes.STRING,
-                "Hoccer"),
+                ""),
         APNS_PRODUCTION_CERTIFICATE_PATH_2(PROPERTY_PREFIX + ".apns.2.cert.production.path",
                 PropertyTypes.STRING,
                 "apns_production.p12"),
@@ -314,17 +314,23 @@ public class TalkServerConfiguration {
     }
 
     private void initApnsConfigurations() {
-        mApnsConfigurations.put((String) ConfigurableProperties.APNS_CLIENT_NAME_1.value, new ApnsConfiguration(
-                (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_1.value,
-                (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_1.value,
-                (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_1.value,
-                (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_1.value));
+        String clientName1 = (String) ConfigurableProperties.APNS_CLIENT_NAME_1.value;
+        if (!clientName1.isEmpty()) {
+            mApnsConfigurations.put(clientName1, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_1.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_1.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_1.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_1.value));
+        }
 
-        mApnsConfigurations.put((String) ConfigurableProperties.APNS_CLIENT_NAME_2.value, new ApnsConfiguration(
-                (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_2.value,
-                (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_2.value,
-                (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_2.value,
-                (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_2.value));
+        String clientName2 = (String) ConfigurableProperties.APNS_CLIENT_NAME_2.value;
+        if (!clientName2.isEmpty()) {
+            mApnsConfigurations.put(clientName2, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_2.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_2.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_2.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_2.value));
+        }
     }
 
     public String getListenAddress() {
