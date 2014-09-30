@@ -7,10 +7,11 @@ talk.db.backend = jongo
 talk.jongo.db = talk-standalone
 
 talk.apns.enabled = false
-talk.apns.cert.production.path = XXX
-talk.apns.cert.production.password = YYY
-talk.apns.cert.sandbox.path = UUU
-talk.apns.cert.sandbox.password = VVV
+talk.apns.1.clientName = AAA
+talk.apns.1.cert.production.path = XXX
+talk.apns.1.cert.production.password = YYY
+talk.apns.1.cert.sandbox.path = UUU
+talk.apns.1.cert.sandbox.password = VVV
 
 talk.gcm.enabled = false
 talk.gcm.apikey = ABCD

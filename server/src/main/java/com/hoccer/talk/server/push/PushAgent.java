@@ -37,7 +37,7 @@ public class PushAgent {
         PRODUCTION, SANDBOX
     }
 
-    private final HashMap<APNS_SERVICE_TYPE, ApnsService> mApnsServices = new HashMap<APNS_SERVICE_TYPE, ApnsService>();
+    private final HashMap<String, HashMap<APNS_SERVICE_TYPE, ApnsService>> mApnsServices = new HashMap<String, HashMap<APNS_SERVICE_TYPE, ApnsService>>();
 
     private final Hashtable<String, PushRequest> mOutstanding;
 
@@ -182,8 +182,12 @@ public class PushAgent {
         return mGcmSender;
     }
 
-    public ApnsService getApnsService(APNS_SERVICE_TYPE type) {
-        return mApnsServices.get(type);
+    public ApnsService getApnsService(String clientName, APNS_SERVICE_TYPE type) {
+        if (mApnsServices.containsKey(clientName)) {
+            return mApnsServices.get(clientName).get(type);
+        }
+
+        return null;
     }
 
     private void initializeGcm() {
@@ -195,18 +199,29 @@ public class PushAgent {
         LOG.info("APNS support enabled");
 
         // set up services
-        LOG.info("  * setting up APNS service (type: '" + APNS_SERVICE_TYPE.PRODUCTION + "')");
-        mApnsServices.put(APNS_SERVICE_TYPE.PRODUCTION, APNS.newService()
-                .withCert(mConfig.getApnsCertProductionPath(),
-                        mConfig.getApnsCertProductionPassword())
-                .withProductionDestination()
-                .build());
-        LOG.info("  * setting up APNS service (type: '" + APNS_SERVICE_TYPE.SANDBOX + "')");
-        mApnsServices.put(APNS_SERVICE_TYPE.SANDBOX, APNS.newService()
-                .withCert(mConfig.getApnsCertSandboxPath(),
-                        mConfig.getApnsCertSandboxPassword())
-                .withSandboxDestination()
-                .build());
+        for (Map.Entry<String, ApnsConfiguration> entry : mConfig.getApnsConfigurations().entrySet()) {
+            String clientName = entry.getKey();
+
+            ApnsConfiguration apnsConfiguration = entry.getValue();
+            ApnsConfiguration.Certificate productionCertificate = apnsConfiguration.getCertificate(PushAgent.APNS_SERVICE_TYPE.PRODUCTION);
+            ApnsConfiguration.Certificate sandboxCertificate = apnsConfiguration.getCertificate(PushAgent.APNS_SERVICE_TYPE.SANDBOX);
+
+            HashMap<APNS_SERVICE_TYPE, ApnsService> services = new HashMap<APNS_SERVICE_TYPE, ApnsService>();
+
+            LOG.info("  * setting up APNS service (clientName: '" + clientName + "', type: '" + APNS_SERVICE_TYPE.PRODUCTION + "')");
+            services.put(APNS_SERVICE_TYPE.PRODUCTION, APNS.newService()
+                    .withCert(productionCertificate.getPath(), productionCertificate.getPassword())
+                    .withProductionDestination()
+                    .build());
+
+            LOG.info("  * setting up APNS service (clientName: '" + clientName + "', type: '" + APNS_SERVICE_TYPE.SANDBOX + "')");
+            services.put(APNS_SERVICE_TYPE.SANDBOX, APNS.newService()
+                    .withCert(sandboxCertificate.getPath(), sandboxCertificate.getPassword())
+                    .withSandboxDestination()
+                    .build());
+
+            mApnsServices.put(clientName, services);
+        }
 
         // set up invalidation
         int delay = mConfig.getApnsInvalidateDelay();
@@ -228,21 +243,26 @@ public class PushAgent {
 
     private void invalidateApns() {
         LOG.info("APNS retrieving inactive devices");
-        Iterator iterator = mApnsServices.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry pairs = (Map.Entry) iterator.next();
-            LOG.info("  * APNS retrieving inactive devices from " + pairs.getKey());
-            final ApnsService service = (ApnsService) pairs.getValue();
-            final Map<String, Date> inactive = service.getInactiveDevices();
-            if (!inactive.isEmpty()) {
-                LOG.info("  * APNS reports " + inactive.size() + " inactive devices");
-                for (String token : inactive.keySet()) {
-                    TalkClient client = mDatabase.findClientByApnsToken(token);
-                    if (client == null) {
-                        LOG.warn("    * APNS invalidates unknown client (token '" + token + "')");
-                    } else {
-                        LOG.info("    * APNS client '" + client.getClientId() + "' invalid since '" + inactive.get(token) + "'");
-                        client.setApnsToken(null);
+
+        for (Map.Entry<String, HashMap<APNS_SERVICE_TYPE, ApnsService>> clientServices : mApnsServices.entrySet()) {
+            String clientName = clientServices.getKey();
+
+            for (Map.Entry<APNS_SERVICE_TYPE, ApnsService> entry : clientServices.getValue().entrySet()) {
+                final APNS_SERVICE_TYPE type = entry.getKey();
+                final ApnsService service = entry.getValue();
+
+                LOG.info("  * APNS retrieving inactive devices from " + type + " for clientName " + clientName);
+                final Map<String, Date> inactive = service.getInactiveDevices();
+                if (!inactive.isEmpty()) {
+                    LOG.info("  * APNS reports " + inactive.size() + " inactive devices");
+                    for (String token : inactive.keySet()) {
+                        TalkClient client = mDatabase.findClientByApnsToken(token);
+                        if (client == null) {
+                            LOG.warn("    * APNS invalidates unknown client (token '" + token + "')");
+                        } else {
+                            LOG.info("    * APNS client '" + client.getClientId() + "' invalid since '" + inactive.get(token) + "'");
+                            client.setApnsToken(null);
+                        }
                     }
                 }
             }
