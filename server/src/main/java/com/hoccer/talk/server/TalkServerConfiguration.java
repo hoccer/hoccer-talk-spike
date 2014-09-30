@@ -75,7 +75,7 @@ public class TalkServerConfiguration {
                 PropertyTypes.INTEGER,
                 3600), // in seconds
 
-        APNS_CLIENT_NAME_1(PROPERTY_PREFIX + ".apns.1.client.name",
+        APNS_CLIENT_NAME_1(PROPERTY_PREFIX + ".apns.1.clientName",
                 PropertyTypes.STRING,
                 "Hoccer XO"),
         APNS_PRODUCTION_CERTIFICATE_PATH_1(PROPERTY_PREFIX + ".apns.1.cert.production.path",
@@ -91,7 +91,7 @@ public class TalkServerConfiguration {
                 PropertyTypes.STRING,
                 "password"),
 
-        APNS_CLIENT_NAME_2(PROPERTY_PREFIX + ".apns.2.client.name",
+        APNS_CLIENT_NAME_2(PROPERTY_PREFIX + ".apns.2.clientName",
                 PropertyTypes.STRING,
                 ""),
         APNS_PRODUCTION_CERTIFICATE_PATH_2(PROPERTY_PREFIX + ".apns.2.cert.production.path",
@@ -107,7 +107,7 @@ public class TalkServerConfiguration {
                 PropertyTypes.STRING,
                 "password"),
 
-        APNS_CLIENT_NAME_3(PROPERTY_PREFIX + ".apns.3.client.name",
+        APNS_CLIENT_NAME_3(PROPERTY_PREFIX + ".apns.3.clientName",
                 PropertyTypes.STRING,
                 ""),
         APNS_PRODUCTION_CERTIFICATE_PATH_3(PROPERTY_PREFIX + ".apns.3.cert.production.path",
