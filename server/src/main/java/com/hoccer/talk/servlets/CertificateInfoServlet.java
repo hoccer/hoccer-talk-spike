@@ -44,12 +44,19 @@ public class CertificateInfoServlet extends HttpServlet {
             ApnsConfiguration apnsConfiguration = entry.getValue();
 
             for (PushAgent.APNS_SERVICE_TYPE type : PushAgent.APNS_SERVICE_TYPE.values()) {
-                ApnsConfiguration.Certificate cert = apnsConfiguration.getCertificate(type);
-                P12CertificateChecker checker = new P12CertificateChecker(cert.getPath(), cert.getPassword());
-
                 jsonGenerator.writeObjectFieldStart(type.name().toLowerCase());
-                jsonGenerator.writeStringField("expirationDate", checker.getCertificateExpiryDate().toString());
-                jsonGenerator.writeBooleanField("isExpired", checker.isExpired());
+
+                try {
+                    ApnsConfiguration.Certificate cert = apnsConfiguration.getCertificate(type);
+                    P12CertificateChecker checker = new P12CertificateChecker(cert.getPath(), cert.getPassword());
+
+                    jsonGenerator.writeBooleanField("exists", true);
+                    jsonGenerator.writeStringField("expirationDate", checker.getCertificateExpiryDate().toString());
+                    jsonGenerator.writeBooleanField("isExpired", checker.isExpired());
+                } catch (IllegalArgumentException e) {
+                    jsonGenerator.writeBooleanField("exists", false);
+                }
+
                 jsonGenerator.writeEndObject();
             }
 
