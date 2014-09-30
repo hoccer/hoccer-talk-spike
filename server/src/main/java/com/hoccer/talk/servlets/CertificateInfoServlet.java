@@ -58,5 +58,6 @@ public class CertificateInfoServlet extends HttpServlet {
 
         jsonGenerator.writeEndObject();
         jsonGenerator.writeEndObject();
+        jsonGenerator.close();
     }
 }
