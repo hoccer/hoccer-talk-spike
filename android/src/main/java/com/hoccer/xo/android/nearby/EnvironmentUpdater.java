@@ -82,7 +82,7 @@ public class EnvironmentUpdater implements LocationListener {
         }
     }
 
-    public TalkEnvironment getEnvironment() {
+    private TalkEnvironment getEnvironment() {
         LOG.trace("getEnvironment()");
         TalkEnvironment theEnvironment = new TalkEnvironment();
 
