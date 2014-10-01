@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.support.v4.app.ListFragment;
 import android.view.View;
+import com.hoccer.xo.release.R;
 
 public class GroupListFragment extends ListFragment implements IPagerFragment {
 
@@ -29,6 +30,6 @@ public class GroupListFragment extends ListFragment implements IPagerFragment {
 
     @Override
     public String getTabName(Resources resources) {
-        return null;
+        return resources.getString(R.string.contacts_tab_groups);
     }
 }

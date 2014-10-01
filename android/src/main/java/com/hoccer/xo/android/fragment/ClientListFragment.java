@@ -11,6 +11,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ClientContactsAdapter;
+import com.hoccer.xo.release.R;
 
 public class ClientListFragment extends ListFragment implements IPagerFragment {
 
@@ -66,6 +67,6 @@ public class ClientListFragment extends ListFragment implements IPagerFragment {
 
     @Override
     public String getTabName(Resources resources) {
-        return null;
+        return resources.getString(R.string.contacts_tab_friends);
     }
 }

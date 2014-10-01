@@ -365,10 +365,8 @@
         <item>IN DER NÄHE</item>
     </string-array>
 
-	<string-array name="contacts_tab_names">
-      <item>FREUNDE</item>
-      <item>GRUPPEN</item>
-    </string-array>
+    <string name="contacts_tab_friends">FREUNDE</string>
+    <string name="contacts_tab_groups">GRUPPEN</string>
 
     <string name="qr_code_tab_scan">SCANNEN</string>
     <string name="qr_code_tab_generate">GENERIEREN</string>

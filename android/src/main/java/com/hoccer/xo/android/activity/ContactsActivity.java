@@ -26,7 +26,6 @@ public class ContactsActivity extends ComposableActivity {
                 new MediaPlayerActivityComponent(this),
                 new ViewPagerActivityComponent(this,
                         R.id.pager,
-                        R.array.contacts_tab_names,
                         new ClientListFragment(),
                         new GroupListFragment())
         };
