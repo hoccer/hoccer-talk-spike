@@ -365,7 +365,7 @@ public class ContactsActivityFunctionalTest extends ActivityInstrumentationTestC
         relationship.setState(state);
 
         TalkKey publicKey = new TalkKey();
-        publicKey.setKeyId(String.format("%%:%%:%%:%%:%%:%%:%%:%%", clientId));
+        publicKey.setKeyId(String.format("PUBLIC_KEY_", clientId));
 
         relatedContact.updatePresence(presence);
         relatedContact.updateRelationship(relationship);
