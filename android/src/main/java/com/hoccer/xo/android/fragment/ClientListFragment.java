@@ -1,8 +1,13 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.view.View;
+import android.widget.ListView;
+import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ClientContactsAdapter;
 
 public class ClientListFragment extends ListFragment implements IPagerFragment {
@@ -41,5 +46,14 @@ public class ClientListFragment extends ListFragment implements IPagerFragment {
     @Override
     public void onPageScrollStateChanged(int state) {
 
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+        TalkClientContact contact = (TalkClientContact) getListAdapter().getItem(position);
+        Intent intent = new Intent(getActivity(), SingleProfileActivity.class);
+        intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
+        startActivity(intent);
     }
 }
