@@ -103,12 +103,13 @@ public class ClientContactsAdapter extends BaseAdapter implements IXoContactList
             long attachmentCount = 0;
             try {
                 messageCount = XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
-//                TODO: attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
+                attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            isInvitedTextView.setText(convertView.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount));
-            isFriendTextView.setVisibility(View.VISIBLE);
+
+            String messageAndAttachmentCountInfo = convertView.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
+            isFriendTextView.setText(messageAndAttachmentCountInfo);
         }
 
         return convertView;

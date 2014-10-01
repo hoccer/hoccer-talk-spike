@@ -220,6 +220,10 @@ public class ContactsActivityFunctionalTest extends ActivityInstrumentationTestC
 
         assertNotNull(itemView);
 
+        TextView isInvitedTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_friend);
+        String expected = getActivity().getResources().getString(com.hoccer.xo.release.R.string.message_and_attachment_count_info, 0, 0);
+        assertEquals(expected, isInvitedTextView.getText());
+
         getInstrumentation().runOnMainSync(new Runnable() {
             @Override
             public void run() {
