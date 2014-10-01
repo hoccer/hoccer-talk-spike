@@ -10,7 +10,7 @@
             <intent android:targetClass="com.hoccer.xo.android.activity.LegalImprintActivity"
                     android:targetPackage="com.hoccer.xo.release"
                     android:action="android.intent.action.VIEW">
-                <extra android:name="xo_legal_imprint_display_mode" android:value="1"></extra>
+                <extra android:name="xo_legal_imprint_display_mode" android:value="ABOUT"></extra>
             </intent>
         </Preference>
         <Preference
@@ -133,7 +133,7 @@
             <intent android:targetClass="com.hoccer.xo.android.activity.LegalImprintActivity"
                     android:targetPackage="com.hoccer.xo.release"
                     android:action="android.intent.action.VIEW">
-                <extra android:name="xo_legal_imprint_display_mode" android:value="2"></extra>
+                <extra android:name="xo_legal_imprint_display_mode" android:value="LICENSES"></extra>
             </intent>
         </Preference>
     </PreferenceCategory>
