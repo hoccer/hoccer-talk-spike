@@ -148,22 +148,20 @@ public class EnvironmentUpdater implements LocationListener {
 
     @Override
     public void onProviderDisabled(String provider) {
-        LOG.debug("onProviderDisabled:" + provider);
-        mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
+        LOG.debug("ignoring onProviderDisabled: " + provider);
+        // we're only interested in onLocationChanged()
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        LOG.debug("onProviderEnabled:" + provider);
-        sendEnvironmentUpdate();
+        LOG.debug("ignoring onProviderEnabled: " + provider);
+        // we're only interested in onLocationChanged()
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        LOG.debug("onStatusChanged:" + provider);
-        if (mIsEnabled) {
-            sendEnvironmentUpdate();
-        }
+        LOG.debug("ignoring onStatusChanged: " + provider);
+        // we're only interested in onLocationChanged()
     }
 
 }
