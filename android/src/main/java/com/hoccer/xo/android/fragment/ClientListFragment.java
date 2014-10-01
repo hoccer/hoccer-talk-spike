@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
@@ -55,5 +57,15 @@ public class ClientListFragment extends ListFragment implements IPagerFragment {
         Intent intent = new Intent(getActivity(), SingleProfileActivity.class);
         intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
         startActivity(intent);
+    }
+
+    @Override
+    public View getCustomTabView(Context context) {
+        return null;
+    }
+
+    @Override
+    public String getTabName(Resources resources) {
+        return null;
     }
 }
