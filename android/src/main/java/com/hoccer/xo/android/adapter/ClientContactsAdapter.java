@@ -68,7 +68,7 @@ public class ClientContactsAdapter extends BaseAdapter implements IXoContactList
 
         final TalkClientContact contact = (TalkClientContact) getItem(position);
 
-        contactNameTextView.setText(contact.getName());
+        contactNameTextView.setText(contact.getNickname());
 
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
