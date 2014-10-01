@@ -84,9 +84,9 @@ public class EnvironmentUpdater implements LocationListener {
 
     private TalkEnvironment getEnvironment() {
         LOG.trace("getEnvironment()");
-        TalkEnvironment theEnvironment = new TalkEnvironment();
+        TalkEnvironment environment = new TalkEnvironment();
 
-        theEnvironment.setType(TalkEnvironment.TYPE_NEARBY);
+        environment.setType(TalkEnvironment.TYPE_NEARBY);
 
         Location networkLocation = null;
         Location gpsLocation = null;
@@ -110,12 +110,12 @@ public class EnvironmentUpdater implements LocationListener {
         }
         if (location != null) {
             Double[] geoLocation = {location.getLongitude(), location.getLatitude()};
-            theEnvironment.setGeoLocation(geoLocation);
-            theEnvironment.setLocationType(location.getProvider());
+            environment.setGeoLocation(geoLocation);
+            environment.setLocationType(location.getProvider());
             if (location.hasAccuracy()) {
-                theEnvironment.setAccuracy(location.getAccuracy());
+                environment.setAccuracy(location.getAccuracy());
             } else {
-                theEnvironment.setAccuracy(0.0f);
+                environment.setAccuracy(0.0f);
             }
         }
 
@@ -126,12 +126,11 @@ public class EnvironmentUpdater implements LocationListener {
             for (ScanResult scan : scanResults) {
                 bssids.add(scan.BSSID);
             }
-            theEnvironment.setBssids(bssids.toArray(new String[bssids.size()]));
+            environment.setBssids(bssids.toArray(new String[bssids.size()]));
         }
-        theEnvironment.setTimestamp(new Date());
-        return theEnvironment;
+        environment.setTimestamp(new Date());
+        return environment;
     }
-
 
     @Override
     public void onLocationChanged(Location location) {
@@ -158,5 +157,4 @@ public class EnvironmentUpdater implements LocationListener {
         LOG.debug("ignoring onStatusChanged: " + provider);
         // we're only interested in onLocationChanged()
     }
-
 }
