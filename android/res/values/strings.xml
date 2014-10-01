@@ -48,6 +48,10 @@
     </string>
     <string name="message_and_attachment_count_info">%1$d messages | %2$d attachments</string>
 
+    <!-- Contact decline invitation dialog -->
+    <string name="friend_request_decline_invitation_title">Decline invitation?</string>
+    <string name="friend_request_decline_invitation_message">Do you really want to decline the invitation from %1$s?</string>
+
     <!-- Deleting attachments -->
     <string name="dialog_attachment_delete_title">Delete Attachment</string>
     <string name="dialog_attachment_delete_message">Delete selected attachments and related chat messages?</string>
