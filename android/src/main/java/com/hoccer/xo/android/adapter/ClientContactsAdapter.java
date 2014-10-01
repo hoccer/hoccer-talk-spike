@@ -85,19 +85,17 @@ public class ClientContactsAdapter extends BaseAdapter implements IXoContactList
         });
 
         if (contact.getClientRelationship().invitedMe()) {
-            convertView.setClickable(false);
             invitedMeLayout.setVisibility(View.VISIBLE);
             isInvitedTextView.setVisibility(View.GONE);
             isFriendTextView.setVisibility(View.GONE);
         } else if (contact.getClientRelationship().isInvited()) {
-            convertView.setClickable(false);
             invitedMeLayout.setVisibility(View.GONE);
             isInvitedTextView.setVisibility(View.VISIBLE);
             isFriendTextView.setVisibility(View.GONE);
         } else if (contact.getClientRelationship().isFriend()) {
-            convertView.setClickable(true);
             invitedMeLayout.setVisibility(View.GONE);
             isInvitedTextView.setVisibility(View.GONE);
+            isFriendTextView.setVisibility(View.VISIBLE);
 
             long messageCount = 0;
             long attachmentCount = 0;
@@ -116,22 +114,14 @@ public class ClientContactsAdapter extends BaseAdapter implements IXoContactList
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-        // add contact to list
-
-        // sort list
-        sortTalkClientContacts();
-
-        // update
+    public boolean isEnabled(int position) {
+        TalkClientContact contact = (TalkClientContact) getItem(position);
+        return contact.getClientRelationship().isFriend();
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        // remove contact from list
-        mClientContactList.remove(contact);
-        // update
-
-        notifyDataSetChanged();
+    public boolean areAllItemsEnabled() {
+        return false;
     }
 
     @Override
@@ -148,8 +138,20 @@ public class ClientContactsAdapter extends BaseAdapter implements IXoContactList
     }
 
     @Override
+    public void onContactRemoved(TalkClientContact contact) {
+        // remove contact from list
+        mClientContactList.remove(contact);
+        // update
+
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public void onContactAdded(TalkClientContact contact) {
+    }
+
+    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        LOG.info(contact);
     }
 
     @Override

@@ -103,6 +103,8 @@ public class ContactsActivityFunctionalTest extends ActivityInstrumentationTestC
 
         assertTrue(expectedContact.getClientRelationship().invitedMe());
 
+        assertFalse(clientContactsAdapter.isEnabled(0));
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -162,6 +164,8 @@ public class ContactsActivityFunctionalTest extends ActivityInstrumentationTestC
 
         assertTrue(expectedContact.getClientRelationship().isInvited());
 
+        assertFalse(clientContactsAdapter.isEnabled(0));
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -212,12 +216,17 @@ public class ContactsActivityFunctionalTest extends ActivityInstrumentationTestC
         TalkClientContact relatedContact = mockClientRelationship(TalkRelationship.STATE_FRIEND, 1);
 
         clientContactsAdapter.onClientRelationshipChanged(null);
+        assertEquals(1, clientContactsAdapter.getCount());
+
+        TalkClientContact contact = (TalkClientContact) clientContactsAdapter.getItem(0);
+        assertTrue(contact.getClientRelationship().isFriend());
+        
+        assertTrue(clientContactsAdapter.isEnabled(0));
 
         getInstrumentation().waitForIdleSync();
 
         final ListView listView = clientListFragment.getListView();
         final View itemView = listView.getChildAt(0);
-
         assertNotNull(itemView);
 
         TextView isInvitedTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_friend);
