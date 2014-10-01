@@ -26,7 +26,6 @@ public class EnvironmentUpdater implements LocationListener {
 
     private static final long MIN_UPDATE_MOVED = 5;
 
-    private final Context mContext;
     private final XoClient mClient = XoApplication.getXoClient();
 
     private final LocationManager mLocationManager;
@@ -34,15 +33,9 @@ public class EnvironmentUpdater implements LocationListener {
 
     private boolean mIsEnabled = false;
 
-    public EnvironmentUpdater(Context pContext) {
-        mContext = pContext;
-
-        mLocationManager = (LocationManager) pContext.getSystemService(Context.LOCATION_SERVICE);
-        mWifiManager = (WifiManager) pContext.getSystemService(Context.WIFI_SERVICE);
-    }
-
-    public Context getContext() {
-        return mContext;
+    public EnvironmentUpdater(Context context) {
+        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
     public boolean isEnabled() {
