@@ -65,6 +65,8 @@ public class EnvironmentUpdater implements LocationListener {
         if (isNetworkProviderEnabled()) {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, this);
         }
+
+        sendEnvironmentUpdate();
     }
 
     public void stopEnvironmentTracking() {
@@ -73,7 +75,7 @@ public class EnvironmentUpdater implements LocationListener {
         mIsEnabled = false;
     }
 
-    public void sendEnvironmentUpdate() {
+    private void sendEnvironmentUpdate() {
         TalkEnvironment environment = getEnvironment();
         if (environment.isValid()) {
             mClient.sendEnvironmentUpdate(environment);

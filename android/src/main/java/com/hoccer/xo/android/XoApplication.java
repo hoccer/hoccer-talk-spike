@@ -378,7 +378,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
             try {
                 ENVIRONMENT_UPDATER.startEnvironmentTracking();
                 hasCurrentRunningNearbySession = true;
-                ENVIRONMENT_UPDATER.sendEnvironmentUpdate();
             } catch (EnvironmentUpdaterException e) {
                 LOG.error("Error when starting EnvironmentUpdater: ", e);
             }
