@@ -32,8 +32,6 @@ public class EnvironmentUpdater implements LocationListener {
     private final LocationManager mLocationManager;
     private final WifiManager mWifiManager;
 
-    private final boolean mNetworkProviderAvailable;
-    private final boolean mGpsProviderAvailable;
     private boolean mIsEnabled = false;
 
     public EnvironmentUpdater(Context pContext) {
@@ -41,9 +39,6 @@ public class EnvironmentUpdater implements LocationListener {
 
         mLocationManager = (LocationManager) pContext.getSystemService(Context.LOCATION_SERVICE);
         mWifiManager = (WifiManager) pContext.getSystemService(Context.WIFI_SERVICE);
-
-        mNetworkProviderAvailable = mLocationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER);
-        mGpsProviderAvailable = mLocationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER);
     }
 
     public Context getContext() {
@@ -54,19 +49,27 @@ public class EnvironmentUpdater implements LocationListener {
         return mIsEnabled;
     }
 
+    private boolean isGpsProviderEnabled() {
+        return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    private boolean isNetworkProviderEnabled() {
+        return mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
     public void startEnvironmentTracking() throws EnvironmentUpdaterException {
         // TODO: handle failed startups
         mIsEnabled = true;
 
-        if (!mGpsProviderAvailable && !mNetworkProviderAvailable) {
+        if (!isGpsProviderEnabled() && !isNetworkProviderEnabled()) {
             throw new EnvironmentUpdaterException("no source for environment information available");
         }
 
-        if (mGpsProviderAvailable) {
+        if (isGpsProviderEnabled()) {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, this);
         }
 
-        if (mNetworkProviderAvailable) {
+        if (isNetworkProviderEnabled()) {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, this);
         }
     }
@@ -92,10 +95,10 @@ public class EnvironmentUpdater implements LocationListener {
 
         Location networkLocation = null;
         Location gpsLocation = null;
-        if (mNetworkProviderAvailable) {
+        if (isNetworkProviderEnabled()) {
             networkLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
-        if (mGpsProviderAvailable) {
+        if (isGpsProviderEnabled()) {
             gpsLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         }
 
