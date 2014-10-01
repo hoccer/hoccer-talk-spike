@@ -85,14 +85,17 @@ public class ClientContactsAdapter extends BaseAdapter implements IXoContactList
         });
 
         if (contact.getClientRelationship().invitedMe()) {
+            convertView.setClickable(false);
             invitedMeLayout.setVisibility(View.VISIBLE);
             isInvitedTextView.setVisibility(View.GONE);
             isFriendTextView.setVisibility(View.GONE);
         } else if (contact.getClientRelationship().isInvited()) {
+            convertView.setClickable(false);
             invitedMeLayout.setVisibility(View.GONE);
             isInvitedTextView.setVisibility(View.VISIBLE);
             isFriendTextView.setVisibility(View.GONE);
         } else if (contact.getClientRelationship().isFriend()) {
+            convertView.setClickable(true);
             invitedMeLayout.setVisibility(View.GONE);
             isInvitedTextView.setVisibility(View.GONE);
 
