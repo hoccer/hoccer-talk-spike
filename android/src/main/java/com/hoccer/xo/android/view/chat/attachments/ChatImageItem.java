@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
@@ -18,6 +17,7 @@ import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 
@@ -62,8 +62,6 @@ public class ChatImageItem extends ChatMessageItem {
             }
         });
 
-        mAttachmentView.setPadding(0, 0, 0, 0);
-        mAttachmentView.setBackgroundDrawable(null);
 
         // calc view size
         double widthScaleFactor = mAvatarView.getVisibility() == View.VISIBLE ? WIDTH_AVATAR_SCALE_FACTOR : WIDTH_SCALE_FACTOR;
@@ -87,13 +85,31 @@ public class ChatImageItem extends ChatMessageItem {
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
 
+        mRootView.setBackgroundDrawable(mAttachmentView.getBackground());
+        mRootView.setPadding(0, 0, 0, 0);
+
+        mAttachmentView.setBackgroundDrawable(null);
+        mAttachmentView.setPadding(0, 0, 0, 0);
+
+        final View imageTextView = mRootView.findViewById(R.id.tv_image_preview_error);
+        imageTextView.setVisibility(View.GONE);
+
         ImageView targetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
         Picasso.with(mContext).load(mContentObject.getContentDataUrl())
-                .error(R.drawable.ic_img_placeholder_error)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
+                .error(R.drawable.ic_img_placeholder)
                 .centerInside()
-                .into(targetView);
+                .into(targetView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                    }
+
+                    @Override
+                    public void onError() {
+                        imageTextView.setVisibility(View.VISIBLE);
+                    }
+                });
         LOG.trace(Picasso.with(mContext).getSnapshot().toString());
     }
 

@@ -404,4 +404,5 @@
     <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
     <string name="nearby_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
 
+    <string name="image_preview_error">Vorschau konnte nicht geladen werden.\nKlicke hier um das Bild zu öffnen.</string>
 </resources>
