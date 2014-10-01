@@ -20,7 +20,7 @@ public class ClientListFragment extends ListFragment implements IPagerFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mClientContactsAdapter = new ClientContactsAdapter();
+        mClientContactsAdapter = new ClientContactsAdapter(getActivity());
         setListAdapter(mClientContactsAdapter);
     }
 

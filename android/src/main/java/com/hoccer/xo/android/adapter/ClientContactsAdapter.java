@@ -1,6 +1,9 @@
 package com.hoccer.xo.android.adapter;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -14,6 +17,7 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -24,11 +28,13 @@ import java.util.List;
 public class ClientContactsAdapter extends BaseAdapter implements IXoContactListener {
 
     private static Logger LOG = Logger.getLogger(ClientContactsAdapter.class);
+    private Activity mActivity;
 
     private List<TalkClientContact> mClientContactList = new ArrayList<TalkClientContact>();
 
-    public ClientContactsAdapter() {
+    public ClientContactsAdapter(Activity activity) {
         try {
+            mActivity = activity;
             mClientContactList = XoApplication.getXoClient().getDatabase().findAllClientContacts();
             sortTalkClientContacts();
         } catch (SQLException e) {
@@ -80,7 +86,16 @@ public class ClientContactsAdapter extends BaseAdapter implements IXoContactList
         declineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                XoApplication.getXoClient().declineFriend(contact);
+                XoDialogs.showYesNoDialog("ConfirmDeclineClientInvitationDialog",
+                    mActivity.getString(R.string.friend_request_decline_invitation_title),
+                    mActivity.getString(R.string.friend_request_decline_invitation_message, contact.getNickname()),
+                    mActivity,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            XoApplication.getXoClient().declineFriend(contact);
+                        }
+                    });
             }
         });
 
