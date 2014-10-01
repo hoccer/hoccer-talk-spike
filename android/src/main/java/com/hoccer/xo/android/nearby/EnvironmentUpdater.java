@@ -34,7 +34,7 @@ public class EnvironmentUpdater implements LocationListener {
 
     private final boolean mNetworkProviderAvailable;
     private final boolean mGpsProviderAvailable;
-    private boolean isEnabled = false;
+    private boolean mIsEnabled = false;
 
     public EnvironmentUpdater(Context pContext) {
         mContext = pContext;
@@ -51,12 +51,12 @@ public class EnvironmentUpdater implements LocationListener {
     }
 
     public boolean isEnabled() {
-        return isEnabled;
+        return mIsEnabled;
     }
 
     public void startEnvironmentTracking() throws EnvironmentUpdaterException {
         // TODO: handle failed startups
-        isEnabled = true;
+        mIsEnabled = true;
 
         if (!mGpsProviderAvailable && !mNetworkProviderAvailable) {
             throw new EnvironmentUpdaterException("no source for environment information available");
@@ -74,7 +74,7 @@ public class EnvironmentUpdater implements LocationListener {
     public void stopEnvironmentTracking() {
         mLocationManager.removeUpdates(this);
         mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
-        isEnabled = false;
+        mIsEnabled = false;
     }
 
     public void sendEnvironmentUpdate() {
@@ -138,7 +138,7 @@ public class EnvironmentUpdater implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         LOG.debug("onLocationChanged:" + location.toString());
-        if (isEnabled) {
+        if (mIsEnabled) {
             sendEnvironmentUpdate();
         }
     }
@@ -158,7 +158,7 @@ public class EnvironmentUpdater implements LocationListener {
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         LOG.debug("onStatusChanged:" + provider);
-        if (isEnabled) {
+        if (mIsEnabled) {
             sendEnvironmentUpdate();
         }
     }
