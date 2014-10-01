@@ -84,9 +84,10 @@ public class EnvironmentUpdater implements LocationListener {
 
     private TalkEnvironment getEnvironment() {
         LOG.trace("getEnvironment()");
-        TalkEnvironment environment = new TalkEnvironment();
 
+        TalkEnvironment environment = new TalkEnvironment();
         environment.setType(TalkEnvironment.TYPE_NEARBY);
+        environment.setTimestamp(new Date());
 
         Location networkLocation = null;
         Location gpsLocation = null;
@@ -97,7 +98,7 @@ public class EnvironmentUpdater implements LocationListener {
             gpsLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         }
 
-        Location location = null;
+        Location location;
         if (gpsLocation != null && networkLocation != null) {
             // both available, select most precise
             if (gpsLocation.getAccuracy() < networkLocation.getAccuracy()) {
@@ -108,6 +109,7 @@ public class EnvironmentUpdater implements LocationListener {
         } else {
             location = gpsLocation != null ? gpsLocation : networkLocation;
         }
+
         if (location != null) {
             Double[] geoLocation = {location.getLongitude(), location.getLatitude()};
             environment.setGeoLocation(geoLocation);
@@ -128,7 +130,7 @@ public class EnvironmentUpdater implements LocationListener {
             }
             environment.setBssids(bssids.toArray(new String[bssids.size()]));
         }
-        environment.setTimestamp(new Date());
+
         return environment;
     }
 
