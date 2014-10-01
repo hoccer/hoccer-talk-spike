@@ -2,7 +2,6 @@ package com.hoccer.xo.android.fragment;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Created by nico on 27/06/2014.
- */
-public class LicensesFragment extends Fragment{
+public class LicensesFragment extends Fragment {
 
     private static final Logger LOG = Logger.getLogger(LicensesFragment.class);
 
