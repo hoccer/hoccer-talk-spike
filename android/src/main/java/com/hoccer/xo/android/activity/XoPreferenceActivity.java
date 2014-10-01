@@ -181,10 +181,6 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if (preference.getKey().equals("preference_import")) {
             doImportCredentials();
             return true;
-        } else if (preference.getKey().equals("preference_about")) {
-            showAbout();
-        } else if (preference.getKey().equals("preference_licenses")) {
-            showLicense();
         } else if (preference.getKey().equals("preference_data_export")) {
             preference.setEnabled(false);
             exportData();
@@ -331,17 +327,5 @@ public class XoPreferenceActivity extends PreferenceActivity
             Toast.makeText(this, R.string.export_credentials_failure, Toast.LENGTH_LONG).show();
         }
         Toast.makeText(this, R.string.export_credentials_success, Toast.LENGTH_LONG).show();
-    }
-
-    private void showAbout() {
-        Intent intent = new Intent(this, LegalImprintActivity.class);
-        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_ABOUT);
-        startActivity(intent);
-    }
-
-    private void showLicense() {
-        Intent intent = new Intent(this, LegalImprintActivity.class);
-        intent.putExtra(LegalImprintActivity.DISPLAY_MODE, LegalImprintActivity.SHOW_LICENSES);
-        startActivity(intent);
     }
 }
