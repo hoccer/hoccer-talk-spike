@@ -38,18 +38,6 @@ public class EnvironmentUpdater implements LocationListener {
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
-    public boolean isEnabled() {
-        return mIsEnabled;
-    }
-
-    private boolean isGpsProviderEnabled() {
-        return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    }
-
-    private boolean isNetworkProviderEnabled() {
-        return mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    }
-
     public void startEnvironmentTracking() throws EnvironmentUpdaterException {
         // TODO: handle failed startups
         mIsEnabled = true;
@@ -73,6 +61,18 @@ public class EnvironmentUpdater implements LocationListener {
         mLocationManager.removeUpdates(this);
         mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
         mIsEnabled = false;
+    }
+
+    public boolean isEnabled() {
+        return mIsEnabled;
+    }
+
+    private boolean isGpsProviderEnabled() {
+        return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    private boolean isNetworkProviderEnabled() {
+        return mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
     private void sendEnvironmentUpdate() {
