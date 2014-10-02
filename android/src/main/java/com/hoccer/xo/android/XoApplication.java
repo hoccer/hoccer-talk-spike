@@ -62,7 +62,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     /** global xo sound pool for system sounds (initialized in onCreate) */
     private static XoSoundPool SOUND_POOL = null;
 
-    public static EnvironmentUpdater ENVIRONMENT_UPDATER = null;
+    private static EnvironmentUpdater ENVIRONMENT_UPDATER = null;
 
     /** root of user-visible storage (initialized in onCreate) */
     private static File EXTERNAL_STORAGE = null;
