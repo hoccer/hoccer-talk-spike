@@ -760,6 +760,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return null;
     }
 
+    public long getInvitedMeRequestsCount() throws SQLException {
+        long invitedMeCount = mRelationships.queryBuilder()
+                .where()
+                .eq("state", TalkRelationship.STATE_INVITED_ME)
+                .countOf();
+        return invitedMeCount;
+    }
+
     public boolean hasPendingFriendRequests() {
         try {
             List<TalkRelationship> invitedRelations = mRelationships.queryBuilder()
