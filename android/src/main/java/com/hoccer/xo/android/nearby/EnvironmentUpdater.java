@@ -9,7 +9,6 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.model.TalkEnvironment;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import org.apache.log4j.Logger;
 
@@ -23,17 +22,18 @@ public class EnvironmentUpdater implements LocationListener {
     private static final Logger LOG = Logger.getLogger(EnvironmentUpdater.class);
 
     private static final long MIN_UPDATE_TIME = 1000;
-
     private static final long MIN_UPDATE_MOVED = 5;
 
-    private final XoClient mClient = XoApplication.getXoClient();
+    private final XoClient mClient;
 
     private final LocationManager mLocationManager;
     private final WifiManager mWifiManager;
 
     private boolean mIsEnabled = false;
 
-    public EnvironmentUpdater(Context context) {
+    public EnvironmentUpdater(Context context, XoClient client) {
+        mClient = client;
+
         mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }

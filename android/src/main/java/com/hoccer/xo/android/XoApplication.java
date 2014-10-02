@@ -289,7 +289,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // create sound pool instance
         SOUND_POOL = new XoSoundPool(this);
 
-        ENVIRONMENT_UPDATER = new EnvironmentUpdater(this);
+        ENVIRONMENT_UPDATER = new EnvironmentUpdater(this, getXoClient());
     }
 
     @Override
