@@ -100,9 +100,9 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         clientsAdapter.onClientRelationshipChanged(null);
 
         assertEquals(1, clientsAdapter.getCount());
-        TalkClientContact expectedContact = (TalkClientContact) clientsAdapter.getItem(0);
+        TalkClientContact contact = (TalkClientContact) clientsAdapter.getItem(0);
 
-        assertTrue(expectedContact.getClientRelationship().invitedMe());
+        assertTrue(contact.getClientRelationship().invitedMe());
 
         assertFalse(clientsAdapter.isEnabled(0));
 
@@ -325,28 +325,28 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         assertEquals(7, clientsAdapter.getCount());
 
         // invited me contacts
-        TalkClientContact expectedContact1 = (TalkClientContact) clientsAdapter.getItem(0);
-        assertEquals("3", expectedContact1.getClientId());
+        TalkClientContact contact1 = (TalkClientContact) clientsAdapter.getItem(0);
+        assertEquals("3", contact1.getClientId());
 
-        TalkClientContact expectedContact2 = (TalkClientContact) clientsAdapter.getItem(1);
-        assertEquals("7", expectedContact2.getClientId());
+        TalkClientContact contact2 = (TalkClientContact) clientsAdapter.getItem(1);
+        assertEquals("7", contact2.getClientId());
 
         // invited others
-        TalkClientContact expectedContact3 = (TalkClientContact) clientsAdapter.getItem(2);
-        assertEquals("2", expectedContact3.getClientId());
+        TalkClientContact contact3 = (TalkClientContact) clientsAdapter.getItem(2);
+        assertEquals("2", contact3.getClientId());
 
-        TalkClientContact expectedContact4 = (TalkClientContact) clientsAdapter.getItem(3);
-        assertEquals("4", expectedContact4.getClientId());
+        TalkClientContact contact4 = (TalkClientContact) clientsAdapter.getItem(3);
+        assertEquals("4", contact4.getClientId());
 
-        TalkClientContact expectedContact5 = (TalkClientContact) clientsAdapter.getItem(4);
-        assertEquals("5", expectedContact5.getClientId());
+        TalkClientContact contact5 = (TalkClientContact) clientsAdapter.getItem(4);
+        assertEquals("5", contact5.getClientId());
 
         // friends
-        TalkClientContact expectedContact6 = (TalkClientContact) clientsAdapter.getItem(5);
-        assertEquals("1", expectedContact6.getClientId());
+        TalkClientContact contact6 = (TalkClientContact) clientsAdapter.getItem(5);
+        assertEquals("1", contact6.getClientId());
 
-        TalkClientContact expectedContact7 = (TalkClientContact) clientsAdapter.getItem(6);
-        assertEquals("6", expectedContact7.getClientId());
+        TalkClientContact contact7 = (TalkClientContact) clientsAdapter.getItem(6);
+        assertEquals("6", contact7.getClientId());
     }
 
 
