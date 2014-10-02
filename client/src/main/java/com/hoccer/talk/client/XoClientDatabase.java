@@ -2,7 +2,10 @@ package com.hoccer.talk.client;
 
 import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.model.*;
+import com.hoccer.talk.util.WeakListenerArray;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.UpdateBuilder;
@@ -12,10 +15,9 @@ import com.j256.ormlite.table.TableUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class XoClientDatabase {
+public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     private static final Logger LOG = Logger.getLogger(XoClientDatabase.class);
 
@@ -42,6 +44,13 @@ public class XoClientDatabase {
 
     Dao<TalkClientSmsToken, Integer> mSmsTokens;
 
+    Dao<TalkClientMediaCollection, Integer> mMediaCollections;
+    Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
+
+    private WeakListenerArray<IXoUploadListener> mUploadListeners = new WeakListenerArray<IXoUploadListener>();
+    private WeakListenerArray<IXoDownloadListener> mDownloadListeners = new WeakListenerArray<IXoDownloadListener>();
+    private WeakListenerArray<IXoMediaCollectionListener> mMediaCollectionListeners = new WeakListenerArray<IXoMediaCollectionListener>();
+
 
     public static void createTables(ConnectionSource cs) throws SQLException {
         TableUtils.createTable(cs, TalkClientContact.class);
@@ -60,11 +69,13 @@ public class XoClientDatabase {
         TableUtils.createTable(cs, TalkKey.class);
         TableUtils.createTable(cs, TalkPrivateKey.class);
 
-        TableUtils.createTable(cs, TalkAttachment.class);
         TableUtils.createTable(cs, TalkClientDownload.class);
         TableUtils.createTable(cs, TalkClientUpload.class);
 
         TableUtils.createTable(cs, TalkClientSmsToken.class);
+
+        TableUtils.createTable(cs, TalkClientMediaCollection.class);
+        TableUtils.createTable(cs, TalkClientMediaCollectionRelation.class);
     }
 
     public XoClientDatabase(IXoClientDatabaseBackend backend) {
@@ -92,6 +103,9 @@ public class XoClientDatabase {
         mClientUploads = mBackend.getDao(TalkClientUpload.class);
 
         mSmsTokens = mBackend.getDao(TalkClientSmsToken.class);
+
+        mMediaCollections = mBackend.getDao(TalkClientMediaCollection.class);
+        mMediaCollectionRelations = mBackend.getDao(TalkClientMediaCollectionRelation.class);
     }
 
     public void saveContact(TalkClientContact contact) throws SQLException {
@@ -123,8 +137,7 @@ public class XoClientDatabase {
     }
 
     public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
-        // message.setProgressState(false); // TODO: WTF is this? is it ever saved with TRUE?
-        mClientMessages.createOrUpdate(message);
+        Dao.CreateOrUpdateStatus result = mClientMessages.createOrUpdate(message);
     }
 
     public void saveMessage(TalkMessage message) throws SQLException {
@@ -151,11 +164,31 @@ public class XoClientDatabase {
     }
 
     public void saveClientDownload(TalkClientDownload download) throws SQLException {
-        mClientDownloads.createOrUpdate(download);
+        Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
+
+        if(result.isCreated()) {
+            for (IXoDownloadListener listener : mDownloadListeners) {
+                listener.onDownloadCreated(download);
+            }
+        } else {
+            for (IXoDownloadListener listener : mDownloadListeners) {
+                listener.onDownloadUpdated(download);
+            }
+        }
     }
 
     public void saveClientUpload(TalkClientUpload upload) throws SQLException {
-        mClientUploads.createOrUpdate(upload);
+        Dao.CreateOrUpdateStatus result = mClientUploads.createOrUpdate(upload);
+
+        if(result.isCreated()) {
+            for (IXoUploadListener listener : mUploadListeners) {
+                listener.onUploadCreated(upload);
+            }
+        } else {
+            for (IXoUploadListener listener : mUploadListeners) {
+                listener.onUploadUpdated(upload);
+            }
+        }
     }
 
     public void refreshClientContact(TalkClientContact contact) throws SQLException {
@@ -180,11 +213,7 @@ public class XoClientDatabase {
                 .query();
     }
 
-    public List<TalkClientContact> findAllClientContacts() throws SQLException {
-        return findAllClientContactsOrderedByRecentMessage();
-    }
-
-    private List<TalkClientContact> findAllClientContactsOrderedByRecentMessage() throws SQLException {
+    public List<TalkClientContact> findAllClientContactsOrderedByRecentMessage() throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> recentUnreadMessages = mClientMessages.queryBuilder();
         QueryBuilder<TalkClientContact, Integer> recentSenders = mClientContacts.queryBuilder();
         recentUnreadMessages.orderBy("timestamp", false);
@@ -206,6 +235,14 @@ public class XoClientDatabase {
             }
         }
         return orderedListOfDistinctSenders;
+    }
+
+    public List<TalkClientContact> findAllClientContacts() throws SQLException {
+        return mClientContacts.queryBuilder().where()
+                .eq("contactType", TalkClientContact.TYPE_CLIENT)
+                .eq("deleted", false)
+                .and(2)
+                .query();
     }
 
     public List<TalkClientContact> findAllGroupContacts() throws SQLException {
@@ -264,6 +301,10 @@ public class XoClientDatabase {
         }
 
         return contact;
+    }
+
+    public TalkClientContact findContactById(int contactId) throws SQLException {
+        return mClientContacts.queryForId(contactId);
     }
 
     public synchronized TalkClientContact findContactByClientId(String clientId, boolean create) throws SQLException {
@@ -342,6 +383,10 @@ public class XoClientDatabase {
         return messages;
     }
 
+    public synchronized TalkClientMessage findMessageById(int messageId) throws SQLException {
+        return mClientMessages.queryForId(messageId);
+    }
+
     public synchronized TalkClientMessage findMessageByMessageId(String messageId, boolean create) throws SQLException {
         TalkClientMessage message = null;
 
@@ -405,7 +450,7 @@ public class XoClientDatabase {
         for (TalkClientMessage message : messages) {
             TalkClientContact conversationContact = message.getConversationContact();
             if (conversationContact != null && conversationContact.getContactType() != null) {
-                if (conversationContact.getContactType().equals("group")) {
+                if (conversationContact.isGroup()) {
                     TalkGroup groupPresence = conversationContact.getGroupPresence();
                     if (groupPresence != null && groupPresence.isTypeNearby()) {
                         nearbyMessages.add(message);
@@ -424,7 +469,7 @@ public class XoClientDatabase {
             TalkClientMessage separator = new TalkClientMessage();
             separator.setConversationContact(c);
             separator.setText("Nearby: " + c.getNickname());
-            separator.setMessageId("SEPARATOR");
+            separator.setMessageId(TalkClientMessage.TYPE_SEPARATOR);
             orderedMessages.add(separator);
             orderedMessages.addAll(findMessagesByContactId(c.getClientContactId(), nearbyMessages.size(), 0));
         }
@@ -449,6 +494,19 @@ public class XoClientDatabase {
         return messages;
     }
 
+    public Vector<Integer> findMessageIdsByContactId(int contactId) throws SQLException {
+        GenericRawResults<Object[]> results = mClientMessages.queryRaw(
+                "select clientMessageId from clientMessage where conversationContact_id = ?",
+                new DataType[]{DataType.INTEGER}, Integer.toString(contactId));
+        List<Object[]> rows = results.getResults();
+        Vector<Integer> ret = new Vector<Integer>(rows.size());
+        for (Object[] row : rows) {
+            Integer r = (Integer) row[0];
+            ret.add(r);
+        }
+        return ret;
+    }
+
     public long getMessageCountByContactId(int contactId) throws SQLException {
         return mClientMessages.queryBuilder()
                 .where()
@@ -470,6 +528,122 @@ public class XoClientDatabase {
         return mClientDownloads.queryForId(clientDownloadId);
     }
 
+    public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
+        List<TalkClientUpload> uploads = mClientUploads.queryBuilder()
+            .where()
+            .eq("mediaType", mediaType)
+            .isNotNull("contentUrl")
+            .and(2)
+            .query();
+
+        List<TalkClientDownload> downloads = mClientDownloads.queryForEq("mediaType", mediaType);
+
+        return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
+    }
+
+    private List<XoTransfer> mergeUploadsAndDownloadsByMessageTimestamp(List<TalkClientUpload> uploads, List<TalkClientDownload> downloads) throws SQLException {
+        List<TalkClientMessage> messages = mClientMessages.queryBuilder()
+                .orderBy("timestamp", false)
+                .where()
+                .isNotNull("attachmentUpload_id")
+                .isNotNull("attachmentDownload_id")
+                .or(2)
+                .query();
+
+        List<XoTransfer> transfers = new ArrayList<XoTransfer>();
+
+        for (TalkClientMessage message : messages) {
+            TalkClientUpload upload = message.getAttachmentUpload();
+            if (upload != null && uploads.contains(upload)) {
+                transfers.add(upload);
+            }
+
+            TalkClientDownload download = message.getAttachmentDownload();
+            if (download != null && download.getState() == TalkClientDownload.State.COMPLETE && downloads.contains(download)) {
+                transfers.add(download);
+            }
+        }
+
+        return transfers;
+    }
+
+    public List<TalkClientDownload> findClientDownloadsByContactId(int contactId) throws SQLException {
+
+        QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
+        messageQb
+                .orderBy("timestamp", false)
+                .where()
+                .eq("senderContact_id", contactId)
+                .or()
+                .eq("conversationContact_id", contactId);
+
+        QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
+        downloadQb.where()
+                .eq("state", TalkClientDownload.State.COMPLETE);
+
+        List<TalkClientDownload> downloads = downloadQb.join(messageQb).query();
+
+        return downloads;
+    }
+
+    public List<TalkClientDownload> findClientDownloadsByMediaTypeAndContactId(String mediaType, int contactId) throws SQLException {
+
+        QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
+        messageQb
+                .orderBy("timestamp", false)
+                .where()
+                .eq("senderContact_id", contactId)
+                .or()
+                .eq("conversationContact_id", contactId);
+
+        QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
+        downloadQb.where()
+                .eq("mediaType", mediaType)
+                .and()
+                .eq("state", TalkClientDownload.State.COMPLETE);
+
+        List<TalkClientDownload> downloads = downloadQb.join(messageQb).query();
+
+        return downloads;
+    }
+
+    public TalkClientMessage findClientMessageByTalkClientDownloadId(int attachmentDownloadId) throws SQLException {
+        List<TalkClientMessage> messages = mClientMessages.queryForEq("attachmentDownload_id", attachmentDownloadId);
+        int numberOfMessages = messages.size();
+
+        if (numberOfMessages == 0) {
+            return null;
+        } else {
+            return messages.get(0);
+        }
+    }
+
+    public TalkClientMessage findClientMessageByTalkClientUploadId(int attachmentUploadId) throws SQLException {
+        List<TalkClientMessage> messages = mClientMessages.queryForEq("attachmentUpload_id", attachmentUploadId);
+        int numberOfMessages = messages.size();
+
+        if (numberOfMessages == 0) {
+            return null;
+        } else {
+            return messages.get(0);
+        }
+    }
+
+    public List<XoTransfer> findAllTransfers() throws SQLException {
+        List<TalkClientUpload> uploads = mClientUploads.queryBuilder()
+                .where()
+                .isNotNull("contentUrl")
+                .query();
+
+        List<TalkClientDownload> downloads = mClientDownloads.queryForAll();
+
+        return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
+    }
+
+    public TalkClientMessage findClientMessageById(int clientMessageId) throws SQLException {
+        return mClientMessages.queryForId(clientMessageId);
+    }
+
     public long findUnseenMessageCountByContactId(int contactId) throws SQLException {
         return mClientMessages.queryBuilder().where()
                 .eq("conversationContact_id", contactId)
@@ -487,6 +661,20 @@ public class XoClientDatabase {
                 .eq("conversationContact_id", contactId)
                 .eq("deleted", false)
                 .and(3)
+                .queryForFirst();
+    }
+
+    public TalkClientMessage findMessageByUploadId(int uploadId) throws SQLException {
+        return mClientMessages.queryBuilder()
+                .where()
+                .eq("attachmentUpload_id", uploadId)
+                .queryForFirst();
+    }
+
+    public TalkClientMessage findMessageByDownloadId(int downloadId) throws SQLException {
+        return mClientMessages.queryBuilder()
+                .where()
+                .eq("attachmentDownload_id", downloadId)
                 .queryForFirst();
     }
 
@@ -666,6 +854,17 @@ public class XoClientDatabase {
         updateBuilder.update();
     }
 
+    public void deleteMessageById(int messageId) throws SQLException {
+        UpdateBuilder<TalkClientMessage, Integer> updateBuilder = mClientMessages.updateBuilder();
+        updateBuilder.updateColumnValue("deleted", true).where()
+                .eq("deleted", false)
+                .eq("clientMessageId", messageId)
+                .and(2);
+        updateBuilder.update();
+
+        TalkClientMessage message = mClientMessages.queryForId(messageId);
+    }
+
     public void deleteAllMessagesFromContactId(int contactId) throws SQLException {
         UpdateBuilder<TalkClientMessage, Integer> updateBuilder = mClientMessages.updateBuilder();
         updateBuilder.updateColumnValue("deleted", true).where()
@@ -730,6 +929,61 @@ public class XoClientDatabase {
         migratedUrl = "https://filecache.talk.hoccer.de:8444" + migratedUrl;
         LOG.debug("migrated url: " + url + " to: " + migratedUrl);
         return migratedUrl;
+    }
+
+    private void deleteClientUpload(TalkClientUpload upload) throws SQLException {
+        int deletedRowsCount = mClientUploads.delete(upload);
+
+        if (deletedRowsCount > 0) {
+            // remove upload from all collections
+            List<TalkClientMediaCollection> collections = findAllMediaCollectionsContainingItem(upload);
+            for (TalkClientMediaCollection collection : collections) {
+                collection.removeItem(upload);
+            }
+
+            for (IXoUploadListener listener : mUploadListeners) {
+                listener.onUploadDeleted(upload);
+            }
+        }
+    }
+
+    public void deleteClientDownload(TalkClientDownload download) throws SQLException {
+        int deletedRowsCount = mClientDownloads.delete(download);
+
+        if (deletedRowsCount > 0) {
+            // remove download from all collections
+            List<TalkClientMediaCollection> collections = findAllMediaCollectionsContainingItem(download);
+            for (TalkClientMediaCollection collection : collections) {
+                collection.removeItem(download);
+            }
+
+            for (IXoDownloadListener listener : mDownloadListeners) {
+                listener.onDownloadDeleted(download);
+            }
+        }
+    }
+
+    public void deleteTransferAndMessage(XoTransfer transfer) throws SQLException {
+        switch (transfer.getDirection()) {
+            case UPLOAD:
+                deleteClientUploadAndMessage((TalkClientUpload)transfer);
+                break;
+            case DOWNLOAD:
+                deleteClientDownloadAndMessage((TalkClientDownload)transfer);
+                break;
+        }
+    }
+
+    public void deleteClientUploadAndMessage(TalkClientUpload upload) throws SQLException {
+        deleteClientUpload(upload);
+        int messageId = findMessageByUploadId(upload.getClientUploadId()).getClientMessageId();
+        deleteMessageById(messageId);
+    }
+
+    public void deleteClientDownloadAndMessage(TalkClientDownload download) throws SQLException {
+        deleteClientDownload(download);
+        int messageId = findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
+        deleteMessageById(messageId);
     }
 
     /* delivered -> deliveredPrivate
@@ -799,5 +1053,129 @@ public class XoClientDatabase {
                 delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
                 break;
         }
+    }
+
+    public void registerUploadListener(IXoUploadListener listener) {
+        mUploadListeners.registerListener(listener);
+    }
+
+    public void unregisterUploadListener(IXoUploadListener listener) {
+        mUploadListeners.unregisterListener(listener);
+    }
+
+    public void registerDownloadListener(IXoDownloadListener listener) {
+        mDownloadListeners.registerListener(listener);
+    }
+
+    public void unregisterDownloadListener(IXoDownloadListener listener) {
+        mDownloadListeners.unregisterListener(listener);
+    }
+
+    //////// MediaCollection Management ////////
+
+    @Override
+    public TalkClientMediaCollection findMediaCollectionById(Integer id) throws SQLException {
+        TalkClientMediaCollection collection = mMediaCollections.queryForId(id);
+        return prepareMediaCollection(collection);
+    }
+
+    @Override
+    public List<TalkClientMediaCollection> findMediaCollectionsByName(String name) throws SQLException {
+        List<TalkClientMediaCollection> collections = mMediaCollections.queryBuilder().where()
+                .eq("name", name)
+                .query();
+
+        for (int i = 0; i < collections.size(); i++) {
+            TalkClientMediaCollection preparedCollection = prepareMediaCollection(collections.get(i));
+            collections.set(i, preparedCollection);
+        }
+        return collections;
+    }
+
+    @Override
+    public List<TalkClientMediaCollection> findAllMediaCollections() throws SQLException {
+        List<TalkClientMediaCollection> collections = mMediaCollections.queryForAll();
+
+        for (int i = 0; i < collections.size(); i++) {
+            TalkClientMediaCollection preparedCollection = prepareMediaCollection(collections.get(i));
+            collections.set(i, preparedCollection);
+        }
+        return collections;
+    }
+
+    @Override
+    public List<TalkClientMediaCollection> findAllMediaCollectionsContainingItem(XoTransfer item) throws SQLException {
+        String column = item.isUpload() ? "uploadItem" : "item";
+
+        List<TalkClientMediaCollectionRelation> relations = mMediaCollectionRelations.queryBuilder()
+                .where()
+                .eq(column, item.getUploadOrDownloadId())
+                .query();
+
+        List<TalkClientMediaCollection> collections = new ArrayList<TalkClientMediaCollection>();
+        for (TalkClientMediaCollectionRelation relation : relations) {
+            TalkClientMediaCollection preparedCollection = findMediaCollectionById(relation.getMediaCollectionId());
+            collections.add(preparedCollection);
+        }
+        return collections;
+    }
+
+    // Creates a new MediaCollection instance with the given name.
+    @Override
+    public TalkClientMediaCollection createMediaCollection(String collectionName) throws SQLException {
+        TalkClientMediaCollection collection = new TalkClientMediaCollection(collectionName);
+        mMediaCollections.createIfNotExists(collection);
+        collection = prepareMediaCollection(collection);
+        for (IXoMediaCollectionListener listener : mMediaCollectionListeners) {
+            listener.onMediaCollectionCreated(collection);
+        }
+        return collection;
+    }
+
+    // Deletes the given collection from database.
+    // Note: The collection will be cleared. Do not use the collection instance after deletion.
+    @Override
+    public void deleteMediaCollectionById(int collectionId) throws SQLException {
+        TalkClientMediaCollection collection = findMediaCollectionById(collectionId);
+        deleteMediaCollection(collection);
+    }
+
+    // Deletes the given collection from database.
+    // Note: The collection will be cleared. Do not use the collection instance after deletion.
+    @Override
+    public void deleteMediaCollection(TalkClientMediaCollection collection) throws SQLException {
+        collection.clear();
+        mMediaCollections.delete(collection);
+        for (IXoMediaCollectionListener listener : mMediaCollectionListeners) {
+            listener.onMediaCollectionDeleted(collection);
+        }
+    }
+
+    @Override
+    public void registerMediaCollectionListener(IXoMediaCollectionListener listener) {
+        mMediaCollectionListeners.registerListener(listener);
+    }
+
+    @Override
+    public void unregisterMediaCollectionListener(IXoMediaCollectionListener listener) {
+        mMediaCollectionListeners.unregisterListener(listener);
+    }
+
+    // The returned Dao should not be used directly to alter the database, use TalkClientMediaCollection instead
+    @Override
+    public Dao<TalkClientMediaCollection, Integer> getMediaCollectionDao() {
+        return mMediaCollections;
+    }
+
+    // The returned Dao should not be used directly to alter the database, use TalkClientMediaCollection instead
+    @Override
+    public Dao<TalkClientMediaCollectionRelation, Integer> getMediaCollectionRelationDao() {
+        return mMediaCollectionRelations;
+    }
+
+    // Returns an already cached collection with the same id or the prepared collection
+    private TalkClientMediaCollection prepareMediaCollection(TalkClientMediaCollection collection) {
+        collection.setDatabase(this);
+        return collection;
     }
 }

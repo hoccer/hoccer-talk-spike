@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.hoccer.xo.release"
 
-          android:versionCode="68"
-          android:versionName="2.2.2">
+          android:versionCode="84"
+          android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
     <uses-sdk
@@ -93,15 +93,10 @@
                 android:name="com.google.android.gms.version"
                 android:value="@integer/google_play_services_version"/>
 
-        <!--API key for Google Maps Android API v2 for RELEASE certificate-->
+        <!-- API key for Google Maps Android API v2 -->
         <meta-data
                 android:name="com.google.android.maps.v2.API_KEY"
-                android:value="AIzaSyBDd2wBF1gH9UcU2KcAPXXKI9G6HQattkM"/>
-
-        <!-- API key for Google Maps Android API v2 based on DEBUG certificate -->
-        <!--<meta-data-->
-        <!--android:name="com.google.android.maps.v2.API_KEY"-->
-        <!--android:value="AIzaSyC9hBvAarkQ9ktS0rWZ5Row-MXRatv8Dj0"/>-->
+                android:value="${google.maps.api.key}"/>
 
         <!-- Contact list - our main activity -->
         <activity
@@ -113,6 +108,16 @@
             <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="video/*" />
             </intent-filter>
         </activity>
 
@@ -126,17 +131,6 @@
                 android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
 
-        <!-- Nearby History activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.NearbyHistoryMessagingActivity"
-                android:label="@string/actionbar_default_title"
-                android:windowSoftInputMode="stateHidden"
-                android:configChanges="keyboardHidden|orientation|screenSize">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
-        </activity>
-
         <!-- Clipboard activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.ClipboardPreviewActivity"
@@ -148,15 +142,53 @@
                     android:value="com.hoccer.xo.android.activity.MessagingActivity"/>
         </activity>
 
+        <!-- MediaBrowserActivity activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.MediaBrowserActivity"
+                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
+                android:screenOrientation="portrait"
+                android:windowSoftInputMode="stateHidden"
+                android:exported="true">
+
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
+        </activity>
+
+        <!-- MediaCollectionSelection activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.MediaCollectionSelectionActivity"
+                android:label="@string/collections"
+                android:screenOrientation="portrait">
+        </activity>
+
+        <!-- ContactSelectionActivity activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.ContactSelectionActivity"
+                android:label="@string/select_recipients"
+                android:screenOrientation="portrait">
+        </activity>
+
+        <!-- FullscreenPlayerActivity activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.FullscreenPlayerActivity"
+                android:label="@string/actionbar_default_title"
+                android:screenOrientation="portrait"
+                android:parentActivityName="com.hoccer.xo.android.activity.MediaBrowserActivity"
+                android:windowSoftInputMode="stateHidden"
+                android:theme="@android:style/Theme.Black.NoTitleBar"
+                android:exported="true">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.AudioAttachmentListActivity"/>
+        </activity>
+
         <!-- Single Profile activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.SingleProfileActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait"
                 android:windowSoftInputMode="stateHidden">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
         </activity>
 
         <!-- Group Profile activity -->
@@ -165,15 +197,11 @@
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait"
                 android:windowSoftInputMode="stateHidden">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
         </activity>
 
         <!-- Pairing activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.PairingActivity"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait">
             <intent-filter>
@@ -181,20 +209,22 @@
 
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data android:scheme="hxo"/>
+                <data android:scheme="${hoccer.invitation.uri.scheme}"/>
             </intent-filter>
+        </activity>
+
+
+        <!-- Invitation activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.DeviceContactsSelectionActivity"
+                android:label="@string/actionbar_default_title">
         </activity>
 
         <!-- Preference activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.XoPreferenceActivity"
                 android:label="@string/actionbar_default_title"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
                 android:screenOrientation="portrait">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
         </activity>
 
         <!--Legal Imprint activity-->
@@ -225,6 +255,11 @@
                 android:label="@string/selectlocation_title">
         </activity>
 
+        <!-- Multi Image Picker Activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.MultiImagePickerActivity"
+                android:label="@string/select_images_title">
+        </activity>
 
         <!-- Test Qr generator activity -->
         <activity
@@ -269,6 +304,8 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
         </receiver>
+
+        <service android:name="com.hoccer.xo.android.service.MediaPlayerService"/>
 
     </application>
 

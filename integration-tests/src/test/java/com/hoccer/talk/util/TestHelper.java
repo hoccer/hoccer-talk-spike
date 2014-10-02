@@ -27,7 +27,7 @@ public class TestHelper {
         if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
-        return new XoClient(new TestClientHost(server));
+        return new XoClient(new TestClientHost(), new TestClientConfiguration(server));
     }
 
     public static HashMap<String, XoClient> initializeTalkClients(TestTalkServer server, int amount) throws Exception {
@@ -62,11 +62,11 @@ public class TestHelper {
         final String client1Id = client1.getSelfContact().getClientId();
         final String client2Id = client2.getSelfContact().getClientId();
 
-        await("client 1 is paired with client 2").untilCall(to(client1.getDatabase()).findContactByClientId(client1Id, false), notNullValue());
-        await("client 1 has client 2's pubkey").untilCall(to(client1.getDatabase().findContactByClientId(client1Id, false)).getPublicKey(), notNullValue());
+        await("client 1 is paired with client 2").untilCall(to(client1.getDatabase()).findContactByClientId(client2Id, false), notNullValue());
+        await("client 1 has client 2's pubkey").untilCall(to(client1.getDatabase().findContactByClientId(client2Id, false)).getPublicKey(), notNullValue());
 
-        await("client 2 is paired with client 1").untilCall(to(client2.getDatabase()).findContactByClientId(client2Id, false), notNullValue());
-        await("client 2 has client 1's pubkey").untilCall(to(client2.getDatabase().findContactByClientId(client2Id, false)).getPublicKey(), notNullValue());
+        await("client 2 is paired with client 1").untilCall(to(client2.getDatabase()).findContactByClientId(client1Id, false), notNullValue());
+        await("client 2 has client 1's pubkey").untilCall(to(client2.getDatabase().findContactByClientId(client1Id, false)).getPublicKey(), notNullValue());
     }
 
     public static String createGroup(XoClient client) throws SQLException {
@@ -80,26 +80,25 @@ public class TestHelper {
 
         client.createGroup(newGroup);
         await("client knows about created group").untilCall(to(client.getDatabase()).findContactByGroupTag(groupTag), notNullValue());
-        final String groupId = client.getDatabase().findContactByGroupTag(groupTag).getGroupId();
-        assertNotNull(groupId);
+        await("created group has a group id").untilCall(to(client.getDatabase().findContactByGroupTag(groupTag)).getGroupId(), notNullValue());
 
+        final String groupId = client.getDatabase().findContactByGroupTag(groupTag).getGroupId();
         return groupId;
     }
 
     public static void inviteToGroup(XoClient invitingClient, XoClient invitedClient, String groupId) throws SQLException, InterruptedException {
         await("invitingClient knows group via groupId").untilCall(to(invitingClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
-
         invitingClient.inviteClientToGroup(groupId, invitedClient.getSelfContact().getClientId());
 
         await("invitedClient knows group via groupId").untilCall(to(invitedClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
+        TalkClientContact groupContactOfInvitedClient = invitedClient.getDatabase().findContactByGroupId(groupId, false);
 
-        TalkClientContact groupContact = invitedClient.getDatabase().findContactByGroupId(groupId, false);
-        assertTrue("invitedClient is invited to group", groupContact.getGroupMember().isInvited());
-        assertEquals("invited client membership is actually the invitedClient", groupContact.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
+        await("invitedClient has received group member update").untilCall(to(groupContactOfInvitedClient).getGroupMember(), notNullValue());
+        assertTrue("invitedClient is invited to group", groupContactOfInvitedClient.getGroupMember().isInvited());
+        assertEquals("invitedClient membership is actually the invitedClient", groupContactOfInvitedClient.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
 
-        // TODO: There are some currently unknown conditions missing that ensure that the invitation actually properly occured
-        // removing this sleep leads to some failures, esp. involving the group key generation by members (instead of admins)
-        Thread.sleep(1000);
+        // only when the invited client has received the shared group key, it is safe to proceed, e.g. to join the group
+        await("invitedClient has a group key").untilCall(to(groupContactOfInvitedClient.getGroupMember()).getSharedKeyId(), notNullValue());
     }
 
     public static void joinGroup(final XoClient joiningClient, final String groupId) {

@@ -52,7 +52,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         ThreadFactoryBuilder threadFactoryBuilder = new ThreadFactoryBuilder();
         threadFactoryBuilder.setNameFormat(name);
         threadFactoryBuilder.setUncaughtExceptionHandler(mClient.getHost().getUncaughtExceptionHandler());
-        return Executors.newScheduledThreadPool(mClient.getHost().getTransferThreads(), threadFactoryBuilder.build());
+        return Executors.newScheduledThreadPool(mClient.getConfiguration().getTransferThreads(), threadFactoryBuilder.build());
     }
 
     private void initializeHttpClient() {
@@ -90,17 +90,30 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     /**********************************************************************************************/
     /****************************************** Download*******************************************/
     /**********************************************************************************************/
-    /**
-     * ******************************************************************************************
-     */
+    /**********************************************************************************************/
     public boolean isDownloadActive(TalkClientDownload download) {
         synchronized (mDownloadsById) {
             return mDownloadsById.containsKey(download.getClientDownloadId());
         }
     }
 
-    public void startOrRestartDownload(final TalkClientDownload download) {
+    public void startOrRestartDownload(final TalkClientDownload download, boolean forcedDownload) {
         LOG.info("startOrRestartDownload()");
+
+        if (!forcedDownload) {
+            int transferLimit = mClient.getDownloadLimit();
+            if (transferLimit == -2) {
+                LOG.debug("download put on hold because manual downloads are activated");
+                download.hold(this);
+                return;
+            }
+            if (transferLimit != -1 && download.getTransmittedContentLength() >= transferLimit) {
+                LOG.debug("download put on hold because the download exceeds the transferLimit");
+                download.hold(this);
+                return;
+            }
+        }
+
         synchronized (mDownloadsById) {
             final int downloadId = download.getClientDownloadId();
             if (!mDownloadsById.containsKey(downloadId)) {
@@ -133,7 +146,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
     public void resumeDownload(TalkClientDownload download) {
         LOG.info("resumeUpload(" + download.getClientDownloadId() + ")");
-        startOrRestartDownload(download);
+        startOrRestartDownload(download, true);
     }
 
     public void cancelDownload(TalkClientDownload download) {
@@ -160,7 +173,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
         ScheduledFuture<?> future = mDownloadExecutor.schedule(new Runnable() {
             @Override
             public void run() {
-                startOrRestartDownload(download);
+                startOrRestartDownload(download, true);
             }
         }, delay, TimeUnit.SECONDS);
         mDownloadRetryQueue.put(download.getClientDownloadId(), future);
@@ -178,9 +191,7 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     /**********************************************************************************************/
     /****************************************** Upload ********************************************/
     /**********************************************************************************************/
-    /**
-     * ******************************************************************************************
-     */
+    /**********************************************************************************************/
     public boolean isUploadActive(TalkClientUpload upload) {
         synchronized (mUploadsById) {
             return mUploadsById.containsKey(upload.getClientUploadId());
@@ -300,7 +311,9 @@ public class XoTransferAgent implements IXoTransferListenerOld {
     public void onDownloadStateChanged(TalkClientDownload download) {
         LOG.info("onDownloadStateChanged(" + download.getClientDownloadId() + ")");
 
-        if (download.getState() == TalkClientDownload.State.PAUSED || download.getState() == TalkClientDownload.State.RETRYING) {
+        if (download.getState() == TalkClientDownload.State.PAUSED
+                || download.getState() == TalkClientDownload.State.ON_HOLD
+                || download.getState() == TalkClientDownload.State.RETRYING) {
             LOG.debug("Download paused. " + download.getClientDownloadId() + " Removing from queue.");
             deactivateDownload(download);
         }

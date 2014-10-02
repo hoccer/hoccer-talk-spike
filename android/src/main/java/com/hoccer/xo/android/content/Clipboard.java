@@ -44,6 +44,11 @@ public class Clipboard {
         return mClipBoardAttachmentType;
     }
 
+    public IContentObject getClipboardContentObject() {
+
+        return null;
+    }
+
     private void initialize() {
 
         sPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -71,11 +76,11 @@ public class Clipboard {
         if (contentObject instanceof TalkClientUpload) {
             TalkClientUpload upload = (TalkClientUpload) contentObject;
             id = upload.getClientUploadId();
-            type = contentObject.getClass().getName();
+            type = TalkClientUpload.class.getName();
         } else if (contentObject instanceof TalkClientDownload) {
             TalkClientDownload download = (TalkClientDownload) contentObject;
             id = download.getClientDownloadId();
-            type = contentObject.getClass().getName();
+            type = TalkClientDownload.class.getName();
         }
         storeIntToClipboard(CLIPBOARD_CONTENT_OBJECT_ID, id);
         storeStringToClipboard(CLIPBOARD_CONTENT_OBJECT_TYPE, type);
@@ -100,6 +105,6 @@ public class Clipboard {
     }
 
     public boolean canProcessClipboard() {
-        return (mClipBoardAttachmentId > 0 && mClipBoardAttachmentType != null);
+        return (mClipBoardAttachmentId != 0 && mClipBoardAttachmentType != null);
     }
 }

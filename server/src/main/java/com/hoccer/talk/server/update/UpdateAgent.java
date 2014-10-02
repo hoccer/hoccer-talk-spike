@@ -590,9 +590,17 @@ public class UpdateAgent extends NotificationDeferrer {
                 withSharedKeyIdSalt = "RENEW";
             }
             ITalkRpcClient rpc = connection.getClientRpc();
-            LOG.info("requestGroupKeys, calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
-            String[] newKeyBoxes = rpc.getEncryptedGroupKeys(forGroupId, forSharedKeyId, withSharedKeyIdSalt, forClientIds, withPublicKeyIds);
-            LOG.info("requestGroupKeys, call of getEncryptedGroupKeys(" + forGroupId + ") returned " + newKeyBoxes.length + " items)");
+            LOG.info("requestGroupKeys, acquiring lock for calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
+            String[] newKeyBoxes;
+            // serialize encrypted key request for one client
+            synchronized (connection.keyRequestLock) {
+                LOG.info("requestGroupKeys, calling getEncryptedGroupKeys(" + forGroupId + ") on client for " + forClientIds.length + " client(s)");
+                // temporarily add penalty so this client won't be selected again unless there is no other who can do the work
+                connection.penalizePriorization(1000);
+                newKeyBoxes = rpc.getEncryptedGroupKeys(forGroupId, forSharedKeyId, withSharedKeyIdSalt, forClientIds, withPublicKeyIds);
+                connection.penalizePriorization(-1000);
+                LOG.info("requestGroupKeys, call of getEncryptedGroupKeys(" + forGroupId + ") returned " + newKeyBoxes.length + " items)");
+            }
             if (newKeyBoxes != null) {
                 boolean responseLengthOk;
                 if ("RENEW".equals(forSharedKeyId)) {
@@ -606,7 +614,7 @@ public class UpdateAgent extends NotificationDeferrer {
                     responseLengthOk = newKeyBoxes.length == forClientIds.length;
                 }
                 if (responseLengthOk) {
-                    connection.resetPriorityPenalty();
+                    connection.resetPriorityPenalty(0L);
                     Date now = new Date();
 
                     TalkGroup group = mDatabase.findGroupById(forGroupId);
@@ -648,18 +656,18 @@ public class UpdateAgent extends NotificationDeferrer {
                     }
                 } else {
                     LOG.error("requestGroupKeys, bad number of keys returned for group " + forGroupId);
-                    connection.penalizePriorization(100L); // penalize this client in selection
-                    sleepForMillis(1000); // TODO: schedule with delay instead of sleep
+                    connection.penalizePriorization(300L); // penalize this client in selection
+                    sleepForMillis(2000); // TODO: schedule with delay instead of sleep
                     checkAndRequestGroupMemberKeys(forGroupId); // try again
                 }
             } else {
                 LOG.error("requestGroupKeys, no keys returned for group " + forGroupId);
-                connection.penalizePriorization(100L); // penalize this client in selection
-                sleepForMillis(1000);  // TODO: schedule with delay instead of sleep
+                connection.penalizePriorization(300L); // penalize this client in selection
+                sleepForMillis(2000);  // TODO: schedule with delay instead of sleep
                 checkAndRequestGroupMemberKeys(forGroupId); // try again
             }
         } else {
-            sleepForMillis(1000); // TODO: schedule with delay instead of sleep
+            sleepForMillis(2000); // TODO: schedule with delay instead of sleep
             LOG.error("requestGroupKeys, no presence for any outdated member of group " + forGroupId);
             checkAndRequestGroupMemberKeys(forGroupId); // try again
         }
@@ -699,6 +707,33 @@ public class UpdateAgent extends NotificationDeferrer {
                     String messageString = new StaticSystemMessage(talkClient, clientHostInfo, message).generateMessage();
                     LOG.info("requestUserAlert");
                     conn.getClientRpc().alertUser(messageString);
+                } catch (Throwable t) {
+                    LOG.error("caught and swallowed exception escaping runnable", t);
+                }
+            }
+        };
+
+        queueOrExecute(context, notificationGenerator);
+    }
+
+    public void requestSettingUpdate(final String clientId, final String setting, final String value, final StaticSystemMessage.Message message) {
+        Runnable notificationGenerator = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final TalkRpcConnection conn = mServer.getClientConnection(clientId);
+                    if (conn == null || !conn.isConnected()) {
+                        return;
+                    }
+                    TalkClient talkClient = mDatabase.findClientById(clientId);
+                    if (talkClient == null) {
+                        return;
+                    }
+                    TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(talkClient.getClientId());
+                    String messageString = new StaticSystemMessage(talkClient, clientHostInfo, message).generateMessage();
+                    //String messageString = "setting '"+setting+"' should be updated to value '"+value+"'";
+                    LOG.info("requestSettingUpdate");
+                    conn.getClientRpc().settingsChanged(setting, value, messageString);
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
                 }

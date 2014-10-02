@@ -9,9 +9,9 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.content.ContentMediaTypes;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
 
@@ -29,8 +29,7 @@ import java.util.List;
  * <p/>
  * To configure list items it uses instances of ChatMessageItem and its subtypes.
  */
-public class
-        ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListenerOld {
+public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListenerOld {
 
     /**
      * Number of TalkClientMessage objects in a batch
@@ -44,17 +43,11 @@ public class
      */
     private static final int AUTO_SCROLL_LIMIT = 5;
 
-    /**
-     * Set to false to override auto scrolling behavior
-     */
-    private boolean shouldAutoScroll = true;
-
     protected TalkClientContact mContact;
 
     protected List<ChatMessageItem> mChatMessageItems;
 
     private ListView mListView;
-
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
@@ -97,25 +90,28 @@ public class
     /**
      * Loads a range of TalkClientMessage objects from database starting at a given offset.
      * Range is defined by constant BATCH_SIZE.
-     *
+     * <p/>
      * Creates the appropriate ChatMessageItem for each TalkClientMessage and adds it to mChatMessageItems.
      *
      * @param offset Index of the first TalkClientMessage object
      */
     public synchronized void loadNextMessages(int offset) {
+        // we disabled the batching option for message loading to avoid some common errors like double messages
+        // TODO: enable batch loading of messages and see if double messages still occur
         if (true) {
             return;
         }
         try {
             long batchSize = BATCH_SIZE;
-            if(offset < 0) {
+            if (offset < 0) {
                 batchSize = batchSize + offset;
                 offset = 0;
             }
-            LOG.debug("loading Messages " + offset + "-" + Math.max((offset - batchSize -1), 0));
+            LOG.debug("loading Messages " + offset + "-" + Math.max((offset - batchSize - 1), 0));
             final List<TalkClientMessage> messagesBatch = mDatabase.findMessagesByContactId(mContact.getClientContactId(), batchSize, offset);
             for (int i = 0; i < messagesBatch.size(); i++) {
                 ChatMessageItem messageItem = getItemForMessage(messagesBatch.get(i));
+
                 mChatMessageItems.set(offset + i, messageItem);
             }
             runOnUiThread(new Runnable() {
@@ -169,16 +165,19 @@ public class
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ChatMessageItem chatItem = getItem(position);
+
         if (!chatItem.getMessage().isSeen()) {
             markMessageAsSeen(chatItem.getMessage());
         }
+
         if (convertView == null) {
-            convertView = chatItem.getViewForMessage();
+            convertView = chatItem.createViewForMessage();
         } else {
             convertView = chatItem.recycleViewForMessage(convertView);
         }
+
         return convertView;
     }
 
@@ -210,17 +209,17 @@ public class
         }
 
         if (contentType != null) {
-            if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeImage)) {
+            if (contentType.equalsIgnoreCase(ContentMediaType.IMAGE)) {
                 chatItemType = ChatItemType.ChatItemWithImage;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeVideo)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.VIDEO)) {
                 chatItemType = ChatItemType.ChatItemWithVideo;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeAudio)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.AUDIO)) {
                 chatItemType = ChatItemType.ChatItemWithAudio;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeData)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.DATA)) {
                 chatItemType = ChatItemType.ChatItemWithData;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeVCard)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.VCARD)) {
                 chatItemType = ChatItemType.ChatItemWithContact;
-            } else if (contentType.equalsIgnoreCase(ContentMediaTypes.MediaTypeGeolocation)) {
+            } else if (contentType.equalsIgnoreCase(ContentMediaType.LOCATION)) {
                 chatItemType = ChatItemType.ChatItemWithLocation;
             }
         }
@@ -229,6 +228,7 @@ public class
 
     protected ChatMessageItem getItemForMessage(TalkClientMessage message) {
         ChatItemType itemType = getListItemTypeForMessage(message);
+
         if (itemType == ChatItemType.ChatItemWithImage) {
             return new ChatImageItem(mActivity, message);
         } else if (itemType == ChatItemType.ChatItemWithVideo) {
@@ -255,63 +255,56 @@ public class
         });
     }
 
-    private boolean isValidMessage(TalkClientMessage message) {
-        if(message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
+    protected boolean isMessageValid(TalkClientMessage message) {
+        if (message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
             return true;
         }
-        if(!message.getText().isEmpty()) {
+        if (!message.getText().isEmpty()) {
             return true;
         }
         return false;
     }
 
     @Override
-    public void notifyDataSetChanged() {
-        super.notifyDataSetChanged();
-
-        if (shouldAutoScroll) {
-            if (mListView.getLastVisiblePosition() >= getCount() - AUTO_SCROLL_LIMIT) {
-                mListView.smoothScrollToPosition(getCount() - 1);
-            }
-        }
-    }
-
-    @Override
     public void onReloadRequest() {
         super.onReloadRequest();
+        initialize();
         notifyDataSetChanged();
     }
 
-    @Override
-    public void onMessageAdded(final TalkClientMessage message) {
-        LOG.debug("onMessageAdded()");
-        if (message.getConversationContact() == mContact && isValidMessage(message)) {
-            for (int i = 0; i < mChatMessageItems.size(); i++) {
-                ChatMessageItem chatMessageItem = mChatMessageItems.get(i);
-                if(chatMessageItem == null) {
-                    continue;
-                }
-                if(message.getClientMessageId() == chatMessageItem.getMessage().getClientMessageId()) {
-                    LOG.warn("tried to add a \"new\" message which was already added!");
-                    return;
-                }
-            }
+    // Returns whether the given message is relevant for this adapter or not
+    protected boolean isMessageRelevant(TalkClientMessage message) {
+        return (message.getConversationContact() == mContact);
+    }
 
+    @Override
+    public void onMessageCreated(final TalkClientMessage message) {
+        LOG.debug("onMessageCreated()");
+        if (isMessageRelevant(message) && isMessageValid(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     ChatMessageItem messageItem = getItemForMessage(message);
-                    mChatMessageItems.add(messageItem);
-                    notifyDataSetChanged();
+                    if(!mChatMessageItems.contains(messageItem)) {
+                        mChatMessageItems.add(messageItem);
+                        notifyDataSetChanged();
+
+                        // autoscroll to new item
+                        if (mListView.getLastVisiblePosition() >= getCount() - AUTO_SCROLL_LIMIT) {
+                            mListView.smoothScrollToPosition(getCount() - 1);
+                        }
+                    } else {
+                        LOG.warn("tried to add a new message which was already added!");
+                    }
                 }
             });
         }
     }
 
     @Override
-    public void onMessageRemoved(final TalkClientMessage message) {
-        LOG.debug("onMessageRemoved()");
-        if (message.getConversationContact() == mContact) {
+    public void onMessageDeleted(final TalkClientMessage message) {
+        LOG.debug("onMessageDeleted()");
+        if (isMessageRelevant(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -324,21 +317,12 @@ public class
     }
 
     @Override
-    public void onMessageStateChanged(final TalkClientMessage message) {
-        LOG.debug("onMessageStateChanged()");
-        if (message.getConversationContact() == mContact && isValidMessage(message)) {
+    public void onMessageUpdated(final TalkClientMessage message) {
+        LOG.debug("onMessageUpdated()");
+        if (isMessageRelevant(message) && isMessageValid(message)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    ChatMessageItem item = new ChatMessageItem(mActivity, message);
-                    if (mChatMessageItems.contains(item)) {
-                        int position = mChatMessageItems.indexOf(item);
-                        ChatMessageItem originalItem = mChatMessageItems.get(position);
-                        originalItem.setMessage(message);
-                    } else {
-                        ChatMessageItem chatMessageItem = new ChatMessageItem(mActivity, message);
-                        mChatMessageItems.add(chatMessageItem);
-                    }
                     notifyDataSetChanged();
                 }
             });
@@ -376,9 +360,7 @@ public class
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    shouldAutoScroll = false;
                     notifyDataSetChanged();
-                    shouldAutoScroll = true;
                 }
             });
         }
@@ -410,9 +392,7 @@ public class
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    shouldAutoScroll = false;
                     notifyDataSetChanged();
-                    shouldAutoScroll = true;
                 }
             });
         }

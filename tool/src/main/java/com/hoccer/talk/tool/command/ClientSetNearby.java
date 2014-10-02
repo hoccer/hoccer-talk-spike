@@ -10,7 +10,7 @@ import com.hoccer.talk.tool.client.TalkToolClientCommand;
 import java.util.List;
 
 @CLICommand(name = "csetnearby", description = "Activate/deactivate nearby mode of a client, " +
-        "use: csetnearby -c <client-id> <true|false>")
+        "use: csetnearby -c <client-id> -f <true|false>")
 public class ClientSetNearby extends TalkToolClientCommand {
 
     @Parameter(description = "<nearby-mode enabled flag (true|false)> - default: 'true'", names = "-f")

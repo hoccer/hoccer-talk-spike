@@ -6,8 +6,9 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
-import com.hoccer.xo.android.content.ContentMediaTypes;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
 
 public class MusicSelector implements IContentSelector {
@@ -17,7 +18,7 @@ public class MusicSelector implements IContentSelector {
 
     public MusicSelector(Context context) {
         mName = context.getResources().getString(R.string.content_music);
-        mIcon = context.getResources().getDrawable(R.drawable.ic_attachment_select_music);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_media, true);
     }
 
     @Override
@@ -71,7 +72,7 @@ public class MusicSelector implements IContentSelector {
 
         SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
         contentObject.setFileName(fileName);
-        contentObject.setContentMediaType(ContentMediaTypes.MediaTypeAudio);
+        contentObject.setContentMediaType(ContentMediaType.AUDIO);
         contentObject.setContentType(fileType);
         contentObject.setContentLength(fileSize);
 

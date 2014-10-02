@@ -5,13 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMembership;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSelf;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
@@ -30,25 +24,22 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
     private static final String DB_TYPE_BOOLEAN = "BOOLEAN";
     private static final String DB_TYPE_INTEGER = "INTEGER";
 
+    private static final int DATABASE_VERSION = 21;
 
+    private static String mDatabaseName = "hoccer-talk.db";
 
-
-    private static String DATABASE_NAME = "hoccer-talk.db";
-
-    private static final int DATABASE_VERSION = 16;
-
-    private static AndroidTalkDatabase INSTANCE = null;
+    private static AndroidTalkDatabase mInstance = null;
 
     public static AndroidTalkDatabase getInstance(Context applicationContext) {
-        if (INSTANCE == null) {
-            INSTANCE = new AndroidTalkDatabase(applicationContext);
+        if (mInstance == null) {
+            mInstance = new AndroidTalkDatabase(applicationContext);
         }
-        return INSTANCE;
+        return mInstance;
     }
 
     private AndroidTalkDatabase(Context context) {
         super(context, PreferenceManager.getDefaultSharedPreferences(context).getString("preference_database", "hoccer-talk.db"), null, DATABASE_VERSION);
-        DATABASE_NAME = PreferenceManager.getDefaultSharedPreferences(context).getString("preference_database", "hoccer-talk.db");
+        mDatabaseName = PreferenceManager.getDefaultSharedPreferences(context).getString("preference_database", "hoccer-talk.db");
     }
 
     @Override
@@ -188,6 +179,25 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
                 talkMessages.executeRaw(addColumn("message", "attachmentUploadStarted", DB_TYPE_STRING));
 
                 migrateDeliveryStates();
+            }
+            if (oldVersion < 17) {
+                TableUtils.createTable(cs, TalkClientMediaCollection.class);
+                TableUtils.createTable(cs, TalkClientMediaCollectionRelation.class);
+            }
+            if (oldVersion < 18) {
+                Dao<TalkClientDownload, Integer> talkClientDownloads = getDao(TalkClientDownload.class);
+                talkClientDownloads.executeRaw(addColumn("clientDownload", "approvalState", DB_TYPE_STRING));
+            }
+            if (oldVersion < 19) {
+                // the changes here have been removed because they have been integrated in version update 17 already
+            }
+            if (oldVersion < 20) {
+                Dao<TalkClientDownload, Integer> talkClientDownloads = getDao(TalkClientDownload.class);
+                talkClientDownloads.executeRaw(addColumn("clientDownload", "transmittedContentLength", DB_TYPE_INTEGER));
+            }
+            if (oldVersion < 21) {
+                Dao<TalkClientContact, Integer> talkClientContacts = getDao(TalkClientContact.class);
+                talkClientContacts.executeRaw(addColumn("clientContact", "createdTimeStamp", DB_TYPE_DATE));
             }
         } catch (SQLException e) {
             LOG.error("sql error upgrading database", e);

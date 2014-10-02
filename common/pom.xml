@@ -1,6 +1,7 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
     <groupId>hoccer</groupId>
     <artifactId>hoccer-talk</artifactId>
@@ -25,17 +26,17 @@
       <artifactId>jackson-annotations</artifactId>
       <version>${jackson.version}</version>
     </dependency>
-      <dependency>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
-          <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-          <version>${jackson.version}</version>
-      </dependency>
-      <!-- JSON-RPC annotations for protocol definition -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <!-- JSON-RPC annotations for protocol definition -->
     <dependency>
       <groupId>hoccer</groupId>
       <artifactId>better-jsonrpc-annotations</artifactId>
@@ -49,9 +50,9 @@
     </dependency>
     <!-- Bouncy Castle (needed for SRP auth) -->
     <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk15on</artifactId>
-        <version>${bouncycastle.version}</version>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>${bouncycastle.version}</version>
     </dependency>
     <!-- Apache Commons Codec (BASE64 and hex encoding) -->
     <dependency>
@@ -68,12 +69,12 @@
     </dependency>
     <!-- Jetbrain's Nullable/NotNull Annotations -->
     <dependency>
-        <groupId>com.intellij</groupId>
-        <artifactId>annotations</artifactId>
-        <version>9.0.4</version>
+      <groupId>com.intellij</groupId>
+      <artifactId>annotations</artifactId>
+      <version>9.0.4</version>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -87,5 +88,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>

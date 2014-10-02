@@ -15,11 +15,11 @@ public class ThreadPoolTest {
 
     private static final int TASKS = 5;
     private static final int THREADS = 5;
-    private AtomicInteger ready = new AtomicInteger(0);
+    private final AtomicInteger ready = new AtomicInteger(0);
     private Executor mExecutor;
 
     @Test
-    public void ThreadPoolTest() throws Exception {
+    public void threadPoolTest() throws Exception {
         System.out.println("ThreadPoolTest starting");
 
         mExecutor = Executors.newScheduledThreadPool(
@@ -41,12 +41,12 @@ public class ThreadPoolTest {
     }
 
     class TestTask {
-        ReentrantLock mLock;
-        Condition mCondition;
-        int mTaskId;
+        final ReentrantLock mLock;
+        final Condition mCondition;
+        final int mTaskId;
         boolean mSignaled;
 
-        TestTask(int taskId) {
+        TestTask(final int taskId) {
             mTaskId = taskId;
             mLock = new ReentrantLock();
             mCondition = mLock.newCondition();
@@ -63,7 +63,7 @@ public class ThreadPoolTest {
                 if (!mSignaled) {
                     throw new RuntimeException("timeout");
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
             finally {
@@ -91,9 +91,9 @@ public class ThreadPoolTest {
                 synchronized (this) {
                     this.wait(500);
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 e.printStackTrace();
-            } catch (Throwable t) {
+            } catch (final Throwable t) {
                 System.out.println("Has thrown t="+t);
             }
             System.out.println("performTimedWait task="+mTaskId+" done on Thread "+Thread.currentThread()+", this="+this);
@@ -102,7 +102,7 @@ public class ThreadPoolTest {
     }
 
     Runnable newTask(final int id) {
-        final Runnable testRunnable = new Runnable() {
+        return new Runnable() {
             @Override
             public void run() {
 
@@ -115,7 +115,7 @@ public class ThreadPoolTest {
                         try {
                         task.performTimedWait();
                         task.performWakeup();
-                        } catch (Throwable t) {
+                        } catch (final Throwable t) {
                             System.out.println("Wait/signal on task "+id+" has thrown t="+t);
                         }
                     }
@@ -123,14 +123,13 @@ public class ThreadPoolTest {
 
                 try {
                     task.performConditionWait();
-                } catch (Throwable t) {
+                } catch (final Throwable t) {
                     System.out.println("Wait on task "+id+" has thrown t="+t);
                 }
                 System.out.println("testRunnable id +"+id+" finished on Thread "+Thread.currentThread());
                 ready.incrementAndGet();
             }
         };
-        return testRunnable;
     }
 
 

@@ -1,35 +1,7 @@
 package com.hoccer.xo.android.service;
 
 import android.app.*;
-
-import com.google.android.gcm.GCMRegistrar;
-
-import com.hoccer.talk.android.push.TalkPushService;
-import com.hoccer.talk.client.IXoStateListener;
-import com.hoccer.talk.client.IXoTokenListener;
-import com.hoccer.talk.client.IXoTransferListenerOld;
-import com.hoccer.talk.client.IXoUnseenListener;
-import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoConfiguration;
-import com.hoccer.xo.android.activity.ContactsActivity;
-import com.hoccer.xo.android.activity.MessagingActivity;
-import com.hoccer.xo.android.sms.SmsReceiver;
-import com.hoccer.xo.release.R;
-
-import org.apache.log4j.Logger;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
@@ -40,6 +12,17 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import com.google.android.gcm.GCMRegistrar;
+import com.hoccer.talk.android.push.TalkPushService;
+import com.hoccer.talk.client.*;
+import com.hoccer.talk.client.model.*;
+import com.hoccer.xo.android.XoAndroidClient;
+import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.activity.ContactsActivity;
+import com.hoccer.xo.android.sms.SmsReceiver;
+import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 import java.net.URI;
 import java.sql.SQLException;
@@ -51,9 +34,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Android service for Hoccer Talk
- *
+ * <p/>
  * This service wraps a Talk client instance for use by Android applications.
- *
+ * <p/>
  * It should be started with startService() and kept alive using keepAlive() RPC calls
  * for as long as it is needed. If not called regularly the service will stop itself.
  */
@@ -61,57 +44,107 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class XoClientService extends Service {
 
+    /**
+     * Delay after which new activities send their first keepalive (seconds)
+     */
+    public static final int SERVICE_KEEPALIVE_PING_DELAY = 60;
+    /**
+     * Interval at which activities send keepalives to the client service (seconds)
+     */
+    public static final int SERVICE_KEEPALIVE_PING_INTERVAL = 600;
+    /**
+     * Timeout after which the client service terminates automatically (seconds)
+     */
+    public static final int SERVICE_KEEPALIVE_TIMEOUT = 1800;
+
+    public static final String CONTACT_DELIMETER = ", ";
+
     private static final Logger LOG = Logger.getLogger(XoClientService.class);
 
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
+    private static final long NOTIFICATION_ALARM_BACKOFF = 10000;
+    private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
     private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
 
-    private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
+    private static final String DEFAULT_TRANSFER_LIMIT = "-1";
 
-    /** Executor for ourselves and the client */
+    private static final int DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT = -1;
+    private static final int DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY = 100;
+
+    private static final String sPreferenceUploadLimitMobileKey = "preference_upload_limit_mobile";
+    private static final String sPreferenceUploadLimitWifiKey = "preference_upload_limit_wifi";
+    private static final String sPreferenceDownloadLimitMobileKey = "preference_download_limit_mobile";
+    private static final String sPreferenceDownloadLimitWifiKey = "preference_download_limit_wifi";
+    private static final String sPreferenceImageUploadPixelCountKey = "preference_image_encoding_size";
+    private static final String sPreferenceImageUploadQualityKey = "preference_image_encoding_quality";
+    private static final String sPreferenceServiceUriKey = "preference_service_uri";
+
+    /**
+     * Executor for ourselves and the client
+     */
     ScheduledExecutorService mExecutor;
 
-    /** Hoccer client that we serve */
-    XoClient mClient;
+    /**
+     * Hoccer client that we serve
+     */
+    XoAndroidClient mClient;
 
-    /** Reference to latest auto-shutdown future */
+    /**
+     * Reference to latest auto-shutdown future
+     */
     ScheduledFuture<?> mShutdownFuture;
 
-    /** All service connections */
+    /**
+     * All service connections
+     */
     ArrayList<Connection> mConnections;
 
-    /** Preferences containing service configuration */
+    /**
+     * Preferences containing service configuration
+     */
     SharedPreferences mPreferences;
 
-    /** Listener for configuration changes */
+    /**
+     * Listener for configuration changes
+     */
     SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener;
 
-    /** Connectivity manager for monitoring */
+    /**
+     * Connectivity manager for monitoring
+     */
     ConnectivityManager mConnectivityManager;
 
-    /** Our connectivity change broadcast receiver */
+    /**
+     * Our connectivity change broadcast receiver
+     */
     ConnectivityReceiver mConnectivityReceiver;
 
-    /** Previous state of connectivity */
-    boolean mPreviousConnectionState = false;
+    /**
+     * Previous state of connectivity
+     */
+    boolean mCurrentConnectionState = false;
 
-    /** Type of previous connection */
-    int mPreviousConnectionType = -1;
+    /**
+     * Type of previous connection
+     */
+    int mCurrentConnectionType = -1;
 
-    /** Notification manager */
+    /**
+     * Notification manager
+     */
     NotificationManager mNotificationManager;
 
-    /** Time of last notification (for cancellation backoff) */
-    long mNotificationTimestamp;
-
-    boolean mAutoDownloadMobile = false;
-
-    boolean mAutoDownloadWifi = true;
+    /**
+     * Time of last notification
+     */
+    long mTimeOfLastAlarm;
 
     ClientListener mClientListener;
 
     boolean mGcmSupported;
+
+    int mCurrentConversationContactId = -1;
 
     private ClientIdReceiver m_clientIdReceiver;
 
@@ -130,7 +163,7 @@ public class XoClientService extends Service {
             mClientListener = new ClientListener();
             mClient.registerTokenListener(mClientListener);
             mClient.registerStateListener(mClientListener);
-            mClient.registerUnseenListener(mClientListener);
+            mClient.registerMessageListener(mClientListener);
             mClient.registerTransferListener(mClientListener);
         }
 
@@ -140,16 +173,23 @@ public class XoClientService extends Service {
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if (key.equals("preference_service_uri")) {
                     configureServiceUri();
-                }
-                if (key.equals("preference_download_auto_mobile")
-                        || key.equals("preference_download_auto_wifi")) {
-                    configureAutoDownloads();
+                } else if (key.equals(sPreferenceDownloadLimitMobileKey)
+                        || key.equals(sPreferenceDownloadLimitWifiKey)
+                        || key.equals(sPreferenceUploadLimitMobileKey)
+                        || key.equals(sPreferenceUploadLimitWifiKey)) {
+                    configureAutoTransfers();
+                } else if (key.equals(sPreferenceImageUploadPixelCountKey)) {
+                    loadPreference(mPreferences, sPreferenceImageUploadPixelCountKey);
+                } else if (key.equals(sPreferenceImageUploadQualityKey)) {
+                    loadPreference(mPreferences, sPreferenceImageUploadQualityKey);
                 }
             }
         };
         mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesListener);
 
-        configureAutoDownloads();
+        loadPreference(mPreferences, sPreferenceImageUploadPixelCountKey);
+        loadPreference(mPreferences, sPreferenceImageUploadQualityKey);
+        configureAutoTransfers();
 
         doVerifyGcm();
 
@@ -159,8 +199,8 @@ public class XoClientService extends Service {
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        IntentFilter filter = new IntentFilter("com.hoccer.xo.android.service.XoClientService$ClientIdReceiver");
-        filter.addAction("CONTACT_ID_IN_CONVERSATION");
+        IntentFilter filter = new IntentFilter(ClientIdReceiver.class.getName());
+        filter.addAction(IntentHelper.ACTION_CONTACT_ID_IN_CONVERSATION);
         m_clientIdReceiver = new ClientIdReceiver();
         registerReceiver(m_clientIdReceiver, filter);
     }
@@ -173,11 +213,12 @@ public class XoClientService extends Service {
         if (mClientListener != null) {
             mClient.unregisterTokenListener(mClientListener);
             mClient.unregisterStateListener(mClientListener);
-            mClient.unregisterUnseenListener(mClientListener);
+            mClient.unregisterMessageListener(mClientListener);
             mClient.unregisterTransferListener(mClientListener);
             mClientListener = null;
         }
-        // XXX unregister client listeners
+
+        // unregister client listeners
         if (mPreferencesListener != null) {
             mPreferences.unregisterOnSharedPreferenceChangeListener(mPreferencesListener);
             mPreferencesListener = null;
@@ -190,7 +231,7 @@ public class XoClientService extends Service {
         LOG.debug("onStartCommand(" + ((intent == null) ? "null" : intent.toString()) + ")");
         if (intent != null) {
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
-                wakeClient();
+                wakeClientInBackground();
             }
             if (intent.hasExtra(TalkPushService.EXTRA_GCM_REGISTERED)) {
                 doUpdateGcm(true);
@@ -230,22 +271,65 @@ public class XoClientService extends Service {
     }
 
     private void configureServiceUri() {
-        String uriString = mPreferences.getString("preference_service_uri", "");
+        String uriString = mPreferences.getString(sPreferenceServiceUriKey, "");
         if (uriString.isEmpty()) {
-            uriString = XoApplication.getXoClient().getHost().getServerUri();
+            uriString = XoApplication.getXoClient().getConfiguration().getServerUri();
         }
         URI uri = URI.create(uriString);
         mClient.setServiceUri(uri);
     }
 
-    private void configureAutoDownloads() {
-        mAutoDownloadMobile = mPreferences.getBoolean("preference_download_auto_mobile", false);
-        mAutoDownloadWifi = mPreferences.getBoolean("preference_download_auto_wifi", true);
+    private void configureAutoTransfers() {
+        switch (mCurrentConnectionType) {
+            case ConnectivityManager.TYPE_MOBILE:
+            case ConnectivityManager.TYPE_BLUETOOTH:
+            case ConnectivityManager.TYPE_WIMAX:
+                loadPreference(mPreferences, sPreferenceUploadLimitMobileKey);
+                loadPreference(mPreferences, sPreferenceDownloadLimitMobileKey);
+                break;
+            case ConnectivityManager.TYPE_ETHERNET:
+            case ConnectivityManager.TYPE_WIFI:
+                loadPreference(mPreferences, sPreferenceUploadLimitWifiKey);
+                loadPreference(mPreferences, sPreferenceDownloadLimitWifiKey);
+                break;
+        }
+    }
+
+    private void loadPreference(SharedPreferences preferences, String key) {
+        if (key != null) {
+            if (key.equals(sPreferenceUploadLimitMobileKey)) {
+                String uploadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
+            } else if (key.equals(sPreferenceDownloadLimitMobileKey)) {
+                String downloadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
+            } else if (key.equals(sPreferenceUploadLimitWifiKey)) {
+                String uploadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setUploadLimit(Integer.parseInt(uploadLimitString));
+            } else if (key.equals(sPreferenceDownloadLimitWifiKey)) {
+                String downloadLimitString = preferences.getString(key, DEFAULT_TRANSFER_LIMIT);
+                mClient.setDownloadLimit(Integer.parseInt(downloadLimitString));
+            } else if (key.equals(sPreferenceImageUploadPixelCountKey)) {
+                String maxPixelCount = mPreferences.getString(sPreferenceImageUploadPixelCountKey,
+                        Integer.toString(DEFAULT_IMAGE_UPLOAD_MAX_PIXEL_COUNT));
+                mClient.setImageUploadMaxPixelCount(Integer.parseInt(maxPixelCount));
+            } else if (key.equals(sPreferenceImageUploadQualityKey)) {
+                String imageQuality = mPreferences.getString(sPreferenceImageUploadQualityKey,
+                        Integer.toString(DEFAULT_IMAGE_UPLOAD_ENCODING_QUALITY));
+                mClient.setImageUploadEncodingQuality(Integer.parseInt(imageQuality));
+            }
+        }
     }
 
     private void wakeClient() {
-        if (mPreviousConnectionState) {
+        if (mCurrentConnectionState) {
             mClient.wake();
+        }
+    }
+
+    private void wakeClientInBackground() {
+        if (mCurrentConnectionState) {
+            mClient.wakeInBackground();
         }
     }
 
@@ -290,7 +374,7 @@ public class XoClientService extends Service {
         if (mGcmSupported) {
             if (forced || !GCMRegistrar.isRegistered(this)) {
                 LOG.debug("requesting GCM registration");
-                GCMRegistrar.register(this, XoConfiguration.GCM_SENDER_ID);
+                GCMRegistrar.register(this, TalkPushService.GCM_SENDER_ID);
             } else {
                 LOG.debug("no need to request GCM registration");
             }
@@ -309,7 +393,7 @@ public class XoClientService extends Service {
                 mClient.registerGcm(this.getPackageName(), GCMRegistrar.getRegistrationId(this));
                 // set the registration timeout (XXX move elsewhere)
                 GCMRegistrar.setRegisterOnServerLifespan(
-                        this, XoConfiguration.GCM_REGISTRATION_EXPIRATION * 1000);
+                        this, TalkPushService.GCM_REGISTRATION_EXPIRATION * 1000);
                 // tell the registrar that we did this successfully
                 GCMRegistrar.setRegisteredOnServer(this, true);
             } else {
@@ -326,11 +410,11 @@ public class XoClientService extends Service {
 
     private void doShutdown() {
         LOG.info("shutting down");
-        // command the client to deactivate
+
         if (mClient.isActivated()) {
             mClient.deactivateNow();
         }
-        // stop ourselves
+
         stopSelf();
     }
 
@@ -344,7 +428,7 @@ public class XoClientService extends Service {
                         doShutdown();
                     }
                 },
-                XoConfiguration.SERVICE_KEEPALIVE_TIMEOUT, TimeUnit.SECONDS
+                SERVICE_KEEPALIVE_TIMEOUT, TimeUnit.SECONDS
         );
     }
 
@@ -376,8 +460,8 @@ public class XoClientService extends Service {
         if (activeNetwork == null) {
             LOG.debug("connectivity change: no connectivity");
             mClient.deactivate();
-            mPreviousConnectionState = false;
-            mPreviousConnectionType = -1;
+            mCurrentConnectionState = false;
+            mCurrentConnectionType = -1;
         } else {
             LOG.debug("connectivity change:"
                     + " type " + activeNetwork.getTypeName()
@@ -399,54 +483,37 @@ public class XoClientService extends Service {
             }
 
             // TODO: is this check too early ? Last if-statement above deactivates client when network dead.
-            boolean netState = activeNetwork.isConnected();
-            int netType = activeNetwork.getType();
+            mCurrentConnectionState = activeNetwork.isConnected();
+            mCurrentConnectionType = activeNetwork.getType();
 
-            // TODO: will this be executed while the XoClient is still activating / connecting / syncing on other threads ?
-            if (XoConfiguration.CONNECTIVITY_RECONNECT_ON_CHANGE) {
-                if (netState && !mClient.isIdle()) {
-                    if (!mPreviousConnectionState
-                            || mPreviousConnectionType == -1
-                            || mPreviousConnectionType != netType) {
-                        if (mClient.getState() < XoClient.STATE_CONNECTING) {
-                            mClient.reconnect("connection change");
-                        }
-                    }
-                }
-            }
-
-            mPreviousConnectionState = netState;
-            mPreviousConnectionType = netType;
+            // reset transfer limits on network type change.
+            configureAutoTransfers();
         }
     }
 
-    private void updateInvitateNotification(List<TalkClientSmsToken> unconfirmedTokens,
-            boolean notify) {
-        LOG.debug("updateInvitateNotification()");
-        XoClientDatabase db = mClient.getDatabase();
-
+    private void updateInvitateNotification(List<TalkClientSmsToken> unconfirmedTokens, boolean doAlarm) {
         // cancel present notification if everything has been seen
         // we back off here to prevent interruption of any in-progress alarms
         if (unconfirmedTokens == null || unconfirmedTokens.isEmpty()) {
-            LOG.debug("no unconfirmed tokens");
             mNotificationManager.cancel(NOTIFICATION_UNCONFIRMED_INVITATIONS);
             return;
         }
 
-        int numUnconfirmed = unconfirmedTokens.size();
+        createInvitationNotification(unconfirmedTokens.size(), doAlarm);
+    }
 
-        // log about what we got
-        LOG.debug("notifying " + numUnconfirmed + " invitations ");
-
+    private void createInvitationNotification(int numUnconfirmed, boolean doAlarm) {
         // build the notification
         Notification.Builder builder = new Notification.Builder(this);
+
         // always set the small icon (should be different depending on if we have a large one)
         builder.setSmallIcon(R.drawable.ic_notification);
-        // large icon XXX
+
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
         builder.setLargeIcon(largeIcon);
+
         // determine if alarms should be sounded
-        if (notify) {
+        if (doAlarm) {
             builder.setDefaults(Notification.DEFAULT_ALL);
         }
         // set total number of messages of more than one
@@ -466,157 +533,9 @@ public class XoClientService extends Service {
         builder.setContentIntent(pendingIntent);
         // set fields
         if (numUnconfirmed > 1) {
-            builder.setContentTitle(numUnconfirmed + " unconfirmed invitations");
+            builder.setContentTitle(numUnconfirmed + getResources().getString(R.string.unconfirmed_invitations_notification_text));
         } else {
-            builder.setContentTitle(numUnconfirmed + " unconfirmed invitation");
-        }
-
-        // finish up
-        Notification notification = null;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            notification = builder.build();
-        } else {
-            notification = builder.getNotification();
-        }
-        // log about it
-        LOG.debug("invite notification " + notification.toString());
-        // update the notification
-        mNotificationManager.notify(NOTIFICATION_UNCONFIRMED_INVITATIONS, notification);
-    }
-
-    private void updateMessageNotification(List<TalkClientMessage> allUnseenMessages,
-            boolean notify) {
-        LOG.debug("updateMessageNotification()");
-        XoClientDatabase db = mClient.getDatabase();
-
-        // we re-collect messages to this to eliminate
-        // messages from deleted contacts that are still in the db (XXX)
-        List<TalkClientMessage> unseenMessages = new ArrayList<TalkClientMessage>();
-
-        // determine where we are in time
-        long now = System.currentTimeMillis();
-        long passed = Math.max(0, now - mNotificationTimestamp);
-
-
-        // do not sound alarms overly often (sound, vibrate)
-        if (passed < XoConfiguration.NOTIFICATION_ALARM_BACKOFF) {
-            notify = false;
-        }
-
-        // we are commited to notifying, update timestamp
-        mNotificationTimestamp = now;
-
-        // collect conversation contacts and sort messages accordingly
-        // also removes messages from deleted clients
-        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
-        Map<Integer, TalkClientContact> contactsById = new HashMap<Integer, TalkClientContact>();
-
-        for (TalkClientMessage message : allUnseenMessages) {
-            TalkClientContact contact = message.getConversationContact();
-            if (contact != null) {
-                int contactId = contact.getClientContactId();
-                if (!contactsById.containsKey(contactId)) {
-                    try {
-                        db.refreshClientContact(contact);
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-                    if (!contact.isDeleted()) {
-                        contactsById.put(contactId, contact);
-                        contacts.add(contact);
-                        unseenMessages.add(message);
-                    }
-                }
-            }  else {
-                LOG.error("message without contact in unseen messages");
-            }
-        }
-
-        // if we have no messages after culling then cancel notification
-        if (unseenMessages.isEmpty()) {
-            LOG.debug("no unseen messages");
-            cancelMessageNotification();
-            return;
-        }
-
-        // for easy reference
-        int numUnseen = unseenMessages.size();
-        int numContacts = contacts.size();
-
-        // log about what we got
-        LOG.debug("notifying " + numUnseen + " messages from " + numContacts + " contacts");
-
-        // build the notification
-        Notification.Builder builder = new Notification.Builder(this);
-        // always set the small icon (should be different depending on if we have a large one)
-        builder.setSmallIcon(R.drawable.ic_notification);
-        // large icon XXX
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-        builder.setLargeIcon(largeIcon);
-        // determine if alarms should be sounded
-        if (notify) {
-            builder.setDefaults(Notification.DEFAULT_ALL);
-        }
-        // set total number of messages of more than one
-        if (numUnseen > 1) {
-            builder.setNumber(numUnseen);
-        }
-        // fill in content
-        if (contacts.size() == 1) {
-            TalkClientContact singleContact = contacts.get(0);
-            // create intent to start the messaging activity for the right contact
-            Intent messagingIntent = new Intent(this, MessagingActivity.class);
-            messagingIntent.putExtra("clientContactId", singleContact.getClientContactId());
-            // make a pending intent with correct back-stack
-            PendingIntent pendingIntent = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                pendingIntent =
-                        TaskStackBuilder.create(this)
-                                .addParentStack(ContactsActivity.class)
-                                .addNextIntentWithParentStack(messagingIntent)
-                                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            } else {
-                pendingIntent = PendingIntent
-                        .getActivity(this, 0, messagingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            }
-            // add the intent to the notification
-            builder.setContentIntent(pendingIntent);
-            // title is always the contact name
-            builder.setContentTitle(singleContact.getNickname());
-            // text depends on number of messages
-            if (unseenMessages.size() == 1) {
-                TalkClientMessage singleMessage = unseenMessages.get(0);
-                builder.setContentText(singleMessage.getText());
-            } else {
-                builder.setContentText(numUnseen + " new messages");
-            }
-        } else {
-            // create pending intent
-            Intent contactsIntent = new Intent(this, ContactsActivity.class);
-            PendingIntent pendingIntent = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                pendingIntent =
-                        TaskStackBuilder.create(this)
-                                .addNextIntent(contactsIntent)
-                                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            } else {
-                pendingIntent = PendingIntent
-                        .getActivity(this, 0, contactsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            }
-            builder.setContentIntent(pendingIntent);
-            // concatenate contact names
-            StringBuilder sb = new StringBuilder();
-            int last = contacts.size() - 1;
-            for (int i = 0; i < contacts.size(); i++) {
-                TalkClientContact contact = contacts.get(i);
-                sb.append(contact.getNickname());
-                if (i < last) {
-                    sb.append(", ");
-                }
-            }
-            // set fields
-            builder.setContentTitle(sb.toString());
-            builder.setContentText(numUnseen + " new messages");
+            builder.setContentTitle(numUnconfirmed + getResources().getString(R.string.unconfirmed_invitations_notification_text));
         }
 
         // finish up
@@ -627,21 +546,191 @@ public class XoClientService extends Service {
             notification = builder.getNotification();
         }
         // log about it
-        LOG.debug("message notification " + notification.toString());
+        LOG.debug("invite notification " + notification.toString());
+
         // update the notification
-        mNotificationManager.notify(NOTIFICATION_UNSEEN_MESSAGES, notification);
+        mNotificationManager.notify(NOTIFICATION_UNCONFIRMED_INVITATIONS, notification);
     }
 
-    private void cancelMessageNotification() {
+    private void updateUnseenMessageNotification(boolean doAlarm) {
+        XoClientDatabase database = mClient.getDatabase();
+        List<TalkClientMessage> unseenMessages;
+        try {
+            unseenMessages = database.findUnseenMessages();
+        } catch (SQLException e) {
+            LOG.error("SQL Exception while retrieving lit of unseen messages", e);
+            return;
+        }
+
+        // if we have no messages cancel notification
+        if (unseenMessages.size() == 0) {
+            mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
+            return;
+        }
+
+        // determine where we are in time
+        // do not sound alarms overly often (sound, vibrate)
         long now = System.currentTimeMillis();
-        long cancelTime = mNotificationTimestamp + XoConfiguration.NOTIFICATION_CANCEL_BACKOFF;
-        long delay = Math.max(0, cancelTime - now);
-        mExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
+        long timeSinceLastNotification = Math.max(0, now - mTimeOfLastAlarm);
+        if (timeSinceLastNotification < NOTIFICATION_ALARM_BACKOFF) {
+            doAlarm = false;
+        }
+
+        // collect unseen messages by contact
+        Map<Integer, ContactUnseenMessageHolder> contactsMap = new HashMap<Integer, ContactUnseenMessageHolder>();
+        for (TalkClientMessage message : unseenMessages) {
+            TalkClientContact contact = message.getConversationContact();
+            if (contact != null) {
+                try {
+                    database.refreshClientContact(contact);
+                } catch (SQLException e) {
+                    LOG.error("SQL Exception while retrieving contact", e);
+                    continue;
+                }
+
+                // ignore unseen messages from deleted contacts and contacts we are currently conversing with
+                if (contact.isDeleted() || mCurrentConversationContactId == contact.getClientContactId()) {
+                    continue;
+                }
+
+                // ignore clients with whom we are not befriended
+                if(contact.isClient() && !contact.isClientFriend()) {
+                    continue;
+                }
+
+                // ignore groups which we are not joined with yet
+                if(contact.isGroup() && !contact.isGroupJoined()) {
+                    continue;
+                }
+
+                if (!contactsMap.containsKey(contact.getClientContactId())) {
+                    ContactUnseenMessageHolder holder = new ContactUnseenMessageHolder(contact);
+                    contactsMap.put(contact.getClientContactId(), holder);
+                }
+
+                ContactUnseenMessageHolder holder = contactsMap.get(contact.getClientContactId());
+                holder.getUnseenMessages().add(message);
+            } else {
+                LOG.error("Message without contact in unseen messages found");
             }
-        }, delay, TimeUnit.MILLISECONDS);
+        }
+
+        // if we have no messages after culling cancel notification
+        if (contactsMap.size() == 0) {
+            mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
+            return;
+        }
+
+        createUnseenMessageNotification(contactsMap, doAlarm);
+    }
+
+    private void createUnseenMessageNotification(Map<Integer, ContactUnseenMessageHolder> contactsMap, boolean doAlarm) {
+        // sum up all unseen messages
+        int unseenMessagesCount = 0;
+        for (ContactUnseenMessageHolder holder : contactsMap.values()) {
+            unseenMessagesCount += holder.getUnseenMessages().size();
+        }
+
+        // build the notification
+        Notification.Builder builder = new Notification.Builder(this);
+
+        // always set the small icon (should be different depending on if we have a large one)
+        builder.setSmallIcon(R.drawable.ic_notification);
+
+        // large icon
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+        builder.setLargeIcon(largeIcon);
+
+        // determine if alarms should be sounded
+        if (doAlarm) {
+            builder.setDefaults(Notification.DEFAULT_ALL);
+            long now = System.currentTimeMillis();
+            mTimeOfLastAlarm = now;
+        }
+
+        // set total number of messages of more than one
+        if (unseenMessagesCount > 1) {
+            builder.setNumber(unseenMessagesCount);
+        }
+
+        // fill in content
+        if (contactsMap.size() == 1) {
+            // create intent to start the messaging activity for the right contact
+            ContactUnseenMessageHolder holder = contactsMap.values().iterator().next();
+            TalkClientContact contact = holder.getContact();
+
+            Intent messagingIntent = new Intent(this, ContactsActivity.class);
+            messagingIntent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
+
+            // make a pending intent with correct back-stack
+            PendingIntent pendingIntent;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                pendingIntent =
+                        TaskStackBuilder.create(this)
+                                .addParentStack(ContactsActivity.class)
+                                .addNextIntentWithParentStack(messagingIntent)
+                                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+            } else {
+                pendingIntent = PendingIntent
+                        .getActivity(this, 0, messagingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
+
+            // add the intent to the notification
+            builder.setContentIntent(pendingIntent);
+
+            // title is always the contact name
+            builder.setContentTitle(contact.getNickname());
+
+            // text depends on number of messages
+            if (holder.getUnseenMessages().size() == 1) {
+                TalkClientMessage singleMessage = holder.getUnseenMessages().get(0);
+                builder.setContentText(singleMessage.getText());
+            } else {
+                builder.setContentText(holder.getUnseenMessages().size() + getResources().getString(R.string.unseen_messages_notification_text));
+            }
+        } else {
+            // create pending intent
+            Intent contactsIntent = new Intent(this, ContactsActivity.class);
+            PendingIntent pendingIntent;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                pendingIntent =
+                        TaskStackBuilder.create(this)
+                                .addNextIntent(contactsIntent)
+                                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+            } else {
+                pendingIntent = PendingIntent
+                        .getActivity(this, 0, contactsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
+            builder.setContentIntent(pendingIntent);
+
+            // concatenate contact names
+            StringBuilder sb = new StringBuilder();
+            for (ContactUnseenMessageHolder holder : contactsMap.values()) {
+                sb.append(holder.getContact().getNickname()).append(CONTACT_DELIMETER);
+            }
+
+            // set fields
+            builder.setContentTitle(sb.substring(0, sb.length() - 2));
+            builder.setContentText(unseenMessagesCount + getResources().getString(R.string.unseen_messages_notification_text));
+        }
+
+        // finish up
+        Notification notification;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            notification = builder.build();
+        } else {
+            notification = builder.getNotification();
+        }
+
+        // update the notification
+        mNotificationManager.notify(NOTIFICATION_UNSEEN_MESSAGES, notification);
+
+        // log all unseen messages found
+        StringBuilder logMessage = new StringBuilder("Notifying about unseen messages: ");
+        for (ContactUnseenMessageHolder holder : contactsMap.values()) {
+            logMessage.append(holder.getContact().getNickname()).append("(").append(holder.getUnseenMessages().size()).append(") ");
+        }
+        LOG.debug(logMessage);
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
@@ -655,7 +744,7 @@ public class XoClientService extends Service {
 
     private class ClientListener implements
             IXoStateListener,
-            IXoUnseenListener,
+            IXoMessageListener,
             IXoTokenListener,
             IXoTransferListenerOld,
             MediaScannerConnection.OnScanCompletedListener {
@@ -670,45 +759,10 @@ public class XoClientService extends Service {
                 mExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        doRegisterGcm(XoConfiguration.GCM_ALWAYS_REGISTER);
-                        doUpdateGcm(XoConfiguration.GCM_ALWAYS_UPDATE);
+                        doRegisterGcm(TalkPushService.GCM_ALWAYS_REGISTER);
+                        doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
                     }
                 });
-            }
-        }
-
-        // XXX
-        //@Override
-        //public void onPushRegistrationRequested() {
-        //    LOG.info("onPushRegistrationRequested()");
-        //    mExecutor.execute(new Runnable() {
-        //        @Override
-        //        public void run() {
-        //            doRegisterGcm(false);
-        //            doUpdateGcm(true);
-        //        }
-        //    });
-        //}
-
-        @Override
-        public void onUnseenMessages(List<TalkClientMessage> unseenMessages, boolean notify) {
-            LOG.debug("onUnseenMessages(" + unseenMessages.size() + "," + notify + ")");
-            ActivityManager activityManager = (ActivityManager) getApplicationContext().
-                    getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningTaskInfo> services = activityManager.getRunningTasks(Integer.MAX_VALUE);
-            if (unseenMessages == null || unseenMessages.isEmpty()) {
-                LOG.debug("no unseen messages");
-                cancelMessageNotification();
-                return;
-            }
-            if (services.get(0).topActivity.getShortClassName().equalsIgnoreCase(MessagingActivity.class.getName())) {
-                    m_clientIdReceiver.setContactId(unseenMessages.get(0).getConversationContact().getClientContactId());
-                    m_clientIdReceiver.setNotificationData(unseenMessages, notify);
-                    Intent intent = new Intent();
-                    intent.setAction("CHECK_ID_IN_CONVERSATION");
-                    sendBroadcast(intent);
-            } else {
-                updateMessageNotification(unseenMessages, notify);
             }
         }
 
@@ -726,41 +780,12 @@ public class XoClientService extends Service {
         public void onDownloadRegistered(TalkClientDownload download) {
             LOG.debug("onDownloadRegistered(" + download.getClientDownloadId() + ")");
             if (download.isAttachment()) {
-                boolean auto = false;
-                switch (mPreviousConnectionType) {
-                    case ConnectivityManager.TYPE_MOBILE:
-                    case ConnectivityManager.TYPE_BLUETOOTH:
-                    case ConnectivityManager.TYPE_WIMAX:
-                        if (mAutoDownloadMobile) {
-                            auto = true;
-                        }
-                        break;
-                    case ConnectivityManager.TYPE_ETHERNET:
-                    case ConnectivityManager.TYPE_WIFI:
-                        if (mAutoDownloadWifi) {
-                            auto = true;
-                        }
-                        break;
-                }
-                if (auto) {
-                    mClient.requestDownload(download);
-                }
+                mClient.requestDownload(download, false);
             }
         }
 
         @Override
         public void onDownloadStateChanged(TalkClientDownload download) {
-            if (download.isAttachment() && download.isContentAvailable()
-                    && download.getContentUrl() == null) {
-                String[] path = new String[]{download.getDataFile()};
-                String[] ctype = new String[]{download.getContentType()};
-                LOG.debug("requesting media scan of " + ctype[0] + " at " + path[0]);
-                mScanningDownloads.put(path[0], download);
-                MediaScannerConnection.scanFile(
-                        XoClientService.this,
-                        path, ctype, this
-                );
-            }
         }
 
         @Override
@@ -773,6 +798,17 @@ public class XoClientService extends Service {
 
         @Override
         public void onDownloadFinished(TalkClientDownload download) {
+            if (download.isAttachment() && download.isContentAvailable()
+                    && download.getContentUrl() == null) {
+                String[] path = new String[]{download.getDataFile()};
+                String[] ctype = new String[]{download.getContentType()};
+                LOG.debug("requesting media scan of " + ctype[0] + " at " + path[0]);
+                mScanningDownloads.put(path[0], download);
+                MediaScannerConnection.scanFile(
+                        XoClientService.this,
+                        path, ctype, this
+                );
+            }
         }
 
         @Override
@@ -808,6 +844,33 @@ public class XoClientService extends Service {
                 download.provideContentUrl(mClient.getTransferAgent(), uri.toString());
             }
             mScanningDownloads.remove(path);
+
+            // send an intent
+            Intent intent = new Intent();
+            intent.setAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
+            intent.putExtra(IntentHelper.EXTRA_MEDIA_URI, uri.toString());
+            sendBroadcast(intent);
+        }
+
+        @Override
+        public void onMessageCreated(TalkClientMessage message) {
+            if (message.isIncoming()) {
+                updateUnseenMessageNotification(true);
+            }
+        }
+
+        @Override
+        public void onMessageUpdated(TalkClientMessage message) {
+            if (message.isIncoming()) {
+                updateUnseenMessageNotification(false);
+            }
+        }
+
+        @Override
+        public void onMessageDeleted(TalkClientMessage message) {
+            if (message.isIncoming()) {
+                updateUnseenMessageNotification(false);
+            }
         }
     }
 
@@ -842,25 +905,28 @@ public class XoClientService extends Service {
         }
     }
 
-    private class ClientIdReceiver extends BroadcastReceiver {
-        private int m_id;
-        private List<TalkClientMessage> m_unseenMessages = new ArrayList<TalkClientMessage>();
-        private boolean m_notify;
+    private class ContactUnseenMessageHolder {
+        private TalkClientContact mContact;
+        private List<TalkClientMessage> mUnseenMessages;
 
+        public ContactUnseenMessageHolder(TalkClientContact contact) {
+            mContact = contact;
+            mUnseenMessages = new ArrayList<TalkClientMessage>();
+        }
+
+        public TalkClientContact getContact() {
+            return mContact;
+        }
+
+        public List<TalkClientMessage> getUnseenMessages() {
+            return mUnseenMessages;
+        }
+    }
+
+    private class ClientIdReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context arg0, Intent intent) {
-            if (m_id != intent.getIntExtra("id", -1)) {
-                updateMessageNotification(m_unseenMessages, m_notify);
-            }
-        }
-
-        public void setContactId(int clientContactId) {
-            m_id = clientContactId;
-        }
-
-        public void setNotificationData(List<TalkClientMessage> unseenMessages, boolean notify) {
-            m_unseenMessages = unseenMessages;
-            m_notify = notify;
+            mCurrentConversationContactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
         }
     }
 }

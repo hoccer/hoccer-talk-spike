@@ -33,19 +33,60 @@
         </Preference>
     </PreferenceCategory>
 
+  <PreferenceCategory
+      android:title="@string/pref_category_image_encoding" >
+
+    <ListPreference
+        android:key="preference_image_encoding_size"
+        android:title="@string/pref_image_size"
+        android:entries="@array/image_transfer_size_options"
+        android:entryValues="@array/image_transfer_size_options_values"
+        android:defaultValue="-1"/>
+
+    <ListPreference
+        android:key="preference_image_encoding_quality"
+        android:title="@string/pref_image_quality"
+        android:entries="@array/image_transfer_quality_options"
+        android:entryValues="@array/image_transfer_quality_options_values"
+        android:defaultValue="100"/>
+
+  </PreferenceCategory>
+
+  <PreferenceCategory
+            android:title="@string/pref_category_transfer_mobile">
+
+        <ListPreference
+                android:key="preference_upload_limit_mobile"
+                android:title="@string/pref_upload_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
+
+        <ListPreference
+                android:key="preference_download_limit_mobile"
+                android:title="@string/pref_download_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
+
+    </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/pref_auto_download">
+            android:title="@string/pref_category_transfer_wifi">
 
-        <CheckBoxPreference
-                android:key="preference_download_auto_mobile"
-                android:title="@string/pref_auto_downloads_mobile"
-                android:defaultValue="false"/>
+        <ListPreference
+                android:key="preference_upload_limit_wifi"
+                android:title="@string/pref_upload_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
 
-        <CheckBoxPreference
-                android:key="preference_download_auto_wifi"
-                android:title="@string/pref_auto_download_wifi"
-                android:defaultValue="true"/>
+        <ListPreference
+                android:key="preference_download_limit_wifi"
+                android:title="@string/pref_download_limit"
+                android:entries="@array/transfer_limits"
+                android:entryValues="@array/transfer_limits_values"
+                android:defaultValue="-1"/>
 
     </PreferenceCategory>
 
@@ -100,44 +141,14 @@
     <PreferenceCategory
             android:title="Development">
 
-        <CheckBoxPreference
-                android:key="preference_log_logcat"
-                android:title="Log via logcat"
-                android:defaultValue="true"/>
-
-        <CheckBoxPreference
-                android:key="preference_log_sd"
-                android:title="Log to SD card"
-                android:defaultValue="false"/>
-
         <ListPreference
-                android:key="preference_log_level"
-                android:title="Global log level"
-                android:entries="@array/preference_log_level_names"
-                android:entryValues="@array/preference_log_level_values"
-                android:defaultValue="INFO"/>
+                android:key="preference_data_import"
+                android:title="Import data ..."
+                android:defaultValue="0"/>
 
-        <CheckBoxPreference
-                android:key="preference_enable_server_side_support_mode"
-                android:title="Enable support mode on server"
-                android:defaultValue="false"/>
-
-        <EditTextPreference
-                android:key="preference_server_uri"
-                android:title="Enter Server URI"
-                />
-
-        <ListPreference
-                android:key="preference_server_uri"
-                android:entries="@array/servers_development"
-                android:entryValues="@array/servers_development"
-                android:title="Select Server URI"/>
-
-        <ListPreference
-                android:key="preference_database"
-                android:entries="@array/databases_development"
-                android:entryValues="@array/database_values_development"
-                android:title="@string/preference_database_title"/>
+        <Preference
+                android:key="preference_data_export"
+                android:title="Export data"/>
 
         <CheckBoxPreference
                 android:key="preference_environment_update"

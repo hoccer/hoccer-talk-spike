@@ -180,21 +180,29 @@ public class CleaningAgent {
     }
 
     private void doCleanFinishedDelivery(TalkDelivery finishedDelivery) {
-        String messageId = finishedDelivery.getMessageId();
-        TalkMessage message = mDatabase.findMessageById(messageId);
-        if (message != null) {
-            if (message.getNumDeliveries() == 1) {
-                // if we have only one delivery then we can safely delete the msg now
-                doDeleteMessage(message);
+        synchronized (mServer.idLock(finishedDelivery.getMessageId())) {
+            TalkDelivery delivery = mDatabase.findDelivery(finishedDelivery.getMessageId(), finishedDelivery.getReceiverId());
+            if (delivery != null) {
+                String messageId = delivery.getMessageId();
+                TalkMessage message = mDatabase.findMessageById(messageId);
+                if (message != null) {
+                    if (message.getNumDeliveries() == 1) {
+                        // if we have only one delivery then we can safely delete the msg now
+                        doDeleteMessage(message);
+                    } else {
+                        // else we need to determine the state of the message in detail
+                        doCleanDeliveriesForMessage(messageId, message);
+                    }
+                } else {
+                    doCleanDeliveriesForMessage(messageId, null);
+                }
+                // always delete the ACKed delivery
+                LOG.debug("doCleanFinishedDelivery: Deleting delivery with state '" + delivery.getState() + "' and attachmentState '" + delivery.getAttachmentState() + "', messageId: " + messageId + ", receiverId:" + delivery.getReceiverId());
+                mDatabase.deleteDelivery(delivery);
             } else {
-                // else we need to determine the state of the message in detail
-                doCleanDeliveriesForMessage(messageId, message);
+                LOG.debug("doCleanFinishedDelivery: Delivery already deleted, messageId: " + finishedDelivery.getMessageId() + ", receiverId:" + finishedDelivery.getReceiverId());
             }
-        } else {
-            doCleanDeliveriesForMessage(messageId, null);
         }
-        // always delete the ACKed delivery
-        mDatabase.deleteDelivery(finishedDelivery);
     }
 
     private void doCleanDeliveriesForMessage(String messageId, TalkMessage message) {
@@ -296,7 +304,7 @@ public class CleaningAgent {
     }
 
     private void doDeleteMessage(TalkMessage message) {
-        LOG.debug("deleting message " + message);
+        LOG.debug("doDeleteMessage: deleting message with id " + message.getMessageId());
 
         // delete attached file if there is one
         String fileId = message.getAttachmentFileId();
@@ -305,6 +313,7 @@ public class CleaningAgent {
             if (filecache == null) {
                 throw new RuntimeException("cant get filecache");
             }
+            LOG.debug("doDeleteMessage: deleting file with id " + fileId);
             filecache.deleteFile(fileId);
         }
 

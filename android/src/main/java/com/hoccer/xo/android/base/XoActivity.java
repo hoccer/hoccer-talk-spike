@@ -1,16 +1,28 @@
 package com.hoccer.xo.android.base;
 
-import android.app.*;
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.TaskStackBuilder;
 import android.content.*;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.*;
+import android.preference.PreferenceManager;
+import android.provider.MediaStore;
+import android.provider.Telephony;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.view.*;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
@@ -18,32 +30,19 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
-import com.hoccer.xo.android.content.*;
+import com.hoccer.xo.android.content.ContentRegistry;
+import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
-import com.hoccer.xo.android.database.AndroidTalkDatabase;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
-import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.hoccer.xo.release.R;
-
 import net.hockeyapp.android.CrashManager;
-
 import org.apache.log4j.Logger;
-
-import android.annotation.SuppressLint;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-
-import android.provider.MediaStore;
-import android.provider.Telephony;
-import android.view.*;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,8 +64,6 @@ public abstract class XoActivity extends FragmentActivity {
     public final static int REQUEST_SELECT_AVATAR = 23;
 
     public final static int REQUEST_CROP_AVATAR = 24;
-
-    public final static int REQUEST_SELECT_ATTACHMENT = 42;
 
     protected Logger LOG = null;
 
@@ -104,11 +101,6 @@ public abstract class XoActivity extends FragmentActivity {
      * Ongoing avatar selection
      */
     ContentSelection mAvatarSelection = null;
-
-    /**
-     * Ongoing attachment selection
-     */
-    ContentSelection mAttachmentSelection = null;
 
     boolean mUpEnabled = false;
 
@@ -183,7 +175,7 @@ public abstract class XoActivity extends FragmentActivity {
         XoApplication.enterBackgroundActiveMode();
     }
 
-    protected void setBackgroundActive() {
+    public void setBackgroundActive() {
         isBackgroundActive = true;
     }
 
@@ -214,8 +206,7 @@ public abstract class XoActivity extends FragmentActivity {
             e.printStackTrace();
         }
     }
-
-    private boolean canStartActivity(Intent intent) {
+    public boolean canStartActivity(Intent intent) {
         if (intent != null) {
             ComponentName componentName = intent.resolveActivity(getPackageManager());
             if (componentName != null) {
@@ -298,13 +289,10 @@ public abstract class XoActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         // set up database connection
-        mDatabase = new XoClientDatabase(
-                AndroidTalkDatabase.getInstance(this.getApplicationContext()));
-        try {
-            mDatabase.initialize();
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
+        mDatabase = XoApplication.getXoClient().getDatabase();
+
+        // get the background executor
+        mBackgroundExecutor = XoApplication.getExecutor();
 
         // set layout
         setContentView(getLayoutResource());
@@ -320,6 +308,37 @@ public abstract class XoActivity extends FragmentActivity {
         registerReceiver(mScreenListener, filter);
 
         mAlertListener = new XoAlertListener(this);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        LOG.debug("onActivityResult(" + requestCode + "," + resultCode + ")");
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (intent == null) {
+            return;
+        }
+
+        if (requestCode == REQUEST_SELECT_AVATAR) {
+            if (mAvatarSelection != null) {
+                ImageSelector selector = (ImageSelector) mAvatarSelection.getSelector();
+                startExternalActivityForResult(selector.createCropIntent(this, intent.getData()), REQUEST_CROP_AVATAR);
+            }
+        } else if (requestCode == REQUEST_CROP_AVATAR) {
+            intent = selectedAvatarPreProcessing(intent);
+            if (intent != null) {
+                IContentObject contentObject = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection, intent);
+                if (contentObject != null) {
+                    LOG.debug("selected avatar " + contentObject.getContentDataUrl());
+                    for (IXoFragment fragment : mTalkFragments) {
+                        fragment.onAvatarSelected(contentObject);
+                    }
+                }
+            } else {
+                showAvatarSelectionError();
+            }
+        }
     }
 
     @Override
@@ -327,9 +346,6 @@ public abstract class XoActivity extends FragmentActivity {
         LOG.debug("onResume()");
         super.onResume();
         checkForCrashesIfEnabled();
-
-        // get the background executor
-        mBackgroundExecutor = XoApplication.getExecutor();
 
         // start the backend service and bind to it
         Intent serviceIntent = new Intent(getApplicationContext(), XoClientService.class);
@@ -342,13 +358,16 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     private void checkForCrashesIfEnabled() {
-        if (XoConfiguration.reportingEnable()) {
-            CrashManager.register(this, XoConfiguration.HOCKEYAPP_ID);
+        if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
+            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId());
         }
     }
 
     private void checkKeys() {
-        if (XoConfiguration.needToRegenerateKey()) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        boolean needToRegenerateKey = preferences.getBoolean("NEED_TO_REGENERATE_KEYS", true);
+
+        if (needToRegenerateKey) {
             createDialog();
             regenerateKeys();
         }
@@ -360,7 +379,11 @@ public abstract class XoActivity extends FragmentActivity {
             public void run() {
                 try {
                     XoApplication.getXoClient().regenerateKeyPair();
-                    XoConfiguration.setRegenerationDone();
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("NEED_TO_REGENERATE_KEYS", false);
+                    editor.commit();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } finally {
@@ -566,52 +589,8 @@ public abstract class XoActivity extends FragmentActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LOG.debug("onActivityResult(" + requestCode + "," + resultCode);
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (data == null) {
-            return;
-        }
-
-        if (requestCode == REQUEST_SELECT_AVATAR) {
-            if (mAvatarSelection != null) {
-                ImageSelector selector = (ImageSelector) mAvatarSelection.getSelector();
-                startExternalActivityForResult(selector.createCropIntent(this, data.getData()), REQUEST_CROP_AVATAR);
-            }
-        } else if (requestCode == REQUEST_CROP_AVATAR) {
-            data = selectedAvatarPreProcessing(data);
-            if (data != null) {
-                IContentObject contentObject = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection, data);
-                if (contentObject != null) {
-                    LOG.debug("selected avatar " + contentObject.getContentDataUrl());
-                    for (IXoFragment fragment : mTalkFragments) {
-                        fragment.onAvatarSelected(contentObject);
-                    }
-                }
-            } else {
-                showAvatarSelectionError();
-            }
-        } else if (requestCode == REQUEST_SELECT_ATTACHMENT) {
-            IContentObject contentObject = ContentRegistry.get(this).createSelectedAttachment(mAttachmentSelection, data);
-            if (contentObject != null) {
-                LOG.debug("selected attachment " + contentObject.getContentDataUrl());
-                for (IXoFragment fragment : mTalkFragments) {
-                    fragment.onAttachmentSelected(contentObject);
-                }
-            } else {
-                showAttachmentSelectionError();
-            }
-        }
-    }
-
     private void showAvatarSelectionError() {
         Toast.makeText(this, R.string.error_avatar_selection, Toast.LENGTH_LONG).show();
-    }
-
-    private void showAttachmentSelectionError() {
-        Toast.makeText(this, R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
     }
 
     protected void enableUpNavigation() {
@@ -664,8 +643,8 @@ public abstract class XoActivity extends FragmentActivity {
                                                                           }
                                                                       }
                                                                   },
-                XoConfiguration.SERVICE_KEEPALIVE_PING_DELAY,
-                XoConfiguration.SERVICE_KEEPALIVE_PING_INTERVAL,
+                XoClientService.SERVICE_KEEPALIVE_PING_DELAY,
+                XoClientService.SERVICE_KEEPALIVE_PING_INTERVAL,
                 TimeUnit.SECONDS
         );
     }
@@ -725,16 +704,24 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     public void showContactConversation(TalkClientContact contact) {
-        LOG.debug("showContactConversation(" + contact.getClientContactId() + ")");
+        showContactConversation(contact.getClientContactId());
+    }
+
+    public void showContactConversation(int contactId) {
+        LOG.debug("showContactConversation(" + contactId + ")");
         Intent intent = new Intent(this, MessagingActivity.class);
-        intent.putExtra(MessagingActivity.EXTRA_CLIENT_CONTACT_ID,
-                contact.getClientContactId());
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contactId);
         startActivity(intent);
     }
 
     public void showPairing() {
         LOG.debug("showPairing()");
         startActivity(new Intent(this, PairingActivity.class));
+    }
+
+    public void showFullscreenPlayer() {
+        LOG.debug("showFullscreenPlayer()");
+        startActivity(new Intent(this, FullscreenPlayerActivity.class));
     }
 
     public void showPreferences() {
@@ -745,14 +732,6 @@ public abstract class XoActivity extends FragmentActivity {
     public void selectAvatar() {
         LOG.debug("selectAvatar()");
         mAvatarSelection = ContentRegistry.get(this).selectAvatar(this, REQUEST_SELECT_AVATAR);
-    }
-
-    public void selectAttachment() {
-        LOG.debug("selectAttachment()");
-
-        setBackgroundActive();
-
-        mAttachmentSelection = ContentRegistry.get(this).selectAttachment(this, REQUEST_SELECT_ATTACHMENT);
     }
 
     public void scanBarcode() {
@@ -768,7 +747,7 @@ public abstract class XoActivity extends FragmentActivity {
             @Override
             public void run() {
 
-                final String qrString = getXoClient().getHost().getUrlScheme() + getXoClient().generatePairingToken();
+                final String qrString = getXoClient().getConfiguration().getUrlScheme() + getXoClient().generatePairingToken();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -782,58 +761,6 @@ public abstract class XoActivity extends FragmentActivity {
 
             }
         });
-    }
-
-    public void composeInviteSms(String token) {
-        LOG.debug("composeInviteSms(" + token + ")");
-
-        try {
-            TalkClientContact self = mDatabase.findSelfContact(false);
-
-            String message = String
-                    .format(getString(R.string.sms_invitation_text), getResources().getString(R.string.url_scheme), token, self.getName());
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //At least KitKat
-                String defaultSmsPackageName = Telephony.Sms
-                        .getDefaultSmsPackage(this); //Need to change the build to API 19
-
-                Intent sendIntent = new Intent(Intent.ACTION_SEND);
-                sendIntent.setType("text/plain");
-                sendIntent.putExtra(Intent.EXTRA_TEXT, message);
-
-                if (defaultSmsPackageName != null) {
-                    sendIntent.setPackage(defaultSmsPackageName);
-                }
-                startActivity(sendIntent);
-            } else {
-                Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse("smsto:"));
-                intent.putExtra("sms_body", message);
-
-                startActivity(intent);
-            }
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
-    }
-
-    public void composeInviteEmail(String token) {
-        LOG.debug("composeInviteEmail(" + token + ")");
-
-        try {
-            TalkClientContact self = mDatabase.findSelfContact(false);
-            String message = String
-                    .format(getString(R.string.email_invitation_text), getXoClient().getHost().getUrlScheme(), token, self.getName());
-            Intent email = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
-            email.putExtra(Intent.EXTRA_SUBJECT,"Join me at Hoccer!");
-            email.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(message));
-            startActivity(Intent.createChooser(email, "Choose Email Client"));
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
-    }
-
-    public void hackReturnedFromDialog() {
     }
 
     public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {

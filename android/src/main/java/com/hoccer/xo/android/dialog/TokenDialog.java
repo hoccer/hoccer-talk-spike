@@ -1,11 +1,5 @@
 package com.hoccer.xo.android.dialog;
 
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.release.R;
-
-import org.apache.log4j.Logger;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -16,6 +10,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.widget.TextView;
+import com.hoccer.talk.client.model.TalkClientSmsToken;
+import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 public class TokenDialog extends DialogFragment implements DialogInterface.OnClickListener {
 
@@ -79,20 +77,17 @@ public class TokenDialog extends DialogFragment implements DialogInterface.OnCli
             LOG.debug("onClick(accept)");
             if(mToken != null) {
                 mActivity.getXoClient().useSmsToken(mToken);
-                mActivity.hackReturnedFromDialog();
             }
         }
         if(which == DialogInterface.BUTTON_NEGATIVE) {
             LOG.debug("onClick(decline)");
             if(mToken != null) {
                 mActivity.getXoClient().rejectSmsToken(mToken);
-                mActivity.hackReturnedFromDialog();
             }
         }
         if(which == DialogInterface.BUTTON_NEUTRAL) {
             LOG.debug("onClick(cancel)");
             dialog.dismiss();
-            mActivity.hackReturnedFromDialog();
         }
     }
 

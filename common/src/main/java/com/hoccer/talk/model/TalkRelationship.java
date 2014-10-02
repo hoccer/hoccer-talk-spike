@@ -3,7 +3,7 @@ package com.hoccer.talk.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import org.jetbrains.annotations.Nullable;
+//import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -105,7 +105,7 @@ public class TalkRelationship {
         this.otherClientId = otherClientId;
     }
 
-    @Nullable
+//    @Nullable
     public String getState() {
         return state;
     }

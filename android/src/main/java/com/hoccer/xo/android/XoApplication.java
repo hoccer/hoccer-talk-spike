@@ -12,11 +12,11 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
-import com.hoccer.xo.android.util.ThumbnailManager;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -34,6 +34,18 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class XoApplication extends Application implements Thread.UncaughtExceptionHandler {
 
+    /* Directories in internal storage */
+    private static final String DOWNLOADS_DIRECTORY = "downloads";
+    private static final String GENERATED_DIRECTORY = "generated";
+    private static final String THUMBNAILS_DIRECTORY = "thumbnails";
+
+    /**
+     * Background executor thread count
+     *
+     * AFAIK this must be at least 3 for RPC to work.
+     */
+    private static final int CLIENT_THREADS = 100;
+
     /** logger for this class (initialized in onCreate) */
     private static Logger LOG = null;
 
@@ -44,7 +56,9 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     /** global xo host */
     private static IXoClientHost CLIENT_HOST = null;
     /** global xo client (initialized in onCreate) */
-    private static XoClient CLIENT = null;
+    private static XoAndroidClient CLIENT = null;
+    /** global xo configuration (initialized in onCreate) */
+    private static XoAndroidClientConfiguration CONFIGURATION = null;
     /** global xo sound pool for system sounds (initialized in onCreate) */
     private static XoSoundPool SOUND_POOL = null;
 
@@ -54,6 +68,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static File EXTERNAL_STORAGE = null;
     /** root of app-private storage (initialized in onCreate) */
     private static File INTERNAL_STORAGE = null;
+    /** root of app-private cache storage (initialized in onCreate) */
+    private static File INTERNAL_CACHE_STORAGE = null;
     /** uncaught exception handler for the client and us */
     private static Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER = null;
     private static DisplayImageOptions CONTENT_IMAGE_OPTIONS = null;
@@ -62,8 +78,12 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return EXECUTOR;
     }
     /** @return the xo client */
-    public static XoClient getXoClient() {
+    public static XoAndroidClient getXoClient() {
         return CLIENT;
+    }
+    /** @return the xo configuration */
+    public static XoAndroidClientConfiguration getConfiguration() {
+        return CONFIGURATION;
     }
     /** @return the xo sound pool */
     public static XoSoundPool getXoSoundPool() {
@@ -96,31 +116,34 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return INTERNAL_STORAGE;
     }
 
+    /**
+     * @return internal cache directory
+     */
+    public static File getCacheStorage() {
+        return INTERNAL_CACHE_STORAGE;
+    }
+
     private Thread.UncaughtExceptionHandler mPreviousHandler;
 
     public static File getAttachmentDirectory() {
-        return new File(EXTERNAL_STORAGE, XoConfiguration.EXTERNAL_ATTACHMENTS);
+        return new File(EXTERNAL_STORAGE, CONFIGURATION.getAttachmentsDirectory());
     }
 
-//    public static File getEncryptedUploadDirectory() {
-//        return new File(INTERNAL_STORAGE, XoConfiguration.INTERNAL_UPLOADS);
-//    }
-
     public static File getEncryptedDownloadDirectory() {
-        return new File(INTERNAL_STORAGE, XoConfiguration.INTERNAL_DOWNLOADS);
+        return new File(INTERNAL_STORAGE, DOWNLOADS_DIRECTORY);
     }
 
     public static File getGeneratedDirectory() {
-        return new File(INTERNAL_STORAGE, XoConfiguration.INTERNAL_GENERATED);
+        return new File(INTERNAL_STORAGE, GENERATED_DIRECTORY);
     }
 
     public static File getAvatarDirectory() {
-        return new File(EXTERNAL_STORAGE, XoConfiguration.INTERNAL_AVATARS);
+        return new File(EXTERNAL_STORAGE, CONFIGURATION.getAvatarsDirectory());
     }
 
 
     public static File getThumbnailDirectory() {
-        return new File(INTERNAL_STORAGE, XoConfiguration.INTERNAL_THUMBNAILS);
+        return new File(INTERNAL_STORAGE, THUMBNAILS_DIRECTORY);
     }
 
     public static File getAvatarLocation(TalkClientDownload download) {
@@ -173,10 +196,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // initialize storage roots (do so early for log files)
         EXTERNAL_STORAGE = Environment.getExternalStorageDirectory();
         INTERNAL_STORAGE = this.getFilesDir();
+        INTERNAL_CACHE_STORAGE = this.getCacheDir();
+
+        // Initialize configuration
+        CONFIGURATION = new XoAndroidClientConfiguration(this);
 
         // initialize logging system
         XoLogging.initialize(this);
-        XoConfiguration.initialize(this);
 
         // configure ormlite to use log4j
         System.setProperty("com.j256.ormlite.logger.type", "LOG4J");
@@ -224,6 +250,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
                 .bitmapConfig(Bitmap.Config.RGB_565)
                 .considerExifParams(true)
                 .build();
+
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
                 .threadPoolSize(2)
                 .build();
@@ -236,8 +263,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ensureDirectory(getGeneratedDirectory());
         ensureNoMedia(getGeneratedDirectory());
         ensureDirectory(getThumbnailDirectory());
-//        ensureDirectory(getEncryptedUploadDirectory());
-//        ensureNoMedia(getEncryptedUploadDirectory());
         ensureDirectory(getEncryptedDownloadDirectory());
         ensureNoMedia(getEncryptedDownloadDirectory());
 
@@ -246,23 +271,18 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
         tfb.setNameFormat("client-%d");
         tfb.setUncaughtExceptionHandler(this);
-        EXECUTOR = Executors.newScheduledThreadPool(
-                        XoConfiguration.CLIENT_THREADS,
-                        tfb.build());
+        EXECUTOR = Executors.newScheduledThreadPool(CLIENT_THREADS, tfb.build());
         ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
         tfb2.setNameFormat("receiving client-%d");
         tfb2.setUncaughtExceptionHandler(this);
-        INCOMING_EXECUTOR = Executors
-                .newScheduledThreadPool(XoConfiguration.CLIENT_THREADS, tfb2.build());
+        INCOMING_EXECUTOR = Executors.newScheduledThreadPool(CLIENT_THREADS, tfb2.build());
 
         // create client instance
         LOG.info("creating client");
         CLIENT_HOST = new XoAndroidClientHost(this);
-        //XoClient client = new XoAndroidClient(CLIENT_HOST);
-        XoClient client = new XoClient(CLIENT_HOST);
+        XoAndroidClient client = new XoAndroidClient(CLIENT_HOST, CONFIGURATION);
         client.setAvatarDirectory(getAvatarDirectory().toString());
         client.setAttachmentDirectory(getAttachmentDirectory().toString());
-//        client.setEncryptedUploadDirectory(getEncryptedUploadDirectory().toString()); //TODO: to be deleted encryption happens on the fly now
         client.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
         CLIENT = client;
 
@@ -293,18 +313,12 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
             EXECUTOR.shutdownNow();
             EXECUTOR = null;
         }
-
-        LOG.info("shutting down logging");
-        XoLogging.shutdown();
-        LOG.info("shutting down configuration");
-        XoConfiguration.shutdown();
     }
 
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        LOG.warn("Received onTrimMemory(" + level + "). Will trim ThumbnailManager.");
-        ThumbnailManager.getInstance(this).clearCache();
+        LOG.warn("Received onTrimMemory(" + level + ").");
     }
 
     @Override

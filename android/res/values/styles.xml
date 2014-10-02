@@ -8,6 +8,8 @@
     <style name="AppBaseTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_appbasetheme</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.AppBaseTheme</item>
+        <item name="android:textAppearanceLargePopupMenu">@style/PopupMenuTextAppearance.AppBaseTheme</item>
+        <item name="android:textAppearanceSmallPopupMenu">@style/PopupMenuTextAppearance.AppBaseTheme</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.AppBaseTheme</item>
         <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.AppBaseTheme</item>
         <item name="android:actionDropDownStyle">@style/DropDownNav.AppBaseTheme</item>
@@ -46,6 +48,20 @@
         <item name="android:layout_marginTop">@dimen/profile_container_margin_vertical</item>
         <item name="android:layout_marginLeft">@dimen/profile_container_margin_horizontal</item>
         <item name="android:layout_marginRight">@dimen/profile_container_margin_horizontal</item>
+    </style>
+
+    <style name="searchTextHiglight">
+        <item name="android:textColor">#FF33B5E5</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="PopupMenu.AppBaseTheme" parent="@android:style/Widget.Holo.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_appbasetheme</item>
+    </style>
+
+    <style name="PopupMenuTextAppearance.AppBaseTheme" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
+        <item name="android:textColor">@android:color/primary_text_dark</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
 </resources>

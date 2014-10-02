@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -126,6 +128,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("ready()");
         requireIdentification(true);
         mConnection.readyClient();
+        // check if all our memberships have the right key and issue rekeying if not
+        checkMembershipKeysForClient(mConnection.getClientId());
     }
 
     @Override
@@ -174,6 +178,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     StaticSystemMessage.Message.UPDATE_NAGGING);
         }
         requireIsNotOutdated();
+
+        // keep disabled until issues with Apple are resolved - no call ist actually made right now, the following is just for testing purposes
+        if ("iPhone OS".equals(clientInfo.getSystemName()) && clientInfo.getClientBuildNumber() >= 14528 && false) {
+            mServer.getUpdateAgent().requestSettingUpdate(mConnection.getClientId(), "mpMediaAccess", "0", StaticSystemMessage.Message.UPDATE_SETTING_ENABLE_MP_MEDIA_ACCESS);
+            //mServer.getUpdateAgent().requestSettingUpdate(mConnection.getClientId(), "mpMediaAccess", "1", StaticSystemMessage.Message.UPDATE_SETTING_ENABLE_MP_MEDIA_ACCESS);
+        }
 
         return serverInfo;
     }
@@ -406,6 +416,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("hintApnsUnreadMessages('" + numUnreadMessages + "' unread messages)");
         TalkClient client = mConnection.getClient();
         client.setApnsUnreadMessages(numUnreadMessages);
+        client.setLastPushMessage(null);
         mDatabase.saveClient(client);
     }
 
@@ -447,15 +458,33 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (existing == null) {
             existing = new TalkPresence();
         }
+
+        boolean keyIdChanged = false;
+        if (fields == null || fields.contains(TalkPresence.FIELD_KEY_ID)) {
+            if (presence.getKeyId() != null && !presence.getKeyId().equals(existing.getKeyId())) {
+                keyIdChanged = true;
+            }
+        }
+
         // update the presence with what we got
         existing.updateWith(presence, fields);
         existing.setClientId(mConnection.getClientId());
         existing.setTimestamp(new Date());
+
+        if (fields == null || fields.contains(TalkPresence.FIELD_AVATAR_URL)) {
+            // iOS clients did not migrate their avatar URLs when the Filecache URL changed.
+            // These URLs can cause problems on Android clients. This workaround "redirects"
+            // all avatar URLs to the current Filecache.
+            // TODO: Remove this when all iOS clients migrated their avatar URLs
+            existing.setAvatarUrl(urlOnCurrentFilecache(presence.getAvatarUrl()));
+        }
+
         if (fields != null) {
             fields.add(TalkPresence.FIELD_CLIENT_ID);
             // if we do not send time stamp updates on presenceModified, we are more conservative and cause a full presence sync after login
             // fields.add(TalkPresence.FIELD_TIMESTAMP);
         }
+
         if (fields == null || fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
             if (presence.isOffline()) {
                 // client os lying about it's presence
@@ -469,7 +498,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
 
         mDatabase.savePresence(existing);
+
         mServer.getUpdateAgent().requestPresenceUpdate(mConnection.getClientId(), fields);
+        if (keyIdChanged) {
+            checkMembershipKeysForClient(mConnection.getClientId());
+        }
+    }
+
+    private String urlOnCurrentFilecache(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            String downloadId = url.getPath().replace("/download/", "");
+            return mServer.getConfiguration().getFilecacheDownloadBase() + downloadId;
+        } catch (MalformedURLException e) {
+            return urlString;
+        }
     }
 
     @Override
@@ -492,18 +535,66 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return res;
     }
 
+    private void checkMembershipKeysForClient(String clientId) {
+        LOG.debug("checkMembershipKeysForClient id "+clientId);
+        TalkPresence myPresence = mDatabase.findPresenceForClient(clientId);
+        if (myPresence == null) {
+            throw new RuntimeException("no presence for client "+clientId);
+        }
+        if (myPresence.getKeyId() == null || myPresence.getKeyId().length() == 0) {
+            throw new RuntimeException("no keyId in presence for client "+clientId);
+        }
+        checkMembershipKeysForClient(clientId, myPresence.getKeyId());
+    }
+
+
+    private void checkMembershipKeysForClient(String clientId, String keyId) {
+        LOG.debug("checkMembershipKeysForClient id "+clientId+", keyid "+keyId);
+        final List<TalkGroupMember> myMemberships = mDatabase.findGroupMembersForClientWithStates(clientId, TalkGroupMember.ACTIVE_STATES);
+
+        if (myMemberships != null && myMemberships.size()>0) {
+            final TalkKey key = mDatabase.findKey(mConnection.getClientId(), keyId);
+            if (key == null) {
+                throw new RuntimeException("checkMembershipKeyForClient: key with id "+keyId+" not found for client "+clientId);
+            }
+            if (key.getKey() == null || key.getKey().length() == 0) {
+                throw new RuntimeException("checkMembershipKeyForClient: key with id "+keyId+" is empty for client "+clientId);
+            }
+
+            for (TalkGroupMember groupMember : myMemberships) {
+                TalkGroup group = mDatabase.findGroupById(groupMember.getGroupId());
+                boolean outDated = false;
+                if (!keyId.equals(groupMember.getMemberKeyId())) {
+                    outDated = true;
+                } else if (group.getSharedKeyId() == null || group.getSharedKeyId().length() == 0) {
+                    outDated = true;
+                } else if (!group.getSharedKeyId().equals(groupMember.getSharedKeyId())) {
+                    outDated = true;
+                }
+                if (outDated) {
+                    LOG.debug("checkMembershipKeysForClient id "+clientId+", outdated keyid "+keyId+", requesting key update for group "+groupMember.getGroupId());
+                    mServer.getUpdateAgent().checkAndRequestGroupMemberKeys(groupMember.getGroupId());
+                } else {
+                    LOG.debug("checkMembershipKeysForClient id "+clientId+", keyid "+keyId+", key ok for group "+groupMember.getGroupId());
+                }
+            }
+        }
+    }
+
     @Override
     public void updateKey(TalkKey key) {
         requireIdentification(true);
         logCall("updateKey()");
-        if (mDatabase.findKey(mConnection.getClientId(), key.getKeyId()) != null) {
+        if (verifyKey(key.getKeyId())) {
             return;
         }
-
-        key.setClientId(mConnection.getClientId());
-        key.setTimestamp(new Date());
-        // TODO: should check if the content is ok
-        mDatabase.saveKey(key);
+        if (key.getKeyId().equals(key.calcKeyId())) {
+            key.setClientId(mConnection.getClientId());
+            key.setTimestamp(new Date());
+            mDatabase.saveKey(key);
+        } else {
+            throw new RuntimeException("updateKey: keyid "+key.getKey()+" is not the id of "+key.getKey());
+        }
     }
 
     @Override
@@ -781,7 +872,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
             }
 
             if (rel.isBlocked()) {
-                setRelationship(myId, clientId, rel.getUnblockState(), rel.getUnblockState(), true);
+                String unblockState = rel.getUnblockState();
+                if (!TalkRelationship.isValidState(unblockState)) {
+                    LOG.warn("unblockClient "+clientId+", invalid unblockState '"+unblockState+"', setting to state to 'none'");
+                    unblockState = TalkRelationship.STATE_NONE;
+                }
+                setRelationship(myId, clientId, unblockState, unblockState, true);
                 return;
             } else {
                 throw new RuntimeException("You have not blocked the client with id '" + clientId + "'");
@@ -1325,10 +1421,15 @@ public class TalkRpcHandler implements ITalkRpcServer {
             String clientId = mConnection.getClientId();
             TalkDelivery delivery = mDatabase.findDelivery(messageId, recipientId);
             if (delivery != null) {
-                // abort outgoing delivery if we are the actual sender
                 if (delivery.getSenderId().equals(clientId)) {
                     setDeliveryState(delivery, newState, false, true);
                 } else {
+                    // TODO: remove this fix in 2015 or after next forced update
+                    // temporary fix for bug in iOS-Client 2.2.12
+                    if (TalkDelivery.STATE_ABORTED_ACKNOWLEDGED.equals(newState)) {
+                        return inDeliveryReject(messageId, "no key or private key not found");
+                    }
+                    // end of fix
                     throw new RuntimeException("you are not the sender");
                 }
                 TalkDelivery result = new TalkDelivery();
@@ -1343,27 +1444,107 @@ public class TalkRpcHandler implements ITalkRpcServer {
     @Override
     public TalkDelivery outDeliveryAbort(String messageId, String recipientId) {
         requireIdentification(true);
-        logCall("deliveryAbort(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
+        logCall("outDeliveryAbort(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
         return deliverySenderChangeState(messageId, recipientId, TalkDelivery.STATE_ABORTED_ACKNOWLEDGED);
     }
 
     @Override
+    public void outDeliveryUnknown(String messageId, String recipientId) {
+        requireIdentification(true);
+        logCall("outDeliveryUnknown(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
+        synchronized (mServer.idLock(messageId)) {
+            String clientId = mConnection.getClientId();
+            TalkDelivery delivery = mDatabase.findDelivery(messageId, recipientId);
+            if (delivery != null) {
+                if (delivery.getSenderId().equals(clientId)) {
+                    // make sure the delivery will be set to a good possibly final state and the clients won't be bothered again
+                    String finalAttachmentState = TalkDelivery.findNextUnknownState(TalkDelivery.nextUnknownOutAttachmentState, delivery.getAttachmentState());
+                    boolean changed = false;
+                    if (!finalAttachmentState.equals(delivery.getAttachmentState())) {
+                        LOG.debug("outDeliveryUnknown: setting delivery from state=" + delivery.getState() + ", attachmentState=" + delivery.getAttachmentState() + " to finalAttachmentState=" + finalAttachmentState);
+                        delivery.setAttachmentState(finalAttachmentState);
+                        delivery.setTimeChanged(new Date());
+                        mDatabase.saveDelivery(delivery);
+                        mServer.getDeliveryAgent().requestDelivery(delivery.getReceiverId(), false);
+                        changed = true;
+                    }
+                    String nextGoodState = TalkDelivery.findNextUnknownState(TalkDelivery.nextUnknownOutState, delivery.getState());
+                    if (!nextGoodState.equals(delivery.getState())) {
+                        LOG.debug("outDeliveryUnknown: setting delivery from state="+delivery.getState()+", attachmentState="+delivery.getAttachmentState()+" to nextGoodState="+nextGoodState);
+                        setDeliveryState(delivery, nextGoodState, false, false);
+                        changed = true;
+                    }
+                    if (!changed) {
+                        LOG.warn("outDeliveryUnknown: delivery already in suitable state="+delivery.getState()+", attachmentState="+delivery.getAttachmentState());
+                    }
+                } else {
+                    throw new RuntimeException("you are not the sender");
+                }
+            } else {
+                LOG.warn("no delivery found for message with id '" + messageId + "' for recipient with id '" + recipientId + "', probably already also deleted on server");
+            }
+        }
+    }
+
+    @Override
+    public void inDeliveryUnknown(String messageId) {
+        requireIdentification(true);
+        logCall("inDeliveryUnknown(messageId: '" + messageId);
+        synchronized (mServer.idLock(messageId)) {
+            String clientId = mConnection.getClientId();
+            TalkDelivery delivery = mDatabase.findDelivery(messageId, clientId);
+            if (delivery != null) {
+                // make sure the delivery will be set to a good possibly final state and the clients won't be bothered again
+                boolean changed = false;
+
+                String finalAttachmentState = TalkDelivery.findNextUnknownState(TalkDelivery.nextUnknownInAttachmentState, delivery.getAttachmentState());
+                 if (!finalAttachmentState.equals(delivery.getAttachmentState())) {
+                    LOG.debug("inDeliveryUnknown: setting delivery from state=" + delivery.getState() + ", attachmentState=" + delivery.getAttachmentState() + " to finalAttachmentState=" + finalAttachmentState);
+                    delivery.setAttachmentState(finalAttachmentState);
+                    delivery.setTimeChanged(new Date());
+                    mDatabase.saveDelivery(delivery);
+                    mServer.getDeliveryAgent().requestDelivery(delivery.getSenderId(), false);
+                    changed = true;
+                 }
+                
+                // note: there are currently no states in nextUnknownInState,
+                // so the following body in the next if-statement
+                // currently should never be executed and is in here
+                // for symmetry with the out-side code only and in
+                // case we might have such states in the future.
+                String nextGoodState = TalkDelivery.findNextUnknownState(TalkDelivery.nextUnknownInState, delivery.getState());
+                if (!nextGoodState.equals(delivery.getState())) {
+                    LOG.debug("inDeliveryUnknown: setting delivery from state="+delivery.getState()+", attachmentState="+delivery.getAttachmentState()+" to nextGoodState="+nextGoodState);
+                    setDeliveryState(delivery, nextGoodState, false, false);
+                    changed = true;
+                }
+                if (!changed) {
+                    LOG.warn("inDeliveryUnknown: delivery already in suitable state="+delivery.getState()+", attachmentState="+delivery.getAttachmentState());
+                }
+            } else {
+                LOG.warn("no delivery found for message with id '" + messageId + "' for recipient with id '" + clientId + "', probably already also deleted on server");
+            }
+        }
+    }
+
+
+    @Override
     public TalkDelivery outDeliveryAcknowledgeRejected(String messageId, String recipientId) {
         requireIdentification(true);
-        logCall("deliveryAbort(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
+        logCall("outDeliveryAcknowledgeRejected(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
         return deliverySenderChangeState(messageId, recipientId, TalkDelivery.STATE_REJECTED_ACKNOWLEDGED);
     }
     @Override
     public TalkDelivery outDeliveryAcknowledgeFailed(String messageId, String recipientId) {
         requireIdentification(true);
-        logCall("deliveryAbort(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
+        logCall("outDeliveryAcknowledgeFailed(messageId: '" + messageId + "', recipientId: '" + recipientId + "'");
         return deliverySenderChangeState(messageId, recipientId, TalkDelivery.STATE_FAILED_ACKNOWLEDGED);
     }
 
     @Override
     public TalkDelivery inDeliveryReject(String messageId, String reason) {
         requireIdentification(true);
-        logCall("deliveryReject(messageId: '" + messageId+", reason:"+reason);
+        logCall("inDeliveryReject(messageId: '" + messageId+", reason:"+reason);
         synchronized (mServer.idLock(messageId)) {
             String clientId = mConnection.getClientId();
             TalkDelivery delivery = mDatabase.findDelivery(messageId, clientId);
@@ -1814,35 +1995,43 @@ public class TalkRpcHandler implements ITalkRpcServer {
         final String clientId = mConnection.getClientId();
         logCall("processFileDownloadMessage(fileId: '" + fileId + "') for client "+clientId + ", nextState='"+nextState+"'");
 
-        List<TalkMessage> messages = mDatabase.findMessagesWithAttachmentFileId(fileId);
-        if (messages.isEmpty()) {
-            throw new RuntimeException("No message found with file id "+fileId);
-        }
-        if (messages.size() > 1) {
-            LOG.error("Multiple messages ("+messages.size()+") found with file id " + fileId);
-        }
-        for (TalkMessage message : messages) {
-            if (clientId.equals(message.getSenderId())) {
-                throw new RuntimeException("Sender must not mess with download, messageId="+message.getMessageId());
+        TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("deliveryRequest-"+clientId);
+        try {
+            lock.lock("processFileDownloadMessage");
+            List<TalkMessage> messages = mDatabase.findMessagesWithAttachmentFileId(fileId);
+            if (messages.isEmpty()) {
+                throw new RuntimeException("No message found with file id "+fileId);
             }
-            synchronized (mServer.idLock(message.getMessageId())) {
-                TalkDelivery delivery = mDatabase.findDelivery(message.getMessageId(), clientId);
-                if (delivery != null) {
-                    LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (download), messageId="+message.getMessageId()+", delivery="+delivery.getId());
+            if (messages.size() > 1) {
+                LOG.error("Multiple messages ("+messages.size()+") found with file id " + fileId);
+            }
+            for (TalkMessage message : messages) {
+                if (clientId.equals(message.getSenderId())) {
+                    throw new RuntimeException("Sender must not mess with download, messageId="+message.getMessageId());
+                }
+                synchronized (mServer.idLock(message.getMessageId())) {
+                    TalkDelivery delivery = mDatabase.findDelivery(message.getMessageId(), clientId);
+                    if (delivery != null) {
+                        LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (download), messageId="+message.getMessageId()+", delivery="+delivery.getId());
 
-                    if (!delivery.nextAttachmentStateAllowed(nextState)) {
-                        throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                        if (!delivery.nextAttachmentStateAllowed(nextState)) {
+                            throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                        }
+                        delivery.setAttachmentState(nextState);
+                        delivery.setTimeChanged(new Date());
+                        mDatabase.saveDelivery(delivery);
+                        mServer.getDeliveryAgent().requestDelivery(delivery.getSenderId(), false);
+                    } else {
+                        throw new RuntimeException("delivery not found, messageId="+message.getMessageId());
                     }
-                    delivery.setAttachmentState(nextState);
-                    delivery.setTimeChanged(new Date());
-                    mDatabase.saveDelivery(delivery);
-                    mServer.getDeliveryAgent().requestDelivery(delivery.getSenderId(), false);
-                } else {
-                    throw new RuntimeException("delivery not found, messageId="+message.getMessageId());
                 }
             }
+            return nextState;
+        } catch (InterruptedException e) {
+            throw new RuntimeException("processFileDownloadMessage ",e);
+        } finally {
+            lock.unlock();
         }
-        return nextState;
     }
 
     //------ sender attachment state indication methods
@@ -1910,38 +2099,54 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (messages.isEmpty()) {
             throw new RuntimeException("No message found with file id "+fileId);
         }
-        for (TalkMessage message : messages) {
-            if (clientId.equals(message.getSenderId())) {
-                synchronized (mServer.idLock(message.getMessageId())) {
-                    message.setAttachmentUploadStarted(new Date());
-                    mDatabase.saveMessage(message);
-                    List<TalkDelivery> deliveries = mDatabase.findDeliveriesForMessage(message.getMessageId());
-                    for (TalkDelivery delivery : deliveries) {
-                        // for some calls we update only a specific delivery, while for other calls we update only the delivery with the proper receiverId
-                        if (receiverId == null || delivery.getReceiverId().equals(receiverId)) {
-                            LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (upload), messageId="+message.getMessageId()+", delivery="+delivery.getId());
 
-                            if (TalkDelivery.ATTACHMENT_STATE_RECEIVED.equals(delivery.getAttachmentState()) &&
-                                    TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState)) {
-                                LOG.info("AttachmentState already 'received', ignoring next state 'uploaded' (download) returning state 'received', messageId="+message.getMessageId()+", delivery="+delivery.getId());
-                                return delivery.getAttachmentState();
-                            }
+        String result = nextState;
+        TalkServer.NonReentrantLock lock = mServer.idLockNonReentrant("deliveryRequest-"+clientId);
+        try {
+            lock.lock("processFileUploadMessage");
+            for (TalkMessage message : messages) {
+                if (clientId.equals(message.getSenderId())) {
+                    synchronized (mServer.idLock(message.getMessageId())) {
+                        message.setAttachmentUploadStarted(new Date());
+                        mDatabase.saveMessage(message);
+                        List<TalkDelivery> deliveries = mDatabase.findDeliveriesForMessage(message.getMessageId());
 
-                            if (!delivery.nextAttachmentStateAllowed(nextState)) {
-                                throw new RuntimeException("next state '"+nextState+"'not allowed, delivery already in state '"+delivery.getAttachmentState()+"', messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                        // update all concerned deliveries
+                        for (TalkDelivery delivery : deliveries) {
+                            // for some calls we update only a specific delivery, while for other calls we update only the delivery with the proper receiverId
+                            if (receiverId == null || delivery.getReceiverId().equals(receiverId)) {
+                                LOG.info("AttachmentState '"+delivery.getAttachmentState()+"' --> '"+nextState+"' (upload), messageId="+message.getMessageId()+", delivery="+delivery.getId());
+
+                                if ((TalkDelivery.ATTACHMENT_STATE_RECEIVED.equals(delivery.getAttachmentState()) ||
+                                        TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED.equals(delivery.getAttachmentState()))
+                                        && TalkDelivery.ATTACHMENT_STATE_UPLOADED.equals(nextState)) {
+                                    LOG.info("AttachmentState already '"+delivery.getAttachmentState()+"', ignoring next state 'uploaded' returning current state, messageId="+message.getMessageId()+", delivery="+delivery.getId());
+                                    result = delivery.getAttachmentState();
+                                    continue;
+                                }
+
+                                if (!delivery.nextAttachmentStateAllowed(nextState)) {
+                                    LOG.warn("next state '" + nextState + "'not allowed, delivery already in state '" + delivery.getAttachmentState() + "', messageId=" + message.getMessageId() + ", delivery=" + delivery.getId());
+                                    result = delivery.getAttachmentState();
+                                    continue;
+                                }
+                                delivery.setAttachmentState(nextState);
+                                delivery.setTimeChanged(message.getAttachmentUploadStarted());
+                                mDatabase.saveDelivery(delivery);
+                                mServer.getDeliveryAgent().requestDelivery(delivery.getReceiverId(), false);
                             }
-                            delivery.setAttachmentState(nextState);
-                            delivery.setTimeChanged(message.getAttachmentUploadStarted());
-                            mDatabase.saveDelivery(delivery);
-                            mServer.getDeliveryAgent().requestDelivery(delivery.getReceiverId(), false);
                         }
                     }
+                } else {
+                    throw new RuntimeException("you are not the sender of this file with messageId="+message.getMessageId());
                 }
-            } else {
-                throw new RuntimeException("you are not the sender of this file with messageId="+message.getMessageId());
             }
+            return result;
+        } catch (InterruptedException e) {
+            throw new RuntimeException("processFileDownloadMessage ",e);
+        } finally {
+            lock.unlock();
         }
-        return nextState;
     }
 
 
@@ -2201,6 +2406,30 @@ public class TalkRpcHandler implements ITalkRpcServer {
         String clientId = mConnection.getClientId();
 
         for (String groupId : groupIds) {
+            TalkGroupMember membership = mDatabase.findGroupMemberForClient(groupId, clientId);
+            if (membership != null && (membership.isInvited() || membership.isMember())) {
+                result.add(true);
+            } else {
+                result.add(false);
+            }
+        }
+
+        return result.toArray(new Boolean[result.size()]);
+    }
+
+    @Override
+    public Boolean[] areMembersOfGroup(String groupId, String[] clientIds) {
+        requireIdentification(true);
+        ArrayList<Boolean> result = new ArrayList<Boolean>();
+        logCall("areMembersOfGroup(groupId: '"+groupId+"clientIds '" + Arrays.toString(clientIds) + "'");
+
+        String myClientId = mConnection.getClientId();
+        TalkGroupMember myMembership = mDatabase.findGroupMemberForClient(groupId, myClientId);
+        if (!(myMembership != null && (myMembership.isInvited() || myMembership.isMember()))) {
+            throw new RuntimeException("not allowed, you are not a member of this group");
+        }
+
+        for (String clientId : clientIds) {
             TalkGroupMember membership = mDatabase.findGroupMemberForClient(groupId, clientId);
             if (membership != null && (membership.isInvited() || membership.isMember())) {
                 result.add(true);

@@ -15,18 +15,22 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.activity.QrCodeGeneratingActivity;
-import com.hoccer.xo.android.activity.QrScannerActivity;
+import com.hoccer.xo.android.activity.DeviceContactsSelectionActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class PairingFragment extends XoFragment implements View.OnClickListener, IXoPairingListener {
+
+    private static final Logger LOG = Logger.getLogger(PairingFragment.class);
 
     TextView mTokenMessage;
     TextView mTokenText;
@@ -45,7 +49,6 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
 
     String mActiveToken;
     String mTokenFromEmail;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,9 +90,6 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
 
         mQrShowButton = (Button) view.findViewById(R.id.pairing_show_qr);
         mQrShowButton.setOnClickListener(this);
-
-        getXoClient().registerPairingListener(this);
-
         return view;
     }
 
@@ -166,7 +166,6 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     @Override
     public void onDestroy() {
         super.onDestroy();
-        getXoClient().unregisterPairingListener(this);
     }
 
     @Override
@@ -181,11 +180,17 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         }
         if (v == mTokenSendSms) {
             LOG.debug("onClick(smsSend)");
-            getXoActivity().composeInviteSms(mTokenText.getText().toString());
+            Intent addressBook = new Intent(getActivity(), DeviceContactsSelectionActivity.class);
+            addressBook.putExtra(DeviceContactsSelectionFragment.EXTRA_IS_SMS_INVITATION, true);
+            addressBook.putExtra(DeviceContactsSelectionFragment.EXTRA_TOKEN, mTokenText.getText().toString());
+            getActivity().startActivity(addressBook);
         }
         if (v == mTokenSendEmail) {
             LOG.debug("onClick(smsSend)");
-            getXoActivity().composeInviteEmail(mTokenText.getText().toString());
+            Intent addressBook = new Intent(getActivity(), DeviceContactsSelectionActivity.class);
+            addressBook.putExtra(DeviceContactsSelectionFragment.EXTRA_IS_SMS_INVITATION, false);
+            addressBook.putExtra(DeviceContactsSelectionFragment.EXTRA_TOKEN, mTokenText.getText().toString());
+            getActivity().startActivity(addressBook);
         }
     }
 
@@ -223,10 +228,10 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
         mActiveToken = token;
         mTokenEdit.setEnabled(false);
         mTokenPairButton.setEnabled(false);
-        getBackgroundExecutor().execute(new Runnable() {
+        getXoActivity().getBackgroundExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                getXoClient().performTokenPairing(token);
+                getXoClient().performTokenPairing(token, PairingFragment.this);
             }
         });
     }
@@ -235,10 +240,11 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onTokenPairingSucceeded(String token) {
         LOG.debug("onTokenPairingSucceeded()");
         if (token.equals(mActiveToken)) {
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    getXoActivity().finish();
+                    Toast.makeText(getXoActivity(), R.string.pairing_success, Toast.LENGTH_LONG).show();
+                    getActivity().finish();
                 }
             });
         }
@@ -248,7 +254,7 @@ public class PairingFragment extends XoFragment implements View.OnClickListener,
     public void onTokenPairingFailed(String token) {
         LOG.debug("onTokenPairingFailed()");
         if (token.equals(mActiveToken)) {
-            runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     showPairingFailure();

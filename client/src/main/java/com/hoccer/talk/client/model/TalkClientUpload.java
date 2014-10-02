@@ -65,7 +65,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 return EnumSet.of(UPLOADING);
             }
         },
-        COMPLETE, FAILED;
+        COMPLETE,
+        FAILED;
 
         public Set<State> possibleFollowUps() {
             return EnumSet.noneOf(State.class);
@@ -202,6 +203,10 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     public void cancel(XoTransferAgent agent) {
         mTransferAgent = agent;
         switchState(State.PAUSED);
+    }
+
+    @Override
+    public void hold(XoTransferAgent agent) {
     }
 
     /**********************************************************************************************/
@@ -370,7 +375,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private void doUploadingAction() {
-        String filename = this.dataFile;
+        String filename = getContentDataUrl();
         if (filename == null || filename.isEmpty()) {
             LOG.error("filename was empty");
             switchState(State.PAUSED);
@@ -460,6 +465,15 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private void doFailedAction() {
         deleteTemporaryFile();
         mTransferAgent.onUploadFailed(this);
+    }
+
+    private void doOnHoldAction() {
+        if (mUploadRequest != null) {
+            mUploadRequest.abort();
+            mUploadRequest = null;
+            LOG.debug("aborted current Upload request. Upload can still resume.");
+        }
+        mTransferAgent.onUploadStateChanged(this);
     }
 
     private boolean isUploadComplete(Header checkRangeHeader) {
@@ -568,6 +582,16 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     /**********************************************************************************************/
     /********************************* XoTransfer implementation **********************************/
     /**********************************************************************************************/
+    @Override
+    public int getTransferId() {
+        return -1 * getClientUploadId();
+    }
+
+    @Override
+    public int getUploadOrDownloadId() {
+        return getClientUploadId();
+    }
+
     /**
      * ******************************************************************************************
      */
@@ -651,6 +675,10 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         return null;
     }
 
+    public void setContentDataUrl(String dataUrl) {
+        dataFile = dataUrl;
+    }
+
     @Override
     public int getContentLength() {
         return dataLength;
@@ -674,8 +702,17 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         return fileName;
     }
 
+    @Override
     public String getDataFile() {
-        return dataFile;
+        // TODO fix up this field on db upgrade
+        if (dataFile != null) {
+            if (dataFile.startsWith("file://")) {
+                return dataFile.substring(7);
+            } else {
+                return dataFile;
+            }
+        }
+        return null;
     }
 
     public String getDownloadUrl() {

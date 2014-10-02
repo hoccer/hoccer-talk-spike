@@ -1,36 +1,39 @@
 package com.hoccer.xo.android.view.model;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
+import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-public class SmsContactItem extends BaseContactItem {
+import java.util.Date;
+
+public class SmsContactItem extends BaseContactItem implements SearchAdapter.Searchable{
 
     private static final Logger LOG = Logger.getLogger(SmsContactItem.class);
 
+    private Context mContext;
     private TalkClientSmsToken mSmsToken;
-
     private String mName;
-
     private String mPhoto;
 
-    public SmsContactItem(XoActivity activity, TalkClientSmsToken smsToken) {
-        super(activity);
+    public SmsContactItem(TalkClientSmsToken smsToken, Context context) {
         mSmsToken = smsToken;
+        mContext = context;
         update();
     }
 
     @Override
     public void update() {
-        ContentResolver resolver = mXoActivity.getContentResolver();
+        ContentResolver resolver = mContext.getContentResolver();
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(mSmsToken.getSender()));
 
         mName = mSmsToken.getSender();
@@ -56,7 +59,7 @@ public class SmsContactItem extends BaseContactItem {
     }
 
     @Override
-    protected View configure(View view) {
+    protected View configure(Context context, View view) {
         LOG.debug("updateToken(" + mSmsToken.getSmsTokenId() + ")");
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         TextView nameView = (TextView) view.findViewById(R.id.contact_name);
@@ -81,8 +84,17 @@ public class SmsContactItem extends BaseContactItem {
     }
 
     @Override
-    public long getTimeStamp() {
+    public long getMessageTimeStamp() {
         return 0;
     }
 
+    @Override
+    public long getContactCreationTimeStamp() {
+        return 0;
+    }
+
+    @Override
+    public boolean matches(String query) {
+        return mName.contains(query);
+    }
 }

@@ -18,28 +18,7 @@ public interface IXoClientHost {
     public IXoClientDatabaseBackend getDatabaseBackend();
     public WebSocketClientFactory   getWebSocketFactory();
     public Thread.UncaughtExceptionHandler getUncaughtExceptionHandler();
-    public String getServerUri();
     public InputStream openInputStreamForUrl(String url) throws IOException;
-
-    public boolean isSupportModeEnabled();
-    public String getSupportTag();
-
-    public boolean getUseBsonProtocol();
-    public String getBsonProtocolString();
-    public String getJsonProtocolString();
-    public int getTransferThreads();
-    public int getConnectTimeout();
-    public int getIdleTimeout();
-
-    public boolean getKeepAliveEnabled();
-    public int getKeepAliveInterval();
-    public int getConnectionIdleTimeout();
-
-    public float getReconnectBackoffFixedDelay();
-    public float getReconnectBackoffVariableFactor();
-    public float getReconnectBackoffVariableMaximum();
-
-    public String getUrlScheme();
 
     public String getClientName();
     public String getClientLanguage();
@@ -53,8 +32,4 @@ public interface IXoClientHost {
     public String getSystemName();
     public String getSystemLanguage();
     public String getSystemVersion();
-
-    public int getRSAKeysize();
-
-    public boolean isSendDeliveryConfirmationEnabled();
 }

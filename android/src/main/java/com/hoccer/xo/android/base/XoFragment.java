@@ -1,16 +1,15 @@
 package com.hoccer.xo.android.base;
 
+import android.app.Activity;
+import android.support.v4.app.Fragment;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.service.IXoClientService;
-
 import org.apache.log4j.Logger;
-
-import android.app.Activity;
-import android.support.v4.app.Fragment;
 
 import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,44 +22,20 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public abstract class XoFragment extends Fragment implements IXoFragment {
 
-    protected Logger LOG = null;
+    private static final Logger LOG = Logger.getLogger(XoFragment.class);
 
     private XoActivity mActivity;
-
-    public XoFragment() {
-        LOG = Logger.getLogger(getClass());
-    }
-
-    public XoClient getXoClient() {
-        return XoApplication.getXoClient();
-    }
-
-    public XoSoundPool getXoSoundPool() {
-        return XoApplication.getXoSoundPool();
-    }
-
-    public File getAvatarDirectory() {
-        return new File(mActivity.getFilesDir(), "avatars");
-    }
-
-    public ScheduledExecutorService getBackgroundExecutor() {
-        return mActivity.getBackgroundExecutor();
-    }
 
     public XoActivity getXoActivity() {
         return mActivity;
     }
 
+    public XoAndroidClient getXoClient() {
+        return XoApplication.getXoClient();
+    }
+
     public XoClientDatabase getXoDatabase() {
         return mActivity.getXoDatabase();
-    }
-
-    public IXoClientService getXoService() {
-        return mActivity.getXoService();
-    }
-
-    public void runOnUiThread(Runnable runnable) {
-        mActivity.runOnUiThread(runnable);
     }
 
     @Override
@@ -88,8 +63,6 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
         }
     }
 
-
-
     public void onServiceConnected() {
     }
 
@@ -101,5 +74,4 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
 
     public void onAvatarSelected(IContentObject contentObject) {
     }
-
 }

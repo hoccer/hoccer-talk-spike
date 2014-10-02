@@ -1,14 +1,13 @@
 package com.hoccer.xo.android.base;
 
-import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.xo.android.XoApplication;
-
-import org.apache.log4j.Logger;
-
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.widget.BaseAdapter;
+import com.hoccer.talk.client.XoClient;
+import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.xo.android.XoApplication;
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
@@ -35,39 +34,50 @@ public abstract class XoAdapter extends BaseAdapter {
 
     private static final long RATE_LIMIT_MSECS = 1000;
 
-    protected final XoActivity mActivity;
+    @Nullable
+    protected XoActivity mActivity = null;
 
-    protected final XoClientDatabase mDatabase;
+    @Nullable
+    protected XoClientDatabase mDatabase = null;
 
-    protected final Resources mResources;
+    @Nullable
+    protected Resources mResources = null;
 
-    protected final LayoutInflater mInflater;
+    @Nullable
+    protected LayoutInflater mInflater = null;
 
-    private final ScheduledExecutorService mExecutor;
+    @Nullable
+    private ScheduledExecutorService mExecutor = null;
+
+    @Nullable
+    private ScheduledFuture<?> mNotifyFuture = null;
 
     protected Logger LOG = null;
 
-    private boolean mActive = false;
-
-    private boolean mNeedsReload = false;
-
     private AdapterReloadListener mAdapterReloadListener;
 
-    private ScheduledFuture<?> mNotifyFuture;
-
+    private boolean mActive = false;
+    private boolean mNeedsReload = false;
     private long mNotifyTimestamp;
 
     public XoAdapter(XoActivity activity) {
         LOG = Logger.getLogger(getClass());
-        mActivity = activity;
-        mDatabase = mActivity.getXoDatabase();
-        mInflater = mActivity.getLayoutInflater();
-        mResources = mActivity.getResources();
-        mExecutor = mActivity.getBackgroundExecutor();
+
+        if (activity != null) {
+            mActivity = activity;
+            mDatabase = mActivity.getXoDatabase();
+            mInflater = mActivity.getLayoutInflater();
+            mResources = mActivity.getResources();
+            mExecutor = mActivity.getBackgroundExecutor();
+        } else {
+            throw new NullPointerException("Activity cannot be null.");
+        }
     }
 
     public void runOnUiThread(Runnable runnable) {
-        mActivity.runOnUiThread(runnable);
+        if (mActivity != null) {
+            mActivity.runOnUiThread(runnable);
+        }
     }
 
     public XoClient getXoClient() {
@@ -75,7 +85,10 @@ public abstract class XoAdapter extends BaseAdapter {
     }
 
     public File getAvatarDirectory() {
-        return new File(mActivity.getFilesDir(), "avatars");
+        if (mActivity != null) {
+            return new File(mActivity.getFilesDir(), "avatars");
+        }
+        return null;
     }
 
     public AdapterReloadListener getAdapterReloadListener() {
@@ -154,20 +167,23 @@ public abstract class XoAdapter extends BaseAdapter {
         }
         if (delta < RATE_LIMIT_MSECS) {
             long delay = RATE_LIMIT_MSECS - delta;
-            mNotifyFuture = mExecutor.schedule(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            mNotifyTimestamp = System.currentTimeMillis();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    XoAdapter.super.notifyDataSetChanged();
-                                }
-                            });
+
+            if (mExecutor != null) {
+                mNotifyFuture = mExecutor.schedule(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                mNotifyTimestamp = System.currentTimeMillis();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        XoAdapter.super.notifyDataSetChanged();
+                                    }
+                                });
+                            }
                         }
-                    }
-                    , delay, TimeUnit.MILLISECONDS);
+                        , delay, TimeUnit.MILLISECONDS);
+            }
         } else {
             mNotifyTimestamp = System.currentTimeMillis();
             runOnUiThread(new Runnable() {

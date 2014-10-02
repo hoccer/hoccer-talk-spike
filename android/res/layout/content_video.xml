@@ -1,40 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/rl_root"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:gravity="left">
+  android:id="@+id/rl_root"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
 
-    <RelativeLayout
-            android:id="@+id/rl_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:background="@android:color/transparent"
-            android:gravity="center">
+  <ImageView
+    android:id="@+id/iv_picture"
+    android:src="@drawable/ic_light_content_picture"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:scaleType="fitCenter"
+    android:layout_alignParentBottom="true"
+    android:adjustViewBounds="true"/>
 
-        <ImageView
-                android:id="@+id/iv_video_preview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:scaleType="fitCenter"
-                android:layout_alignParentBottom="true"
-                android:adjustViewBounds="true"
-                android:visibility="gone"/>
+  <ImageButton
+    android:id="@+id/ib_play_button"
+    android:layout_width="@dimen/default_attachment_icon_dim"
+    android:layout_height="@dimen/default_attachment_icon_dim"
+    android:scaleType="fitXY"
+    android:layout_centerVertical="true"
+    android:layout_centerInParent="true"
+    android:gravity="center"
+    android:background="@android:color/transparent"/>
 
-        <ImageButton
-                android:id="@+id/ib_content_open"
-                android:src="@drawable/ic_dark_video"
-                android:layout_width="@dimen/default_attachment_icon_dim"
-                android:layout_height="@dimen/default_attachment_icon_dim"
-                android:scaleType="fitXY"
-                android:layout_centerVertical="true"
-                android:layout_centerInParent="true"
-                android:gravity="center"
-                android:background="@android:color/transparent"
-                android:visibility="visible"/>
-    </RelativeLayout>
+  <ImageView android:id="@+id/iv_picture_overlay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
 
 </RelativeLayout>

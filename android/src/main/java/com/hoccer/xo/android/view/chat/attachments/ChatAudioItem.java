@@ -1,26 +1,42 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
-
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.net.Uri;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.content.MediaMetaData;
+import com.hoccer.xo.android.content.MediaPlaylist;
+import com.hoccer.xo.android.content.SingleItemPlaylist;
+import com.hoccer.xo.android.service.MediaPlayerService;
+import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
+import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.view.chat.ChatMessageItem;
+import com.hoccer.xo.release.R;
+
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 
 public class ChatAudioItem extends ChatMessageItem {
 
+    private ImageButton mPlayPauseButton;
+    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
+    private IContentObject mAudioContentObject;
+    private boolean mIsPlayable = false;
+
     public ChatAudioItem(Context context, TalkClientMessage message) {
         super(context, message);
+        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(context);
     }
 
     @Override
@@ -39,62 +55,139 @@ public class ChatAudioItem extends ChatMessageItem {
         super.displayAttachment(contentObject);
 
         // add view lazily
-        if (mContentWrapper.getChildCount() == 0) {
-            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            LinearLayout audioLayout = (LinearLayout) inflater.inflate(R.layout.content_audio, null);
-            mContentWrapper.addView(audioLayout);
+        if (mContentWrapper.getChildCount() == 0)
+        {
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+            View v =  inflater.inflate(R.layout.content_audio, null);
+            mContentWrapper.addView(v);
         }
-        TextView captionTextView = (TextView) mContentWrapper.findViewById(R.id.tv_content_audio_caption);
-        TextView fileNameTextView = (TextView) mContentWrapper.findViewById(R.id.tv_content_audio_name);
-        ImageButton playButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_content_audio_play);
+        LinearLayout audioLayout = (LinearLayout) mContentWrapper.getChildAt(0);
+        TextView captionTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_caption);
+        TextView fileNameTextView = (TextView) audioLayout.findViewById(R.id.tv_content_audio_name);
+        mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
+        setPlayButton();
 
-        int textColor = -1;
-        int iconId = -1;
-        if (mMessage.isIncoming()) {
-            textColor = Color.BLACK;
-            iconId = R.drawable.ic_dark_music;
+        if(mMessage.isIncoming()) {
+            captionTextView.setTextColor(mContext.getResources().getColor(R.color.xo_incoming_message_textColor));
+            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_incoming_message_textColor));
         } else {
-            textColor = Color.WHITE;
-            iconId = R.drawable.ic_light_music;
+            captionTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
+            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
         }
 
-        captionTextView.setTextColor(textColor);
-        fileNameTextView.setTextColor(textColor);
-        playButton.setImageResource(iconId);
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(contentObject.getContentDataUrl());
+        String displayName;
+        if (metaData.getTitle() != null) {
+            displayName = metaData.getTitle().trim();
 
-        String extension = "";
-        try {
-            String dataUrl = contentObject.getContentDataUrl();
-            if (dataUrl != null) {
-                extension = dataUrl.substring(dataUrl.lastIndexOf("."), dataUrl.length());
+            if (metaData.getArtist() != null) {
+                displayName = metaData.getArtist().trim() + " - " + displayName;
             }
-        } catch (StringIndexOutOfBoundsException e) {
-            LOG.error("ChatAudioItem: error while extracting the file extension. Probably there is none.");
+        } else {
+            try {
+                URI fileUri = new URI(contentObject.getContentDataUrl());
+                File contentFile = new File(fileUri);
+                displayName = contentFile.getName();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+                displayName = contentObject.getFileName();
+            }
         }
 
-        String displayName = "";
-        String filename = contentObject.getFileName();
-        if (filename != null) {
-            displayName = filename + extension;
-        }
         fileNameTextView.setText(displayName);
 
-        playButton.setOnClickListener(new View.OnClickListener() {
+        mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
+        mPlayPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (contentObject.isContentAvailable()) {
-                    String url = contentObject.getContentUrl();
-                    if (url == null) {
-                        url = contentObject.getContentDataUrl();
+                if (mIsPlayable) {
+                    if (isActive()) {
+                        pausePlaying();
+                    } else {
+                        startPlaying();
                     }
-                    if (url != null) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setDataAndType(Uri.parse(url), "audio/*");
-                        XoActivity activity = (XoActivity) view.getContext();
-                        activity.startExternalActivity(intent);
-                    }
+                } else {
+                    AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
+                    alertDialog.setMessage(mContext.getResources().getString(R.string.content_not_supported_audio_msg));
+                    alertDialog.setTitle(mContext.getString(R.string.content_not_supported_audio_title));
+                    DialogInterface.OnClickListener nullListener = null;
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", nullListener);
+                    alertDialog.show();
                 }
             }
         });
+
+        mAudioContentObject = contentObject;
+        mIsPlayable = mAudioContentObject != null;
+        updatePlayPauseView();
+
+        initializeMediaPlayerService();
+    }
+
+    @Override
+    public void detachView() {
+        mMediaPlayerServiceConnector.disconnect();
+    }
+
+    private void pausePlaying() {
+        if (mMediaPlayerServiceConnector.isConnected()) {
+            mMediaPlayerServiceConnector.getService().pause();
+        }
+    }
+
+    private void startPlaying() {
+        if (mMediaPlayerServiceConnector.isConnected()) {
+            MediaPlayerService service = mMediaPlayerServiceConnector.getService();
+            MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAudioContentObject);
+            service.playItemInPlaylist(mAudioContentObject, playlist);
+        }
+    }
+
+    private void setPlayButton(){
+        mPlayPauseButton.setBackgroundDrawable(null);
+        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_play, mMessage.isIncoming()));
+    }
+
+    private void setPauseButton(){
+        mPlayPauseButton.setBackgroundDrawable(null);
+        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_pause, mMessage.isIncoming()));
+    }
+
+    public void updatePlayPauseView() {
+        if(mPlayPauseButton != null && mMessage != null) {
+            if (isActive()) {
+                setPauseButton();
+            } else {
+                setPlayButton();
+            }
+        }
+    }
+
+    public boolean isActive() {
+        boolean isActive = false;
+        if (mAudioContentObject != null && mMediaPlayerServiceConnector.isConnected()) {
+            MediaPlayerService service = mMediaPlayerServiceConnector.getService();
+            isActive = !service.isPaused() && !service.isStopped() && mAudioContentObject.equals(service.getCurrentMediaItem());
+        }
+
+        return isActive;
+    }
+
+    private void initializeMediaPlayerService(){
+        mMediaPlayerServiceConnector.connect(
+                IntentHelper.ACTION_PLAYER_STATE_CHANGED,
+                new MediaPlayerServiceConnector.Listener() {
+                    @Override
+                    public void onConnected(MediaPlayerService service) {
+                        updatePlayPauseView();
+                    }
+                    @Override
+                    public void onDisconnected() {
+                    }
+                    @Override
+                    public void onAction(String action, MediaPlayerService service) {
+                        updatePlayPauseView();
+                    }
+                });
     }
 }

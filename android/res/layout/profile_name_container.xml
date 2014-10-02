@@ -36,10 +36,11 @@
             android:inputType="text|textNoSuggestions"
             android:maxLength="25"
             android:visibility="gone"
-            />
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"/>
 
     <TextView
             android:id="@+id/tv_profile_name"
+            android:hint="@string/profile_name_hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tv_profile_name_text"
@@ -49,7 +50,6 @@
             android:maxLines="1"
             android:singleLine="true"
             android:layout_marginRight="45dp"
-            android:text="Max Mustermann"
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"/>
 
 

@@ -1,20 +1,22 @@
 package com.hoccer.xo.android.dialog;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.view.View;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.CheckedTextView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupManagementContactsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.fragment.GroupProfileCreationFragment;
 import com.hoccer.xo.release.R;
-
 import org.apache.log4j.Logger;
-
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.DialogInterface;
-import android.os.Bundle;
 
 import java.util.ArrayList;
 
@@ -27,20 +29,17 @@ public class GroupManageDialog extends DialogFragment {
     private ContactsAdapter mAdapter;
     private ArrayList<TalkClientContact> mContactsToInvite;
     private ArrayList<TalkClientContact> mContactsToKick;
+    private ArrayList<TalkClientContact> mCurrentContactsInGroup = new ArrayList<TalkClientContact>();
+    private boolean mCloneGroupContact = false;
 
-    public GroupManageDialog() {
+    public GroupManageDialog(TalkClientContact group, ArrayList<TalkClientContact> currentContactsInGroup, ArrayList<TalkClientContact> contactsFromNearbyToInvite, boolean cloneGroupContact) {
         super();
-
-        mContactsToInvite = new ArrayList();
-        mContactsToKick = new ArrayList();
-    }
-
-    public GroupManageDialog(TalkClientContact group) {
-        super();
-
         mGroup = group;
         mContactsToInvite = new ArrayList();
         mContactsToKick = new ArrayList();
+        mCurrentContactsInGroup.addAll(currentContactsInGroup);
+        mContactsToInvite.addAll(contactsFromNearbyToInvite);
+        mCloneGroupContact = cloneGroupContact;
     }
 
     @Override
@@ -53,7 +52,7 @@ public class GroupManageDialog extends DialogFragment {
             mAdapter.setFilter(new ContactsAdapter.Filter() {
                 @Override
                 public boolean shouldShow(TalkClientContact contact) {
-                    return contact.isClient() && (contact.isClientRelated() || contact.isEverRelated());
+                    return mCurrentContactsInGroup.contains(contact) || (contact.isClient() && (contact.isClientRelated() || contact.isEverRelated()));
                 }
             });
         }
@@ -116,11 +115,15 @@ public class GroupManageDialog extends DialogFragment {
     }
 
     private void updateMemberships() {
-        for (TalkClientContact contact : mContactsToInvite) {
-            ((XoActivity) getActivity()).getXoClient().inviteClientToGroup(mGroup.getGroupId(), contact.getClientId());
-        }
-        for (TalkClientContact contact : mContactsToKick) {
-            ((XoActivity) getActivity()).getXoClient().kickClientFromGroup(mGroup.getGroupId(), contact.getClientId());
+        if (mCloneGroupContact) {
+            ((GroupProfileCreationFragment) getTargetFragment()).updateContactList(mContactsToInvite);
+        } else {
+            for (TalkClientContact contact : mContactsToInvite) {
+                ((XoActivity) getActivity()).getXoClient().inviteClientToGroup(mGroup.getGroupId(), contact.getClientId());
+            }
+            for (TalkClientContact contact : mContactsToKick) {
+                ((XoActivity) getActivity()).getXoClient().kickClientFromGroup(mGroup.getGroupId(), contact.getClientId());
+            }
         }
     }
 

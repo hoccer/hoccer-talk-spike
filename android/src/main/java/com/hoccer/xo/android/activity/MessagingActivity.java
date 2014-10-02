@@ -1,40 +1,36 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.ActionBar;
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.view.Menu;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
-import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.base.XoActivity;
+import com.hoccer.xo.android.base.IMessagingFragmentManager;
+import com.hoccer.xo.android.base.IProfileFragmentManager;
+import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.fragment.CompositionFragment;
-import com.hoccer.xo.android.fragment.MessagingFragment;
+import com.hoccer.xo.android.fragment.*;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.release.R;
 
-import java.sql.SQLException;
 
-public class MessagingActivity extends XoActivity implements IXoContactListener {
+public class MessagingActivity extends XoActionbarActivity implements IMessagingFragmentManager, IProfileFragmentManager {
 
-    public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
+    public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
     ActionBar mActionBar;
 
-    MessagingFragment mMessagingFragment;
-    CompositionFragment mCompositionFragment;
+    Fragment mCurrentFragment;
 
-    TalkClientContact mContact;
     private IContentObject mClipboardAttachment;
-    private getContactIdInConversation m_checkIdReceiver;
 
     @Override
     protected int getLayoutResource() {
@@ -43,12 +39,11 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
 
     @Override
     protected int getMenuResource() {
-        return R.menu.fragment_messaging;
+        return -1;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
 
         // get action bar (for setting title)
@@ -57,131 +52,86 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
         // enable up navigation
         enableUpNavigation();
 
-        // get our primary fragment
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        mMessagingFragment = (MessagingFragment) fragmentManager.findFragmentById(R.id.activity_messaging_fragment);
-        mMessagingFragment.setRetainInstance(true);
-        mCompositionFragment = (CompositionFragment) fragmentManager.findFragmentById(R.id.activity_messaging_composer);
-        mCompositionFragment.setRetainInstance(true);
-
-        // register receiver for notification check
-        IntentFilter filter = new IntentFilter("com.hoccer.xo.android.activity.MessagingActivity$getContactIdInConversation");
-        filter.addAction("CHECK_ID_IN_CONVERSATION");
-        m_checkIdReceiver = new getContactIdInConversation();
-        registerReceiver(m_checkIdReceiver, filter);
+        // handle converse intent
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+            if (contactId == -1) {
+                LOG.error("invalid contact id");
+            } else {
+                showMessageFragment(contactId);
+            }
+        } else if (intent != null && intent.hasExtra(EXTRA_NEARBY_ARCHIVE)) {
+            showNearbyArchiveFragment();
+        } else {
+            LOG.error("Neither contact ID nor nearby-archive specified");
+        }
     }
 
     @Override
     protected void onResume() {
-        LOG.debug("onResume()");
         super.onResume();
-
-        Intent intent = getIntent();
-
-        // handle converse intent
-        if (intent != null && intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
-            int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
-            m_checkIdReceiver.setId(contactId);
-            if (contactId == -1) {
-                LOG.error("invalid contact id");
-            } else {
-                try {
-                    TalkClientContact contact = getXoDatabase().findClientContactById(contactId);
-                    if (contact != null) {
-                        setContact(contact);
-                    }
-                } catch (SQLException e) {
-                    LOG.error("sql error", e);
-                }
-            }
-        }
-        getXoClient().registerContactListener(this);
     }
 
     @Override
     protected void onPause() {
-        LOG.debug("onPause()");
         super.onPause();
-
-        getXoClient().unregisterContactListener(this);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        LOG.debug("onCreateOptionsMenu()");
-        boolean result = super.onCreateOptionsMenu(menu);
-
-        // select client/group profile entry for appropriate icon
-        if (mContact != null) {
-            MenuItem clientItem = menu.findItem(R.id.menu_profile_client);
-            clientItem.setVisible(mContact.isClient());
-            MenuItem groupItem = menu.findItem(R.id.menu_single_profile);
-            groupItem.setVisible(mContact.isGroup());
-        }
-
-        return result;
     }
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(m_checkIdReceiver);
         super.onDestroy();
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
-        switch (item.getItemId()) {
-            case R.id.menu_profile_client:
-            case R.id.menu_single_profile:
-                if (mContact != null) {
-                    showContactProfile(mContact);
-                }
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-        return true;
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
         IContentObject contentObject = messageItem.getContent();
-
-        if (contentObject.isContentAvailable()) {
-            mClipboardAttachment = contentObject;
-
-            PopupMenu popup = new PopupMenu(this, messageItemView);
-            popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
-            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-
-                public boolean onMenuItemClick(MenuItem item) {
-                    popupItemSelected(item);
-                    return true;
-                }
-            });
-
-            popup.show();
+        final int messageId = messageItem.getMessage().getClientMessageId();
+        final String messageText = messageItem.getText();
+        PopupMenu popup = new PopupMenu(this, messageItemView);
+        if (contentObject != null) {
+            if (contentObject.isContentAvailable()) {
+                mClipboardAttachment = contentObject;
+            }
         }
+        popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                popupItemSelected(item, messageId, messageText);
+                return true;
+            }
+        });
+        popup.show();
     }
 
-    public void popupItemSelected(MenuItem item) {
+    public void popupItemSelected(MenuItem item, int messageId, String text) {
         switch (item.getItemId()) {
-            case R.id.menu_copy_attachment:
-                Clipboard clipboard = Clipboard.get(this);
-                clipboard.storeAttachment(mClipboardAttachment);
-                mClipboardAttachment = null;
+            case R.id.menu_copy_message:
+                if (mClipboardAttachment != null) {
+                    Clipboard clipboard = Clipboard.get(this);
+                    clipboard.storeAttachment(mClipboardAttachment);
+                    mClipboardAttachment = null;
+                } else {
+                    ClipboardManager clipboardText = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("simple text", text);
+                    clipboardText.setPrimaryClip(clip);
+                }
+                break;
+            case R.id.menu_delete_message:
+                getXoClient().deleteMessage(messageId);
+                break;
         }
     }
 
     public void setActionBarText(TalkClientContact contact) {
         String title;
-        if (contact.isGroup()) {
-            if (contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
-                title = getResources().getString(R.string.nearby_text);
-            } else {
-                title = contact.getName();
-            }
+        if (contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
+            title = getResources().getString(R.string.nearby_text);
         } else {
             title = contact.getNickname();
         }
@@ -190,79 +140,91 @@ public class MessagingActivity extends XoActivity implements IXoContactListener 
 
     @Override
     public void clipBoardItemSelected(IContentObject contentObject) {
-        mCompositionFragment.onAttachmentSelected(contentObject);
-    }
-
-    private void setContact(TalkClientContact contact) {
-        LOG.debug("setContact(" + contact.getClientContactId() + ")");
-        mContact = contact;
-        setActionBarText(contact);
-        mMessagingFragment.setContact(contact);
-        mCompositionFragment.setContact(contact);
-        if (mContact.isDeleted()) {
-            finish();
+        if (mCurrentFragment instanceof MessagingFragment) {
+            ((MessagingFragment) mCurrentFragment).onAttachmentSelected(contentObject);
         }
-        // invalidate menu so that profile buttons get disabled/enabled
-        invalidateOptionsMenu();
     }
 
     @Override
     protected void applicationWillEnterBackground() {
         super.applicationWillEnterBackground();
-        if (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
-            finish();
-        } else if (mContact.isClient() && mContact.isNearby()) {
-            finish();
+        if (mCurrentFragment instanceof MessagingFragment) {
+            ((MessagingFragment) mCurrentFragment).applicationWillEnterBackground();
         }
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-        // we don't care
+    public void showMessageFragment(int contactId) {
+        mCurrentFragment = new MessagingFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, contactId);
+        mCurrentFragment.setArguments(bundle);
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
+        fragmentTransaction.commit();
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        if (mContact != null && mContact.getClientContactId() == contact.getClientContactId()) {
-            finish();
+    public void showNearbyArchiveFragment() {
+        mCurrentFragment = new NearbyArchiveFragment();
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void showSingleProfileFragment(int clientContactId) {
+        mCurrentFragment = new SingleProfileFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, clientContactId);
+        mCurrentFragment.setArguments(bundle);
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void showGroupProfileFragment(int groupContactId, boolean startInActionMode, boolean addToBackStack) {
+        mCurrentFragment = new GroupProfileFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
+        if (startInActionMode) {
+            bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, true);
+        } else {
+            bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, false);
         }
-    }
+        mCurrentFragment.setArguments(bundle);
 
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-        // we don't care
-    }
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
 
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-        // we don't care
-    }
-
-    @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-        // we don't care
-    }
-
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-        // we don't care
-    }
-
-    private class getContactIdInConversation extends BroadcastReceiver {
-        private int m_contactId;
-
-        public void setId(int id) {
-            m_contactId = id;
+        if (addToBackStack) {
+            fragmentTransaction.addToBackStack(null);
         }
-
-        @Override
-        public void onReceive(Context arg0, Intent arg1) {
-            Intent intent = new Intent();
-            intent.setAction("CONTACT_ID_IN_CONVERSATION");
-            intent.putExtra("id", m_contactId);
-            sendBroadcast(intent);
-        }
-
+        fragmentTransaction.commit();
     }
 
+    @Override
+    public void showGroupProfileCreationFragment(int groupContactId, boolean cloneProfile) {
+        mCurrentFragment = new GroupProfileCreationFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(GroupProfileCreationFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
+        if (cloneProfile) {
+            bundle.putBoolean(GroupProfileCreationFragment.ARG_CLONE_CURRENT_GROUP, true);
+        }
+        mCurrentFragment.setArguments(bundle);
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
 }

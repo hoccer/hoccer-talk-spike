@@ -458,6 +458,12 @@ public interface ITalkRpcServer {
     // abort a delivery as sender
     TalkDelivery outDeliveryAbort(String messageId, String recipientId);
 
+    // inform the server that a delivery is unknown to you as sender
+    void outDeliveryUnknown(String messageId, String recipientId);
+
+    // inform the server that a delivery is unknown to you as receiver
+    void inDeliveryUnknown(String messageId);
+
     // reject a delivery as receiver
     TalkDelivery inDeliveryReject(String messageId, String reason);
 
@@ -718,10 +724,15 @@ public interface ITalkRpcServer {
      */
     void destroyEnvironment(String type);
 
+    // returns true for each group where you are an active or invited group member
     Boolean[] isMemberInGroups(String[] groupIds);
 
     // return true if for each client the caller is related to by a relationsShip or by an active group membership
     Boolean[] isContactOf(String[] clientIds);
+
+    // returns true for each client that is an active or invited group member
+    // throws exception if you are not an active or invited group member
+    Boolean[] areMembersOfGroup(String groupId, String[] clientIds);
 }
 
 /**

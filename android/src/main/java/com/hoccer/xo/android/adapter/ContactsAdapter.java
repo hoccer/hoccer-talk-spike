@@ -7,11 +7,7 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.IXoTokenListener;
 import com.hoccer.talk.client.IXoTransferListenerOld;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
-import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.client.model.*;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 
@@ -114,7 +110,7 @@ public abstract class ContactsAdapter extends XoAdapter
                     newTokens = new ArrayList<TalkClientSmsToken>();
                 }
 
-                List<TalkClientContact> newClients = mDatabase.findAllClientContacts();
+                List<TalkClientContact> newClients = mDatabase.findAllClientContactsOrderedByRecentMessage();
                 LOG.debug("found " + newClients.size() + " contacts");
 
                 if(mFilter != null) {
@@ -184,14 +180,14 @@ public abstract class ContactsAdapter extends XoAdapter
     }
 
     @Override
-    public void onMessageAdded(TalkClientMessage message) {
+    public void onMessageCreated(TalkClientMessage message) {
         requestReload();
     }
     @Override
-    public void onMessageRemoved(TalkClientMessage message) {
+    public void onMessageDeleted(TalkClientMessage message) {
     }
     @Override
-    public void onMessageStateChanged(TalkClientMessage message) {
+    public void onMessageUpdated(TalkClientMessage message) {
     }
 
     @Override
@@ -407,6 +403,15 @@ public abstract class ContactsAdapter extends XoAdapter
 
     public void setOnItemCountChangedListener(OnItemCountChangedListener onItemCountChangedListener) {
         mOnItemCountChangedListener = onItemCountChangedListener;
+    }
+
+    public String[] getMembersIds() {
+        String[] ids = new String[mClientContacts.size()];
+        int i = 0;
+        for (TalkClientContact contact : mClientContacts) {
+            ids[i++] = contact.getClientId();
+        }
+        return ids;
     }
 
     public interface Filter {

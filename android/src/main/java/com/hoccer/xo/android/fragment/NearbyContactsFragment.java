@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -14,6 +15,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.NearbyContactsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -23,10 +25,11 @@ import java.sql.SQLException;
 
 public class NearbyContactsFragment extends XoListFragment implements IXoContactListener {
     private static final Logger LOG = Logger.getLogger(NearbyContactsFragment.class);
+
     private NearbyContactsAdapter mNearbyAdapter;
     private TalkClientContact mCurrentNearbyGroup;
-
     private ListView mContactList;
+    private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
     private TextView mPlaceholderText;
 
@@ -34,11 +37,21 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_contacts, container, false);
         mContactList = (ListView) view.findViewById(android.R.id.list);
+
+        mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
+        mPlaceholderImageFrame.setImageResource(R.drawable.placeholder_nearby);
+
         mPlaceholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
-        mPlaceholderImage.setImageResource(R.drawable.placeholder_nearby);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_nearby_point, true));
+        } else {
+            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_nearby_point, true));
+        }
+
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
         mPlaceholderText.setMovementMethod(LinkMovementMethod.getInstance());
         setPlaceholderText();
+
         return view;
     }
 
@@ -59,6 +72,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         } else {
             deactivateNearbyChat();
         }
+
         getXoActivity().getXoClient().registerContactListener(this);
         if (mNearbyAdapter != null) {
             mNearbyAdapter.notifyDataSetChanged();
@@ -67,7 +81,6 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     @Override
     public void onDestroy() {
-        getXoActivity().getXoClient().unregisterContactListener(this);
         if (mNearbyAdapter != null) {
             mNearbyAdapter.unregisterListeners();
         }
@@ -76,7 +89,9 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
     }
 
     private void setPlaceholderText() {
-        String link = "<a href=\"" + getResources().getString(R.string.link_tutorial) + "#nearby\">" + getResources().getString(R.string.placeholder_nearby_link_text) + "</a>";
+        String anchorName = getString(R.string.tutorial_nearby_anchor);
+        String link = "<a href=\"" + getResources().getString(R.string.link_tutorial) + "#" + anchorName + "\">" +
+                getResources().getString(R.string.placeholder_nearby_link_text) + "</a>";
         String text = String.format(getString(R.string.placeholder_nearby_text), link);
         mPlaceholderText.setText(Html.fromHtml(text));
     }
@@ -123,8 +138,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
 
     private void createAdapter() {
         if (mNearbyAdapter == null) {
-            mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity());
-            mNearbyAdapter.retrieveDataFromDb(mCurrentNearbyGroup);
+            mNearbyAdapter = new NearbyContactsAdapter(getXoDatabase(), getXoActivity(), mCurrentNearbyGroup);
             mNearbyAdapter.registerListeners();
             runOnUiThread(new Runnable() {
                 @Override
@@ -153,6 +167,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
             @Override
             public void run() {
                 mContactList.setVisibility(View.GONE);
+                mPlaceholderImageFrame.setVisibility(View.VISIBLE);
                 mPlaceholderImage.setVisibility(View.VISIBLE);
                 mPlaceholderText.setVisibility(View.VISIBLE);
             }
@@ -163,6 +178,7 @@ public class NearbyContactsFragment extends XoListFragment implements IXoContact
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+				mPlaceholderImageFrame.setVisibility(View.GONE);
                 mPlaceholderImage.setVisibility(View.GONE);
                 mPlaceholderText.setVisibility(View.GONE);
                 mContactList.setVisibility(View.VISIBLE);

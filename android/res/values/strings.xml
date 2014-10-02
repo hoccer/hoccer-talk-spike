@@ -3,16 +3,17 @@
 
     <string name="app_name">Hoccer XO</string>
 
-    <string name="demo_message">Lorem ipsum dolor...</string>
+    <string name="demo_message">Lorem ipsum dolor…</string>
 
     <!-- common strings -->
-    <string name="common_ok">Ok</string>
+    <string name="common_ok">OK</string>
     <string name="common_cancel">Cancel</string>
     <string name="common_yes">Yes</string>
     <string name="common_no">No</string>
     <string name="common_done">Done</string>
     <string name="common_decline">Decline</string>
     <string name="common_accept">Accept</string>
+    <string name="common_delete">Delete</string>
 
     <!-- Menu entries -->
     <string name="menu_my_profile">My profile</string>
@@ -24,6 +25,7 @@
     <string name="menu_add_attachment">Add attachment</string>
     <string name="menu_profile">Profile</string>
     <string name="menu_settings">Settings</string>
+    <string name="menu_music_viewer">Media</string>
     <string name="menu_about">About Hoccer XO</string>
     <string name="menu_faq">FAQ</string>
     <string name="menu_tutorial">Tutorial</string>
@@ -45,6 +47,22 @@
         Do you wish to accept?
     </string>
 
+    <!-- Deleting attachments -->
+
+    <string name="dialog_attachment_delete_title">Delete Attachment</string>
+    <string name="dialog_attachment_delete_message">Delete selected attachments and related chat messages?</string>
+
+    <!-- AudioAttachmentList Fragment -->
+    <string name="audio_attachment_list_all">All</string>
+    <string name="audio_attachment_list_unknown">Unknown</string>
+    <string name="menu_search">Search</string>
+    <string name="search_hint">Search Attachments</string>
+
+    <string-array name="delete_options">
+        <item>Remove from collection</item>
+        <item>Delete file</item>
+    </string-array>
+
     <!-- Nearby location request -->
     <string name="dialog_enable_location_service_title">Location Services</string>
     <string name="dialog_enable_location_service_message">This feature uses location service
@@ -55,6 +73,10 @@
     <!-- Nearby delete archive request -->
     <string name="dialog_confirm_nearby_deletion_title">Confirm deletion</string>
     <string name="dialog_confirm_nearby_deletion_message">Do you really want to delete messages from this group?</string>
+
+    <!-- Invitation dialog -->
+    <string name="multi_invitation_button">continue</string>
+    <string name="dialog_cancel">Cancel</string>
 
     <!-- Contact list items -->
     <string name="contact_name_new_client">New Friend</string>
@@ -67,11 +89,19 @@
     <string name="dialog_empty_group_title">Can Not Send Message</string>
     <string name="dialog_empty_group_message">You can not send a message to this group because there are no members except you. Please invite friends to this group.</string>
 
+    <string name="attachment_over_limit_title">Really send Message?</string>
+    <string name="attachment_over_limit_upload_question">Attachment size is %1$s. Do you really want to send this message?</string>
+    <string name="attachment_over_limit_confirm">Send</string>
+    <string name="attachment_on_hold_upload_question">Upload %1$s?</string>
+    <string name="attachment_on_hold_download_question">Download %1$s?</string>
+    <string name="attachment_encoding_error">Error while encoding file. Cannot send attachment.</string>
+
     <!-- Messaging fragment -->
-    <string name="messaging_loading">Loading...</string>
+    <string name="messaging_loading">Loading…</string>
     <string name="messaging_no_messages">No Messages</string>
     <string name="messaging_invited_join">Join group</string>
-    <string name="menu_copy_attachment">Copy</string>
+    <string name="context_menu_copy_message">Copy</string>
+    <string name="context_menu_delete_message">Delete</string>
 
     <!-- Pairing fragment -->
     <string name="pairing_token_info">Give this token to someone:</string>
@@ -81,19 +111,22 @@
     <string name="pairing_qr_info">You can also pair using QR codes:</string>
     <string name="pairing_qr_show">Show QR code</string>
     <string name="pairing_qr_scan">Scan QR code</string>
-    <string name="pairing_token_generating">Generating...</string>
+    <string name="pairing_token_generating">Generating…</string>
     <string name="pairing_token_send_sms">Send via SMS</string>
     <string name="pairing_token_send_email">Send via e-mail</string>
     <string name="pairing_success">Pairing succeeded</string>
     <string name="dialog_pairing_failed_title">Pairing failed</string>
     <string name="dialog_pairing_failed_message">The code you have entered is invalid.</string>
-	<string name="paired_with">You successfully paired with </string>
-    <string name="pairing_incorrect_code">Incorrect code, please try again.</string>
+	<string name="toast_pairing_successful">You have successfully paired.</string>
+    <string name="toast_pairing_failed">Incorrect code, please try again.</string>
     <string name="pairing_scanner">QR scanner</string>
     <string name="pairing_generator">QR identifier</string>
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Change my image</string>
+    <string name="dialog_avatar_options_title">Avatar options</string>
+    <string name="dialog_set_avatar_option">Change avatar</string>
+    <string name="dialog_delete_avatar_option">Delete avatar</string>
     <string name="profile_name_title">Name</string>
     <string name="profile_name_hint">Your name</string>
     <string name="profile_status_text">status</string>
@@ -108,6 +141,8 @@
     <string name="profile_user_unblock_button">Unblock this user</string>
     <string name="profile_user_depair_button">Depair this user</string>
     <string name="profile_user_delete_button">Delete this user</string>
+    <string name="profile_user_name_unknown">unknown</string>
+    <string name="profile_self_initial_name">anonymous</string>
 
     <string name="friend_request_add_as_friend">Add as a friend</string>
     <string name="friend_request_cancel_invitation">Cancel invitation</string>
@@ -125,23 +160,32 @@
     <string name="profile_group_kick_button">Kick user from this Group</string>
     <string name="profile_group_disband_button">Disband this Group</string>
     <string name="profile_group_delete_button">Delete this Group</string>
+    <string name="profile_group_permanent_nearby">New Group</string>
 
     <!-- Messages -->
     <string name="message_text">Your message text</string>
 
-    <!-- Content -->
-    <string name="content_downloading">Downloading...</string>
-    <string name="content_uploading">Uploading...</string>
+    <!-- Notifications -->
+    <string name="unseen_messages_notification_text">\u0020new messages</string>
+    <string name="unconfirmed_invitations_notification_text">\u0020unconfirmed invitations</string>
 
-    <string name="content_images">Photo</string>
+    <!-- Content -->
+    <string name="content_downloading">Downloading…</string>
+    <string name="content_uploading">Uploading…</string>
+
+    <string name="content_images">Image</string>
+    <string name="content_multi_images">Multiple images</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Take Photo</string>
-    <string name="content_music">Music</string>
+    <string name="content_music">Further media</string>
     <string name="content_ringtone">Ringtone</string>
     <string name="content_contact">Contact</string>
     <string name="content_location">Location</string>
     <string name="content_data">Data</string>
     <string name="content_clipboard">Clipboard</string>
+
+    <string name="content_not_supported_audio_title">Unsupported Format</string>
+    <string name="content_not_supported_audio_msg">This audio attachment cannot be played back.</string>
 
     <!-- Client states (used in status fragment) -->
     <string name="client_state_idle">Idle</string>
@@ -153,6 +197,10 @@
     <string name="client_state_login">Logging in</string>
     <string name="client_state_connecting">Connecting</string>
     <string name="client_state_unknown">Unknown</string>
+
+    <!-- FullscreenPlayer -->
+    <string name="track_number_filler">of</string>
+    <string name="deleted_contact_name">Removed Contact</string>
 
     <!-- Attachment type selection dialog -->
     <string name="selectattachment_title">Select attachment</string>
@@ -184,6 +232,10 @@
     <!-- Location selection activity -->
     <string name="selectlocation_title">Select location</string>
 
+    <!-- Multi image selection activity -->
+    <string name="select_images_title">Select images</string>
+    <string name="select_count">Select (%1$s)</string>
+
     <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Delete group</string>
     <string name="dialog_delete_group_message">Are you sure you want to delete this group?</string>
@@ -210,6 +262,8 @@
     <string name="menu_group_profile_reject_invitation">Reject invitation</string>
     <string name="menu_group_profile_join">Join group</string>
     <string name="menu_group_profile_leave">Leave group</string>
+    <string name="menu_group_profile_permanent">Create permanent group</string>
+
     <string name="location">Location</string>
     <string name="video">Video</string>
     <string name="show_location_instruction">Use button to show on map</string>
@@ -218,10 +272,10 @@
     <string name="profile_name_text">Name</string>
     <string name="profile_key_text">Key</string>
 
-    <string name="transfer_state_encrypting">Encrypting...</string>
-    <string name="transfer_state_decrypting">Decrypting...</string>
-    <string name="transfer_state_downloading">Downloading...</string>
-    <string name="transfer_state_uploading">Uploading...</string>
+    <string name="transfer_state_encrypting">Encrypting…</string>
+    <string name="transfer_state_decrypting">Decrypting…</string>
+    <string name="transfer_state_downloading">Downloading…</string>
+    <string name="transfer_state_uploading">Uploading…</string>
     <string name="transfer_state_pause">Pause</string>
     <string name="dialog_attachment_choose_reselect_option">Choose another Attachment</string>
     <string name="dialog_attachment_choose_discard_option">Remove attachment</string>
@@ -231,13 +285,44 @@
         receive any further messages from this contact.
     </string>
 
+    <!-- Device contact data selection dialog -->
+    <string name="dialog_device_contact_data_selection">Select entry</string>
+
+    <!-- Media Player -->
+    <string name="media_meta_data_unknown_title">Unknown title</string>
+    <string name="media_meta_data_unknown_artist">Unknown artist</string>
+    <string name="media_player_playlist_track_divider">of</string>
+    <string name="media_player_default_filter_label">All</string>
+
+    <!-- Media Browser -->
+    <string name="collections">Collections</string>
+    <string name="menu_collections">Collections</string>
+    <string name="new_media_collection">New collection</string>
+    <string name="enter_new_collection_name">Please enter the name for the new collection:</string>
+    <string name="add_to_collection">Add to collection</string>
+    <string name="share_with_contact">Share</string>
+    <string name="added_attachment_to_collection">Added %1$s to \'%2$s\' collection</string>
+    <string name="select_recipients">Select recipients</string>
+    <string name="error_could_not_find_file_for_sending">Couldn\'t find and send file \'%1$s\'</string>
+    <string name="rename_collection">Rename Collection</string>
+    <string name="dialog_delete_collection_title">Delete collections</string>
+    <string name="dialog_delete_collection_message">Are you sure you want to delete the selected collection(s)? The attachments
+        will not be deleted.
+    </string>
+
     <!-- Preferences -->
     <string name="preference_keysize_summary">Renew RSA key with selected size</string>
     <string name="preference_keysize_title">RSA Key Size</string>
     <string name="category">Category</string>
-    <string name="pref_auto_downloads_mobile">On mobile networks</string>
-    <string name="pref_auto_download_wifi">On wireless networks</string>
-    <string name="pref_auto_download">Automatic downloads</string>
+
+    <string name="pref_category_image_encoding">Image Attachment Compression</string>
+    <string name="pref_image_size">Image size</string>
+    <string name="pref_image_quality">Image quality</string>
+    <string name="pref_category_transfer_mobile">Cellular Attachment Transfer</string>
+    <string name="pref_category_transfer_wifi">WI-FI Attachment Transfer</string>
+    <string name="pref_upload_limit">Auto Upload limit</string>
+    <string name="pref_download_limit">Auto Download limit</string>
+
     <string name="pref_confirm_messages_seen">Confirm seen messages</string>
     <string name="pref_credentials">Credentials</string>
     <string name="pref_export_credentials">Export credentials</string>
@@ -247,7 +332,10 @@
     <string name="pref_encryption">Encryption</string>
     <string name="pref_crash_report">Send report after app crashed</string>
     <string name="pref_crash_report_switcher">Enable reporting</string>
-    <string name="pref_please_wait">Please wait...</string>
+    <string name="pref_please_wait">Please wait…</string>
+    <string name="pref_up_down_limit">Up/Download Limit</string>
+    <string name="up_down_unlimited_option">unlimited</string>
+    <string name="up_down_manual_option">manual transfer</string>
     <string name="profile_compare_key_description">For extra security compare this fingerprint with
         the fingerprint seen by your friends in your contact card.
     </string>
@@ -257,18 +345,9 @@
     <string name="contact_item_sent_attachment">Sent %1$s attachment</string>
     <string name="error_avatar_selection">The image you have selected is not suitable as Avatar.</string>
     <string name="error_attachment_selection">The file you have selected cannot be used as an attachment.</string>
-    <string name="sms_invitation_text">Hey! I\'m now using the free app Hoccer XO for secure
-        chatting. Download it now: http://hoccer.com/ Then add me as a contact:\n
-        %1$s%2$s
-        \nxo %3$s
-    </string>
-    <string name="email_invitation_text">Hey!\nI\'m now using the free app Hoccer XO for secure
-        chatting. Download it now:\n
-        &lt;a href=http://hoccer.com/"&gt;http://hoccer.com/&lt;a&gt;\n
-        Then add me as a contact:\n
-        &lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;
-        \nxo %3$s
-    </string>
+    <string name="sms_invitation_text">Hey! I\'m now using the free app Hoccer XO for secure chatting. Download it now: http://hoccer.com/\nThen add me as a contact:\n%1$s%2$s\nxo %3$s</string>
+    <string name="email_invitation_subject">Join me at Hoccer!</string>
+    <string name="email_invitation_text">Hey!&lt;br&gt;I\'m now using the free app Hoccer XO for secure chatting. Download it now:&lt;br&gt;&lt;a href=http://hoccer.com/&gt;http://hoccer.com/&lt;a&gt;&lt;br&gt;&lt;br&gt;Then add me as contact:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
     <string name="dialog_export_credentials_title">Export credentials</string>
     <string name="export_credentials_success">Successfully saved your credentials.</string>
     <string name="export_credentials_failure">Error while saving your credentials.</string>
@@ -281,51 +360,45 @@
     <string name="no_password">Please enter a Password.</string>
     <string name="cant_find_credentials">Can\'t find "credentials.json" on your device.</string>
 
-    <string-array name="preference_log_level_names">
-        <item>Fatal</item>
-        <item>Error</item>
-        <item>Warn</item>
-        <item>Info</item>
-        <item>Debug</item>
-        <item>Trace</item>
-    </string-array>
-
-    <string-array name="preference_log_level_values">
-        <item>FATAL</item>
-        <item>ERROR</item>
-        <item>WARN</item>
-        <item>INFO</item>
-        <item>DEBUG</item>
-        <item>TRACE</item>
-    </string-array>
-
     <string-array name="tab_names">
         <item>CHATS</item>
         <item>INVITATIONS</item>
         <item>NEARBY</item>
     </string-array>
 
+    <string name="about_url">http://www.hoccer.com/xo-about-view</string>
+
     <string name="preference_database_title">Local Database</string>
     <string name="placeholder_conversations_text">Invite friends to chat with!</string>
-    <string name="placeholder_nearby_text">Waiting for others %1$s...</string>
+    <string name="tutorial_nearby_anchor">nearby</string>
+    <string name="placeholder_nearby_text">Waiting for others %1$s…</string>
     <string name="placeholder_nearby_link_text">nearby</string>
     <string name="actionbar_default_title">Hoccer</string>
-    <string name="content_audio_caption">Music</string>
+    <string name="content_audio_caption">Media</string>
+    <string name="content_audio_by_contact_caption">Media from %1$s</string>
     <string name="nearby_info_usercount">%1$d Users are Nearby</string>
     <string name="profile_nickname_text">Nickname</string>
-    <string name="message_seen_text">read</string>
     <string name="nearby_text">All nearby</string>
     <string name="error_send_message">Could not send message.</string>
     <string name="pref_privacy_title">Privacy</string>
     <string name="nearby_saved">Nearby saved</string>
     <string name="error_send_message_empty_group">There is nobody in this group.</string>
     <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
+    <string name="invite_several_entries">Has several entries</string>
 
     <string name="about_advert_text">Hoccer XO \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. Hoccer sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. Hoccer XO provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
-    <string name="about_version_description">Version %1$s</string>
+    <string name="about_version_description">Version %1$s (%2$d)</string>
+
+    <string name="search_section_caption_contacts">Contacts</string>
+    <string name="search_section_caption_files">Files</string>
+    <string name="search_section_caption_images">Images</string>
+    <string name="search_section_caption_audio_files">Audio Files</string>
+    <string name="search_section_caption_video_files">Video Files</string>
 
     <!-- media types for "expecting ..." in message states -->
-    <string name="attachment_expects_text">expects %1$s</string>
+    <string name="attachment_expects_text">expecting %1$s</string>
+    <string name="attachment_failed_text">%1$s undeliverable</string>
+
     <string name="message_state_default">attachment</string>
     <string name="message_state_image">image</string>
     <string name="message_state_video">video</string>
@@ -333,10 +406,22 @@
     <string name="message_state_data">file</string>
     <string name="message_state_contact">vcard</string>
     <string name="message_state_location">location</string>
+
+    <string name="message_pending_text">pending</string>
+    <string name="message_sent_text">sent</string>
+    <string name="message_seen_text">read</string>
     <string name="message_unseen_text">unread</string>
     <string name="message_privat_text">delivered</string>
+    <string name="message_failed_text">undeliverable</string>
+    <string name="message_aborted_text">aborted</string>
+    <string name="message_rejected_text">rejected</string>
+
     <string name="attachment_failed">Error while downloading File.</string>
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
-    <string name="message_failed_text">undeliverable</string>
+    <string name="toast_stored_external_file_to_clipboard">Your file has been stored in the clipboard.</string>
+
+    <!-- Nearby all invite texts -->
+    <string name="nearby_invite_all">invite %1$d group members as friend</string>
+    <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
 
 </resources>
