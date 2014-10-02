@@ -35,8 +35,6 @@ public class TalkGroup {
         return false;
     }
 
-    private String _id;
-
     @DatabaseField(columnName = FIELD_GROUP_ID, id = true)
     String groupId;
 
@@ -72,9 +70,6 @@ public class TalkGroup {
 
     @DatabaseField
     Date groupKeyUpdateInProgress;
-
-    public TalkGroup() {
-    }
 
     @JsonIgnore
     public boolean isTypeNearby() {
