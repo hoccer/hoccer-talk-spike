@@ -3089,18 +3089,18 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             return;
         }
 
-        clientContact.updateRelationship(relationship);
+        if(clientContact.updateRelationship(relationship)) {
+            try {
+                mDatabase.saveRelationship(clientContact.getClientRelationship());
+                mDatabase.saveContact(clientContact);
+            } catch (SQLException e) {
+                LOG.error("SQL error", e);
+            }
 
-        try {
-            mDatabase.saveRelationship(clientContact.getClientRelationship());
-            mDatabase.saveContact(clientContact);
-        } catch (SQLException e) {
-            LOG.error("SQL error", e);
-        }
-
-        for (int i = 0; i < mContactListeners.size(); i++) {
-            IXoContactListener listener = mContactListeners.get(i);
-            listener.onClientRelationshipChanged(clientContact);
+            for (int i = 0; i < mContactListeners.size(); i++) {
+                IXoContactListener listener = mContactListeners.get(i);
+                listener.onClientRelationshipChanged(clientContact);
+            }
         }
     }
 
