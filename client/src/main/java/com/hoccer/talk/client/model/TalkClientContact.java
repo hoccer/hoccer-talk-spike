@@ -610,7 +610,7 @@ public class TalkClientContact implements Serializable {
     @ClientMethodOnly
     public boolean updateRelationship(TalkRelationship relationship) {
         ensureClient();
-        boolean updated = false;
+        boolean updated;
         if(this.clientRelationship == null) {
             this.clientRelationship = relationship;
             updated = true;
