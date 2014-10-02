@@ -3,7 +3,6 @@ package com.hoccer.xo.android.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -19,7 +18,6 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.release.R;
-import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -29,12 +27,12 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     private Activity mActivity;
 
-    private List<TalkClientContact> mClientContactList = new ArrayList<TalkClientContact>();
+    private List<TalkClientContact> mClients = new ArrayList<TalkClientContact>();
 
     public ClientsAdapter(Activity activity) {
         try {
             mActivity = activity;
-            mClientContactList = XoApplication.getXoClient().getDatabase().findAllClientContacts();
+            mClients = XoApplication.getXoClient().getDatabase().findAllClientContacts();
             sortTalkClientContacts();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -43,17 +41,17 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public int getCount() {
-        return mClientContactList.size();
+        return mClients.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mClientContactList.get(position);
+        return mClients.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return mClientContactList.get(position).getClientContactId();
+        return mClients.get(position).getClientContactId();
     }
 
     @Override
@@ -140,9 +138,9 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        mClientContactList.clear();
+        mClients.clear();
         try {
-            mClientContactList = XoApplication.getXoClient().getDatabase().findAllClientContacts();
+            mClients = XoApplication.getXoClient().getDatabase().findAllClientContacts();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -154,7 +152,7 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
     @Override
     public void onContactRemoved(TalkClientContact contact) {
         // remove contact from list
-        mClientContactList.remove(contact);
+        mClients.remove(contact);
         // update
 
         notifyDataSetChanged();
@@ -177,27 +175,27 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
     }
 
     private void sortTalkClientContacts() {
-        List<TalkClientContact> invitedMeContacts = new ArrayList<TalkClientContact>();
-        List<TalkClientContact> invitedContacts = new ArrayList<TalkClientContact>();
-        List<TalkClientContact> friendContacts = new ArrayList<TalkClientContact>();
+        List<TalkClientContact> invitedMeClients = new ArrayList<TalkClientContact>();
+        List<TalkClientContact> invitedClients = new ArrayList<TalkClientContact>();
+        List<TalkClientContact> friendClients = new ArrayList<TalkClientContact>();
 
-        for (TalkClientContact contact : mClientContactList) {
-            TalkRelationship relationship = contact.getClientRelationship();
+        for (TalkClientContact client : mClients) {
+            TalkRelationship relationship = client.getClientRelationship();
             if (relationship != null) {
                 if (relationship.invitedMe()) {
-                    invitedMeContacts.add(contact);
+                    invitedMeClients.add(client);
                 } else if (relationship.isInvited()) {
-                    invitedContacts.add(contact);
+                    invitedClients.add(client);
                 } else if (relationship.isFriend()) {
-                    friendContacts.add(contact);
+                    friendClients.add(client);
                 }
             }
         }
 
-        invitedContacts.addAll(friendContacts);
-        invitedMeContacts.addAll(invitedContacts);
+        invitedClients.addAll(friendClients);
+        invitedMeClients.addAll(invitedClients);
 
-        mClientContactList = invitedMeContacts;
+        mClients = invitedMeClients;
     }
 
     private void refreshView() {
