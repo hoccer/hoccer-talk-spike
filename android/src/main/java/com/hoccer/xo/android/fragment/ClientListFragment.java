@@ -21,7 +21,8 @@ import java.sql.SQLException;
 
 public class ClientListFragment extends ListFragment implements IPagerFragment, IXoContactListener {
 
-    ClientContactsAdapter mClientContactsAdapter;
+
+    ClientsAdapter mClientsAdapter;
 
     private View tabView;
     private TextView notificationBadgeTextView;
@@ -31,9 +32,9 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mClientContactsAdapter = new ClientContactsAdapter(getActivity());
+        mClientsAdapter = new ClientsAdapter(getActivity());
         notificationBadgeTextView = (TextView) tabView.findViewById(R.id.tv_contact_invite_notification_badge);
-        setListAdapter(mClientContactsAdapter);
+        setListAdapter(mClientsAdapter);
     }
 
     @Override
@@ -48,14 +49,14 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
             notificationBadgeTextView.setVisibility(View.VISIBLE);
         }
         notificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
-        XoApplication.getXoClient().registerContactListener(mClientContactsAdapter);
+        XoApplication.getXoClient().registerContactListener(mClientsAdapter);
         XoApplication.getXoClient().registerContactListener(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        XoApplication.getXoClient().unregisterContactListener(mClientContactsAdapter);
+        XoApplication.getXoClient().unregisterContactListener(mClientsAdapter);
         XoApplication.getXoClient().unregisterContactListener(this);
     }
 

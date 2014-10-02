@@ -25,14 +25,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientContactsAdapter extends BaseAdapter implements IXoContactListener {
+public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
-    private static Logger LOG = Logger.getLogger(ClientContactsAdapter.class);
     private Activity mActivity;
 
     private List<TalkClientContact> mClientContactList = new ArrayList<TalkClientContact>();
 
-    public ClientContactsAdapter(Activity activity) {
+    public ClientsAdapter(Activity activity) {
         try {
             mActivity = activity;
             mClientContactList = XoApplication.getXoClient().getDatabase().findAllClientContacts();
