@@ -19,7 +19,9 @@
     android:id="@+id/tv_image_preview_error"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+
     android:layout_centerInParent="true"
     android:gravity="center_horizontal"
-    android:text="@string/image_preview_error"/>
+    android:text="@string/image_preview_error"
+    android:textColor="#66000000"/>
 </RelativeLayout>
