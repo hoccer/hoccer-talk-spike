@@ -6,6 +6,7 @@ import android.app.Instrumentation.ActivityMonitor;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.suitebuilder.annotation.Suppress;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -77,6 +78,7 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         assertNotNull(newGroupMenuItem);
     }
 
+    @Suppress
     public void testViewPagerUI() {
         assertEquals(0, activity.getActionBar().getSelectedTab().getPosition());
         assertEquals(2, activity.getActionBar().getTabCount());
