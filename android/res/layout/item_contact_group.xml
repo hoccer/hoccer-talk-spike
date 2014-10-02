@@ -37,6 +37,14 @@
         android:visibility="gone">
 
       <Button
+          android:id="@+id/btn_decline"
+          android:text="@string/common_decline"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          style="@style/ButtonGrayAppBaseTheme"/>
+
+      <Button
           android:id="@+id/btn_accept"
           android:text="@string/common_accept"
           android:layout_width="0dp"
@@ -44,13 +52,6 @@
           android:layout_weight="1"
           style="@style/ButtonAppBaseTheme"/>
 
-      <Button
-          android:id="@+id/btn_decline"
-          android:text="@string/common_decline"
-          android:layout_width="0dp"
-          android:layout_height="wrap_content"
-          android:layout_weight="1"
-          style="@style/ButtonGrayAppBaseTheme"/>
     </LinearLayout>
 
     <TextView
