@@ -3211,11 +3211,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void updateGroupMember(TalkGroupMember member) {
-        updateGroupMemberHere(member);
-    }
-
-
-    public void updateGroupMemberHere(TalkGroupMember member) {
         LOG.info("updateGroupMember(groupId: '" + member.getGroupId() + "', clientId: '" + member.getClientId() + "', state: '" + member.getState() + "')");
         TalkClientContact groupContact;
         TalkClientContact clientContact;
