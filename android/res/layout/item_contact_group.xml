@@ -24,33 +24,45 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:singleLine="true"
-        style="@style/AppBaseTheme.Contact.Name"/>
+        style="@style/AppBaseTheme.Contact.Name"
+        android:layout_marginRight="85dp"/>
+
+    <LinearLayout
+        android:id="@+id/ll_invited_me"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/contact_icon"
+        android:layout_below="@+id/contact_name"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+      <Button
+          android:id="@+id/btn_accept"
+          android:text="@string/common_accept"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          style="@style/ButtonAppBaseTheme"/>
+
+      <Button
+          android:id="@+id/btn_decline"
+          android:text="@string/common_decline"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          style="@style/ButtonGrayAppBaseTheme"/>
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/contact_unseen_messages"
-        android:layout_alignRight="@+id/contact_icon"
-        android:layout_alignTop="@id/contact_icon"
-        style="@style/AppBaseTheme.Contact.UnreadMessages"/>
-
-    <TextView
-        android:id="@+id/contact_last_message"
-        android:text="Lorem ipsum dolor..."
+        android:id="@+id/is_joined"
         android:textColor="@android:color/secondary_text_dark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/contact_icon"
         android:layout_toLeftOf="@id/contact_type"
         android:layout_below="@id/contact_name"
+        android:text="Heinz, Marie, Jan, + 30 others"
+        android:visibility="gone"
         style="@style/AppBaseTheme.Contact.LastMessage" tools:ignore="HardcodedText"/>
-
-    <TextView
-        android:id="@+id/contact_type"
-        android:text="@string/common_group"
-        android:textColor="@android:color/secondary_text_dark"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/AppBaseTheme.Contact.CommonGroup"/>
 
 </RelativeLayout>
