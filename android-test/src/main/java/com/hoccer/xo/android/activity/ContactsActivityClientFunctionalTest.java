@@ -152,6 +152,13 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
 
         TextView isFriendTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_friend);
         assertEquals(View.GONE, isFriendTextView.getVisibility());
+
+        View tabView = getActivity().getActionBar().getTabAt(0).getCustomView();
+        assertNotNull(tabView);
+
+        TextView pendingInvitationsBadgeTextView = (TextView) tabView.findViewById(com.hoccer.xo.release.R.id.tv_contact_invite_notification_badge);
+        assertNotNull(pendingInvitationsBadgeTextView);
+        assertEquals("1", pendingInvitationsBadgeTextView.getText());
     }
 
     public void testInvitedRelationUI() throws InterruptedException {
