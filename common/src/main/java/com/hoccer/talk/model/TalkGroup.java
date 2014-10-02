@@ -203,6 +203,11 @@ public class TalkGroup {
             updated = true;
         }
 
+        if(!groupTag.equals(g.groupTag)) {
+            groupTag = g.groupTag;
+            updated = true;
+        }
+
         if(!groupAvatarUrl.equals(g.groupAvatarUrl)) {
             groupAvatarUrl = g.groupAvatarUrl;
             updated = true;
