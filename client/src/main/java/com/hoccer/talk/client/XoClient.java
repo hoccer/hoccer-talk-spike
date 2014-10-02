@@ -3267,8 +3267,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 groupContact.updateGroupMember(member);
                 TalkClientMembership membership = mDatabase.findMembershipByContacts(groupContact.getClientContactId(), clientContact.getClientContactId(), true);
                 membership.updateGroupMember(member);
-
-                decryptGroupKey(groupContact, member);
+                groupContact.setGroupKey(getDecryptedGroupKey(member));
 
                 mDatabase.saveGroupMember(membership.getMember());
                 mDatabase.saveContact(groupContact);
@@ -3316,35 +3315,45 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private void decryptGroupKey(TalkClientContact group, TalkGroupMember member) {
+    private String getDecryptedGroupKey(TalkGroupMember member) {
         LOG.debug("decrypting group key");
-        String keyId = member.getMemberKeyId();
-        String encryptedGroupKey = member.getEncryptedGroupKey();
+        final String keyId = member.getMemberKeyId();
+        final String encryptedGroupKey = member.getEncryptedGroupKey();
         if(keyId == null || encryptedGroupKey == null) {
             LOG.info("can't decrypt group key because there isn't one yet");
-            return;
+            return null;
         }
+
+        final TalkPrivateKey talkPrivateKey;
         try {
-            TalkPrivateKey talkPrivateKey = mDatabase.findPrivateKeyByKeyId(keyId);
-            if(talkPrivateKey == null) {
-                LOG.error("no private key for keyId " + keyId);
-            } else {
-                PrivateKey privateKey = talkPrivateKey.getAsNative();
-                if(privateKey == null) {
-                    LOG.error("could not decode private key");
-                } else {
-                    byte[] rawEncryptedGroupKey = Base64.decodeBase64(encryptedGroupKey.getBytes(Charset.forName("UTF-8")));
-                    byte[] rawGroupKey = RSACryptor.decryptRSA(privateKey, rawEncryptedGroupKey);
-                    LOG.debug("successfully decrypted group key");
-                    String groupKey = new String(Base64.encodeBase64(rawGroupKey));
-                    group.setGroupKey(groupKey);
-                }
-            }
+             talkPrivateKey = mDatabase.findPrivateKeyByKeyId(keyId);
         } catch (SQLException e) {
             LOG.error("SQL error", e);
+            return null;
+        }
+
+        if (talkPrivateKey == null) {
+            LOG.error("no private key for keyId " + keyId);
+            return null;
+        }
+
+        final PrivateKey privateKey = talkPrivateKey.getAsNative();
+        if (privateKey == null) {
+            LOG.error("could not decode private key");
+            return null;
+        }
+
+        final byte[] rawGroupKey;
+        try {
+            final byte[] rawEncryptedGroupKey = Base64.decodeBase64(encryptedGroupKey.getBytes(Charset.forName("UTF-8")));
+            rawGroupKey = RSACryptor.decryptRSA(privateKey, rawEncryptedGroupKey);
         } catch (GeneralSecurityException e) {
             LOG.error("error decrypting group key", e);
+            return null;
         }
+
+        LOG.debug("successfully decrypted group key");
+        return new String(Base64.encodeBase64(rawGroupKey));
     }
 
     private String[] updateableClients(TalkClientContact group, String[] onlyWithClientIds) {
