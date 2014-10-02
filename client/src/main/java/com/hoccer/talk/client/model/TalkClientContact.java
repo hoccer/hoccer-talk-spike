@@ -617,8 +617,9 @@ public class TalkClientContact implements Serializable {
         } else {
             updated = this.clientRelationship.updateWith(relationship);
         }
-        if(this.clientRelationship.isRelated()) {
+        if(this.clientRelationship.isRelated() && !isEverRelated()) {
             markAsRelated();
+            updated = true;
         }
         return updated;
     }
