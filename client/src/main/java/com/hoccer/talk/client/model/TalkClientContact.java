@@ -625,8 +625,9 @@ public class TalkClientContact implements Serializable {
     }
 
     @GroupMethodOnly
-    public void updateGroupPresence(TalkGroup group) {
+    public boolean updateGroupPresence(TalkGroup group) {
         ensureGroup();
+        boolean updated;
         if(this.groupPresence == null) {
             if(group.getGroupId() != null) {
                 groupId = group.getGroupId();
@@ -635,22 +636,29 @@ public class TalkClientContact implements Serializable {
                 groupTag = group.getGroupTag();
             }
             this.groupPresence = group;
+            updated = true;
         } else {
-            this.groupPresence.updateWith(group);
+            updated = this.groupPresence.updateWith(group);
         }
+
+        return updated;
     }
 
     @GroupMethodOnly
-    public void updateGroupMember(TalkGroupMember member) {
+    public boolean updateGroupMember(TalkGroupMember member) {
         ensureGroup();
+        boolean updated;
         if(this.groupMember == null) {
             this.groupMember = member;
+            updated = true;
         } else {
-            this.groupMember.updateWith(member);
+            updated = this.groupMember.updateWith(member);
         }
         if(this.groupMember.isInvolved()) {
             markAsRelated();
+            updated = true;
         }
+        return updated;
     }
 
     public static TalkClientContact createGroupContact() {
