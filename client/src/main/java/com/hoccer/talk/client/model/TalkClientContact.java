@@ -608,16 +608,19 @@ public class TalkClientContact implements Serializable {
         }
     }
     @ClientMethodOnly
-    public void updateRelationship(TalkRelationship relationship) {
+    public boolean updateRelationship(TalkRelationship relationship) {
         ensureClient();
+        boolean updated = false;
         if(this.clientRelationship == null) {
             this.clientRelationship = relationship;
+            updated = true;
         } else {
-            this.clientRelationship.updateWith(relationship);
+            updated = this.clientRelationship.updateWith(relationship);
         }
         if(this.clientRelationship.isRelated()) {
             markAsRelated();
         }
+        return updated;
     }
 
     @GroupMethodOnly
