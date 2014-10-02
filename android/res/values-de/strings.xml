@@ -47,9 +47,13 @@
     </string>
     <string name="message_and_attachment_count_info">%1$d Nachrichten | %2$d Anhänge</string>
 
-    <!-- Contact decline invitation dialog -->
+    <!-- Friend decline invitation dialog -->
     <string name="friend_request_decline_invitation_title">Einladung ablehnen?</string>
     <string name="friend_request_decline_invitation_message">Möchtest du die Einladung von %1$s wirklich ablehnen?</string>
+
+    <!-- Group decline invitation dialog -->
+    <string name="group_request_decline_invitation_title">Gruppeneinladung ablehnen?</string>
+    <string name="group_request_decline_invitation_message">Möchtest du der Gruppe %1$s wirklich nicht beitreten?</string>
 
     <!-- Deleting attachments -->
     <string name="dialog_attachment_delete_title">Anhang Löschen</string>
@@ -413,6 +417,5 @@
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
     <string name="nearby_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
-
 
 </resources>
