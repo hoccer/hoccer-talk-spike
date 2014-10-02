@@ -31,8 +31,6 @@ public class TalkRelationship {
         return STATES_VALID_SET.contains(state);
     }
 
-    private String _id;
-
     @DatabaseField(generatedId = true)
     private long relationshipId;
 
@@ -50,9 +48,6 @@ public class TalkRelationship {
 
     @DatabaseField
     Date lastChanged;
-
-    public TalkRelationship() {
-    }
 
     @JsonIgnore
     public boolean isRelated() {
@@ -105,7 +100,6 @@ public class TalkRelationship {
         this.otherClientId = otherClientId;
     }
 
-//    @Nullable
     public String getState() {
         return state;
     }
