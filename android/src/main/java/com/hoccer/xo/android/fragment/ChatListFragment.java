@@ -26,12 +26,6 @@ import java.lang.ref.WeakReference;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Fragment that shows a list of contacts
- * <p/>
- * This currently shows only contact data but should also be able to show
- * recent conversations for use as a "conversations" view.
- */
 public class ChatListFragment extends SearchableListFragment implements OnItemCountChangedListener {
 
     private static final Logger LOG = Logger.getLogger(ChatListFragment.class);
