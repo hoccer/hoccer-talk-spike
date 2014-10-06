@@ -222,7 +222,6 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
         };
 
         mAdapter = new ChatsAdapter((XoActivity) getActivity(), filter);
-        mAdapter.onResume();
         mAdapter.setOnItemCountChangedListener(this);
         setListAdapter(mAdapter);
     }
