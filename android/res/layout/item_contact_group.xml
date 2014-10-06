@@ -4,7 +4,9 @@
         xmlns:custom="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp">
 
     <com.hoccer.xo.android.view.AvatarView
             android:id="@+id/contact_icon"
@@ -21,17 +23,18 @@
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="85dp"
             android:layout_toRightOf="@id/contact_icon"
             android:ellipsize="end"
             android:maxLines="1"
             android:singleLine="true"
-            style="@style/AppBaseTheme.Contact.Name"
-            android:layout_marginRight="85dp"/>
+            style="@style/AppBaseTheme.Contact.Name"/>
 
     <LinearLayout
             android:id="@+id/ll_invited_me"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
+            android:layout_marginRight="5dp"
             android:layout_toRightOf="@+id/contact_icon"
             android:layout_below="@+id/contact_name"
             android:orientation="horizontal"
@@ -41,7 +44,7 @@
                 android:id="@+id/btn_decline"
                 android:text="@string/common_decline"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 style="@style/ButtonGrayAppBaseTheme"/>
 
@@ -49,7 +52,7 @@
                 android:id="@+id/btn_accept"
                 android:text="@string/common_accept"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 style="@style/ButtonAppBaseTheme"/>
 
