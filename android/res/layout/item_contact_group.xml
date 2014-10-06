@@ -1,69 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <com.hoccer.xo.android.view.AvatarView
-        android:id="@+id/contact_icon"
-        android:clickable="true"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        custom:cornerRadius="65"
-        custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
-        style="@style/AppBaseTheme.Contact.Avatar"/>
-    
+            android:id="@+id/contact_icon"
+            android:clickable="true"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            custom:cornerRadius="65"
+            custom:defaultAvatarImageUrl="@drawable/avatar_default_contact"
+            style="@style/AppBaseTheme.Contact.Avatar"/>
+
     <TextView
-        android:id="@+id/contact_name"
-        android:text="@string/contact_name_new_group"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/contact_icon"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:singleLine="true"
-        style="@style/AppBaseTheme.Contact.Name"
-        android:layout_marginRight="85dp"/>
+            android:id="@+id/contact_name"
+            android:text="@string/contact_name_new_group"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/contact_icon"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:singleLine="true"
+            style="@style/AppBaseTheme.Contact.Name"
+            android:layout_marginRight="85dp"/>
 
     <LinearLayout
-        android:id="@+id/ll_invited_me"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/contact_icon"
-        android:layout_below="@+id/contact_name"
-        android:orientation="horizontal"
-        android:visibility="gone">
+            android:id="@+id/ll_invited_me"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/contact_icon"
+            android:layout_below="@+id/contact_name"
+            android:orientation="horizontal"
+            android:visibility="gone">
 
-      <Button
-          android:id="@+id/btn_decline"
-          android:text="@string/common_decline"
-          android:layout_width="0dp"
-          android:layout_height="wrap_content"
-          android:layout_weight="1"
-          style="@style/ButtonGrayAppBaseTheme"/>
+        <Button
+                android:id="@+id/btn_decline"
+                android:text="@string/common_decline"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                style="@style/ButtonGrayAppBaseTheme"/>
 
-      <Button
-          android:id="@+id/btn_accept"
-          android:text="@string/common_accept"
-          android:layout_width="0dp"
-          android:layout_height="wrap_content"
-          android:layout_weight="1"
-          style="@style/ButtonAppBaseTheme"/>
+        <Button
+                android:id="@+id/btn_accept"
+                android:text="@string/common_accept"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                style="@style/ButtonAppBaseTheme"/>
 
     </LinearLayout>
 
     <TextView
-        android:id="@+id/is_joined"
-        android:textColor="@android:color/secondary_text_dark"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/contact_icon"
-        android:layout_toLeftOf="@id/contact_type"
-        android:layout_below="@id/contact_name"
-        android:text="Heinz, Marie, Jan, + 30 others"
-        android:visibility="gone"
-        style="@style/AppBaseTheme.Contact.LastMessage" tools:ignore="HardcodedText"/>
+            android:id="@+id/is_joined"
+            android:textColor="@android:color/secondary_text_dark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/contact_icon"
+            android:layout_toLeftOf="@id/contact_type"
+            android:layout_below="@id/contact_name"
+            android:text="Heinz, Marie, Jan, + 30 others"
+            tools:ignore="HardcodedText"
+            android:visibility="gone"
+            style="@style/AppBaseTheme.Contact.LastMessage"/>
 
 </RelativeLayout>
