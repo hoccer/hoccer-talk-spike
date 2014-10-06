@@ -29,8 +29,8 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
     private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
 
-    private View tabView;
-    private TextView notificationBadgeTextView;
+    private View mTabView;
+    private TextView mNotificationBadgeTextView;
 
     private int mInvitedMeCount = 0;
 
@@ -59,7 +59,7 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mClientsAdapter = new ClientsAdapter(getActivity());
-        notificationBadgeTextView = (TextView) tabView.findViewById(R.id.tv_contact_invite_notification_badge);
+        mNotificationBadgeTextView = (TextView) mTabView.findViewById(R.id.tv_contact_invite_notification_badge);
         setListAdapter(mClientsAdapter);
     }
 
@@ -72,9 +72,9 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
             e.printStackTrace();
         }
         if (mInvitedMeCount > 0) {
-            notificationBadgeTextView.setVisibility(View.VISIBLE);
+            mNotificationBadgeTextView.setVisibility(View.VISIBLE);
         }
-        notificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
+        mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
         XoApplication.getXoClient().registerContactListener(mClientsAdapter);
         XoApplication.getXoClient().registerContactListener(this);
     }
@@ -112,8 +112,8 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
 
     @Override
     public View getCustomTabView(Context context) {
-        tabView = LayoutInflater.from(context).inflate(R.layout.view_contacts_tab_friends, null);
-        return tabView;
+        mTabView = LayoutInflater.from(context).inflate(R.layout.view_contacts_tab_friends, null);
+        return mTabView;
     }
 
     @Override
@@ -130,11 +130,11 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
                 e.printStackTrace();
             }
             if (mInvitedMeCount > 0) {
-                notificationBadgeTextView.setVisibility(View.VISIBLE);
-                notificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
+                mNotificationBadgeTextView.setVisibility(View.VISIBLE);
+                mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
             } else {
-                notificationBadgeTextView.setVisibility(View.GONE);
-                notificationBadgeTextView.setText("");
+                mNotificationBadgeTextView.setVisibility(View.GONE);
+                mNotificationBadgeTextView.setText("");
             }
         }
     }
