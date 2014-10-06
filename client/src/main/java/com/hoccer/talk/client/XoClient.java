@@ -2945,6 +2945,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             clientContact.modifyPresence(presence, fields);
         }
 
+        // ensure that a timestamp is set, this is a manual migration step for the newly introduced timestamp field
         if (clientContact.getCreatedTimeStamp() == null) {
             clientContact.setCreatedTimeStamp(new Date());
         }
@@ -3123,6 +3124,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             return;
         }
 
+        // ensure that a timestamp is set, this is a manual migration step for the newly introduced timestamp field
         if (groupContact.getCreatedTimeStamp() == null) {
             groupContact.setCreatedTimeStamp(new Date());
         }
@@ -3256,6 +3258,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             return;
         }
 
+        // ensure that a timestamp is set, this is a manual migration step for the newly introduced timestamp field
         if (groupContact.getCreatedTimeStamp() == null) {
             groupContact.setCreatedTimeStamp(new Date());
             updated = true;
