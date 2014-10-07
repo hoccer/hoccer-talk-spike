@@ -84,9 +84,9 @@ public class ChatImageItem extends ChatMessageItem {
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
 
+        // we need to copy the background to rootview which will have the correct bubble size
         rootView.setBackgroundDrawable(mAttachmentView.getBackground());
         rootView.setPadding(0, 0, 0, 0);
-
         mAttachmentView.setBackgroundDrawable(null);
         mAttachmentView.setPadding(0, 0, 0, 0);
 
