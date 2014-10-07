@@ -18,11 +18,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static junit.framework. TestCase.assertTrue;
-import static junit.framework. TestCase.assertFalse;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.fail;
+import static junit.framework.TestCase.*;
 
 public class MediaCollectionTest {
 
@@ -82,7 +78,7 @@ public class MediaCollectionTest {
         TalkClientMediaCollection collection = null;
         try {
             collection = mDatabase.createMediaCollection(collectionName);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
         }
@@ -98,7 +94,7 @@ public class MediaCollectionTest {
         TalkClientMediaCollection collectionCopy = null;
         try {
             collectionCopy = mDatabase.findMediaCollectionById(collection.getId());
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
         }
@@ -110,7 +106,7 @@ public class MediaCollectionTest {
         // check database directly
         List<TalkClientMediaCollection> collections = null;
         try {
-        collections = mDatabase.findAllMediaCollections();
+            collections = mDatabase.findAllMediaCollections();
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -129,7 +125,7 @@ public class MediaCollectionTest {
         TalkClientMediaCollection collection = null;
         try {
             collection = mDatabase.createMediaCollection(collectionName);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
         }
@@ -186,7 +182,7 @@ public class MediaCollectionTest {
         TalkClientMediaCollection collection = null;
         try {
             collection = mDatabase.createMediaCollection(collectionName);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
         }
@@ -289,7 +285,7 @@ public class MediaCollectionTest {
         List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
         assertNotNull(relations);
         assertEquals(itemCount, relations.size());
-        for(int i = 0; i < itemCount; i++) {
+        for (int i = 0; i < itemCount; i++) {
             assertEquals(i, relations.get(i).getIndex());
             assertEquals(items.get(i).getTransferId(), relations.get(i).getTransferItem().getTransferId());
         }
@@ -702,7 +698,7 @@ public class MediaCollectionTest {
         boolean exceptionThrown = false;
         try {
             collection.reorderItemIndex(1, -1);
-        } catch(IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             exceptionThrown = true;
         }
 
@@ -736,7 +732,7 @@ public class MediaCollectionTest {
         exceptionThrown = false;
         try {
             collection.reorderItemIndex(3, 6);
-        } catch(IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             exceptionThrown = true;
         }
 
@@ -818,7 +814,7 @@ public class MediaCollectionTest {
 
         assertEquals(1, listenerTester.onNameChangedCalled.size());
         assertEquals(collection, listenerTester.onNameChangedCalled.get(0).args[0]);
-        assertEquals(expectedCollectionName, ((TalkClientMediaCollection)listenerTester.onNameChangedCalled.get(0).args[0]).getName());
+        assertEquals(expectedCollectionName, ((TalkClientMediaCollection) listenerTester.onNameChangedCalled.get(0).args[0]).getName());
 
         assertEquals(1, listenerTester.onItemOrderChangedCalled.size());
         assertEquals(collection, listenerTester.onItemOrderChangedCalled.get(0).args[0]);
@@ -897,7 +893,7 @@ public class MediaCollectionTest {
 
         int itemCount = 10;
         ArrayList<TalkClientDownload> expectedItemList = new ArrayList<TalkClientDownload>();
-        for(int i = 0; i < itemCount; i++) {
+        for (int i = 0; i < itemCount; i++) {
             expectedItemList.add(new TalkClientDownload());
         }
 
@@ -905,7 +901,7 @@ public class MediaCollectionTest {
             collection = mDatabase.createMediaCollection(collectionName);
 
             // create some items and addItem to collection
-            for(int i = 0; i < itemCount; i++) {
+            for (int i = 0; i < itemCount; i++) {
                 mDatabase.saveClientDownload(expectedItemList.get(i));
                 collection.addItem(expectedItemList.get(i));
             }
@@ -915,7 +911,7 @@ public class MediaCollectionTest {
         }
 
         int index = 0;
-        for(XoTransfer item : collection) {
+        for (XoTransfer item : collection) {
             assertEquals(expectedItemList.get(index++), item);
         }
 
@@ -924,7 +920,7 @@ public class MediaCollectionTest {
         int removeIndex = 2;
         for (Iterator<XoTransfer> iterator = collection.iterator();
              iterator.hasNext(); ) {
-            if(index == removeIndex) {
+            if (index == removeIndex) {
                 iterator.remove();
                 break;
             }
@@ -936,7 +932,7 @@ public class MediaCollectionTest {
         expectedItemList.remove(removeIndex);
 
         index = 0;
-        for(XoTransfer item : collection) {
+        for (XoTransfer item : collection) {
             assertEquals(expectedItemList.get(index++), item);
         }
     }
@@ -996,13 +992,13 @@ public class MediaCollectionTest {
 
         int itemCount = 10;
         ArrayList<TalkClientDownload> expectedItemList = new ArrayList<TalkClientDownload>();
-        for(int i = 0; i < itemCount; i++) {
+        for (int i = 0; i < itemCount; i++) {
             expectedItemList.add(new TalkClientDownload());
         }
         try {
             collection = mDatabase.createMediaCollection(collectionName);
 
-            for(TalkClientDownload item : expectedItemList) {
+            for (TalkClientDownload item : expectedItemList) {
                 mDatabase.saveClientDownload(item);
                 collection.addItem(item);
             }
@@ -1016,7 +1012,7 @@ public class MediaCollectionTest {
         assertEquals(expectedItemList.size(), itemList.size());
 
         int index = 0;
-        for(TalkClientDownload item : expectedItemList) {
+        for (TalkClientDownload item : expectedItemList) {
             assertEquals(item, itemList.get(index++));
         }
     }
@@ -1067,6 +1063,7 @@ public class MediaCollectionTest {
 
     private class ValueContainer<T> {
         public T value;
+
         public ValueContainer(T initValue) {
             value = initValue;
         }
@@ -1076,12 +1073,12 @@ public class MediaCollectionTest {
 
         List<TalkClientMediaCollectionRelation> relations = null;
         try {
-             relations = database.getMediaCollectionRelationDao().queryBuilder()
+            relations = database.getMediaCollectionRelationDao().queryBuilder()
                     .orderBy("index", true)
                     .where()
                     .eq("collection_id", collectionId)
                     .query();
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
         }
