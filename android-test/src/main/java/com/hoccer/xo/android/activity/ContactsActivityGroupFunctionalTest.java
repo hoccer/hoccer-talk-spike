@@ -15,7 +15,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.*;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.fragment.GroupListFragment;
-import com.hoccer.xo.android.fragment.GroupsAdapter;
+import com.hoccer.xo.android.adapter.GroupsAdapter;
 
 import java.sql.SQLException;
 

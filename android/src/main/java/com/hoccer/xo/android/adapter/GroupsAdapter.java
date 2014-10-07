@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.fragment;
+package com.hoccer.xo.android.adapter;
 
 import android.app.Activity;
 import android.content.Context;
@@ -87,7 +87,7 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
         LinearLayout invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
         Button acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
         Button declineButton = (Button) convertView.findViewById(R.id.btn_decline);
-        TextView isJoinedTextView = (TextView) convertView.findViewById(R.id.is_joined);
+        TextView isJoinedTextView = (TextView) convertView.findViewById(R.id.tv_is_joined);
 
         final TalkClientContact group = (TalkClientContact) getItem(position);
 
