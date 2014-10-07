@@ -21,6 +21,8 @@ import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
@@ -30,13 +32,37 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
     private List<TalkClientContact> mClients = new ArrayList<TalkClientContact>();
 
     public ClientsAdapter(Activity activity) {
+        mActivity = activity;
+        mClients = getAllClientContacts();
+    }
+
+    private List<TalkClientContact> getAllClientContacts() {
+
+        List<TalkClientContact> invitedMe = null;
+        List<TalkClientContact> invited = null;
+        List<TalkClientContact> friends = null;
         try {
-            mActivity = activity;
-            mClients = XoApplication.getXoClient().getDatabase().findAllClientContacts();
-            sortTalkClientContacts();
+            invitedMe = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_INVITED_ME);
+            invited = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_INVITED);
+            friends = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        Comparator comparator = new Comparator<TalkClientContact>() {
+            @Override
+            public int compare(TalkClientContact o1, TalkClientContact o2) {
+                return o1.getNickname().compareTo(o2.getNickname());
+            }
+        };
+
+        Collections.sort(invited, comparator);
+        Collections.sort(friends, comparator);
+
+        invited.addAll(friends);
+        invitedMe.addAll(invited);
+
+        return invitedMe;
     }
 
     @Override
@@ -139,22 +165,13 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
         mClients.clear();
-        try {
-            mClients = XoApplication.getXoClient().getDatabase().findAllClientContacts();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        sortTalkClientContacts();
-
+        mClients = getAllClientContacts();
         refreshView();
     }
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-        // remove contact from list
         mClients.remove(contact);
-        // update
-
         notifyDataSetChanged();
     }
 
@@ -172,30 +189,6 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-    }
-
-    private void sortTalkClientContacts() {
-        List<TalkClientContact> invitedMeClients = new ArrayList<TalkClientContact>();
-        List<TalkClientContact> invitedClients = new ArrayList<TalkClientContact>();
-        List<TalkClientContact> friendClients = new ArrayList<TalkClientContact>();
-
-        for (TalkClientContact client : mClients) {
-            TalkRelationship relationship = client.getClientRelationship();
-            if (relationship != null) {
-                if (relationship.invitedMe()) {
-                    invitedMeClients.add(client);
-                } else if (relationship.isInvited()) {
-                    invitedClients.add(client);
-                } else if (relationship.isFriend()) {
-                    friendClients.add(client);
-                }
-            }
-        }
-
-        invitedClients.addAll(friendClients);
-        invitedMeClients.addAll(invitedClients);
-
-        mClients = invitedMeClients;
     }
 
     private void refreshView() {
