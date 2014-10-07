@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.hoccer.talk.util.Comparer.isEqual;
+
 @DatabaseTable(tableName = "relationship")
 public class TalkRelationship {
 
@@ -31,6 +33,7 @@ public class TalkRelationship {
         return STATES_VALID_SET.contains(state);
     }
 
+    // needed for ormlight database
     private String _id;
 
     @DatabaseField(generatedId = true)
@@ -50,9 +53,6 @@ public class TalkRelationship {
 
     @DatabaseField
     Date lastChanged;
-
-    public TalkRelationship() {
-    }
 
     @JsonIgnore
     public boolean isRelated() {
@@ -105,7 +105,6 @@ public class TalkRelationship {
         this.otherClientId = otherClientId;
     }
 
-//    @Nullable
     public String getState() {
         return state;
     }
@@ -134,11 +133,29 @@ public class TalkRelationship {
     }
 
     @JsonIgnore
-    public void updateWith(TalkRelationship r) {
-        this.setClientId(r.getClientId());
-        this.setOtherClientId(r.getOtherClientId());
-        this.setState(r.getState());
-        this.setLastChanged(r.getLastChanged());
-    }
+    public boolean updateWith(final TalkRelationship other) {
+        boolean updated = false;
 
+        if(!isEqual(clientId, other.clientId)) {
+            clientId = other.clientId;
+            updated = true;
+        }
+
+        if(!isEqual(otherClientId, other.otherClientId)) {
+            otherClientId = other.otherClientId;
+            updated = true;
+        }
+
+        if(!isEqual(state, other.state)) {
+            state = other.state;
+            updated = true;
+        }
+
+        if(!isEqual(lastChanged, other.lastChanged)) {
+            lastChanged = other.lastChanged;
+            updated = true;
+        }
+
+        return updated;
+    }
 }

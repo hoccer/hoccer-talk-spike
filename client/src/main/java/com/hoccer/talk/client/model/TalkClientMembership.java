@@ -48,12 +48,16 @@ public class TalkClientMembership {
         return member;
     }
 
-    public void updateGroupMember(TalkGroupMember member) {
+    public boolean updateGroupMember(TalkGroupMember member) {
+        boolean updated;
         if(this.member == null) {
             this.member = member;
+            updated = true;
         } else {
-            this.member.updateWith(member);
+            updated = this.member.updateWith(member);
         }
+
+        return updated;
     }
 
     public boolean hasLatestGroupKey() {

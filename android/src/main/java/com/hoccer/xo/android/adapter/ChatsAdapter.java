@@ -63,32 +63,36 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
     }
 
     public void loadContacts() {
-        synchronized (this) {
-            int oldItemCount = mContactItems.size();
-            mContactItems.clear();
-            try {
-                List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
-                for (TalkClientContact contact : filteredContacts) {
-                    mContactItems.add(new TalkClientContactItem(contact, mActivity));
+        try {
+            final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
+            final List<TalkClientSmsToken> allSmsTokens = mDatabase.findAllSmsTokens();
+            final long nearbyMessageCount = mDatabase.getNearbyMessageCount();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    final int oldItemCount = mContactItems.size();
+                    mContactItems.clear();
+
+                    for (final TalkClientContact contact : filteredContacts) {
+                        mContactItems.add(new TalkClientContactItem(contact, mActivity));
+                    }
+
+                    for (final TalkClientSmsToken smsToken : allSmsTokens) {
+                        mContactItems.add(new SmsContactItem(smsToken, mActivity));
+                    }
+
+                    if (nearbyMessageCount > 0) {
+                        mContactItems.add(new NearbyGroupContactItem());
+                    }
+
+                    checkItemCountAndNotify(oldItemCount);
+                    notifyDataSetChanged();
+                    reloadFinished();
                 }
-
-                List<TalkClientSmsToken> allSmsTokens = mDatabase.findAllSmsTokens();
-                for (TalkClientSmsToken smsToken : allSmsTokens) {
-                    mContactItems.add(new SmsContactItem(smsToken, mActivity));
-                }
-
-                long nearbyMessageCount = mDatabase.getNearbyMessageCount();
-                if (nearbyMessageCount > 0) {
-                    mContactItems.add(new NearbyGroupContactItem());
-                }
-
-                checkItemCountAndNotify(oldItemCount);
-
-                notifyDataSetChanged();
-                reloadFinished();
-            } catch (SQLException e) {
-                LOG.error("sql error", e);
-            }
+            });
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
         }
     }
 
@@ -295,12 +299,7 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
 
     @Override
     public void onGroupMembershipChanged(final TalkClientContact contact) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                loadContacts();
-            }
-        });
+        loadContacts();
     }
 
     @Override
