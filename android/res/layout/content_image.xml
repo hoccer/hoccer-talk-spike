@@ -14,14 +14,4 @@
     android:id="@+id/iv_picture_overlay"
     android:layout_width="match_parent"
     android:layout_height="match_parent"/>
-
-  <TextView
-    android:id="@+id/tv_image_preview_error"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-
-    android:layout_centerInParent="true"
-    android:gravity="center_horizontal"
-    android:text="@string/image_preview_error"
-    android:textColor="#66000000"/>
 </RelativeLayout>
