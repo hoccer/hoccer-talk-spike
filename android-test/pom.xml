@@ -17,7 +17,7 @@
 
   <name>Hoccer Talk Tests for Android</name>
   <artifactId>hoccer-talk-android-test</artifactId>
-  <version>2.3.0-SNAPSHOT</version>
+  <version>3.0.0-SNAPSHOT</version>
 
   <dependencies>
 
@@ -40,7 +40,7 @@
       <groupId>hoccer</groupId>
       <artifactId>hoccer-talk-android</artifactId>
       <type>apk</type>
-      <version>2.3.0-SNAPSHOT</version>
+      <version>3.0.0-SNAPSHOT</version>
     </dependency>
 
     <!-- enable the compiler to find your java classes from the main project-->
@@ -49,7 +49,7 @@
       <artifactId>hoccer-talk-android</artifactId>
       <scope>provided</scope>
       <type>jar</type>
-      <version>2.3.0-SNAPSHOT</version>
+      <version>3.0.0-SNAPSHOT</version>
     </dependency>
 
     <!-- exclude (provide) dependencies that are already included in the android apk to prevent duplication error -->
