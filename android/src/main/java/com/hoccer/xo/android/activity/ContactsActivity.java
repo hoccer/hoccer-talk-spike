@@ -22,7 +22,7 @@ public class ContactsActivity extends ComposableActivity {
 
     @Override
     protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[] {
+        return new ActivityComponent[]{
                 new MediaPlayerActivityComponent(this),
                 new ViewPagerActivityComponent(this,
                         R.id.pager,
