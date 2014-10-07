@@ -15,6 +15,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
+import com.hoccer.xo.android.adapter.GroupsAdapter;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
 
