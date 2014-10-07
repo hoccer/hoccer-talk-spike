@@ -160,7 +160,7 @@
     <string name="friend_request_accept_invitation">Accept invitation</string>
     <string name="friend_request_decline_invitation">Decline invitation</string>
     <string name="friend_request_invited_me_description">wants to be your friend.</string>
-    <string name="friend_request_invite_send">Invite send</string>
+    <string name="friend_request_invite_send">Invite sent</string>
 
     <string name="group_name_hint">Group name</string>
     <string name="profile_group_members_title">Members</string>
