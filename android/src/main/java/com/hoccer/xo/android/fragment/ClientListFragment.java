@@ -77,8 +77,6 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
             mNotificationBadgeTextView.setVisibility(View.VISIBLE);
         }
         mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
-        XoApplication.getXoClient().registerContactListener(mClientsAdapter);
-        XoApplication.getXoClient().registerContactListener(this);
     }
 
     @Override
