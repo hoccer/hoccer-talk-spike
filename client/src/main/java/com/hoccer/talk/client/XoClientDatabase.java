@@ -166,7 +166,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public void saveClientDownload(TalkClientDownload download) throws SQLException {
         Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
 
-        if(result.isCreated()) {
+        if (result.isCreated()) {
             for (IXoDownloadListener listener : mDownloadListeners) {
                 listener.onDownloadCreated(download);
             }
@@ -180,7 +180,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public void saveClientUpload(TalkClientUpload upload) throws SQLException {
         Dao.CreateOrUpdateStatus result = mClientUploads.createOrUpdate(upload);
 
-        if(result.isCreated()) {
+        if (result.isCreated()) {
             for (IXoUploadListener listener : mUploadListeners) {
                 listener.onUploadCreated(upload);
             }
@@ -568,11 +568,11 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
         List<TalkClientUpload> uploads = mClientUploads.queryBuilder()
-            .where()
-            .eq("mediaType", mediaType)
-            .isNotNull("contentUrl")
-            .and(2)
-            .query();
+                .where()
+                .eq("mediaType", mediaType)
+                .isNotNull("contentUrl")
+                .and(2)
+                .query();
 
         List<TalkClientDownload> downloads = mClientDownloads.queryForEq("mediaType", mediaType);
 
@@ -1012,10 +1012,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public void deleteTransferAndMessage(XoTransfer transfer) throws SQLException {
         switch (transfer.getDirection()) {
             case UPLOAD:
-                deleteClientUploadAndMessage((TalkClientUpload)transfer);
+                deleteClientUploadAndMessage((TalkClientUpload) transfer);
                 break;
             case DOWNLOAD:
-                deleteClientDownloadAndMessage((TalkClientDownload)transfer);
+                deleteClientDownloadAndMessage((TalkClientDownload) transfer);
                 break;
         }
     }
