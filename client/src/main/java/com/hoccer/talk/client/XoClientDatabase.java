@@ -245,12 +245,45 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
     }
 
+    public List<TalkClientContact> findClientContactsByState(String state) throws SQLException {
+        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
+        List<TalkRelationship> relationships = mRelationships.queryBuilder()
+                .where()
+                .eq("state", state)
+                .query();
+        for (TalkRelationship relationship : relationships) {
+            TalkClientContact contact = findContactByClientId(relationship.getOtherClientId(), false);
+            if (contact != null) {
+                contacts.add(contact);
+            }
+        }
+        return contacts;
+    }
+
     public List<TalkClientContact> findAllGroupContacts() throws SQLException {
         return mClientContacts.queryBuilder().where()
                 .eq("contactType", TalkClientContact.TYPE_GROUP)
                 .eq("deleted", false)
                 .and(2)
                 .query();
+    }
+
+    public List<TalkClientContact> findGroupContactsByState(String state) throws SQLException {
+
+        List<TalkClientContact> result = new ArrayList<TalkClientContact>();
+
+        List<TalkClientContact> groupContacts = mClientContacts.queryBuilder().where()
+                .eq("contactType", TalkClientContact.TYPE_GROUP)
+                .eq("deleted", false)
+                .and(2)
+                .query();
+        for (TalkClientContact groupContact : groupContacts) {
+            if (groupContact.getGroupMember().getState().equals(state)) {
+                result.add(groupContact);
+            }
+        }
+
+        return result;
     }
 
     public int findGroupMemberCountForGroup(TalkClientContact groupContact) throws SQLException {
