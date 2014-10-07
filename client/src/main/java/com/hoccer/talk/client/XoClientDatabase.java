@@ -246,7 +246,8 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findClientContactsByState(String state) throws SQLException {
-        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
+        List<TalkClientContact> result = new ArrayList<TalkClientContact>();
+        Set<TalkClientContact> contacts = new HashSet<TalkClientContact>();
         List<TalkRelationship> relationships = mRelationships.queryBuilder()
                 .where()
                 .eq("state", state)
@@ -257,7 +258,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 contacts.add(contact);
             }
         }
-        return contacts;
+
+        result.addAll(contacts);
+        return result;
     }
 
     public List<TalkClientContact> findAllGroupContacts() throws SQLException {
