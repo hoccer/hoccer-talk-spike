@@ -80,8 +80,8 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroy() {
+        super.onDestroy();
         XoApplication.getXoClient().unregisterContactListener(mClientsAdapter);
         XoApplication.getXoClient().unregisterContactListener(this);
     }
