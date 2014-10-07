@@ -321,50 +321,61 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
     }
 
     public void testClientListSorting() {
-        mockClientRelationship(TalkRelationship.STATE_FRIEND, 1);
-        mockClientRelationship(TalkRelationship.STATE_INVITED, 2);
-        mockClientRelationship(TalkRelationship.STATE_INVITED_ME, 3);
-        mockClientRelationship(TalkRelationship.STATE_INVITED, 4);
-        mockClientRelationship(TalkRelationship.STATE_INVITED, 5);
-        mockClientRelationship(TalkRelationship.STATE_FRIEND, 6);
-        mockClientRelationship(TalkRelationship.STATE_INVITED_ME, 7);
+        mockClientRelationship(TalkRelationship.STATE_FRIEND, 1, "H");
+        mockClientRelationship(TalkRelationship.STATE_INVITED, 2, "D");
+        mockClientRelationship(TalkRelationship.STATE_INVITED_ME, 3, "B");
+        mockClientRelationship(TalkRelationship.STATE_INVITED, 4, "E");
+        mockClientRelationship(TalkRelationship.STATE_INVITED, 5, "C");
+        mockClientRelationship(TalkRelationship.STATE_FRIEND, 6, "I");
+        mockClientRelationship(TalkRelationship.STATE_INVITED_ME, 7, "A");
+        mockClientRelationship(TalkRelationship.STATE_FRIEND, 8, "F");
+        mockClientRelationship(TalkRelationship.STATE_FRIEND, 9, "G");
 
         clientsAdapter.onClientRelationshipChanged(null);
 
-        assertEquals(7, clientsAdapter.getCount());
+        assertEquals(9, clientsAdapter.getCount());
 
-        // invited me contacts
+        // invited me contacts - ordered chronologically
         TalkClientContact contact1 = (TalkClientContact) clientsAdapter.getItem(0);
-        assertEquals("3", contact1.getClientId());
+        assertEquals("B", contact1.getName());
 
         TalkClientContact contact2 = (TalkClientContact) clientsAdapter.getItem(1);
-        assertEquals("7", contact2.getClientId());
+        assertEquals("A", contact2.getName());
 
-        // invited others
+        // invited others - ordered alphabetically
         TalkClientContact contact3 = (TalkClientContact) clientsAdapter.getItem(2);
-        assertEquals("2", contact3.getClientId());
+        assertEquals("C", contact3.getName());
 
         TalkClientContact contact4 = (TalkClientContact) clientsAdapter.getItem(3);
-        assertEquals("4", contact4.getClientId());
+        assertEquals("D", contact4.getName());
 
         TalkClientContact contact5 = (TalkClientContact) clientsAdapter.getItem(4);
-        assertEquals("5", contact5.getClientId());
+        assertEquals("E", contact5.getName());
 
-        // friends
+        // friends - ordered alphabetically
         TalkClientContact contact6 = (TalkClientContact) clientsAdapter.getItem(5);
-        assertEquals("1", contact6.getClientId());
+        assertEquals("F", contact6.getName());
 
         TalkClientContact contact7 = (TalkClientContact) clientsAdapter.getItem(6);
-        assertEquals("6", contact7.getClientId());
+        assertEquals("G", contact7.getName());
+
+        TalkClientContact contact8 = (TalkClientContact) clientsAdapter.getItem(7);
+        assertEquals("H", contact8.getName());
+
+        TalkClientContact contact9 = (TalkClientContact) clientsAdapter.getItem(8);
+        assertEquals("I", contact9.getName());
     }
 
-
     private TalkClientContact mockClientRelationship(String state, int clientId) {
+        return mockClientRelationship(state, clientId, OTHER_CLIENT_NAME_PREFIX + clientId);
+    }
+
+    private TalkClientContact mockClientRelationship(String state, int clientId, String clientName) {
 
         final TalkClientContact relatedContact = new TalkClientContact(TalkClientContact.TYPE_CLIENT, Integer.toString(clientId));
 
         TalkPresence presence = new TalkPresence();
-        presence.setClientName(OTHER_CLIENT_NAME_PREFIX + clientId);
+        presence.setClientName(clientName);
         presence.setClientId(Integer.toString(clientId));
 
         String selfContactId = XoApplication.getXoClient().getSelfContact().getClientId();
