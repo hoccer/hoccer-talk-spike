@@ -35,12 +35,15 @@ public abstract class ComposableActivity extends XoActivity {
         return null;
     }
 
+    public ComposableActivity() {
+        super();
+
+        mComponents = createComponents();
+    }
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // set list of components
-        mComponents = createComponents();
 
         for (final ActivityComponent component : mComponents) {
             component.onCreate(savedInstanceState);
