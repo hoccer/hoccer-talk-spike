@@ -52,8 +52,8 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
         Comparator comparator = new Comparator<TalkClientContact>() {
             @Override
-            public int compare(TalkClientContact o1, TalkClientContact o2) {
-                return o1.getNickname().compareTo(o2.getNickname());
+            public int compare(TalkClientContact contact1, TalkClientContact contact2) {
+                return contact1.getNickname().compareTo(contact2.getNickname());
             }
         };
 
@@ -175,8 +175,9 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-        mClients.remove(contact);
-        notifyDataSetChanged();
+        mClients.clear();
+        mClients = getAllClientContacts();
+        refreshView();
     }
 
     @Override
@@ -185,7 +186,11 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
+        mClients.clear();
+        mClients = getAllClientContacts();
+        refreshView();
     }
+
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
