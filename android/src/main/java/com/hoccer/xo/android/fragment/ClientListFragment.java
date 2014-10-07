@@ -64,6 +64,9 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
 
         mNotificationBadgeTextView = (TextView) getCustomTabView(getActivity()).findViewById(R.id.tv_contact_invite_notification_badge);
         setListAdapter(mClientsAdapter);
+
+        XoApplication.getXoClient().registerContactListener(mClientsAdapter);
+        XoApplication.getXoClient().registerContactListener(this);
     }
 
     @Override
