@@ -59,6 +59,8 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mClientsAdapter = new ClientsAdapter(getActivity());
+
+        mTabView = LayoutInflater.from(getActivity()).inflate(R.layout.view_contacts_tab_friends, null);
         mNotificationBadgeTextView = (TextView) mTabView.findViewById(R.id.tv_contact_invite_notification_badge);
         setListAdapter(mClientsAdapter);
     }
@@ -112,8 +114,7 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
 
     @Override
     public View getCustomTabView(Context context) {
-        mTabView = LayoutInflater.from(context).inflate(R.layout.view_contacts_tab_friends, null);
-        return mTabView;
+        return LayoutInflater.from(context).inflate(R.layout.view_contacts_tab_friends, null);
     }
 
     @Override
