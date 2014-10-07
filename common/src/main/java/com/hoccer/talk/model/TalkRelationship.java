@@ -33,6 +33,9 @@ public class TalkRelationship {
         return STATES_VALID_SET.contains(state);
     }
 
+    // needed for ormlight database
+    private String _id;
+
     @DatabaseField(generatedId = true)
     private long relationshipId;
 
