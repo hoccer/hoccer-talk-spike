@@ -21,20 +21,6 @@ public abstract class ComposableActivity extends XoActivity {
      */
     protected abstract ActivityComponent[] createComponents();
 
-    /*
-     * Returns the first component of the given type or null.
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends ActivityComponent> T getComponent(final Class<T> clazz) {
-        for (final ActivityComponent component : mComponents) {
-            if (clazz.equals(component.getClass())) {
-                return (T) component;
-            }
-        }
-
-        return null;
-    }
-
     public ComposableActivity() {
         super();
 
