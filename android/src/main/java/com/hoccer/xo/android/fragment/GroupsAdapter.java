@@ -21,6 +21,8 @@ import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
@@ -30,13 +32,31 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
     private Activity mActivity;
 
     public GroupsAdapter(Activity activity) {
+        mActivity = activity;
+        mGroups = getAllGroupContacts();
+    }
+
+    private List<TalkClientContact> getAllGroupContacts() {
+
+        List<TalkClientContact> invitedMe = null;
+        List<TalkClientContact> joined = null;
         try {
-            mActivity = activity;
-            mGroups = XoApplication.getXoClient().getDatabase().findAllGroupContacts();
-            sortGroupContacts();
+            invitedMe = XoApplication.getXoClient().getDatabase().findGroupContactsByState(TalkGroupMember.STATE_INVITED);
+            joined = XoApplication.getXoClient().getDatabase().findGroupContactsByState(TalkGroupMember.STATE_JOINED);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        Collections.sort(joined, new Comparator<TalkClientContact>() {
+            @Override
+            public int compare(TalkClientContact o1, TalkClientContact o2) {
+                return o1.getNickname().compareTo(o2.getNickname());
+            }
+        });
+
+        invitedMe.addAll(joined);
+
+        return invitedMe;
     }
 
     @Override
@@ -108,26 +128,6 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
         return convertView;
     }
 
-    private void sortGroupContacts() {
-        List<TalkClientContact> invitedMeGroups = new ArrayList<TalkClientContact>();
-        List<TalkClientContact> joinedGroups = new ArrayList<TalkClientContact>();
-
-        for (TalkClientContact group : mGroups) {
-            TalkGroupMember member = group.getGroupMember();
-            if (member != null) {
-                if (member.isInvited()){
-                    invitedMeGroups.add(group);
-                } else if (member.isJoined()) {
-                    joinedGroups.add(group);
-                }
-            }
-        }
-
-        invitedMeGroups.addAll(joinedGroups);
-
-        mGroups = invitedMeGroups;
-    }
-
     @Override
     public void onContactAdded(TalkClientContact contact) {
 
@@ -155,12 +155,7 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        try {
-            mGroups = XoApplication.getXoClient().getDatabase().findAllGroupContacts();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        sortGroupContacts();
+        mGroups = getAllGroupContacts();
         refreshView();
     }
 
