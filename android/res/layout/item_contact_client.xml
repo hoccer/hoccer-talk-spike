@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/contact_icon"
             android:layout_below="@+id/contact_name"
-            android:text="@string/friend_request_invited_by_you_description"
+            android:text="@string/friend_request_invite_send"
             android:textSize="15dp"
             android:visibility="gone"
             style="@style/AppBaseTheme.Contact.LastMessage"/>

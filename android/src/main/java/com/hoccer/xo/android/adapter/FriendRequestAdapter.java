@@ -77,7 +77,7 @@ public class FriendRequestAdapter extends XoAdapter {
         if (contact.getClientRelationship().invitedMe()) {
             descriptionView.setText(R.string.friend_request_invited_me_description);
         } else {
-            descriptionView.setText(R.string.friend_request_invited_by_you_description);
+            descriptionView.setText(R.string.friend_request_invite_send);
         }
 
         return view;
