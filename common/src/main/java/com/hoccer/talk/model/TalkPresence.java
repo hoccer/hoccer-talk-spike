@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.hoccer.talk.util.Comparer.isEqual;
+
 @DatabaseTable(tableName = "presence")
 public class TalkPresence {
 
@@ -139,39 +141,101 @@ public class TalkPresence {
     }
 
     @JsonIgnore
-    public void updateWith(TalkPresence p) {
-        this.setClientId(p.getClientId());
-        this.setClientName(p.getClientName());
-        this.setClientStatus(p.getClientStatus());
-        this.setTimestamp(p.getTimestamp());
-        this.setAvatarUrl(p.getAvatarUrl());
-        this.setKeyId(p.getKeyId());
-        this.setConnectionStatus(p.getConnectionStatus());
+    public boolean updateWith(final TalkPresence other) {
+        boolean updated = false;
+
+        if(!isEqual(clientId, other.clientId)) {
+            clientId = other.clientId;
+            updated = true;
+        }
+
+        if(!isEqual(clientName, other.clientName)) {
+            clientName = other.clientName;
+            updated = true;
+        }
+
+        if(!isEqual(clientStatus, other.clientStatus)) {
+            clientStatus = other.clientStatus;
+            updated = true;
+        }
+
+        if(!isEqual(timestamp, other.timestamp)) {
+            timestamp = other.timestamp;
+            updated = true;
+        }
+
+        if(!isEqual(avatarUrl, other.avatarUrl)) {
+            avatarUrl = other.avatarUrl;
+            updated = true;
+        }
+
+        if(!isEqual(keyId, other.keyId)) {
+            keyId = other.keyId;
+            updated = true;
+        }
+
+        if(!isEqual(connectionStatus, other.connectionStatus)) {
+            connectionStatus = other.connectionStatus;
+            updated = true;
+        }
+
+        return updated;
     }
 
     @JsonIgnore
-    public void updateWith(TalkPresence p, Set<String> fields) {
+    public boolean updateWith(final TalkPresence other, final Set<String> fields) {
+        boolean updated = false;
+
         if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_ID)) {
-            this.setClientId(p.getClientId());
+            if(!isEqual(clientId, other.clientId)) {
+                clientId = other.clientId;
+                updated = true;
+            }
         }
+
         if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_NAME)) {
-            this.setClientName(p.getClientName());
+            if(!isEqual(clientName, other.clientName)) {
+                clientName = other.clientName;
+                updated = true;
+            }
         }
+
         if (fields == null || fields.contains(TalkPresence.FIELD_CLIENT_STATUS)) {
-            this.setClientStatus(p.getClientStatus());
+            if(!isEqual(clientStatus, other.clientStatus)) {
+                clientStatus = other.clientStatus;
+                updated = true;
+            }
         }
+
         if (fields == null || fields.contains(TalkPresence.FIELD_TIMESTAMP)) {
-            this.setTimestamp(p.getTimestamp());
+            if(!isEqual(timestamp, other.timestamp)) {
+                timestamp = other.timestamp;
+                updated = true;
+            }
         }
+
         if (fields == null || fields.contains(TalkPresence.FIELD_AVATAR_URL)) {
-            this.setAvatarUrl(p.getAvatarUrl());
+            if(!isEqual(avatarUrl, other.avatarUrl)) {
+                avatarUrl = other.avatarUrl;
+                updated = true;
+            }
         }
+
         if (fields == null || fields.contains(TalkPresence.FIELD_KEY_ID)) {
-            this.setKeyId(p.getKeyId());
+            if(!isEqual(keyId, other.keyId)) {
+                keyId = other.keyId;
+                updated = true;
+            }
         }
+
         if (fields == null || fields.contains(TalkPresence.FIELD_CONNECTION_STATUS)) {
-            this.setConnectionStatus(p.getConnectionStatus());
+            if(!isEqual(connectionStatus, other.connectionStatus)) {
+                connectionStatus = other.connectionStatus;
+                updated = true;
+            }
         }
+
+        return updated;
     }
 
     @JsonIgnore
@@ -200,5 +264,4 @@ public class TalkPresence {
         }
         return result;
     }
-
 }
