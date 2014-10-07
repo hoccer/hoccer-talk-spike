@@ -89,6 +89,7 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
     }
 
     boolean ready = false;
+
     public void testInvitedMeRelationUI() throws InterruptedException {
 
         mockGroupRelationship(TalkGroupMember.STATE_INVITED, "1");
@@ -201,16 +202,16 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
 
     @UiThreadTest
     public void testGroupListSorting() {
-        mockGroupRelationship(TalkGroupMember.STATE_JOINED, "1");
-        mockGroupRelationship(TalkGroupMember.STATE_INVITED, "2");
-        mockGroupRelationship(TalkGroupMember.STATE_JOINED, "3");
-        mockGroupRelationship(TalkGroupMember.STATE_INVITED, "4");
-        mockGroupRelationship(TalkGroupMember.STATE_JOINED, "5");
-        mockGroupRelationship(TalkGroupMember.STATE_INVITED, "6");
-        mockGroupRelationship(TalkGroupMember.STATE_JOINED, "7");
-        mockGroupRelationship(TalkGroupMember.STATE_INVITED, "8");
-        mockGroupRelationship(TalkGroupMember.STATE_JOINED, "9");
-        mockGroupRelationship(TalkGroupMember.STATE_INVITED, "10");
+        mockGroupRelationship(TalkGroupMember.STATE_JOINED, "1", "J");
+        mockGroupRelationship(TalkGroupMember.STATE_INVITED, "2", "A");
+        mockGroupRelationship(TalkGroupMember.STATE_JOINED, "3", "H");
+        mockGroupRelationship(TalkGroupMember.STATE_INVITED, "4", "B");
+        mockGroupRelationship(TalkGroupMember.STATE_JOINED, "5", "I");
+        mockGroupRelationship(TalkGroupMember.STATE_INVITED, "6", "C");
+        mockGroupRelationship(TalkGroupMember.STATE_JOINED, "7", "G");
+        mockGroupRelationship(TalkGroupMember.STATE_INVITED, "8", "D");
+        mockGroupRelationship(TalkGroupMember.STATE_JOINED, "9", "F");
+        mockGroupRelationship(TalkGroupMember.STATE_INVITED, "10", "E");
 
         assertEquals(10, groupsAdapter.getCount());
 
@@ -226,21 +227,25 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
         TalkClientContact group10 = (TalkClientContact) groupsAdapter.getItem(9);
 
         // invited to group
-        assertEquals("2", group1.getGroupId());
-        assertEquals("4", group2.getGroupId());
-        assertEquals("6", group3.getGroupId());
-        assertEquals("8", group4.getGroupId());
-        assertEquals("10", group5.getGroupId());
+        assertEquals("A", group1.getNickname());
+        assertEquals("B", group2.getNickname());
+        assertEquals("C", group3.getNickname());
+        assertEquals("D", group4.getNickname());
+        assertEquals("E", group5.getNickname());
 
         // joined group
-        assertEquals("1", group6.getGroupId());
-        assertEquals("3", group7.getGroupId());
-        assertEquals("5", group8.getGroupId());
-        assertEquals("7", group9.getGroupId());
-        assertEquals("9", group10.getGroupId());
+        assertEquals("F", group6.getNickname());
+        assertEquals("G", group7.getNickname());
+        assertEquals("H", group8.getNickname());
+        assertEquals("I", group9.getNickname());
+        assertEquals("J", group10.getNickname());
     }
 
     private void mockGroupRelationship(String state, String groupId) {
+        mockGroupRelationship(state, groupId, GROUP_NAME_PREFIX + groupId);
+    }
+
+    private void mockGroupRelationship(String state, String groupId, String groudName) {
 
         TalkClientContact groupContact = TalkClientContact.createGroupContact();
         groupContact.updateGroupId(groupId);
@@ -248,7 +253,7 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
         TalkGroup groupPresence = new TalkGroup();
         groupPresence.setGroupId(groupContact.getGroupId());
         groupPresence.setGroupTag(groupContact.getGroupTag());
-        groupPresence.setGroupName(GROUP_NAME_PREFIX + groupId);
+        groupPresence.setGroupName(groudName);
         groupContact.updateGroupPresence(groupPresence);
 
         TalkGroupMember groupMember = new TalkGroupMember();
