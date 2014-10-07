@@ -18,11 +18,7 @@ import org.junit.Test;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.assertNull;
-import static junit.framework.TestCase.fail;
+import static junit.framework.TestCase.*;
 
 public class MediaPlaylistControllerTest {
 
@@ -623,7 +619,7 @@ public class MediaPlaylistControllerTest {
             collection = mDatabase.createMediaCollection("test_collection");
 
             int itemCount = 4; // the tests rely on the given count here!
-            for(int i = 0; i < itemCount; i++) {
+            for (int i = 0; i < itemCount; i++) {
                 TalkClientDownload item = new TalkClientDownload();
                 mDatabase.saveClientDownload(item);
                 collection.addItem(item);

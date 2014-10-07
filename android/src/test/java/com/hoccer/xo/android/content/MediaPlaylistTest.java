@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.client.*;
+import com.hoccer.talk.client.IXoClientDatabaseBackend;
+import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
@@ -19,10 +21,7 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 
-import static junit.framework. TestCase.assertTrue;
-import static junit.framework. TestCase.assertFalse;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.fail;
+import static junit.framework.TestCase.*;
 
 public class MediaPlaylistTest {
 
@@ -92,7 +91,7 @@ public class MediaPlaylistTest {
         MediaCollectionPlaylist playlist = new MediaCollectionPlaylist(collection);
 
         assertEquals(collection.size(), playlist.size());
-        for(int i = 0; i < collection.size(); i++) {
+        for (int i = 0; i < collection.size(); i++) {
             assertEquals(collection.getItem(i), playlist.getItem(i));
         }
 
@@ -218,13 +217,13 @@ public class MediaPlaylistTest {
 
         // create downloads for user1
         int expectedItemCount1 = 3;
-        for(int i = 0; i < expectedItemCount1; i++) {
+        for (int i = 0; i < expectedItemCount1; i++) {
             createAudioDownloadWithUser(user1);
         }
 
         // create downloads for user2
         int expectedItemCount2 = 4;
-        for(int i = 0; i < expectedItemCount2; i++) {
+        for (int i = 0; i < expectedItemCount2; i++) {
             createAudioDownloadWithUser(user2);
         }
 
@@ -331,7 +330,7 @@ public class MediaPlaylistTest {
         // test iterator
         int expectedItemCount = 1;
         int actualItemCount = 0;
-        for(IContentObject playlistItem : playlist) {
+        for (IContentObject playlistItem : playlist) {
             actualItemCount++;
             assertTrue(expectedItem.equals(playlistItem));
         }
@@ -412,7 +411,7 @@ public class MediaPlaylistTest {
         assertEquals(0, playlist.size());
 
         // test iterator
-        for(IContentObject item : playlist) {
+        for (IContentObject item : playlist) {
             fail();
         }
     }
@@ -457,6 +456,7 @@ public class MediaPlaylistTest {
 
     private class ValueContainer<T> {
         public T value;
+
         public ValueContainer(T initValue) {
             value = initValue;
         }
