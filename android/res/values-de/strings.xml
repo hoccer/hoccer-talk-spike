@@ -32,8 +32,8 @@
     <string name="menu_contacts">Kontakte</string>
 
     <!-- Tutorial and FAQ links -->
-    <string name="link_tutorial">http://hoccer.com/hoccer-xo-anleitung/</string>
-    <string name="link_faq">http://hoccer.com/hoccer-xo-fragen-antworten/</string>
+    <string name="link_tutorial">http://faq.hoccer.com/de/tutorial-xo/</string>
+    <string name="link_faq">http://faq.hoccer.com/de/faq-xo/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_title">Kontakte</string>

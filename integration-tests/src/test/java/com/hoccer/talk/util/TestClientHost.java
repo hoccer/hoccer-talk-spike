@@ -62,6 +62,7 @@ public class TestClientHost implements IXoClientHost {
         URLConnection conn = u.openConnection();
         return conn.getInputStream();
     }
+
     @Override
     public String getClientName() {
         return "TestTool";

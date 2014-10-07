@@ -4,9 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework. TestCase.assertTrue;
-import static junit.framework. TestCase.assertFalse;
-import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.*;
 
 public class WeakListenerArrayTest {
     private interface Listener {
@@ -39,7 +37,7 @@ public class WeakListenerArrayTest {
 
         assertEquals(1, mListenerArray.size());
 
-        for(Listener listener : mListenerArray) {
+        for (Listener listener : mListenerArray) {
             listener.onCall();
         }
 
@@ -59,7 +57,7 @@ public class WeakListenerArrayTest {
         mListenerArray.registerListener(myListener);
         mListenerArray.unregisterListener(myListener);
 
-        for(Listener listener : mListenerArray) {
+        for (Listener listener : mListenerArray) {
             listener.onCall();
         }
 
@@ -71,7 +69,7 @@ public class WeakListenerArrayTest {
         final ValueContainer<Integer> onListenerCalledCount = new ValueContainer<Integer>(0);
 
         Integer expectedListenerCount = 10;
-        for(int i = 0; i < expectedListenerCount; i++) {
+        for (int i = 0; i < expectedListenerCount; i++) {
             mListenerArray.registerListener(new Listener() {
                 public void onCall() {
                     onListenerCalledCount.value++;
@@ -79,7 +77,7 @@ public class WeakListenerArrayTest {
             });
         }
 
-        for(Listener listener : mListenerArray) {
+        for (Listener listener : mListenerArray) {
             listener.onCall();
         }
 
@@ -89,7 +87,7 @@ public class WeakListenerArrayTest {
     @Test
     public void testUnregisterAllListener() {
         Integer listenerCount = 10;
-        for(int i = 0; i < listenerCount; i++) {
+        for (int i = 0; i < listenerCount; i++) {
             mListenerArray.registerListener(new Listener() {
                 public void onCall() {
                 }
@@ -102,6 +100,7 @@ public class WeakListenerArrayTest {
 
     private class ValueContainer<T> {
         public T value;
+
         public ValueContainer(T initValue) {
             value = initValue;
         }

@@ -7,11 +7,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
 
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Security;
+import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
@@ -54,9 +50,9 @@ public class RSATest {
         System.out.println("RSA-pub-IOS[" + pubencIOS.length + ":"
                 + Base64.encodeBase64String(pubencIOS_X));
 
-        if (Arrays.equals(pubencIOS,pubencIOS_X)) {
+        if (Arrays.equals(pubencIOS, pubencIOS_X)) {
             System.out.println("X509-UnWrapper RSA 1024 ok");
-        }  else {
+        } else {
             System.out.println("X509-UnWrapper RSA 1024 failed ###########");
         }
 
@@ -90,12 +86,12 @@ public class RSATest {
         byte[] pubWBytes = Base64.decodeBase64(myPubKey);
         byte[] pubBytes = RSACryptor.wrapRSA1024_X509_deprecated(pubWBytes);
         byte[] pubXBytes = RSACryptor.wrapRSA_X509(pubWBytes);
-        if (Arrays.equals(pubBytes,pubXBytes)) {
+        if (Arrays.equals(pubBytes, pubXBytes)) {
             System.out.println("X509-Wrapper RSA 1024 ok");
-        }  else {
+        } else {
             System.out.println("X509-UnWrapper RSA 1024 failed ###########");
             System.out.println("pubBytes :" + CryptoUtils.toHex(pubBytes));
-            System.out.println("pubXBytes:"+ CryptoUtils.toHex(pubXBytes));
+            System.out.println("pubXBytes:" + CryptoUtils.toHex(pubXBytes));
         }
 
         byte[] privBytes = Base64.decodeBase64(myPrivKey);
@@ -170,9 +166,9 @@ public class RSATest {
                 + Base64.encodeBase64String(pubencIOS_X));
 
 
-       // byte[] privencIOS = RSACryptor.unwrapRSA1024_PKCS8(privenc);
-       // System.out.println("RSA-priv-IOS[" + privencIOS.length + "]:"
-       //         + Base64.encodeBase64String(privencIOS));
+        // byte[] privencIOS = RSACryptor.unwrapRSA1024_PKCS8(privenc);
+        // System.out.println("RSA-priv-IOS[" + privencIOS.length + "]:"
+        //         + Base64.encodeBase64String(privencIOS));
 
         byte[] pubWrapped = RSACryptor.wrapRSA_X509(pubencIOS_X);
         // byte[] privWrapped = RSACryptor.wrapRSA1024_PKCS8(privencIOS);
@@ -191,5 +187,5 @@ public class RSATest {
         System.out.println("RSA-wrapper-OK pub:["
                 + pubOK + "]:");
 
-         }
+    }
 }

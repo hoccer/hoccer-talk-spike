@@ -2,7 +2,6 @@ package com.hoccer.talk.crypto.test;
 
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.crypto.CryptoUtils;
-import com.hoccer.talk.crypto.RSACryptor;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Test;
@@ -19,12 +18,12 @@ public class AESTest {
     @Test
     public void testAES() throws Exception {
 
-        byte[] testsalt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-                            17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
-        byte[] testkey = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-                           16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+        byte[] testsalt = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
+        byte[] testkey = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
 
-        byte[] nulliv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        byte[] nulliv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         System.out.println("AES encryption/decryption Testing:");
         System.out.println("salt=" + Base64.encodeBase64String(testsalt));
@@ -51,11 +50,11 @@ public class AESTest {
         }
 
         // test key derivation
-        byte[] derivedKey = AESCryptor.make256BitKeyFromPassword_PBKDF2WithHmacSHA256("myPassword",testsalt);
+        byte[] derivedKey = AESCryptor.make256BitKeyFromPassword_PBKDF2WithHmacSHA256("myPassword", testsalt);
         System.out.println("PBKDF2WithHmacSHA256 derived key=" + CryptoUtils.toHex(derivedKey));
-        String derivedTestKey ="55b8d68993154cad3642a15a64445db04ebd7a2eec5362f9294ecbc1d57a02db";
+        String derivedTestKey = "55b8d68993154cad3642a15a64445db04ebd7a2eec5362f9294ecbc1d57a02db";
         System.out.println("test key                        =" + derivedTestKey);
-        if (!derivedTestKey.equals(CryptoUtils.toHex(derivedKey)))  {
+        if (!derivedTestKey.equals(CryptoUtils.toHex(derivedKey))) {
             throw new Exception("PBKDF2WithHmacSHA256 unexpected result, key differs");
         }
 

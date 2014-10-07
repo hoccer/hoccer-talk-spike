@@ -21,28 +21,17 @@ public abstract class ComposableActivity extends XoActivity {
      */
     protected abstract ActivityComponent[] createComponents();
 
-    /*
-     * Returns the first component of the given type or null.
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends ActivityComponent> T getComponent(final Class<T> clazz) {
-        for(final ActivityComponent component : mComponents) {
-            if(clazz.equals(component.getClass())) {
-                return (T)component;
-            }
-        }
+    public ComposableActivity() {
+        super();
 
-        return null;
+        mComponents = createComponents();
     }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // set list of components
-        mComponents = createComponents();
-
-        for(final ActivityComponent component : mComponents) {
+        for (final ActivityComponent component : mComponents) {
             component.onCreate(savedInstanceState);
         }
     }
@@ -50,7 +39,7 @@ public abstract class ComposableActivity extends XoActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        for(final ActivityComponent component : mComponents) {
+        for (final ActivityComponent component : mComponents) {
             component.onStart();
         }
     }
@@ -58,7 +47,7 @@ public abstract class ComposableActivity extends XoActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        for(final ActivityComponent component : mComponents) {
+        for (final ActivityComponent component : mComponents) {
             component.onResume();
         }
     }
@@ -71,7 +60,7 @@ public abstract class ComposableActivity extends XoActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean result = super.onCreateOptionsMenu(menu);
 
-        if(result) {
+        if (result) {
             for (final ActivityComponent component : mComponents) {
                 if (!component.onCreateOptionsMenu(menu)) {
                     return false;
@@ -87,7 +76,7 @@ public abstract class ComposableActivity extends XoActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         boolean isConsumed = super.onOptionsItemSelected(item);
 
-        if(!isConsumed) {
+        if (!isConsumed) {
             for (final ActivityComponent component : mComponents) {
                 if (component.onOptionsItemSelected(item)) {
                     return true;
@@ -103,7 +92,7 @@ public abstract class ComposableActivity extends XoActivity {
     protected void onPause() {
         super.onPause();
 
-        for(int i = mComponents.length - 1; i >= 0; i--) {
+        for (int i = mComponents.length - 1; i >= 0; i--) {
             mComponents[i].onPause();
         }
     }
@@ -112,7 +101,7 @@ public abstract class ComposableActivity extends XoActivity {
     protected void onStop() {
         super.onStop();
 
-        for(int i = mComponents.length - 1; i >= 0; i--) {
+        for (int i = mComponents.length - 1; i >= 0; i--) {
             mComponents[i].onStop();
         }
     }
@@ -121,7 +110,7 @@ public abstract class ComposableActivity extends XoActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        for(int i = mComponents.length - 1; i >= 0; i--) {
+        for (int i = mComponents.length - 1; i >= 0; i--) {
             mComponents[i].onDestroy();
         }
     }

@@ -33,8 +33,8 @@
     <string name="menu_contacts">Contacts</string>
 
     <!-- Tutorial and FAQ links -->
-    <string name="link_tutorial">http://hoccer.com/hoccer-xo-tutorial/</string>
-    <string name="link_faq">http://hoccer.com/hoccer-xo-faq/</string>
+    <string name="link_tutorial">http://faq.hoccer.com/tutorial-xo/</string>
+    <string name="link_faq">http://faq.hoccer.com/faq-xo/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_title">Contacts</string>
