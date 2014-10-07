@@ -17,6 +17,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
@@ -88,6 +89,7 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
             convertView = inflater.inflate(R.layout.item_contact_client, null);
         }
 
+        AvatarView avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
         TextView contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
         LinearLayout invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
         Button acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
@@ -96,6 +98,8 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
         TextView isFriendTextView = (TextView) convertView.findViewById(R.id.tv_is_friend);
 
         final TalkClientContact contact = (TalkClientContact) getItem(position);
+
+        avatarView.setContact(contact);
 
         contactNameTextView.setText(contact.getNickname());
 

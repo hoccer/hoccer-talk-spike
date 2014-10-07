@@ -17,6 +17,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
@@ -81,6 +82,7 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
             convertView = inflater.inflate(R.layout.item_contact_group, null);
         }
 
+        AvatarView avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
         TextView contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
         LinearLayout invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
         Button acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
@@ -90,6 +92,7 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
         final TalkClientContact group = (TalkClientContact) getItem(position);
 
         contactNameTextView.setText(group.getNickname());
+        avatarView.setContact(group);
 
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
