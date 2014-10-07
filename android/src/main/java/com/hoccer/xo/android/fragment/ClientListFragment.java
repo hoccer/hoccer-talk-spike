@@ -61,7 +61,8 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
         mClientsAdapter = new ClientsAdapter(getActivity());
 
         mTabView = LayoutInflater.from(getActivity()).inflate(R.layout.view_contacts_tab_friends, null);
-        mNotificationBadgeTextView = (TextView) mTabView.findViewById(R.id.tv_contact_invite_notification_badge);
+
+        mNotificationBadgeTextView = (TextView) getCustomTabView(getActivity()).findViewById(R.id.tv_contact_invite_notification_badge);
         setListAdapter(mClientsAdapter);
     }
 
