@@ -46,12 +46,14 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         clientsAdapter = (ClientsAdapter) clientListFragment.getListAdapter();
 
         XoApplication.getXoClient().getDatabase().eraseAllClientContacts();
+        XoApplication.getXoClient().getDatabase().eraseAllRelationships();
     }
 
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
         XoApplication.getXoClient().getDatabase().eraseAllClientContacts();
+        XoApplication.getXoClient().getDatabase().eraseAllRelationships();
     }
 
     public void testPreconditions() {
