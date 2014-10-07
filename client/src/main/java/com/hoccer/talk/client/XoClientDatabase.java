@@ -278,8 +278,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .and(2)
                 .query();
         for (TalkClientContact groupContact : groupContacts) {
-            if (groupContact.getGroupMember().getState().equals(state)) {
-                result.add(groupContact);
+            TalkGroupMember groupMember = groupContact.getGroupMember();
+            if (groupMember != null && groupMember.getState().equals(state)) {
+                    result.add(groupContact);
             }
         }
 
