@@ -171,15 +171,11 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        mClients.clear();
-        mClients = getAllClientContacts();
         refreshView();
     }
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-        mClients.clear();
-        mClients = getAllClientContacts();
         refreshView();
     }
 
@@ -189,11 +185,8 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        mClients.clear();
-        mClients = getAllClientContacts();
         refreshView();
     }
-
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
@@ -204,10 +197,13 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
     }
 
     private void refreshView() {
+        final List<TalkClientContact> newClients = getAllClientContacts();
+
         Handler guiHandler = new Handler(Looper.getMainLooper());
         guiHandler.post(new Runnable() {
             @Override
             public void run() {
+                mClients = newClients;
                 notifyDataSetChanged();
             }
         });
