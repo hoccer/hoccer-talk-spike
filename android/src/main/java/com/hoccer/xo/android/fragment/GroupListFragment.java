@@ -71,7 +71,7 @@ public class GroupListFragment extends ListFragment implements IPagerFragment, I
     public void onResume() {
         super.onResume();
         try {
-            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
+            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroups();
         } catch (SQLException e) {
             e.printStackTrace();
         }
