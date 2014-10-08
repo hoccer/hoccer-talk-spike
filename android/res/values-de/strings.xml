@@ -51,6 +51,12 @@
     <string name="friend_request_decline_invitation_title">Einladung ablehnen?</string>
     <string name="friend_request_decline_invitation_message">Möchtest du die Einladung von %1$s wirklich ablehnen?</string>
 
+    <!-- Groups fragment -->
+    <plurals name="groups_and_x_more">
+        <item quantity="one">und ein weiterer</item>
+        <item quantity="other">und %1$d weitere</item>
+    </plurals>
+
     <!-- Group decline invitation dialog -->
     <string name="group_request_decline_invitation_title">Gruppeneinladung ablehnen?</string>
     <string name="group_request_decline_invitation_message">Möchtest du der Gruppe %1$s wirklich nicht beitreten?</string>

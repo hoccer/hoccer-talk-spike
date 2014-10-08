@@ -3,8 +3,10 @@ package com.hoccer.xo.android.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,16 +23,14 @@ import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
 
-    private List<TalkClientContact> mGroups = new ArrayList<TalkClientContact>();
+    private static final int DISPLAY_NAMES_MAX_LENGTH = 30;
 
     private Activity mActivity;
+    private List<TalkClientContact> mGroups = new ArrayList<TalkClientContact>();
 
     public GroupsAdapter(Activity activity) {
         mActivity = activity;
@@ -126,10 +126,36 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
             } else if (member.isJoined()) {
                 invitedMeLayout.setVisibility(View.GONE);
                 groupMembersTextView.setVisibility(View.VISIBLE);
+                groupMembersTextView.setText(getGroupMembersString(group));
             }
         }
 
         return convertView;
+    }
+
+    private String getGroupMembersString(TalkClientContact group) {
+        ArrayDeque<String> displayMembers = new ArrayDeque<String>();
+        List<TalkClientContact> joinedContacts = group.getJoinedGroupContacts();
+
+        for (TalkClientContact contact : joinedContacts) {
+            displayMembers.addLast(contact.getNickname());
+
+            if (TextUtils.join(", ", displayMembers).length() > DISPLAY_NAMES_MAX_LENGTH) {
+                displayMembers.removeLast();
+                break;
+            }
+        }
+
+        String groupMembersString = TextUtils.join(", ", displayMembers);
+        int moreCount = joinedContacts.size() - displayMembers.size();
+
+        if (moreCount > 0) {
+            Resources resources = mActivity.getResources();
+            String moreString = resources.getQuantityString(R.plurals.groups_and_x_more, moreCount, moreCount);
+            groupMembersString = groupMembersString + " " + moreString;
+        }
+
+        return groupMembersString;
     }
 
     @Override
