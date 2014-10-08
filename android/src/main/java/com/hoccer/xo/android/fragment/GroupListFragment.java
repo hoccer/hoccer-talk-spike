@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
+import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
@@ -19,11 +21,18 @@ import com.hoccer.xo.android.adapter.GroupsAdapter;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
 
-public class GroupListFragment extends ListFragment implements IPagerFragment {
+import java.sql.SQLException;
+
+public class GroupListFragment extends ListFragment implements IPagerFragment, IXoContactListener {
 
     GroupsAdapter mGroupsAdapter;
     private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
+
+    private View mTabView;
+    private TextView mNotificationBadgeTextView;
+
+    private int mInvitedMeCount = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,19 +59,33 @@ public class GroupListFragment extends ListFragment implements IPagerFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mGroupsAdapter = new GroupsAdapter(getActivity());
+
+        mNotificationBadgeTextView = (TextView) getCustomTabView(getActivity()).findViewById(R.id.tv_contact_invite_notification_badge);
         setListAdapter(mGroupsAdapter);
+
+        XoApplication.getXoClient().registerContactListener(mGroupsAdapter);
+        XoApplication.getXoClient().registerContactListener(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        XoApplication.getXoClient().registerContactListener(mGroupsAdapter);
+        try {
+            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if (mInvitedMeCount > 0) {
+            mNotificationBadgeTextView.setVisibility(View.VISIBLE);
+        }
+        mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+      public void onDestroy() {
+        super.onDestroy();
         XoApplication.getXoClient().unregisterContactListener(mGroupsAdapter);
+        XoApplication.getXoClient().unregisterContactListener(this);
     }
 
     @Override
@@ -91,11 +114,60 @@ public class GroupListFragment extends ListFragment implements IPagerFragment {
 
     @Override
     public View getCustomTabView(Context context) {
-        return null;
+        if (mTabView == null) {
+            mTabView = LayoutInflater.from(context).inflate(R.layout.view_contacts_tab_groups, null);
+        }
+        return mTabView;
     }
 
     @Override
     public String getTabName(Resources resources) {
         return resources.getString(R.string.contacts_tab_groups);
     }
+
+    @Override
+    public void onGroupMembershipChanged(TalkClientContact contact) {
+        try {
+            mInvitedMeCount = XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroups();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mInvitedMeCount > 0) {
+                    mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
+                    mNotificationBadgeTextView.setVisibility(View.VISIBLE);
+                } else {
+                    mNotificationBadgeTextView.setText("");
+                    mNotificationBadgeTextView.setVisibility(View.GONE);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onClientRelationshipChanged(TalkClientContact contact) {
+
+    }
+
+    @Override
+    public void onContactAdded(TalkClientContact contact) {
+
+    }
+
+    @Override
+    public void onContactRemoved(TalkClientContact contact) {
+
+    }
+
+    @Override
+    public void onClientPresenceChanged(TalkClientContact contact) {
+
+    }
+
+    @Override
+    public void onGroupPresenceChanged(TalkClientContact contact) {
+    }
+
 }

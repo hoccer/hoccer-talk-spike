@@ -805,6 +805,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return invitedMeCount;
     }
 
+    public int getCountOfInvitedMeGroups() throws SQLException {
+        return findGroupContactsByState(TalkGroupMember.STATE_INVITED).size();
+    }
+
     public boolean hasPendingFriendRequests() {
         try {
             List<TalkRelationship> invitedRelations = mRelationships.queryBuilder()
