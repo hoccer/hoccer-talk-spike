@@ -126,30 +126,33 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
             }
         });
 
-        if (contact.getClientRelationship().invitedMe()) {
-            invitedMeLayout.setVisibility(View.VISIBLE);
-            isInvitedTextView.setVisibility(View.GONE);
-            isFriendTextView.setVisibility(View.GONE);
-        } else if (contact.getClientRelationship().isInvited()) {
-            invitedMeLayout.setVisibility(View.GONE);
-            isInvitedTextView.setVisibility(View.VISIBLE);
-            isFriendTextView.setVisibility(View.GONE);
-        } else if (contact.getClientRelationship().isFriend()) {
-            invitedMeLayout.setVisibility(View.GONE);
-            isInvitedTextView.setVisibility(View.GONE);
-            isFriendTextView.setVisibility(View.VISIBLE);
+        TalkRelationship relationship = contact.getClientRelationship();
+        if (relationship != null) {
+            if (relationship.invitedMe()) {
+                invitedMeLayout.setVisibility(View.VISIBLE);
+                isInvitedTextView.setVisibility(View.GONE);
+                isFriendTextView.setVisibility(View.GONE);
+            } else if (relationship.isInvited()) {
+                invitedMeLayout.setVisibility(View.GONE);
+                isInvitedTextView.setVisibility(View.VISIBLE);
+                isFriendTextView.setVisibility(View.GONE);
+            } else if (relationship.isFriend()) {
+                invitedMeLayout.setVisibility(View.GONE);
+                isInvitedTextView.setVisibility(View.GONE);
+                isFriendTextView.setVisibility(View.VISIBLE);
 
-            long messageCount = 0;
-            long attachmentCount = 0;
-            try {
-                messageCount = XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
-                attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
-            } catch (SQLException e) {
-                e.printStackTrace();
+                long messageCount = 0;
+                long attachmentCount = 0;
+                try {
+                    messageCount = XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
+                    attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                String messageAndAttachmentCountInfo = convertView.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
+                isFriendTextView.setText(messageAndAttachmentCountInfo);
             }
-
-            String messageAndAttachmentCountInfo = convertView.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
-            isFriendTextView.setText(messageAndAttachmentCountInfo);
         }
 
         return convertView;
