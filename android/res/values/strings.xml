@@ -446,5 +446,4 @@
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">invite %1$d group members as friend</string>
     <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
-
 </resources>

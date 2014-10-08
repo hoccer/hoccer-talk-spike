@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
@@ -28,7 +27,7 @@ public class ChatImageItem extends ChatMessageItem {
     public static final double WIDTH_AVATAR_SCALE_FACTOR = 0.7;
     public static final double IMAGE_SCALE_FACTOR = 0.5;
 
-    private RelativeLayout mRootView;
+    private ImageView mTargetView;
 
     public ChatImageItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -62,9 +61,6 @@ public class ChatImageItem extends ChatMessageItem {
             }
         });
 
-        mAttachmentView.setPadding(0, 0, 0, 0);
-        mAttachmentView.setBackgroundDrawable(null);
-
         // calc view size
         double widthScaleFactor = mAvatarView.getVisibility() == View.VISIBLE ? WIDTH_AVATAR_SCALE_FACTOR : WIDTH_SCALE_FACTOR;
         int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * widthScaleFactor);
@@ -74,11 +70,12 @@ public class ChatImageItem extends ChatMessageItem {
         int width = boundImageSize.x;
         int height = boundImageSize.y;
 
-        mRootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
-        mRootView.getLayoutParams().width = width;
-        mRootView.getLayoutParams().height = height;
+        RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        rootView.getLayoutParams().width = width;
+        rootView.getLayoutParams().height = height;
 
-        ImageView overlayView = (ImageView) mRootView.findViewById(R.id.iv_picture_overlay);
+        // set gravity and message bubble mask
+        ImageView overlayView = (ImageView) rootView.findViewById(R.id.iv_picture_overlay);
         if (mMessage.isIncoming()) {
             mContentWrapper.setGravity(Gravity.LEFT);
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
@@ -87,24 +84,27 @@ public class ChatImageItem extends ChatMessageItem {
             overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
 
-        ImageView targetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
+        // we need to copy the background to rootview which will have the correct bubble size
+        rootView.setBackgroundDrawable(mAttachmentView.getBackground());
+        rootView.setPadding(0, 0, 0, 0);
+        mAttachmentView.setBackgroundDrawable(null);
+        mAttachmentView.setPadding(0, 0, 0, 0);
+
+        mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
         Picasso.with(mContext).load(mContentObject.getContentDataUrl())
-                .error(R.drawable.ic_img_placeholder_error)
+                .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
                 .centerInside()
-                .into(targetView);
+                .into(mTargetView);
         LOG.trace(Picasso.with(mContext).getSnapshot().toString());
     }
 
     @Override
     public void detachView() {
-        // check for null in case display attachment has not yet been called
-        if (mRootView != null) {
-            ImageView targetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
-            if (targetView != null) {
-                Picasso.with(mContext).cancelRequest(targetView);
-            }
+        // cancel image loading if in case display attachment has been called
+        if (mTargetView != null) {
+            Picasso.with(mContext).cancelRequest(mTargetView);
         }
     }
 
