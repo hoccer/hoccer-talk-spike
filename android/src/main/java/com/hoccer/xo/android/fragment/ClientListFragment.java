@@ -127,20 +127,23 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        if (contact.getClientRelationship().invitedMe()) {
-            try {
-                mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            if (mInvitedMeCount > 0) {
-                mNotificationBadgeTextView.setVisibility(View.VISIBLE);
-                mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
-            } else {
-                mNotificationBadgeTextView.setVisibility(View.GONE);
-                mNotificationBadgeTextView.setText("");
-            }
+        try {
+            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mInvitedMeCount > 0) {
+                    mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
+                    mNotificationBadgeTextView.setVisibility(View.VISIBLE);
+                } else {
+                    mNotificationBadgeTextView.setVisibility(View.GONE);
+                    mNotificationBadgeTextView.setText("");
+                }
+            }
+        });
     }
 
     @Override
