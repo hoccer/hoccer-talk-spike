@@ -21,8 +21,6 @@
     <string name="menu_pair">Kontakt hinzufügen</string>
     <string name="menu_group_profile_add_person">Hinzufügen</string>
     <string name="menu_new_group">Gruppe erstellen</string>
-    <string name="menu_scan_code">Code scannen</string>
-    <string name="menu_show_code">Code anzeigen</string>
     <string name="menu_add_attachment">Anhang hinzufügen</string>
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
@@ -33,8 +31,8 @@
     <string name="menu_clear_conversation">Chat löschen</string>
 
     <!-- Tutorial and FAQ links -->
-    <string name="link_tutorial">http://hoccer.com/hoccer-xo-anleitung/</string>
-    <string name="link_faq">http://hoccer.com/hoccer-xo-fragen-antworten/</string>
+    <string name="link_tutorial">http://faq.hoccer.com/de/tutorial-xo/</string>
+    <string name="link_faq">http://faq.hoccer.com/de/faq-xo/</string>
 
     <!-- Contacts fragment -->
     <string name="contacts_category_friends">Freunde</string>
@@ -92,24 +90,27 @@
     <string name="context_menu_copy_message">Kopieren</string>
     <string name="context_menu_delete_message">Löschen</string>
 
-    <!-- Pairing fragment -->
-    <string name="pairing_token_info">Gib diesen Code einem Freund</string>
-    <string name="pairing_code_info">Gib einen Einladungscode hier ein:</string>
-    <string name="pairing_code_hint">Code eingeben</string>
-    <string name="pairing_token_pair">Code bestätigen</string>
-    <string name="pairing_qr_info">Füge einen neuen Kontakt per QR Scan hinzu:</string>
-    <string name="pairing_qr_show">QR Code anzeigen</string>
-    <string name="pairing_qr_scan">QR Code scannen</string>
-    <string name="pairing_token_generating">Erzeugen…</string>
-    <string name="pairing_token_send_sms">Einladen per SMS</string>
-    <string name="pairing_token_send_email">Einladen per e-mail</string>
-    <string name="pairing_success">Kontakt wurde erfolgreich hinzugefügt</string>
-    <string name="dialog_pairing_failed_title">Der Kontakt konnte nicht hinzugefügt werden</string>
-    <string name="dialog_pairing_failed_message">Der eingegebene Code ist ungültig.</string>
-	<string name="toast_pairing_successful">Du hast dich erfolgreich befreundet.</string>
-<string name="toast_pairing_failed">Ungültiger Code. Bitte versuche es erneut.</string>
-<string name="pairing_scanner">QR-Scanner</string>
-<string name="pairing_generator">QR-Code</string>
+    <!-- Pairing toast messages -->
+    <string name="toast_pairing_successful">Du hast dich erfolgreich befreundet.</string>
+    <string name="toast_pairing_failed">Ungültiger Code. Bitte versuche es erneut.</string>
+
+    <!-- Invitation dialog -->
+    <string name="dialog_select_invite_method_title">Einladen per</string>
+    <string name="dialog_select_invite_method_sms_item">SMS</string>
+    <string name="dialog_select_invite_method_mail_item">E-Mail</string>
+    <string name="dialog_select_invite_method_code_item">Code</string>
+
+    <!-- SMS/E-Mail invitation -->
+    <string name="dialog_missing_pairing_token_title">Einladung kann nicht erzeugt werden</string>
+    <string name="dialog_missing_pairing_token_message">Bitte versuche es später noch einmal.</string>
+
+    <!-- QR code generator fragment -->
+    <string name="pairing_token_generation_failed">QR-Code konnte nicht erzeugt werden.</string>
+    <string name="pairing_token_generation_retry">Erneut versuchen</string>
+    <string name="scan_or_copy_code">Scanne oder kopiere diesen Code</string>
+
+    <!-- QR code scanner fragment -->
+    <string name="or_insert_code">Oder Code eingeben</string>
 
     <!-- Profile fragment -->
     <string name="profile_avatar_set_button">Mein Bild ändern</string>
@@ -324,9 +325,9 @@
     <string name="contact_item_sent_attachment">%1$s Datei gesendet</string>
     <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar verwenden.</string>
     <string name="error_attachment_selection">Sie können diese Datei nicht als Anhang verwenden.</string>
-    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App HoccerXO zum sicheren Chatten! Jetzt herunterladen: http://hoccer.com/\nDann mich als Kontakt hinzufügen: %1$s%2$s\nxo %3$s</string>
+    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App HoccerXO zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\nxo %3$s</string>
     <string name="email_invitation_subject">Triff mich bei Hoccer!</string>
-    <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Gratis-App Hoccer XO zum sicheren chatten! Jetzt herunterladen:&lt;br&gt;&lt;a href=http://hoccer.com/&gt;http://hoccer.com/&lt;a&gt;&lt;br&gt;&lt;br&gt;Und dann mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
+    <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Gratis-App Hoccer XO zum sicheren chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>
     <string name="export_credentials_success">Zugangsdaten erfolgreich exportiert.</string>
     <string name="export_credentials_failure">Es ist ein Fehler beim Exportieren der Zugangsdaten aufgetreten.</string>
@@ -360,6 +361,9 @@
         <item>EINLADUNGEN</item>
         <item>IN DER NÄHE</item>
     </string-array>
+
+    <string name="qr_code_tab_scan">SCANNEN</string>
+    <string name="qr_code_tab_generate">GENERIEREN</string>
 
     <string name="search_section_caption_contacts">Kontakte</string>
     <string name="search_section_caption_files">Dateien</string>

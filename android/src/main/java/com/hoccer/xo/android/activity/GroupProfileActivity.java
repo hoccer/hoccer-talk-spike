@@ -3,8 +3,9 @@ package com.hoccer.xo.android.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import com.hoccer.xo.android.activity.component.ActivityComponent;
+import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.base.IProfileFragmentManager;
-import com.hoccer.xo.android.base.XoActionbarActivity;
 import com.hoccer.xo.android.fragment.GroupProfileCreationFragment;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
 import com.hoccer.xo.release.R;
@@ -12,7 +13,7 @@ import com.hoccer.xo.release.R;
 /**
  * Activity wrapping a group profile fragment
  */
-public class GroupProfileActivity extends XoActionbarActivity implements IProfileFragmentManager {
+public class GroupProfileActivity extends ComposableActivity implements IProfileFragmentManager {
 
     /* use this extra to open in "client registration" mode */
     public static final String EXTRA_CLIENT_CREATE_GROUP = "clientCreateGroup";
@@ -20,6 +21,11 @@ public class GroupProfileActivity extends XoActionbarActivity implements IProfil
     /* use this extra to show the given contact */
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
     public static final String EXTRA_MAKE_FROM_NEARBY = "fromNearby";
+
+    @Override
+    protected ActivityComponent[] createComponents() {
+        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+    }
 
     @Override
     protected int getLayoutResource() {

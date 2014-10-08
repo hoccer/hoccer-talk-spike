@@ -11,11 +11,7 @@ import android.widget.TextView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-/**
- * Fragment that shows the "about" web page
- */
 public class AboutFragment extends Fragment {
-
 
     private static final Logger LOG = Logger.getLogger(AboutFragment.class);
 
@@ -39,10 +35,4 @@ public class AboutFragment extends Fragment {
             e.printStackTrace();
         }
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
 }

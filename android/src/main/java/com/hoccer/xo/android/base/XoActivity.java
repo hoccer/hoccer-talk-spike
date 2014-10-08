@@ -14,9 +14,7 @@ import android.net.Uri;
 import android.os.*;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.provider.Telephony;
 import android.support.v4.app.FragmentActivity;
-import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -30,11 +28,13 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
+import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -106,14 +106,13 @@ public abstract class XoActivity extends FragmentActivity {
 
     private ActionBar mActionBar;
 
-    private String mBarcodeToken = null;
-
     private AttachmentTransferControlView mSpinner;
     private Handler mDialogDismisser;
     private Dialog mDialog;
     private ScreenReceiver mScreenListener;
     private XoAlertListener mAlertListener;
 
+    private boolean mOptionsMenuEnabled = true;
 
 
     public XoActivity() {
@@ -255,7 +254,7 @@ public abstract class XoActivity extends FragmentActivity {
 
     @Override
     public void onBackPressed() {
-        if (!(this instanceof ContactsActivity)) {
+        if (!(this instanceof ChatsActivity)) {
             isBackPressed = true;
         }
         super.onBackPressed();
@@ -486,12 +485,24 @@ public abstract class XoActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         LOG.debug("onCreateOptionsMenu()");
-        getMenuInflater().inflate(R.menu.common, menu);
-        int activityMenu = getMenuResource();
-        if (activityMenu >= 0) {
-            getMenuInflater().inflate(activityMenu, menu);
+
+        if (mOptionsMenuEnabled) {
+            getMenuInflater().inflate(R.menu.common, menu);
+
+            int activityMenu = getMenuResource();
+            if (activityMenu >= 0) {
+                getMenuInflater().inflate(activityMenu, menu);
+            }
+
+            return true;
         }
-        return true;
+
+        return false;
+    }
+
+    public void setOptionsMenuEnabled(boolean optionsMenuEnabled) {
+        mOptionsMenuEnabled = optionsMenuEnabled;
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -513,12 +524,6 @@ public abstract class XoActivity extends FragmentActivity {
                 break;
             case R.id.menu_new_group:
                 showNewGroup();
-                break;
-            case R.id.menu_scan_code:
-                scanBarcode();
-                break;
-            case R.id.menu_show_code:
-                showBarcode();
                 break;
             case R.id.menu_settings:
                 showPreferences();
@@ -716,7 +721,49 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void showPairing() {
         LOG.debug("showPairing()");
-        startActivity(new Intent(this, PairingActivity.class));
+        XoDialogs.showSingleChoiceDialog(
+                "SelectPairingMethod",
+                R.string.dialog_select_invite_method_title,
+                new String[]{
+                        getResources().getString(R.string.dialog_select_invite_method_sms_item),
+                        getResources().getString(R.string.dialog_select_invite_method_mail_item),
+                        getResources().getString(R.string.dialog_select_invite_method_code_item)
+                },
+                this,
+                new XoDialogs.OnSingleSelectionFinishedListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id, int selectedItem) {
+                        switch (selectedItem) {
+                            case 0:
+                                pairBySMS();
+                                break;
+                            case 1:
+                                pairByMail();
+                                break;
+                            case 2:
+                                pairByCode();
+                                break;
+                        }
+                    }
+                });
+    }
+
+    private void pairBySMS() {
+        Intent intent = new Intent(this, DeviceContactsInvitationActivity.class);
+        intent.putExtra(DeviceContactsInvitationFragment.EXTRA_IS_SMS_INVITATION, true);
+        startActivity(intent);
+    }
+
+    private void pairByMail() {
+        Intent intent = new Intent(this, DeviceContactsInvitationActivity.class);
+        intent.putExtra(DeviceContactsInvitationFragment.EXTRA_IS_SMS_INVITATION, false);
+        startActivity(intent);
+    }
+
+    public void pairByCode() {
+        LOG.debug("pairByCode()");
+        Intent intent = new Intent(this, QrCodeActivity.class);
+        startActivity(intent);
     }
 
     public void showFullscreenPlayer() {
@@ -732,35 +779,6 @@ public abstract class XoActivity extends FragmentActivity {
     public void selectAvatar() {
         LOG.debug("selectAvatar()");
         mAvatarSelection = ContentRegistry.get(this).selectAvatar(this, REQUEST_SELECT_AVATAR);
-    }
-
-    public void scanBarcode() {
-        LOG.debug("showBarcode()");
-        Intent qrScanner = new Intent(this, QrScannerActivity.class);
-        startActivity(qrScanner);
-    }
-
-    public void showBarcode() {
-        LOG.debug("scanBarcode()");
-
-        XoApplication.getExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-
-                final String qrString = getXoClient().getConfiguration().getUrlScheme() + getXoClient().generatePairingToken();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        Intent qr = new Intent(XoActivity.this, QrCodeGeneratingActivity.class);
-                        qr.putExtra("QR", qrString);
-                        startActivity(qr);
-
-                    }
-                });
-
-            }
-        });
     }
 
     public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
@@ -786,11 +804,6 @@ public abstract class XoActivity extends FragmentActivity {
             }
             for (IXoFragment fragment : mTalkFragments) {
                 fragment.onServiceConnected();
-            }
-            if (mBarcodeToken != null) {
-                // XXX perform token pairing with callback
-                getXoClient().performTokenPairing(mBarcodeToken);
-                mBarcodeToken = null;
             }
         }
 

@@ -1,14 +1,14 @@
 package com.hoccer.talk.server;
 
 import com.hoccer.scm.GitInfo;
+import com.hoccer.talk.server.push.ApnsConfiguration;
+import com.hoccer.talk.server.push.PushAgent;
 import org.apache.log4j.Logger;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Encapsulation of server configuration
@@ -68,24 +68,60 @@ public class TalkServerConfiguration {
         APNS_ENABLED(PROPERTY_PREFIX + ".apns.enabled",
                 PropertyTypes.BOOLEAN,
                 false),
-        APNS_PRODUCTION_CERTIFICATE_PATH(PROPERTY_PREFIX + ".apns.cert.production.path",
-                PropertyTypes.STRING,
-                "apns_production.p12"),
-        APNS_PRODUCTION_CERTIFICATE_PASSWORD(PROPERTY_PREFIX + ".apns.cert.production.password",
-                PropertyTypes.STRING,
-                "password"),
-        APNS_SANDBOX_CERTIFICATE_PATH(PROPERTY_PREFIX + ".apns.cert.sandbox.path",
-                PropertyTypes.STRING,
-                "apns_sandbox.p12"),
-        APNS_SANDBOX_CERTIFICATE_PASSWORD(PROPERTY_PREFIX + ".apns.cert.sandbox.password",
-                PropertyTypes.STRING,
-                "password"),
         APNS_INVALIDATE_DELAY(PROPERTY_PREFIX + ".apns.invalidate.delay",
                 PropertyTypes.INTEGER,
                 30), // in seconds
         APNS_INVALIDATE_INTERVAL(PROPERTY_PREFIX + ".apns.invalidate.interval",
                 PropertyTypes.INTEGER,
                 3600), // in seconds
+
+        APNS_CLIENT_NAME_1(PROPERTY_PREFIX + ".apns.1.clientName",
+                PropertyTypes.STRING,
+                "Hoccer XO"),
+        APNS_PRODUCTION_CERTIFICATE_PATH_1(PROPERTY_PREFIX + ".apns.1.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_1(PROPERTY_PREFIX + ".apns.1.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_1(PROPERTY_PREFIX + ".apns.1.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_1(PROPERTY_PREFIX + ".apns.1.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_2(PROPERTY_PREFIX + ".apns.2.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_2(PROPERTY_PREFIX + ".apns.2.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_2(PROPERTY_PREFIX + ".apns.2.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_2(PROPERTY_PREFIX + ".apns.2.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_2(PROPERTY_PREFIX + ".apns.2.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
+
+        APNS_CLIENT_NAME_3(PROPERTY_PREFIX + ".apns.3.clientName",
+                PropertyTypes.STRING,
+                ""),
+        APNS_PRODUCTION_CERTIFICATE_PATH_3(PROPERTY_PREFIX + ".apns.3.cert.production.path",
+                PropertyTypes.STRING,
+                "apns_production.p12"),
+        APNS_PRODUCTION_CERTIFICATE_PASSWORD_3(PROPERTY_PREFIX + ".apns.3.cert.production.password",
+                PropertyTypes.STRING,
+                "password"),
+        APNS_SANDBOX_CERTIFICATE_PATH_3(PROPERTY_PREFIX + ".apns.3.cert.sandbox.path",
+                PropertyTypes.STRING,
+                "apns_sandbox.p12"),
+        APNS_SANDBOX_CERTIFICATE_PASSWORD_3(PROPERTY_PREFIX + ".apns.3.cert.sandbox.password",
+                PropertyTypes.STRING,
+                "password"),
 
         // GCM
         GCM_ENABLED(PROPERTY_PREFIX + ".gcm.enabled",
@@ -143,6 +179,11 @@ public class TalkServerConfiguration {
         FILECACHE_DOWNLOAD_BASE(PROPERTY_PREFIX + ".filecache.downloadBase",
                 PropertyTypes.STRING,
                 "http://localhost:8081/download/"),
+
+        // INVITATIONS
+        INVITATION_ALLOWED_URI_SCHEMES(PROPERTY_PREFIX + ".invitation.allowed.uri.schemes",
+                PropertyTypes.STRING,
+                "hxo, hxod"),
 
         // MISC
         SUPPORT_TAG(PROPERTY_PREFIX + ".support.tag",
@@ -204,70 +245,116 @@ public class TalkServerConfiguration {
 
     private String mVersion = "<unknown>";
     private GitInfo gitInfo = new GitInfo();
+    private HashMap<String, ApnsConfiguration> mApnsConfigurations = new HashMap<String, ApnsConfiguration>();
 
     public TalkServerConfiguration() {
     }
 
     public void report() {
-        LOG.info("Current configuration:" +
-                        "\n - General:" +
-                        MessageFormat.format("\n   * version:                            ''{0}''", mVersion) +
-                        MessageFormat.format("\n   * git.commit.id:                      ''{0}''", gitInfo.commitId) +
-                        MessageFormat.format("\n   * git.commit.id.abbrev:               ''{0}''", gitInfo.commitIdAbbrev) +
-                        MessageFormat.format("\n   * git.branch:                         ''{0}''", gitInfo.branch) +
-                        MessageFormat.format("\n   * git.commit.time:                    ''{0}''", gitInfo.commitTime) +
-                        MessageFormat.format("\n   * git.build.time:                     ''{0}''", gitInfo.buildTime) +
-                        "\n - WebServer Configuration:" +
-                        MessageFormat.format("\n   * listen address:                     ''{0}''", this.getListenAddress()) +
-                        MessageFormat.format("\n   * listen port:                        {0}", Long.toString(getListenPort())) +
-                        "\n - Database Configuration:" +
-                        MessageFormat.format("\n   * database backend:                   ''{0}''", this.getDatabaseBackend()) +
-                        MessageFormat.format("\n   * jongo host:                         ''{0}''", this.getJongoHost()) +
-                        MessageFormat.format("\n   * jongo database:                     ''{0}''", this.getJongoDb()) +
-                        MessageFormat.format("\n   * jongo connections/host:             {0}", this.getJongoConnectionsPerHost()) +
-                        MessageFormat.format("\n   * jongo max wait time (in ms):        {0}", this.getJongoMaxWaitTime()) +
-                        "\n - Push Configuration:" +
-                        MessageFormat.format("\n   * push rate limit (in milli-seconds): {0}", Long.toString(this.getPushRateLimit())) +
-                        "\n   - APNS:" +
-                        MessageFormat.format("\n     * enabled:                          {0}", this.isApnsEnabled()) +
-                        MessageFormat.format("\n     * production cert path :            ''{0}''", this.getApnsCertProductionPath()) +
-                        MessageFormat.format("\n     * production cert password (length):''{0}''", this.getApnsCertProductionPassword().length()) + // here we don't really print the password literal to stdout of course
-                        MessageFormat.format("\n     * sandbox cert path :               ''{0}''", this.getApnsCertSandboxPath()) +
-                        MessageFormat.format("\n     * sandbox cert password (length):   ''{0}''", this.getApnsCertSandboxPassword().length()) + // here we don't really print the password literal to stdout of course
-                        MessageFormat.format("\n     * apns invalidate delay (in s):     {0}", Long.toString(this.getApnsInvalidateDelay())) +
-                        MessageFormat.format("\n     * apns invalidate interval (in s):  {0}", Long.toString(this.getApnsInvalidateInterval())) +
-                        "\n   - GCM:" +
-                        MessageFormat.format("\n     * enabled:                          {0}", this.isGcmEnabled()) +
-                        MessageFormat.format("\n     * api key (length):                 ''{0}''", getGcmApiKey().length()) +
-                        MessageFormat.format("\n     * wake ttl (in s)                   ''{0}''", Long.toString(GCM_WAKE_TTL)) +
-                        "\n - Cleaning Agent Configuration:" +
-                        MessageFormat.format("\n   * clients cleanup delay (in s):       {0}", Long.toString(this.getApnsInvalidateDelay())) +
-                        MessageFormat.format("\n   * clients cleanup interval (in s):    {0}", Long.toString(this.getCleanupAllClientsInterval())) +
-                        MessageFormat.format("\n   * deliveries cleanup delay (in s):    {0}", Long.toString(this.getCleanupAllDeliveriesDelay())) +
-                        MessageFormat.format("\n   * deliveries cleanup interval (in s): {0}", Long.toString(this.getCleanupAllDeliveriesInterval())) +
-                        "\n - Filecache Configuration:" +
-                        MessageFormat.format("\n   * filecache control url:              ''{0}''", this.getFilecacheControlUrl()) +
-                        MessageFormat.format("\n   * filecache upload base url:          ''{0}''", this.getFilecacheUploadBase()) +
-                        MessageFormat.format("\n   * filecache download base url:        ''{0}''", this.getFilecacheDownloadBase()) +
-                        "\n - Other:" +
-                        MessageFormat.format("\n   * support tag: ''{0}''", this.getSupportTag()) +
-                        "\n - Threads:" +
-                        MessageFormat.format("\n   * DeliveryAgent Threads Poolsize:     {0}", this.getDeliveryAgentThreadPoolSize()) +
-                        MessageFormat.format("\n   * CleanupAgent  Threads Poolsize:     {0}", this.getCleaningAgentThreadPoolSize()) +
-                        MessageFormat.format("\n   * PushAgent     Threads Poolsize:     {0}", this.getPushAgentThreadPoolSize()) +
-                        MessageFormat.format("\n   * PingAgent     Threads Poolsize:     {0}", this.getPingAgentThreadPoolSize()) +
-                        MessageFormat.format("\n   * UpdateAgent   Threads Poolsize:     {0}", this.getUpdateAgentThreadPoolSize()) +
-                        "\n - Ping:" +
-                        MessageFormat.format("\n   * Ping interval (in s):               {0}", this.getPingInterval()) +
-                        MessageFormat.format("\n   * perform ping at intervals:          {0}", this.getPerformPingAtInterval()) +
-                        "\n - Debugging:" +
-                        MessageFormat.format("\n   * LogAllCalls:                        {0}", this.getLogAllCalls())
-        );
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(                     "\n - General:");
+        builder.append(MessageFormat.format("\n   * version:                              ''{0}''", mVersion));
+        builder.append(MessageFormat.format("\n   * git.commit.id:                        ''{0}''", gitInfo.commitId));
+        builder.append(MessageFormat.format("\n   * git.commit.id.abbrev:                 ''{0}''", gitInfo.commitIdAbbrev));
+        builder.append(MessageFormat.format("\n   * git.branch:                           ''{0}''", gitInfo.branch));
+        builder.append(MessageFormat.format("\n   * git.commit.time:                      ''{0}''", gitInfo.commitTime));
+        builder.append(MessageFormat.format("\n   * git.build.time:                       ''{0}''", gitInfo.buildTime));
+        builder.append(                     "\n - WebServer Configuration:");
+        builder.append(MessageFormat.format("\n   * listen address:                       ''{0}''", this.getListenAddress()));
+        builder.append(MessageFormat.format("\n   * listen port:                          {0}", Long.toString(getListenPort())));
+        builder.append(                     "\n - Database Configuration:");
+        builder.append(MessageFormat.format("\n   * database backend:                     ''{0}''", this.getDatabaseBackend()));
+        builder.append(MessageFormat.format("\n   * jongo host:                           ''{0}''", this.getJongoHost()));
+        builder.append(MessageFormat.format("\n   * jongo database:                       ''{0}''", this.getJongoDb()));
+        builder.append(MessageFormat.format("\n   * jongo connections/host:               {0}", this.getJongoConnectionsPerHost()));
+        builder.append(MessageFormat.format("\n   * jongo max wait time (in ms):          {0}", this.getJongoMaxWaitTime()));
+        builder.append(                     "\n - Push Configuration:");
+        builder.append(MessageFormat.format("\n   * push rate limit (in milli-seconds):   {0}", Long.toString(this.getPushRateLimit())));
+        builder.append(                     "\n   - APNS:");
+        builder.append(MessageFormat.format("\n     * enabled:                            {0}", this.isApnsEnabled()));
+        builder.append(MessageFormat.format("\n     * apns invalidate delay (in s):       {0}", Long.toString(this.getApnsInvalidateDelay())));
+        builder.append(MessageFormat.format("\n     * apns invalidate interval (in s):    {0}", Long.toString(this.getApnsInvalidateInterval())));
+        builder.append(MessageFormat.format("\n     * default client name:                ''{0}''", this.getApnsDefaultClientName()));
+
+        for (Map.Entry<String, ApnsConfiguration> entry : getApnsConfigurations().entrySet()) {
+            String clientName = entry.getKey();
+            ApnsConfiguration apnsConfiguration = entry.getValue();
+            ApnsConfiguration.Certificate productionCertificate = apnsConfiguration.getCertificate(PushAgent.APNS_SERVICE_TYPE.PRODUCTION);
+            ApnsConfiguration.Certificate sandboxCertificate = apnsConfiguration.getCertificate(PushAgent.APNS_SERVICE_TYPE.SANDBOX);
+
+            builder.append(MessageFormat.format("\n     * configuration for client name:      ''{0}''", clientName));
+            builder.append(MessageFormat.format("\n       * production cert path :            ''{0}''", productionCertificate.getPath()));
+            builder.append(MessageFormat.format("\n       * production cert password (length):''{0}''", productionCertificate.getPassword().length())); // here we don't really print the password literal to stdout of course
+            builder.append(MessageFormat.format("\n       * sandbox cert path :               ''{0}''", sandboxCertificate.getPath()));
+            builder.append(MessageFormat.format("\n       * sandbox cert password (length):   ''{0}''", sandboxCertificate.getPassword().length())); // here we don't really print the password literal to stdout of course
+        }
+
+        builder.append(                     "\n   - GCM:");
+        builder.append(MessageFormat.format("\n     * enabled:                            {0}", this.isGcmEnabled()));
+        builder.append(MessageFormat.format("\n     * api key (length):                   ''{0}''", getGcmApiKey().length()));
+        builder.append(MessageFormat.format("\n     * wake ttl (in s)                     ''{0}''", Long.toString(GCM_WAKE_TTL)));
+        builder.append(                     "\n - Cleaning Agent Configuration:");
+        builder.append(MessageFormat.format("\n   * clients cleanup delay (in s):         {0}", Long.toString(this.getApnsInvalidateDelay())));
+        builder.append(MessageFormat.format("\n   * clients cleanup interval (in s):      {0}", Long.toString(this.getCleanupAllClientsInterval())));
+        builder.append(MessageFormat.format("\n   * deliveries cleanup delay (in s):      {0}", Long.toString(this.getCleanupAllDeliveriesDelay())));
+        builder.append(MessageFormat.format("\n   * deliveries cleanup interval (in s):   {0}", Long.toString(this.getCleanupAllDeliveriesInterval())));
+        builder.append(                     "\n - Filecache Configuration:");
+        builder.append(MessageFormat.format("\n   * filecache control url:                ''{0}''", this.getFilecacheControlUrl()));
+        builder.append(MessageFormat.format("\n   * filecache upload base url:            ''{0}''", this.getFilecacheUploadBase()));
+        builder.append(MessageFormat.format("\n   * filecache download base url:          ''{0}''", this.getFilecacheDownloadBase()));
+        builder.append(                      "\n - Invitation Configuration:");
+        builder.append(MessageFormat.format("\n   * allowed invitation URI schemes:     {0}", this.getAllowedInviteUriSchemes()));
+        builder.append(                     "\n - Other:");
+        builder.append(MessageFormat.format("\n   * support tag:                          ''{0}''", this.getSupportTag()));
+        builder.append(                     "\n - Threads:");
+        builder.append(MessageFormat.format("\n   * DeliveryAgent Threads Poolsize:       {0}", this.getDeliveryAgentThreadPoolSize()));
+        builder.append(MessageFormat.format("\n   * CleanupAgent  Threads Poolsize:       {0}", this.getCleaningAgentThreadPoolSize()));
+        builder.append(MessageFormat.format("\n   * PushAgent     Threads Poolsize:       {0}", this.getPushAgentThreadPoolSize()));
+        builder.append(MessageFormat.format("\n   * PingAgent     Threads Poolsize:       {0}", this.getPingAgentThreadPoolSize()));
+        builder.append(MessageFormat.format("\n   * UpdateAgent   Threads Poolsize:       {0}", this.getUpdateAgentThreadPoolSize()));
+        builder.append(                     "\n - Ping:");
+        builder.append(MessageFormat.format("\n   * Ping interval (in s):                 {0}", this.getPingInterval()));
+        builder.append(MessageFormat.format("\n   * perform ping at intervals:            {0}", this.getPerformPingAtInterval()));
+        builder.append(                     "\n - Debugging:");
+        builder.append(MessageFormat.format("\n   * LogAllCalls:                          {0}", this.getLogAllCalls()));
+
+        LOG.info("Current configuration:" + builder.toString());
     }
 
     public void configureFromProperties(Properties properties) {
         LOG.info("Loading from properties...");
         ConfigurableProperties.loadFromProperties(properties);
+        initApnsConfigurations();
+    }
+
+    private void initApnsConfigurations() {
+        String clientName1 = (String) ConfigurableProperties.APNS_CLIENT_NAME_1.value;
+        if (!clientName1.isEmpty()) {
+            mApnsConfigurations.put(clientName1, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_1.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_1.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_1.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_1.value));
+        }
+
+        String clientName2 = (String) ConfigurableProperties.APNS_CLIENT_NAME_2.value;
+        if (!clientName2.isEmpty()) {
+            mApnsConfigurations.put(clientName2, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_2.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_2.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_2.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_2.value));
+        }
+
+        String clientName3 = (String) ConfigurableProperties.APNS_CLIENT_NAME_3.value;
+        if (!clientName3.isEmpty()) {
+            mApnsConfigurations.put(clientName3, new ApnsConfiguration(
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH_3.value,
+                    (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD_3.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH_3.value,
+                    (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD_3.value));
+        }
     }
 
     public String getListenAddress() {
@@ -314,20 +401,16 @@ public class TalkServerConfiguration {
         return (Boolean) ConfigurableProperties.APNS_ENABLED.value;
     }
 
-    public String getApnsCertProductionPath() {
-        return (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PATH.value;
+    public HashMap<String, ApnsConfiguration> getApnsConfigurations() {
+        return mApnsConfigurations;
     }
 
-    public String getApnsCertProductionPassword() {
-        return (String) ConfigurableProperties.APNS_PRODUCTION_CERTIFICATE_PASSWORD.value;
+    public ApnsConfiguration getApnsConfiguration(String clientName) {
+        return mApnsConfigurations.get(clientName);
     }
 
-    public String getApnsCertSandboxPath() {
-        return (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PATH.value;
-    }
-
-    public String getApnsCertSandboxPassword() {
-        return (String) ConfigurableProperties.APNS_SANDBOX_CERTIFICATE_PASSWORD.value;
+    public String getApnsDefaultClientName() {
+        return (String) ConfigurableProperties.APNS_CLIENT_NAME_1.value;
     }
 
     public int getApnsInvalidateDelay() {
@@ -382,6 +465,11 @@ public class TalkServerConfiguration {
 
     public void setFilecacheDownloadBase(String mFilecacheDownloadBase) {
         ConfigurableProperties.FILECACHE_DOWNLOAD_BASE.setValue(mFilecacheDownloadBase);
+    }
+
+    public List<String> getAllowedInviteUriSchemes() {
+        String schemesString = (String) ConfigurableProperties.INVITATION_ALLOWED_URI_SCHEMES.value;
+        return Arrays.asList(schemesString.replace(" ", "").split(","));
     }
 
     public String getSupportTag() {

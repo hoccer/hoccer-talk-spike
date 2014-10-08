@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -23,13 +24,14 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.adapter.ContactsPageAdapter;
-import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.activity.component.ActivityComponent;
+import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
+import com.hoccer.xo.android.adapter.ChatsPageAdapter;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.content.contentselectors.VideoSelector;
-import com.hoccer.xo.android.fragment.NearbyContactsFragment;
+import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
@@ -37,16 +39,23 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class ContactsActivity extends XoActionbarActivity implements IXoStateListener, IXoContactListener {
+public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoContactListener, IXoPairingListener {
 
-    private final static Logger LOG = Logger.getLogger(ContactsActivity.class);
+    private final static Logger LOG = Logger.getLogger(ChatsActivity.class);
+    private static final String ACTION_ALREADY_HANDLED = "com.hoccer.xo.android.intent.action.ALREADY_HANDLED";
 
     private ViewPager mViewPager;
     private ActionBar mActionBar;
-    private ContactsPageAdapter mAdapter;
+    private ChatsPageAdapter mAdapter;
 
     private boolean mEnvironmentUpdatesEnabled;
     private boolean mNoUserInput = false;
+    private String mPairingToken;
+
+    @Override
+    protected ActivityComponent[] createComponents() {
+        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+    }
 
     @Override
     protected int getLayoutResource() {
@@ -67,7 +76,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         mViewPager.setOnPageChangeListener(new ConversationsPageListener());
 
         mActionBar = getActionBar();
-        mAdapter = new ContactsPageAdapter(getSupportFragmentManager(), tabs.length);
+        mAdapter = new ChatsPageAdapter(getSupportFragmentManager(), tabs.length);
         mViewPager.setAdapter(mAdapter);
         mActionBar.setHomeButtonEnabled(false);
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -110,10 +119,17 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleTokenPairingIntent(intent);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         refreshEnvironmentUpdater(false);
         getXoClient().registerStateListener(this);
+        handleTokenPairingIntent(getIntent());
 
         // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
         getXoClient().registerContactListener(this);
@@ -175,6 +191,48 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         }
     }
 
+    private void handleTokenPairingIntent(Intent intent) {
+        if (intent.getAction() == Intent.ACTION_VIEW) {
+            String token = intent.getData().getHost();
+            intent.setAction(ACTION_ALREADY_HANDLED);
+
+            if (getXoClient().isActive()) {
+                performTokenPairing(token);
+            } else {
+                mPairingToken = token;
+            }
+        }
+    }
+
+    private void performTokenPairing(final String token) {
+        getBackgroundExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                getXoClient().performTokenPairing(token, ChatsActivity.this);
+            }
+        });
+    }
+
+    @Override
+    public void onTokenPairingSucceeded(String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(ChatsActivity.this, R.string.toast_pairing_successful, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public void onTokenPairingFailed(String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(ChatsActivity.this, R.string.toast_pairing_failed, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     private IContentObject getVideoContentObject(Intent dataIntent) {
         VideoSelector videoSelector = new VideoSelector(this);
         // a more generic and static way to obtain the ContentObject would be cool
@@ -191,7 +249,7 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
         LOG.debug("refreshEnvironmentUpdater");
         int position = mViewPager.getCurrentItem();
         Fragment fragment = mAdapter.getItem(position);
-        if (fragment instanceof NearbyContactsFragment) {
+        if (fragment instanceof NearbyChatListFragment) {
             if (mEnvironmentUpdatesEnabled) {
                 if (isLocationServiceEnabled()) {
                     LOG.debug("refreshEnvironmentUpdater:startNearbySession");
@@ -206,8 +264,8 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
     private void shutDownNearbySession() {
         LOG.debug("shutDownNearbySession");
         XoApplication.stopNearbySession();
-        NearbyContactsFragment nearbyContactsFragment = (NearbyContactsFragment) mAdapter.getItem(2);
-        nearbyContactsFragment.shutdownNearbyChat();
+        NearbyChatListFragment nearbyChatListFragment = (NearbyChatListFragment) mAdapter.getItem(2);
+        nearbyChatListFragment.shutdownNearbyChat();
     }
 
     private boolean isLocationServiceEnabled() {
@@ -312,9 +370,13 @@ public class ContactsActivity extends XoActionbarActivity implements IXoStateLis
             shutDownNearbySession();
         } else if (client.isActive()) {
             refreshEnvironmentUpdater(true);
+
+            if (mPairingToken != null) {
+                performTokenPairing(mPairingToken);
+                mPairingToken = null;
+            }
         }
     }
-
 
     // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
     private void updateInvitationCount() {

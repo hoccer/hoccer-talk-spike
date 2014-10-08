@@ -1,18 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/menu_scan_code"
-        android:title="@string/menu_scan_code"
-        android:showAsAction="never"
-        android:orderInCategory="200"/>
-
-    <item
-        android:id="@+id/menu_show_code"
-        android:title="@string/menu_show_code"
-        android:showAsAction="never"
-        android:orderInCategory="210"/>
-
-    <item
         android:id="@+id/menu_pair"
         android:title="@string/menu_pair"
         android:icon="@drawable/ic_contact_new"

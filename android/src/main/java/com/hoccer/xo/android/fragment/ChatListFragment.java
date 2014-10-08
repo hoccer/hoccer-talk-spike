@@ -11,7 +11,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MessagingActivity;
-import com.hoccer.xo.android.adapter.BetterContactsAdapter;
+import com.hoccer.xo.android.adapter.ChatsAdapter;
 import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
@@ -31,12 +31,12 @@ import java.util.List;
  * This currently shows only contact data but should also be able to show
  * recent conversations for use as a "conversations" view.
  */
-public class ContactsFragment extends SearchableListFragment implements OnItemCountChangedListener {
+public class ChatListFragment extends SearchableListFragment implements OnItemCountChangedListener {
 
-    private static final Logger LOG = Logger.getLogger(ContactsFragment.class);
+    private static final Logger LOG = Logger.getLogger(ChatListFragment.class);
 
     private XoClientDatabase mDatabase;
-    private BetterContactsAdapter mAdapter;
+    private ChatsAdapter mAdapter;
     private WeakReference<SearchAdapter> mSearchAdapterReference = new WeakReference<SearchAdapter>(null);
 
     private TextView mPlaceholderText;
@@ -50,13 +50,17 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mDatabase = XoApplication.getXoClient().getDatabase();
-        initContactListAdapter();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_contacts, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_contacts, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
         mPlaceholderImage= (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
@@ -69,16 +73,12 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
             mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
         }
 
+        initContactListAdapter();
         ListView contactList = (ListView) view.findViewById(android.R.id.list);
         registerForContextMenu(contactList);
-        return view;
-    }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        // initial update
         onItemCountChanged(mAdapter.getCount());
-        setListAdapter(mAdapter);
     }
 
     @Override
@@ -202,7 +202,7 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
     }
 
     private void initContactListAdapter() {
-        BetterContactsAdapter.Filter filter = new BetterContactsAdapter.Filter() {
+        ChatsAdapter.Filter filter = new ChatsAdapter.Filter() {
             @Override
             public boolean shouldShow(TalkClientContact contact) {
                 if (contact.isGroup()) {
@@ -221,9 +221,10 @@ public class ContactsFragment extends SearchableListFragment implements OnItemCo
             }
         };
 
-        mAdapter = new BetterContactsAdapter((XoActivity) getActivity(), filter);
+        mAdapter = new ChatsAdapter((XoActivity) getActivity(), filter);
         mAdapter.onResume();
         mAdapter.setOnItemCountChangedListener(this);
+        setListAdapter(mAdapter);
     }
 
     public void onGroupCreationSucceeded(int contactId) {

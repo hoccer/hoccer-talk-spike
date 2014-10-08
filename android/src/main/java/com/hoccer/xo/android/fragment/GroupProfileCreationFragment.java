@@ -400,7 +400,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     private void enterAvatarEditMode() {
         if (mGroup != null && mGroup.isEditable()) {
             if (mGroup.getAvatarContentUrl() != null) {
-                XoDialogs.showSingleChoiceDialog("AvatarSelection",
+                XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                         R.string.dialog_avatar_options_title,
                         new String[]{
                                 getResources().getString(R.string.dialog_set_avatar_option),

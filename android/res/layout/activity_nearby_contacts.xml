@@ -7,7 +7,7 @@
         android:orientation="vertical">
 
     <fragment
-            class="com.hoccer.xo.android.fragment.NearbyContactsFragment"
+            class="com.hoccer.xo.android.fragment.NearbyChatListFragment"
             android:id="@+id/activity_nearby_contacts_activity"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

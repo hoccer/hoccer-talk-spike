@@ -43,6 +43,10 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
         return mProperties.getProperty("hoccer.invitation.uri.scheme") + "://";
     }
 
+    public String getInvitationServerUri() {
+        return mProperties.getProperty("hoccer.invitation.server.uri");
+    }
+
     @Override
     public int getRSAKeysize() {
         String keySizeString = mPreferences.getString("preference_keysize", "2048");

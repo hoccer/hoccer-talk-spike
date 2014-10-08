@@ -22,9 +22,9 @@ import java.util.Comparator;
 import java.util.List;
 
 
-public class BetterContactsAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
+public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
 
-    private static final Logger LOG = Logger.getLogger(BetterContactsAdapter.class);
+    private static final Logger LOG = Logger.getLogger(ChatsAdapter.class);
 
     private static final Comparator<BaseContactItem> LATEST_ITEM_COMPARATOR = new Comparator<BaseContactItem>() {
         @Override
@@ -51,11 +51,11 @@ public class BetterContactsAdapter extends XoAdapter implements IXoContactListen
     private OnItemCountChangedListener mOnItemCountChangedListener;
     private XoClientDatabase mDatabase;
 
-    public BetterContactsAdapter(XoActivity activity) {
+    public ChatsAdapter(XoActivity activity) {
         this(activity, null);
     }
 
-    public BetterContactsAdapter(XoActivity activity, @Nullable Filter filter) {
+    public ChatsAdapter(XoActivity activity, @Nullable Filter filter) {
         super(activity);
         mDatabase = XoApplication.getXoClient().getDatabase();
         mFilter = filter;

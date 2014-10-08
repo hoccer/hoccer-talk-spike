@@ -516,6 +516,11 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .countOf();
     }
 
+    public long getAttachmentCountByContactId(int contactId) throws SQLException {
+        Where where = mClientMessages.queryBuilder().where();
+        return where.and(where.and(where.eq("conversationContact_id", contactId), where.eq("deleted", false)), where.or(where.isNotNull("attachmentUpload_id"), where.isNotNull("attachmentDownload_id"))).countOf();
+    }
+
     public TalkPrivateKey findPrivateKeyByKeyId(String keyId) throws SQLException {
         return mPrivateKeys.queryBuilder().where().eq("keyId", keyId).queryForFirst();
     }

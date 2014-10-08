@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="@color/xo_main_background">
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+        <ImageView
+                android:id="@+id/iv_qr_code"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:visibility="invisible"/>
+
+        <ProgressBar
+                android:id="@+id/pb_generating_pairing_token"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"/>
+
+        <LinearLayout
+                android:id="@+id/ll_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_centerInParent="true"
+                android:visibility="invisible">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@android:style/TextAppearance.DeviceDefault.Medium"
+                    android:text="@string/pairing_token_generation_failed"/>
+
+            <Button
+                    android:id="@+id/btn_retry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pairing_token_generation_retry"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <TextView
+            android:id="@+id/tv_pairing_token"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@android:style/TextAppearance.DeviceDefault.Large"
+            android:gravity="center"
+            android:textIsSelectable="true"/>
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="60dp"
+            android:gravity="center"
+            android:textColor="@color/common_signin_btn_light_text_disabled"
+            android:textSize="8pt"
+            android:text="@string/scan_or_copy_code"  />
+
+</LinearLayout>

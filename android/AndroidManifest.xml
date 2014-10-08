@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.hoccer.xo.release"
 
-          android:versionCode="84"
+          android:versionCode="88"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -98,12 +98,14 @@
                 android:name="com.google.android.maps.v2.API_KEY"
                 android:value="${google.maps.api.key}"/>
 
-        <!-- Contact list - our main activity -->
+        <!-- Chat list - our main activity -->
         <activity
-                android:name="com.hoccer.xo.android.activity.ContactsActivity"
+                android:name="com.hoccer.xo.android.activity.ChatsActivity"
                 android:label="@string/actionbar_default_title"
                 android:configChanges="keyboardHidden|orientation|screenSize"
-                android:screenOrientation="portrait">
+                android:screenOrientation="portrait"
+                android:launchMode="singleTask">
+
             <!-- Show in launcher -->
             <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.MAIN"/>
@@ -118,6 +120,12 @@
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="video/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="${hoccer.invitation.uri.scheme}"/>
             </intent-filter>
         </activity>
 
@@ -145,14 +153,14 @@
         <!-- MediaBrowserActivity activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MediaBrowserActivity"
-                android:parentActivityName="com.hoccer.xo.android.activity.ContactsActivity"
+                android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity"
                 android:screenOrientation="portrait"
                 android:windowSoftInputMode="stateHidden"
                 android:exported="true">
 
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.ContactsActivity"/>
+                    android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
         </activity>
 
         <!-- MediaCollectionSelection activity -->
@@ -199,24 +207,9 @@
                 android:windowSoftInputMode="stateHidden">
         </activity>
 
-        <!-- Pairing activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.PairingActivity"
-                android:label="@string/actionbar_default_title"
-                android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="${hoccer.invitation.uri.scheme}"/>
-            </intent-filter>
-        </activity>
-
-
         <!-- Invitation activity -->
         <activity
-                android:name="com.hoccer.xo.android.activity.DeviceContactsSelectionActivity"
+                android:name="com.hoccer.xo.android.activity.DeviceContactsInvitationActivity"
                 android:label="@string/actionbar_default_title">
         </activity>
 
@@ -261,17 +254,12 @@
                 android:label="@string/select_images_title">
         </activity>
 
-        <!-- Test Qr generator activity -->
+        <!-- QR code activity -->
         <activity
-                android:name="com.hoccer.xo.android.activity.QrCodeGeneratingActivity"
-                android:label="@string/pairing_generator">
-        </activity>
-
-        <!-- Test Qr scanner activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.QrScannerActivity"
-                android:label="@string/pairing_scanner"
-                android:screenOrientation="portrait">
+                android:name="com.hoccer.xo.android.activity.QrCodeActivity"
+                android:label="@string/actionbar_default_title"
+                android:screenOrientation="portrait"
+                android:windowSoftInputMode="adjustResize">
         </activity>
 
         <!-- Connection and delivery service -->

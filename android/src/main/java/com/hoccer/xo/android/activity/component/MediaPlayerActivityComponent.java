@@ -1,7 +1,8 @@
-package com.hoccer.xo.android.base;
+package com.hoccer.xo.android.activity.component;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
@@ -10,26 +11,29 @@ import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 
+
 /**
- * Activity keeps track of synchronizing the mediaplay icon
- * according to the mediaplayer state.
- * It can also be used to pause the current media.
+ * Adds and manages the media icon in the actionbar based on the current MediaPlayerService state.
  */
-public abstract class XoActionbarActivity extends XoActivity {
+public class MediaPlayerActivityComponent extends ActivityComponent {
 
     private Menu mMenu;
     private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
 
+    public MediaPlayerActivityComponent(final FragmentActivity activity) {
+        super(activity);
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(this);
+        mMediaPlayerServiceConnector = new MediaPlayerServiceConnector(getActivity());
         mMediaPlayerServiceConnector.connect(
                 IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
                     @Override
-                    public void onConnected(MediaPlayerService service) {
+                    public void onConnected(final MediaPlayerService service) {
                         updateActionBarIcons();
                     }
 
@@ -38,7 +42,7 @@ public abstract class XoActionbarActivity extends XoActivity {
                     }
 
                     @Override
-                    public void onAction(String action, MediaPlayerService service) {
+                    public void onAction(final String action, final MediaPlayerService service) {
                         updateActionBarIcons();
                     }
                 }
@@ -46,26 +50,27 @@ public abstract class XoActionbarActivity extends XoActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         mMediaPlayerServiceConnector.disconnect();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        boolean result = super.onCreateOptionsMenu(menu);
-
-        mMenu = menu;
-        updateActionBarIcons();
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        final boolean result = super.onCreateOptionsMenu(menu);
+        if (result) {
+            mMenu = menu;
+            updateActionBarIcons();
+        } else {
+            mMenu = null;
+        }
 
         return result;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.menu_media_player:
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        if(item.getItemId() == R.id.menu_media_player) {
                 openFullScreenPlayer();
                 return true;
         }
@@ -73,15 +78,15 @@ public abstract class XoActionbarActivity extends XoActivity {
     }
 
     private void openFullScreenPlayer() {
-        Intent resultIntent = new Intent(this, FullscreenPlayerActivity.class);
-        startActivity(resultIntent);
+        final Intent resultIntent = new Intent(getActivity(), FullscreenPlayerActivity.class);
+        getActivity().startActivity(resultIntent);
     }
 
     private void updateActionBarIcons() {
         if (mMediaPlayerServiceConnector != null && mMediaPlayerServiceConnector.isConnected() && mMenu != null) {
-            MenuItem mediaPlayerItem = mMenu.findItem(R.id.menu_media_player);
+            final MenuItem mediaPlayerItem = mMenu.findItem(R.id.menu_media_player);
 
-            MediaPlayerService service = mMediaPlayerServiceConnector.getService();
+            final MediaPlayerService service = mMediaPlayerServiceConnector.getService();
             if (service.isStopped() || service.isPaused()) {
                 mediaPlayerItem.setVisible(false);
             } else {
