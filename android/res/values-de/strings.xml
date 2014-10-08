@@ -79,7 +79,6 @@
     <!-- Contact list items -->
     <string name="contact_name_new_client">Neuer Kontakt</string>
     <string name="contact_name_new_group">Neue Gruppe</string>
-    <string name="contact_status">Hallo!</string>
     <string name="contact_role_owner">Besitzer</string>
 
     <!-- Composition fragment -->

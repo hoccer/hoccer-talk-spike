@@ -53,4 +53,12 @@
         <item name="android:textColor">@android:color/secondary_text_dark</item>
         <item name="android:textSize">3pt</item>
     </style>
+
+    <style name="AppBaseTheme.Contact.GroupContactStatus" parent="AppBaseTheme.Contact">
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@android:color/secondary_text_dark</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:layout_margin">2dp</item>
+        <item name="android:textSize">3pt</item>
+    </style>
 </resources>
