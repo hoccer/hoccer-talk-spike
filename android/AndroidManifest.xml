@@ -252,6 +252,13 @@
                 android:windowSoftInputMode="adjustResize">
         </activity>
 
+        <!-- Data Export Activity -->
+        <activity android:name="com.hoccer.xo.android.activity.DataExportActivity">
+            <intent-filter>
+                <action android:name="com.hoccer.xo.android.action.EXPORT_DATA"/>
+            </intent-filter>
+        </activity>
+
         <!-- Connection and delivery service -->
         <service android:name="com.hoccer.xo.android.service.XoClientService"/>
 
