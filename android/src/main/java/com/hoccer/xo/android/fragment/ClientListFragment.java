@@ -71,7 +71,7 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
     public void onResume() {
         super.onResume();
         try {
-            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getInvitedMeRequestsCount();
+            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -129,7 +129,7 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
     public void onClientRelationshipChanged(TalkClientContact contact) {
         if (contact.getClientRelationship().invitedMe()) {
             try {
-                mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getInvitedMeRequestsCount();
+                mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
