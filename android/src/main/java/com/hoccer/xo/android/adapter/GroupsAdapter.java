@@ -87,7 +87,7 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
         LinearLayout invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
         Button acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
         Button declineButton = (Button) convertView.findViewById(R.id.btn_decline);
-        TextView isJoinedTextView = (TextView) convertView.findViewById(R.id.tv_is_joined);
+        TextView groupMembersTextView = (TextView) convertView.findViewById(R.id.tv_group_members);
 
         final TalkClientContact group = (TalkClientContact) getItem(position);
 
@@ -119,12 +119,13 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
 
         if (group.isGroup() && group.getGroupMember() != null) {
             TalkGroupMember member = group.getGroupMember();
+
             if (member.isInvited()) {
                 invitedMeLayout.setVisibility(View.VISIBLE);
-                isJoinedTextView.setVisibility(View.GONE);
+                groupMembersTextView.setVisibility(View.GONE);
             } else if (member.isJoined()) {
                 invitedMeLayout.setVisibility(View.GONE);
-                isJoinedTextView.setVisibility(View.VISIBLE);
+                groupMembersTextView.setVisibility(View.VISIBLE);
             }
         }
 

@@ -140,8 +140,8 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
         Button acceptButton = (Button) itemView.findViewById(com.hoccer.xo.release.R.id.btn_accept);
         assertEquals(View.VISIBLE, acceptButton.getVisibility());
 
-        TextView isJoinedTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_joined);
-        assertEquals(View.GONE, isJoinedTextView.getVisibility());
+        TextView groupMembersTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_group_members);
+        assertEquals(View.GONE, groupMembersTextView.getVisibility());
     }
 
     public void testIsJoinedRelationUI() throws InterruptedException {
@@ -188,8 +188,8 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
         LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.hoccer.xo.release.R.id.ll_invited_me);
         assertEquals(ViewGroup.GONE, invitedMeLayout.getVisibility());
 
-        TextView isJoinedTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_joined);
-        assertEquals(View.VISIBLE, isJoinedTextView.getVisibility());
+        TextView groupMembersTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_group_members);
+        assertEquals(View.VISIBLE, groupMembersTextView.getVisibility());
     }
 
     public void testAcceptInvitation() {
