@@ -254,7 +254,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
         for (TalkRelationship relationship : relationships) {
             TalkClientContact contact = findContactByClientId(relationship.getOtherClientId(), false);
-            if (contact != null) {
+            if (contact != null && contact.getClientRelationship() != null) {
                 contacts.add(contact);
             }
         }
