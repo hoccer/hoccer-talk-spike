@@ -185,15 +185,18 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        mGroups = getAllGroupContacts();
         refreshView();
     }
 
     private void refreshView() {
+        final List<TalkClientContact> newGroups = getAllGroupContacts();
+
         Handler guiHandler = new Handler(Looper.getMainLooper());
         guiHandler.post(new Runnable() {
             @Override
             public void run() {
+                mGroups = newGroups;
+
                 notifyDataSetChanged();
             }
         });
