@@ -522,24 +522,28 @@ public class TalkClientContact implements Serializable {
 
     @GroupMethodOnly
     public  boolean isEmptyGroup() {
-        return (getActiveGroupMemberCount() <= 1);
+        return (getJoinedGroupContacts().size() == 0);
     }
 
     @GroupMethodOnly
-    public int getActiveGroupMemberCount() {
-        int activeMemberCount = 0;
+    public List<TalkClientContact> getJoinedGroupContacts() {
+        ArrayList<TalkClientContact> joinedContacts = new ArrayList<TalkClientContact>();
+
         if (getGroupMemberships() != null) {
-            for (TalkClientMembership groupMembership : getGroupMemberships()) {
-                TalkGroupMember groupMember = groupMembership.getMember();
-                if (groupMember == null) {
-                    continue;
-                }
-                if (groupMember.getState().equals(TalkGroupMember.STATE_JOINED)) {
-                    activeMemberCount++;
+            for (TalkClientMembership membership : getGroupMemberships()) {
+                TalkClientContact contact = membership.getClientContact();
+                TalkGroupMember groupMember = membership.getMember();
+
+                boolean isNotSelf = contact != null && !contact.isSelf();
+                boolean isJoined = groupMember != null && groupMember.isJoined();
+
+                if (isNotSelf && isJoined) {
+                    joinedContacts.add(contact);
                 }
             }
         }
-        return activeMemberCount;
+
+        return joinedContacts;
     }
 
     public boolean isNearby() {

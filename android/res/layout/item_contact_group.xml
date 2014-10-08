@@ -2,7 +2,6 @@
 <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:custom="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="5dp"
@@ -59,15 +58,13 @@
     </LinearLayout>
 
     <TextView
-            android:id="@+id/tv_is_joined"
+            android:id="@+id/tv_group_members"
             android:textColor="@android:color/secondary_text_dark"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/contact_icon"
             android:layout_toLeftOf="@id/contact_type"
             android:layout_below="@id/contact_name"
-            android:text="Heinz, Marie, Jan, + 30 others"
-            tools:ignore="HardcodedText"
             android:visibility="gone"
             style="@style/AppBaseTheme.Contact.LastMessage"/>
 

@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -21,10 +22,7 @@ import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
@@ -39,6 +37,7 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     private List<TalkClientContact> getAllClientContacts() {
 
+        Set<TalkClientContact> all = new HashSet<TalkClientContact>();
         List<TalkClientContact> invitedMe = null;
         List<TalkClientContact> invited = null;
         List<TalkClientContact> friends = null;
@@ -60,10 +59,11 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
         Collections.sort(invited, comparator);
         Collections.sort(friends, comparator);
 
-        invited.addAll(friends);
-        invitedMe.addAll(invited);
+        all.addAll(invitedMe);
+        all.addAll(invited);
+        all.addAll(friends);
 
-        return invitedMe;
+        return new ArrayList<TalkClientContact>(all);
     }
 
     @Override
@@ -126,30 +126,33 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
             }
         });
 
-        if (contact.getClientRelationship().invitedMe()) {
-            invitedMeLayout.setVisibility(View.VISIBLE);
-            isInvitedTextView.setVisibility(View.GONE);
-            isFriendTextView.setVisibility(View.GONE);
-        } else if (contact.getClientRelationship().isInvited()) {
-            invitedMeLayout.setVisibility(View.GONE);
-            isInvitedTextView.setVisibility(View.VISIBLE);
-            isFriendTextView.setVisibility(View.GONE);
-        } else if (contact.getClientRelationship().isFriend()) {
-            invitedMeLayout.setVisibility(View.GONE);
-            isInvitedTextView.setVisibility(View.GONE);
-            isFriendTextView.setVisibility(View.VISIBLE);
+        TalkRelationship relationship = contact.getClientRelationship();
+        if (relationship != null) {
+            if (relationship.invitedMe()) {
+                invitedMeLayout.setVisibility(View.VISIBLE);
+                isInvitedTextView.setVisibility(View.GONE);
+                isFriendTextView.setVisibility(View.GONE);
+            } else if (relationship.isInvited()) {
+                invitedMeLayout.setVisibility(View.GONE);
+                isInvitedTextView.setVisibility(View.VISIBLE);
+                isFriendTextView.setVisibility(View.GONE);
+            } else if (relationship.isFriend()) {
+                invitedMeLayout.setVisibility(View.GONE);
+                isInvitedTextView.setVisibility(View.GONE);
+                isFriendTextView.setVisibility(View.VISIBLE);
 
-            long messageCount = 0;
-            long attachmentCount = 0;
-            try {
-                messageCount = XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
-                attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
-            } catch (SQLException e) {
-                e.printStackTrace();
+                long messageCount = 0;
+                long attachmentCount = 0;
+                try {
+                    messageCount = XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
+                    attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                String messageAndAttachmentCountInfo = convertView.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
+                isFriendTextView.setText(messageAndAttachmentCountInfo);
             }
-
-            String messageAndAttachmentCountInfo = convertView.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
-            isFriendTextView.setText(messageAndAttachmentCountInfo);
         }
 
         return convertView;
@@ -168,15 +171,11 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        mClients.clear();
-        mClients = getAllClientContacts();
         refreshView();
     }
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-        mClients.clear();
-        mClients = getAllClientContacts();
         refreshView();
     }
 
@@ -186,11 +185,8 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        mClients.clear();
-        mClients = getAllClientContacts();
         refreshView();
     }
-
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
@@ -201,10 +197,13 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
     }
 
     private void refreshView() {
+        final List<TalkClientContact> newClients = getAllClientContacts();
+
         Handler guiHandler = new Handler(Looper.getMainLooper());
         guiHandler.post(new Runnable() {
             @Override
             public void run() {
+                mClients = newClients;
                 notifyDataSetChanged();
             }
         });
