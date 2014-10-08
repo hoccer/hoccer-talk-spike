@@ -201,7 +201,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
             @Override
             public boolean shouldShow(TalkClientContact contact) {
                 if (contact.isGroup()) {
-                    if (contact.isGroupInvolved() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()))) {
+                    if (contact.isGroupJoined() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()))) {
                         return true;
                     }
                 } else if (contact.isClient()) {
