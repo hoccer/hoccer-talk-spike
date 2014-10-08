@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -21,10 +22,7 @@ import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
@@ -39,6 +37,7 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     private List<TalkClientContact> getAllClientContacts() {
 
+        Set<TalkClientContact> all = new HashSet<TalkClientContact>();
         List<TalkClientContact> invitedMe = null;
         List<TalkClientContact> invited = null;
         List<TalkClientContact> friends = null;
@@ -60,10 +59,11 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
         Collections.sort(invited, comparator);
         Collections.sort(friends, comparator);
 
-        invited.addAll(friends);
-        invitedMe.addAll(invited);
+        all.addAll(invitedMe);
+        all.addAll(invited);
+        all.addAll(friends);
 
-        return invitedMe;
+        return new ArrayList<TalkClientContact>(all);
     }
 
     @Override
