@@ -1996,8 +1996,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     }
 
-    private byte[] extractCredentialsAsJson(TalkClientContact selfContact) throws RuntimeException {
+    public String extractCredentialsAsJson() throws RuntimeException {
         try {
+            TalkClientContact selfContact = getSelfContact();
             String clientId = selfContact.getClientId();
             TalkClientSelf self = selfContact.getSelf();
 
@@ -2006,8 +2007,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             rootNode.put("password", self.getSrpSecret());
             rootNode.put("salt", self.getSrpSalt());
             rootNode.put("clientId", clientId);
-            String jsonString = jsonMapper.writeValueAsString(rootNode);
-            return jsonString.getBytes("UTF-8");
+            return jsonMapper.writeValueAsString(rootNode);
         } catch (Exception e) {
             LOG.error("decoder exception in extractCredentials", e);
             throw new RuntimeException("exception during extractCredentials", e);
@@ -2015,9 +2015,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public byte[] makeEncryptedCredentialsContainer(String containerPassword) throws Exception {
-        byte[] credentials = extractCredentialsAsJson(getSelfContact());
-        byte[] container = CryptoJSON.encryptedContainer(credentials, containerPassword, "credentials");
-        return container;
+        String credentialsJson = extractCredentialsAsJson();
+        return CryptoJSON.encryptedContainer(credentialsJson.getBytes("UTF-8"), containerPassword, "credentials");
     }
 
     public boolean setEncryptedCredentialsFromContainer(byte[] jsonContainer, String containerPassword) {
