@@ -810,6 +810,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return null;
     }
 
+    public int getTotalCountOfInvitations() throws SQLException {
+        return (int) (getCountOfInvitedMeGroups() + getCountOfInvitedMeClients());
+    }
+
     public long getCountOfInvitedMeClients() throws SQLException {
         long invitedMeCount = mRelationships.queryBuilder()
                 .where()

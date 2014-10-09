@@ -14,6 +14,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoPairingListener;
@@ -51,6 +53,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private boolean mEnvironmentUpdatesEnabled;
     private boolean mNoUserInput = false;
     private String mPairingToken;
+    private TextView mInvitationNotificationBadge;
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -130,35 +133,23 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         refreshEnvironmentUpdater(false);
         getXoClient().registerStateListener(this);
         handleTokenPairingIntent(getIntent());
-
-        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
         getXoClient().registerContactListener(this);
         updateInvitationCount();
-        // TODO: done.
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        getXoClient().unregisterStateListener(this);
-
-        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-        getXoClient().unregisterContactListener(this);
-        // TODO: done.
+        unregisterListeners();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        getXoClient().unregisterStateListener(this);
-
-        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-        getXoClient().unregisterContactListener(this);
-        // TODO: done.
+        unregisterListeners();
     }
 
     private void initWithShareIntent() {
-
         Intent shareIntent = getIntent();
         String type = shareIntent.getType();
         Uri contentUri = (Uri) shareIntent.getParcelableExtra(Intent.EXTRA_STREAM);
@@ -292,12 +283,18 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         return true;
     }
 
+    private void unregisterListeners() {
+        getXoClient().unregisterStateListener(this);
+        getXoClient().unregisterContactListener(this);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
-
-
+        MenuItem item = menu.findItem(R.id.menu_contacts);
+        mInvitationNotificationBadge = (TextView) item.getActionView().findViewById(R.id.tv_invite_notification_badge);
+        updateInvitationCount();
 
         return true;
     }
@@ -388,26 +385,38 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         }
     }
 
-    // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
     private void updateInvitationCount() {
-        final int invitationsCount = getXoDatabase().findAllPendingFriendRequests().size();
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                ActionBar.Tab invitationTab = mActionBar.getTabAt(1);
-                String[] tabs = getResources().getStringArray(R.array.tab_names);
-                String tabText = tabs[1];
-
-                if (invitationsCount == 0) {
-                    invitationTab.setText(tabText);
-                } else {
-                    invitationTab.setText(tabText + " (" + invitationsCount + ")");
+        if (mInvitationNotificationBadge != null) {
+            try {
+                int invitationCount = XoApplication.getXoClient().getDatabase().getTotalCountOfInvitations();
+                if (invitationCount > 0) {
+                    updateNotificationBadge(invitationCount);
                 }
+            } catch (SQLException e) {
+                LOG.error("SQL Exception while getting amount of invitation", e);
             }
-        });
+        }
+    }
 
+    private void updateNotificationBadge(final int invitationCount) {
+        int visibility = View.GONE;
+        if (invitationCount > 0) {
+            visibility = View.VISIBLE;
+        }
+
+        if (shouldShowNotificationBadge(visibility)) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mInvitationNotificationBadge.setText(Integer.toString(invitationCount));
+                    mInvitationNotificationBadge.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+    }
+
+    private boolean shouldShowNotificationBadge(int visibility) {
+        return !(mInvitationNotificationBadge.getVisibility() == View.GONE && visibility == View.GONE);
     }
 
     @Override
