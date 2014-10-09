@@ -98,7 +98,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesListener);
         mEnvironmentUpdatesEnabled = mPreferences.getBoolean("preference_environment_update", true);
 
-        getXoClient().registerStateListener(this);
+        registerListeners();
 
         // if the client is not yet registered start the registration procedure
         if (!getXoClient().isRegistered()) {
