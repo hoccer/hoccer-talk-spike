@@ -70,15 +70,7 @@ public class GroupListFragment extends ListFragment implements IPagerFragment, I
     @Override
     public void onResume() {
         super.onResume();
-        try {
-            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroups();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        if (mInvitedMeCount > 0) {
-            mNotificationBadgeTextView.setVisibility(View.VISIBLE);
-        }
-        mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
+        updateNotificationBadge();
     }
 
     @Override
@@ -127,23 +119,7 @@ public class GroupListFragment extends ListFragment implements IPagerFragment, I
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        try {
-            mInvitedMeCount = XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroups();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mInvitedMeCount > 0) {
-                    mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
-                    mNotificationBadgeTextView.setVisibility(View.VISIBLE);
-                } else {
-                    mNotificationBadgeTextView.setText("");
-                    mNotificationBadgeTextView.setVisibility(View.GONE);
-                }
-            }
-        });
+        updateNotificationBadge();
     }
 
     @Override
@@ -170,4 +146,30 @@ public class GroupListFragment extends ListFragment implements IPagerFragment, I
     public void onGroupPresenceChanged(TalkClientContact contact) {
     }
 
+    private void updateNotificationBadge() {
+        try {
+            mInvitedMeCount = XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroups();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                if (mInvitedMeCount > 0) {
+                    mNotificationBadgeTextView.setVisibility(View.VISIBLE);
+                    if (mInvitedMeCount > 99) {
+                        mNotificationBadgeTextView.setTextSize(11);
+                    }
+                    if (mInvitedMeCount > 999) {
+                        mNotificationBadgeTextView.setText(9);
+                    }
+                    mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
+                } else {
+                    mNotificationBadgeTextView.setText("");
+                    mNotificationBadgeTextView.setVisibility(View.GONE);
+                }
+            }
+        });
+    }
 }

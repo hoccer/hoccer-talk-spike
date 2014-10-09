@@ -247,7 +247,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public List<TalkClientContact> findClientContactsByState(String state) throws SQLException {
         List<TalkClientContact> result = new ArrayList<TalkClientContact>();
-        Set<TalkClientContact> contacts = new HashSet<TalkClientContact>();
+        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
         List<TalkRelationship> relationships = mRelationships.queryBuilder()
                 .where()
                 .eq("state", state)
@@ -358,6 +358,19 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             contact = new TalkClientContact(TalkClientContact.TYPE_CLIENT, clientId);
             mClientContacts.create(contact);
         }
+
+        return contact;
+    }
+
+    public TalkClientContact findDeletedContactByClientId(String clientId) throws SQLException {
+        TalkClientContact contact = null;
+
+        contact = mClientContacts.queryBuilder()
+                .where()
+                .eq("clientId", clientId)
+                .eq("deleted", true)
+                .and(2)
+                .queryForFirst();
 
         return contact;
     }

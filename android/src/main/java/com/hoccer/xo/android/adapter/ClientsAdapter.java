@@ -37,7 +37,7 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     private List<TalkClientContact> getAllClientContacts() {
 
-        Set<TalkClientContact> all = new HashSet<TalkClientContact>();
+        List<TalkClientContact> all = new ArrayList<TalkClientContact>();
         List<TalkClientContact> invitedMe = null;
         List<TalkClientContact> invited = null;
         List<TalkClientContact> friends = null;
@@ -63,7 +63,7 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
         all.addAll(invited);
         all.addAll(friends);
 
-        return new ArrayList<TalkClientContact>(all);
+        return all;
     }
 
     @Override
