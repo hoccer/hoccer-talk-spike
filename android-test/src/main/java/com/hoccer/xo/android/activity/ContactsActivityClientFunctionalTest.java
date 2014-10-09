@@ -105,8 +105,7 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         TalkClientContact contact = (TalkClientContact) clientsAdapter.getItem(0);
 
         assertTrue(contact.getClientRelationship().invitedMe());
-
-        assertFalse(clientsAdapter.isEnabled(0));
+        assertTrue(clientsAdapter.isEnabled(0));
 
         new Thread(new Runnable() {
             @Override
@@ -173,8 +172,7 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         TalkClientContact expectedContact = (TalkClientContact) clientsAdapter.getItem(0);
 
         assertTrue(expectedContact.getClientRelationship().isInvited());
-
-        assertFalse(clientsAdapter.isEnabled(0));
+        assertTrue(clientsAdapter.isEnabled(0));
 
         new Thread(new Runnable() {
             @Override
@@ -230,7 +228,6 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
 
         TalkClientContact contact = (TalkClientContact) clientsAdapter.getItem(0);
         assertTrue(contact.getClientRelationship().isFriend());
-        
         assertTrue(clientsAdapter.isEnabled(0));
 
         getInstrumentation().waitForIdleSync();

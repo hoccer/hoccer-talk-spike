@@ -159,17 +159,6 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
     }
 
     @Override
-    public boolean isEnabled(int position) {
-        TalkClientContact contact = (TalkClientContact) getItem(position);
-        return contact.getClientRelationship().isFriend();
-    }
-
-    @Override
-    public boolean areAllItemsEnabled() {
-        return false;
-    }
-
-    @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
         refreshView();
     }
