@@ -25,6 +25,11 @@ public interface IPagerFragment {
     String getTabName(Resources resources);
 
     /*
+     * @see android.app.Activity.onResume
+     */
+    void onPageResume();
+
+    /*
      * @see android.app.ActionBar.TabListener.onTabSelected
      * @see android.support.v4.view.ViewPager.OnPageChangeListener.onPageSelected
      */
@@ -34,6 +39,11 @@ public interface IPagerFragment {
      * android.app.ActionBar.TabListener.onTabUnselected
      */
     void onPageUnselected();
+
+    /*
+     * @see android.app.Activity.onPause
+     */
+    void onPagePause();
 
     /*
      * @see android.support.v4.view.ViewPager.OnPageChangeListener.onPageScrollStateChanged

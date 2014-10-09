@@ -30,6 +30,7 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
     private Runnable mShowNotificationBadge = new Runnable() {
         @Override
         public void run() {
+            setNotificationBadgeTextSize();
             mNotificationBadge.setText(mNotificationCount.toString());
             mNotificationBadge.setVisibility(View.VISIBLE);
         }
@@ -135,6 +136,16 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
             runOnMainThread(mShowNotificationBadge);
         } else if (mNotificationBadge.getVisibility() == View.VISIBLE) {
             runOnMainThread(mHideNotificationBadge);
+        }
+    }
+
+    private void setNotificationBadgeTextSize() {
+        if (mNotificationCount < 10) {
+            mNotificationBadge.setTextSize(13);
+        } else if (mNotificationCount < 100) {
+            mNotificationBadge.setText(11);
+        } else if (mNotificationCount < 1000) {
+            mNotificationBadge.setText(9);
         }
     }
 

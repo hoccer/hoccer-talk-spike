@@ -52,7 +52,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private boolean mNoUserInput = false;
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
-    private String[] mTabNames;
 
     private SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener  = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
@@ -180,8 +179,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         }
     }
     private void initTabs() {
-        mTabNames = getResources().getStringArray(R.array.tab_names);
-        initViewPager(new ChatsPageAdapter(getSupportFragmentManager(), mTabNames.length));
+        initViewPager(new ChatsPageAdapter(getSupportFragmentManager()));
     }
 
     private void initViewPager(PagerAdapter adapter) {
@@ -194,9 +192,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         ActionBar ab = getActionBar();
         ab.setHomeButtonEnabled(false);
         ab.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        for (String tabName : mTabNames) {
+
+        String[] tabNames = getResources().getStringArray(R.array.tab_names);
+        for (String tabName : tabNames) {
             ab.addTab(ab.newTab().setText(tabName).setTabListener(new ConversationsTabListener()));
         }
+
         mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
     }
 
@@ -326,7 +327,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void shutDownNearbySession() {
         LOG.debug("shutDownNearbySession");
         XoApplication.stopNearbySession();
-        NearbyChatListFragment f = (NearbyChatListFragment) getFragmentAt(2);
+        NearbyChatListFragment f = (NearbyChatListFragment) getFragmentAt(1);
         f.shutdownNearbyChat();
     }
 
