@@ -123,6 +123,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         super.onCreateOptionsMenu(menu);
         menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
         menu.findItem(R.id.menu_contacts).setActionProvider(mContactsMenuItemActionProvider);
+        menu.findItem(R.id.menu_my_profile).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         return true;
     }
