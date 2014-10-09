@@ -182,8 +182,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             TalkClientUpload attachmentUpload = SelectedContent.createAttachmentUpload(contentObject);
             try {
                 getXoDatabase().saveClientUpload(attachmentUpload);
-                Clipboard clipboard = Clipboard.get(this);
-                clipboard.storeAttachment(attachmentUpload);
+                Clipboard.get(this).storeAttachment(attachmentUpload);
                 Toast.makeText(this, getString(R.string.toast_stored_external_file_to_clipboard), Toast.LENGTH_LONG).show();
             } catch (SQLException e) {
                 e.printStackTrace();
