@@ -158,10 +158,11 @@ public class GroupListFragment extends ListFragment implements IPagerFragment, I
 
                 if (mInvitedMeCount > 0) {
                     mNotificationBadgeTextView.setVisibility(View.VISIBLE);
-                    if (mInvitedMeCount > 99) {
-                        mNotificationBadgeTextView.setTextSize(11);
-                    }
-                    if (mInvitedMeCount > 999) {
+                    if (mInvitedMeCount < 10) {
+                        mNotificationBadgeTextView.setTextSize(13);
+                    } else if (mInvitedMeCount < 100) {
+                        mNotificationBadgeTextView.setText(11);
+                    } else if (mInvitedMeCount < 1000) {
                         mNotificationBadgeTextView.setText(9);
                     }
                     mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
