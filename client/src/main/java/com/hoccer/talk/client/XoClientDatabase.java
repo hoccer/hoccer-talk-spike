@@ -252,9 +252,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .where()
                 .eq("state", state)
                 .query();
+
         for (TalkRelationship relationship : relationships) {
             TalkClientContact contact = findContactByClientId(relationship.getOtherClientId(), false);
-            if (contact != null && contact.getClientRelationship() != null) {
+            if (contact != null && contact.getClientRelationship() != null && contact.getClientRelationship().getState().equals(state) && !contacts.contains(contact)) {
                 contacts.add(contact);
             }
         }
