@@ -4,8 +4,8 @@
 
     <item android:id="@+id/menu_contacts"
           android:title="@string/menu_contacts"
-          android:showAsAction="always"
-          android:actionLayout="@layout/view_contacts_menu_item"/>
+          android:icon="@drawable/ic_contacts"
+          android:showAsAction="always"/>
 
     <item android:id="@+id/menu_my_profile"
          android:title="@string/menu_my_profile"

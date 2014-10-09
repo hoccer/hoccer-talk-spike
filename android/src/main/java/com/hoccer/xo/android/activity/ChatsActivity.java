@@ -14,14 +14,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
-import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
@@ -36,12 +32,13 @@ import com.hoccer.xo.android.content.contentselectors.VideoSelector;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.view.ContactsActionItemProvider;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoContactListener, IXoPairingListener {
+public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
 
     private final static Logger LOG = Logger.getLogger(ChatsActivity.class);
     private static final String ACTION_ALREADY_HANDLED = "com.hoccer.xo.android.intent.action.ALREADY_HANDLED";
@@ -53,7 +50,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private boolean mEnvironmentUpdatesEnabled;
     private boolean mNoUserInput = false;
     private String mPairingToken;
-    private TextView mInvitationNotificationBadge;
+    private ContactsActionItemProvider mContactsActionItemProvider;
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -87,6 +84,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             mActionBar.addTab(mActionBar.newTab().setText(tabName).setTabListener(new ConversationsTabListener()));
         }
 
+        mContactsActionItemProvider = new ContactsActionItemProvider(this);
         SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
@@ -131,10 +129,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onResume() {
         super.onResume();
         refreshEnvironmentUpdater(false);
-        getXoClient().registerStateListener(this);
+        registerListeners();
         handleTokenPairingIntent(getIntent());
-        getXoClient().registerContactListener(this);
-        updateInvitationCount();
+        mContactsActionItemProvider.evaluateNotifications();
     }
 
     @Override
@@ -283,18 +280,25 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         return true;
     }
 
+    private void registerListeners() {
+        getXoClient().registerStateListener(this);
+        if (mContactsActionItemProvider != null) {
+            getXoClient().registerContactListener(mContactsActionItemProvider);
+        }
+    }
+
     private void unregisterListeners() {
         getXoClient().unregisterStateListener(this);
-        getXoClient().unregisterContactListener(this);
+        if (mContactsActionItemProvider != null) {
+            getXoClient().unregisterContactListener(mContactsActionItemProvider);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
-        MenuItem item = menu.findItem(R.id.menu_contacts);
-        mInvitationNotificationBadge = (TextView) item.getActionView().findViewById(R.id.tv_invite_notification_badge);
-        updateInvitationCount();
+        menu.findItem(R.id.menu_contacts).setActionProvider(mContactsActionItemProvider);
 
         return true;
     }
@@ -306,9 +310,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             case R.id.menu_audio_attachment_list:
                 startMediaBrowserActivity();
                 break;
-            case R.id.menu_contacts:
-                startContactsActivity();
-                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -316,11 +317,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     public void startMediaBrowserActivity() {
         Intent intent = new Intent(this, MediaBrowserActivity.class);
-        startActivity(intent);
-    }
-
-    private void startContactsActivity() {
-        Intent intent = new Intent(this, ContactsActivity.class);
         startActivity(intent);
     }
 
@@ -384,64 +380,4 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             }
         }
     }
-
-    private void updateInvitationCount() {
-        if (mInvitationNotificationBadge != null) {
-            try {
-                int invitationCount = XoApplication.getXoClient().getDatabase().getTotalCountOfInvitations();
-                if (invitationCount > 0) {
-                    updateNotificationBadge(invitationCount);
-                }
-            } catch (SQLException e) {
-                LOG.error("SQL Exception while getting amount of invitation", e);
-            }
-        }
-    }
-
-    private void updateNotificationBadge(final int invitationCount) {
-        int visibility = View.GONE;
-        if (invitationCount > 0) {
-            visibility = View.VISIBLE;
-        }
-
-        if (shouldShowNotificationBadge(visibility)) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mInvitationNotificationBadge.setText(Integer.toString(invitationCount));
-                    mInvitationNotificationBadge.setVisibility(View.VISIBLE);
-                }
-            });
-        }
-    }
-
-    private boolean shouldShowNotificationBadge(int visibility) {
-        return !(mInvitationNotificationBadge.getVisibility() == View.GONE && visibility == View.GONE);
-    }
-
-    @Override
-    public void onContactAdded(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-        updateInvitationCount();
-    }
-
-    @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-    }
-    // TODO: end
 }
