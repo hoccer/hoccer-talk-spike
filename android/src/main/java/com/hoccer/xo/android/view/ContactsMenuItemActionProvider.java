@@ -19,9 +19,9 @@ import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class ContactsActionItemProvider extends ActionProvider implements IXoContactListener {
+public class ContactsMenuItemActionProvider extends ActionProvider implements IXoContactListener {
 
-    static final Logger LOG = Logger.getLogger(ContactsActionItemProvider.class);
+    static final Logger LOG = Logger.getLogger(ContactsMenuItemActionProvider.class);
 
     private TextView mNotificationBadge;
     private Context mContext;
@@ -48,7 +48,7 @@ public class ContactsActionItemProvider extends ActionProvider implements IXoCon
      *
      * @param context Context for accessing resources.
      */
-    public ContactsActionItemProvider(Context context) {
+    public ContactsMenuItemActionProvider(Context context) {
         super(context);
         mContext = context;
     }
