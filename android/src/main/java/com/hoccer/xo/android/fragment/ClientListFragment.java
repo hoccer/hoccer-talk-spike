@@ -90,19 +90,19 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
     }
 
     @Override
-    public void onPageSelected() {
-
-    }
+    public void onPageResume() {}
 
     @Override
-    public void onPageUnselected() {
-
-    }
+    public void onPageSelected() {}
 
     @Override
-    public void onPageScrollStateChanged(int state) {
+    public void onPageUnselected() {}
 
-    }
+    @Override
+    public void onPagePause() {}
+
+    @Override
+    public void onPageScrollStateChanged(int state) {}
 
     @Override
     public View getCustomTabView(Context context) {
