@@ -14,7 +14,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -22,7 +21,10 @@ import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
