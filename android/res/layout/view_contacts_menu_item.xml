@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@android:style/Widget.ActionButton">
 
-  <ImageView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:src="@drawable/ic_contacts"
-      android:layout_gravity="center_vertical"/>
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_contacts"
+            android:layout_gravity="center_vertical"/>
 
-  <TextView
-      android:id="@+id/tv_invite_notification_badge"
-      android:layout_marginLeft="22dp"
-      android:layout_gravity="start"
-      android:background="@drawable/unread_messages"
-      android:visibility="gone"
-      style="@style/AppBaseTheme.Contact.UnreadMessages"/>
+    <TextView
+            android:id="@+id/tv_invite_notification_badge"
+            android:layout_marginLeft="22dp"
+            android:layout_gravity="start"
+            android:background="@drawable/unread_messages"
+            android:visibility="gone"
+            style="@style/AppBaseTheme.Contact.UnreadMessages"/>
 </FrameLayout>
