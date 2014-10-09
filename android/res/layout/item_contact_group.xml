@@ -9,7 +9,7 @@
 
     <com.hoccer.xo.android.view.AvatarView
             android:id="@+id/contact_icon"
-            android:clickable="true"
+            android:clickable="false"
             android:layout_width="65dp"
             android:layout_height="65dp"
             custom:cornerRadius="65"
