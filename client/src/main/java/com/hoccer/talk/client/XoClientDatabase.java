@@ -362,6 +362,19 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contact;
     }
 
+    public TalkClientContact findDeletedContactByClientId(String clientId) throws SQLException {
+        TalkClientContact contact = null;
+
+        contact = mClientContacts.queryBuilder()
+                .where()
+                .eq("clientId", clientId)
+                .eq("deleted", true)
+                .and(2)
+                .queryForFirst();
+
+        return contact;
+    }
+
     public synchronized TalkClientContact findContactByGroupId(String groupId, boolean create) throws SQLException {
         TalkClientContact contact = null;
 
