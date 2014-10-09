@@ -2,6 +2,8 @@ package com.hoccer.xo.android.content;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.ContentState;
@@ -28,7 +30,7 @@ import java.util.UUID;
  * content from external sources.
  *
  */
-public class SelectedContent implements IContentObject {
+public class SelectedContent implements IContentObject, Parcelable {
 
     private static final Logger LOG = Logger.getLogger(SelectedContent.class);
 
@@ -54,6 +56,25 @@ public class SelectedContent implements IContentObject {
      * Converted to a file when selected content becomes an upload.
      */
     byte[] mData = null;
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mFileName);
+        dest.writeString(mContentUrl);
+        dest.writeString(mContentDataUrl);
+        dest.writeString(mContentType);
+        dest.writeString(mContentMediaType);
+        dest.writeString(mContentHmac);
+        dest.writeInt(mContentLength);
+        dest.writeDouble(mContentAspectRatio);
+        dest.writeByteArray(mData);
+    }
 
     public SelectedContent(Intent resultIntent, String contentDataUrl) {
 
