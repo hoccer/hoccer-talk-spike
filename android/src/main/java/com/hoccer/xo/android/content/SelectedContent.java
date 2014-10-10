@@ -17,6 +17,7 @@ import java.io.*;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -32,23 +33,25 @@ import java.util.UUID;
  */
 public class SelectedContent implements IContentObject, Parcelable {
 
+    public static final SelectedContentCreator CREATOR = new SelectedContentCreator();
+
     private static final Logger LOG = Logger.getLogger(SelectedContent.class);
 
     String mFileName;
 
-    String mContentUrl;
+    String mContentUri;
 
-    String mContentDataUrl;
+    String mDataUri;
 
     String mContentType = null;
 
-    String mContentMediaType = null;
+    String mMediaType = null;
 
-    String mContentHmac = null;
+    String mHmac = null;
 
-    int    mContentLength = -1;
+    int    mLength = -1;
 
-    double mContentAspectRatio = 1.0;
+    double mAspectRatio = 1.0;
 
     /**
      * Literal data.
@@ -57,66 +60,63 @@ public class SelectedContent implements IContentObject, Parcelable {
      */
     byte[] mData = null;
 
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mFileName);
-        dest.writeString(mContentUrl);
-        dest.writeString(mContentDataUrl);
-        dest.writeString(mContentType);
-        dest.writeString(mContentMediaType);
-        dest.writeString(mContentHmac);
-        dest.writeInt(mContentLength);
-        dest.writeDouble(mContentAspectRatio);
-        dest.writeByteArray(mData);
-    }
-
-    public SelectedContent(Intent resultIntent, String contentDataUrl) {
-
-        if (resultIntent != null && resultIntent.getData() != null) {
-            Uri contentUrl = resultIntent.getData();
-            LOG.debug("new selected content: " + contentUrl);
-            mContentUrl = contentUrl.toString();
-            mContentType = resultIntent.getType();
+    public SelectedContent(Intent intent, String dataUri) {
+        if (intent != null && intent.getData() != null) {
+            initWithContentUri(intent.getData().toString(), intent.getType());
         }
-        mContentDataUrl = contentDataUrl;
+        mDataUri = dataUri;
     }
 
-    public SelectedContent(String contentUrl, String contentDataUrl) {
-        LOG.debug("new selected content: " + contentUrl);
-        mContentUrl = contentUrl;
-        mContentDataUrl = contentDataUrl;
+    public SelectedContent(String contentUri, String dataUri) {
+        initWithContentUri(contentUri, null);
+        mDataUri = dataUri;
     }
 
     public SelectedContent(byte[] data) {
         LOG.debug("new selected content with raw data");
         mData = data;
-        mContentLength = data.length;
+        mLength = data.length;
+    }
+
+    public SelectedContent(Parcel source) {
+        LOG.debug("create from parcel");
+        mFileName = source.readString();
+        mContentUri = source.readString();
+        mDataUri = source.readString();
+        mContentType = source.readString();
+        mMediaType = source.readString();
+        mHmac = source.readString();
+        mLength = source.readInt();
+        mAspectRatio = source.readDouble();
+        readDataFromParcel(source);
     }
 
     public void setFileName(String fileName) {
         this.mFileName = fileName;
     }
 
-    public void setContentType(String mContentType) {
-        this.mContentType = mContentType;
+    public void setContentType(String contentType) {
+        this.mContentType = contentType;
     }
 
-    public void setContentMediaType(String mContentMediaType) {
-        this.mContentMediaType = mContentMediaType;
+    public void setContentMediaType(String mediaType) {
+        this.mMediaType = mediaType;
     }
 
-    public void setContentLength(int mContentLength) {
-        this.mContentLength = mContentLength;
+    public void setContentLength(int length) {
+        this.mLength = length;
     }
 
-    public void setContentAspectRatio(double mContentAspectRatio) {
-        this.mContentAspectRatio = mContentAspectRatio;
+    public void setContentAspectRatio(double aspectRatio) {
+        this.mAspectRatio = aspectRatio;
+    }
+
+    public void setData(byte[] data) {
+        mData = data;
+    }
+
+    public byte[] getData() {
+        return mData;
     }
 
     @Override
@@ -146,43 +146,36 @@ public class SelectedContent implements IContentObject, Parcelable {
 
     @Override
     public String getContentUrl() {
-        return mContentUrl;
+        return mContentUri;
     }
 
     @Override
     public String getContentDataUrl() {
-        return mContentDataUrl;
+        return mDataUri;
     }
 
     @Override
     public int getContentLength() {
-        return mContentLength;
+        return mLength;
     }
 
     @Override
     public String getContentMediaType() {
-        return mContentMediaType;
+        return mMediaType;
     }
 
     @Override
     public double getContentAspectRatio() {
-        return mContentAspectRatio;
+        return mAspectRatio;
     }
 
     @Override
     public String getContentHmac() {
-        if (mContentHmac == null) {
-            byte[] hmac = new byte[0];
-            try {
-                hmac = CryptoUtils.computeHmac(mContentDataUrl);
-                mContentHmac = new String(Base64.encodeBase64(hmac));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (mHmac == null) {
+            createHmac();
         }
-        LOG.debug("mContentHmac="+mContentHmac);
-        return mContentHmac;
+        LOG.debug("mContentHmac="+mHmac);
+        return mHmac;
     }
 
     @Override
@@ -195,47 +188,126 @@ public class SelectedContent implements IContentObject, Parcelable {
         return 0;
     }
 
-    public byte[] getData() {
-        return mData;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        LOG.debug("write to parcel");
+        dest.writeString(mFileName);
+        dest.writeString(mContentUri);
+        dest.writeString(mDataUri);
+        dest.writeString(mContentType);
+        dest.writeString(mMediaType);
+        dest.writeString(mHmac);
+        dest.writeInt(mLength);
+        dest.writeDouble(mAspectRatio);
+        dest.writeByteArray(mData);
     }
 
-    public void setData(byte[] data) {
-        mData = data;
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    private void writeDataToFile() {
-        if(mData != null) {
-            File dir = XoApplication.getGeneratedDirectory();
-            File file = new File(dir, UUID.randomUUID().toString());
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SelectedContent content = (SelectedContent) o;
+
+        if (Double.compare(content.mAspectRatio, mAspectRatio) != 0) return false;
+        if (mLength != content.mLength) return false;
+        if (mContentType != null ? !mContentType.equals(content.mContentType) : content.mContentType != null)
+            return false;
+        if (mContentUri != null ? !mContentUri.equals(content.mContentUri) : content.mContentUri != null) return false;
+        if (!Arrays.equals(mData, content.mData)) return false;
+        if (mDataUri != null ? !mDataUri.equals(content.mDataUri) : content.mDataUri != null) return false;
+        if (mFileName != null ? !mFileName.equals(content.mFileName) : content.mFileName != null) return false;
+        if (mHmac != null ? !mHmac.equals(content.mHmac) : content.mHmac != null) return false;
+        if (mMediaType != null ? !mMediaType.equals(content.mMediaType) : content.mMediaType != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = mFileName != null ? mFileName.hashCode() : 0;
+        result = 31 * result + (mContentUri != null ? mContentUri.hashCode() : 0);
+        result = 31 * result + (mDataUri != null ? mDataUri.hashCode() : 0);
+        result = 31 * result + (mContentType != null ? mContentType.hashCode() : 0);
+        result = 31 * result + (mMediaType != null ? mMediaType.hashCode() : 0);
+        result = 31 * result + (mHmac != null ? mHmac.hashCode() : 0);
+        result = 31 * result + mLength;
+        temp = Double.doubleToLongBits(mAspectRatio);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (mData != null ? Arrays.hashCode(mData) : 0);
+        return result;
+    }
+
+    private void initWithContentUri(String uri, String contentType) {
+        mContentUri = uri;
+        mContentType = contentType;
+        LOG.debug("create from content uri: " + mContentUri);
+    }
+
+    private void readDataFromParcel(Parcel source) {
+        if (mLength > 0) {
             try {
-                file.createNewFile();
-                OutputStream os = null;
-                MessageDigest digest = null;
-                if (mContentHmac == null) {
-                    digest = MessageDigest.getInstance("SHA256");
-                    os = new DigestOutputStream(new FileOutputStream(file), digest);
-                }  else {
-                    os = new FileOutputStream(file);
-                }
-                os.write(mData);
-                os.flush();
-                os.close();
-                mContentDataUrl = "file://" + file.toString();
-                mData = null;
-                if (digest != null) {
-                    mContentHmac = new String(Base64.encodeBase64(digest.digest()));
-                }
-            } catch (IOException e) {
-                LOG.error("error writing content to file", e);
-            } catch (NoSuchAlgorithmException e) {
-                LOG.error("error writing content to file", e);
+                mData = new byte[mLength];
+                source.readByteArray(mData);
+            } catch (NullPointerException e) {
+                LOG.error("No binary data in parcel even though length is > 0");
             }
+        }
+    }
+
+    private String createHmac() {
+        String hmac = null;
+        try {
+            hmac = new String(Base64.encodeBase64(CryptoUtils.computeHmac(mDataUri)));
+        } catch (Exception e) {
+            LOG.error("Error creating HMAC", e);
+        }
+        return hmac;
+    }
+
+    private void toFile() {
+        if(mData != null) {
+            writeToFile();
+        }
+    }
+
+    private void writeToFile() {
+        try {
+            File file = new File(XoApplication.getGeneratedDirectory(), UUID.randomUUID().toString());
+            file.createNewFile();
+            OutputStream os = null;
+            MessageDigest digest = null;
+            if (mHmac == null) {
+                digest = MessageDigest.getInstance("SHA256");
+                os = new DigestOutputStream(new FileOutputStream(file), digest);
+            }  else {
+                os = new FileOutputStream(file);
+            }
+            os.write(mData);
+            os.flush();
+            os.close();
+            mDataUri = "file://" + file.toString();
+            mData = null;
+            if (digest != null) {
+                mHmac = new String(Base64.encodeBase64(digest.digest()));
+            }
+        } catch (IOException e) {
+            LOG.error("error writing content to file", e);
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("error writing content to file", e);
         }
     }
 
     public static TalkClientUpload createAvatarUpload(IContentObject object) {
         if(object instanceof SelectedContent) {
-            ((SelectedContent)object).writeDataToFile();
+            ((SelectedContent)object).toFile();
         }
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAvatar(
@@ -253,7 +325,7 @@ public class SelectedContent implements IContentObject, Parcelable {
      */
     public static TalkClientUpload createAttachmentUpload(IContentObject object) {
         if(object instanceof SelectedContent) {
-            ((SelectedContent)object).writeDataToFile();
+            ((SelectedContent)object).toFile();
         }
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(
@@ -268,4 +340,15 @@ public class SelectedContent implements IContentObject, Parcelable {
         return upload;
     }
 
+    public static class SelectedContentCreator implements Parcelable.Creator<SelectedContent> {
+        @Override
+        public SelectedContent createFromParcel(Parcel source) {
+            return new SelectedContent(source);
+        }
+
+        @Override
+        public SelectedContent[] newArray(int size) {
+            return new SelectedContent[size];
+        }
+    }
 }
