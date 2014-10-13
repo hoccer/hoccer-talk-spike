@@ -73,9 +73,9 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContactListAdapter = createAdapter();
-
         mNotificationBadgeTextView = (TextView) getCustomTabView(getActivity()).findViewById(R.id.tv_contact_invite_notification_badge);
+
+        mContactListAdapter = createAdapter();
         setListAdapter(mContactListAdapter);
 
         XoApplication.getXoClient().registerContactListener(mContactListAdapter);
@@ -145,6 +145,7 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         if (mTabView == null) {
             mTabView = LayoutInflater.from(context).inflate(mTabLayoutId, null);
         }
+
         return mTabView;
     }
 
@@ -176,12 +177,13 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
                 if (mInvitedMeCount > 0) {
                     mNotificationBadgeTextView.setVisibility(View.VISIBLE);
+
                     if (mInvitedMeCount < 10) {
                         mNotificationBadgeTextView.setTextSize(13);
                     } else if (mInvitedMeCount < 100) {
@@ -189,6 +191,7 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
                     } else if (mInvitedMeCount < 1000) {
                         mNotificationBadgeTextView.setText(9);
                     }
+
                     mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
                 } else {
                     mNotificationBadgeTextView.setText("");
