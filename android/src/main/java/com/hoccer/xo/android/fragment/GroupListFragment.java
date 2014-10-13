@@ -5,11 +5,11 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
@@ -23,7 +23,7 @@ import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
 
-public class GroupListFragment extends ListFragment implements IPagerFragment, IXoContactListener {
+public class GroupListFragment extends SearchableListFragment implements IPagerFragment, IXoContactListener {
 
     GroupsAdapter mGroupsAdapter;
     private ImageView mPlaceholderImageFrame;
@@ -119,6 +119,20 @@ public class GroupListFragment extends ListFragment implements IPagerFragment, I
     @Override
     public String getTabName(Resources resources) {
         return resources.getString(R.string.contacts_tab_groups);
+    }
+
+    @Override
+    protected ListAdapter searchInAdapter(String query) {
+        mGroupsAdapter.setQuery(query);
+        return mGroupsAdapter;
+    }
+
+    @Override
+    protected void onSearchModeEnabled() {}
+
+    @Override
+    protected void onSearchModeDisabled() {
+        mGroupsAdapter.setQuery(null);
     }
 
     @Override

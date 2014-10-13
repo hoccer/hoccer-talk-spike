@@ -31,14 +31,41 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
 
     private Activity mActivity;
     private List<TalkClientContact> mGroups = new ArrayList<TalkClientContact>();
+    private String mQuery;
 
     public GroupsAdapter(Activity activity) {
         mActivity = activity;
-        mGroups = getAllGroupContacts();
+        mGroups = getGroupContacts();
+    }
+
+    public void setQuery(String query) {
+        mQuery = query;
+        refreshView();
+    }
+
+    private List<TalkClientContact> getGroupContacts() {
+        List<TalkClientContact> all = getAllGroupContacts();
+
+        if (mQuery != null && !mQuery.isEmpty()) {
+            return filterGroupContacts(all, mQuery);
+        } else {
+            return all;
+        }
+    }
+
+    private List<TalkClientContact> filterGroupContacts(List<TalkClientContact> contacts, String query) {
+        List<TalkClientContact> filtered = new ArrayList<TalkClientContact>();
+
+        for (TalkClientContact contact : contacts) {
+            if (contact.getNickname().toLowerCase().contains(query)) {
+                filtered.add(contact);
+            }
+        }
+
+        return filtered;
     }
 
     private List<TalkClientContact> getAllGroupContacts() {
-
         List<TalkClientContact> invitedMe = null;
         List<TalkClientContact> joined = null;
         try {
@@ -189,7 +216,7 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
     }
 
     private void refreshView() {
-        final List<TalkClientContact> newGroups = getAllGroupContacts();
+        final List<TalkClientContact> newGroups = getGroupContacts();
 
         Handler guiHandler = new Handler(Looper.getMainLooper());
         guiHandler.post(new Runnable() {
