@@ -90,6 +90,36 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         updateNotificationBadge();
     }
 
+    protected void updateNotificationBadge() {
+        try {
+            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mInvitedMeCount > 0) {
+                    mNotificationBadgeTextView.setVisibility(View.VISIBLE);
+
+                    if (mInvitedMeCount < 10) {
+                        mNotificationBadgeTextView.setTextSize(13);
+                    } else if (mInvitedMeCount < 100) {
+                        mNotificationBadgeTextView.setText(11);
+                    } else if (mInvitedMeCount < 1000) {
+                        mNotificationBadgeTextView.setText(9);
+                    }
+
+                    mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
+                } else {
+                    mNotificationBadgeTextView.setText("");
+                    mNotificationBadgeTextView.setVisibility(View.GONE);
+                }
+            }
+        });
+    }
+
     @Override
     protected ListAdapter searchInAdapter(String query) {
         mContactListAdapter.setQuery(query);
@@ -170,34 +200,4 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {}
-
-    protected void updateNotificationBadge() {
-        try {
-            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mInvitedMeCount > 0) {
-                    mNotificationBadgeTextView.setVisibility(View.VISIBLE);
-
-                    if (mInvitedMeCount < 10) {
-                        mNotificationBadgeTextView.setTextSize(13);
-                    } else if (mInvitedMeCount < 100) {
-                        mNotificationBadgeTextView.setText(11);
-                    } else if (mInvitedMeCount < 1000) {
-                        mNotificationBadgeTextView.setText(9);
-                    }
-
-                    mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
-                } else {
-                    mNotificationBadgeTextView.setText("");
-                    mNotificationBadgeTextView.setVisibility(View.GONE);
-                }
-            }
-        });
-    }
 }
