@@ -5,11 +5,11 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
@@ -22,8 +22,7 @@ import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
 
-public class ClientListFragment extends ListFragment implements IPagerFragment, IXoContactListener {
-
+public class ClientListFragment extends SearchableListFragment implements IPagerFragment, IXoContactListener {
 
     ClientsAdapter mClientsAdapter;
     private ImageView mPlaceholderImageFrame;
@@ -71,6 +70,20 @@ public class ClientListFragment extends ListFragment implements IPagerFragment, 
     public void onResume() {
         super.onResume();
         updateNotificationBadge();
+    }
+
+    @Override
+    protected ListAdapter searchInAdapter(String query) {
+        mClientsAdapter.setQuery(query);
+        return mClientsAdapter;
+    }
+
+    @Override
+    protected void onSearchModeEnabled() {}
+
+    @Override
+    protected void onSearchModeDisabled() {
+        mClientsAdapter.setQuery(null);
     }
 
     @Override

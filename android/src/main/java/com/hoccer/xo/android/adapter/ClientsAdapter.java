@@ -29,20 +29,48 @@ import java.util.List;
 public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
 
     private Activity mActivity;
-
     private List<TalkClientContact> mClients = new ArrayList<TalkClientContact>();
+    private String mQuery;
 
     public ClientsAdapter(Activity activity) {
         mActivity = activity;
-        mClients = getAllClientContacts();
+        mClients = getClientContacts();
+    }
+
+    public void setQuery(String query) {
+        mQuery = query;
+        refreshView();
+    }
+
+    private List<TalkClientContact> getClientContacts() {
+        List<TalkClientContact> all = getAllClientContacts();
+
+        if (mQuery != null && !mQuery.isEmpty()) {
+            return filterClientContacts(all, mQuery);
+        } else {
+            return all;
+        }
+    }
+
+    private List<TalkClientContact> filterClientContacts(List<TalkClientContact> contacts, String query) {
+        List<TalkClientContact> filtered = new ArrayList<TalkClientContact>();
+
+        for (TalkClientContact contact : contacts) {
+            if (contact.getNickname().toLowerCase().contains(query)) {
+                filtered.add(contact);
+            }
+        }
+
+        return filtered;
     }
 
     private List<TalkClientContact> getAllClientContacts() {
-
         List<TalkClientContact> all = new ArrayList<TalkClientContact>();
+
         List<TalkClientContact> invitedMe = null;
         List<TalkClientContact> invited = null;
         List<TalkClientContact> friends = null;
+
         try {
             invitedMe = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_INVITED_ME);
             invited = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_INVITED);
@@ -188,7 +216,7 @@ public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
     }
 
     private void refreshView() {
-        final List<TalkClientContact> newClients = getAllClientContacts();
+        final List<TalkClientContact> newClients = getClientContacts();
 
         Handler guiHandler = new Handler(Looper.getMainLooper());
         guiHandler.post(new Runnable() {
