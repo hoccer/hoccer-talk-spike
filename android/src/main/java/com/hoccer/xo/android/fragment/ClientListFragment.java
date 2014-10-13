@@ -5,9 +5,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -31,6 +29,9 @@ public class ClientListFragment extends SearchableListFragment implements IPager
     private View mTabView;
     private TextView mNotificationBadgeTextView;
 
+    private MenuItem mMenuItemPairing;
+    private MenuItem mMenuItemNewGroup;
+
     private int mInvitedMeCount = 0;
 
     @Override
@@ -52,6 +53,13 @@ public class ClientListFragment extends SearchableListFragment implements IPager
             mPlaceholderImageFrame.setBackgroundDrawable(getResources().getDrawable(R.drawable.placeholder_chats));
             mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        mMenuItemPairing = menu.findItem(R.id.menu_pair);
+        mMenuItemNewGroup = menu.findItem(R.id.menu_new_group);
     }
 
     @Override
@@ -79,11 +87,22 @@ public class ClientListFragment extends SearchableListFragment implements IPager
     }
 
     @Override
-    protected void onSearchModeEnabled() {}
+    protected void onSearchModeEnabled() {
+        mMenuItemPairing.setVisible(false);
+        mMenuItemNewGroup.setVisible(false);
+    }
 
     @Override
     protected void onSearchModeDisabled() {
         mClientListAdapter.setQuery(null);
+
+        if (mMenuItemPairing != null) {
+            mMenuItemPairing.setVisible(true);
+        }
+
+        if (mMenuItemNewGroup != null) {
+            mMenuItemNewGroup.setVisible(true);
+        }
     }
 
     @Override
