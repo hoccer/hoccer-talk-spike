@@ -13,7 +13,7 @@
             android:listSelector="@drawable/contact_list_selector"/>
 
     <RelativeLayout
-        android:id="@android:id/empty"
+        android:id="@+id/rl_placeholder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">

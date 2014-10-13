@@ -3,13 +3,11 @@ package com.hoccer.xo.android.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.*;
-import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
@@ -28,6 +26,10 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     protected int mPlaceholderId;
     protected int mPlaceholderHeadId;
     protected int mPlaceholderTextId;
+
+    private RelativeLayout mPlaceholderLayout;
+    private DataSetObserver mPlaceholderUpdateObserver;
+
     protected int mTabLayoutId;
     protected int mTabNameId;
 
@@ -47,6 +49,14 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mPlaceholderLayout = (RelativeLayout) view.findViewById(R.id.rl_placeholder);
+        mPlaceholderUpdateObserver = new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                updatePlaceholder();
+            }
+        };
 
         ImageView placeholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
         ImageView placeholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
@@ -88,6 +98,8 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     public void onResume() {
         super.onResume();
         updateNotificationBadge();
+        updatePlaceholder();
+        mContactListAdapter.registerDataSetObserver(mPlaceholderUpdateObserver);
     }
 
     protected void updateNotificationBadge() {
@@ -120,6 +132,16 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         });
     }
 
+    private void updatePlaceholder() {
+        int visibility = View.GONE;
+
+        if (mContactListAdapter.getCount() == 0 && mContactListAdapter.getQuery() == null) {
+            visibility = View.VISIBLE;
+        }
+
+        mPlaceholderLayout.setVisibility(visibility);
+    }
+
     @Override
     protected ListAdapter searchInAdapter(String query) {
         mContactListAdapter.setQuery(query);
@@ -143,6 +165,12 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         if (mMenuItemNewGroup != null) {
             mMenuItemNewGroup.setVisible(true);
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mContactListAdapter.unregisterDataSetObserver(mPlaceholderUpdateObserver);
     }
 
     @Override

@@ -21,6 +21,10 @@ public abstract class ContactListAdapter extends BaseAdapter implements IXoConta
         mActivity = activity;
     }
 
+    public String getQuery() {
+        return mQuery;
+    }
+
     public void setQuery(String query) {
         mQuery = query;
         refreshView();
