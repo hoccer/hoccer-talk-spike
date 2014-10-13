@@ -25,10 +25,6 @@ public class GroupListAdapter extends ContactListAdapter {
 
     private static final int DISPLAY_NAMES_MAX_LENGTH = 30;
 
-    private Activity mActivity;
-    private List<TalkClientContact> mGroups = new ArrayList<TalkClientContact>();
-    private String mQuery;
-
     public GroupListAdapter(Activity activity) {
         super(activity);
     }
