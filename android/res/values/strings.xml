@@ -391,6 +391,7 @@
 
     <string name="preference_database_title">Local Database</string>
     <string name="placeholder_conversations_text">Invite friends to chat with!</string>
+    <string name="placeholder_groups_text">Create groups to chat with many friends at once.</string>
     <string name="tutorial_nearby_anchor">nearby</string>
     <string name="placeholder_nearby_text">Waiting for others %1$s…</string>
     <string name="placeholder_nearby_link_text">nearby</string>

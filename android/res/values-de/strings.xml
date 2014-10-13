@@ -356,6 +356,7 @@
     <string name="cant_find_credentials">Kann die Datei "credentials.json" mit den Zugangsdaten nicht finden.</string>
 
     <string name="placeholder_conversations_text">Lade deine Freunde zum Chatten ein!</string>
+    <string name="placeholder_groups_text">Lege Gruppen an um mit vielen Freunden gleichzeitig zu chatten.</string>
     <string name="tutorial_nearby_anchor">in-der-naehe</string>
     <string name="placeholder_nearby_text">Warten auf Kontakte %1$s…</string>
     <string name="placeholder_nearby_link_text">in der Nähe</string>

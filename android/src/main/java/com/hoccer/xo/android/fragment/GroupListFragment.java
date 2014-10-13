@@ -28,6 +28,7 @@ public class GroupListFragment extends ListFragment implements IPagerFragment, I
     GroupsAdapter mGroupsAdapter;
     private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
+    private TextView mPlaceholderText;
 
     private View mTabView;
     private TextView mNotificationBadgeTextView;
@@ -44,15 +45,18 @@ public class GroupListFragment extends ListFragment implements IPagerFragment, I
         super.onViewCreated(view, savedInstanceState);
 
         mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
-        mPlaceholderImage= (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
+        mPlaceholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
+        mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            mPlaceholderImageFrame.setBackground(getResources().getDrawable(R.drawable.placeholder_chats));
-            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
+            mPlaceholderImageFrame.setBackground(getResources().getDrawable(R.drawable.placeholder_group));
+            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_group_head, true));
         } else {
-            mPlaceholderImageFrame.setBackgroundDrawable(getResources().getDrawable(R.drawable.placeholder_chats));
-            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
+            mPlaceholderImageFrame.setBackgroundDrawable(getResources().getDrawable(R.drawable.placeholder_group));
+            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_group_head, true));
         }
+
+        mPlaceholderText.setText(R.string.placeholder_groups_text);
     }
 
     @Override
