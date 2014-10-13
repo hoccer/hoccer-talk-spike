@@ -381,8 +381,8 @@
         <item>NEARBY</item>
     </string-array>
 
-	  <string name="contacts_tab_friends">FRIENDS</string>
-  	<string name="contacts_tab_groups">GROUPS</string>
+    <string name="contacts_tab_friends">FRIENDS</string>
+    <string name="contacts_tab_groups">GROUPS</string>
 
     <string name="qr_code_tab_scan">SCAN</string>
     <string name="qr_code_tab_generate">GENERATE</string>
