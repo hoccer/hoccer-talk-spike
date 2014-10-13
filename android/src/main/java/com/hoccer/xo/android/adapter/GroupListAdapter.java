@@ -4,17 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
@@ -25,7 +21,7 @@ import com.hoccer.xo.release.R;
 import java.sql.SQLException;
 import java.util.*;
 
-public class GroupListAdapter extends BaseAdapter implements IXoContactListener {
+public class GroupListAdapter extends ContactListAdapter {
 
     private static final int DISPLAY_NAMES_MAX_LENGTH = 30;
 
@@ -34,38 +30,11 @@ public class GroupListAdapter extends BaseAdapter implements IXoContactListener 
     private String mQuery;
 
     public GroupListAdapter(Activity activity) {
-        mActivity = activity;
-        mGroups = getGroupContacts();
+        super(activity);
     }
 
-    public void setQuery(String query) {
-        mQuery = query;
-        refreshView();
-    }
-
-    private List<TalkClientContact> getGroupContacts() {
-        List<TalkClientContact> all = getAllGroupContacts();
-
-        if (mQuery != null && !mQuery.isEmpty()) {
-            return filterGroupContacts(all, mQuery);
-        } else {
-            return all;
-        }
-    }
-
-    private List<TalkClientContact> filterGroupContacts(List<TalkClientContact> contacts, String query) {
-        List<TalkClientContact> filtered = new ArrayList<TalkClientContact>();
-
-        for (TalkClientContact contact : contacts) {
-            if (contact.getNickname().toLowerCase().contains(query)) {
-                filtered.add(contact);
-            }
-        }
-
-        return filtered;
-    }
-
-    private List<TalkClientContact> getAllGroupContacts() {
+    @Override
+    protected List<TalkClientContact> getAllContacts() {
         List<TalkClientContact> invitedMe = null;
         List<TalkClientContact> joined = null;
         try {
@@ -85,21 +54,6 @@ public class GroupListAdapter extends BaseAdapter implements IXoContactListener 
         invitedMe.addAll(joined);
 
         return invitedMe;
-    }
-
-    @Override
-    public int getCount() {
-        return mGroups.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return mGroups.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return mGroups.get(position).getClientContactId();
     }
 
     @Override
@@ -186,46 +140,12 @@ public class GroupListAdapter extends BaseAdapter implements IXoContactListener 
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-
-    }
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {
-
-    }
-
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-
-    }
-
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-
-    }
-
-    @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-
+        refreshView();
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
         refreshView();
-    }
-
-    private void refreshView() {
-        final List<TalkClientContact> newGroups = getGroupContacts();
-
-        Handler guiHandler = new Handler(Looper.getMainLooper());
-        guiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mGroups = newGroups;
-
-                notifyDataSetChanged();
-            }
-        });
     }
 }
