@@ -16,7 +16,7 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
-import com.hoccer.xo.android.adapter.ClientsAdapter;
+import com.hoccer.xo.android.adapter.ClientListAdapter;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
 
@@ -24,7 +24,7 @@ import java.sql.SQLException;
 
 public class ClientListFragment extends SearchableListFragment implements IPagerFragment, IXoContactListener {
 
-    ClientsAdapter mClientsAdapter;
+    ClientListAdapter mClientListAdapter;
     private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
 
@@ -57,12 +57,12 @@ public class ClientListFragment extends SearchableListFragment implements IPager
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mClientsAdapter = new ClientsAdapter(getActivity());
+        mClientListAdapter = new ClientListAdapter(getActivity());
 
         mNotificationBadgeTextView = (TextView) getCustomTabView(getActivity()).findViewById(R.id.tv_contact_invite_notification_badge);
-        setListAdapter(mClientsAdapter);
+        setListAdapter(mClientListAdapter);
 
-        XoApplication.getXoClient().registerContactListener(mClientsAdapter);
+        XoApplication.getXoClient().registerContactListener(mClientListAdapter);
         XoApplication.getXoClient().registerContactListener(this);
     }
 
@@ -74,8 +74,8 @@ public class ClientListFragment extends SearchableListFragment implements IPager
 
     @Override
     protected ListAdapter searchInAdapter(String query) {
-        mClientsAdapter.setQuery(query);
-        return mClientsAdapter;
+        mClientListAdapter.setQuery(query);
+        return mClientListAdapter;
     }
 
     @Override
@@ -83,13 +83,13 @@ public class ClientListFragment extends SearchableListFragment implements IPager
 
     @Override
     protected void onSearchModeDisabled() {
-        mClientsAdapter.setQuery(null);
+        mClientListAdapter.setQuery(null);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        XoApplication.getXoClient().unregisterContactListener(mClientsAdapter);
+        XoApplication.getXoClient().unregisterContactListener(mClientListAdapter);
         XoApplication.getXoClient().unregisterContactListener(this);
     }
 

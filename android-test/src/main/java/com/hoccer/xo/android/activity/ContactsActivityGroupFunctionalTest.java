@@ -14,8 +14,8 @@ import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.*;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.adapter.GroupListAdapter;
 import com.hoccer.xo.android.fragment.GroupListFragment;
-import com.hoccer.xo.android.adapter.GroupsAdapter;
 
 import java.sql.SQLException;
 
@@ -25,7 +25,7 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
 
     private ContactsActivity activity;
     private GroupListFragment groupListFragment;
-    private GroupsAdapter groupsAdapter;
+    private GroupListAdapter groupListAdapter;
 
     public ContactsActivityGroupFunctionalTest() {
         super(ContactsActivity.class);
@@ -39,7 +39,7 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
         ViewPager viewPager = (ViewPager) activity.findViewById(com.hoccer.xo.release.R.id.pager);
         FragmentPagerAdapter adapter = (FragmentPagerAdapter) viewPager.getAdapter();
         groupListFragment = (GroupListFragment) adapter.getItem(1);
-        groupsAdapter = (GroupsAdapter) groupListFragment.getListAdapter();
+        groupListAdapter = (GroupListAdapter) groupListFragment.getListAdapter();
 
         XoApplication.getXoClient().getDatabase().eraseAllGroupContacts();
         XoApplication.getXoClient().getDatabase().eraseAllGroupMemberships();
@@ -94,9 +94,9 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
 
         mockGroupRelationship(TalkGroupMember.STATE_INVITED, "1");
 
-        assertEquals(1, groupsAdapter.getCount());
+        assertEquals(1, groupListAdapter.getCount());
 
-        TalkClientContact group = (TalkClientContact) groupsAdapter.getItem(0);
+        TalkClientContact group = (TalkClientContact) groupListAdapter.getItem(0);
 
         assertTrue(group.getGroupMember().isInvited());
 
@@ -148,9 +148,9 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
 
         mockGroupRelationship(TalkGroupMember.STATE_JOINED, "1");
 
-        assertEquals(1, groupsAdapter.getCount());
+        assertEquals(1, groupListAdapter.getCount());
 
-        TalkClientContact group = (TalkClientContact) groupsAdapter.getItem(0);
+        TalkClientContact group = (TalkClientContact) groupListAdapter.getItem(0);
 
         assertTrue(group.getGroupMember().isJoined());
 
@@ -213,18 +213,18 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
         mockGroupRelationship(TalkGroupMember.STATE_JOINED, "9", "F");
         mockGroupRelationship(TalkGroupMember.STATE_INVITED, "10", "E");
 
-        assertEquals(10, groupsAdapter.getCount());
+        assertEquals(10, groupListAdapter.getCount());
 
-        TalkClientContact group1 = (TalkClientContact) groupsAdapter.getItem(0);
-        TalkClientContact group2 = (TalkClientContact) groupsAdapter.getItem(1);
-        TalkClientContact group3 = (TalkClientContact) groupsAdapter.getItem(2);
-        TalkClientContact group4 = (TalkClientContact) groupsAdapter.getItem(3);
-        TalkClientContact group5 = (TalkClientContact) groupsAdapter.getItem(4);
-        TalkClientContact group6 = (TalkClientContact) groupsAdapter.getItem(5);
-        TalkClientContact group7 = (TalkClientContact) groupsAdapter.getItem(6);
-        TalkClientContact group8 = (TalkClientContact) groupsAdapter.getItem(7);
-        TalkClientContact group9 = (TalkClientContact) groupsAdapter.getItem(8);
-        TalkClientContact group10 = (TalkClientContact) groupsAdapter.getItem(9);
+        TalkClientContact group1 = (TalkClientContact) groupListAdapter.getItem(0);
+        TalkClientContact group2 = (TalkClientContact) groupListAdapter.getItem(1);
+        TalkClientContact group3 = (TalkClientContact) groupListAdapter.getItem(2);
+        TalkClientContact group4 = (TalkClientContact) groupListAdapter.getItem(3);
+        TalkClientContact group5 = (TalkClientContact) groupListAdapter.getItem(4);
+        TalkClientContact group6 = (TalkClientContact) groupListAdapter.getItem(5);
+        TalkClientContact group7 = (TalkClientContact) groupListAdapter.getItem(6);
+        TalkClientContact group8 = (TalkClientContact) groupListAdapter.getItem(7);
+        TalkClientContact group9 = (TalkClientContact) groupListAdapter.getItem(8);
+        TalkClientContact group10 = (TalkClientContact) groupListAdapter.getItem(9);
 
         // invited to group
         assertEquals("A", group1.getNickname());

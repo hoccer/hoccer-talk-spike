@@ -25,7 +25,7 @@ import com.hoccer.xo.release.R;
 import java.sql.SQLException;
 import java.util.*;
 
-public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
+public class GroupListAdapter extends BaseAdapter implements IXoContactListener {
 
     private static final int DISPLAY_NAMES_MAX_LENGTH = 30;
 
@@ -33,7 +33,7 @@ public class GroupsAdapter extends BaseAdapter implements IXoContactListener {
     private List<TalkClientContact> mGroups = new ArrayList<TalkClientContact>();
     private String mQuery;
 
-    public GroupsAdapter(Activity activity) {
+    public GroupListAdapter(Activity activity) {
         mActivity = activity;
         mGroups = getGroupContacts();
     }

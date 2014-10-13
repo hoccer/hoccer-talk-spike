@@ -17,7 +17,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
-import com.hoccer.xo.android.adapter.GroupsAdapter;
+import com.hoccer.xo.android.adapter.GroupListAdapter;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
 
@@ -25,7 +25,7 @@ import java.sql.SQLException;
 
 public class GroupListFragment extends SearchableListFragment implements IPagerFragment, IXoContactListener {
 
-    GroupsAdapter mGroupsAdapter;
+    GroupListAdapter mGroupListAdapter;
     private ImageView mPlaceholderImageFrame;
     private ImageView mPlaceholderImage;
     private TextView mPlaceholderText;
@@ -62,12 +62,12 @@ public class GroupListFragment extends SearchableListFragment implements IPagerF
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mGroupsAdapter = new GroupsAdapter(getActivity());
+        mGroupListAdapter = new GroupListAdapter(getActivity());
 
         mNotificationBadgeTextView = (TextView) getCustomTabView(getActivity()).findViewById(R.id.tv_contact_invite_notification_badge);
-        setListAdapter(mGroupsAdapter);
+        setListAdapter(mGroupListAdapter);
 
-        XoApplication.getXoClient().registerContactListener(mGroupsAdapter);
+        XoApplication.getXoClient().registerContactListener(mGroupListAdapter);
         XoApplication.getXoClient().registerContactListener(this);
     }
 
@@ -80,7 +80,7 @@ public class GroupListFragment extends SearchableListFragment implements IPagerF
     @Override
       public void onDestroy() {
         super.onDestroy();
-        XoApplication.getXoClient().unregisterContactListener(mGroupsAdapter);
+        XoApplication.getXoClient().unregisterContactListener(mGroupListAdapter);
         XoApplication.getXoClient().unregisterContactListener(this);
     }
 
@@ -123,8 +123,8 @@ public class GroupListFragment extends SearchableListFragment implements IPagerF
 
     @Override
     protected ListAdapter searchInAdapter(String query) {
-        mGroupsAdapter.setQuery(query);
-        return mGroupsAdapter;
+        mGroupListAdapter.setQuery(query);
+        return mGroupListAdapter;
     }
 
     @Override
@@ -132,7 +132,7 @@ public class GroupListFragment extends SearchableListFragment implements IPagerF
 
     @Override
     protected void onSearchModeDisabled() {
-        mGroupsAdapter.setQuery(null);
+        mGroupListAdapter.setQuery(null);
     }
 
     @Override

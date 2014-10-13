@@ -26,13 +26,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class ClientsAdapter extends BaseAdapter implements IXoContactListener {
+public class ClientListAdapter extends BaseAdapter implements IXoContactListener {
 
     private Activity mActivity;
     private List<TalkClientContact> mClients = new ArrayList<TalkClientContact>();
     private String mQuery;
 
-    public ClientsAdapter(Activity activity) {
+    public ClientListAdapter(Activity activity) {
         mActivity = activity;
         mClients = getClientContacts();
     }
