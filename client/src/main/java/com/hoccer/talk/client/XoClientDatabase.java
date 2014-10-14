@@ -246,22 +246,15 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findClientContactsByState(String state) throws SQLException {
-        List<TalkClientContact> result = new ArrayList<TalkClientContact>();
-        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
-        List<TalkRelationship> relationships = mRelationships.queryBuilder()
-                .where()
-                .eq("state", state)
-                .query();
+        QueryBuilder<TalkRelationship, Long> relationships = mRelationships.queryBuilder();
+        relationships.where()
+                .eq("state", state);
 
-        for (TalkRelationship relationship : relationships) {
-            TalkClientContact contact = findContactByClientId(relationship.getOtherClientId(), false);
-            if (contact != null && contact.getClientRelationship() != null && contact.getClientRelationship().getState().equals(state) && !contacts.contains(contact)) {
-                contacts.add(contact);
-            }
-        }
+        QueryBuilder<TalkClientContact, Integer> contacts = mClientContacts.queryBuilder();
+        contacts.where()
+                .eq("deleted", false);
 
-        result.addAll(contacts);
-        return result;
+        return contacts.join(relationships).query();
     }
 
     public List<TalkClientContact> findAllGroupContacts() throws SQLException {
@@ -273,22 +266,17 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findGroupContactsByState(String state) throws SQLException {
+        QueryBuilder<TalkGroupMember, Long> groupMembers = mGroupMembers.queryBuilder();
+        groupMembers.where()
+                .eq("state", state);
 
-        List<TalkClientContact> result = new ArrayList<TalkClientContact>();
-
-        List<TalkClientContact> groupContacts = mClientContacts.queryBuilder().where()
+        QueryBuilder<TalkClientContact, Integer> contacts = mClientContacts.queryBuilder();
+        contacts.where()
                 .eq("contactType", TalkClientContact.TYPE_GROUP)
-                .eq("deleted", false)
-                .and(2)
-                .query();
-        for (TalkClientContact groupContact : groupContacts) {
-            TalkGroupMember groupMember = groupContact.getGroupMember();
-            if (groupMember != null && groupMember.getState().equals(state) && groupMember.getMemberKeyId() != null) {
-                    result.add(groupContact);
-            }
-        }
+                .and()
+                .eq("deleted", false);
 
-        return result;
+        return contacts.join(groupMembers).query();
     }
 
     public int findGroupMemberCountForGroup(TalkClientContact groupContact) throws SQLException {

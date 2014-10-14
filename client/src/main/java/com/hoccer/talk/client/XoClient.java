@@ -3285,7 +3285,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
                 // group contact update
                 if(groupContact.updateGroupMember(member)) {
-                    mDatabase.saveGroupMember(member);
                     mDatabase.saveContact(groupContact);
                     updated = true;
                 }
