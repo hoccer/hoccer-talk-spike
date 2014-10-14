@@ -8,9 +8,17 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public abstract class ContactListAdapter extends BaseAdapter implements IXoContactListener {
+
+    protected static final Comparator<TalkClientContact> CLIENT_CONTACT_COMPARATOR = new Comparator<TalkClientContact>() {
+        @Override
+        public int compare(TalkClientContact contact1, TalkClientContact contact2) {
+            return contact1.getNickname().compareTo(contact2.getNickname());
+        }
+    };
 
     protected Activity mActivity;
     protected List<TalkClientContact> mContacts = new ArrayList<TalkClientContact>();

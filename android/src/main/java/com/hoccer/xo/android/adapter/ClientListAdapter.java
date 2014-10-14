@@ -9,20 +9,24 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 public class ClientListAdapter extends ContactListAdapter {
+
+    private static final Logger LOG = Logger.getLogger(ClientListAdapter.class);
 
     public ClientListAdapter(Activity activity) {
         super(activity);
@@ -30,35 +34,24 @@ public class ClientListAdapter extends ContactListAdapter {
 
     @Override
     protected List<TalkClientContact> getAllContacts() {
-        List<TalkClientContact> all = new ArrayList<TalkClientContact>();
-
-        List<TalkClientContact> invitedMe = null;
-        List<TalkClientContact> invited = null;
-        List<TalkClientContact> friends = null;
+        List<TalkClientContact> invitedMe;
+        List<TalkClientContact> invited;
+        List<TalkClientContact> friends;
 
         try {
-            invitedMe = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_INVITED_ME);
-            invited = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_INVITED);
-            friends = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND);
+            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+            invitedMe = database.findClientContactsByState(TalkRelationship.STATE_INVITED_ME);
+            invited = database.findClientContactsByState(TalkRelationship.STATE_INVITED);
+            friends = database.findClientContactsByState(TalkRelationship.STATE_FRIEND);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Could not fetch client contacts", e);
+            return Collections.emptyList();
         }
 
-        Comparator comparator = new Comparator<TalkClientContact>() {
-            @Override
-            public int compare(TalkClientContact contact1, TalkClientContact contact2) {
-                return contact1.getNickname().compareTo(contact2.getNickname());
-            }
-        };
+        Collections.sort(invited, CLIENT_CONTACT_COMPARATOR);
+        Collections.sort(friends, CLIENT_CONTACT_COMPARATOR);
 
-        Collections.sort(invited, comparator);
-        Collections.sort(friends, comparator);
-
-        all.addAll(invitedMe);
-        all.addAll(invited);
-        all.addAll(friends);
-
-        return all;
+        return ListUtils.union(invitedMe, ListUtils.union(invited, friends));
     }
 
     @Override

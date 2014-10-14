@@ -11,17 +11,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.*;
 
 public class GroupListAdapter extends ContactListAdapter {
+
+    private static final Logger LOG = Logger.getLogger(GroupListAdapter.class);
 
     private static final int DISPLAY_NAMES_MAX_LENGTH = 30;
 
@@ -31,25 +36,21 @@ public class GroupListAdapter extends ContactListAdapter {
 
     @Override
     protected List<TalkClientContact> getAllContacts() {
-        List<TalkClientContact> invitedMe = null;
-        List<TalkClientContact> joined = null;
+        List<TalkClientContact> invitedMe;
+        List<TalkClientContact> joined;
+
         try {
-            invitedMe = XoApplication.getXoClient().getDatabase().findGroupContactsByState(TalkGroupMember.STATE_INVITED);
-            joined = XoApplication.getXoClient().getDatabase().findGroupContactsByState(TalkGroupMember.STATE_JOINED);
+            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+            invitedMe = database.findGroupContactsByState(TalkGroupMember.STATE_INVITED);
+            joined = database.findGroupContactsByState(TalkGroupMember.STATE_JOINED);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Could not fetch group contacts", e);
+            return Collections.emptyList();
         }
 
-        Collections.sort(joined, new Comparator<TalkClientContact>() {
-            @Override
-            public int compare(TalkClientContact o1, TalkClientContact o2) {
-                return o1.getNickname().compareTo(o2.getNickname());
-            }
-        });
+        Collections.sort(joined, CLIENT_CONTACT_COMPARATOR);
 
-        invitedMe.addAll(joined);
-
-        return invitedMe;
+        return ListUtils.union(invitedMe, joined);
     }
 
     @Override

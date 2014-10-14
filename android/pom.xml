@@ -120,6 +120,12 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>${commons-collections.version}</version>
+    </dependency>
+
     <!-- Apache Commons Codec (BASE64 and hex encoding) -->
     <dependency>
       <groupId>commons-codec</groupId>

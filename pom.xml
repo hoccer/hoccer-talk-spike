@@ -69,6 +69,7 @@
     <bouncycastle.version>1.48</bouncycastle.version>
     <commons-codec.version>1.7</commons-codec.version>
     <commons-lang.version>3.3.2</commons-lang.version>
+    <commons-collections.version>4.0</commons-collections.version>
     <bson4jackson.version>2.2.0</bson4jackson.version>
     <apache.httpclient.version>4.0.3</apache.httpclient.version>
     <apache.tika.version>1.4</apache.tika.version>
