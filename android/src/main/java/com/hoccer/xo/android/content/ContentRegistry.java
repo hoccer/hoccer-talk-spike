@@ -262,7 +262,7 @@ public class ContentRegistry {
                 if (selector instanceof ClipboardSelector) {
                     ClipboardSelector clipboardSelector = (ClipboardSelector) selector;
                     XoActivity xoActivity = (XoActivity) fragment.getActivity();
-                    xoActivity.clipBoardItemSelected(clipboardSelector.selectObjectFromClipboard(xoActivity, intent));
+                    xoActivity.clipBoardItemSelected(clipboardSelector.selectObjectFromClipboard());
                 } else {
                     if (selector instanceof MultiImageSelector) {
                         startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGE_ATTACHMENTS);

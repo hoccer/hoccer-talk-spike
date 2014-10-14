@@ -18,7 +18,6 @@ public class ClipboardPreviewFragment extends XoFragment {
 
     private IContentObject mContentObject;
 
-//    private OldContentView mContentView;
     private TextView mContentName;
     private TextView mContentSize;
     private Button mOkButton;
@@ -30,7 +29,6 @@ public class ClipboardPreviewFragment extends XoFragment {
         super.onCreateView(inflater, container, savedInstanceState);
 
         View view = inflater.inflate(R.layout.fragment_clipboard_preview, container, false);
-//        mContentView = (OldContentView) view.findViewById(R.id.content_view);
 
         View labels = view.findViewById(R.id.clipboard_preview_labels);
         mContentName = (TextView) labels.findViewById(R.id.content_name);
@@ -59,7 +57,6 @@ public class ClipboardPreviewFragment extends XoFragment {
 
     public void setContentObject(IContentObject contentObject) {
         mContentObject = contentObject;
-//        mContentView.displayContent(getXoActivity(), mContentObject, null);
 
         mContentName.setText("");
         mContentSize.setText(String.valueOf(contentObject.getContentLength()));
@@ -70,25 +67,6 @@ public class ClipboardPreviewFragment extends XoFragment {
     ClipboardPreviewActivity activity = (ClipboardPreviewActivity)getXoActivity();
         activity.sendSelectionIntent();
     }
-
-    @Override
-    public void onResume() {
-        LOG.debug("onResume()");
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        LOG.debug("onPause()");
-        super.onPause();
-    }
-
-    @Override
-    public void onDestroy() {
-        LOG.debug("onDestroy()");
-        super.onDestroy();
-    }
-
 
 }
 

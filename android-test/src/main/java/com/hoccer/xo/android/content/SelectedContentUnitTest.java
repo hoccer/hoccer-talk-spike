@@ -10,7 +10,7 @@ import org.apache.tika.mime.MimeTypes;
 
 public class SelectedContentUnitTest extends TestCase {
 
-    static final Logger LOG = Logger.getLogger(SelectedContentUnitTest.class);
+    private static final Logger LOG = Logger.getLogger(SelectedContentUnitTest.class);
 
     public void testParcelableContentWithData() {
         LOG.info("Test parcelable Content");

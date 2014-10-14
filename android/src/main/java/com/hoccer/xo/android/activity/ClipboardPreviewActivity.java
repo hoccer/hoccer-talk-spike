@@ -10,7 +10,9 @@ import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.Clipboard;
+import com.hoccer.xo.android.content.ClipboardContent;
 import com.hoccer.xo.android.fragment.ClipboardPreviewFragment;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 
 import java.sql.SQLException;
@@ -19,8 +21,7 @@ import java.sql.SQLException;
 public class ClipboardPreviewActivity extends XoActivity {
 
     private ClipboardPreviewFragment mClipboardPreviewFragment;
-    private int mClipboardContentObjectId;
-    private String mClipboardContentObjectType;
+    private ClipboardContent mContent;
 
     @Override
     protected int getLayoutResource() {
@@ -39,31 +40,18 @@ public class ClipboardPreviewActivity extends XoActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         mClipboardPreviewFragment = (ClipboardPreviewFragment) fragmentManager.findFragmentById(R.id.activity_clipboard_preview_fragment);
 
-        Intent intent = getIntent();
-        if (intent != null) {
-            if (intent.hasExtra(Clipboard.CLIPBOARD_CONTENT_OBJECT_ID)) {
-                IContentObject contentObject = null;
-                XoClientDatabase database = getXoDatabase();
-                mClipboardContentObjectId = intent.getIntExtra(Clipboard.CLIPBOARD_CONTENT_OBJECT_ID, 0);
-                mClipboardContentObjectType = intent.getStringExtra(Clipboard.CLIPBOARD_CONTENT_OBJECT_TYPE);
-                try {
-                    if (mClipboardContentObjectType.equals(TalkClientUpload.class.getName())) {
-                        contentObject = database.findClientUploadById(mClipboardContentObjectId);
-                    } else if (mClipboardContentObjectType.equals(TalkClientDownload.class.getName())) {
-                        contentObject = database.findClientDownloadById(mClipboardContentObjectId);
-                    }
-                } catch (SQLException e) {
-                    LOG.error("SQL Exception while retrieving clipboard object for selection intent", e);
-                }
-                mClipboardPreviewFragment.setContentObject(contentObject);
+        Intent i = getIntent();
+        if (i != null) {
+            if (i.hasExtra(IntentHelper.EXTRA_CONTENT_OBJECT)) {
+                mContent = i.getParcelableExtra(IntentHelper.EXTRA_CONTENT_OBJECT);
+                mClipboardPreviewFragment.setContentObject(mContent);
             }
         }
     }
 
     public void sendSelectionIntent() {
         Intent intent = new Intent();
-        intent.putExtra(Clipboard.CLIPBOARD_CONTENT_OBJECT_ID, mClipboardContentObjectId);
-        intent.putExtra(Clipboard.CLIPBOARD_CONTENT_OBJECT_TYPE, mClipboardContentObjectType);
+        intent.putExtra(IntentHelper.EXTRA_CONTENT_OBJECT, mContent);
 
         if (getParent() == null) {
             setResult(Activity.RESULT_OK, intent);

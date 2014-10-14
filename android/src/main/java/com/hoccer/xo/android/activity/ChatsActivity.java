@@ -176,17 +176,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         }
 
         if (contentObject != null) {
-            // Clipboard only works with TalkClientUpload and TalkClientDownload so we have to create one
-            // unfortunately this Upload object will be a dead entry in the database since the attachment selection recreates the Upoad Object
-            // see CompositionFragment.validateAndSendComposedMessage()
-            TalkClientUpload attachmentUpload = SelectedContent.createAttachmentUpload(contentObject);
-            try {
-                getXoDatabase().saveClientUpload(attachmentUpload);
-                Clipboard.get(this).storeAttachment(attachmentUpload);
-                Toast.makeText(this, getString(R.string.toast_stored_external_file_to_clipboard), Toast.LENGTH_LONG).show();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            Clipboard.getInstance(this).storeAttachment(contentObject);
         }
     }
 
