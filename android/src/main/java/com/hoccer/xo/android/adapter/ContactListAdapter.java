@@ -16,7 +16,7 @@ public abstract class ContactListAdapter extends BaseAdapter implements IXoConta
     protected static final Comparator<TalkClientContact> CLIENT_CONTACT_COMPARATOR = new Comparator<TalkClientContact>() {
         @Override
         public int compare(TalkClientContact contact1, TalkClientContact contact2) {
-            return contact1.getNickname().compareTo(contact2.getNickname());
+            return contact1.getNickname().compareToIgnoreCase(contact2.getNickname());
         }
     };
 
