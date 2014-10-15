@@ -61,8 +61,7 @@ public class Clipboard {
     }
 
     public void clearClipboard() {
-        if (mContent != null) {
-            ClipboardContent.clearPreferences(sPreferences.edit());
-        }
+        ClipboardContent.clearPreferences(sPreferences.edit());
+        // mContent will be cleared by updateContentFromPreferences()
     }
 }
