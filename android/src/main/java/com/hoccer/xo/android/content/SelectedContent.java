@@ -28,9 +28,8 @@ import java.util.UUID;
  * content from external sources.
  *
  */
-public class SelectedContent implements IContentObject, Parcelable {
+public class SelectedContent implements IContentObject {
 
-    public static final SelectedContentCreator CREATOR = new SelectedContentCreator();
     private static final Logger LOG = Logger.getLogger(SelectedContent.class);
 
     String mFileName;
@@ -68,19 +67,6 @@ public class SelectedContent implements IContentObject, Parcelable {
         mData = data;
         mLength = data.length;
         computeHmac();
-    }
-
-    public SelectedContent(Parcel source) {
-        LOG.debug("create from parcel");
-        mFileName = source.readString();
-        mContentUri = source.readString();
-        mDataUri = source.readString();
-        mContentType = source.readString();
-        mMediaType = source.readString();
-        mHmac = source.readString();
-        mLength = source.readInt();
-        mAspectRatio = source.readDouble();
-        readDataFromParcel(source);
     }
 
     public void setFileName(String fileName) {
@@ -173,25 +159,6 @@ public class SelectedContent implements IContentObject, Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        LOG.debug("write to parcel");
-        dest.writeString(mFileName);
-        dest.writeString(mContentUri);
-        dest.writeString(mDataUri);
-        dest.writeString(mContentType);
-        dest.writeString(mMediaType);
-        dest.writeString(mHmac);
-        dest.writeInt(mLength);
-        dest.writeDouble(mAspectRatio);
-        dest.writeByteArray(mData);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || !IContentObject.class.isAssignableFrom(o.getClass())) return false;
@@ -209,17 +176,6 @@ public class SelectedContent implements IContentObject, Parcelable {
         mContentUri = uri;
         mContentType = contentType;
         LOG.debug("create from content uri: " + mContentUri);
-    }
-
-    private void readDataFromParcel(Parcel source) {
-        if (mLength > 0) {
-            try {
-                mData = new byte[mLength];
-                source.readByteArray(mData);
-            } catch (NullPointerException e) {
-                LOG.error("No binary data in parcel even though length is > 0");
-            }
-        }
     }
 
     private void computeHmac() {
@@ -288,17 +244,5 @@ public class SelectedContent implements IContentObject, Parcelable {
                 object.getContentLength(),
                 object.getContentHmac());
         return upload;
-    }
-
-    public static class SelectedContentCreator implements Parcelable.Creator<SelectedContent> {
-        @Override
-        public SelectedContent createFromParcel(Parcel source) {
-            return new SelectedContent(source);
-        }
-
-        @Override
-        public SelectedContent[] newArray(int size) {
-            return new SelectedContent[size];
-        }
     }
 }
