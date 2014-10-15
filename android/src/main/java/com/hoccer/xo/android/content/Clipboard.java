@@ -34,10 +34,10 @@ public class Clipboard {
     public void storeAttachment(IContentObject contentObject) {
         ClipboardContent cc = ClipboardContent.fromContentObject(contentObject);
         cc.saveToPreferences(sPreferences.edit());
+        // mContent will be set by updateContentFromPreferences()
     }
 
     private void initialize() {
-
         sPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         sPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
@@ -62,7 +62,7 @@ public class Clipboard {
         }
     }
 
-    public boolean canProcessClipboard() {
+    public boolean hasContent() {
         return (mContent != null);
     }
 }

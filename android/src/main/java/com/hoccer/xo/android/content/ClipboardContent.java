@@ -20,7 +20,16 @@ public class ClipboardContent implements IContentObject, Parcelable {
     private static final Logger LOG = Logger.getLogger(ClipboardContent.class);
     private static final int DEFAULT_LENGTH = -1;
     private static final double DEFAULT_ASPECT_RATIO = 1.0;
-    private static enum PREF_KEYS { FILE_NAME, CONTENT_URI, DATA_URI, CONTENT_TYPE, MEDIA_TYPE, HMAC, LENGTH, ASPECT_RATIO}
+    private static enum PREF_KEYS {
+        FILE_NAME,
+        CONTENT_URI,
+        DATA_URI,
+        CONTENT_TYPE,
+        MEDIA_TYPE,
+        HMAC,
+        LENGTH,
+        ASPECT_RATIO
+    }
 
     private final String mFileName;
     private final String mContentUri;

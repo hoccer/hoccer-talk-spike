@@ -218,7 +218,7 @@ public class ContentRegistry {
         }
 
         // Add ClipboardSelector when it has something to process
-        if (mClipboardSelector.canProcessClipboard()) {
+        if (mClipboardSelector.hasContent()) {
             Map<String, Object> fields = createDataObjectFromContentSelector(fragment.getActivity(), mClipboardSelector);
             if (fields != null) {
                 options.add(fields);

@@ -4,21 +4,13 @@ package com.hoccer.xo.android.content.contentselectors;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.os.Parcel;
-import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.activity.ClipboardPreviewActivity;
-import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
-
-import java.sql.SQLException;
 
 public class ClipboardSelector implements IContentSelector {
 
@@ -68,7 +60,7 @@ public class ClipboardSelector implements IContentSelector {
         return true;
     }
 
-    public boolean canProcessClipboard() {
-        return mClipboard.canProcessClipboard();
+    public boolean hasContent() {
+        return mClipboard.hasContent();
     }
 }
