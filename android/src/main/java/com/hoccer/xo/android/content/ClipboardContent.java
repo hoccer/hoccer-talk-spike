@@ -14,27 +14,10 @@ import java.io.File;
 
 public class ClipboardContent implements IContentObject, Parcelable {
 
-    public static final String PREFERENCE_KEY_PREFIX = ClipboardContent.class.getSimpleName() + "_";
     public static final ClipboardContentCreator CREATOR = new ClipboardContentCreator();
 
     private static final Logger LOG = Logger.getLogger(ClipboardContent.class);
-    private static final int DEFAULT_LENGTH = -1;
     private static final double DEFAULT_ASPECT_RATIO = 1.0;
-
-    private static enum PREFERENCE_KEY {
-        FILE_NAME,
-        CONTENT_URI,
-        DATA_URI,
-        CONTENT_TYPE,
-        MEDIA_TYPE,
-        HMAC,
-        LENGTH,
-        ASPECT_RATIO;
-
-        String getKey() {
-            return PREFERENCE_KEY_PREFIX + name();
-        }
-    }
 
     private final String mFileName;
     private final String mContentUri;
@@ -51,16 +34,6 @@ public class ClipboardContent implements IContentObject, Parcelable {
         } else {
             return new ClipboardContent(contentObject);
         }
-    }
-
-    public static ClipboardContent fromPreferences(SharedPreferences preferences) {
-        for (PREFERENCE_KEY key : PREFERENCE_KEY.values()) {
-            if (!preferences.contains(key.getKey())) {
-                return null;
-            }
-        }
-
-        return new ClipboardContent(preferences);
     }
 
     private ClipboardContent(IContentObject fromContent) {
@@ -86,44 +59,6 @@ public class ClipboardContent implements IContentObject, Parcelable {
         mAspectRatio = getOrSetDefaulAspectRatio(source.readDouble());
         mLength = isFileAccessable() ? getLengthFromFile() : source.readInt();
 
-    }
-
-    private ClipboardContent(SharedPreferences prefs) {
-        mFileName = prefs.getString(PREFERENCE_KEY.FILE_NAME.getKey(), null);
-        mContentUri = prefs.getString(PREFERENCE_KEY.CONTENT_URI.getKey(), null);
-        mDataUri = prefs.getString(PREFERENCE_KEY.DATA_URI.getKey(), null);
-        mContentType = prefs.getString(PREFERENCE_KEY.CONTENT_TYPE.getKey(), null);
-        mMediaType = prefs.getString(PREFERENCE_KEY.MEDIA_TYPE.getKey(), null);
-        mHmac = prefs.getString(PREFERENCE_KEY.HMAC.getKey(), null);
-        mLength = isFileAccessable() ? getLengthFromFile() : prefs.getInt(PREFERENCE_KEY.LENGTH.getKey(), DEFAULT_LENGTH);
-        mAspectRatio = getAspectRatioFromPreferences(prefs);
-    }
-
-    public void saveToPreferences(SharedPreferences.Editor editor) {
-        clearPreferences(editor);
-        LOG.debug("Save ClipboardContent to preferences");
-        editor.putString(PREFERENCE_KEY.FILE_NAME.getKey(), mFileName);
-        editor.putString(PREFERENCE_KEY.CONTENT_URI.getKey(), mContentUri);
-        editor.putString(PREFERENCE_KEY.DATA_URI.getKey(), mDataUri);
-        editor.putString(PREFERENCE_KEY.CONTENT_TYPE.getKey(), mContentType);
-        editor.putString(PREFERENCE_KEY.MEDIA_TYPE.getKey(), mMediaType);
-        editor.putString(PREFERENCE_KEY.HMAC.getKey(), mHmac);
-        editor.putInt(PREFERENCE_KEY.LENGTH.getKey(), mLength);
-        editor.putLong(PREFERENCE_KEY.ASPECT_RATIO.getKey(), Double.doubleToRawLongBits(mAspectRatio));
-        editor.apply();
-    }
-
-    public static void clearPreferences(SharedPreferences.Editor editor) {
-        LOG.debug("Clear ClipboardContent from preferences");
-        editor.remove(PREFERENCE_KEY.FILE_NAME.getKey());
-        editor.remove(PREFERENCE_KEY.CONTENT_URI.getKey());
-        editor.remove(PREFERENCE_KEY.DATA_URI.getKey());
-        editor.remove(PREFERENCE_KEY.CONTENT_TYPE.getKey());
-        editor.remove(PREFERENCE_KEY.MEDIA_TYPE.getKey());
-        editor.remove(PREFERENCE_KEY.HMAC.getKey());
-        editor.remove(PREFERENCE_KEY.LENGTH.getKey());
-        editor.remove(PREFERENCE_KEY.ASPECT_RATIO.getKey());
-        editor.apply();
     }
 
     @Override
@@ -286,11 +221,6 @@ public class ClipboardContent implements IContentObject, Parcelable {
             aspectRatio = DEFAULT_ASPECT_RATIO;
         }
         return aspectRatio;
-    }
-
-    private double getAspectRatioFromPreferences(SharedPreferences preferences) {
-        long defaultValue = Double.doubleToRawLongBits(DEFAULT_ASPECT_RATIO);
-        return Double.longBitsToDouble(preferences.getLong(PREFERENCE_KEY.ASPECT_RATIO.getKey(), defaultValue));
     }
 
     public static class ClipboardContentCreator implements Parcelable.Creator<ClipboardContent> {

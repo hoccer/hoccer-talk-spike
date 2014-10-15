@@ -109,7 +109,7 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
         switch (item.getItemId()) {
             case R.id.menu_copy_message:
                 if (messageItem.getContent() != null && messageItem.getContent().isContentAvailable()) {
-                    Clipboard.getInstance(this).setContent(messageItem.getContent());
+                    Clipboard.getInstance().setContent(messageItem.getContent());
                 } else {
                     putMessageTextInSystemClipboard(messageItem);
                 }

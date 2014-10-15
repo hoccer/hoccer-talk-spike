@@ -9,41 +9,18 @@ public class Clipboard {
 
     private static Clipboard INSTANCE = null;
 
-    private static SharedPreferences sPreferences;
-    private static SharedPreferences.OnSharedPreferenceChangeListener sPreferencesListener;
-
-    private Context mContext;
     private ClipboardContent mContent;
 
-    public static synchronized Clipboard getInstance(Context applicationContext) {
+    public static synchronized Clipboard getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new Clipboard(applicationContext);
+            INSTANCE = new Clipboard();
         }
+
         return INSTANCE;
     }
 
-    private Clipboard(Context context) {
-        mContext = context;
-        initialize();
-    }
-
-    private void initialize() {
-        sPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        sPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.startsWith(ClipboardContent.PREFERENCE_KEY_PREFIX)) {
-                    updateContentFromPreferences();
-                }
-            }
-        };
-        sPreferences.registerOnSharedPreferenceChangeListener(sPreferencesListener);
-
-        updateContentFromPreferences();
-    }
-
-    private void updateContentFromPreferences() {
-        mContent = ClipboardContent.fromPreferences(sPreferences);
+    private Clipboard() {
+        // private constructor to make sure that getInstance() is used instead
     }
 
     public boolean hasContent() {
@@ -55,13 +32,10 @@ public class Clipboard {
     }
 
     public void setContent(IContentObject contentObject) {
-        ClipboardContent cc = ClipboardContent.fromContentObject(contentObject);
-        cc.saveToPreferences(sPreferences.edit());
-        // mContent will be set by updateContentFromPreferences()
+        mContent = ClipboardContent.fromContentObject(contentObject);
     }
 
     public void clearContent() {
-        ClipboardContent.clearPreferences(sPreferences.edit());
-        // mContent will be cleared by updateContentFromPreferences()
+        mContent = null;
     }
 }

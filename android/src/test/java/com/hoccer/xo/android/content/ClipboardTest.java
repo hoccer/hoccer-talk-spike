@@ -1,33 +1,31 @@
 package com.hoccer.xo.android.content;
 
-import android.content.SharedPreferences;
 import android.os.Parcel;
-import android.preference.PreferenceManager;
-import android.test.InstrumentationTestCase;
 import com.hoccer.talk.content.ContentMediaType;
 import org.apache.tika.mime.MimeTypes;
+import org.junit.Before;
+import org.junit.Test;
 
-public class ClipboardTest extends InstrumentationTestCase {
+import static junit.framework.TestCase.*;
 
-    private static SharedPreferences sPreferences;
+public class ClipboardTest {
+
     private SelectedContent mTestContent;
     private Clipboard mClipboard;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        sPreferences = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
-        ClipboardContent.clearPreferences(sPreferences.edit());
-
-        mClipboard = Clipboard.getInstance(this.getInstrumentation().getTargetContext());
+    @Before
+    public void setUp() throws Exception {
+        mClipboard = Clipboard.getInstance();
         mTestContent = createSelectedContentWithData();
     }
 
+    @Test
     public void testClipboardInitialization() {
         assertFalse(mClipboard.hasContent());
         assertNull(mClipboard.getContent());
     }
 
+    @Test
     public void testClipboardSetContent() {
         mClipboard.setContent(mTestContent);
 
@@ -35,6 +33,7 @@ public class ClipboardTest extends InstrumentationTestCase {
         assertEquals(mTestContent, mClipboard.getContent());
     }
 
+    @Test
     public void testClipboardClearContent() {
         mClipboard.setContent(mTestContent);
         mClipboard.clearContent();
@@ -43,25 +42,13 @@ public class ClipboardTest extends InstrumentationTestCase {
         assertNull(mClipboard.getContent());
     }
 
+    @Test
     public void testParcelableClipboardContent() {
         ClipboardContent content = ClipboardContent.fromContentObject(mTestContent);
         Parcel parcel = createParcelFor(content);
         ClipboardContent contentFromParcel = ClipboardContent.CREATOR.createFromParcel(parcel);
 
         assertEquals(content, contentFromParcel);
-    }
-
-    public void testClipboardContentSavedInPreferences() {
-        ClipboardContent content = ClipboardContent.fromContentObject(mTestContent);
-        content.saveToPreferences(sPreferences.edit());
-        ClipboardContent contentFromPreferences = ClipboardContent.fromPreferences(sPreferences);
-
-        assertEquals(content, contentFromPreferences);
-    }
-
-    public void testClipboardContentFromEmptyPreferences() {
-        ClipboardContent content = ClipboardContent.fromPreferences(sPreferences);
-        assertNull(content);
     }
 
     private SelectedContent createSelectedContentWithData() {
