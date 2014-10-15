@@ -53,7 +53,7 @@ public class Clipboard {
     }
 
     private void updateContentFromPreferences() {
-        mContent = new ClipboardContent(sPreferences);
+        mContent = ClipboardContent.fromPreferences(sPreferences);
     }
 
     public void clearClipBoard() {

@@ -39,6 +39,10 @@ public class ClipboardContent implements IContentObject, Parcelable {
         }
     }
 
+    public static ClipboardContent fromPreferences(SharedPreferences preferences) {
+        return new ClipboardContent(preferences);
+    }
+
     private ClipboardContent(IContentObject fromContent) {
         LOG.debug("create from content object");
         mFileName = fromContent.getFileName();
@@ -51,7 +55,7 @@ public class ClipboardContent implements IContentObject, Parcelable {
         mLength = isFileAccessable() ? getLengthFromFile() : fromContent.getContentLength();
     }
 
-    public ClipboardContent(Parcel source) {
+    private ClipboardContent(Parcel source) {
         LOG.debug("create from parcel");
         mFileName = source.readString();
         mContentUri = source.readString();
@@ -64,7 +68,7 @@ public class ClipboardContent implements IContentObject, Parcelable {
 
     }
 
-    public ClipboardContent(SharedPreferences prefs) {
+    private ClipboardContent(SharedPreferences prefs) {
         mFileName = prefs.getString(getKey(PREF_KEYS.FILE_NAME), null);
         mContentUri = prefs.getString(getKey(PREF_KEYS.CONTENT_URI), null);
         mDataUri = prefs.getString(getKey(PREF_KEYS.DATA_URI), null);

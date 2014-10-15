@@ -32,7 +32,7 @@ public class ClipboardContentUnitTest extends InstrumentationTestCase {
         LOG.info("Test ClipboardContent saved in preferences");
         ClipboardContent content = ClipboardContent.fromContentObject(mTestContent);
         content.saveToPreferences(sPreferences.edit());
-        ClipboardContent contentFromPreferences = new ClipboardContent(sPreferences);
+        ClipboardContent contentFromPreferences = ClipboardContent.fromPreferences(sPreferences);
 
         assertEquals(content, contentFromPreferences);
     }
