@@ -96,8 +96,8 @@ public class ClipboardContent implements IContentObject, Parcelable {
 
     @Override
     public boolean isContentAvailable() {
-    return false;
-}
+        return false;
+    }
 
     @Override
     public ContentState getContentState() {
