@@ -17,7 +17,7 @@
 
   <name>Hoccer Talk for Android</name>
   <artifactId>hoccer-talk-android</artifactId>
-  <version>3.0.0</version>
+  <version>${hoccer-talk-android.version}</version>
 
   <dependencies>
 
