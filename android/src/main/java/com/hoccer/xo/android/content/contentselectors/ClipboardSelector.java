@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.activity.ClipboardPreviewActivity;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -39,9 +37,7 @@ public class ClipboardSelector implements IContentSelector {
 
     @Override
     public Intent createSelectionIntent(Context context) {
-        Intent intent = new Intent(context, ClipboardPreviewActivity.class);
-        intent.putExtra(IntentHelper.EXTRA_CONTENT_OBJECT, mClipboard.getContent());
-        return intent;
+        return null; // not used for clipboard selection
     }
 
     public IContentObject selectObjectFromClipboard() {
