@@ -1,8 +1,7 @@
 package com.hoccer.xo.android.content;
 
 import android.content.Intent;
-import android.os.Parcel;
-import android.os.Parcelable;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.ContentState;
@@ -215,6 +214,7 @@ public class SelectedContent implements IContentObject {
         if(object instanceof SelectedContent) {
             ((SelectedContent)object).toFile();
         }
+
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAvatar(
                 object.getContentUrl(),
@@ -224,15 +224,19 @@ public class SelectedContent implements IContentObject {
         return upload;
     }
 
-    /*
-     * Warning: This method does not work with TalkClientDownloads as 'object' since there is a contentLength mismatch between
-     * TalkClientUpload and TalkClientDownload although its the same file.
-     * The contentLength seems to be conceptually different between both.
-     */
     public static TalkClientUpload createAttachmentUpload(IContentObject object) {
         if(object instanceof SelectedContent) {
             ((SelectedContent)object).toFile();
         }
+
+        int length = object.getContentLength();
+
+        if(object instanceof XoTransfer) {
+            XoTransfer transfer = (XoTransfer) object;
+            File file = new File(transfer.getDataFile());
+            length = (int)file.length();
+        }
+
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(
                 object.getFileName(),
@@ -241,8 +245,9 @@ public class SelectedContent implements IContentObject {
                 object.getContentType(),
                 object.getContentMediaType(),
                 object.getContentAspectRatio(),
-                object.getContentLength(),
+                length,
                 object.getContentHmac());
+
         return upload;
     }
 }
