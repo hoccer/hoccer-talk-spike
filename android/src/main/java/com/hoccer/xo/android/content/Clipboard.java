@@ -6,7 +6,7 @@ public class Clipboard {
 
     private static Clipboard INSTANCE = null;
 
-    private ClipboardContent mContent;
+    private IContentObject mContent;
 
     public static synchronized Clipboard getInstance() {
         if (INSTANCE == null) {
@@ -24,12 +24,12 @@ public class Clipboard {
         return (mContent != null);
     }
 
-    public ClipboardContent getContent() {
+    public IContentObject getContent() {
         return mContent;
     }
 
     public void setContent(IContentObject contentObject) {
-        mContent = ClipboardContent.fromContentObject(contentObject);
+        mContent = contentObject;
     }
 
     public void clearContent() {
