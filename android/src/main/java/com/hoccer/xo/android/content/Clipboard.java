@@ -15,11 +15,6 @@ public class Clipboard {
     private Context mContext;
     private ClipboardContent mContent;
 
-    private Clipboard(Context context) {
-        mContext = context;
-        initialize();
-    }
-
     public static synchronized Clipboard getInstance(Context applicationContext) {
         if (INSTANCE == null) {
             INSTANCE = new Clipboard(applicationContext);
@@ -27,14 +22,9 @@ public class Clipboard {
         return INSTANCE;
     }
 
-    public ClipboardContent getContent() {
-        return mContent;
-    }
-
-    public void storeAttachment(IContentObject contentObject) {
-        ClipboardContent cc = ClipboardContent.fromContentObject(contentObject);
-        cc.saveToPreferences(sPreferences.edit());
-        // mContent will be set by updateContentFromPreferences()
+    private Clipboard(Context context) {
+        mContext = context;
+        initialize();
     }
 
     private void initialize() {
@@ -56,13 +46,23 @@ public class Clipboard {
         mContent = ClipboardContent.fromPreferences(sPreferences);
     }
 
+    public boolean hasContent() {
+        return (mContent != null);
+    }
+
+    public ClipboardContent getContent() {
+        return mContent;
+    }
+
+    public void setContent(IContentObject contentObject) {
+        ClipboardContent cc = ClipboardContent.fromContentObject(contentObject);
+        cc.saveToPreferences(sPreferences.edit());
+        // mContent will be set by updateContentFromPreferences()
+    }
+
     public void clearClipboard() {
         if (mContent != null) {
             ClipboardContent.clearPreferences(sPreferences.edit());
         }
-    }
-
-    public boolean hasContent() {
-        return (mContent != null);
     }
 }

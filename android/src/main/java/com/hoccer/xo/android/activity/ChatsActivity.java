@@ -172,7 +172,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         }
 
         if (contentObject != null) {
-            Clipboard.getInstance(this).storeAttachment(contentObject);
+            Clipboard.getInstance(this).setContent(contentObject);
             Toast.makeText(this, getString(R.string.toast_stored_external_file_to_clipboard), Toast.LENGTH_LONG).show();
         }
     }
