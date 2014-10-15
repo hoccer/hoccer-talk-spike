@@ -38,7 +38,6 @@ import org.apache.log4j.Logger;
 public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoContactListener, IXoPairingListener {
 
     private final static Logger LOG = Logger.getLogger(ChatsActivity.class);
-    private static final String ACTION_ALREADY_HANDLED = "com.hoccer.xo.android.intent.action.ALREADY_HANDLED";
 
     private ViewPager mViewPager;
     private ActionBar mActionBar;
@@ -102,22 +101,25 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             startActivity(intent);
         }
 
-        // check whether we should immediately open the conversation with a contact
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
-            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
-            showContactConversation(contactId);
-        }
-
-        if (getIntent().getAction() == Intent.ACTION_SEND) {
-            initWithShareIntent();
-        }
+        handleIntent(getIntent());
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        handleTokenPairingIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            handleTokenPairingIntent(intent);
+        }
+        else if (Intent.ACTION_SEND.equals(intent.getAction())) {
+            handleShareIntent(intent);
+        }
+        else if (intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+            handleContactIdIntent(intent);
+        }
     }
 
     @Override
@@ -125,7 +127,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         super.onResume();
         refreshEnvironmentUpdater(false);
         getXoClient().registerStateListener(this);
-        handleTokenPairingIntent(getIntent());
 
         // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
         getXoClient().registerContactListener(this);
@@ -153,11 +154,14 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         // TODO: done.
     }
 
-    private void initWithShareIntent() {
+    private void handleContactIdIntent(Intent intent) {
+        int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+        showContactConversation(contactId);
+    }
 
-        Intent shareIntent = getIntent();
-        String type = shareIntent.getType();
-        Uri contentUri = (Uri) shareIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+    private void handleShareIntent(Intent intent) {
+        String type = intent.getType();
+        Uri contentUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
 
         // Factory method in IContentSelector expects content to be in intent extra field 'data'
         Intent dataIntent = new Intent();
@@ -190,15 +194,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void handleTokenPairingIntent(Intent intent) {
-        if (intent.getAction() == Intent.ACTION_VIEW) {
-            String token = intent.getData().getHost();
-            intent.setAction(ACTION_ALREADY_HANDLED);
+        String token = intent.getData().getHost();
 
-            if (getXoClient().isActive()) {
-                performTokenPairing(token);
-            } else {
-                mPairingToken = token;
-            }
+        if (getXoClient().isActive()) {
+            performTokenPairing(token);
+        } else {
+            mPairingToken = token;
         }
     }
 
