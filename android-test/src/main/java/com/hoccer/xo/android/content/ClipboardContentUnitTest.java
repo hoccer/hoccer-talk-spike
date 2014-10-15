@@ -17,6 +17,7 @@ public class ClipboardContentUnitTest extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         sPreferences = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
+        ClipboardContent.clearPreferences(sPreferences.edit());
         mTestContent = createSelectedContentWithData();
     }
 
@@ -34,6 +35,11 @@ public class ClipboardContentUnitTest extends InstrumentationTestCase {
         ClipboardContent contentFromPreferences = ClipboardContent.fromPreferences(sPreferences);
 
         assertEquals(content, contentFromPreferences);
+    }
+
+    public void testClipboardContentFromEmptyPreferences() {
+        ClipboardContent content = ClipboardContent.fromPreferences(sPreferences);
+        assertNull(content);
     }
 
     private SelectedContent createSelectedContentWithData() {
