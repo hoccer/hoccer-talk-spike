@@ -24,13 +24,13 @@ public class ClipboardContentUnitTest extends InstrumentationTestCase {
 
     public void testParcelableClipboardContent() {
         LOG.info("Test parcelable ClipboardContent");
-        ClipboardContent content = new ClipboardContent(mTestContent);
+        ClipboardContent content = ClipboardContent.fromContentObject(mTestContent);
         assertEquals(content, getClipboardContentFromParcel(content));
     }
 
     public void testClipboardContentSavedInPreferences() {
         LOG.info("Test ClipboardContent saved in preferences");
-        ClipboardContent content = new ClipboardContent(mTestContent);
+        ClipboardContent content = ClipboardContent.fromContentObject(mTestContent);
         content.saveToPreferences(sPreferences.edit());
         ClipboardContent contentFromPreferences = new ClipboardContent(sPreferences);
 

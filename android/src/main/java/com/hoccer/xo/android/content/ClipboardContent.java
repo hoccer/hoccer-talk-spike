@@ -31,7 +31,15 @@ public class ClipboardContent implements IContentObject, Parcelable {
     private final double mAspectRatio;
     private final int mLength;
 
-    public ClipboardContent(IContentObject fromContent) {
+    public static ClipboardContent fromContentObject(IContentObject contentObject) {
+        if ((contentObject instanceof ClipboardContent)) {
+            return (ClipboardContent) contentObject;
+        } else {
+            return new ClipboardContent(contentObject);
+        }
+    }
+
+    private ClipboardContent(IContentObject fromContent) {
         LOG.debug("create from content object");
         mFileName = fromContent.getFileName();
         mContentUri = fromContent.getContentUrl();

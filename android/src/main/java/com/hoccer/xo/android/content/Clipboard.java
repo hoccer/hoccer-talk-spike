@@ -32,13 +32,7 @@ public class Clipboard {
     }
 
     public void storeAttachment(IContentObject contentObject) {
-        ClipboardContent cc;
-        if (!(contentObject instanceof ClipboardContent)) {
-            cc = new ClipboardContent(contentObject);
-        } else {
-            cc = (ClipboardContent) contentObject;
-        }
-
+        ClipboardContent cc = ClipboardContent.fromContentObject(contentObject);
         cc.saveToPreferences(sPreferences.edit());
     }
 
