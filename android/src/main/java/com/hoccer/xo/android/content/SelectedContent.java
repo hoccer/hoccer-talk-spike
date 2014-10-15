@@ -18,14 +18,13 @@ import java.util.UUID;
 
 /**
  * Content objects
- *
+ * <p/>
  * This is a grabbag object for all the properties
  * of content objects that we need in the UI.
- *
+ * <p/>
  * They do not cary an identity and can be created
  * from uploads, downloads as well as by selecting
  * content from external sources.
- *
  */
 public class SelectedContent implements IContentObject {
 
@@ -37,12 +36,12 @@ public class SelectedContent implements IContentObject {
     String mContentType = null;
     String mMediaType = null;
     String mHmac = null;
-    int    mLength = -1;
+    int mLength = -1;
     double mAspectRatio = 1.0;
 
     /**
      * Literal data.
-     *
+     * <p/>
      * Converted to a file when selected content becomes an upload.
      */
     byte[] mData = null;
@@ -190,7 +189,7 @@ public class SelectedContent implements IContentObject {
     }
 
     private void toFile() {
-        if(mData != null) {
+        if (mData != null) {
             writeToFile();
         }
     }
@@ -211,8 +210,8 @@ public class SelectedContent implements IContentObject {
     }
 
     public static TalkClientUpload createAvatarUpload(IContentObject object) {
-        if(object instanceof SelectedContent) {
-            ((SelectedContent)object).toFile();
+        if (object instanceof SelectedContent) {
+            ((SelectedContent) object).toFile();
         }
 
         TalkClientUpload upload = new TalkClientUpload();
@@ -225,16 +224,16 @@ public class SelectedContent implements IContentObject {
     }
 
     public static TalkClientUpload createAttachmentUpload(IContentObject object) {
-        if(object instanceof SelectedContent) {
-            ((SelectedContent)object).toFile();
+        if (object instanceof SelectedContent) {
+            ((SelectedContent) object).toFile();
         }
 
         int length = object.getContentLength();
 
-        if(object instanceof XoTransfer) {
+        if (object instanceof XoTransfer) {
             XoTransfer transfer = (XoTransfer) object;
             File file = new File(transfer.getDataFile());
-            length = (int)file.length();
+            length = (int) file.length();
         }
 
         TalkClientUpload upload = new TalkClientUpload();
