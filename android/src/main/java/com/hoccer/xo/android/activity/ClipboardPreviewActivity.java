@@ -4,18 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
-import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.content.ClipboardContent;
 import com.hoccer.xo.android.fragment.ClipboardPreviewFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
-
-import java.sql.SQLException;
 
 
 public class ClipboardPreviewActivity extends XoActivity {
