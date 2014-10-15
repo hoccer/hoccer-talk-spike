@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.content;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -10,14 +9,12 @@ import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.xo.android.XoApplication;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
-import java.io.*;
-import java.security.DigestOutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.UUID;
 
 /**
@@ -34,23 +31,15 @@ import java.util.UUID;
 public class SelectedContent implements IContentObject, Parcelable {
 
     public static final SelectedContentCreator CREATOR = new SelectedContentCreator();
-
     private static final Logger LOG = Logger.getLogger(SelectedContent.class);
 
     String mFileName;
-
     String mContentUri;
-
     String mDataUri;
-
     String mContentType = null;
-
     String mMediaType = null;
-
     String mHmac = null;
-
     int    mLength = -1;
-
     double mAspectRatio = 1.0;
 
     /**
@@ -65,17 +54,20 @@ public class SelectedContent implements IContentObject, Parcelable {
             initWithContentUri(intent.getData().toString(), intent.getType());
         }
         mDataUri = dataUri;
+        computeHmac();
     }
 
     public SelectedContent(String contentUri, String dataUri) {
         initWithContentUri(contentUri, null);
         mDataUri = dataUri;
+        computeHmac();
     }
 
     public SelectedContent(byte[] data) {
         LOG.debug("new selected content with raw data");
         mData = data;
         mLength = data.length;
+        computeHmac();
     }
 
     public SelectedContent(Parcel source) {
@@ -109,10 +101,6 @@ public class SelectedContent implements IContentObject, Parcelable {
 
     public void setContentAspectRatio(double aspectRatio) {
         this.mAspectRatio = aspectRatio;
-    }
-
-    public void setData(byte[] data) {
-        mData = data;
     }
 
     public byte[] getData() {
@@ -171,10 +159,6 @@ public class SelectedContent implements IContentObject, Parcelable {
 
     @Override
     public String getContentHmac() {
-        if (mHmac == null) {
-            createHmac();
-        }
-        LOG.debug("mContentHmac="+mHmac);
         return mHmac;
     }
 
@@ -210,39 +194,15 @@ public class SelectedContent implements IContentObject, Parcelable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || ((Object) this).getClass() != o.getClass()) return false;
+        if (o == null || !IContentObject.class.isAssignableFrom(o.getClass())) return false;
 
-        SelectedContent content = (SelectedContent) o;
-
-        if (Double.compare(content.mAspectRatio, mAspectRatio) != 0) return false;
-        if (mLength != content.mLength) return false;
-        if (mContentType != null ? !mContentType.equals(content.mContentType) : content.mContentType != null)
-            return false;
-        if (mContentUri != null ? !mContentUri.equals(content.mContentUri) : content.mContentUri != null) return false;
-        if (!Arrays.equals(mData, content.mData)) return false;
-        if (mDataUri != null ? !mDataUri.equals(content.mDataUri) : content.mDataUri != null) return false;
-        if (mFileName != null ? !mFileName.equals(content.mFileName) : content.mFileName != null) return false;
-        if (mHmac != null ? !mHmac.equals(content.mHmac) : content.mHmac != null) return false;
-        if (mMediaType != null ? !mMediaType.equals(content.mMediaType) : content.mMediaType != null) return false;
-
-        return true;
+        IContentObject content = (IContentObject) o;
+        return mHmac != null && mHmac.equals(content.getContentHmac());
     }
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        result = mFileName != null ? mFileName.hashCode() : 0;
-        result = 31 * result + (mContentUri != null ? mContentUri.hashCode() : 0);
-        result = 31 * result + (mDataUri != null ? mDataUri.hashCode() : 0);
-        result = 31 * result + (mContentType != null ? mContentType.hashCode() : 0);
-        result = 31 * result + (mMediaType != null ? mMediaType.hashCode() : 0);
-        result = 31 * result + (mHmac != null ? mHmac.hashCode() : 0);
-        result = 31 * result + mLength;
-        temp = Double.doubleToLongBits(mAspectRatio);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (mData != null ? Arrays.hashCode(mData) : 0);
-        return result;
+        return mHmac != null ? mHmac.hashCode() : 0;
     }
 
     private void initWithContentUri(String uri, String contentType) {
@@ -262,14 +222,16 @@ public class SelectedContent implements IContentObject, Parcelable {
         }
     }
 
-    private String createHmac() {
-        String hmac = null;
+    private void computeHmac() {
         try {
-            hmac = new String(Base64.encodeBase64(CryptoUtils.computeHmac(mDataUri)));
+            if (mDataUri != null) {
+                mHmac = CryptoUtils.computeHmac(mDataUri);
+            } else if (mData != null) {
+                mHmac = CryptoUtils.computeHmac(mData);
+            }
         } catch (Exception e) {
-            LOG.error("Error creating HMAC", e);
+            LOG.error("Error computing HMAC", e);
         }
-        return hmac;
     }
 
     private void toFile() {
@@ -282,25 +244,13 @@ public class SelectedContent implements IContentObject, Parcelable {
         try {
             File file = new File(XoApplication.getGeneratedDirectory(), UUID.randomUUID().toString());
             file.createNewFile();
-            OutputStream os = null;
-            MessageDigest digest = null;
-            if (mHmac == null) {
-                digest = MessageDigest.getInstance("SHA256");
-                os = new DigestOutputStream(new FileOutputStream(file), digest);
-            }  else {
-                os = new FileOutputStream(file);
-            }
+            OutputStream os = new FileOutputStream(file);
             os.write(mData);
             os.flush();
             os.close();
             mDataUri = "file://" + file.toString();
             mData = null;
-            if (digest != null) {
-                mHmac = new String(Base64.encodeBase64(digest.digest()));
-            }
         } catch (IOException e) {
-            LOG.error("error writing content to file", e);
-        } catch (NoSuchAlgorithmException e) {
             LOG.error("error writing content to file", e);
         }
     }

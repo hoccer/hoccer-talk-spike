@@ -1,31 +1,26 @@
 package com.hoccer.xo.android.content;
 
 import android.os.Parcel;
+import android.test.InstrumentationTestCase;
 import com.hoccer.talk.content.ContentMediaType;
 import org.apache.tika.mime.MimeTypes;
-import org.junit.Before;
-import org.junit.Test;
 
-import static junit.framework.TestCase.*;
-
-public class ClipboardTest {
+public class ClipboardTest extends InstrumentationTestCase {
 
     private SelectedContent mTestContent;
     private Clipboard mClipboard;
 
-    @Before
-    public void setUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
         mClipboard = Clipboard.getInstance();
         mTestContent = createSelectedContentWithData();
     }
 
-    @Test
     public void testClipboardInitialization() {
         assertFalse(mClipboard.hasContent());
         assertNull(mClipboard.getContent());
     }
 
-    @Test
     public void testClipboardSetContent() {
         mClipboard.setContent(mTestContent);
 
@@ -33,7 +28,6 @@ public class ClipboardTest {
         assertEquals(mTestContent, mClipboard.getContent());
     }
 
-    @Test
     public void testClipboardClearContent() {
         mClipboard.setContent(mTestContent);
         mClipboard.clearContent();
@@ -42,7 +36,6 @@ public class ClipboardTest {
         assertNull(mClipboard.getContent());
     }
 
-    @Test
     public void testParcelableClipboardContent() {
         ClipboardContent content = ClipboardContent.fromContentObject(mTestContent);
         Parcel parcel = createParcelFor(content);
@@ -52,7 +45,7 @@ public class ClipboardTest {
     }
 
     private SelectedContent createSelectedContentWithData() {
-        SelectedContent sc = new SelectedContent(new byte[1]);
+        SelectedContent sc = new SelectedContent("hello".getBytes());
         sc.setContentMediaType(ContentMediaType.DATA);
         sc.setFileName("random_content.txt");
         sc.setContentType(MimeTypes.PLAIN_TEXT);

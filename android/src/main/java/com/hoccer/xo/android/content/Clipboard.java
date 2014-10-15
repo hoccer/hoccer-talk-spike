@@ -1,8 +1,5 @@
 package com.hoccer.xo.android.content;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import com.hoccer.talk.content.IContentObject;
 
 public class Clipboard {
