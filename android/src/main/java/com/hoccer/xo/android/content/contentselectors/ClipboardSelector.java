@@ -37,18 +37,14 @@ public class ClipboardSelector implements IContentSelector {
 
     @Override
     public Intent createSelectionIntent(Context context) {
-        return null; // not used for clipboard selection
-    }
-
-    public IContentObject selectObjectFromClipboard() {
-        IContentObject contentObject = mClipboard.getContent();
-        mClipboard.clearContent();
-        return contentObject;
+        return null; // this selector does not use an external activity
     }
 
     @Override
     public IContentObject createObjectFromSelectionResult(Context context, Intent intent) {
-        return selectObjectFromClipboard();
+        IContentObject contentObject = mClipboard.getContent();
+        mClipboard.clearContent();
+        return contentObject;
     }
 
     @Override

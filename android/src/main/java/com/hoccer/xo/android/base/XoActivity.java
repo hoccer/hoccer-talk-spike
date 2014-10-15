@@ -784,9 +784,6 @@ public abstract class XoActivity extends FragmentActivity {
     public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
     }
 
-    public void clipBoardItemSelected(IContentObject contentObject) {
-    }
-
     /**
      * Connection to our backend service
      */

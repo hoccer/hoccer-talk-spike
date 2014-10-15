@@ -139,8 +139,6 @@
                 android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
 
-        <!-- Clipboard activity -->
-
         <!-- MediaBrowserActivity activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.MediaBrowserActivity"

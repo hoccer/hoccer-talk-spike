@@ -137,13 +137,6 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
     }
 
     @Override
-    public void clipBoardItemSelected(IContentObject contentObject) {
-        if (mCurrentFragment instanceof MessagingFragment) {
-            ((MessagingFragment) mCurrentFragment).onAttachmentSelected(contentObject);
-        }
-    }
-
-    @Override
     protected void applicationWillEnterBackground() {
         super.applicationWillEnterBackground();
         if (mCurrentFragment instanceof MessagingFragment) {
