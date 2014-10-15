@@ -5,20 +5,42 @@ import android.os.Parcel;
 import android.preference.PreferenceManager;
 import android.test.InstrumentationTestCase;
 import com.hoccer.talk.content.ContentMediaType;
-import org.apache.log4j.Logger;
 import org.apache.tika.mime.MimeTypes;
 
-public class ClipboardContentUnitTest extends InstrumentationTestCase {
+public class ClipboardTest extends InstrumentationTestCase {
 
     private static SharedPreferences sPreferences;
     private SelectedContent mTestContent;
+    private Clipboard mClipboard;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         sPreferences = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
         ClipboardContent.clearPreferences(sPreferences.edit());
+
+        mClipboard = Clipboard.getInstance(this.getInstrumentation().getTargetContext());
         mTestContent = createSelectedContentWithData();
+    }
+
+    public void testClipboardInitialization() {
+        assertFalse(mClipboard.hasContent());
+        assertNull(mClipboard.getContent());
+    }
+
+    public void testClipboardSetContent() {
+        mClipboard.setContent(mTestContent);
+
+        assertTrue(mClipboard.hasContent());
+        assertEquals(mTestContent, mClipboard.getContent());
+    }
+
+    public void testClipboardClearContent() {
+        mClipboard.setContent(mTestContent);
+        mClipboard.clearContent();
+
+        assertFalse(mClipboard.hasContent());
+        assertNull(mClipboard.getContent());
     }
 
     public void testParcelableClipboardContent() {

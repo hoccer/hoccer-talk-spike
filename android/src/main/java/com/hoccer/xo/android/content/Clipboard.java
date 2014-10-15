@@ -60,7 +60,7 @@ public class Clipboard {
         // mContent will be set by updateContentFromPreferences()
     }
 
-    public void clearClipboard() {
+    public void clearContent() {
         ClipboardContent.clearPreferences(sPreferences.edit());
         // mContent will be cleared by updateContentFromPreferences()
     }
