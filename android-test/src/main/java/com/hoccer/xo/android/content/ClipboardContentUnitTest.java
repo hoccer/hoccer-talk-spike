@@ -25,7 +25,10 @@ public class ClipboardContentUnitTest extends InstrumentationTestCase {
     public void testParcelableClipboardContent() {
         LOG.info("Test parcelable ClipboardContent");
         ClipboardContent content = ClipboardContent.fromContentObject(mTestContent);
-        assertEquals(content, getClipboardContentFromParcel(content));
+        Parcel parcel = createParcelFor(content);
+        ClipboardContent contentFromParcel = ClipboardContent.CREATOR.createFromParcel(parcel);
+
+        assertEquals(content, contentFromParcel);
     }
 
     public void testClipboardContentSavedInPreferences() {
@@ -44,10 +47,6 @@ public class ClipboardContentUnitTest extends InstrumentationTestCase {
         sc.setFileName("random_content.txt");
         sc.setContentType(MimeTypes.PLAIN_TEXT);
         return sc;
-    }
-
-    private ClipboardContent getClipboardContentFromParcel(ClipboardContent content) {
-        return ClipboardContent.CREATOR.createFromParcel(createParcelFor(content));
     }
 
     private Parcel createParcelFor(ClipboardContent content) {
