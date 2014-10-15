@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.content;
 
-import android.content.SharedPreferences;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.hoccer.talk.content.ContentDisposition;
@@ -44,8 +43,8 @@ public class ClipboardContent implements IContentObject, Parcelable {
         mContentType = fromContent.getContentType();
         mMediaType = fromContent.getContentMediaType();
         mHmac = getOrCreateHmac(fromContent.getContentHmac());
-        mAspectRatio = getOrSetDefaulAspectRatio(fromContent.getContentAspectRatio());
-        mLength = isFileAccessable() ? getLengthFromFile() : fromContent.getContentLength();
+        mAspectRatio = getOrSetDefaultAspectRatio(fromContent.getContentAspectRatio());
+        mLength = isFileAccessible() ? getLengthFromFile() : fromContent.getContentLength();
     }
 
     private ClipboardContent(Parcel source) {
@@ -56,8 +55,8 @@ public class ClipboardContent implements IContentObject, Parcelable {
         mContentType = source.readString();
         mMediaType = source.readString();
         mHmac = getOrCreateHmac(source.readString());
-        mAspectRatio = getOrSetDefaulAspectRatio(source.readDouble());
-        mLength = isFileAccessable() ? getLengthFromFile() : source.readInt();
+        mAspectRatio = getOrSetDefaultAspectRatio(source.readDouble());
+        mLength = isFileAccessible() ? getLengthFromFile() : source.readInt();
 
     }
 
@@ -177,7 +176,7 @@ public class ClipboardContent implements IContentObject, Parcelable {
         return result;
     }
 
-    private boolean isFileAccessable() {
+    private boolean isFileAccessible() {
         boolean b = false;
         if (mDataUri != null && !mDataUri.isEmpty()) {
             File f = new File(mDataUri);
@@ -216,7 +215,7 @@ public class ClipboardContent implements IContentObject, Parcelable {
         return hmac;
     }
 
-    private double getOrSetDefaulAspectRatio(double aspectRatio) {
+    private double getOrSetDefaultAspectRatio(double aspectRatio) {
         if (aspectRatio == 0) {
             aspectRatio = DEFAULT_ASPECT_RATIO;
         }
