@@ -159,7 +159,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         String type = shareIntent.getType();
         Uri contentUri = (Uri) shareIntent.getParcelableExtra(Intent.EXTRA_STREAM);
 
-        // Factory method in IContentSelector expects content to  be in intent extra field 'data'
+        // Factory method in IContentSelector expects content to be in intent extra field 'data'
         Intent dataIntent = new Intent();
         dataIntent.setData(contentUri);
 
@@ -175,6 +175,18 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             Clipboard.getInstance(this).storeAttachment(contentObject);
             Toast.makeText(this, getString(R.string.toast_stored_external_file_to_clipboard), Toast.LENGTH_LONG).show();
         }
+    }
+
+    private IContentObject getImageContentObject(Intent dataIntent) {
+        ImageSelector imageSelector = new ImageSelector(this);
+        // a more generic and static way to obtain the ContentObject would be cool
+        return imageSelector.createObjectFromSelectionResult(this, dataIntent);
+    }
+
+    private IContentObject getVideoContentObject(Intent dataIntent) {
+        VideoSelector videoSelector = new VideoSelector(this);
+        // a more generic and static way to obtain the ContentObject would be cool
+        return videoSelector.createObjectFromSelectionResult(this, dataIntent);
     }
 
     private void handleTokenPairingIntent(Intent intent) {
@@ -217,18 +229,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
                 Toast.makeText(ChatsActivity.this, R.string.toast_pairing_failed, Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private IContentObject getVideoContentObject(Intent dataIntent) {
-        VideoSelector videoSelector = new VideoSelector(this);
-        // a more generic and static way to obtain the ContentObject would be cool
-        return videoSelector.createObjectFromSelectionResult(this, dataIntent);
-    }
-
-    private IContentObject getImageContentObject(Intent dataIntent) {
-        ImageSelector imageSelector = new ImageSelector(this);
-        // a more generic and static way to obtain the ContentObject would be cool
-        return imageSelector.createObjectFromSelectionResult(this, dataIntent);
     }
 
     private void refreshEnvironmentUpdater(boolean force) {
