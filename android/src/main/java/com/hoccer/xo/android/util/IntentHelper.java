@@ -34,7 +34,6 @@ public class IntentHelper {
     public static final String EXTRA_CONTACT_ID = "com.hoccer.xo.android.extra.CONTACT_ID";
     public static final String EXTRA_TALK_CLIENT_MESSAGE_ID = "com.hoccer.xo.android.extra.TALK_CLIENT_MESSAGE_ID";
     public static final String EXTRA_MEDIA_URI = "com.hoccer.xo.android.extra.MEDIA_URI";
-    public static final String EXTRA_CONTENT_OBJECT = "com.hoccer.xo.android.extra.CONTENT_OBJECT";
 
     public static final String ACTION_MEDIA_DOWNLOAD_SCANNED = "com.hoccer.xo.android.action.MEDIA_DOWNLOAD_SCANNED";
 

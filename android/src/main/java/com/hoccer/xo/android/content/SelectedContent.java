@@ -156,20 +156,6 @@ public class SelectedContent implements IContentObject {
         return 0;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !IContentObject.class.isAssignableFrom(o.getClass())) return false;
-
-        IContentObject content = (IContentObject) o;
-        return mHmac != null && mHmac.equals(content.getContentHmac());
-    }
-
-    @Override
-    public int hashCode() {
-        return mHmac != null ? mHmac.hashCode() : 0;
-    }
-
     private void initWithContentUri(String uri, String contentType) {
         mContentUri = uri;
         mContentType = contentType;
