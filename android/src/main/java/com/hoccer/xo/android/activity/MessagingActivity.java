@@ -108,7 +108,7 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
     private void popupItemSelected(MenuItem item, ChatMessageItem messageItem) {
         switch (item.getItemId()) {
             case R.id.menu_copy_message:
-                if (messageItem.getContent() != null) {
+                if (messageItem.getContent() != null && messageItem.getContent().isContentAvailable()) {
                     Clipboard.getInstance(this).storeAttachment(messageItem.getContent());
                 } else {
                     putMessageTextInSystemClipboard(messageItem);
