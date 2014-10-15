@@ -46,7 +46,7 @@ public class ClipboardSelector implements IContentSelector {
 
     public IContentObject selectObjectFromClipboard() {
         IContentObject contentObject = mClipboard.getContent();
-        mClipboard.clearClipBoard();
+        mClipboard.clearClipboard();
         return contentObject;
     }
 
