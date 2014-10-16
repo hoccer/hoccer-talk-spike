@@ -23,7 +23,7 @@
       android:background="#ffcdcdcd"/>
 
   <RelativeLayout
-      android:id="@+id/rl_messages_wrapper"
+      android:id="@+id/rl_messages_container"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_below="@+id/tv_profile_chat_info_text"

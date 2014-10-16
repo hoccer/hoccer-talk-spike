@@ -86,6 +86,7 @@ public class SingleProfileFragment extends XoFragment
         mAvatarImage = (ImageView) view.findViewById(R.id.profile_avatar_image);
         mNameText = (TextView) view.findViewById(R.id.tv_profile_name);
         mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_chat_stats);
+        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_messages_container);
         mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
         mKeyContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_key);
         mKeyText = (TextView) view.findViewById(R.id.tv_profile_key);
