@@ -39,7 +39,7 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private View mTabView;
     private TextView mNotificationBadgeTextView;
 
-    private int mInvitedMeCount = 0;
+    protected int mInvitedMeCount = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -103,12 +103,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     }
 
     protected void updateNotificationBadge() {
-        try {
-            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {

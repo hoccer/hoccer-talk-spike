@@ -1,10 +1,13 @@
 package com.hoccer.xo.android.fragment;
 
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.adapter.GroupListAdapter;
 import com.hoccer.xo.release.R;
+
+import java.sql.SQLException;
 
 public class GroupListFragment extends ContactListFragment {
 
@@ -26,5 +29,15 @@ public class GroupListFragment extends ContactListFragment {
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
         updateNotificationBadge();
+    }
+
+    @Override
+    protected void updateNotificationBadge() {
+        try {
+            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroups();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        super.updateNotificationBadge();
     }
 }

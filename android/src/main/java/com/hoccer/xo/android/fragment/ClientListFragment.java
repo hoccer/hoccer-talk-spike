@@ -1,10 +1,13 @@
 package com.hoccer.xo.android.fragment;
 
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ClientListAdapter;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.release.R;
+
+import java.sql.SQLException;
 
 public class ClientListFragment extends ContactListFragment {
 
@@ -26,5 +29,15 @@ public class ClientListFragment extends ContactListFragment {
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
         updateNotificationBadge();
+    }
+
+    @Override
+    protected void updateNotificationBadge() {
+        try {
+            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        super.updateNotificationBadge();
     }
 }
