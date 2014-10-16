@@ -108,7 +108,7 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-
+        evaluateNotifications();
     }
 
     private View initView(Context context) {
