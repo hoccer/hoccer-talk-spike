@@ -201,65 +201,18 @@ public class TalkGroupMember {
     }
 
     @JsonIgnore
-    public boolean updateWith(TalkGroupMember m) {
-        boolean updated = false;
-
-        if(!clientId.equals(m.clientId)) {
-            clientId = m.clientId;
-            updated = true;
-        }
-
-        if(!groupId.equals(m.groupId)) {
-            groupId = m.groupId;
-            updated = true;
-        }
-
-        if(!role.equals(m.role)) {
-            role = m.role;
-            updated = true;
-        }
-
-        if(!state.equals(m.state)) {
-            state = m.state;
-            updated = true;
-        }
-
-        if(!memberKeyId.equals(m.memberKeyId)) {
-            memberKeyId = m.memberKeyId;
-            updated = true;
-        }
-
-        if(!encryptedGroupKey.equals(m.encryptedGroupKey)) {
-            encryptedGroupKey = m.encryptedGroupKey;
-            updated = true;
-        }
-
-        if(!lastChanged.equals(m.lastChanged)) {
-            lastChanged = m.lastChanged;
-            updated = true;
-        }
-
-        if(!sharedKeyId.equals(m.sharedKeyId)) {
-            sharedKeyId = m.sharedKeyId;
-            updated = true;
-        }
-
-        if(!sharedKeyIdSalt.equals(m.sharedKeyIdSalt)) {
-            sharedKeyIdSalt = m.sharedKeyIdSalt;
-            updated = true;
-        }
-
-        if(!sharedKeyDate.equals(m.sharedKeyDate)) {
-            sharedKeyDate = m.sharedKeyDate;
-            updated = true;
-        }
-
-        if(!keySupplier.equals(m.keySupplier)) {
-            keySupplier = m.keySupplier;
-            updated = true;
-        }
-
-        return updated;
+    public void updateWith(TalkGroupMember m) {
+        this.setClientId(m.getClientId());
+        this.setGroupId(m.getGroupId());
+        this.setRole(m.getRole());
+        this.setState(m.getState());
+        this.setMemberKeyId(m.getMemberKeyId());
+        this.setEncryptedGroupKey(m.getEncryptedGroupKey());
+        this.setLastChanged(m.getLastChanged());
+        this.setSharedKeyId(m.getSharedKeyId());
+        this.setSharedKeyIdSalt(m.getSharedKeyIdSalt());
+        this.setKeySupplier(m.getKeySupplier());
+        this.setSharedKeyDate(m.getSharedKeyDate());
     }
 
     // only copies the field where a foreign member is interested in
@@ -287,4 +240,5 @@ public class TalkGroupMember {
         this.setEncryptedGroupKey(null);
         this.setKeySupplier(null);
     }
-}
+
+    }
