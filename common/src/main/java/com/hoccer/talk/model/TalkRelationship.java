@@ -10,8 +10,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.hoccer.talk.util.Comparer.isEqual;
-
 @DatabaseTable(tableName = "relationship")
 public class TalkRelationship {
 
@@ -133,26 +131,26 @@ public class TalkRelationship {
     }
 
     @JsonIgnore
-    public boolean updateWith(final TalkRelationship other) {
+    public boolean updateWith(TalkRelationship r) {
         boolean updated = false;
 
-        if(!isEqual(clientId, other.clientId)) {
-            clientId = other.clientId;
+        if(!clientId.equals(r.clientId)) {
+            clientId = r.clientId;
             updated = true;
         }
 
-        if(!isEqual(otherClientId, other.otherClientId)) {
-            otherClientId = other.otherClientId;
+        if(!otherClientId.equals(r.otherClientId)) {
+            otherClientId = r.otherClientId;
             updated = true;
         }
 
-        if(!isEqual(state, other.state)) {
-            state = other.state;
+        if(!state.equals(r.state)) {
+            state = r.state;
             updated = true;
         }
 
-        if(!isEqual(lastChanged, other.lastChanged)) {
-            lastChanged = other.lastChanged;
+        if(!lastChanged.equals(r.lastChanged)) {
+            lastChanged = r.lastChanged;
             updated = true;
         }
 
