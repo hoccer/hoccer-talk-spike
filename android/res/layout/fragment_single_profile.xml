@@ -31,10 +31,10 @@
 
         <include
                 android:id="@+id/inc_chat_stats"
-                layout="@layout/profile_chat_stats_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/inc_profile_name"
+                layout="@layout/profile_chat_stats_container"
                 style="@style/ProfileContainerStyle"/>
 
         <include

@@ -41,15 +41,18 @@ public class SingleProfileFragment extends XoFragment
     }
 
     public static final String ARG_CREATE_SELF = "ARG_CREATE_SELF";
-
     public static final String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
+
     private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
 
     private Mode mMode;
-
     private ActionMode mActionMode;
 
     private TextView mNameText;
+
+    private RelativeLayout mChatContainer;
+
+    private TextView mChatMessagesText;
 
     private RelativeLayout mKeyContainer;
 
@@ -82,6 +85,8 @@ public class SingleProfileFragment extends XoFragment
 
         mAvatarImage = (ImageView) view.findViewById(R.id.profile_avatar_image);
         mNameText = (TextView) view.findViewById(R.id.tv_profile_name);
+        mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_chat_stats);
+        mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
         mKeyContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_key);
         mKeyText = (TextView) view.findViewById(R.id.tv_profile_key);
         mEditName = (EditText) view.findViewById(R.id.et_profile_name);
@@ -464,6 +469,61 @@ public class SingleProfileFragment extends XoFragment
     private void update() {
         LOG.debug("update(" + mContact.getClientContactId() + ")");
 
+        updateAvatar();
+        updateName();
+        updateChatContainer();
+        updateFingerprint();
+        updateInviteButton(mContact);
+        updateDeclineButton(mContact);
+        hideNicknameEdit();
+        updateNicknameContainer();
+    }
+
+    private void updateChatContainer() {
+        if (mContact.isSelf()) {
+            mChatContainer.setVisibility(View.GONE);
+        } else {
+            updateMessageText();
+            mChatContainer.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updateMessageText() {
+        try {
+            int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
+            mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
+        } catch (SQLException e) {
+            LOG.error("Error fetching message count from database.");
+        }
+    }
+
+    private void updateNicknameContainer() {
+        View nickNameContainer = getView().findViewById(R.id.inc_profile_nickname);
+        if (mContact.isSelf()) {
+            nickNameContainer.setVisibility(View.GONE);
+        } else {
+            updateNickname(mContact);
+            nickNameContainer.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updateName() {
+        // apply data from the contact that needs to recurse
+        String name = getResources().getString(R.string.profile_user_name_unknown);
+        if (mContact.isClient() || mContact.isSelf()) {
+            if (mContact.isSelf() && !mContact.isSelfRegistered()) {
+                name = mContact.getSelf().getRegistrationName();
+            } else {
+                TalkPresence presence = mContact.getClientPresence();
+                if (presence != null) {
+                    name = presence.getClientName();
+                }
+            }
+        }
+        mNameText.setText(name);
+    }
+
+    private void updateAvatar() {
         String avatarUrl = null;
         if (mContact.isSelf()) {
             TalkClientUpload avatarUpload = mContact.getAvatarUpload();
@@ -485,38 +545,15 @@ public class SingleProfileFragment extends XoFragment
                 .placeholder(R.drawable.avatar_default_contact_large)
                 .error(R.drawable.avatar_default_contact_large)
                 .into(mAvatarImage);
-
-        // apply data from the contact that needs to recurse
-        String name = getResources().getString(R.string.profile_user_name_unknown);
-        if (mContact.isClient() || mContact.isSelf()) {
-            if (mContact.isSelf() && !mContact.isSelfRegistered()) {
-                name = mContact.getSelf().getRegistrationName();
-            } else {
-                TalkPresence presence = mContact.getClientPresence();
-                if (presence != null) {
-                    name = presence.getClientName();
-                }
-            }
-        }
-        mNameText.setText(name);
-        mKeyText.setText(getFingerprint());
-
-        updateInviteButton(mContact);
-        updateDeclineButton(mContact);
-        hideNicknameEdit();
-        View nickNameContainer = getView().findViewById(R.id.inc_profile_nickname);
-        if (this.mContact.isSelf()) {
-            nickNameContainer.setVisibility(View.GONE);
-        } else {
-            updateNickname(mContact);
-            nickNameContainer.setVisibility(View.VISIBLE);
-        }
-
     }
 
     private void updateNickname(TalkClientContact contact) {
         mNicknameEditText.setText(contact.getNickname());
         mNicknameTextView.setText(contact.getNickname());
+    }
+
+    private void updateFingerprint() {
+        mKeyText.setText(getFingerprint());
     }
 
     public String getFingerprint() {

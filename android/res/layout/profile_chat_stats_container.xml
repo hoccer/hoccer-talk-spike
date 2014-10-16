@@ -3,7 +3,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/rl_profile_chat_info_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:visibility="gone">
 
   <TextView
       android:id="@+id/tv_profile_chat_info_text"
@@ -50,40 +51,8 @@
         android:layout_alignParentRight="true"
         android:layout_gravity="center_vertical|right"
         android:src="@drawable/ic_light_navigation_next_item"
-        android:layout_marginLeft="4dp"/>
-
-  </RelativeLayout>
-
-  <RelativeLayout
-      android:id="@+id/rl_attachments_wrapper"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/rl_messages_wrapper"
-      android:layout_marginLeft="@dimen/profile_text_margin"
-      android:layout_marginTop="15dp">
-
-    <TextView
-        android:id="@+id/tv_attachments_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_toLeftOf="@+id/iv_go_to_attachments_indicator"
-        android:layout_centerVertical="true"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:singleLine="true"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-        android:text="45 Attachments"/>
-
-    <ImageView
-        android:id="@+id/iv_go_to_attachments_indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_gravity="center_vertical|right"
-        android:src="@drawable/ic_light_navigation_next_item"
-        android:layout_marginLeft="4dp"/>
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="@dimen/profile_text_margin" />
 
   </RelativeLayout>
 
