@@ -5,8 +5,6 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
-import static com.hoccer.talk.util.Comparer.isEqual;
-
 
 @DatabaseTable(tableName = "group")
 public class TalkGroup {
@@ -195,69 +193,17 @@ public class TalkGroup {
     }
 
     @JsonIgnore
-    public boolean updateWith(final TalkGroup other) {
-        boolean updated = false;
-
-        if(!isEqual(groupId, other.groupId)) {
-            groupId = other.groupId;
-            updated = true;
-        }
-
-        if(!isEqual(groupName, other.groupName)) {
-            groupName = other.groupName;
-            updated = true;
-        }
-
-        if(!isEqual(groupTag, other.groupTag)) {
-            groupTag = other.groupTag;
-            updated = true;
-        }
-
-        if(!isEqual(groupAvatarUrl, other.groupAvatarUrl)) {
-            groupAvatarUrl = other.groupAvatarUrl;
-            updated = true;
-        }
-
-        if(!isEqual(state, other.state)) {
-            state = other.state;
-            updated = true;
-        }
-
-        if(!isEqual(lastChanged, other.lastChanged)) {
-            lastChanged = other.lastChanged;
-            updated = true;
-        }
-
-        if(!isEqual(groupType, other.groupType)) {
-            groupType = other.groupType;
-            updated = true;
-        }
-
-        if(!isEqual(sharedKeyId, other.sharedKeyId)) {
-            sharedKeyId = other.sharedKeyId;
-            updated = true;
-        }
-
-        if(!isEqual(sharedKeyIdSalt, other.sharedKeyIdSalt)) {
-            sharedKeyIdSalt = other.sharedKeyIdSalt;
-            updated = true;
-        }
-
-        if(!isEqual(keySupplier, other.keySupplier)) {
-            keySupplier = other.keySupplier;
-            updated = true;
-        }
-
-        if(!isEqual(keyDate, other.keyDate)) {
-            keyDate = other.keyDate;
-            updated = true;
-        }
-
-        if(!isEqual(groupKeyUpdateInProgress, other.groupKeyUpdateInProgress)) {
-            groupKeyUpdateInProgress = other.groupKeyUpdateInProgress;
-            updated = true;
-        }
-
-        return updated;
+    public void updateWith(TalkGroup g) {
+        this.setGroupId(g.getGroupId());
+        this.setGroupName(g.getGroupName());
+        this.setGroupAvatarUrl(g.getGroupAvatarUrl());
+        this.setState(g.getState());
+        this.setLastChanged(g.getLastChanged());
+        this.setGroupType(g.getGroupType());
+        this.setSharedKeyId(g.getSharedKeyId());
+        this.setSharedKeyIdSalt(g.getSharedKeyIdSalt());
+        this.setKeySupplier(g.getKeySupplier());
+        this.setKeyDate(g.getKeyDate());
+        this.setGroupKeyUpdateInProgress(this.getGroupKeyUpdateInProgress());
     }
 }

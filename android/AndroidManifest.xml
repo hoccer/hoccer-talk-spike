@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.hoccer.xo.release"
 
-          android:versionCode="88"
+          android:versionCode="89"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -145,17 +145,6 @@
                 android:windowSoftInputMode="stateHidden"
                 android:exported="true"
                 android:configChanges="keyboardHidden|orientation|screenSize">
-        </activity>
-
-        <!-- Clipboard activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.ClipboardPreviewActivity"
-                android:label="@string/actionbar_default_title"
-                android:parentActivityName="com.hoccer.xo.android.activity.MessagingActivity"
-                android:windowSoftInputMode="stateHidden">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.MessagingActivity"/>
         </activity>
 
         <!-- MediaBrowserActivity activity -->

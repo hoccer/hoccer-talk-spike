@@ -1,110 +1,38 @@
 package com.hoccer.xo.android.content;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 
 public class Clipboard {
 
-    public static final String CLIPBOARD_CONTENT_OBJECT_ID = "CLIPBOARD_CONTENT_OBJECT_ID";
-    public static final String CLIPBOARD_CONTENT_OBJECT_TYPE = "CLIPBOARD_CONTENT_OBJECT_TYPE";
-
     private static Clipboard INSTANCE = null;
 
-    private Context mContext;
-    private int mClipBoardAttachmentId;
-    private String mClipBoardAttachmentType;
+    private IContentObject mContent;
 
-    private static SharedPreferences sPreferences;
-    private static SharedPreferences.OnSharedPreferenceChangeListener sPreferencesListener;
-
-    public static synchronized Clipboard get(Context applicationContext) {
+    public static synchronized Clipboard getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new Clipboard(applicationContext);
+            INSTANCE = new Clipboard();
         }
+
         return INSTANCE;
     }
 
-    public Clipboard(Context context) {
-        super();
-
-        mContext = context;
-
-        initialize();
+    private Clipboard() {
+        // private constructor to make sure that getInstance() is used instead
     }
 
-    public int getClipBoardAttachmentId() {
-        return mClipBoardAttachmentId;
+    public boolean hasContent() {
+        return (mContent != null);
     }
 
-    public String getClipboardContentObjectType() {
-        return mClipBoardAttachmentType;
+    public IContentObject getContent() {
+        return mContent;
     }
 
-    public IContentObject getClipboardContentObject() {
-
-        return null;
+    public void setContent(IContentObject contentObject) {
+        mContent = contentObject;
     }
 
-    private void initialize() {
-
-        sPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        sPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals(CLIPBOARD_CONTENT_OBJECT_ID) || key.equals(CLIPBOARD_CONTENT_OBJECT_TYPE)) {
-                    updateValuesFromPreferences();
-                }
-            }
-        };
-        sPreferences.registerOnSharedPreferenceChangeListener(sPreferencesListener);
-
-        updateValuesFromPreferences();
-    }
-
-    void updateValuesFromPreferences() {
-        mClipBoardAttachmentId = sPreferences.getInt(CLIPBOARD_CONTENT_OBJECT_ID, 0);
-        mClipBoardAttachmentType = sPreferences.getString(CLIPBOARD_CONTENT_OBJECT_TYPE, null);
-    }
-
-    public void storeAttachment(IContentObject contentObject) {
-        int id = 0;
-        String type = null;
-        if (contentObject instanceof TalkClientUpload) {
-            TalkClientUpload upload = (TalkClientUpload) contentObject;
-            id = upload.getClientUploadId();
-            type = TalkClientUpload.class.getName();
-        } else if (contentObject instanceof TalkClientDownload) {
-            TalkClientDownload download = (TalkClientDownload) contentObject;
-            id = download.getClientDownloadId();
-            type = TalkClientDownload.class.getName();
-        }
-        storeIntToClipboard(CLIPBOARD_CONTENT_OBJECT_ID, id);
-        storeStringToClipboard(CLIPBOARD_CONTENT_OBJECT_TYPE, type);
-    }
-
-    private void storeIntToClipboard(String key, int value) {
-        SharedPreferences.Editor editor = sPreferences.edit();
-        editor.remove(key).commit();
-        editor.putInt(key, value).commit();
-    }
-
-    private void storeStringToClipboard(String key, String value) {
-        SharedPreferences.Editor editor = sPreferences.edit();
-        editor.remove(key).commit();
-        editor.putString(key, value).commit();
-    }
-
-    public void clearClipBoard() {
-        SharedPreferences.Editor editor = sPreferences.edit();
-        editor.remove(Clipboard.CLIPBOARD_CONTENT_OBJECT_ID).commit();
-        editor.remove(Clipboard.CLIPBOARD_CONTENT_OBJECT_TYPE).commit();
-    }
-
-    public boolean canProcessClipboard() {
-        return (mClipBoardAttachmentId != 0 && mClipBoardAttachmentType != null);
+    public void clearContent() {
+        mContent = null;
     }
 }

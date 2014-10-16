@@ -612,26 +612,21 @@ public class TalkClientContact implements Serializable {
         }
     }
     @ClientMethodOnly
-    public boolean updateRelationship(TalkRelationship relationship) {
+    public void updateRelationship(TalkRelationship relationship) {
         ensureClient();
-        boolean updated;
         if(this.clientRelationship == null) {
             this.clientRelationship = relationship;
-            updated = true;
         } else {
-            updated = this.clientRelationship.updateWith(relationship);
+            this.clientRelationship.updateWith(relationship);
         }
-        if(this.clientRelationship.isRelated() && !isEverRelated()) {
+        if(this.clientRelationship.isRelated()) {
             markAsRelated();
-            updated = true;
         }
-        return updated;
     }
 
     @GroupMethodOnly
-    public boolean updateGroupPresence(TalkGroup group) {
+    public void updateGroupPresence(TalkGroup group) {
         ensureGroup();
-        boolean updated;
         if(this.groupPresence == null) {
             if(group.getGroupId() != null) {
                 groupId = group.getGroupId();
@@ -640,29 +635,22 @@ public class TalkClientContact implements Serializable {
                 groupTag = group.getGroupTag();
             }
             this.groupPresence = group;
-            updated = true;
         } else {
-            updated = this.groupPresence.updateWith(group);
+            this.groupPresence.updateWith(group);
         }
-
-        return updated;
     }
 
     @GroupMethodOnly
-    public boolean updateGroupMember(TalkGroupMember member) {
+    public void updateGroupMember(TalkGroupMember member) {
         ensureGroup();
-        boolean updated;
         if(this.groupMember == null) {
             this.groupMember = member;
-            updated = true;
         } else {
-            updated = this.groupMember.updateWith(member);
+            this.groupMember.updateWith(member);
         }
-        if(this.groupMember.isInvolved() && !this.everRelated) {
+        if(this.groupMember.isInvolved()) {
             markAsRelated();
-            updated = true;
         }
-        return updated;
     }
 
     public static TalkClientContact createGroupContact() {

@@ -6,8 +6,6 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
 
-import static com.hoccer.talk.util.Comparer.isEqual;
-
 @DatabaseTable(tableName = "groupMember")
 public class TalkGroupMember {
 
@@ -203,98 +201,34 @@ public class TalkGroupMember {
     }
 
     @JsonIgnore
-    public boolean updateWith(final TalkGroupMember other) {
-        boolean updated = false;
-
-        if(!isEqual(clientId, other.clientId)) {
-            clientId = other.clientId;
-            updated = true;
-        }
-
-        if(!isEqual(groupId, other.groupId)) {
-            groupId = other.groupId;
-            updated = true;
-        }
-
-        if(!isEqual(role, other.role)) {
-            role = other.role;
-            updated = true;
-        }
-
-        if(!isEqual(state, other.state)) {
-            state = other.state;
-            updated = true;
-        }
-
-        if(!isEqual(memberKeyId, other.memberKeyId)) {
-            memberKeyId = other.memberKeyId;
-            updated = true;
-        }
-
-        if(!isEqual(encryptedGroupKey, other.encryptedGroupKey)) {
-            encryptedGroupKey = other.encryptedGroupKey;
-            updated = true;
-        }
-
-        if(!isEqual(lastChanged, other.lastChanged)) {
-            lastChanged = other.lastChanged;
-            updated = true;
-        }
-
-        if(!isEqual(sharedKeyId, other.sharedKeyId)) {
-            sharedKeyId = other.sharedKeyId;
-            updated = true;
-        }
-
-        if(!isEqual(sharedKeyIdSalt, other.sharedKeyIdSalt)) {
-            sharedKeyIdSalt = other.sharedKeyIdSalt;
-            updated = true;
-        }
-
-        if(!isEqual(sharedKeyDate, other.sharedKeyDate)) {
-            sharedKeyDate = other.sharedKeyDate;
-            updated = true;
-        }
-
-        if(!isEqual(keySupplier, other.keySupplier)) {
-            keySupplier = other.keySupplier;
-            updated = true;
-        }
-
-        return updated;
+    public void updateWith(TalkGroupMember m) {
+        this.setClientId(m.getClientId());
+        this.setGroupId(m.getGroupId());
+        this.setRole(m.getRole());
+        this.setState(m.getState());
+        this.setMemberKeyId(m.getMemberKeyId());
+        this.setEncryptedGroupKey(m.getEncryptedGroupKey());
+        this.setLastChanged(m.getLastChanged());
+        this.setSharedKeyId(m.getSharedKeyId());
+        this.setSharedKeyIdSalt(m.getSharedKeyIdSalt());
+        this.setKeySupplier(m.getKeySupplier());
+        this.setSharedKeyDate(m.getSharedKeyDate());
     }
 
     // only copies the field where a foreign member is interested in
     @JsonIgnore
-    public boolean foreignUpdateWith(final TalkGroupMember other) {
-        boolean updated = false;
-
-        if(!isEqual(clientId, other.clientId)) {
-            clientId = other.clientId;
-            updated = true;
-        }
-
-        if(!isEqual(groupId, other.groupId)) {
-            groupId = other.groupId;
-            updated = true;
-        }
-
-        if(!isEqual(role, other.role)) {
-            role = other.role;
-            updated = true;
-        }
-
-        if(!isEqual(state, other.state)) {
-            state = other.state;
-            updated = true;
-        }
-
-        if(!isEqual(lastChanged, other.lastChanged)) {
-            lastChanged = other.lastChanged;
-            updated = true;
-        }
-
-        return updated;
+    public void foreignUpdateWith(TalkGroupMember m) {
+        this.setClientId(m.getClientId());
+        this.setGroupId(m.getGroupId());
+        this.setRole(m.getRole());
+        this.setState(m.getState());
+        //this.setMemberKeyId(m.getMemberKeyId());
+        //this.setEncryptedGroupKey(m.getEncryptedGroupKey());
+        this.setLastChanged(m.getLastChanged());
+        //this.setSharedKeyId(m.getSharedKeyId());
+        //this.setSharedKeyIdSalt(m.getSharedKeyIdSalt());
+        //this.setKeySupplier(m.getKeySupplier());
+        //this.setSharedKeyDate(m.getSharedKeyDate());
     }
 
     @JsonIgnore
@@ -306,4 +240,5 @@ public class TalkGroupMember {
         this.setEncryptedGroupKey(null);
         this.setKeySupplier(null);
     }
-}
+
+    }
