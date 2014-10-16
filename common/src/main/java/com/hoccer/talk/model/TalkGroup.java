@@ -5,8 +5,6 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
-import static com.hoccer.talk.util.Comparer.isEqual;
-
 
 @DatabaseTable(tableName = "group")
 public class TalkGroup {
@@ -195,66 +193,66 @@ public class TalkGroup {
     }
 
     @JsonIgnore
-    public boolean updateWith(final TalkGroup other) {
+    public boolean updateWith(TalkGroup g) {
         boolean updated = false;
 
-        if(!isEqual(groupId, other.groupId)) {
-            groupId = other.groupId;
+        if(!groupId.equals(g.groupId)) {
+            groupId = g.groupId;
             updated = true;
         }
 
-        if(!isEqual(groupName, other.groupName)) {
-            groupName = other.groupName;
+        if(!groupName.equals(g.groupName)) {
+            groupName = g.groupName;
             updated = true;
         }
 
-        if(!isEqual(groupTag, other.groupTag)) {
-            groupTag = other.groupTag;
+        if(!groupTag.equals(g.groupTag)) {
+            groupTag = g.groupTag;
             updated = true;
         }
 
-        if(!isEqual(groupAvatarUrl, other.groupAvatarUrl)) {
-            groupAvatarUrl = other.groupAvatarUrl;
+        if(!groupAvatarUrl.equals(g.groupAvatarUrl)) {
+            groupAvatarUrl = g.groupAvatarUrl;
             updated = true;
         }
 
-        if(!isEqual(state, other.state)) {
-            state = other.state;
+        if(!state.equals(g.state)) {
+            state = g.state;
             updated = true;
         }
 
-        if(!isEqual(lastChanged, other.lastChanged)) {
-            lastChanged = other.lastChanged;
+        if(!lastChanged.equals(g.lastChanged)) {
+            lastChanged = g.lastChanged;
             updated = true;
         }
 
-        if(!isEqual(groupType, other.groupType)) {
-            groupType = other.groupType;
+        if(!groupType.equals(g.groupType)) {
+            groupType = g.groupType;
             updated = true;
         }
 
-        if(!isEqual(sharedKeyId, other.sharedKeyId)) {
-            sharedKeyId = other.sharedKeyId;
+        if(!sharedKeyId.equals(g.sharedKeyId)) {
+            sharedKeyId = g.sharedKeyId;
             updated = true;
         }
 
-        if(!isEqual(sharedKeyIdSalt, other.sharedKeyIdSalt)) {
-            sharedKeyIdSalt = other.sharedKeyIdSalt;
+        if(!sharedKeyIdSalt.equals(g.sharedKeyIdSalt)) {
+            sharedKeyIdSalt = g.sharedKeyIdSalt;
             updated = true;
         }
 
-        if(!isEqual(keySupplier, other.keySupplier)) {
-            keySupplier = other.keySupplier;
+        if(!keySupplier.equals(g.keySupplier)) {
+            keySupplier = g.keySupplier;
             updated = true;
         }
 
-        if(!isEqual(keyDate, other.keyDate)) {
-            keyDate = other.keyDate;
+        if(!keyDate.equals(g.keyDate)) {
+            keyDate = g.keyDate;
             updated = true;
         }
 
-        if(!isEqual(groupKeyUpdateInProgress, other.groupKeyUpdateInProgress)) {
-            groupKeyUpdateInProgress = other.groupKeyUpdateInProgress;
+        if(!groupKeyUpdateInProgress.equals(g.groupKeyUpdateInProgress)) {
+            groupKeyUpdateInProgress = g.groupKeyUpdateInProgress;
             updated = true;
         }
 
