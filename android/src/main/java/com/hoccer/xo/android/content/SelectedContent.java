@@ -1,101 +1,94 @@
 package com.hoccer.xo.android.content;
 
 import android.content.Intent;
-import android.net.Uri;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.xo.android.XoApplication;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
-import java.io.*;
-import java.security.DigestOutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.UUID;
 
 /**
  * Content objects
- *
+ * <p/>
  * This is a grabbag object for all the properties
  * of content objects that we need in the UI.
- *
+ * <p/>
  * They do not cary an identity and can be created
  * from uploads, downloads as well as by selecting
  * content from external sources.
- *
  */
 public class SelectedContent implements IContentObject {
 
     private static final Logger LOG = Logger.getLogger(SelectedContent.class);
 
     String mFileName;
-
-    String mContentUrl;
-
-    String mContentDataUrl;
-
+    String mContentUri;
+    String mDataUri;
     String mContentType = null;
-
-    String mContentMediaType = null;
-
-    String mContentHmac = null;
-
-    int    mContentLength = -1;
-
-    double mContentAspectRatio = 1.0;
+    String mMediaType = null;
+    String mHmac = null;
+    int mLength = -1;
+    double mAspectRatio = 1.0;
 
     /**
      * Literal data.
-     *
+     * <p/>
      * Converted to a file when selected content becomes an upload.
      */
     byte[] mData = null;
 
-    public SelectedContent(Intent resultIntent, String contentDataUrl) {
-
-        if (resultIntent != null && resultIntent.getData() != null) {
-            Uri contentUrl = resultIntent.getData();
-            LOG.debug("new selected content: " + contentUrl);
-            mContentUrl = contentUrl.toString();
-            mContentType = resultIntent.getType();
+    public SelectedContent(Intent intent, String dataUri) {
+        if (intent != null && intent.getData() != null) {
+            initWithContentUri(intent.getData().toString(), intent.getType());
         }
-        mContentDataUrl = contentDataUrl;
+        mDataUri = dataUri;
+        computeHmac();
     }
 
-    public SelectedContent(String contentUrl, String contentDataUrl) {
-        LOG.debug("new selected content: " + contentUrl);
-        mContentUrl = contentUrl;
-        mContentDataUrl = contentDataUrl;
+    public SelectedContent(String contentUri, String dataUri) {
+        initWithContentUri(contentUri, null);
+        mDataUri = dataUri;
+        computeHmac();
     }
 
     public SelectedContent(byte[] data) {
         LOG.debug("new selected content with raw data");
         mData = data;
-        mContentLength = data.length;
+        mLength = data.length;
+        computeHmac();
     }
 
     public void setFileName(String fileName) {
         this.mFileName = fileName;
     }
 
-    public void setContentType(String mContentType) {
-        this.mContentType = mContentType;
+    public void setContentType(String contentType) {
+        this.mContentType = contentType;
     }
 
-    public void setContentMediaType(String mContentMediaType) {
-        this.mContentMediaType = mContentMediaType;
+    public void setContentMediaType(String mediaType) {
+        this.mMediaType = mediaType;
     }
 
-    public void setContentLength(int mContentLength) {
-        this.mContentLength = mContentLength;
+    public void setContentLength(int length) {
+        this.mLength = length;
     }
 
-    public void setContentAspectRatio(double mContentAspectRatio) {
-        this.mContentAspectRatio = mContentAspectRatio;
+    public void setContentAspectRatio(double aspectRatio) {
+        this.mAspectRatio = aspectRatio;
+    }
+
+    public byte[] getData() {
+        return mData;
     }
 
     @Override
@@ -125,43 +118,32 @@ public class SelectedContent implements IContentObject {
 
     @Override
     public String getContentUrl() {
-        return mContentUrl;
+        return mContentUri;
     }
 
     @Override
     public String getContentDataUrl() {
-        return mContentDataUrl;
+        return mDataUri;
     }
 
     @Override
     public int getContentLength() {
-        return mContentLength;
+        return mLength;
     }
 
     @Override
     public String getContentMediaType() {
-        return mContentMediaType;
+        return mMediaType;
     }
 
     @Override
     public double getContentAspectRatio() {
-        return mContentAspectRatio;
+        return mAspectRatio;
     }
 
     @Override
     public String getContentHmac() {
-        if (mContentHmac == null) {
-            byte[] hmac = new byte[0];
-            try {
-                hmac = CryptoUtils.computeHmac(mContentDataUrl);
-                mContentHmac = new String(Base64.encodeBase64(hmac));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        LOG.debug("mContentHmac="+mContentHmac);
-        return mContentHmac;
+        return mHmac;
     }
 
     @Override
@@ -174,48 +156,50 @@ public class SelectedContent implements IContentObject {
         return 0;
     }
 
-    public byte[] getData() {
-        return mData;
+    private void initWithContentUri(String uri, String contentType) {
+        mContentUri = uri;
+        mContentType = contentType;
+        LOG.debug("create from content uri: " + mContentUri);
     }
 
-    public void setData(byte[] data) {
-        mData = data;
-    }
-
-    private void writeDataToFile() {
-        if(mData != null) {
-            File dir = XoApplication.getGeneratedDirectory();
-            File file = new File(dir, UUID.randomUUID().toString());
-            try {
-                file.createNewFile();
-                OutputStream os = null;
-                MessageDigest digest = null;
-                if (mContentHmac == null) {
-                    digest = MessageDigest.getInstance("SHA256");
-                    os = new DigestOutputStream(new FileOutputStream(file), digest);
-                }  else {
-                    os = new FileOutputStream(file);
-                }
-                os.write(mData);
-                os.flush();
-                os.close();
-                mContentDataUrl = "file://" + file.toString();
-                mData = null;
-                if (digest != null) {
-                    mContentHmac = new String(Base64.encodeBase64(digest.digest()));
-                }
-            } catch (IOException e) {
-                LOG.error("error writing content to file", e);
-            } catch (NoSuchAlgorithmException e) {
-                LOG.error("error writing content to file", e);
+    private void computeHmac() {
+        try {
+            if (mDataUri != null) {
+                mHmac = CryptoUtils.computeHmac(mDataUri);
+            } else if (mData != null) {
+                mHmac = CryptoUtils.computeHmac(mData);
             }
+        } catch (Exception e) {
+            LOG.error("Error computing HMAC", e);
+        }
+    }
+
+    private void toFile() {
+        if (mData != null) {
+            writeToFile();
+        }
+    }
+
+    private void writeToFile() {
+        try {
+            File file = new File(XoApplication.getGeneratedDirectory(), UUID.randomUUID().toString());
+            file.createNewFile();
+            OutputStream os = new FileOutputStream(file);
+            os.write(mData);
+            os.flush();
+            os.close();
+            mDataUri = "file://" + file.toString();
+            mData = null;
+        } catch (IOException e) {
+            LOG.error("error writing content to file", e);
         }
     }
 
     public static TalkClientUpload createAvatarUpload(IContentObject object) {
-        if(object instanceof SelectedContent) {
-            ((SelectedContent)object).writeDataToFile();
+        if (object instanceof SelectedContent) {
+            ((SelectedContent) object).toFile();
         }
+
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAvatar(
                 object.getContentUrl(),
@@ -225,15 +209,19 @@ public class SelectedContent implements IContentObject {
         return upload;
     }
 
-    /*
-     * Warning: This method does not work with TalkClientDownloads as 'object' since there is a contentLength mismatch between
-     * TalkClientUpload and TalkClientDownload although its the same file.
-     * The contentLength seems to be conceptually different between both.
-     */
     public static TalkClientUpload createAttachmentUpload(IContentObject object) {
-        if(object instanceof SelectedContent) {
-            ((SelectedContent)object).writeDataToFile();
+        if (object instanceof SelectedContent) {
+            ((SelectedContent) object).toFile();
         }
+
+        int length = object.getContentLength();
+
+        if (object instanceof XoTransfer) {
+            XoTransfer transfer = (XoTransfer) object;
+            File file = new File(transfer.getDataFile());
+            length = (int) file.length();
+        }
+
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(
                 object.getFileName(),
@@ -242,9 +230,9 @@ public class SelectedContent implements IContentObject {
                 object.getContentType(),
                 object.getContentMediaType(),
                 object.getContentAspectRatio(),
-                object.getContentLength(),
+                length,
                 object.getContentHmac());
+
         return upload;
     }
-
 }

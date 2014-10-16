@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.base.IXoFragment;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.contentselectors.*;
 import com.hoccer.xo.android.fragment.CompositionFragment;
@@ -206,19 +207,14 @@ public class ContentRegistry {
         // collect selection intents and associated information
         final List<Map<String, Object>> options = new ArrayList<Map<String, Object>>();
         for (IContentSelector selector : mAttachmentSelectors) {
-            Intent selectionIntent = selector.createSelectionIntent(fragment.getActivity());
-            if (IntentHelper.isIntentResolvable(selectionIntent, fragment.getActivity())) {
-                Map<String, Object> fields = new HashMap<String, Object>();
-                fields.put(KEY_INTENT, selectionIntent);
-                fields.put(KEY_SELECTOR, selector);
-                fields.put(KEY_ICON, selector.getContentIcon());
-                fields.put(KEY_NAME, selector.getName());
+            Map<String, Object> fields = createDataObjectFromContentSelector(fragment.getActivity(), selector);
+            if (fields != null) {
                 options.add(fields);
             }
         }
 
         // Add ClipboardSelector when it has something to process
-        if (mClipboardSelector.canProcessClipboard()) {
+        if (mClipboardSelector.hasContent()) {
             Map<String, Object> fields = createDataObjectFromContentSelector(fragment.getActivity(), mClipboardSelector);
             if (fields != null) {
                 options.add(fields);
@@ -259,10 +255,10 @@ public class ContentRegistry {
                 contentSelection.setSelector(selector);
                 Intent intent = (Intent) sel.get(KEY_INTENT);
 
-                if (selector instanceof ClipboardSelector) {
-                    ClipboardSelector clipboardSelector = (ClipboardSelector) selector;
-                    XoActivity xoActivity = (XoActivity) fragment.getActivity();
-                    xoActivity.clipBoardItemSelected(clipboardSelector.selectObjectFromClipboard(xoActivity, intent));
+                if (intent == null) {
+                    // selectors without intent can return the result immediately
+                    IContentObject contentObject = selector.createObjectFromSelectionResult(fragment.getActivity(), null);
+                    ((IXoFragment)fragment).onAttachmentSelected(contentObject);
                 } else {
                     if (selector instanceof MultiImageSelector) {
                         startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGE_ATTACHMENTS);
@@ -317,10 +313,9 @@ public class ContentRegistry {
      * @return a Map containing all relevant intent information
      */
     private Map<String, Object> createDataObjectFromContentSelector(final Activity activity, final IContentSelector selector) {
-
         Intent selectionIntent = selector.createSelectionIntent(activity);
 
-        if (IntentHelper.isIntentResolvable(selectionIntent, activity)) {
+        if (selectionIntent == null || IntentHelper.isIntentResolvable(selectionIntent, activity)) {
             Map<String, Object> fields = new HashMap<String, Object>();
             fields.put(KEY_INTENT, selectionIntent);
             fields.put(KEY_SELECTOR, selector);

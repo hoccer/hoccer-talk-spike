@@ -20,7 +20,6 @@ import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -28,7 +27,6 @@ import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.adapter.ChatsPageAdapter;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.content.contentselectors.VideoSelector;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
@@ -37,12 +35,9 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-import java.sql.SQLException;
-
 public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoContactListener, IXoPairingListener {
 
     private final static Logger LOG = Logger.getLogger(ChatsActivity.class);
-    private static final String ACTION_ALREADY_HANDLED = "com.hoccer.xo.android.intent.action.ALREADY_HANDLED";
 
     private ViewPager mViewPager;
     private ActionBar mActionBar;
@@ -106,22 +101,25 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             startActivity(intent);
         }
 
-        // check whether we should immediately open the conversation with a contact
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
-            int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
-            showContactConversation(contactId);
-        }
-
-        if (getIntent().getAction() == Intent.ACTION_SEND) {
-            initWithShareIntent();
-        }
+        handleIntent(getIntent());
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        handleTokenPairingIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            handleTokenPairingIntent(intent);
+        }
+        else if (Intent.ACTION_SEND.equals(intent.getAction())) {
+            handleShareIntent(intent);
+        }
+        else if (intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+            handleContactIdIntent(intent);
+        }
     }
 
     @Override
@@ -129,7 +127,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         super.onResume();
         refreshEnvironmentUpdater(false);
         getXoClient().registerStateListener(this);
-        handleTokenPairingIntent(getIntent());
 
         // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
         getXoClient().registerContactListener(this);
@@ -157,13 +154,16 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         // TODO: done.
     }
 
-    private void initWithShareIntent() {
+    private void handleContactIdIntent(Intent intent) {
+        int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
+        showContactConversation(contactId);
+    }
 
-        Intent shareIntent = getIntent();
-        String type = shareIntent.getType();
-        Uri contentUri = (Uri) shareIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+    private void handleShareIntent(Intent intent) {
+        String type = intent.getType();
+        Uri contentUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
 
-        // Factory method in IContentSelector expects content to  be in intent extra field 'data'
+        // Factory method in IContentSelector expects content to be in intent extra field 'data'
         Intent dataIntent = new Intent();
         dataIntent.setData(contentUri);
 
@@ -176,31 +176,30 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         }
 
         if (contentObject != null) {
-            // Clipboard only works with TalkClientUpload and TalkClientDownload so we have to create one
-            // unfortunately this Upload object will be a dead entry in the database since the attachment selection recreates the Upoad Object
-            // see CompositionFragment.validateAndSendComposedMessage()
-            TalkClientUpload attachmentUpload = SelectedContent.createAttachmentUpload(contentObject);
-            try {
-                getXoDatabase().saveClientUpload(attachmentUpload);
-                Clipboard clipboard = Clipboard.get(this);
-                clipboard.storeAttachment(attachmentUpload);
-                Toast.makeText(this, getString(R.string.toast_stored_external_file_to_clipboard), Toast.LENGTH_LONG).show();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            Clipboard.getInstance().setContent(contentObject);
+            Toast.makeText(this, getString(R.string.toast_stored_external_file_to_clipboard), Toast.LENGTH_LONG).show();
         }
     }
 
-    private void handleTokenPairingIntent(Intent intent) {
-        if (intent.getAction() == Intent.ACTION_VIEW) {
-            String token = intent.getData().getHost();
-            intent.setAction(ACTION_ALREADY_HANDLED);
+    private IContentObject getImageContentObject(Intent dataIntent) {
+        ImageSelector imageSelector = new ImageSelector(this);
+        // a more generic and static way to obtain the ContentObject would be cool
+        return imageSelector.createObjectFromSelectionResult(this, dataIntent);
+    }
 
-            if (getXoClient().isActive()) {
-                performTokenPairing(token);
-            } else {
-                mPairingToken = token;
-            }
+    private IContentObject getVideoContentObject(Intent dataIntent) {
+        VideoSelector videoSelector = new VideoSelector(this);
+        // a more generic and static way to obtain the ContentObject would be cool
+        return videoSelector.createObjectFromSelectionResult(this, dataIntent);
+    }
+
+    private void handleTokenPairingIntent(Intent intent) {
+        String token = intent.getData().getHost();
+
+        if (getXoClient().isActive()) {
+            performTokenPairing(token);
+        } else {
+            mPairingToken = token;
         }
     }
 
@@ -231,18 +230,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
                 Toast.makeText(ChatsActivity.this, R.string.toast_pairing_failed, Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private IContentObject getVideoContentObject(Intent dataIntent) {
-        VideoSelector videoSelector = new VideoSelector(this);
-        // a more generic and static way to obtain the ContentObject would be cool
-        return videoSelector.createObjectFromSelectionResult(this, dataIntent);
-    }
-
-    private IContentObject getImageContentObject(Intent dataIntent) {
-        ImageSelector imageSelector = new ImageSelector(this);
-        // a more generic and static way to obtain the ContentObject would be cool
-        return imageSelector.createObjectFromSelectionResult(this, dataIntent);
     }
 
     private void refreshEnvironmentUpdater(boolean force) {
