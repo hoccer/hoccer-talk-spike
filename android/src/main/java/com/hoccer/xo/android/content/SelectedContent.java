@@ -51,20 +51,17 @@ public class SelectedContent implements IContentObject {
             initWithContentUri(intent.getData().toString(), intent.getType());
         }
         mDataUri = dataUri;
-        computeHmac();
     }
 
     public SelectedContent(String contentUri, String dataUri) {
         initWithContentUri(contentUri, null);
         mDataUri = dataUri;
-        computeHmac();
     }
 
     public SelectedContent(byte[] data) {
         LOG.debug("new selected content with raw data");
         mData = data;
         mLength = data.length;
-        computeHmac();
     }
 
     public void setFileName(String fileName) {
@@ -143,6 +140,10 @@ public class SelectedContent implements IContentObject {
 
     @Override
     public String getContentHmac() {
+        if (mHmac == null) {
+            mHmac = computeHmac();
+        }
+
         return mHmac;
     }
 
@@ -162,16 +163,18 @@ public class SelectedContent implements IContentObject {
         LOG.debug("create from content uri: " + mContentUri);
     }
 
-    private void computeHmac() {
+    private String computeHmac() {
         try {
             if (mDataUri != null) {
-                mHmac = CryptoUtils.computeHmac(mDataUri);
+                return CryptoUtils.computeHmac(mDataUri);
             } else if (mData != null) {
-                mHmac = CryptoUtils.computeHmac(mData);
+                return CryptoUtils.computeHmac(mData);
             }
         } catch (Exception e) {
             LOG.error("Error computing HMAC", e);
         }
+
+        return null;
     }
 
     private void toFile() {
