@@ -193,64 +193,17 @@ public class TalkGroup {
     }
 
     @JsonIgnore
-    public boolean updateWith(TalkGroup g) {
-        boolean updated = false;
-
-        if(!groupId.equals(g.groupId)) {
-            groupId = g.groupId;
-            updated = true;
-        }
-
-        if(!groupName.equals(g.groupName)) {
-            groupName = g.groupName;
-            updated = true;
-        }
-
-        if(!groupAvatarUrl.equals(g.groupAvatarUrl)) {
-            groupAvatarUrl = g.groupAvatarUrl;
-            updated = true;
-        }
-
-        if(!state.equals(g.state)) {
-            state = g.state;
-            updated = true;
-        }
-
-        if(!lastChanged.equals(g.lastChanged)) {
-            lastChanged = g.lastChanged;
-            updated = true;
-        }
-
-        if(!groupType.equals(g.groupType)) {
-            groupType = g.groupType;
-            updated = true;
-        }
-
-        if(!sharedKeyId.equals(g.sharedKeyId)) {
-            sharedKeyId = g.sharedKeyId;
-            updated = true;
-        }
-
-        if(!sharedKeyIdSalt.equals(g.sharedKeyIdSalt)) {
-            sharedKeyIdSalt = g.sharedKeyIdSalt;
-            updated = true;
-        }
-
-        if(!keySupplier.equals(g.keySupplier)) {
-            keySupplier = g.keySupplier;
-            updated = true;
-        }
-
-        if(!keyDate.equals(g.keyDate)) {
-            keyDate = g.keyDate;
-            updated = true;
-        }
-
-        if(!groupKeyUpdateInProgress.equals(g.groupKeyUpdateInProgress)) {
-            groupKeyUpdateInProgress = g.groupKeyUpdateInProgress;
-            updated = true;
-        }
-
-        return updated;
+    public void updateWith(TalkGroup g) {
+        this.setGroupId(g.getGroupId());
+        this.setGroupName(g.getGroupName());
+        this.setGroupAvatarUrl(g.getGroupAvatarUrl());
+        this.setState(g.getState());
+        this.setLastChanged(g.getLastChanged());
+        this.setGroupType(g.getGroupType());
+        this.setSharedKeyId(g.getSharedKeyId());
+        this.setSharedKeyIdSalt(g.getSharedKeyIdSalt());
+        this.setKeySupplier(g.getKeySupplier());
+        this.setKeyDate(g.getKeyDate());
+        this.setGroupKeyUpdateInProgress(this.getGroupKeyUpdateInProgress());
     }
 }
