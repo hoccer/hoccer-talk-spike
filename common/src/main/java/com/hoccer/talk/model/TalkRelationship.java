@@ -131,29 +131,11 @@ public class TalkRelationship {
     }
 
     @JsonIgnore
-    public boolean updateWith(TalkRelationship r) {
-        boolean updated = false;
-
-        if(!clientId.equals(r.clientId)) {
-            clientId = r.clientId;
-            updated = true;
-        }
-
-        if(!otherClientId.equals(r.otherClientId)) {
-            otherClientId = r.otherClientId;
-            updated = true;
-        }
-
-        if(!state.equals(r.state)) {
-            state = r.state;
-            updated = true;
-        }
-
-        if(!lastChanged.equals(r.lastChanged)) {
-            lastChanged = r.lastChanged;
-            updated = true;
-        }
-
-        return updated;
+    public void updateWith(TalkRelationship r) {
+        this.setClientId(r.getClientId());
+        this.setOtherClientId(r.getOtherClientId());
+        this.setState(r.getState());
+        this.setLastChanged(r.getLastChanged());
     }
+
 }
