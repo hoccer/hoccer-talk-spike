@@ -654,7 +654,7 @@ public class TalkClientContact implements Serializable {
         } else {
             updated = this.groupMember.updateWith(member);
         }
-        if(this.groupMember.isInvolved() && !this.everRelated) {
+        if(this.groupMember.isInvolved()) {
             markAsRelated();
             updated = true;
         }
