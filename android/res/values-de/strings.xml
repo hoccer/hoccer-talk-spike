@@ -46,6 +46,7 @@
         Möchtest du die Einladung annehmen?
     </string>
     <string name="message_and_attachment_count_info">%1$d Nachrichten | %2$d Anhänge</string>
+    <string name="blocked_contact">Blockierter Kontakt</string>
 
     <!-- Friend decline invitation dialog -->
     <string name="friend_request_decline_invitation_title">Einladung ablehnen?</string>

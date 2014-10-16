@@ -20,6 +20,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -37,12 +38,14 @@ public class ClientListAdapter extends ContactListAdapter {
         List<TalkClientContact> invitedMe;
         List<TalkClientContact> invited;
         List<TalkClientContact> friends;
+        List<TalkClientContact> blocked;
 
         try {
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
             invitedMe = database.findClientContactsByState(TalkRelationship.STATE_INVITED_ME);
             invited = database.findClientContactsByState(TalkRelationship.STATE_INVITED);
             friends = database.findClientContactsByState(TalkRelationship.STATE_FRIEND);
+            blocked = database.findClientContactsByState(TalkRelationship.STATE_BLOCKED);
         } catch (SQLException e) {
             LOG.error("Could not fetch client contacts", e);
             return Collections.emptyList();
@@ -50,8 +53,9 @@ public class ClientListAdapter extends ContactListAdapter {
 
         Collections.sort(invited, CLIENT_CONTACT_COMPARATOR);
         Collections.sort(friends, CLIENT_CONTACT_COMPARATOR);
+        Collections.sort(blocked, CLIENT_CONTACT_COMPARATOR);
 
-        return ListUtils.union(invitedMe, ListUtils.union(invited, friends));
+        return ListUtils.union(invitedMe, ListUtils.union(invited, ListUtils.union(friends, blocked)));
     }
 
     @Override
@@ -109,7 +113,7 @@ public class ClientListAdapter extends ContactListAdapter {
                 invitedMeLayout.setVisibility(View.GONE);
                 isInvitedTextView.setVisibility(View.VISIBLE);
                 isFriendTextView.setVisibility(View.GONE);
-            } else if (relationship.isFriend()) {
+            } else if (relationship.isFriend() || relationship.isBlocked()) {
                 invitedMeLayout.setVisibility(View.GONE);
                 isInvitedTextView.setVisibility(View.GONE);
                 isFriendTextView.setVisibility(View.VISIBLE);
@@ -125,6 +129,10 @@ public class ClientListAdapter extends ContactListAdapter {
 
                 String messageAndAttachmentCountInfo = convertView.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
                 isFriendTextView.setText(messageAndAttachmentCountInfo);
+
+                if (relationship.isBlocked()) {
+                    isFriendTextView.setText(convertView.getResources().getString(R.string.blocked_contact));
+                }
             }
         }
 

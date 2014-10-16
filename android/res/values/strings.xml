@@ -47,6 +47,7 @@
         Do you wish to accept?
     </string>
     <string name="message_and_attachment_count_info">%1$d messages | %2$d attachments</string>
+    <string name="blocked_contact">Blocked contact</string>
 
     <!-- Friend decline invitation dialog -->
     <string name="friend_request_decline_invitation_title">Decline invitation?</string>
