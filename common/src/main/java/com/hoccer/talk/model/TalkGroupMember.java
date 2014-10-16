@@ -266,35 +266,18 @@ public class TalkGroupMember {
 
     // only copies the field where a foreign member is interested in
     @JsonIgnore
-    public boolean foreignUpdateWith(final TalkGroupMember other) {
-        boolean updated = false;
-
-        if(!isEqual(clientId, other.clientId)) {
-            clientId = other.clientId;
-            updated = true;
-        }
-
-        if(!isEqual(groupId, other.groupId)) {
-            groupId = other.groupId;
-            updated = true;
-        }
-
-        if(!isEqual(role, other.role)) {
-            role = other.role;
-            updated = true;
-        }
-
-        if(!isEqual(state, other.state)) {
-            state = other.state;
-            updated = true;
-        }
-
-        if(!isEqual(lastChanged, other.lastChanged)) {
-            lastChanged = other.lastChanged;
-            updated = true;
-        }
-
-        return updated;
+    public void foreignUpdateWith(TalkGroupMember m) {
+        this.setClientId(m.getClientId());
+        this.setGroupId(m.getGroupId());
+        this.setRole(m.getRole());
+        this.setState(m.getState());
+        //this.setMemberKeyId(m.getMemberKeyId());
+        //this.setEncryptedGroupKey(m.getEncryptedGroupKey());
+        this.setLastChanged(m.getLastChanged());
+        //this.setSharedKeyId(m.getSharedKeyId());
+        //this.setSharedKeyIdSalt(m.getSharedKeyIdSalt());
+        //this.setKeySupplier(m.getKeySupplier());
+        //this.setSharedKeyDate(m.getSharedKeyDate());
     }
 
     @JsonIgnore
