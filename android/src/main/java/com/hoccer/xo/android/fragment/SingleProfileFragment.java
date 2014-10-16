@@ -19,6 +19,7 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
+import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -51,6 +52,8 @@ public class SingleProfileFragment extends XoFragment
     private TextView mNameText;
 
     private RelativeLayout mChatContainer;
+
+    private RelativeLayout mChatMessagesContainer;
 
     private TextView mChatMessagesText;
 
@@ -95,6 +98,8 @@ public class SingleProfileFragment extends XoFragment
         mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
         mNicknameEditText = (EditText) view.findViewById(R.id.et_profile_nickname);
         mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
+
+        startMessagesActivityOnChatMessagesContainerClick();
 
         if (getArguments() != null) {
             if (getArguments().getBoolean(ARG_CREATE_SELF)) {
@@ -487,6 +492,17 @@ public class SingleProfileFragment extends XoFragment
             updateMessageText();
             mChatContainer.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void startMessagesActivityOnChatMessagesContainerClick() {
+        mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), MessagingActivity.class);
+                intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
+                getXoActivity().startActivity(intent);
+            }
+        });
     }
 
     private void updateMessageText() {
