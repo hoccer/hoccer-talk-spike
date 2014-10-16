@@ -35,7 +35,7 @@ public abstract class ContactListAdapter extends BaseAdapter implements IXoConta
 
     public void setQuery(String query) {
         mQuery = query;
-        refreshView();
+        updateContactsAndView();
     }
 
     protected List<TalkClientContact> getContacts() {
@@ -77,7 +77,7 @@ public abstract class ContactListAdapter extends BaseAdapter implements IXoConta
         return mContacts.get(position).getClientContactId();
     }
 
-    protected void refreshView() {
+    public void updateContactsAndView() {
         final List<TalkClientContact> newContacts = getContacts();
 
         Handler guiHandler = new Handler(Looper.getMainLooper());
@@ -92,22 +92,22 @@ public abstract class ContactListAdapter extends BaseAdapter implements IXoConta
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        refreshView();
+        updateContactsAndView();
     }
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-        refreshView();
+        updateContactsAndView();
     }
 
     @Override
     public void onContactAdded(TalkClientContact contact) {
-        refreshView();
+        updateContactsAndView();
     }
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        refreshView();
+        updateContactsAndView();
     }
 
     @Override

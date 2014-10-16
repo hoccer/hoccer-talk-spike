@@ -138,11 +138,11 @@ public class GroupListAdapter extends ContactListAdapter {
 
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
-        refreshView();
+        updateContactsAndView();
     }
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        refreshView();
+        updateContactsAndView();
     }
 }

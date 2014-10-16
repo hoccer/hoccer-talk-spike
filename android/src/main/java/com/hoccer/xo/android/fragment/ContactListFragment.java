@@ -97,9 +97,14 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     @Override
     public void onResume() {
         super.onResume();
+        updateAdapter();
         updateNotificationBadge();
         updatePlaceholder();
         mContactListAdapter.registerDataSetObserver(mPlaceholderUpdateObserver);
+    }
+
+    private void updateAdapter() {
+        mContactListAdapter.updateContactsAndView();
     }
 
     protected void updateNotificationBadge() {
