@@ -6,8 +6,6 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
 
-import static com.hoccer.talk.util.Comparer.isEqual;
-
 @DatabaseTable(tableName = "groupMember")
 public class TalkGroupMember {
 
@@ -203,61 +201,61 @@ public class TalkGroupMember {
     }
 
     @JsonIgnore
-    public boolean updateWith(final TalkGroupMember other) {
+    public boolean updateWith(TalkGroupMember m) {
         boolean updated = false;
 
-        if(!isEqual(clientId, other.clientId)) {
-            clientId = other.clientId;
+        if(!clientId.equals(m.clientId)) {
+            clientId = m.clientId;
             updated = true;
         }
 
-        if(!isEqual(groupId, other.groupId)) {
-            groupId = other.groupId;
+        if(!groupId.equals(m.groupId)) {
+            groupId = m.groupId;
             updated = true;
         }
 
-        if(!isEqual(role, other.role)) {
-            role = other.role;
+        if(!role.equals(m.role)) {
+            role = m.role;
             updated = true;
         }
 
-        if(!isEqual(state, other.state)) {
-            state = other.state;
+        if(!state.equals(m.state)) {
+            state = m.state;
             updated = true;
         }
 
-        if(!isEqual(memberKeyId, other.memberKeyId)) {
-            memberKeyId = other.memberKeyId;
+        if(!memberKeyId.equals(m.memberKeyId)) {
+            memberKeyId = m.memberKeyId;
             updated = true;
         }
 
-        if(!isEqual(encryptedGroupKey, other.encryptedGroupKey)) {
-            encryptedGroupKey = other.encryptedGroupKey;
+        if(!encryptedGroupKey.equals(m.encryptedGroupKey)) {
+            encryptedGroupKey = m.encryptedGroupKey;
             updated = true;
         }
 
-        if(!isEqual(lastChanged, other.lastChanged)) {
-            lastChanged = other.lastChanged;
+        if(!lastChanged.equals(m.lastChanged)) {
+            lastChanged = m.lastChanged;
             updated = true;
         }
 
-        if(!isEqual(sharedKeyId, other.sharedKeyId)) {
-            sharedKeyId = other.sharedKeyId;
+        if(!sharedKeyId.equals(m.sharedKeyId)) {
+            sharedKeyId = m.sharedKeyId;
             updated = true;
         }
 
-        if(!isEqual(sharedKeyIdSalt, other.sharedKeyIdSalt)) {
-            sharedKeyIdSalt = other.sharedKeyIdSalt;
+        if(!sharedKeyIdSalt.equals(m.sharedKeyIdSalt)) {
+            sharedKeyIdSalt = m.sharedKeyIdSalt;
             updated = true;
         }
 
-        if(!isEqual(sharedKeyDate, other.sharedKeyDate)) {
-            sharedKeyDate = other.sharedKeyDate;
+        if(!sharedKeyDate.equals(m.sharedKeyDate)) {
+            sharedKeyDate = m.sharedKeyDate;
             updated = true;
         }
 
-        if(!isEqual(keySupplier, other.keySupplier)) {
-            keySupplier = other.keySupplier;
+        if(!keySupplier.equals(m.keySupplier)) {
+            keySupplier = m.keySupplier;
             updated = true;
         }
 
