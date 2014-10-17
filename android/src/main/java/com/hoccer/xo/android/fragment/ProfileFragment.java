@@ -1,17 +1,15 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.base.XoFragment;
@@ -27,34 +25,46 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
 
     private static final Logger LOG = Logger.getLogger(ProfileFragment.class);
 
-    protected TextView mNameText;
-    protected EditText mNameEditText;
+    protected TalkClientContact mContact;
 
     protected RelativeLayout mChatContainer;
-    protected RelativeLayout mChatMessagesContainer;
-    protected TextView mChatMessagesText;
-    protected ImageView mAvatarImage;
-
-    protected IContentObject mAvatarToSet;
-
-    protected TalkClientContact mContact;
+    private RelativeLayout mChatMessagesContainer;
+    private TextView mChatMessagesText;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_chat_stats);
+        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_messages_container);
+        mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        setContact();
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        setContact();
+        setHasOptionsMenu(true);
 
         startMessagingActivityOnChatMessagesContainerClick();
 
         getXoClient().registerContactListener(this);
         getXoClient().registerMessageListener(this);
-        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        getXoClient().unregisterContactListener(this);
+        getXoClient().unregisterMessageListener(this);
     }
 
     private void setContact() {
@@ -70,13 +80,6 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
         }
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        getXoClient().unregisterContactListener(this);
-        getXoClient().unregisterMessageListener(this);
-    }
-
     private void startMessagingActivityOnChatMessagesContainerClick() {
         mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,6 +89,19 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
                 getXoActivity().startActivity(intent);
             }
         });
+    }
+
+    private void updateMessageTextOnUiThread() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateMessageText();
+            }
+        });
+    }
+
+    protected void updateMessageText(int count) {
+        mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
     }
 
     protected abstract int getClientContactId();
@@ -126,18 +142,4 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {}
-
-    private void updateMessageTextOnUiThread() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                updateMessageText();
-            }
-        });
-    }
-
-    protected void updateMessageText(int count) {
-        mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
-    }
-
 }

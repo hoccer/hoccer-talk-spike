@@ -38,16 +38,22 @@ public class SingleProfileFragment extends ProfileFragment
 
     private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
 
+    private TextView mNameText;
+    private EditText mNameEditText;
+    private ImageView mAvatarImage;
     private TextView mKeyText;
     private TextView mNicknameTextView;
     private EditText mNicknameEditText;
     private ImageButton mNicknameEditButton;
     private LinearLayout mInviteButtonContainer;
 
+    private IContentObject mAvatarToSet;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_single_profile, container, false);
     }
+
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -55,9 +61,6 @@ public class SingleProfileFragment extends ProfileFragment
 
         mAvatarImage = (ImageView) view.findViewById(R.id.profile_avatar_image);
         mNameText = (TextView) view.findViewById(R.id.tv_profile_name);
-        mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_chat_stats);
-        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_messages_container);
-        mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
         mKeyText = (TextView) view.findViewById(R.id.tv_profile_key);
         mNameEditText = (EditText) view.findViewById(R.id.et_profile_name);
         mNicknameEditButton = (ImageButton) view.findViewById(R.id.ib_profile_nickname_edit);

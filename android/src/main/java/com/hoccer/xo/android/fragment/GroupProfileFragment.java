@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -52,6 +53,9 @@ public class GroupProfileFragment extends ProfileFragment
 
     private Mode mMode;
 
+    private TextView mNameText;
+    private EditText mNameEditText;
+    private ImageView mAvatarImage;
     private Button mInviteAllButton;
     private LinearLayout mGroupMembersContainer;
     private TextView mGroupMembersTitle;
@@ -61,6 +65,8 @@ public class GroupProfileFragment extends ProfileFragment
     private ContactsAdapter mGroupMemberAdapter;
 
     private TalkClientContact mGroup;
+
+    private IContentObject mAvatarToSet;
 
     private Menu mOptionsMenu;
 
@@ -86,9 +92,6 @@ public class GroupProfileFragment extends ProfileFragment
         mNameEditText.setFocusableInTouchMode(true);
         mNameEditText.setOnKeyListener(new BackPressListener());
 
-        mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_chat_stats);
-        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_messages_container);
-        mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
 
         mInviteAllButton = (Button) view.findViewById(R.id.profile_group_button_invite_all);
         mInviteAllButton.setOnClickListener(this);
@@ -100,11 +103,16 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mGroup = mContact;
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
-        if (mContact != null) {
-            mGroup = mContact;
+        if (mGroup != null) {
             mMode = Mode.PROFILE;
             refreshContact(mGroup);
         }
