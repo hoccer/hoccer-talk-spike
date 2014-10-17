@@ -21,7 +21,8 @@
     <RelativeLayout
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:padding="5dp">
+        android:padding="5dp"
+        android:layout_gravity="center_vertical">
 
       <ImageButton
           android:id="@+id/ib_messaging_composer_add_attachment"
