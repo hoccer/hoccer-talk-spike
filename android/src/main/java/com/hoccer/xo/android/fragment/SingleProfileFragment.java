@@ -38,41 +38,25 @@ import java.sql.SQLException;
 public class SingleProfileFragment extends XoFragment
         implements View.OnClickListener, IXoContactListener, ActionMode.Callback, IXoMessageListener {
 
-
-    public static final String ARG_CREATE_SELF = "ARG_CREATE_SELF";
     public static final String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
 
     private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
 
-    private ActionMode mActionMode;
-
     private TextView mNameText;
-
     private RelativeLayout mChatContainer;
-
     private RelativeLayout mChatMessagesContainer;
-
     private TextView mChatMessagesText;
-
-    private RelativeLayout mKeyContainer;
-
     private TextView mKeyText;
-
     private ImageView mAvatarImage;
+    private EditText mEditName;
+    private ImageButton mNicknameEditButton;
+    private TextView mNicknameTextView;
+    private EditText mNicknameEditText;
+    private LinearLayout mInviteButtonContainer;
 
     private IContentObject mAvatarToSet;
 
     private TalkClientContact mContact;
-
-    private EditText mEditName;
-
-    private ImageButton mNicknameEditButton;
-
-    private TextView mNicknameTextView;
-
-    private EditText mNicknameEditText;
-
-    private LinearLayout mInviteButtonContainer;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,7 +72,6 @@ public class SingleProfileFragment extends XoFragment
         mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_chat_stats);
         mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_messages_container);
         mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
-        mKeyContainer = (RelativeLayout) view.findViewById(R.id.inc_profile_key);
         mKeyText = (TextView) view.findViewById(R.id.tv_profile_key);
         mEditName = (EditText) view.findViewById(R.id.et_profile_name);
         mNicknameEditButton = (ImageButton) view.findViewById(R.id.ib_profile_nickname_edit);
@@ -99,16 +82,12 @@ public class SingleProfileFragment extends XoFragment
         startMessagingActivityOnChatMessagesContainerClick();
 
         if (getArguments() != null) {
-            if (getArguments().getBoolean(ARG_CREATE_SELF)) {
-                createSelf();
-            } else {
-                int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-                try {
-                    mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
-                    showProfile();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+            int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
+            try {
+                mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                showProfile();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         } else {
             LOG.error("Creating SingleProfileFragment without arguments is not supported.");
@@ -428,19 +407,6 @@ public class SingleProfileFragment extends XoFragment
         refreshContact(mContact);
     }
 
-    private void createSelf() {
-        LOG.debug("createSelf()");
-        mKeyContainer.setVisibility(View.GONE);
-        mContact = getXoClient().getSelfContact();
-        if (mActionMode == null) {
-            mActionMode = getActivity().startActionMode(this);
-        }
-        finishActivityIfContactDeleted();
-
-        update();
-        updateActionBar();
-    }
-
     public void updateActionBar() {
         LOG.debug("update(" + mContact.getClientContactId() + ")");
         getActivity().runOnUiThread(new Runnable() {
@@ -715,8 +681,6 @@ public class SingleProfileFragment extends XoFragment
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {
-
-        mActionMode = null;
 
         String nameString = mEditName.getText().toString();
         String newUserName = nameString.isEmpty() ? getResources().getString(R.string.profile_self_initial_name) : nameString;
