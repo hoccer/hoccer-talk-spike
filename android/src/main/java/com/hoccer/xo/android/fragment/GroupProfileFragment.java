@@ -9,8 +9,10 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkGroup;
@@ -19,6 +21,7 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
+import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
@@ -40,7 +43,7 @@ import java.util.List;
  * Fragment for display and editing of group profiles.
  */
 public class GroupProfileFragment extends XoFragment
-        implements View.OnClickListener, IXoContactListener, ActionMode.Callback,
+        implements IXoContactListener, IXoMessageListener, View.OnClickListener, ActionMode.Callback,
         AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
@@ -61,6 +64,9 @@ public class GroupProfileFragment extends XoFragment
     private LinearLayout mGroupMembersContainer;
     private TextView mGroupMembersTitle;
     private ListView mGroupMembersList;
+    private RelativeLayout mChatContainer;
+    private RelativeLayout mChatMessagesContainer;
+    private TextView mChatMessagesText;
     @Nullable
     private ContactsAdapter mGroupMemberAdapter;
 
@@ -92,11 +98,17 @@ public class GroupProfileFragment extends XoFragment
         mGroupNameEdit.setFocusableInTouchMode(true);
         mGroupNameEdit.setOnKeyListener(new BackPressListener());
 
+        mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_chat_stats);
+        mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_messages_container);
+        mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
+
         mInviteAllButton = (Button) view.findViewById(R.id.profile_group_button_invite_all);
         mInviteAllButton.setOnClickListener(this);
         mGroupMembersContainer = (LinearLayout) view.findViewById(R.id.profile_group_members_container);
         mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
         mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
+
+        startMessagingActivityOnChatMessagesContainerClick();
 
         Bundle arguments = getArguments();
         if (arguments != null) {
@@ -126,6 +138,17 @@ public class GroupProfileFragment extends XoFragment
         }
 
         return view;
+    }
+
+    private void startMessagingActivityOnChatMessagesContainerClick() {
+        mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), MessagingActivity.class);
+                intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mGroup.getClientContactId());
+                getXoActivity().startActivity(intent);
+            }
+        });
     }
 
     class BackPressListener implements View.OnKeyListener {
@@ -181,6 +204,7 @@ public class GroupProfileFragment extends XoFragment
         setHasOptionsMenu(true);
 
         getXoClient().registerContactListener(this);
+        getXoClient().registerMessageListener(this);
 
         updateInviteButton();
         updateActionBar();
@@ -190,6 +214,7 @@ public class GroupProfileFragment extends XoFragment
     public void onPause() {
         super.onPause();
         getXoClient().unregisterContactListener(this);
+        getXoClient().unregisterMessageListener(this);
     }
 
     @Override
@@ -325,30 +350,49 @@ public class GroupProfileFragment extends XoFragment
     private void update() {
         LOG.debug("update(" + mGroup.getClientContactId() + ")");
 
-        String avatarUrl = null;
-        if (mGroup.isGroupAdmin()) {
-            TalkClientUpload avatarUpload = mGroup.getAvatarUpload();
-            if (avatarUpload != null && avatarUpload.isContentAvailable()) {
-                avatarUrl = avatarUpload.getContentDataUrl();
-            }
+        updateAvatar();
+        updateChatContainer();
+        updateGroupMembersVisibility();
+        updateGroupName();
+        updateContentVisibility();
+    }
+
+    private void updateChatContainer() {
+        if (mGroup.isGroupRegistered()) {
+            updateMessageText();
+            mChatContainer.setVisibility(View.VISIBLE);
         } else {
-            TalkClientDownload avatarDownload = mGroup.getAvatarDownload();
-            if (avatarDownload != null && avatarDownload.isContentAvailable()) {
-                if (avatarDownload.getDataFile() != null) {
-                    Uri uri = Uri.fromFile(new File(avatarDownload.getDataFile()));
-                    avatarUrl = uri.toString();
-                }
-            }
+            mChatContainer.setVisibility(View.GONE);
         }
-        Picasso.with(getActivity())
-                .load(avatarUrl)
-                .placeholder(R.drawable.avatar_default_group_large)
-                .error(R.drawable.avatar_default_group_large)
-                .into(mAvatarImage);
+    }
 
-        mGroupMembersTitle.setVisibility(mGroup.isGroupRegistered() ? View.VISIBLE : View.GONE);
-        mGroupMembersList.setVisibility(mGroup.isGroupRegistered() || !mCurrentClientsInGroup.isEmpty() ? View.VISIBLE : View.GONE);
+    private void updateMessageText() {
+        try {
+            int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mGroup.getClientContactId());
+            mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
+        } catch (SQLException e) {
+            LOG.error("Error fetching message count from database.");
+        }
+    }
 
+    private void updateContentVisibility() {
+        switch (mMode) {
+            case PROFILE:
+                mGroupNameText.setVisibility(View.VISIBLE);
+                mGroupNameEdit.setVisibility(View.GONE);
+                mGroupMembersContainer.setVisibility(View.VISIBLE);
+                break;
+            case EDIT_GROUP:
+                mGroupNameText.setVisibility(View.GONE);
+                mGroupNameEdit.setVisibility(View.VISIBLE);
+                mGroupMembersContainer.setVisibility(View.VISIBLE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void updateGroupName() {
         String name = null;
 
         TalkGroup groupPresence = mGroup.getGroupPresence();
@@ -371,21 +415,34 @@ public class GroupProfileFragment extends XoFragment
         }
 
         mGroupNameEdit.setText(name);
+    }
 
-        switch (mMode) {
-            case PROFILE:
-                mGroupNameText.setVisibility(View.VISIBLE);
-                mGroupNameEdit.setVisibility(View.GONE);
-                mGroupMembersContainer.setVisibility(View.VISIBLE);
-                break;
-            case EDIT_GROUP:
-                mGroupNameText.setVisibility(View.GONE);
-                mGroupNameEdit.setVisibility(View.VISIBLE);
-                mGroupMembersContainer.setVisibility(View.VISIBLE);
-                break;
-            default:
-                break;
+    private void updateGroupMembersVisibility() {
+        mGroupMembersTitle.setVisibility(mGroup.isGroupRegistered() ? View.VISIBLE : View.GONE);
+        mGroupMembersList.setVisibility(mGroup.isGroupRegistered() || !mCurrentClientsInGroup.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void updateAvatar() {
+        String avatarUrl = null;
+        if (mGroup.isGroupAdmin()) {
+            TalkClientUpload avatarUpload = mGroup.getAvatarUpload();
+            if (avatarUpload != null && avatarUpload.isContentAvailable()) {
+                avatarUrl = avatarUpload.getContentDataUrl();
+            }
+        } else {
+            TalkClientDownload avatarDownload = mGroup.getAvatarDownload();
+            if (avatarDownload != null && avatarDownload.isContentAvailable()) {
+                if (avatarDownload.getDataFile() != null) {
+                    Uri uri = Uri.fromFile(new File(avatarDownload.getDataFile()));
+                    avatarUrl = uri.toString();
+                }
+            }
         }
+        Picasso.with(getActivity())
+                .load(avatarUrl)
+                .placeholder(R.drawable.avatar_default_group_large)
+                .error(R.drawable.avatar_default_group_large)
+                .into(mAvatarImage);
     }
 
     private void refreshContact(TalkClientContact newContact) {
@@ -785,5 +842,29 @@ public class GroupProfileFragment extends XoFragment
         }
 
         return roles;
+    }
+
+    @Override
+    public void onMessageCreated(TalkClientMessage message) {
+        updateMessageTextOnUiThread();
+    }
+
+    @Override
+    public void onMessageUpdated(TalkClientMessage message) {
+        updateMessageTextOnUiThread();
+    }
+
+    @Override
+    public void onMessageDeleted(TalkClientMessage message) {
+        updateMessageTextOnUiThread();
+    }
+
+    private void updateMessageTextOnUiThread() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateMessageText();
+            }
+        });
     }
 }

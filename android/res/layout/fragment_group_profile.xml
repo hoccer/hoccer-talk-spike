@@ -59,6 +59,13 @@
             android:visibility="gone"
             style="@style/AppBaseTheme.Group.Name"/>
 
+    <include
+        android:id="@+id/inc_chat_stats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/profile_chat_stats_container"
+        style="@style/ProfileContainerStyle"/>
+
     <LinearLayout
             android:id="@+id/profile_group_members_container"
             android:orientation="vertical"
