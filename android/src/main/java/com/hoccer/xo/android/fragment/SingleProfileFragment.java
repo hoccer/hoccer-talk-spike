@@ -9,9 +9,11 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkPresence;
@@ -34,7 +36,7 @@ import java.sql.SQLException;
  * Fragment for display and editing of single-contact profiles.
  */
 public class SingleProfileFragment extends XoFragment
-        implements View.OnClickListener, IXoContactListener, ActionMode.Callback {
+        implements View.OnClickListener, IXoContactListener, ActionMode.Callback, IXoMessageListener {
 
     public enum Mode {
         PROFILE,
@@ -99,7 +101,7 @@ public class SingleProfileFragment extends XoFragment
         mNicknameEditText = (EditText) view.findViewById(R.id.et_profile_nickname);
         mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
 
-        startMessagesActivityOnChatMessagesContainerClick();
+        startMessagingActivityOnChatMessagesContainerClick();
 
         if (getArguments() != null) {
             if (getArguments().getBoolean(ARG_CREATE_SELF)) {
@@ -241,6 +243,7 @@ public class SingleProfileFragment extends XoFragment
         LOG.debug("onResume()");
         super.onResume();
         getXoClient().registerContactListener(this);
+        getXoClient().registerMessageListener(this);
         setHasOptionsMenu(true);
     }
 
@@ -249,6 +252,7 @@ public class SingleProfileFragment extends XoFragment
         LOG.debug("onPause()");
         super.onPause();
         getXoClient().unregisterContactListener(this);
+        getXoClient().unregisterMessageListener(this);
     }
 
     @Override
@@ -494,7 +498,7 @@ public class SingleProfileFragment extends XoFragment
         }
     }
 
-    private void startMessagesActivityOnChatMessagesContainerClick() {
+    private void startMessagingActivityOnChatMessagesContainerClick() {
         mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -751,5 +755,29 @@ public class SingleProfileFragment extends XoFragment
             refreshContact(mContact);
             update();
         }
+    }
+
+    @Override
+    public void onMessageCreated(TalkClientMessage message) {
+        updateMessageTextOnUiThread();
+    }
+
+    @Override
+    public void onMessageUpdated(TalkClientMessage message) {
+        updateMessageTextOnUiThread();
+    }
+
+    @Override
+    public void onMessageDeleted(TalkClientMessage message) {
+        updateMessageTextOnUiThread();
+    }
+
+    private void updateMessageTextOnUiThread() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateMessageText();
+            }
+        });
     }
 }
