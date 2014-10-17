@@ -21,8 +21,6 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
-import com.hoccer.xo.android.activity.MessagingActivity;
-import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.release.R;
@@ -35,28 +33,16 @@ import java.sql.SQLException;
 /**
  * Fragment for display and editing of single-contact profiles.
  */
-public class SingleProfileFragment extends XoFragment
-        implements View.OnClickListener, IXoContactListener, ActionMode.Callback, IXoMessageListener {
-
-    public static final String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
+public class SingleProfileFragment extends ProfileFragment
+        implements View.OnClickListener, ActionMode.Callback {
 
     private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
 
-    private TextView mNameText;
-    private RelativeLayout mChatContainer;
-    private RelativeLayout mChatMessagesContainer;
-    private TextView mChatMessagesText;
     private TextView mKeyText;
-    private ImageView mAvatarImage;
-    private EditText mEditName;
-    private ImageButton mNicknameEditButton;
     private TextView mNicknameTextView;
     private EditText mNicknameEditText;
+    private ImageButton mNicknameEditButton;
     private LinearLayout mInviteButtonContainer;
-
-    private IContentObject mAvatarToSet;
-
-    private TalkClientContact mContact;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -73,24 +59,19 @@ public class SingleProfileFragment extends XoFragment
         mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_messages_container);
         mChatMessagesText = (TextView) view.findViewById(R.id.tv_messages_text);
         mKeyText = (TextView) view.findViewById(R.id.tv_profile_key);
-        mEditName = (EditText) view.findViewById(R.id.et_profile_name);
+        mNameEditText = (EditText) view.findViewById(R.id.et_profile_name);
         mNicknameEditButton = (ImageButton) view.findViewById(R.id.ib_profile_nickname_edit);
         mNicknameTextView = (TextView) view.findViewById(R.id.tv_profile_nickname);
         mNicknameEditText = (EditText) view.findViewById(R.id.et_profile_nickname);
         mInviteButtonContainer = (LinearLayout) view.findViewById(R.id.inc_profile_request);
+    }
 
-        startMessagingActivityOnChatMessagesContainerClick();
+    @Override
+    public void onResume() {
+        super.onResume();
 
-        if (getArguments() != null) {
-            int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
-            try {
-                mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
-                showProfile();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        } else {
-            LOG.error("Creating SingleProfileFragment without arguments is not supported.");
+        if (mContact != null) {
+            showProfile();
         }
     }
 
@@ -210,29 +191,6 @@ public class SingleProfileFragment extends XoFragment
         } else {
             declineButton.setVisibility(View.GONE);
         }
-    }
-
-    @Override
-    public void onResume() {
-        LOG.debug("onResume()");
-        super.onResume();
-        getXoClient().registerContactListener(this);
-        getXoClient().registerMessageListener(this);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onPause() {
-        LOG.debug("onPause()");
-        super.onPause();
-        getXoClient().unregisterContactListener(this);
-        getXoClient().unregisterMessageListener(this);
-    }
-
-    @Override
-    public void onDestroy() {
-        LOG.debug("onDestroy()");
-        super.onDestroy();
     }
 
     @Override
@@ -396,10 +354,6 @@ public class SingleProfileFragment extends XoFragment
         }
     }
 
-    public TalkClientContact getContact() {
-        return mContact;
-    }
-
     private void showProfile() {
         if (mContact != null) {
             LOG.debug("showProfile(" + mContact.getClientContactId() + ")");
@@ -408,7 +362,6 @@ public class SingleProfileFragment extends XoFragment
     }
 
     public void updateActionBar() {
-        LOG.debug("update(" + mContact.getClientContactId() + ")");
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -431,9 +384,8 @@ public class SingleProfileFragment extends XoFragment
         });
     }
 
-    private void update() {
-        LOG.debug("update(" + mContact.getClientContactId() + ")");
-
+    @Override
+    protected void updateView() {
         updateAvatar();
         updateName();
         updateChatContainer();
@@ -453,21 +405,16 @@ public class SingleProfileFragment extends XoFragment
         }
     }
 
-    private void startMessagingActivityOnChatMessagesContainerClick() {
-        mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), MessagingActivity.class);
-                intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
-                getXoActivity().startActivity(intent);
-            }
-        });
+    @Override
+    protected int getClientContactId() {
+        return mContact.getClientContactId();
     }
 
-    private void updateMessageText() {
+    @Override
+    protected void updateMessageText() {
         try {
             int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
-            mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
+            super.updateMessageText(count);
         } catch (SQLException e) {
             LOG.error("Error fetching message count from database.");
         }
@@ -600,7 +547,7 @@ public class SingleProfileFragment extends XoFragment
             @Override
             public void run() {
                 LOG.debug("updating ui");
-                update();
+                updateView();
             }
         });
     }
@@ -608,11 +555,6 @@ public class SingleProfileFragment extends XoFragment
     private boolean isMyContact(TalkClientContact contact) {
         return mContact != null && mContact == contact || mContact.getClientContactId() == contact
                 .getClientContactId();
-    }
-
-    @Override
-    public void onContactAdded(TalkClientContact contact) {
-        // we don't care
     }
 
     @Override
@@ -653,23 +595,15 @@ public class SingleProfileFragment extends XoFragment
     }
 
     @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-    }
-
-    @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         return true;
     }
 
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        mEditName.setVisibility(View.VISIBLE);
+        mNameEditText.setVisibility(View.VISIBLE);
         mNameText.setVisibility(View.INVISIBLE);
-        mEditName.setText(mNameText.getText());
+        mNameEditText.setText(mNameText.getText());
         mAvatarImage.setOnClickListener(this);
         return true;
     }
@@ -682,40 +616,16 @@ public class SingleProfileFragment extends XoFragment
     @Override
     public void onDestroyActionMode(ActionMode mode) {
 
-        String nameString = mEditName.getText().toString();
+        String nameString = mNameEditText.getText().toString();
         String newUserName = nameString.isEmpty() ? getResources().getString(R.string.profile_self_initial_name) : nameString;
 
         mNameText.setText(newUserName);
-        mEditName.setVisibility(View.GONE);
+        mNameEditText.setVisibility(View.GONE);
         mNameText.setVisibility(View.VISIBLE);
         mAvatarImage.setOnClickListener(null);
 
         getXoClient().setClientString(newUserName, "happier");
         refreshContact(mContact);
-        update();
-    }
-
-    @Override
-    public void onMessageCreated(TalkClientMessage message) {
-        updateMessageTextOnUiThread();
-    }
-
-    @Override
-    public void onMessageUpdated(TalkClientMessage message) {
-        updateMessageTextOnUiThread();
-    }
-
-    @Override
-    public void onMessageDeleted(TalkClientMessage message) {
-        updateMessageTextOnUiThread();
-    }
-
-    private void updateMessageTextOnUiThread() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                updateMessageText();
-            }
-        });
+        updateView();
     }
 }

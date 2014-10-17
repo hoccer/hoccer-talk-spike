@@ -8,11 +8,8 @@ import android.os.Bundle;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkGroup;
@@ -21,10 +18,8 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
-import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
-import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -42,13 +37,12 @@ import java.util.List;
 /**
  * Fragment for display and editing of group profiles.
  */
-public class GroupProfileFragment extends XoFragment
-        implements IXoContactListener, IXoMessageListener, View.OnClickListener, ActionMode.Callback,
-        AdapterView.OnItemClickListener {
+public class GroupProfileFragment extends ProfileFragment
+        implements  View.OnClickListener, ActionMode.Callback, AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
+
     private boolean mBackPressed = false;
-    public static final String ARG_CLIENT_CONTACT_ID = "ARG_CLIENT_CONTACT_ID";
     public static final String ARG_START_IN_ACTION_MODE = "ARG_START_IN_ACTION_MODE";
 
     public enum Mode {
@@ -58,21 +52,15 @@ public class GroupProfileFragment extends XoFragment
 
     private Mode mMode;
 
-    private TextView mGroupNameText;
-    private EditText mGroupNameEdit;
     private Button mInviteAllButton;
     private LinearLayout mGroupMembersContainer;
     private TextView mGroupMembersTitle;
     private ListView mGroupMembersList;
-    private RelativeLayout mChatContainer;
-    private RelativeLayout mChatMessagesContainer;
-    private TextView mChatMessagesText;
+
     @Nullable
     private ContactsAdapter mGroupMemberAdapter;
 
     private TalkClientContact mGroup;
-    private IContentObject mAvatarToSet;
-    private ImageView mAvatarImage;
 
     private Menu mOptionsMenu;
 
@@ -93,10 +81,10 @@ public class GroupProfileFragment extends XoFragment
         mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
         mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
 
-        mGroupNameText = (TextView) view.findViewById(R.id.profile_group_name);
-        mGroupNameEdit = (EditText) view.findViewById(R.id.profile_group_name_edit);
-        mGroupNameEdit.setFocusableInTouchMode(true);
-        mGroupNameEdit.setOnKeyListener(new BackPressListener());
+        mNameText = (TextView) view.findViewById(R.id.profile_group_name);
+        mNameEditText = (EditText) view.findViewById(R.id.profile_group_name_edit);
+        mNameEditText.setFocusableInTouchMode(true);
+        mNameEditText.setOnKeyListener(new BackPressListener());
 
         mChatContainer = (RelativeLayout) view.findViewById(R.id.inc_chat_stats);
         mChatMessagesContainer = (RelativeLayout) view.findViewById(R.id.rl_messages_container);
@@ -108,63 +96,27 @@ public class GroupProfileFragment extends XoFragment
         mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
         mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
 
-        startMessagingActivityOnChatMessagesContainerClick();
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mContact != null) {
+            mGroup = mContact;
+            mMode = Mode.PROFILE;
+            refreshContact(mGroup);
+        }
 
         Bundle arguments = getArguments();
         if (arguments != null) {
-            if (arguments.containsKey(ARG_CLIENT_CONTACT_ID)) {
-                int clientContactId = arguments.getInt(ARG_CLIENT_CONTACT_ID);
-                try {
-                    mGroup = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
-                } catch (SQLException e) {
-                    LOG.error("SQL error while retrieving group contact ", e);
-                }
-                if (mGroup != null) {
-                    if (!mGroup.isGroup()) {
-                        LOG.error("The given contact is not a group.");
-                    }
-                    mMode = Mode.PROFILE;
-                    refreshContact(mGroup);
-                }
-            } else {
-                LOG.error("Creating GroupProfileFragment without arguments is not supported.");
-            }
-
             if (arguments.containsKey(ARG_START_IN_ACTION_MODE)) {
                 if (arguments.getBoolean(ARG_START_IN_ACTION_MODE)) {
                     getActivity().startActionMode(this);
                 }
             }
         }
-
-        return view;
-    }
-
-    private void startMessagingActivityOnChatMessagesContainerClick() {
-        mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), MessagingActivity.class);
-                intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mGroup.getClientContactId());
-                getXoActivity().startActivity(intent);
-            }
-        });
-    }
-
-    class BackPressListener implements View.OnKeyListener {
-
-        @Override
-        public boolean onKey(View view, int i, KeyEvent keyEvent) {
-            if (i == KeyEvent.KEYCODE_BACK && mMode == Mode.EDIT_GROUP) {
-                mBackPressed = true;
-            }
-            return false;
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
 
         if (mGroupMemberAdapter == null) {
             mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity(), mGroup);
@@ -201,20 +153,25 @@ public class GroupProfileFragment extends XoFragment
         } else {
             mGroupMembersList.setOnItemClickListener(null);
         }
-        setHasOptionsMenu(true);
-
-        getXoClient().registerContactListener(this);
-        getXoClient().registerMessageListener(this);
 
         updateInviteButton();
         updateActionBar();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        getXoClient().unregisterContactListener(this);
-        getXoClient().unregisterMessageListener(this);
+    protected int getClientContactId() {
+        return mGroup.getClientContactId();
+    }
+
+    class BackPressListener implements View.OnKeyListener {
+
+        @Override
+        public boolean onKey(View view, int i, KeyEvent keyEvent) {
+            if (i == KeyEvent.KEYCODE_BACK && mMode == Mode.EDIT_GROUP) {
+                mBackPressed = true;
+            }
+            return false;
+        }
     }
 
     @Override
@@ -333,23 +290,18 @@ public class GroupProfileFragment extends XoFragment
         return isSelectionHandled;
     }
 
-    public TalkClientContact getContact() {
-        return mGroup;
-    }
-
     private void saveEditedGroup() {
-        String newGroupName = mGroupNameEdit.getText().toString();
+        String newGroupName = mNameEditText.getText().toString();
         if (newGroupName.isEmpty()) {
             newGroupName = "";
         }
-        mGroupNameText.setText(newGroupName);
+        mNameText.setText(newGroupName);
 
         getXoClient().setGroupName(mGroup, newGroupName);
     }
 
-    private void update() {
-        LOG.debug("update(" + mGroup.getClientContactId() + ")");
-
+    @Override
+    protected void updateView() {
         updateAvatar();
         updateChatContainer();
         updateGroupMembersVisibility();
@@ -366,10 +318,11 @@ public class GroupProfileFragment extends XoFragment
         }
     }
 
-    private void updateMessageText() {
+    @Override
+    protected void updateMessageText() {
         try {
             int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mGroup.getClientContactId());
-            mChatMessagesText.setText(getResources().getQuantityString(R.plurals.message_count, count, count));
+            super.updateMessageText(count);
         } catch (SQLException e) {
             LOG.error("Error fetching message count from database.");
         }
@@ -378,13 +331,13 @@ public class GroupProfileFragment extends XoFragment
     private void updateContentVisibility() {
         switch (mMode) {
             case PROFILE:
-                mGroupNameText.setVisibility(View.VISIBLE);
-                mGroupNameEdit.setVisibility(View.GONE);
+                mNameText.setVisibility(View.VISIBLE);
+                mNameEditText.setVisibility(View.GONE);
                 mGroupMembersContainer.setVisibility(View.VISIBLE);
                 break;
             case EDIT_GROUP:
-                mGroupNameText.setVisibility(View.GONE);
-                mGroupNameEdit.setVisibility(View.VISIBLE);
+                mNameText.setVisibility(View.GONE);
+                mNameEditText.setVisibility(View.VISIBLE);
                 mGroupMembersContainer.setVisibility(View.VISIBLE);
                 break;
             default:
@@ -405,16 +358,16 @@ public class GroupProfileFragment extends XoFragment
                 name = "";
             }
         } else if (mMode == Mode.EDIT_GROUP) {
-            name = mGroupNameEdit.getText().toString();
+            name = mNameEditText.getText().toString();
         }
 
         if (this.mGroup.getGroupPresence() != null && this.mGroup.getGroupPresence().isTypeNearby()) {
-            mGroupNameText.setText(R.string.nearby_text);
+            mNameText.setText(R.string.nearby_text);
         } else {
-            mGroupNameText.setText(name);
+            mNameText.setText(name);
         }
 
-        mGroupNameEdit.setText(name);
+        mNameEditText.setText(name);
     }
 
     private void updateGroupMembersVisibility() {
@@ -468,7 +421,7 @@ public class GroupProfileFragment extends XoFragment
                 if (mGroup.isDeleted()) {
                     getActivity().finish();
                 } else {
-                    update();
+                    updateView();
                 }
             }
         });
@@ -537,10 +490,6 @@ public class GroupProfileFragment extends XoFragment
         if (isCurrentGroup(contact)) {
             getActivity().finish();
         }
-    }
-
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
     }
 
     @Override
@@ -756,7 +705,7 @@ public class GroupProfileFragment extends XoFragment
 
         mMode = Mode.EDIT_GROUP;
         configureActionMenuItems(menu);
-        update();
+        updateView();
 
         return true;
     }
@@ -793,11 +742,11 @@ public class GroupProfileFragment extends XoFragment
     public void onDestroyActionMode(ActionMode actionMode) {
         // hide softkeyboard
         InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.hideSoftInputFromInputMethod(mGroupNameEdit.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        inputManager.hideSoftInputFromInputMethod(mNameEditText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 
         if (!mBackPressed) {
             if (!mContactsToInviteToGroup.isEmpty()) {
-                String newGroupName = mGroupNameEdit.getText().toString();
+                String newGroupName = mNameEditText.getText().toString();
                 if (mGroup != null && !mGroup.isGroupRegistered()) {
                     if (newGroupName.isEmpty()) {
                         newGroupName = getString(R.string.profile_group_permanent_nearby);
@@ -806,7 +755,7 @@ public class GroupProfileFragment extends XoFragment
                     getXoClient().createGroupWithContacts(mGroup, getMembersIds(), getMembersRoles());
                 }
             } else {
-                String newGroupName = mGroupNameEdit.getText().toString();
+                String newGroupName = mNameEditText.getText().toString();
                 if (!newGroupName.isEmpty()) {
                     saveEditedGroup();
                 }
@@ -815,7 +764,7 @@ public class GroupProfileFragment extends XoFragment
         mBackPressed = false;
         mAvatarImage.setOnClickListener(null);
         mMode = Mode.PROFILE;
-        update();
+        updateView();
 
         configureOptionsMenuItems(mOptionsMenu);
     }
@@ -842,29 +791,5 @@ public class GroupProfileFragment extends XoFragment
         }
 
         return roles;
-    }
-
-    @Override
-    public void onMessageCreated(TalkClientMessage message) {
-        updateMessageTextOnUiThread();
-    }
-
-    @Override
-    public void onMessageUpdated(TalkClientMessage message) {
-        updateMessageTextOnUiThread();
-    }
-
-    @Override
-    public void onMessageDeleted(TalkClientMessage message) {
-        updateMessageTextOnUiThread();
-    }
-
-    private void updateMessageTextOnUiThread() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                updateMessageText();
-            }
-        });
     }
 }
