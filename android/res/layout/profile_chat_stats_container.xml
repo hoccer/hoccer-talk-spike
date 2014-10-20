@@ -28,6 +28,7 @@
       android:layout_height="wrap_content"
       android:layout_below="@+id/v_profile_chat_info_delimiter"
       android:paddingLeft="@dimen/profile_text_margin"
+      android:paddingRight="@dimen/profile_text_margin"
       android:paddingTop="15dp"
       android:clickable="true"
       android:background="@drawable/default_selector">
@@ -53,8 +54,7 @@
         android:layout_alignParentRight="true"
         android:layout_gravity="center_vertical|right"
         android:src="@drawable/ic_light_navigation_next_item"
-        android:layout_marginLeft="4dp"
-        android:paddingRight="@dimen/profile_text_margin" />
+        android:layout_marginLeft="4dp"/>
 
   </RelativeLayout>
 
