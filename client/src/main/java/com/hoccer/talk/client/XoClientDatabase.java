@@ -273,8 +273,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         QueryBuilder<TalkClientContact, Integer> contacts = mClientContacts.queryBuilder();
         contacts.where()
                 .eq("contactType", TalkClientContact.TYPE_GROUP)
-                .and()
-                .eq("deleted", false);
+                .isNotNull("groupPresence_id")
+                .eq("deleted", false)
+                .and(3);
 
         return contacts.join(groupMembers).query();
     }
