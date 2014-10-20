@@ -30,6 +30,7 @@
       android:paddingLeft="@dimen/profile_text_margin"
       android:paddingRight="@dimen/profile_text_margin"
       android:paddingTop="15dp"
+      android:clipToPadding="false"
       android:clickable="true"
       android:background="@drawable/default_selector">
 
