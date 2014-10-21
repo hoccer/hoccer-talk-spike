@@ -261,7 +261,10 @@
           <renameManifestPackage>${apk.package.name}</renameManifestPackage>
           <assetsDirectory>${project.build.directory}/assets</assetsDirectory>
           <resourceDirectory>${project.basedir}/res</resourceDirectory>
-          <resourceOverlayDirectory>${project.build.directory}/generated-resources</resourceOverlayDirectory>
+          <resourceOverlayDirectories>
+            <directory>${project.build.directory}/generated-resources</directory>
+            <directory>${environment.path}/res</directory>
+          </resourceOverlayDirectories>
           <nativeLibrariesDirectory>${project.basedir}/libs</nativeLibrariesDirectory>
           <extractDuplicates>true</extractDuplicates>
           <sdk>
