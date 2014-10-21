@@ -182,10 +182,9 @@
   <properties>
     <!-- Can be overridden by calling `mvn -Denvironment=[testing|production]` -->
     <environment>development</environment>
-
     <environment.path>${project.basedir}/environments/${environment}</environment.path>
 
-    <!-- Default values for default environment (development), can be overwritten in a profile below -->
+    <!-- Default values for all environments, can be overwritten in a profile below -->
     <apk.signing.skip>false</apk.signing.skip>
     <apk.signing.postfix>signed</apk.signing.postfix>
   </properties>
