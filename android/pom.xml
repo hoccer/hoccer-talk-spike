@@ -180,8 +180,8 @@
   </dependencies>
 
   <properties>
-    <!-- Can be overridden by calling `mvn -Denvironment=[testing|production]` -->
-    <environment>development</environment>
+    <!-- Can be overridden by calling `mvn -Denvironment=[xo-testing|xo-production]` -->
+    <environment>xo-development</environment>
     <environment.path>${project.basedir}/environments/${environment}</environment.path>
 
     <!-- Default values for all environments, can be overwritten in a profile below -->
@@ -195,7 +195,7 @@
       <activation>
         <property>
           <name>environment</name>
-          <value>production</value>
+          <value>xo-production</value>
         </property>
       </activation>
       <properties>
