@@ -13,12 +13,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.Predicate;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -29,6 +32,19 @@ public class GroupListAdapter extends ContactListAdapter {
     private static final Logger LOG = Logger.getLogger(GroupListAdapter.class);
 
     private static final int DISPLAY_NAMES_MAX_LENGTH = 30;
+
+    private static final Predicate<TalkClientContact> IS_NEARBY_GROUP_PREDICATE = new Predicate<TalkClientContact>() {
+        @Override
+        public boolean evaluate(TalkClientContact group) {
+            TalkGroup groupPresence = group.getGroupPresence();
+
+            if (groupPresence != null) {
+                return groupPresence.isTypeNearby();
+            }
+
+            return false;
+        }
+    };
 
     public GroupListAdapter(Activity activity) {
         super(activity);
@@ -49,6 +65,7 @@ public class GroupListAdapter extends ContactListAdapter {
         }
 
         Collections.sort(joined, CLIENT_CONTACT_COMPARATOR);
+        CollectionUtils.filterInverse(joined, IS_NEARBY_GROUP_PREDICATE);
 
         return ListUtils.union(invitedMe, joined);
     }
