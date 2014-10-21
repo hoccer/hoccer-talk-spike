@@ -45,6 +45,7 @@
     <maven-failsafe.version>2.17</maven-failsafe.version>
     <maven-android.version>3.8.2</maven-android.version>
     <maven-jarsigner.version>1.3.2</maven-jarsigner.version>
+    <properties-maven.version>1.0-alpha-2</properties-maven.version>
     <git-commit-id.version>2.1.7</git-commit-id.version>
     <flapdoodle-embed-mongo.version>1.40</flapdoodle-embed-mongo.version>
 

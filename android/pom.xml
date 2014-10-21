@@ -230,6 +230,24 @@
     <finalName>hoccer-xo-android-${project.version}-${environment}-${apk.signing.postfix}</finalName>
 
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>${properties-maven.version}</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>${environment.path}/environment.properties</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Android plugin -->
       <!-- Documentation of configuration options can be found here:
            http://jayway.github.io/maven-android-plugin/apk-mojo.html and here:
@@ -240,6 +258,7 @@
         <version>${maven-android.version}</version>
         <configuration>
           <androidManifestFile>${project.build.directory}/AndroidManifest.xml</androidManifestFile>
+          <renameManifestPackage>${apk.package.name}</renameManifestPackage>
           <assetsDirectory>${project.build.directory}/assets</assetsDirectory>
           <resourceDirectory>${project.basedir}/res</resourceDirectory>
           <resourceOverlayDirectory>${project.build.directory}/generated-resources</resourceOverlayDirectory>
