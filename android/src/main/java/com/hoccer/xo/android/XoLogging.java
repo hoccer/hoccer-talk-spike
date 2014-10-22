@@ -19,7 +19,6 @@ public class XoLogging {
     private static final Layout LOG_FILE_LAYOUT = new PatternLayout("[%t] %-5p %c - %m%n");
     private static final int LOG_FILE_SIZE = 1024 * 1024;
     private static final int LOG_FILE_COUNT = 10;
-    private static final String LOG_FILE_BASENAME = "hoccer-xo.log";
     private static final Layout LOG_LOGCAT_LAYOUT = new PatternLayout("[%t] %-5p %c - %m%n");
 
     private static String sLogTag;
@@ -48,7 +47,7 @@ public class XoLogging {
 
         // create file appender
         try {
-            File file = new File(getLogDirectory(), LOG_FILE_BASENAME);
+            File file = new File(getLogDirectory(), sLogTag + ".log");
             sFileAppender = new RollingFileAppender(LOG_FILE_LAYOUT, file.toString());
             sFileAppender.setMaximumFileSize(LOG_FILE_SIZE);
             sFileAppender.setMaxBackupIndex(LOG_FILE_COUNT);
