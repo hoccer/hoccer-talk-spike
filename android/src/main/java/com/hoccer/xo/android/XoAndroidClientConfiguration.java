@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.hoccer.talk.client.XoDefaultClientConfiguration;
+import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -16,12 +17,12 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
 
     private final SharedPreferences mPreferences;
     private final Properties mProperties;
-
+    private String mAppName;
 
     public XoAndroidClientConfiguration(Context context) {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
         mProperties = new Properties();
+        mAppName = context.getString(R.string.app_name);
 
         try {
             InputStream inputStream = context.getAssets().open("environment.properties");
@@ -70,7 +71,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     }
 
     public String getAttachmentsDirectory() {
-        return "Hoccer XO";
+        return mAppName;
     }
 
     public String getAvatarsDirectory() {
