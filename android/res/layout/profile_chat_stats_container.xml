@@ -3,8 +3,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/rl_profile_chat_info_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="visible">
+                android:layout_height="wrap_content">
 
   <TextView
       android:id="@+id/tv_profile_chat_info_text"
@@ -19,7 +18,6 @@
       android:layout_width="match_parent"
       android:layout_height="1dp"
       android:layout_below="@+id/tv_profile_chat_info_text"
-      android:layout_marginTop="5dp"
       android:background="#ffcdcdcd"/>
 
   <RelativeLayout
@@ -29,7 +27,7 @@
       android:layout_below="@+id/v_profile_chat_info_delimiter"
       android:paddingLeft="@dimen/profile_text_margin"
       android:paddingRight="@dimen/profile_text_margin"
-      android:paddingTop="15dp"
+      android:paddingTop="10dp"
       android:clipToPadding="false"
       android:clickable="true"
       android:background="@drawable/default_selector">
