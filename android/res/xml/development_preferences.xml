@@ -33,26 +33,26 @@
         </Preference>
     </PreferenceCategory>
 
-  <PreferenceCategory
-      android:title="@string/pref_category_image_encoding" >
+    <PreferenceCategory
+            android:title="@string/pref_category_image_encoding">
 
-    <ListPreference
-        android:key="preference_image_encoding_size"
-        android:title="@string/pref_image_size"
-        android:entries="@array/image_transfer_size_options"
-        android:entryValues="@array/image_transfer_size_options_values"
-        android:defaultValue="-1"/>
+        <ListPreference
+                android:key="preference_image_encoding_size"
+                android:title="@string/pref_image_size"
+                android:entries="@array/image_transfer_size_options"
+                android:entryValues="@array/image_transfer_size_options_values"
+                android:defaultValue="-1"/>
 
-    <ListPreference
-        android:key="preference_image_encoding_quality"
-        android:title="@string/pref_image_quality"
-        android:entries="@array/image_transfer_quality_options"
-        android:entryValues="@array/image_transfer_quality_options_values"
-        android:defaultValue="100"/>
+        <ListPreference
+                android:key="preference_image_encoding_quality"
+                android:title="@string/pref_image_quality"
+                android:entries="@array/image_transfer_quality_options"
+                android:entryValues="@array/image_transfer_quality_options_values"
+                android:defaultValue="100"/>
 
-  </PreferenceCategory>
+    </PreferenceCategory>
 
-  <PreferenceCategory
+    <PreferenceCategory
             android:title="@string/pref_category_transfer_mobile">
 
         <ListPreference
