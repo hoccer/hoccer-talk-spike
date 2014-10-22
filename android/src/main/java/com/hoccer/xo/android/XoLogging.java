@@ -21,14 +21,10 @@ public class XoLogging {
     private static final int LOG_FILE_COUNT = 10;
     private static final String LOG_FILE_BASENAME = "hoccer-xo.log";
     private static final Layout LOG_LOGCAT_LAYOUT = new PatternLayout("[%t] %-5p %c - %m%n");
-    private final static String LOG_TAG = "HoccerXO";
 
-    /** The root logger */
+    private static String sLogTag;
     private static Logger sRootLogger;
-
-    /** Log file appender */
     private static RollingFileAppender sFileAppender;
-    /** Logcat appender */
     private static LogcatAppender      sLogcatAppender;
 
     /** @return directory for log files */
@@ -40,8 +36,9 @@ public class XoLogging {
      * Initialize the logging system
      * @param application for context
      */
-    public static void initialize(XoApplication application) {
-        Log.i(LOG_TAG, "[logging] initializing logging");
+    public static void initialize(XoApplication application, String logTag) {
+        sLogTag = logTag;
+        Log.i(sLogTag, "[logging] initializing logging");
 
         // get the root logger for configuration
         sRootLogger = Logger.getRootLogger();
@@ -79,13 +76,13 @@ public class XoLogging {
     }
 
     private static void configureLogLevel(String levelString) {
-        Log.i(LOG_TAG, "[logging] setting log level to " + levelString);
+        Log.i(sLogTag, "[logging] setting log level to " + levelString);
         Level level = Level.toLevel(levelString);
         sRootLogger.setLevel(level);
     }
 
     private static void configureLogSd(boolean enabled) {
-        Log.i(LOG_TAG, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to SD card");
+        Log.i(sLogTag, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to SD card");
         if(enabled) {
             XoApplication.ensureDirectory(getLogDirectory());
             sRootLogger.addAppender(sFileAppender);
@@ -95,7 +92,7 @@ public class XoLogging {
     }
 
     private static void configureLogLogcat(boolean enabled) {
-        Log.i(LOG_TAG, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to logcat");
+        Log.i(sLogTag, "[logging] " + (enabled ? "enabling" : "disabling") + " logging to logcat");
         if(enabled) {
             sRootLogger.addAppender(sLogcatAppender);
         } else {
@@ -116,34 +113,34 @@ public class XoLogging {
             int level = event.getLevel().toInt();
             if(level == Level.WARN_INT) {
                 if(event.getThrowableInformation() != null) {
-                    Log.w(LOG_TAG, message, event.getThrowableInformation().getThrowable());
+                    Log.w(sLogTag, message, event.getThrowableInformation().getThrowable());
                 } else {
-                    Log.w(LOG_TAG, message);
+                    Log.w(sLogTag, message);
                 }
             } else if(level == Level.ERROR_INT) {
                 if(event.getThrowableInformation() != null) {
-                    Log.e(LOG_TAG, message, event.getThrowableInformation().getThrowable());
+                    Log.e(sLogTag, message, event.getThrowableInformation().getThrowable());
                 } else {
-                    Log.e(LOG_TAG, message);
+                    Log.e(sLogTag, message);
                 }
             } else if(level == Level.FATAL_INT) {
                 if(event.getThrowableInformation() != null) {
-                    Log.wtf(LOG_TAG, message, event.getThrowableInformation().getThrowable());
+                    Log.wtf(sLogTag, message, event.getThrowableInformation().getThrowable());
                 } else {
-                    Log.wtf(LOG_TAG, message);
+                    Log.wtf(sLogTag, message);
                 }
             } else {
                 if(event.getThrowableInformation() != null) {
-                    Log.i(LOG_TAG, message, event.getThrowableInformation().getThrowable());
+                    Log.i(sLogTag, message, event.getThrowableInformation().getThrowable());
                 } else {
-                    Log.i(LOG_TAG, message);
+                    Log.i(sLogTag, message);
                 }
             }
         }
 
         @Override
         public void close() {
-            Log.v(LOG_TAG, "[logging] logcat appender closed");
+            Log.v(sLogTag, "[logging] logcat appender closed");
         }
 
         @Override
