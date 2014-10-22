@@ -232,6 +232,8 @@
         <includes>
           <include>values/strings.xml</include>
           <include>values-de/strings.xml</include>
+          <include>xml/development_preferences.xml</include>
+          <include>xml/preferences.xml</include>
         </includes>
       </resource>
     </resources>
