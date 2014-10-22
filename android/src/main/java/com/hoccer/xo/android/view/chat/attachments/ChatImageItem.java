@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.XoConfiguration;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
@@ -91,7 +91,7 @@ public class ChatImageItem extends ChatMessageItem {
         mAttachmentView.setPadding(0, 0, 0, 0);
 
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
-        Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
+        Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
         Picasso.with(mContext).load(mContentObject.getContentDataUrl())
                 .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
