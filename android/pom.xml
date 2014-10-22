@@ -225,6 +225,15 @@
         <directory>${environment.path}/assets/</directory>
         <targetPath>${project.build.directory}/assets</targetPath>
       </resource>
+      <resource>
+        <directory>${project.basedir}/res</directory>
+        <targetPath>${project.build.directory}/res</targetPath>
+        <filtering>true</filtering>
+        <includes>
+          <include>values/strings.xml</include>
+          <include>values-de/strings.xml</include>
+        </includes>
+      </resource>
     </resources>
 
     <finalName>hoccer-xo-android-${project.version}-${environment}-${apk.signing.postfix}</finalName>
@@ -264,6 +273,7 @@
           <resourceOverlayDirectories>
             <directory>${project.build.directory}/generated-resources</directory>
             <directory>${environment.path}/res</directory>
+            <directory>${project.build.directory}/res</directory>
           </resourceOverlayDirectories>
           <nativeLibrariesDirectory>${project.basedir}/libs</nativeLibrariesDirectory>
           <extractDuplicates>true</extractDuplicates>
