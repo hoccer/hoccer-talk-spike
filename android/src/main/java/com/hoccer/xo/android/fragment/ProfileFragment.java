@@ -53,7 +53,12 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
 
         setHasOptionsMenu(true);
 
-        startMessagingActivityOnChatMessagesContainerClick();
+        mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMessagingActivity();
+            }
+        });
 
         getXoClient().registerContactListener(this);
         getXoClient().registerMessageListener(this);
@@ -80,15 +85,10 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
         }
     }
 
-    private void startMessagingActivityOnChatMessagesContainerClick() {
-        mChatMessagesContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), MessagingActivity.class);
-                intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
-                getXoActivity().startActivity(intent);
-            }
-        });
+    protected void showMessagingActivity() {
+        Intent intent = new Intent(getActivity(), MessagingActivity.class);
+        intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, getClientContactId());
+        getXoActivity().startActivity(intent);
     }
 
     private void updateMessageTextOnUiThread() {
