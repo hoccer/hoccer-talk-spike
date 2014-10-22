@@ -34,7 +34,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="45dp"
             android:layout_marginRight="45dp"
             android:layout_marginTop="5dp"
@@ -58,6 +57,13 @@
             android:maxLength="25"
             android:visibility="gone"
             style="@style/AppBaseTheme.Group.Name"/>
+
+    <include
+        android:id="@+id/inc_chat_stats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/profile_chat_stats_container"
+        style="@style/ProfileContainerStyle"/>
 
     <LinearLayout
             android:id="@+id/profile_group_members_container"

@@ -20,37 +20,44 @@
                 android:layout_height="200dp"
                 android:layout_gravity="center_horizontal"/>
 
-
         <include
                 android:id="@+id/inc_profile_name"
-                layout="@layout/profile_name_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/profile_avatar_image"
+                layout="@layout/profile_name_container"
+                style="@style/ProfileContainerStyle"/>
+
+        <include
+                android:id="@+id/inc_chat_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/inc_profile_name"
+                layout="@layout/profile_chat_stats_container"
                 style="@style/ProfileContainerStyle"/>
 
         <include
                 android:id="@+id/inc_profile_nickname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/inc_chat_stats"
                 layout="@layout/profile_nickname_container"
-                android:layout_below="@+id/inc_profile_name"
                 style="@style/ProfileContainerStyle"/>
 
         <include
                 android:id="@+id/inc_profile_request"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                layout="@layout/profile_request_container"
                 android:layout_below="@+id/inc_profile_nickname"
+                layout="@layout/profile_request_container"
                 style="@style/ProfileContainerStyle"/>
 
         <include
                 android:id="@+id/inc_profile_key"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                layout="@layout/profile_key_container"
                 android:layout_below="@+id/inc_profile_request"
+                layout="@layout/profile_key_container"
                 style="@style/ProfileContainerStyle"/>
 
     </RelativeLayout>
