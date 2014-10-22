@@ -1,5 +1,5 @@
 
-Hoccer XO
+${app.name}
 Copyright 2013 Hoccer Betriebs GmbH
 All rights reserved except as stated below.
 
@@ -12,11 +12,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -------------------------------------------------------------------------------
 
-Hoccer XO has been built using Open Source and Free Software.
+${app.name} has been built using Open Source and Free Software.
 
 We thank all parties for their generous and excellent contributions to
 the cause of Free and Open software, without which it would have been
-close to impossible to create Hoccer XO.
+close to impossible to create ${app.name}.
 
 This file contains the license terms and attributions for all our dependencies
 as required by their respective licenses.
@@ -273,7 +273,7 @@ Copyright 2010 ZXing authors
 
 -------------------------------------------------------------------------------
 
-Hoccer XO contains Ez-Vcard, a Vcard library.
+${app.name} contains Ez-Vcard, a Vcard library.
 
 It is licensed under the following BSD license:
 
@@ -304,7 +304,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 -------------------------------------------------------------------------------
 
-Hoccer XO containts ORMlite, a database mapper.
+${app.name} containts ORMlite, a database mapper.
 
 It is licensed under the following minimalist license:
 
@@ -324,7 +324,7 @@ The author may be contacted via http://ormlite.com/.
 
 -------------------------------------------------------------------------------
 
-Hoccer XO contains Bouncy Castle, a cryptography library.
+${app.name} contains Bouncy Castle, a cryptography library.
 
 It is licensed under the following MIT license:
 
@@ -350,7 +350,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 -------------------------------------------------------------------------------
 
-Hoccer XO contains Freemarker, a Java template engine,
+${app.name} contains Freemarker, a Java template engine,
 as an indirect dependency of Ez-Vcard.
 
 It is licensed under the following BSD license:
@@ -392,7 +392,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -------------------------------------------------------------------------------
 
-Hoccer XO contains JSoup, an HTML parser,
+${app.name} contains JSoup, an HTML parser,
 as an indirect dependency through Ez-Vcard.
 
 It is licensed under the following MIT license:

@@ -230,6 +230,7 @@
         <targetPath>${project.build.directory}/res</targetPath>
         <filtering>true</filtering>
         <includes>
+          <include>raw/licenses</include>
           <include>values/strings.xml</include>
           <include>values-de/strings.xml</include>
           <include>xml/development_preferences.xml</include>
