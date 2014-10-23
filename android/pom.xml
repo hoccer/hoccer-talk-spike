@@ -180,28 +180,28 @@
   </dependencies>
 
   <properties>
-    <!-- Can be overridden by calling `mvn -Denvironment=[xo-testing|xo-production]` -->
+    <!-- Can be overridden by calling `mvn -Denvironment=ENVIRONMENT` -->
     <environment>xo-development</environment>
     <environment.path>${project.basedir}/environments/${environment}</environment.path>
 
-    <!-- Default values for all environments, can be overwritten in a profile below -->
-    <apk.signing.skip>false</apk.signing.skip>
-    <apk.signing.postfix>signed</apk.signing.postfix>
+    <!-- Can be overridden by calling `mvn -Dapk.sign=false` -->
+    <apk.sign>true</apk.sign>
+    <apk.sign.skip>false</apk.sign.skip>
+    <apk.sign.postfix>signed</apk.sign.postfix>
   </properties>
 
   <profiles>
     <profile>
-      <id>environment-production</id>
+      <id>apk-sign-false</id>
       <activation>
         <property>
-          <name>environment</name>
-          <value>xo-production</value>
+          <name>apk.sign</name>
+          <value>false</value>
         </property>
       </activation>
       <properties>
-        <android.release>true</android.release>
-        <apk.signing.skip>true</apk.signing.skip>
-        <apk.signing.postfix>unsigned</apk.signing.postfix>
+        <apk.sign.skip>true</apk.sign.skip>
+        <apk.sign.postfix>unsigned</apk.sign.postfix>
       </properties>
     </profile>
   </profiles>
@@ -239,7 +239,7 @@
       </resource>
     </resources>
 
-    <finalName>hoccer-android-${project.version}-${environment}-${apk.signing.postfix}</finalName>
+    <finalName>hoccer-android-${project.version}-${environment}-${apk.sign.postfix}</finalName>
 
     <plugins>
       <plugin>
@@ -327,7 +327,7 @@
                 <argument>-digestalg</argument>
                 <argument>SHA1</argument>
               </arguments>
-              <skip>${apk.signing.skip}</skip>
+              <skip>${apk.sign.skip}</skip>
             </configuration>
           </execution>
         </executions>
