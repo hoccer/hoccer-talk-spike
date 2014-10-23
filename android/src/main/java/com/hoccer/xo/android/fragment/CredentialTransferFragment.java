@@ -1,13 +1,16 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.release.R;
@@ -28,29 +31,27 @@ public class CredentialTransferFragment extends XoFragment {
     public void onViewCreated(final View view, final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
-        if(packageName != null) {
-            tryImportCredentialsFromPackage(packageName);
+        PackageInfo importPackageInfo = null;
+        final String importPackageName = XoApplication.getConfiguration().getCredentialImportPackage();
+        if (importPackageName != null) {
+            importPackageInfo = getPackageInfoByName(importPackageName);
+        }
+
+        if (importPackageInfo != null) {
+            setupTransferLayout(importPackageInfo);
         } else {
             showCreateSingleProfileFragment();
         }
     }
 
-    private void tryImportCredentialsFromPackage(final String packageName) {
-        final PackageInfo packageInfo = getPackageInfoByName(packageName);
-        if (packageInfo != null) {
-            tryImportCredentialsFromPackage(packageInfo);
-        } else {
-            showCreateSingleProfileFragment();
-        }
-    }
-
-    private void tryImportCredentialsFromPackage(final PackageInfo packageInfo) {
+    private void setupTransferLayout(final PackageInfo packageInfo) {
         if (doesPackageSupportTransfer(packageInfo)) {
-            showImportButton();
+            setupImportBlock();
         } else {
-            showUpdateInformation();
+            setupUpdateBlock();
         }
+
+        setupNewClientBlock();
     }
 
     private static boolean doesPackageSupportTransfer(final PackageInfo packageInfo) {
@@ -68,14 +69,37 @@ public class CredentialTransferFragment extends XoFragment {
         return result;
     }
 
-    private void showImportButton() {
+    private void setupImportBlock() {
         final View view = getView().findViewById(R.id.ll_import_credentials);
         view.setVisibility(View.VISIBLE);
     }
 
-    private void showUpdateInformation() {
+    private void setupUpdateBlock() {
         final View view = getView().findViewById(R.id.ll_update_information);
         view.setVisibility(View.VISIBLE);
+
+        final Button playstoreButton = (Button) getView().findViewById(R.id.btn_open_playstore);
+        playstoreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("market://details?id=com.hoccer.xo.release"));
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void setupNewClientBlock() {
+        final View view = getView().findViewById(R.id.ll_create_new_client);
+        view.setVisibility(View.VISIBLE);
+
+        final Button newClientButton = (Button) getView().findViewById(R.id.btn_create_new_client);
+        newClientButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCreateSingleProfileFragment();
+            }
+        });
     }
 
     private void showCreateSingleProfileFragment() {
