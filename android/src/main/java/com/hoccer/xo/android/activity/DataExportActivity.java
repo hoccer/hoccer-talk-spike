@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 public class DataExportActivity extends Activity {
 
     private static final String EXTRA_RESULT_CREDENTIALS_JSON = "credentialsJson";
-    public static final String XOX_PACKAGE_NAME = "com.artcom.hoccer";
+    public static final String CALLING_PACKAGE_NAME = "com.artcom.hoccer";
 
     private static final Logger LOG = Logger.getLogger(DataExportActivity.class);
 
@@ -18,12 +18,12 @@ public class DataExportActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_export);
-        exportCredentialsToXOX();
+        exportCredentialsToCallingPackage();
         finish();
     }
 
-    private void exportCredentialsToXOX() {
-        if (XOX_PACKAGE_NAME.equals(getCallingPackage())) {
+    private void exportCredentialsToCallingPackage() {
+        if (CALLING_PACKAGE_NAME.equals(getCallingPackage())) {
             exportCredentials();
         } else {
             setResult(Activity.RESULT_CANCELED);
@@ -32,6 +32,7 @@ public class DataExportActivity extends Activity {
 
     private void exportCredentials() {
         try {
+            LOG.info("Exporting credentials to " + getCallingPackage());
             String credentialsJson = XoApplication.getXoClient().extractCredentialsAsJson();
             setResult(Activity.RESULT_OK, new Intent()
                     .putExtra(EXTRA_RESULT_CREDENTIALS_JSON, credentialsJson));
