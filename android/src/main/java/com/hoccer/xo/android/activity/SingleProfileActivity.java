@@ -3,9 +3,11 @@ package com.hoccer.xo.android.activity;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
+import com.hoccer.xo.android.fragment.SingleProfileCreationFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.release.R;
 
@@ -22,8 +24,6 @@ public class SingleProfileActivity extends ComposableActivity {
     public static final String SINGLE_PROFILE_FRAGMENT = "SINGLE_PROFILE_FRAGMENT";
 
     ActionBar mActionBar;
-
-    SingleProfileFragment mSingleProfileFragment;
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -71,23 +71,19 @@ public class SingleProfileActivity extends ComposableActivity {
         Bundle bundle = new Bundle();
         bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, contactId);
 
-        mSingleProfileFragment = new SingleProfileFragment();
-        mSingleProfileFragment.setArguments(bundle);
+        Fragment fragment = new SingleProfileFragment();
+        fragment.setArguments(bundle);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_single_profile_fragment_container, mSingleProfileFragment);
+        ft.replace(R.id.fl_single_profile_fragment_container, fragment);
         ft.commit();
     }
 
     private void showCreateSingleProfileFragment() {
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(SingleProfileFragment.ARG_CREATE_SELF, true);
-
-        mSingleProfileFragment = new SingleProfileFragment();
-        mSingleProfileFragment.setArguments(bundle);
+        Fragment fragment = new SingleProfileCreationFragment();
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_single_profile_fragment_container, mSingleProfileFragment, SINGLE_PROFILE_FRAGMENT);
+        ft.replace(R.id.fl_single_profile_fragment_container, fragment, SINGLE_PROFILE_FRAGMENT);
         ft.commit();
     }
 }

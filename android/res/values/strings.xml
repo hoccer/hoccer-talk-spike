@@ -429,11 +429,11 @@
     <string name="nearby_invite_all">invite %1$d group members as friend</string>
     <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
 
-  <string name="profile_chat_info_text">Chat</string>
-  <!--<string name="messages_count">%1$s Messages</string>-->
+    <string name="profile_chat_info_text">Chat</string>
+    <!--<string name="messages_count">%1$s Messages</string>-->
 
-  <plurals name="message_count">
-    <item quantity="one">1 Message</item>
-    <item quantity="other">%d Messages</item>
-  </plurals>
+    <plurals name="message_count">
+        <item quantity="one">1 Message</item>
+        <item quantity="other">%d Messages</item>
+    </plurals>
 </resources>
