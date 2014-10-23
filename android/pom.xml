@@ -239,7 +239,7 @@
       </resource>
     </resources>
 
-    <finalName>hoccer-xo-android-${project.version}-${environment}-${apk.signing.postfix}</finalName>
+    <finalName>hoccer-android-${project.version}-${environment}-${apk.signing.postfix}</finalName>
 
     <plugins>
       <plugin>
