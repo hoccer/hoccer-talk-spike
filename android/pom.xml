@@ -180,8 +180,8 @@
   </dependencies>
 
   <properties>
-    <!-- Can be overridden by calling `mvn -Denvironment=[testing|production]` -->
-    <environment>development</environment>
+    <!-- Can be overridden by calling `mvn -Denvironment=[xo-testing|xo-production]` -->
+    <environment>xo-development</environment>
     <environment.path>${project.basedir}/environments/${environment}</environment.path>
 
     <!-- Default values for all environments, can be overwritten in a profile below -->
@@ -195,7 +195,7 @@
       <activation>
         <property>
           <name>environment</name>
-          <value>production</value>
+          <value>xo-production</value>
         </property>
       </activation>
       <properties>
@@ -225,11 +225,41 @@
         <directory>${environment.path}/assets/</directory>
         <targetPath>${project.build.directory}/assets</targetPath>
       </resource>
+      <resource>
+        <directory>${project.basedir}/res</directory>
+        <targetPath>${project.build.directory}/res</targetPath>
+        <filtering>true</filtering>
+        <includes>
+          <include>raw/licenses</include>
+          <include>values/strings.xml</include>
+          <include>values-de/strings.xml</include>
+          <include>xml/development_preferences.xml</include>
+          <include>xml/preferences.xml</include>
+        </includes>
+      </resource>
     </resources>
 
-    <finalName>hoccer-xo-android-${project.version}-${environment}-${apk.signing.postfix}</finalName>
+    <finalName>hoccer-android-${project.version}-${environment}-${apk.signing.postfix}</finalName>
 
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>${properties-maven.version}</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>${environment.path}/environment.properties</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Android plugin -->
       <!-- Documentation of configuration options can be found here:
            http://jayway.github.io/maven-android-plugin/apk-mojo.html and here:
@@ -240,9 +270,14 @@
         <version>${maven-android.version}</version>
         <configuration>
           <androidManifestFile>${project.build.directory}/AndroidManifest.xml</androidManifestFile>
+          <renameManifestPackage>${apk.package.name}</renameManifestPackage>
           <assetsDirectory>${project.build.directory}/assets</assetsDirectory>
           <resourceDirectory>${project.basedir}/res</resourceDirectory>
-          <resourceOverlayDirectory>${project.build.directory}/generated-resources</resourceOverlayDirectory>
+          <resourceOverlayDirectories>
+            <directory>${project.build.directory}/generated-resources</directory>
+            <directory>${environment.path}/res</directory>
+            <directory>${project.build.directory}/res</directory>
+          </resourceOverlayDirectories>
           <nativeLibrariesDirectory>${project.basedir}/libs</nativeLibrariesDirectory>
           <extractDuplicates>true</extractDuplicates>
           <sdk>
