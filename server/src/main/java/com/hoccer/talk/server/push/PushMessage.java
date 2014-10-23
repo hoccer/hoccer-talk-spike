@@ -1,5 +1,8 @@
 package com.hoccer.talk.server.push;
 
+import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Result;
+import com.google.android.gcm.server.Sender;
 import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkClientHostInfo;
 import com.hoccer.talk.server.TalkServerConfiguration;
@@ -7,6 +10,8 @@ import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
 import com.notnoop.apns.PayloadBuilder;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
 
 public class PushMessage {
 
@@ -27,7 +32,6 @@ public class PushMessage {
         this.mConfig = mAgent.getConfiguration();
     }
 
-    // Currently implemented only for APNS
     public void perform() {
         LOG.info("performing push to clientId: '" + mClient.getClientId() + "', message: '" + mMessage + "'");
         if(mConfig.isGcmEnabled() && mClient.isGcmCapable()) {
@@ -70,7 +74,26 @@ public class PushMessage {
     }
 
     private void performGcm() {
-        LOG.warn("performGcm: Currently unsupported! Doing nothing.");
-    }
+        LOG.info("GCM message '" + mMessage + "' for " + mClient.getClientId());
 
+        Sender gcmSender = mAgent.getGcmSender();
+        Message message = new Message.Builder()
+                .restrictedPackageName(mClient.getGcmPackage())
+                .addData("message", mMessage)
+                .build();
+
+        try {
+            Result res = gcmSender.send(message, mClient.getGcmRegistration(), 10);
+            if (res.getMessageId() != null) {
+                if (res.getCanonicalRegistrationId() != null) {
+                    LOG.warn("GCM returned a canonical registration id - we should do something with it");
+                }
+                LOG.debug("GCM push successful, return message id " + res.getMessageId());
+            } else {
+                LOG.error("GCM push returned error '" + res.getErrorCodeName() + "'");
+            }
+        } catch (IOException e) {
+            LOG.error("GCM push error", e);
+        }
+    }
 }
