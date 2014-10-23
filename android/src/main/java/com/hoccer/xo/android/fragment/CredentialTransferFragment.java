@@ -57,6 +57,14 @@ public class CredentialTransferFragment extends XoFragment {
     private void setupImportBlock() {
         final View view = getView().findViewById(R.id.ll_import_credentials);
         view.setVisibility(View.VISIBLE);
+
+        final Button importButton = (Button) getView().findViewById(R.id.btn_import_credentials);
+        importButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                importCredentials();
+            }
+        });
     }
 
     private void setupUpdateBlock() {
@@ -100,6 +108,10 @@ public class CredentialTransferFragment extends XoFragment {
             // package is not installed, case already handled above
         }
         return result;
+    }
+
+    private void importCredentials() {
+        // todo actually import credentials and renew the srp secret
     }
 
     private void showCreateSingleProfileFragment() {
