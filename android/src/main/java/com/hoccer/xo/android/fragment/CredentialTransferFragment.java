@@ -54,21 +54,6 @@ public class CredentialTransferFragment extends XoFragment {
         setupNewClientBlock();
     }
 
-    private static boolean doesPackageSupportTransfer(final PackageInfo packageInfo) {
-        final int versionCode = packageInfo.versionCode;
-        return versionCode >= 92;
-    }
-
-    private PackageInfo getPackageInfoByName(final String packageName) {
-        PackageInfo result = null;
-        try {
-            result = getActivity().getPackageManager().getPackageInfo(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            // package is not installed, case already handled above
-        }
-        return result;
-    }
-
     private void setupImportBlock() {
         final View view = getView().findViewById(R.id.ll_import_credentials);
         view.setVisibility(View.VISIBLE);
@@ -100,6 +85,21 @@ public class CredentialTransferFragment extends XoFragment {
                 showCreateSingleProfileFragment();
             }
         });
+    }
+
+    private static boolean doesPackageSupportTransfer(final PackageInfo packageInfo) {
+        final int versionCode = packageInfo.versionCode;
+        return versionCode >= 92;
+    }
+
+    private PackageInfo getPackageInfoByName(final String packageName) {
+        PackageInfo result = null;
+        try {
+            result = getActivity().getPackageManager().getPackageInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            // package is not installed, case already handled above
+        }
+        return result;
     }
 
     private void showCreateSingleProfileFragment() {
