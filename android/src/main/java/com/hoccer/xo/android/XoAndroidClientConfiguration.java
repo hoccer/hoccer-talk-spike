@@ -79,7 +79,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     }
 
     public String getHockeyAppId() {
-        return "60f2a55705e94d33e62a7b1643671f46";
+        return mProperties.getProperty("hockey.app.id");
     }
 
     public String getLogLevel() {
