@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.release.R;
 
@@ -15,8 +16,6 @@ import com.hoccer.xo.release.R;
  * Fragment handles the credential import from the supported package.
  */
 public class CredentialTransferFragment extends XoFragment {
-
-    public static final String SUPPORTED_CREDENTIAL_TRANSFER_PACKAGE_NAME = "com.hoccer.xo.release";
 
     public static final String ARG_PACKAGE_VERSION_CODE = "ARG_PACKAGE_VERSION_CODE";
 
@@ -29,27 +28,40 @@ public class CredentialTransferFragment extends XoFragment {
     public void onViewCreated(final View view, final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final PackageInfo packageInfo = getTransferCompatiblePackageInfo();
-        if (packageInfo != null) {
-            if (isTransferSupported(packageInfo)) {
-                showImportButton();
-            } else {
-                showUpdateInformation();
-            }
+        final String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
+        if(packageName != null) {
+            tryImportCredentialsFromPackage(packageName);
         } else {
             showCreateSingleProfileFragment();
         }
     }
 
-    private boolean isTransferSupported(final PackageInfo packageInfo) {
+    private void tryImportCredentialsFromPackage(final String packageName) {
+        final PackageInfo packageInfo = getPackageInfoByName(packageName);
+        if (packageInfo != null) {
+            tryImportCredentialsFromPackage(packageInfo);
+        } else {
+            showCreateSingleProfileFragment();
+        }
+    }
+
+    private void tryImportCredentialsFromPackage(final PackageInfo packageInfo) {
+        if (doesPackageSupportTransfer(packageInfo)) {
+            showImportButton();
+        } else {
+            showUpdateInformation();
+        }
+    }
+
+    private static boolean doesPackageSupportTransfer(final PackageInfo packageInfo) {
         final int versionCode = packageInfo.versionCode;
         return versionCode >= 92;
     }
 
-    private PackageInfo getTransferCompatiblePackageInfo() {
+    private PackageInfo getPackageInfoByName(final String packageName) {
         PackageInfo result = null;
         try {
-            result = getActivity().getPackageManager().getPackageInfo(CredentialTransferFragment.SUPPORTED_CREDENTIAL_TRANSFER_PACKAGE_NAME, 0);
+            result = getActivity().getPackageManager().getPackageInfo(packageName, 0);
         } catch (PackageManager.NameNotFoundException e) {
             // package is not installed, case already handled above
         }
