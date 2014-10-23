@@ -36,16 +36,6 @@ public class TalkPushService extends GCMBaseIntentService {
         super(GCM_SENDER_ID);
     }
 
-    private void sendServiceIntent(String extra, String extraValue) {
-        Intent serviceIntent = new Intent(getApplicationContext(), XoClientService.class);
-        serviceIntent.putExtra(extra, extraValue);
-        startService(serviceIntent);
-    }
-
-    private void wakeClient() {
-        sendServiceIntent(EXTRA_WAKE_CLIENT, "dummy");
-    }
-
     @Override
     protected void onMessage(Context context, Intent intent) {
         LOG.info("onMessage(" + intent.toString() + ")");
@@ -83,4 +73,13 @@ public class TalkPushService extends GCMBaseIntentService {
         sendServiceIntent(EXTRA_GCM_UNREGISTERED, registrationId);
     }
 
+    private void wakeClient() {
+        sendServiceIntent(EXTRA_WAKE_CLIENT, "dummy");
+    }
+
+    private void sendServiceIntent(String extra, String extraValue) {
+        Intent serviceIntent = new Intent(getApplicationContext(), XoClientService.class);
+        serviceIntent.putExtra(extra, extraValue);
+        startService(serviceIntent);
+    }
 }
