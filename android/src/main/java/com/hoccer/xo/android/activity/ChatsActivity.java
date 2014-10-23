@@ -97,7 +97,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         // if the client is not yet registered start the registration procedure
         if (!getXoClient().isRegistered()) {
             Intent intent = new Intent(this, SingleProfileActivity.class);
-            intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CREATE_SELF, true);
+            intent.putExtra(SingleProfileActivity.EXTRA_INITIALIZE_SELF, true);
             startActivity(intent);
         }
 
