@@ -7,7 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.fragment.CredentialTransferFragment;
+import com.hoccer.xo.android.fragment.SingleProfileCreationFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.release.R;
 
@@ -16,11 +16,12 @@ import com.hoccer.xo.release.R;
  */
 public class SingleProfileActivity extends ComposableActivity {
 
-    /* use this extra to start client initialization */
-    public static final String EXTRA_INITIALIZE_SELF = "clientInitializeSelf";
+    /* use this extra to open in "client registration" mode */
+    public static final String EXTRA_CLIENT_CREATE_SELF = "clientCreateSelf";
 
     /* use this extra to show the given contact */
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
+    public static final String SINGLE_PROFILE_FRAGMENT = "SINGLE_PROFILE_FRAGMENT";
 
     ActionBar mActionBar;
 
@@ -51,8 +52,8 @@ public class SingleProfileActivity extends ComposableActivity {
         Intent intent = getIntent();
 
         if (intent != null) {
-            if (intent.hasExtra(EXTRA_INITIALIZE_SELF)) {
-                    showCredentialTransferFragment();
+            if (intent.hasExtra(EXTRA_CLIENT_CREATE_SELF)) {
+                showCreateSingleProfileFragment();
             } else if (intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
                 int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
                 if (contactId == -1) {
@@ -66,13 +67,6 @@ public class SingleProfileActivity extends ComposableActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-	private void showCredentialTransferFragment() {
-        CredentialTransferFragment fragment = new CredentialTransferFragment();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_single_profile_fragment_container, fragment);
-        ft.commit();
-    }
-
     private void showSingleProfileFragment(int contactId) {
         Bundle bundle = new Bundle();
         bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, contactId);
@@ -82,6 +76,14 @@ public class SingleProfileActivity extends ComposableActivity {
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fl_single_profile_fragment_container, fragment);
+        ft.commit();
+    }
+
+    private void showCreateSingleProfileFragment() {
+        Fragment fragment = new SingleProfileCreationFragment();
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fl_single_profile_fragment_container, fragment, SINGLE_PROFILE_FRAGMENT);
         ft.commit();
     }
 }

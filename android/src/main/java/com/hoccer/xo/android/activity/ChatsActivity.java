@@ -49,7 +49,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     @Override
     protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+        return new ActivityComponent[]{new MediaPlayerActivityComponent(this)};
     }
 
     @Override
@@ -94,10 +94,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         getXoClient().registerStateListener(this);
 
-        // if the client is not yet registered start the registration procedure
+        // if the client is not yet registered start initialization process
         if (!getXoClient().isRegistered()) {
-            Intent intent = new Intent(this, SingleProfileActivity.class);
-            intent.putExtra(SingleProfileActivity.EXTRA_INITIALIZE_SELF, true);
+            Intent intent = new Intent(this, RegistrationActivity.class);
             startActivity(intent);
         }
 
@@ -113,11 +112,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             handleTokenPairingIntent(intent);
-        }
-        else if (Intent.ACTION_SEND.equals(intent.getAction())) {
+        } else if (Intent.ACTION_SEND.equals(intent.getAction())) {
             handleShareIntent(intent);
-        }
-        else if (intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+        } else if (intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             handleContactIdIntent(intent);
         }
     }

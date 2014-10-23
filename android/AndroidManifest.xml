@@ -181,6 +181,14 @@
                     android:value="com.hoccer.xo.android.activity.AudioAttachmentListActivity"/>
         </activity>
 
+        <!-- Registration activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.RegistrationActivity"
+                android:label="@string/actionbar_default_title"
+                android:screenOrientation="portrait"
+                android:windowSoftInputMode="stateHidden">
+        </activity>
+
         <!-- Single Profile activity -->
         <activity
                 android:name="com.hoccer.xo.android.activity.SingleProfileActivity"
