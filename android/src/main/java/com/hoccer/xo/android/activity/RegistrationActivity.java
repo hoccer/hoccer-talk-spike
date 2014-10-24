@@ -1,5 +1,7 @@
 package com.hoccer.xo.android.activity;
 
+import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -83,5 +85,26 @@ public class RegistrationActivity extends XoActivity {
         intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CREATE_SELF, true);
         startActivity(intent);
         finish();
+    }
+
+    public void importCredentials() {
+        final String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
+        final Intent intent = new Intent();
+        final ComponentName component = new ComponentName(packageName, "com.hoccer.xo.android.activity.DataExportActivity");
+        intent.setComponent(component);
+        startActivityForResult(intent, 0);
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 0) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                final String credentialsJson = data.getStringExtra("credentialsJson");
+                LOG.info("got credentials: " + credentialsJson);
+            } else {
+                LOG.info("did not get credentials");
+            }
+        }
     }
 }

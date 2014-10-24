@@ -23,27 +23,24 @@ public class ImportCredentialFragment extends XoFragment {
     public void onViewCreated(final View view, final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final Button importButton = (Button) view.findViewById(R.id.btn_import_credentials);
-        importButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                importCredentials();
-            }
-        });
+        final RegistrationActivity registrationActivity = (RegistrationActivity) getActivity();
+        if (registrationActivity != null) {
 
-        final Button newClientButton = (Button) getView().findViewById(R.id.btn_create_new_client);
-        newClientButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                final RegistrationActivity registrationActivity = (RegistrationActivity) getActivity();
-                if (registrationActivity != null) {
+            final Button importButton = (Button) view.findViewById(R.id.btn_import_credentials);
+            importButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    registrationActivity.importCredentials();
+                }
+            });
+
+            final Button newClientButton = (Button) getView().findViewById(R.id.btn_create_new_client);
+            newClientButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
                     registrationActivity.startNewClientRegistration();
                 }
-            }
-        });
-    }
-
-    private void importCredentials() {
-        // todo actually import credentials and renew the srp secret
+            });
+        }
     }
 }
