@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
@@ -127,7 +126,7 @@ public class ChatVideoItem extends ChatMessageItem {
 
         // load thumbnail with picasso
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
-        Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
+        Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
         Picasso.with(mContext).load("file://" + mThumbnailPath)
                 .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * ChatImageItem.IMAGE_SCALE_FACTOR), (int) (height * ChatImageItem.IMAGE_SCALE_FACTOR))

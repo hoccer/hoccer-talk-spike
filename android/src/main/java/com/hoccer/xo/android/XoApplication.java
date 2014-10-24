@@ -202,7 +202,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         CONFIGURATION = new XoAndroidClientConfiguration(this);
 
         // initialize logging system
-        XoLogging.initialize(this);
+        XoLogging.initialize(this, CONFIGURATION.getAppName().replace(" ", ""));
 
         // configure ormlite to use log4j
         System.setProperty("com.j256.ormlite.logger.type", "LOG4J");

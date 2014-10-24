@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Hoccer XO</string>
+    <string name="app_name">${app.name}</string>
 
     <string name="demo_message">Lorem ipsum dolor…</string>
 
@@ -24,7 +24,7 @@
     <string name="menu_add_attachment">Anhang hinzufügen</string>
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
-    <string name="menu_about">Über Hoccer XO</string>
+    <string name="menu_about">Über ${app.name}</string>
     <string name="menu_music_viewer">Medien</string>
     <string name="menu_reconnect">erneut verbinden</string>
     <string name="menu_quit">schließen</string>
@@ -341,9 +341,9 @@
     <string name="contact_item_sent_attachment">%1$s Datei gesendet</string>
     <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar verwenden.</string>
     <string name="error_attachment_selection">Sie können diese Datei nicht als Anhang verwenden.</string>
-    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App HoccerXO zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\nxo %3$s</string>
-    <string name="email_invitation_subject">Triff mich bei Hoccer!</string>
-    <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Gratis-App Hoccer XO zum sicheren chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
+    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\nxo %3$s</string>
+    <string name="email_invitation_subject">Triff mich bei ${app.name}!</string>
+    <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Gratis-App ${app.name} zum sicheren chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>
     <string name="export_credentials_success">Zugangsdaten erfolgreich exportiert.</string>
     <string name="export_credentials_failure">Es ist ein Fehler beim Exportieren der Zugangsdaten aufgetreten.</string>
@@ -361,7 +361,7 @@
     <string name="tutorial_nearby_anchor">in-der-naehe</string>
     <string name="placeholder_nearby_text">Warten auf Kontakte %1$s…</string>
     <string name="placeholder_nearby_link_text">in der Nähe</string>
-    <string name="actionbar_default_title">Hoccer</string>
+    <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Medien</string>
     <string name="content_audio_by_contact_caption">Medien von %1$s</string>
     <string name="nearby_info_usercount">%1$d Benutzer in der Nähe</string>
@@ -390,7 +390,7 @@
     <string name="search_section_caption_audio_files">Audiodateien</string>
     <string name="search_section_caption_video_files">Videodateien</string>
 
-    <string name="about_advert_text">Hoccer XO \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt Hoccer neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. Hoccer XO ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
+    <string name="about_advert_text">${app.name} \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt ${app.name} neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. ${app.name} ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s (%2$d)</string>
 
     <!-- media types for "expecting ..." in message states -->
@@ -423,12 +423,11 @@
     <string name="nearby_invite_all">%1$d Mitglieder als Freunde einladen</string>
     <string name="nearby_disinvite_all">%1$d Mitglieder als Freunde ausladen</string>
 
-  <string name="profile_chat_info_text">Chat</string>
-  <!--<string name="messages_count">%1$s Nachrichten</string>-->
+    <string name="profile_chat_info_text">Chat</string>
+    <!--<string name="messages_count">%1$s Nachrichten</string>-->
 
-  <plurals name="message_count">
-    <item quantity="one">1 Nachricht</item>
-    <item quantity="other">%d Nachrichten</item>
-  </plurals>
-
+    <plurals name="message_count">
+        <item quantity="one">1 Nachricht</item>
+        <item quantity="other">%d Nachrichten</item>
+    </plurals>
 </resources>

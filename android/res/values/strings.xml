@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Hoccer XO</string>
+    <string name="app_name">${app.name}</string>
 
     <string name="demo_message">Lorem ipsum dolor…</string>
 
@@ -24,7 +24,7 @@
     <string name="menu_profile">Profile</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_music_viewer">Media</string>
-    <string name="menu_about">About Hoccer XO</string>
+    <string name="menu_about">About ${app.name}</string>
     <string name="menu_faq">FAQ</string>
     <string name="menu_tutorial">Tutorial</string>
     <string name="menu_reconnect">Reconnect</string>
@@ -362,9 +362,9 @@
     <string name="contact_item_sent_attachment">Sent %1$s attachment</string>
     <string name="error_avatar_selection">The image you have selected is not suitable as Avatar.</string>
     <string name="error_attachment_selection">The file you have selected cannot be used as an attachment.</string>
-    <string name="sms_invitation_text">Hey! I\'m now using the free app Hoccer XO for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\nxo %3$s</string>
-    <string name="email_invitation_subject">Join me at Hoccer!</string>
-    <string name="email_invitation_text">Hey!&lt;br&gt;I\'m now using the free app Hoccer XO for secure chatting. Download it now and add me as contact:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
+    <string name="sms_invitation_text">Hey! I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\nxo %3$s</string>
+    <string name="email_invitation_subject">Join me at ${app.name}!</string>
+    <string name="email_invitation_text">Hey!&lt;br&gt;I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as contact:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
     <string name="dialog_export_credentials_title">Export credentials</string>
     <string name="export_credentials_success">Successfully saved your credentials.</string>
     <string name="export_credentials_failure">Error while saving your credentials.</string>
@@ -396,7 +396,7 @@
     <string name="tutorial_nearby_anchor">nearby</string>
     <string name="placeholder_nearby_text">Waiting for others %1$s…</string>
     <string name="placeholder_nearby_link_text">nearby</string>
-    <string name="actionbar_default_title">Hoccer</string>
+    <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Media</string>
     <string name="content_audio_by_contact_caption">Media from %1$s</string>
     <string name="nearby_info_usercount">%1$d Users are Nearby</string>
@@ -409,7 +409,7 @@
     <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
     <string name="invite_several_entries">Has several entries</string>
 
-    <string name="about_advert_text">Hoccer XO \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. Hoccer sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. Hoccer XO provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
+    <string name="about_advert_text">${app.name} \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. ${app.name} sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. ${app.name} provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s (%2$d)</string>
 
     <string name="search_section_caption_contacts">Contacts</string>
@@ -447,11 +447,11 @@
     <string name="nearby_invite_all">invite %1$d group members as friend</string>
     <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
 
-  <string name="profile_chat_info_text">Chat</string>
-  <!--<string name="messages_count">%1$s Messages</string>-->
+    <string name="profile_chat_info_text">Chat</string>
+    <!--<string name="messages_count">%1$s Messages</string>-->
 
-  <plurals name="message_count">
-    <item quantity="one">1 Message</item>
-    <item quantity="other">%d Messages</item>
-  </plurals>
+    <plurals name="message_count">
+        <item quantity="one">1 Message</item>
+        <item quantity="other">%d Messages</item>
+    </plurals>
 </resources>
