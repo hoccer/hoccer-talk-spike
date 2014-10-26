@@ -10,15 +10,20 @@ import com.hoccer.scm.GitInfo;
 import com.hoccer.talk.server.database.JongoDatabase;
 import com.hoccer.talk.server.database.OrmliteDatabase;
 import com.hoccer.talk.server.database.migrations.DatabaseMigrationManager;
+import com.hoccer.talk.server.push.ApnsConfiguration;
+import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
 import com.hoccer.talk.server.cryptoutils.*;
 import com.hoccer.talk.servlets.CertificateInfoServlet;
+import com.hoccer.talk.servlets.InvitationServlet;
 import com.hoccer.talk.servlets.ServerInfoServlet;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
@@ -27,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -76,19 +82,21 @@ public class TalkServerMain {
     private void checkApnsCertificateExpirationStatus(TalkServerConfiguration config) {
         // report APNS expiry
         if (config.isApnsEnabled()) {
-            final P12CertificateChecker p12ProductionVerifier = new P12CertificateChecker(
-                    config.getApnsCertProductionPath(),
-                    config.getApnsCertProductionPassword());
-            final P12CertificateChecker p12SandboxVerifier = new P12CertificateChecker(
-                    config.getApnsCertProductionPath(),
-                    config.getApnsCertProductionPassword());
-            try {
-                LOG.info("APNS production cert expiryDate is: " + p12ProductionVerifier.getCertificateExpiryDate());
-                LOG.info("APNS production cert expiration status: " + p12ProductionVerifier.isExpired());
-                LOG.info("APNS sandbox cert expiryDate is: " + p12SandboxVerifier.getCertificateExpiryDate());
-                LOG.info("APNS sandbox cert expiration status: " + p12SandboxVerifier.isExpired());
-            } catch (IOException e) {
-                e.printStackTrace();
+            for (Map.Entry<String, ApnsConfiguration> entry : config.getApnsConfigurations().entrySet()) {
+                String clientName = entry.getKey();
+                ApnsConfiguration apnsConfiguration = entry.getValue();
+
+                for (PushAgent.APNS_SERVICE_TYPE type : PushAgent.APNS_SERVICE_TYPE.values()) {
+                    ApnsConfiguration.Certificate cert = apnsConfiguration.getCertificate(type);
+                    final P12CertificateChecker checker = new P12CertificateChecker(cert.getPath(), cert.getPassword());
+
+                    try {
+                        LOG.info("APNS " + type + " cert expiryDate is: " + checker.getCertificateExpiryDate());
+                        LOG.info("APNS " + type + " cert expiration status: " + checker.isExpired());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }
@@ -112,12 +120,26 @@ public class TalkServerMain {
         serverInfoContextHandler.addServlet(ServerInfoServlet.class, "/info");
         serverInfoContextHandler.addServlet(CertificateInfoServlet.class, "/certificates");
 
+        // handler for invitation landing pages
+        ServletContextHandler invitationContextHandler = new ServletContextHandler();
+        invitationContextHandler.setContextPath("/invite");
+        invitationContextHandler.setAttribute("server", talkServer);
+        invitationContextHandler.addServlet(InvitationServlet.class, "/*");
+
+        // handler for static files
+        ContextHandler staticHandler = new ContextHandler("/static");
+        ResourceHandler staticResourceHandler = new ResourceHandler();
+        staticResourceHandler.setResourceBase(getClass().getResource("/static").toExternalForm());
+        staticHandler.setHandler(staticResourceHandler);
+
         // handler for talk websocket connections
         WebSocketHandler clientHandler = new TalkRpcConnectionHandler(talkServer);
 
         // set server handlers
         HandlerCollection handlerCollection = new HandlerCollection();
         handlerCollection.addHandler(clientHandler);
+        handlerCollection.addHandler(invitationContextHandler);
+        handlerCollection.addHandler(staticHandler);
         handlerCollection.addHandler(serverInfoContextHandler);
         handlerCollection.addHandler(metricsContextHandler);
         server.setHandler(handlerCollection);

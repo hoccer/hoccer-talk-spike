@@ -8,16 +8,16 @@
                 android:title="@string/menu_about"
                 android:key="preference_about">
             <intent android:targetClass="com.hoccer.xo.android.activity.LegalImprintActivity"
-                    android:targetPackage="com.hoccer.xo.release"
+                    android:targetPackage="${apk.package.name}"
                     android:action="android.intent.action.VIEW">
-                <extra android:name="xo_legal_imprint_display_mode" android:value="1"></extra>
+                <extra android:name="xo_legal_imprint_display_mode" android:value="ABOUT"></extra>
             </intent>
         </Preference>
         <Preference
                 android:title="@string/menu_faq"
                 android:key="preference_faq">
             <intent android:targetClass="com.hoccer.xo.android.activity.FaqTutorialActivity"
-                    android:targetPackage="com.hoccer.xo.release"
+                    android:targetPackage="${apk.package.name}"
                     android:action="android.intent.action.VIEW">
                 <extra android:name="URL" android:value="@string/link_faq"></extra>
             </intent>
@@ -26,33 +26,33 @@
                 android:title="@string/menu_tutorial"
                 android:key="preference_tutorial">
             <intent android:targetClass="com.hoccer.xo.android.activity.FaqTutorialActivity"
-                    android:targetPackage="com.hoccer.xo.release"
+                    android:targetPackage="${apk.package.name}"
                     android:action="android.intent.action.VIEW">
                 <extra android:name="URL" android:value="@string/link_tutorial"></extra>
             </intent>
         </Preference>
     </PreferenceCategory>
 
-  <PreferenceCategory
-      android:title="@string/pref_category_image_encoding" >
+    <PreferenceCategory
+            android:title="@string/pref_category_image_encoding">
 
-    <ListPreference
-        android:key="preference_image_encoding_size"
-        android:title="@string/pref_image_size"
-        android:entries="@array/image_transfer_size_options"
-        android:entryValues="@array/image_transfer_size_options_values"
-        android:defaultValue="-1"/>
+        <ListPreference
+                android:key="preference_image_encoding_size"
+                android:title="@string/pref_image_size"
+                android:entries="@array/image_transfer_size_options"
+                android:entryValues="@array/image_transfer_size_options_values"
+                android:defaultValue="-1"/>
 
-    <ListPreference
-        android:key="preference_image_encoding_quality"
-        android:title="@string/pref_image_quality"
-        android:entries="@array/image_transfer_quality_options"
-        android:entryValues="@array/image_transfer_quality_options_values"
-        android:defaultValue="100"/>
+        <ListPreference
+                android:key="preference_image_encoding_quality"
+                android:title="@string/pref_image_quality"
+                android:entries="@array/image_transfer_quality_options"
+                android:entryValues="@array/image_transfer_quality_options_values"
+                android:defaultValue="100"/>
 
-  </PreferenceCategory>
+    </PreferenceCategory>
 
-  <PreferenceCategory
+    <PreferenceCategory
             android:title="@string/pref_category_transfer_mobile">
 
         <ListPreference
@@ -131,9 +131,9 @@
                 android:title="@string/menu_licenses"
                 android:key="preference_licenses">
             <intent android:targetClass="com.hoccer.xo.android.activity.LegalImprintActivity"
-                    android:targetPackage="com.hoccer.xo.release"
+                    android:targetPackage="${apk.package.name}"
                     android:action="android.intent.action.VIEW">
-                <extra android:name="xo_legal_imprint_display_mode" android:value="2"></extra>
+                <extra android:name="xo_legal_imprint_display_mode" android:value="LICENSES"></extra>
             </intent>
         </Preference>
     </PreferenceCategory>

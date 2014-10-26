@@ -10,6 +10,7 @@ import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.content.SelectedContent;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -31,18 +32,7 @@ public class ContactOperations {
     }
 
     public static void sendTransferToContact(XoTransfer transfer, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
-        File file = new File(transfer.getDataFile());
-
-        TalkClientUpload upload = new TalkClientUpload();
-        upload.initializeAsAttachment(
-                transfer.getFileName(),
-                null, // HACK: when re-sending an upload or download, the content url is cleared to exclude it from the music browser
-                transfer.getContentDataUrl(),
-                transfer.getContentType(),
-                transfer.getContentMediaType(),
-                transfer.getContentAspectRatio(),
-                (int)file.length(),
-                transfer.getContentHmac());
+        TalkClientUpload upload = SelectedContent.createAttachmentUpload(transfer);
 
         String messageTag = XoApplication.getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
         LOG.debug("Sending Attachment " + upload + " to contact " + contact);

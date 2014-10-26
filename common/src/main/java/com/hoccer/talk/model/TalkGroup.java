@@ -35,6 +35,7 @@ public class TalkGroup {
         return false;
     }
 
+    // needed for ormlight database
     private String _id;
 
     @DatabaseField(columnName = FIELD_GROUP_ID, id = true)
@@ -72,9 +73,6 @@ public class TalkGroup {
 
     @DatabaseField
     Date groupKeyUpdateInProgress;
-
-    public TalkGroup() {
-    }
 
     @JsonIgnore
     public boolean isTypeNearby() {

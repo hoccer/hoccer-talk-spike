@@ -10,10 +10,8 @@ import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
-import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-// import java.security.Provider;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -115,16 +113,12 @@ public class ClientMessage extends TalkToolCommand {
     }
 
     private String getContentHmac(String contentDataUrl) {
-        byte[] hmac = new byte[0];
-        String contentHmac = null;
         try {
-            hmac = CryptoUtils.computeHmac(contentDataUrl);
-            contentHmac = new String(Base64.encodeBase64(hmac));
-
+            return CryptoUtils.computeHmac(contentDataUrl);
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-        return contentHmac;
     }
 
     private TalkClientUpload createAttachment(File fileToUpload) {

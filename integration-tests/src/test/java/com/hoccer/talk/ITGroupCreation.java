@@ -1,8 +1,6 @@
 package com.hoccer.talk;
 
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestHelper;
 import com.hoccer.talk.util.TestTalkServer;
@@ -13,11 +11,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.HashMap;
-
-import static com.jayway.awaitility.Awaitility.await;
-import static com.jayway.awaitility.Awaitility.to;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
 
 @RunWith(JUnit4.class)
 public class ITGroupCreation extends IntegrationTest {

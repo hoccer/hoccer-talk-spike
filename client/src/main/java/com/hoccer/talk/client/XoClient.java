@@ -2919,13 +2919,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void updateClientPresence(TalkPresence presence, Set<String> fields) {
         LOG.debug("updateClientPresence(" + presence.getClientId() + ")");
-        boolean newContact = false;
-        TalkClientContact clientContact = null;
+        TalkClientContact clientContact;
         try {
             clientContact = mDatabase.findContactByClientId(presence.getClientId(), false);
             if (clientContact == null) {
                 clientContact = mDatabase.findContactByClientId(presence.getClientId(), true);
-                newContact = true;
             }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -2947,6 +2945,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             clientContact.modifyPresence(presence, fields);
         }
 
+        // ensure that a timestamp is set, this is a manual migration step for the newly introduced timestamp field
         if (clientContact.getCreatedTimeStamp() == null) {
             clientContact.setCreatedTimeStamp(new Date());
         }
@@ -3109,14 +3108,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void updateGroupPresence(TalkGroup group) {
         LOG.info("updateGroupPresence(" + group.getGroupId() + ")");
 
-        boolean newGroup = false;
-        boolean newContact = false;
-        TalkClientContact groupContact = null;
+        TalkClientContact groupContact;
         try {
             groupContact = mDatabase.findContactByGroupTag(group.getGroupTag());
             if(groupContact == null) {
                 groupContact = mDatabase.findContactByGroupId(group.getGroupId(), true);
-                newGroup = true;
             }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -3128,6 +3124,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             return;
         }
 
+        // ensure that a timestamp is set, this is a manual migration step for the newly introduced timestamp field
         if (groupContact.getCreatedTimeStamp() == null) {
             groupContact.setCreatedTimeStamp(new Date());
         }
@@ -3216,17 +3213,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public void updateGroupMember(TalkGroupMember member) {
-        updateGroupMemberHere(member);
-    }
-
-
-    public void updateGroupMemberHere(TalkGroupMember member) {
         LOG.info("updateGroupMember(groupId: '" + member.getGroupId() + "', clientId: '" + member.getClientId() + "', state: '" + member.getState() + "')");
         TalkClientContact groupContact;
         TalkClientContact clientContact;
-        boolean needGroupUpdate = false;
-        boolean newGroup = false; // TODO: should we read this flags somewhere ??
-        boolean newContact = false; // TODO: should we read this flags somewhere ??
 
         try {
             groupContact = mDatabase.findContactByGroupId(member.getGroupId(), false);
@@ -3235,7 +3224,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 if (createGroup) {
                     LOG.info("creating group for member in state '" + member.getState() + "' groupId '" + member.getGroupId() + "'");
                     groupContact = mDatabase.findContactByGroupId(member.getGroupId(), true);
-                    newGroup = true;
                 } else {
                     LOG.warn("ignoring incoming member for unknown group for member in state '" + member.getState() + "' groupId '" + member.getGroupId() + "'");
                     return;
@@ -3248,7 +3236,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 if (createContact) {
                     LOG.info("creating contact for member in state '" + member.getState() + "' clientId '" + member.getClientId() + "'");
                     clientContact = mDatabase.findContactByClientId(member.getClientId(), true);
-                    newContact = true;
                 } else {
                     LOG.warn("ignoring incoming member for unknown contact for member in state '" + member.getState() + "' clientId '" + member.getGroupId() + "'");
                     return;
@@ -3268,6 +3255,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             return;
         }
 
+        // ensure that a timestamp is set, this is a manual migration step for the newly introduced timestamp field
         if (groupContact.getCreatedTimeStamp() == null) {
             groupContact.setCreatedTimeStamp(new Date());
         }
@@ -3328,27 +3316,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         for (int i = 0; i < mContactListeners.size(); i++) {
             IXoContactListener listener = mContactListeners.get(i);
             listener.onGroupMembershipChanged(groupContact);
-        }
-
-        // TODO: needGroupUpdate is never changed, do we mean newGroup or newClient instead ??
-        if (needGroupUpdate) {
-            LOG.debug("we now require a group update to retrieve presences");
-            mExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        TalkGroup[] groups = mServerRpc.getGroups(new Date(0));
-                        for (TalkGroup group : groups) {
-                            if (group.getState().equals(TalkGroup.STATE_EXISTS)) {
-                                LOG.debug("updating group " + group.getGroupId());
-                                updateGroupPresence(group);
-                            }
-                        }
-                    } catch (JsonRpcClientException e) {
-                        LOG.error("Error while getting groups: ", e);
-                    }
-                }
-            });
         }
     }
 

@@ -912,8 +912,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 setRelationship(clientId, mConnection.getClientId(), TalkRelationship.STATE_NONE, TalkRelationship.STATE_NONE, true);
             } else if (rel.isBlocked()) {
                 throw new RuntimeException("already blocked");
+            } else {
+                throw new RuntimeException("illegal state");
             }
-            throw new RuntimeException("illegal state");
         }
     }
 

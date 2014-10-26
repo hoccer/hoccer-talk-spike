@@ -182,14 +182,14 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             }
             if (oldVersion < 17) {
                 TableUtils.createTable(cs, TalkClientMediaCollection.class);
+                TableUtils.createTable(cs, TalkClientMediaCollectionRelation.class);
             }
             if (oldVersion < 18) {
                 Dao<TalkClientDownload, Integer> talkClientDownloads = getDao(TalkClientDownload.class);
                 talkClientDownloads.executeRaw(addColumn("clientDownload", "approvalState", DB_TYPE_STRING));
             }
             if (oldVersion < 19) {
-                Dao<TalkClientMediaCollectionRelation, Integer> mediaCollectionRelations = getDao(TalkClientMediaCollectionRelation.class);
-                mediaCollectionRelations.executeRaw(addColumn("mediaCollectionRelation", "uploadItem", DB_TYPE_INTEGER));
+                // the changes here have been removed because they have been integrated in version update 17 already
             }
             if (oldVersion < 20) {
                 Dao<TalkClientDownload, Integer> talkClientDownloads = getDao(TalkClientDownload.class);

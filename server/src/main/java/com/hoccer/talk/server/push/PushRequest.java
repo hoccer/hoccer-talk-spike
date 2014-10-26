@@ -111,27 +111,36 @@ public class PushRequest {
     }
 
     private void performApns(int deliveringCount) {
-        LOG.info("APNS push for " + mClientId);
+        String clientName = mConfig.getApnsDefaultClientName();
+        PushAgent.APNS_SERVICE_TYPE type = PushAgent.APNS_SERVICE_TYPE.PRODUCTION;
 
-        // We use the production service as default in all cases, even if no client host info is present,
-        // sandbox will only be used if buildVariant of host info is 'debug'
-        ApnsService apnsService = mAgent.getApnsService(PushAgent.APNS_SERVICE_TYPE.PRODUCTION);
-        if (mClientHostInfo != null && "debug".equals(mClientHostInfo.getClientBuildVariant())) {
-            LOG.info("  * using sandbox apns service");
-            apnsService = mAgent.getApnsService(PushAgent.APNS_SERVICE_TYPE.SANDBOX);
+        if (mClientHostInfo != null) {
+            clientName = mClientHostInfo.getClientName();
+
+            if ("debug".equals(mClientHostInfo.getClientBuildVariant())) {
+                type = PushAgent.APNS_SERVICE_TYPE.SANDBOX;
+            }
         }
 
-        PayloadBuilder b = APNS.newPayload();
-        int messageCount = deliveringCount + mClient.getApnsUnreadMessages();
-        if (messageCount > 1) {
-            b.localizedKey("apn_new_messages");
-            b.localizedArguments(String.valueOf(messageCount));
+        ApnsService apnsService = mAgent.getApnsService(clientName, type);
+
+        if (apnsService != null) {
+            LOG.info("APNS push for " + mClientId + " using " + type + " type");
+
+            PayloadBuilder b = APNS.newPayload();
+            int messageCount = deliveringCount + mClient.getApnsUnreadMessages();
+            if (messageCount > 1) {
+                b.localizedKey("apn_new_messages");
+                b.localizedArguments(String.valueOf(messageCount));
+            } else {
+                b.localizedKey("apn_one_new_message");
+            }
+
+            b.badge(messageCount);
+            b.sound("default");
+            apnsService.push(mClient.getApnsToken(), b.build());
         } else {
-            b.localizedKey("apn_one_new_message");
+            LOG.error("APNS push skipped, no service configured for clientName '" + clientName + "' and type '" + type + "'");
         }
-
-        b.badge(messageCount);
-        b.sound("default");
-        apnsService.push(mClient.getApnsToken(), b.build());
     }
 }

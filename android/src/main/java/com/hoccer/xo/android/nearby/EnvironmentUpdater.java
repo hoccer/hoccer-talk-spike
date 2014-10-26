@@ -9,7 +9,6 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.model.TalkEnvironment;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import org.apache.log4j.Logger;
 
@@ -23,83 +22,83 @@ public class EnvironmentUpdater implements LocationListener {
     private static final Logger LOG = Logger.getLogger(EnvironmentUpdater.class);
 
     private static final long MIN_UPDATE_TIME = 1000;
-
     private static final long MIN_UPDATE_MOVED = 5;
 
-    private final Context mContext;
-    private final XoClient mClient = XoApplication.getXoClient();
+    private final XoClient mClient;
 
     private final LocationManager mLocationManager;
     private final WifiManager mWifiManager;
 
-    private final boolean mNetworkProviderAvailable;
-    private final boolean mGpsProviderAvailable;
-    private boolean isEnabled = false;
+    private boolean mIsEnabled = false;
 
-    public EnvironmentUpdater(Context pContext) {
-        mContext = pContext;
+    public EnvironmentUpdater(Context context, XoClient client) {
+        mClient = client;
 
-        mLocationManager = (LocationManager) pContext.getSystemService(Context.LOCATION_SERVICE);
-        mWifiManager = (WifiManager) pContext.getSystemService(Context.WIFI_SERVICE);
-
-        mNetworkProviderAvailable = mLocationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER);
-        mGpsProviderAvailable = mLocationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER);
-    }
-
-    public Context getContext() {
-        return mContext;
-    }
-
-    public boolean isEnabled() {
-        return isEnabled;
+        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
     public void startEnvironmentTracking() throws EnvironmentUpdaterException {
         // TODO: handle failed startups
-        isEnabled = true;
+        mIsEnabled = true;
 
-        if (!mGpsProviderAvailable && !mNetworkProviderAvailable) {
+        if (!isGpsProviderEnabled() && !isNetworkProviderEnabled()) {
             throw new EnvironmentUpdaterException("no source for environment information available");
         }
 
-        if (mGpsProviderAvailable) {
+        if (isGpsProviderEnabled()) {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, this);
         }
 
-        if (mNetworkProviderAvailable) {
+        if (isNetworkProviderEnabled()) {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_UPDATE_TIME, MIN_UPDATE_MOVED, this);
         }
+
+        sendEnvironmentUpdate();
     }
 
     public void stopEnvironmentTracking() {
         mLocationManager.removeUpdates(this);
         mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
-        isEnabled = false;
+        mIsEnabled = false;
     }
 
-    public void sendEnvironmentUpdate() {
+    public boolean isEnabled() {
+        return mIsEnabled;
+    }
+
+    private boolean isGpsProviderEnabled() {
+        return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    private boolean isNetworkProviderEnabled() {
+        return mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    private void sendEnvironmentUpdate() {
         TalkEnvironment environment = getEnvironment();
         if (environment.isValid()) {
             mClient.sendEnvironmentUpdate(environment);
         }
     }
 
-    public TalkEnvironment getEnvironment() {
+    private TalkEnvironment getEnvironment() {
         LOG.trace("getEnvironment()");
-        TalkEnvironment theEnvironment = new TalkEnvironment();
 
-        theEnvironment.setType(TalkEnvironment.TYPE_NEARBY);
+        TalkEnvironment environment = new TalkEnvironment();
+        environment.setType(TalkEnvironment.TYPE_NEARBY);
+        environment.setTimestamp(new Date());
 
         Location networkLocation = null;
         Location gpsLocation = null;
-        if (mNetworkProviderAvailable) {
+        if (isNetworkProviderEnabled()) {
             networkLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
-        if (mGpsProviderAvailable) {
+        if (isGpsProviderEnabled()) {
             gpsLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         }
 
-        Location location = null;
+        Location location;
         if (gpsLocation != null && networkLocation != null) {
             // both available, select most precise
             if (gpsLocation.getAccuracy() < networkLocation.getAccuracy()) {
@@ -110,14 +109,15 @@ public class EnvironmentUpdater implements LocationListener {
         } else {
             location = gpsLocation != null ? gpsLocation : networkLocation;
         }
+
         if (location != null) {
             Double[] geoLocation = {location.getLongitude(), location.getLatitude()};
-            theEnvironment.setGeoLocation(geoLocation);
-            theEnvironment.setLocationType(location.getProvider());
+            environment.setGeoLocation(geoLocation);
+            environment.setLocationType(location.getProvider());
             if (location.hasAccuracy()) {
-                theEnvironment.setAccuracy(location.getAccuracy());
+                environment.setAccuracy(location.getAccuracy());
             } else {
-                theEnvironment.setAccuracy(0.0f);
+                environment.setAccuracy(0.0f);
             }
         }
 
@@ -128,39 +128,35 @@ public class EnvironmentUpdater implements LocationListener {
             for (ScanResult scan : scanResults) {
                 bssids.add(scan.BSSID);
             }
-            theEnvironment.setBssids(bssids.toArray(new String[bssids.size()]));
+            environment.setBssids(bssids.toArray(new String[bssids.size()]));
         }
-        theEnvironment.setTimestamp(new Date());
-        return theEnvironment;
-    }
 
+        return environment;
+    }
 
     @Override
     public void onLocationChanged(Location location) {
         LOG.debug("onLocationChanged:" + location.toString());
-        if (isEnabled) {
+        if (mIsEnabled) {
             sendEnvironmentUpdate();
         }
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        LOG.debug("onProviderDisabled:" + provider);
-        mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
+        LOG.debug("ignoring onProviderDisabled: " + provider);
+        // we're only interested in onLocationChanged()
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        LOG.debug("onProviderEnabled:" + provider);
-        sendEnvironmentUpdate();
+        LOG.debug("ignoring onProviderEnabled: " + provider);
+        // we're only interested in onLocationChanged()
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        LOG.debug("onStatusChanged:" + provider);
-        if (isEnabled) {
-            sendEnvironmentUpdate();
-        }
+        LOG.debug("ignoring onStatusChanged: " + provider);
+        // we're only interested in onLocationChanged()
     }
-
 }

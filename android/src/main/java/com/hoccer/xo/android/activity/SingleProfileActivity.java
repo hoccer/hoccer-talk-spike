@@ -3,33 +3,32 @@ package com.hoccer.xo.android.activity;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Menu;
-import android.view.MenuItem;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkRelationship;
-import com.hoccer.xo.android.base.XoActionbarActivity;
+import com.hoccer.xo.android.activity.component.ActivityComponent;
+import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
+import com.hoccer.xo.android.fragment.SingleProfileCreationFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
 import com.hoccer.xo.release.R;
 
 /**
  * Activity wrapping a single profile fragment
  */
-public class SingleProfileActivity extends XoActionbarActivity {
+public class SingleProfileActivity extends ComposableActivity {
 
     /* use this extra to open in "client registration" mode */
     public static final String EXTRA_CLIENT_CREATE_SELF = "clientCreateSelf";
 
     /* use this extra to show the given contact */
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
-
-    Mode mMode;
+    public static final String SINGLE_PROFILE_FRAGMENT = "SINGLE_PROFILE_FRAGMENT";
 
     ActionBar mActionBar;
 
-    SingleProfileFragment mSingleProfileFragment;
+    @Override
+    protected ActivityComponent[] createComponents() {
+        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+    }
 
     @Override
     protected int getLayoutResource() {
@@ -68,44 +67,23 @@ public class SingleProfileActivity extends XoActionbarActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    @Override
-    protected void onResume() {
-        LOG.debug("onResume()");
-        super.onResume();
-
-        if (mMode == Mode.CREATE_SELF) {
-            getActionBar().setDisplayHomeAsUpEnabled(false);
-        }
-    }
-
     private void showSingleProfileFragment(int contactId) {
         Bundle bundle = new Bundle();
         bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, contactId);
 
-        mSingleProfileFragment = new SingleProfileFragment();
-        mSingleProfileFragment.setArguments(bundle);
+        Fragment fragment = new SingleProfileFragment();
+        fragment.setArguments(bundle);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_single_profile_fragment_container, mSingleProfileFragment);
+        ft.replace(R.id.fl_single_profile_fragment_container, fragment);
         ft.commit();
     }
 
     private void showCreateSingleProfileFragment() {
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(SingleProfileFragment.ARG_CREATE_SELF, true);
-
-        mSingleProfileFragment = new SingleProfileFragment();
-        mSingleProfileFragment.setArguments(bundle);
+        Fragment fragment = new SingleProfileCreationFragment();
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_single_profile_fragment_container, mSingleProfileFragment);
+        ft.replace(R.id.fl_single_profile_fragment_container, fragment, SINGLE_PROFILE_FRAGMENT);
         ft.commit();
     }
-
-    public enum Mode {
-        PROFILE,
-        CREATE_SELF,
-        CONFIRM_SELF
-    }
-
 }

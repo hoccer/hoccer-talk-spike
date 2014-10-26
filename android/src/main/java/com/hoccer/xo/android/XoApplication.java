@@ -62,7 +62,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     /** global xo sound pool for system sounds (initialized in onCreate) */
     private static XoSoundPool SOUND_POOL = null;
 
-    public static EnvironmentUpdater ENVIRONMENT_UPDATER = null;
+    private static EnvironmentUpdater ENVIRONMENT_UPDATER = null;
 
     /** root of user-visible storage (initialized in onCreate) */
     private static File EXTERNAL_STORAGE = null;
@@ -202,7 +202,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         CONFIGURATION = new XoAndroidClientConfiguration(this);
 
         // initialize logging system
-        XoLogging.initialize(this);
+        XoLogging.initialize(this, CONFIGURATION.getAppName().replace(" ", ""));
 
         // configure ormlite to use log4j
         System.setProperty("com.j256.ormlite.logger.type", "LOG4J");
@@ -289,7 +289,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // create sound pool instance
         SOUND_POOL = new XoSoundPool(this);
 
-        ENVIRONMENT_UPDATER = new EnvironmentUpdater(this);
+        ENVIRONMENT_UPDATER = new EnvironmentUpdater(this, getXoClient());
     }
 
     @Override
@@ -378,7 +378,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
             try {
                 ENVIRONMENT_UPDATER.startEnvironmentTracking();
                 hasCurrentRunningNearbySession = true;
-                ENVIRONMENT_UPDATER.sendEnvironmentUpdate();
             } catch (EnvironmentUpdaterException e) {
                 LOG.error("Error when starting EnvironmentUpdater: ", e);
             }
