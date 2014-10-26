@@ -254,6 +254,36 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     @Override
+    public String srpChangeVerifier(String verifier, String salt) {
+        logCall("srpChangeVerifier(verifier: '" + verifier + "', salt: '" + salt + "')");
+
+        if (!mConnection.isLoggedIn()) {
+            throw new RuntimeException("Must be logged in to change verifier");
+        }
+
+        String clientId = mConnection.getClientId();
+
+        if (clientId == null) {
+            throw new RuntimeException("You need to generate an id before registering");
+        }
+
+        // TODO: check verifier and salt for viability
+
+        TalkClient client = mConnection.getClient();
+        client.setSrpSalt(salt);
+        client.setSrpVerifier(verifier);
+
+        try {
+            mDatabase.saveClient(client);
+            //mStatistics.signalClientRegisteredSucceeded();
+        } catch (RuntimeException e) {
+            //mStatistics.signalClientRegisteredFailed();
+            throw e;
+        }
+        return clientId;
+    }
+
+    @Override
     public String srpPhase1(String clientId, String A) {
         logCall("srpPhase1(clientId: '" + clientId + "', '" + A + "')");
 
@@ -753,6 +783,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
     // TODO: extract as generic TokenGenerator for the server in general?!
     // TODO: Do not use a command line tool for this! Use a library or so...
     private String genPw() {
+        return createPasswordLowerChars(10);
+        /*
         String result = null;
         ProcessBuilder pb = new ProcessBuilder("pwgen", "10", "1");
         try {
@@ -768,7 +800,35 @@ public class TalkRpcHandler implements ITalkRpcServer {
             LOG.error("Error in running 'pwgen'!", ioe);
         }
         return result;
+        */
     }
+
+    public static String createPasswordLowerChars(int n) {
+        char[] pw = new char[n];
+        for (int i=0; i < n; i++) {
+            int c = 'a' +  (int)(Math.random() * 26);
+            pw[i] = (char)c;
+        }
+        return new String(pw);
+    }
+
+    public static String createPassword(int n) {
+        char[] pw = new char[n];
+        int c  = 'A';
+        int  r1 = 0;
+        for (int i=0; i < n; i++)
+        {
+            r1 = (int)(Math.random() * 3);
+            switch(r1) {
+                case 0: c = '0' +  (int)(Math.random() * 10); break;
+                case 1: c = 'a' +  (int)(Math.random() * 26); break;
+                case 2: c = 'A' +  (int)(Math.random() * 26); break;
+            }
+            pw[i] = (char)c;
+        }
+        return new String(pw);
+    }
+
 
     @Override
     public boolean pairByToken(String secret) {
