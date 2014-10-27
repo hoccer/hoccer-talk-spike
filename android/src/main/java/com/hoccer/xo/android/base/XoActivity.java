@@ -304,13 +304,11 @@ public abstract class XoActivity extends FragmentActivity {
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
         // screen state listener
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         mScreenListener = new ScreenReceiver();
         registerReceiver(mScreenListener, filter);
 
         mAlertListener = new XoAlertListener(this);
-
     }
 
     @Override
@@ -467,22 +465,14 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     private class ScreenReceiver extends BroadcastReceiver {
-
-        private boolean wasScreenOn = true;
-
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                wasScreenOn = false;
-            } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                wasScreenOn = true;
+                if (!isAppInBackground) {
+                    applicationWillEnterBackground();
+                }
             }
         }
-
-        public boolean isScreenOn() {
-            return wasScreenOn;
-        }
-
     }
 
     @Override
