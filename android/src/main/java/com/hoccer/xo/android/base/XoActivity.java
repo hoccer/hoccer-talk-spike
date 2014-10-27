@@ -149,11 +149,11 @@ public abstract class XoActivity extends FragmentActivity {
 
 
     // Application background/foreground observation
-    public static boolean isAppInBackground = false;
-    public static boolean isWindowFocused = false;
-    public static boolean isMenuOpened = false;
-    public static boolean isBackOrUpPressed = false;
-    public static boolean isBackgroundActive = false;
+    private static boolean isAppInBackground = false;
+    private static boolean isWindowFocused = false;
+    private static boolean isMenuOpened = false;
+    private static boolean isBackOrUpPressed = false;
+    private static boolean isBackgroundActive = false;
 
     protected void applicationWillEnterForeground() {
         LOG.debug("Application will enter foreground.");
