@@ -21,7 +21,7 @@ public class SingleProfileActivity extends ComposableActivity {
 
     /* use this extra to show the given contact */
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
-    public static final String SINGLE_PROFILE_FRAGMENT = "SINGLE_PROFILE_FRAGMENT";
+    public static final String SINGLE_PROFILE_CREATION_FRAGMENT = "SINGLE_PROFILE_CREATION_FRAGMENT";
 
     ActionBar mActionBar;
 
@@ -83,7 +83,7 @@ public class SingleProfileActivity extends ComposableActivity {
         Fragment fragment = new SingleProfileCreationFragment();
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_single_profile_fragment_container, fragment, SINGLE_PROFILE_FRAGMENT);
+        ft.replace(R.id.fl_single_profile_fragment_container, fragment, SINGLE_PROFILE_CREATION_FRAGMENT);
         ft.commit();
     }
 }
