@@ -49,9 +49,9 @@ public class CredentialExportService extends IntentService {
             bundle.putString(EXTRA_RESULT_CREDENTIALS_JSON, credentialsJson);
 
             LOG.info("Exporting credentials");
-            resultReceiver.send(Activity.RESULT_OK, bundle);
+            //resultReceiver.send(Activity.RESULT_OK, bundle);
         } catch (Exception e) {
-            resultReceiver.send(Activity.RESULT_CANCELED, null);
+            //resultReceiver.send(Activity.RESULT_CANCELED, null);
         }
     }
 }

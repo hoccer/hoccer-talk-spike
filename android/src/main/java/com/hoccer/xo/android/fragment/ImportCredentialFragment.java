@@ -5,14 +5,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import com.hoccer.xo.android.activity.RegistrationActivity;
 import com.hoccer.xo.android.base.XoFragment;
+import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 /**
  * Fragment shows the credential import information.
  */
 public class ImportCredentialFragment extends XoFragment {
+
+    private static final Logger LOG = Logger.getLogger(ImportCredentialFragment.class);
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
@@ -25,12 +31,29 @@ public class ImportCredentialFragment extends XoFragment {
 
         final RegistrationActivity registrationActivity = (RegistrationActivity) getActivity();
         if (registrationActivity != null) {
-
             final Button importButton = (Button) view.findViewById(R.id.btn_import_credentials);
             importButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    registrationActivity.importCredentials();
+                    final View progressOverlay = view.findViewById(R.id.pb_import_progress);
+                    progressOverlay.setVisibility(View.VISIBLE);
+                    importButton.setEnabled(false);
+
+                    CredentialImporter.importCredentials(registrationActivity, new CredentialImporter.CredentialImportListener() {
+                        @Override
+                        public void onSuccess() {
+                            LOG.info("Credentials imported successfully");
+                            progressOverlay.setVisibility(View.GONE);
+                            importButton.setEnabled(true);
+                        }
+
+                        @Override
+                        public void onFailure() {
+                            LOG.info("Credentials import failed");
+                            progressOverlay.setVisibility(View.GONE);
+                            importButton.setEnabled(true);
+                        }
+                    });
                 }
             });
 
