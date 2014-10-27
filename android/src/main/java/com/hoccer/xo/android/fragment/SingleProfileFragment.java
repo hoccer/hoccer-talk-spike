@@ -212,13 +212,13 @@ public class SingleProfileFragment extends ProfileFragment
                 menu.findItem(R.id.menu_profile_unblock).setVisible(false);
                 menu.findItem(R.id.menu_profile_delete).setVisible(false);
             } else {
-                if (mContact.isNearby()) {
+                TalkRelationship relationship = mContact.getClientRelationship();
+                if (relationship == null && mContact.isNearby()) {
                     menu.findItem(R.id.menu_profile_edit).setVisible(false);
                     menu.findItem(R.id.menu_profile_delete).setVisible(false);
                     menu.findItem(R.id.menu_profile_block).setVisible(false);
                     menu.findItem(R.id.menu_profile_unblock).setVisible(false);
                 } else {
-                    TalkRelationship relationship = mContact.getClientRelationship();
                     if (relationship == null || relationship.isBlocked()) { // todo != null correct
                         menu.findItem(R.id.menu_profile_block).setVisible(false);
                         menu.findItem(R.id.menu_profile_unblock).setVisible(true);
