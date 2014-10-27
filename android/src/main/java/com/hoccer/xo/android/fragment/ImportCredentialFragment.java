@@ -35,23 +35,30 @@ public class ImportCredentialFragment extends XoFragment {
             importButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    final View progressOverlay = view.findViewById(R.id.pb_import_progress);
+                    final View progressOverlay = view.findViewById(R.id.rl_progress_overlay);
                     progressOverlay.setVisibility(View.VISIBLE);
-                    importButton.setEnabled(false);
 
                     CredentialImporter.importCredentials(registrationActivity, new CredentialImporter.CredentialImportListener() {
                         @Override
                         public void onSuccess() {
-                            LOG.info("Credentials imported successfully");
-                            progressOverlay.setVisibility(View.GONE);
-                            importButton.setEnabled(true);
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    LOG.info("Credentials imported successfully");
+                                    progressOverlay.setVisibility(View.GONE);
+                                }
+                            });
                         }
 
                         @Override
                         public void onFailure() {
-                            LOG.info("Credentials import failed");
-                            progressOverlay.setVisibility(View.GONE);
-                            importButton.setEnabled(true);
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    LOG.info("Credentials import failed");
+                                    progressOverlay.setVisibility(View.GONE);
+                                }
+                            });
                         }
                     });
                 }
