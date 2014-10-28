@@ -129,13 +129,13 @@ public class CredentialImporter {
 
                 if (resultCode == Activity.RESULT_OK && resultData != null) {
                     final byte[] credentials = resultData.getByteArray(CredentialExportService.EXTRA_RESULT_CREDENTIALS_JSON);
-                    XoApplication.getXoClient().setCredentialsFromEncryptedJson(credentials, CredentialExportService.JSON_ENCRYPTION_PASSWORD);
+                    XoApplication.getXoClient().setCredentialsFromEncryptedJson(credentials, CredentialExportService.CREDENTIALS_ENCRYPTION_PASSWORD);
 
                     // TODO renew srp secret
 
                     mListener.onSuccess();
                 } else {
-                    
+
                     // TODO handle error case gracefully
 
                     mListener.onFailure();
