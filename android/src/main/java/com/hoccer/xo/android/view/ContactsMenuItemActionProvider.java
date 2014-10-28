@@ -82,19 +82,13 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-
-    }
+    public void onContactAdded(TalkClientContact contact) {}
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-
-    }
+    public void onContactRemoved(TalkClientContact contact) {}
 
     @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-
-    }
+    public void onClientPresenceChanged(TalkClientContact contact) {}
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
@@ -102,9 +96,7 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
     }
 
     @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-
-    }
+    public void onGroupPresenceChanged(TalkClientContact contact) {}
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
