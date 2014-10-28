@@ -1996,63 +1996,59 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     }
 
-    public String extractCredentialsAsJson() throws RuntimeException {
+    public String getCredentialsAsJson() throws RuntimeException {
         try {
-            TalkClientContact selfContact = getSelfContact();
-            String clientId = selfContact.getClientId();
-            TalkClientSelf self = selfContact.getSelf();
+            final TalkClientContact selfContact = mSelfContact;
+            final String clientId = selfContact.getClientId();
+            final TalkClientSelf self = selfContact.getSelf();
 
-            ObjectMapper jsonMapper = new ObjectMapper();
-            ObjectNode rootNode = jsonMapper.createObjectNode();
+            final ObjectMapper jsonMapper = new ObjectMapper();
+            final ObjectNode rootNode = jsonMapper.createObjectNode();
             rootNode.put("password", self.getSrpSecret());
             rootNode.put("salt", self.getSrpSalt());
             rootNode.put("clientId", clientId);
             return jsonMapper.writeValueAsString(rootNode);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("decoder exception in extractCredentials", e);
             throw new RuntimeException("exception during extractCredentials", e);
         }
     }
 
-    public byte[] makeEncryptedCredentialsContainer(String containerPassword) throws Exception {
-        String credentialsJson = extractCredentialsAsJson();
+    public byte[] getCredentialsAsEncryptedJson(final String containerPassword) throws Exception {
+        final String credentialsJson = getCredentialsAsJson();
         return CryptoJSON.encrypt(credentialsJson.getBytes("UTF-8"), containerPassword, "credentials");
     }
 
-    public boolean setEncryptedCredentialsFromContainer(byte[] jsonContainer, String containerPassword) {
+    public boolean setCredentialsFromJson(final String jsonCredentials) {
         try {
-            byte[] credentials = CryptoJSON.decrypt(jsonContainer, containerPassword, "credentials");
-            ObjectMapper jsonMapper = new ObjectMapper();
-            JsonNode json = jsonMapper.readTree(credentials);
-            if (json == null || !json.isObject()) {
-                throw new Exception("setEncryptedCredentialsFromContainer: not a json object");
+            final ObjectMapper jsonMapper = new ObjectMapper();
+            final JsonNode rootNode = jsonMapper.readTree(jsonCredentials);
+            if (rootNode == null || !rootNode.isObject()) {
+                throw new Exception("Not a json object");
             }
-            JsonNode password = json.get("password");
-            if (password == null) {
-                throw new Exception("setEncryptedCredentialsFromContainer: missing password");
+            final JsonNode passwordNode = rootNode.get("password");
+            if (passwordNode == null) {
+                throw new Exception("Missing password node");
             }
-            JsonNode saltNode = json.get("salt");
+            final JsonNode saltNode = rootNode.get("salt");
             if (saltNode == null) {
-                throw new Exception("setEncryptedCredentialsFromContainer: missing salt");
+                throw new Exception("Missing salt node");
             }
-            JsonNode clientIdNode = json.get("clientId");
+            final JsonNode clientIdNode = rootNode.get("clientId");
             if (clientIdNode == null) {
-                throw new Exception("parseEncryptedContainer: wrong or missing ciphered content");
+                throw new Exception("Missing clientId node");
             }
 
             // Update credentials
-            TalkClientSelf self = getSelfContact().getSelf();
-            self.provideCredentials(saltNode.asText(), password.asText());
+            final TalkClientSelf self = mSelfContact.getSelf();
+            self.provideCredentials(saltNode.asText(), passwordNode.asText());
 
             // Update client id
-            TalkClientContact selfContact = getSelfContact();
-            selfContact.updateSelfRegistered(clientIdNode.asText());
-
-            mSelfContact = selfContact;
+            mSelfContact.updateSelfRegistered(clientIdNode.asText());
 
             // save credentials and contact
             mDatabase.saveCredentials(self);
-            mDatabase.saveContact(selfContact);
+            mDatabase.saveContact(mSelfContact);
 
             // remove contacts + groups from DB
             mDatabase.eraseAllRelationships();
@@ -2063,10 +2059,20 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             reconnect("Credentials imported.");
 
             return true;
-        } catch (SQLException sqlException) {
-            LOG.error("setEncryptedCredentialsFromContainer", sqlException);
-        } catch (Exception e) {
-            LOG.error("setEncryptedCredentialsFromContainer", e);
+        } catch (final SQLException sqlException) {
+            LOG.error("setCredentialsFromJson", sqlException);
+        } catch (final Exception e) {
+            LOG.error("setCredentialsFromJson", e);
+        }
+        return false;
+    }
+
+    public boolean setCredentialsFromEncryptedJson(final byte[] jsonContainer, final String containerPassword) {
+        try {
+            final byte[] credentials = CryptoJSON.decrypt(jsonContainer, containerPassword, "credentials");
+            return setCredentialsFromJson(new String(credentials, "UTF-8"));
+        } catch (final Exception e) {
+            LOG.error("setCredentialsFromEncryptedJson", e);
         }
         return false;
     }

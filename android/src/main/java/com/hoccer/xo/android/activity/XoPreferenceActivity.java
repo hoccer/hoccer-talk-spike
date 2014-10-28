@@ -2,7 +2,6 @@ package com.hoccer.xo.android.activity;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -276,7 +275,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             byte[] credentials = new byte[(int) credentialsFile.length()];
             fileInputStream.read(credentials);
 
-            boolean result = XoApplication.getXoClient().setEncryptedCredentialsFromContainer(credentials, password);
+            boolean result = XoApplication.getXoClient().setCredentialsFromEncryptedJson(credentials, password);
             if (result) {
                 Toast.makeText(this, R.string.import_credentials_success, Toast.LENGTH_LONG).show();
             } else {
@@ -312,7 +311,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void exportCredentials(String password) {
         try {
             byte[] credentialsContainer = XoApplication.getXoClient()
-                    .makeEncryptedCredentialsContainer(password);
+                    .getCredentialsAsEncryptedJson(password);
 
             FileOutputStream fos = new FileOutputStream(
                     XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);

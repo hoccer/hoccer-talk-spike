@@ -17,6 +17,8 @@ public class CredentialExportService extends IntentService {
 
     public static final String EXTRA_RESULT_CREDENTIALS_JSON = "credentialsJson";
 
+    public static final String JSON_ENCRYPTION_PASSWORD = "4brj3paAr8D2Qvgw";
+
     public CredentialExportService() {
         super("DataExportService");
 
@@ -41,11 +43,10 @@ public class CredentialExportService extends IntentService {
 
     private static void exportCredentials(final ResultReceiver resultReceiver) {
         try {
-            final String credentialsJson = XoApplication.getXoClient().extractCredentialsAsJson();
-            final Bundle bundle = new Bundle();
-            bundle.putString(EXTRA_RESULT_CREDENTIALS_JSON, credentialsJson);
-
             LOG.info("Exporting credentials");
+            final byte[] credentials = XoApplication.getXoClient().getCredentialsAsEncryptedJson();
+            final Bundle bundle = new Bundle();
+            bundle.putByteArray(EXTRA_RESULT_CREDENTIALS_JSON, credentials);
             resultReceiver.send(Activity.RESULT_OK, bundle);
         } catch (final Exception e) {
             resultReceiver.send(Activity.RESULT_CANCELED, null);
