@@ -63,4 +63,9 @@ public class RegistrationActivity extends XoActivity {
         startActivity(intent);
         finish();
     }
+
+    @Override
+    public void onBackPressed() {
+        // do nothing if back is pressed
+    }
 }
