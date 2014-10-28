@@ -101,8 +101,4 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     public String getCredentialImportPackage() {
         return mProperties.getProperty("hoccer.android.credential.import.package", null);
     }
-
-    public String getCredentialProtocolVersion() {
-        return mProperties.getProperty("hoccer.android.credential.protocol.version", null);
-    }
 }

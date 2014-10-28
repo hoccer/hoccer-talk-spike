@@ -18,8 +18,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class CredentialImporter {
 
-    private static final String EXTRA_CREDENTIAL_PROTOCOL_VERSION = "credential_protocol_version";
-
     private static final Logger LOG = Logger.getLogger(CredentialImporter.class);
 
     private static final int CREDENTIAL_RECEIVE_TIMEOUT_SECONDS = 15;
@@ -75,7 +73,6 @@ public class CredentialImporter {
             intent.setClassName(packageName, className);
             intent.setAction("com.hoccer.xo.android.action.EXPORT_DATA");
             intent.putExtra("receiver", new CredentialResultReceiver(new Handler(), listener));
-            intent.putExtra(EXTRA_CREDENTIAL_PROTOCOL_VERSION, XoApplication.getConfiguration().getCredentialProtocolVersion());
             context.sendBroadcast(intent);
         }
     }
@@ -131,7 +128,7 @@ public class CredentialImporter {
                 mAnswerReceived = true;
 
                 if (resultCode == Activity.RESULT_OK && resultData != null) {
-                    final String credentialsJson = resultData.getString("credentialsJson");
+                    final String credentialsJson = resultData.getString(CredentialExportService.EXTRA_RESULT_CREDENTIALS_JSON);
 
                     // TODO save new credentials, renew srp secret and restart
 
