@@ -24,25 +24,12 @@ public class CredentialExportService extends IntentService {
 
     @Override
     protected void onHandleIntent(final Intent intent) {
-        final String packageName = XoApplication.getConfiguration().getCredentialExportPackage();
-
-        if (packageName == null) {
-            LOG.warn("Export request received from '" + intent.getPackage() + "' but no export package configured.");
-            return;
-        }
-
-        if (!packageName.equals(intent.getPackage())) {
-            LOG.warn("Export request received from '" + intent.getPackage() + "' but allowed export package is '" + packageName + "'");
-            return;
-        }
-
-
         if (!intent.hasExtra("receiver")) {
             LOG.warn("Export request received from '" + intent.getPackage() + "' but no receiver provided.");
             return;
         }
 
-        ResultReceiver resultReceiver = intent.getParcelableExtra("receiver");
+        final ResultReceiver resultReceiver = intent.getParcelableExtra("receiver");
 
         if (resultReceiver == null) {
             LOG.warn("Export request received from '" + intent.getPackage() + "' but receiver provided is null.");
@@ -55,12 +42,13 @@ public class CredentialExportService extends IntentService {
     private static void exportCredentials(final ResultReceiver resultReceiver) {
         try {
             final String credentialsJson = XoApplication.getXoClient().extractCredentialsAsJson();
+            final byte[] encryptedCredentials = XoApplication.getXoClient().makeEncryptedCredentialsContainer(credentialsJson, )
             final Bundle bundle = new Bundle();
             bundle.putString(EXTRA_RESULT_CREDENTIALS_JSON, credentialsJson);
 
             LOG.info("Exporting credentials");
             resultReceiver.send(Activity.RESULT_OK, bundle);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             resultReceiver.send(Activity.RESULT_CANCELED, null);
         }
     }
