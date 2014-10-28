@@ -135,9 +135,9 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
         if (mNotificationCount < 10) {
             mNotificationBadge.setTextSize(13);
         } else if (mNotificationCount < 100) {
-            mNotificationBadge.setText(11);
+            mNotificationBadge.setTextSize(11);
         } else if (mNotificationCount < 1000) {
-            mNotificationBadge.setText(9);
+            mNotificationBadge.setTextSize(9);
         }
     }
 
