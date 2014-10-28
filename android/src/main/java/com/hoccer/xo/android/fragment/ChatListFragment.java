@@ -10,7 +10,6 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.activity.ContactsActivity;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.ChatsAdapter;
 import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
@@ -49,7 +48,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_contacts, container, false);
+        return inflater.inflate(R.layout.fragment_client_contacts, container, false);
     }
 
     @Override

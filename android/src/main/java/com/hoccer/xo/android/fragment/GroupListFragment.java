@@ -1,5 +1,9 @@
 package com.hoccer.xo.android.fragment;
 
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
@@ -12,13 +16,15 @@ import java.sql.SQLException;
 public class GroupListFragment extends ContactListFragment {
 
     public GroupListFragment() {
-        mPlaceholderId = R.drawable.placeholder_group;
-        mPlaceholderHeadId = R.drawable.placeholder_group_head;
-        mPlaceholderTextId = R.string.placeholder_groups_text;
         mTabLayoutId = R.layout.view_contacts_tab_groups;
         mTabNameId = R.string.contacts_tab_groups;
 
         mItemActivityClass = GroupProfileActivity.class;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_group_contacts, container, false);
     }
 
     @Override
@@ -34,7 +40,7 @@ public class GroupListFragment extends ContactListFragment {
     @Override
     protected void updateNotificationBadge() {
         try {
-            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroups();
+            mInvitedMeCount = XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroups();
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -23,13 +23,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private ContactListAdapter mContactListAdapter;
     protected  Class<?> mItemActivityClass;
 
-    protected int mPlaceholderId;
-    protected int mPlaceholderHeadId;
-    protected int mPlaceholderTextId;
-
-    private RelativeLayout mPlaceholderLayout;
-    private DataSetObserver mPlaceholderUpdateObserver;
-
     protected int mTabLayoutId;
     protected int mTabNameId;
 
@@ -41,36 +34,10 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
 
     protected int mInvitedMeCount = 0;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_contacts, container, false);
-    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        mPlaceholderLayout = (RelativeLayout) view.findViewById(R.id.rl_placeholder);
-        mPlaceholderUpdateObserver = new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                updatePlaceholder();
-            }
-        };
-
-        ImageView placeholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
-        ImageView placeholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
-        TextView placeholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            placeholderImageFrame.setBackground(getResources().getDrawable(mPlaceholderId));
-            placeholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getActivity(), mPlaceholderHeadId, true));
-        } else {
-            placeholderImageFrame.setBackgroundDrawable(getResources().getDrawable(mPlaceholderId));
-            placeholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), mPlaceholderHeadId, true));
-        }
-
-        placeholderText.setText(mPlaceholderTextId);
     }
 
     @Override
@@ -99,8 +66,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         super.onResume();
         updateAdapter();
         updateNotificationBadge();
-        updatePlaceholder();
-        mContactListAdapter.registerDataSetObserver(mPlaceholderUpdateObserver);
     }
 
     private void updateAdapter() {
@@ -131,16 +96,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         });
     }
 
-    private void updatePlaceholder() {
-        int visibility = View.GONE;
-
-        if (mContactListAdapter.getCount() == 0 && mContactListAdapter.getQuery() == null) {
-            visibility = View.VISIBLE;
-        }
-
-        mPlaceholderLayout.setVisibility(visibility);
-    }
-
     @Override
     protected ListAdapter searchInAdapter(String query) {
         mContactListAdapter.setQuery(query);
@@ -164,12 +119,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         if (mMenuItemNewGroup != null) {
             mMenuItemNewGroup.setVisible(true);
         }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mContactListAdapter.unregisterDataSetObserver(mPlaceholderUpdateObserver);
     }
 
     @Override
