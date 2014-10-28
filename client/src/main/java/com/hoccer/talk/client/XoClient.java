@@ -1998,15 +1998,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public String getCredentialsAsJson() throws RuntimeException {
         try {
-            final TalkClientContact selfContact = mSelfContact;
-            final String clientId = selfContact.getClientId();
-            final TalkClientSelf self = selfContact.getSelf();
+            final String clientId = mSelfContact.getClientId();
+            final TalkClientSelf self = mSelfContact.getSelf();
 
             final ObjectMapper jsonMapper = new ObjectMapper();
             final ObjectNode rootNode = jsonMapper.createObjectNode();
             rootNode.put("password", self.getSrpSecret());
             rootNode.put("salt", self.getSrpSalt());
             rootNode.put("clientId", clientId);
+            rootNode.put("clientName", mSelfContact.getName());
             return jsonMapper.writeValueAsString(rootNode);
         } catch (final Exception e) {
             LOG.error("decoder exception in extractCredentials", e);
@@ -2038,16 +2038,24 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             if (clientIdNode == null) {
                 throw new Exception("Missing clientId node");
             }
+            final JsonNode clientNameNode = rootNode.get("clientName");
+            if (clientNameNode == null) {
+                throw new Exception("Missing clientName node");
+            }
 
-            // Update credentials
+            // update credentials
             final TalkClientSelf self = mSelfContact.getSelf();
             self.provideCredentials(saltNode.asText(), passwordNode.asText());
 
-            // Update client id
+            // update client id
             mSelfContact.updateSelfRegistered(clientIdNode.asText());
+
+            // update client name
+            mSelfContact.getClientPresence().setClientName(clientNameNode.asText());
 
             // save credentials and contact
             mDatabase.saveCredentials(self);
+            mDatabase.savePresence(mSelfContact.getClientPresence());
             mDatabase.saveContact(mSelfContact);
 
             // remove contacts + groups from DB
