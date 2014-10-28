@@ -18,13 +18,12 @@
 
   <TextView
       android:id="@+id/tv_contact_invite_notification_badge"
-      android:text="2"
-      android:background="@drawable/unread_messages"
+      android:background="@drawable/unread_messages_badge"
       android:layout_alignTop="@android:id/title"
       android:layout_alignRight="@android:id/title"
       android:layout_marginRight="-35dp"
       android:layout_marginTop="-10dp"
       android:visibility="gone"
-      style="@style/AppBaseTheme.Contact.UnreadMessages"/>
+      style="@style/AppBaseTheme.Contact.UnreadMessagesBadge"/>
 
 </RelativeLayout>

@@ -15,10 +15,9 @@
 
     <TextView
             android:id="@+id/tv_invite_notification_badge"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="5dp"
             android:layout_marginLeft="22dp"
             android:layout_gravity="start"
-            android:background="@drawable/unread_messages"
-            android:visibility="gone"
-            style="@style/AppBaseTheme.Contact.UnreadMessages"/>
+            android:background="@drawable/unread_messages_badge"
+            style="@style/AppBaseTheme.Contact.UnreadMessagesBadge"/>
 </FrameLayout>
