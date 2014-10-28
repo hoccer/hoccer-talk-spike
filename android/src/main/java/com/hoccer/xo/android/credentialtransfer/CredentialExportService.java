@@ -42,7 +42,6 @@ public class CredentialExportService extends IntentService {
     private static void exportCredentials(final ResultReceiver resultReceiver) {
         try {
             final String credentialsJson = XoApplication.getXoClient().extractCredentialsAsJson();
-            final byte[] encryptedCredentials = XoApplication.getXoClient().makeEncryptedCredentialsContainer(credentialsJson, )
             final Bundle bundle = new Bundle();
             bundle.putString(EXTRA_RESULT_CREDENTIALS_JSON, credentialsJson);
 
