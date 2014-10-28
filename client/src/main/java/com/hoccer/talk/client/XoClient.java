@@ -2016,12 +2016,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public byte[] makeEncryptedCredentialsContainer(String containerPassword) throws Exception {
         String credentialsJson = extractCredentialsAsJson();
-        return CryptoJSON.encryptedContainer(credentialsJson.getBytes("UTF-8"), containerPassword, "credentials");
+        return CryptoJSON.encrypt(credentialsJson.getBytes("UTF-8"), containerPassword, "credentials");
     }
 
     public boolean setEncryptedCredentialsFromContainer(byte[] jsonContainer, String containerPassword) {
         try {
-            byte[] credentials = CryptoJSON.decryptedContainer(jsonContainer, containerPassword, "credentials");
+            byte[] credentials = CryptoJSON.decrypt(jsonContainer, containerPassword, "credentials");
             ObjectMapper jsonMapper = new ObjectMapper();
             JsonNode json = jsonMapper.readTree(credentials);
             if (json == null || !json.isObject()) {
