@@ -46,10 +46,8 @@ public class SingleProfileActivityFunctionalTest extends ActivityInstrumentation
     public void testActionModeUI() {
         TextView nameText = (TextView) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.tv_profile_name);
         EditText editName = (EditText) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.et_profile_name);
-        RelativeLayout keyContainer = (RelativeLayout) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.inc_profile_key);
 
-        assertEquals(keyContainer.getVisibility(), View.GONE);
-        assertEquals(nameText.getVisibility(), View.INVISIBLE);
+        assertEquals(nameText.getVisibility(), View.GONE);
         assertEquals(editName.getVisibility(), View.VISIBLE);
         assertEquals(editName.getHint(), activity.getString(com.hoccer.xo.release.R.string.profile_name_hint));
         assertEquals(editName.getText().toString(), "");
