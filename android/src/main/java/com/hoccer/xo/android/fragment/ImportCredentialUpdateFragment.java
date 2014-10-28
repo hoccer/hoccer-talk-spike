@@ -7,14 +7,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.RegistrationActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 /**
  * Fragment handles the credential import from the supported package.
  */
 public class ImportCredentialUpdateFragment extends XoFragment {
+
+    private static final Logger LOG = Logger.getLogger(ImportCredentialUpdateFragment.class);
+
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_import_credential_update, container, false);
@@ -28,9 +33,15 @@ public class ImportCredentialUpdateFragment extends XoFragment {
         playstoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                final Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("market://details?id=com.hoccer.xo.release"));
-                startActivity(intent);
+
+                final String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
+                if (packageName != null) {
+                    final Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse("market://details?id=" + packageName));
+                    startActivity(intent);
+                } else {
+                    LOG.error("Allowed credential import package property is null.");
+                }
             }
         });
 

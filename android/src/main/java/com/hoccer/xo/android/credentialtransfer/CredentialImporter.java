@@ -71,7 +71,7 @@ public class CredentialImporter {
             final Intent intent = new Intent();
             final String className = CredentialExportReceiver.class.getName();
             intent.setClassName(packageName, className);
-            intent.setAction("com.hoccer.xo.android.action.EXPORT_DATA");
+            intent.setAction(packageName + ".action.EXPORT_DATA");
             intent.putExtra("receiver", new CredentialResultReceiver(new Handler(), listener));
             context.sendBroadcast(intent);
         }
