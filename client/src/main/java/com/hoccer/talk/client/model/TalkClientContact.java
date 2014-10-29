@@ -522,11 +522,11 @@ public class TalkClientContact implements Serializable {
 
     @GroupMethodOnly
     public boolean isEmptyGroup() {
-        return getJoinedGroupContacts().isEmpty();
+        return getJoinedGroupContactsExceptSelf().isEmpty();
     }
 
     @GroupMethodOnly
-    public List<TalkClientContact> getJoinedGroupContacts() {
+    public List<TalkClientContact> getJoinedGroupContactsExceptSelf() {
         ArrayList<TalkClientContact> joinedContacts = new ArrayList<TalkClientContact>();
 
         if (getGroupMemberships() != null) {

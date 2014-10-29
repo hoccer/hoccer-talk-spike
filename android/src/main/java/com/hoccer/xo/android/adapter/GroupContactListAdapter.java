@@ -130,7 +130,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
 
     private String getGroupMembersString(TalkClientContact group) {
         ArrayDeque<String> displayMembers = new ArrayDeque<String>();
-        List<TalkClientContact> joinedContacts = group.getJoinedGroupContacts();
+        List<TalkClientContact> joinedContacts = group.getJoinedGroupContactsExceptSelf();
 
         for (TalkClientContact contact : joinedContacts) {
             displayMembers.addLast(contact.getNickname());
