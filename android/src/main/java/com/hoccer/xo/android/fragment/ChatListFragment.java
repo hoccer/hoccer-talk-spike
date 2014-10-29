@@ -10,7 +10,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MessagingActivity;
-import com.hoccer.xo.android.adapter.ChatsAdapter;
+import com.hoccer.xo.android.adapter.ChatListAdapter;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.dialog.TokenDialog;
@@ -32,7 +32,7 @@ public class ChatListFragment extends SearchableListFragment {
             R.string.placeholder_conversations_text);
 
     private XoClientDatabase mDatabase;
-    private ChatsAdapter mAdapter;
+    private ChatListAdapter mAdapter;
     private WeakReference<SearchAdapter> mSearchAdapterReference = new WeakReference<SearchAdapter>(null);
 
     private MenuItem mMyProfileMenuItem;
@@ -181,7 +181,7 @@ public class ChatListFragment extends SearchableListFragment {
     }
 
     private void initAdapter() {
-        ChatsAdapter.Filter filter = new ChatsAdapter.Filter() {
+        ChatListAdapter.Filter filter = new ChatListAdapter.Filter() {
             @Override
             public boolean shouldShow(TalkClientContact contact) {
                 if (contact.isGroup()) {
@@ -200,7 +200,7 @@ public class ChatListFragment extends SearchableListFragment {
             }
         };
 
-        mAdapter = new ChatsAdapter((XoActivity) getActivity(), filter);
+        mAdapter = new ChatListAdapter((XoActivity) getActivity(), filter);
         setListAdapter(mAdapter);
     }
 

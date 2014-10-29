@@ -29,9 +29,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
+public class NearbyChatListAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
 
-    private static final Logger LOG = Logger.getLogger(NearbyChatsAdapter.class);
+    private static final Logger LOG = Logger.getLogger(NearbyChatListAdapter.class);
     private static final long RATE_LIMIT_MSECS = 1000;
 
     private XoClientDatabase mDatabase;
@@ -43,7 +43,7 @@ public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListene
     private List<TalkClientContact> mNearbyContacts = new ArrayList<TalkClientContact>();
     private TalkClientContact mCurrentNearbyGroup;
 
-    public NearbyChatsAdapter(XoClientDatabase db, XoActivity xoActivity, TalkClientContact group) {
+    public NearbyChatListAdapter(XoClientDatabase db, XoActivity xoActivity, TalkClientContact group) {
         super();
         mDatabase = db;
         mXoActivity = xoActivity;
