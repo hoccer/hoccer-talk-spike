@@ -5,6 +5,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
+import com.hoccer.talk.util.CredentialTransfer;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
@@ -44,7 +45,8 @@ public class CredentialExportService extends IntentService {
     private static void exportCredentials(final ResultReceiver resultReceiver) {
         try {
             LOG.info("Exporting credentials");
-            final byte[] credentials = XoApplication.getXoClient().getCredentialsAsEncryptedJson(CREDENTIALS_ENCRYPTION_PASSWORD);
+            final CredentialTransfer credentialTransfer = new CredentialTransfer(XoApplication.getXoClient());
+            final byte[] credentials = credentialTransfer.getCredentialsAsEncryptedJson(CREDENTIALS_ENCRYPTION_PASSWORD);
             final Bundle bundle = new Bundle();
             bundle.putByteArray(EXTRA_RESULT_CREDENTIALS_JSON, credentials);
             resultReceiver.send(Activity.RESULT_OK, bundle);

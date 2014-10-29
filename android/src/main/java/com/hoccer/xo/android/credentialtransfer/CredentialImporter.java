@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import com.hoccer.talk.util.CredentialTransfer;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
@@ -129,7 +130,9 @@ public class CredentialImporter {
 
                 if (resultCode == Activity.RESULT_OK && resultData != null) {
                     final byte[] credentials = resultData.getByteArray(CredentialExportService.EXTRA_RESULT_CREDENTIALS_JSON);
-                    XoApplication.getXoClient().setCredentialsFromEncryptedJson(credentials, CredentialExportService.CREDENTIALS_ENCRYPTION_PASSWORD);
+
+                    final CredentialTransfer credentialTransfer = new CredentialTransfer(XoApplication.getXoClient());
+                    credentialTransfer.setCredentialsFromEncryptedJson(credentials, CredentialExportService.CREDENTIALS_ENCRYPTION_PASSWORD);
 
                     // TODO renew srp secret
 

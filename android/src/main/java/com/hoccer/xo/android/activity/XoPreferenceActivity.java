@@ -12,6 +12,7 @@ import android.os.Message;
 import android.preference.*;
 import android.view.*;
 import android.widget.Toast;
+import com.hoccer.talk.util.CredentialTransfer;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.util.XoImportExportUtils;
@@ -275,7 +276,8 @@ public class XoPreferenceActivity extends PreferenceActivity
             byte[] credentials = new byte[(int) credentialsFile.length()];
             fileInputStream.read(credentials);
 
-            boolean result = XoApplication.getXoClient().setCredentialsFromEncryptedJson(credentials, password);
+            final CredentialTransfer credentialTransfer = new CredentialTransfer(XoApplication.getXoClient());
+            final boolean result = credentialTransfer.setCredentialsFromEncryptedJson(credentials, password);
             if (result) {
                 Toast.makeText(this, R.string.import_credentials_success, Toast.LENGTH_LONG).show();
             } else {
@@ -310,8 +312,8 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private void exportCredentials(String password) {
         try {
-            byte[] credentialsContainer = XoApplication.getXoClient()
-                    .getCredentialsAsEncryptedJson(password);
+            final CredentialTransfer credentialTransfer = new CredentialTransfer(XoApplication.getXoClient());
+            final byte[] credentialsContainer = credentialTransfer.getCredentialsAsEncryptedJson(password);
 
             FileOutputStream fos = new FileOutputStream(
                     XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);
