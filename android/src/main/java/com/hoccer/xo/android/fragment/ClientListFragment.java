@@ -19,7 +19,7 @@ public class ClientListFragment extends ContactListFragment {
         mTabLayoutId = R.layout.view_contacts_tab_friends;
         mTabNameId = R.string.contacts_tab_friends;
 
-        mItemActivityClass = SingleProfileActivity.class;
+        mProfileActivityClass = SingleProfileActivity.class;
     }
 
     @Override

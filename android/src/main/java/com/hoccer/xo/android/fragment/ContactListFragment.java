@@ -3,8 +3,6 @@ package com.hoccer.xo.android.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.database.DataSetObserver;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
@@ -13,15 +11,12 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
-import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.release.R;
-
-import java.sql.SQLException;
 
 public abstract class ContactListFragment extends SearchableListFragment implements IPagerFragment, IXoContactListener {
 
     private ContactListAdapter mContactListAdapter;
-    protected  Class<?> mItemActivityClass;
+    protected  Class<?> mProfileActivityClass;
 
     protected int mTabLayoutId;
     protected int mTabNameId;
@@ -130,9 +125,12 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
         TalkClientContact contact = (TalkClientContact) getListAdapter().getItem(position);
-        Intent intent = new Intent(getActivity(), mItemActivityClass);
+        startProfileActivity(contact);
+    }
+
+    private void startProfileActivity(TalkClientContact contact) {
+        Intent intent = new Intent(getActivity(), mProfileActivityClass);
         intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
         startActivity(intent);
     }

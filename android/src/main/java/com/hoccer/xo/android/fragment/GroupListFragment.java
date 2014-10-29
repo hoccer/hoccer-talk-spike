@@ -19,7 +19,7 @@ public class GroupListFragment extends ContactListFragment {
         mTabLayoutId = R.layout.view_contacts_tab_groups;
         mTabNameId = R.string.contacts_tab_groups;
 
-        mItemActivityClass = GroupProfileActivity.class;
+        mProfileActivityClass = GroupProfileActivity.class;
     }
 
     @Override
