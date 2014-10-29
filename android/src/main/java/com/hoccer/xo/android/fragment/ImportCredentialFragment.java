@@ -57,7 +57,7 @@ public class ImportCredentialFragment extends XoFragment {
                                 @Override
                                 public void run() {
                                     LOG.info("Credentials import failed");
-                                    progressOverlay.setVisibility(View.GONE);
+                                    registrationActivity.startNewClientRegistration();
                                 }
                             });
                         }
