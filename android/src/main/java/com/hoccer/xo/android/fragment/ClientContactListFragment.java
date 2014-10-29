@@ -19,9 +19,7 @@ public class ClientContactListFragment extends ContactListFragment {
     public static final Logger LOG = Logger.getLogger(ContactListFragment.class);
 
     public ClientContactListFragment() {
-        mTabLayoutId = R.layout.view_contacts_tab_friends;
         mTabNameId = R.string.contacts_tab_friends;
-
         mProfileActivityClass = SingleProfileActivity.class;
     }
 

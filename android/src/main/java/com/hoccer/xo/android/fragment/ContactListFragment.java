@@ -18,7 +18,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private ContactListAdapter mContactListAdapter;
     protected  Class<?> mProfileActivityClass;
 
-    protected int mTabLayoutId;
     protected int mTabNameId;
 
     private MenuItem mMenuItemPairing;
@@ -154,7 +153,9 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     @Override
     public View getCustomTabView(Context context) {
         if (mTabView == null) {
-            mTabView = LayoutInflater.from(context).inflate(mTabLayoutId, null);
+            mTabView = LayoutInflater.from(context).inflate(R.layout.view_contacts_tab_with_badge, null);
+            TextView title = (TextView) mTabView.findViewById(android.R.id.title);
+            title.setText(mTabNameId);
         }
 
         return mTabView;
