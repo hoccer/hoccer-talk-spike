@@ -45,13 +45,11 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
     private List<TalkClientContact> mNearbyContacts = new ArrayList<TalkClientContact>();
     private TalkClientContact mCurrentNearbyGroup;
 
-    public NearbyChatListAdapter(XoClientDatabase db, XoActivity xoActivity, TalkClientContact group) {
+    public NearbyChatListAdapter(XoClientDatabase db, XoActivity xoActivity) {
         super();
         mDatabase = db;
         mXoActivity = xoActivity;
         mExecutor = mXoActivity.getBackgroundExecutor();
-
-        updateFromDatabase(group);
     }
 
     @Override
@@ -301,19 +299,13 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
     }
 
     @Override
-    public void onDownloadRegistered(TalkClientDownload download) {
-
-    }
+    public void onDownloadRegistered(TalkClientDownload download) {}
 
     @Override
-    public void onDownloadStarted(TalkClientDownload download) {
-
-    }
+    public void onDownloadStarted(TalkClientDownload download) {}
 
     @Override
-    public void onDownloadProgress(TalkClientDownload download) {
-
-    }
+    public void onDownloadProgress(TalkClientDownload download) {}
 
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
@@ -323,14 +315,10 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
     }
 
     @Override
-    public void onDownloadFailed(TalkClientDownload download) {
-
-    }
+    public void onDownloadFailed(TalkClientDownload download) {}
 
     @Override
-    public void onDownloadStateChanged(TalkClientDownload download) {
-
-    }
+    public void onDownloadStateChanged(TalkClientDownload download) {}
 
     @Override
     public void onUploadStarted(TalkClientUpload upload) {
@@ -340,22 +328,14 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
     }
 
     @Override
-    public void onUploadProgress(TalkClientUpload upload) {
-
-    }
+    public void onUploadProgress(TalkClientUpload upload) {}
 
     @Override
-    public void onUploadFinished(TalkClientUpload upload) {
-
-    }
+    public void onUploadFinished(TalkClientUpload upload) {}
 
     @Override
-    public void onUploadFailed(TalkClientUpload upload) {
-
-    }
+    public void onUploadFailed(TalkClientUpload upload) {}
 
     @Override
-    public void onUploadStateChanged(TalkClientUpload upload) {
-
-    }
+    public void onUploadStateChanged(TalkClientUpload upload) {}
 }
