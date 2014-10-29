@@ -1,14 +1,11 @@
 package com.hoccer.xo.android.fragment;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.adapter.GroupContactListAdapter;
+import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -16,15 +13,14 @@ import java.sql.SQLException;
 
 public class GroupContactListFragment extends ContactListFragment {
 
-    public static final Logger LOG = Logger.getLogger(GroupContactListFragment.class);
+    private static final Logger LOG = Logger.getLogger(GroupContactListFragment.class);
+    private static final Placeholder PLACEHOLDER = new Placeholder(
+            R.drawable.placeholder_group,
+            R.drawable.placeholder_group_head,
+            R.string.placeholder_groups_text);
 
     public GroupContactListFragment() {
-        super(R.string.contacts_tab_groups, GroupProfileActivity.class);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_group_contacts, container, false);
+        super(R.string.contacts_tab_groups, GroupProfileActivity.class, PLACEHOLDER);
     }
 
     @Override

@@ -26,8 +26,7 @@
                 android:layout_centerInParent="true"
                 android:layout_marginLeft="33dp"
                 android:layout_marginRight="33dp"
-                android:layout_marginTop="80dp"
-                android:background="@drawable/placeholder_group"/>
+                android:layout_marginTop="80dp"/>
             <ImageView
                 android:id="@+id/iv_contacts_placeholder"
                 android:layout_width="wrap_content"
@@ -36,8 +35,7 @@
                 android:layout_centerInParent="true"
                 android:layout_marginLeft="33dp"
                 android:layout_marginRight="33dp"
-                android:layout_marginTop="80dp"
-                android:background="@drawable/placeholder_group_head"/>
+                android:layout_marginTop="80dp"/>
             <TextView
                 android:id="@+id/tv_contacts_placeholder"
                 android:layout_width="wrap_content"
@@ -45,10 +43,12 @@
                 android:layout_below="@+id/iv_contacts_placeholder"
                 android:layout_marginTop="35dp"
                 android:layout_centerHorizontal="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:gravity="center_horizontal"
                 android:textColor="@color/common_signin_btn_light_text_disabled"
                 android:textSize="8pt"
-                android:text="@string/placeholder_groups_text"/>
+                android:text="@string/placeholder_conversations_text"/>
     </RelativeLayout>
 
 </RelativeLayout>

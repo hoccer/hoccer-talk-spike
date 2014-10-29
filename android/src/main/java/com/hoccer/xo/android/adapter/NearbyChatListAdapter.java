@@ -14,9 +14,11 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,9 +31,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
+public class NearbyChatListAdapter extends BaseAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
 
-    private static final Logger LOG = Logger.getLogger(NearbyChatsAdapter.class);
+    private static final Logger LOG = Logger.getLogger(NearbyChatListAdapter.class);
     private static final long RATE_LIMIT_MSECS = 1000;
 
     private XoClientDatabase mDatabase;
@@ -43,13 +45,11 @@ public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListene
     private List<TalkClientContact> mNearbyContacts = new ArrayList<TalkClientContact>();
     private TalkClientContact mCurrentNearbyGroup;
 
-    public NearbyChatsAdapter(XoClientDatabase db, XoActivity xoActivity, TalkClientContact group) {
+    public NearbyChatListAdapter(XoClientDatabase db, XoActivity xoActivity) {
         super();
         mDatabase = db;
         mXoActivity = xoActivity;
         mExecutor = mXoActivity.getBackgroundExecutor();
-
-        updateFromDatabase(group);
     }
 
     @Override
@@ -192,36 +192,24 @@ public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListene
             return;
         }
 
-        List<TalkClientContact> clientsInGroup = null;
         try {
-            clientsInGroup = mDatabase.findClientsInGroup(group);
-            clientsInGroup.add(0, group);
-        } catch (SQLException e) {
-            LOG.error("SQL Error while retrieving nearby group contacts.", e);
-        }
+            final List<TalkClientContact> nearbyContacts = mDatabase.findClientsInGroup(group);
+            CollectionUtils.filterInverse(nearbyContacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
 
-        if(clientsInGroup != null) {
-            // copy list to final variable and process on UI thread
-            final List<TalkClientContact> finalClientsInGroup = clientsInGroup;
+            if (!group.isEmptyGroup()) {
+                group.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
+                nearbyContacts.add(0, group);
+            }
+
             mXoActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mNearbyContacts.clear();
-                    for (TalkClientContact contact : finalClientsInGroup) {
-                        if (contact.isGroup()) {
-                            if (contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
-                                contact.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
-                                mNearbyContacts.add(contact);
-                            }
-                        } else {
-                            if (!contact.isSelf()) {
-                                mNearbyContacts.add(contact);
-                            }
-                        }
-                    }
-                    refreshList();
+                    mNearbyContacts = nearbyContacts;
+                    notifyDataSetChanged();
                 }
             });
+        } catch (SQLException e) {
+            LOG.error("SQL Error while retrieving nearby group contacts.", e);
         }
     }
 
@@ -232,20 +220,6 @@ public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListene
                 notifyDataSetChanged();
             }
         });
-    }
-
-    public interface Filter {
-        public boolean shouldShow(TalkClientContact contact);
-    }
-
-    private List<TalkClientContact> filter(List<TalkClientContact> in, Filter filter) {
-        ArrayList<TalkClientContact> res = new ArrayList<TalkClientContact>();
-        for (TalkClientContact contact : in) {
-            if (filter.shouldShow(contact)) {
-                res.add(contact);
-            }
-        }
-        return res;
     }
 
     private
@@ -309,7 +283,7 @@ public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListene
                     }
                     mNearbyContacts.add(position, conversationContact);
                 }
-                refreshList();
+                notifyDataSetChanged();
             }
         });
     }
@@ -325,19 +299,13 @@ public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListene
     }
 
     @Override
-    public void onDownloadRegistered(TalkClientDownload download) {
-
-    }
+    public void onDownloadRegistered(TalkClientDownload download) {}
 
     @Override
-    public void onDownloadStarted(TalkClientDownload download) {
-
-    }
+    public void onDownloadStarted(TalkClientDownload download) {}
 
     @Override
-    public void onDownloadProgress(TalkClientDownload download) {
-
-    }
+    public void onDownloadProgress(TalkClientDownload download) {}
 
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
@@ -347,14 +315,10 @@ public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListene
     }
 
     @Override
-    public void onDownloadFailed(TalkClientDownload download) {
-
-    }
+    public void onDownloadFailed(TalkClientDownload download) {}
 
     @Override
-    public void onDownloadStateChanged(TalkClientDownload download) {
-
-    }
+    public void onDownloadStateChanged(TalkClientDownload download) {}
 
     @Override
     public void onUploadStarted(TalkClientUpload upload) {
@@ -364,22 +328,14 @@ public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListene
     }
 
     @Override
-    public void onUploadProgress(TalkClientUpload upload) {
-
-    }
+    public void onUploadProgress(TalkClientUpload upload) {}
 
     @Override
-    public void onUploadFinished(TalkClientUpload upload) {
-
-    }
+    public void onUploadFinished(TalkClientUpload upload) {}
 
     @Override
-    public void onUploadFailed(TalkClientUpload upload) {
-
-    }
+    public void onUploadFailed(TalkClientUpload upload) {}
 
     @Override
-    public void onUploadStateChanged(TalkClientUpload upload) {
-
-    }
+    public void onUploadStateChanged(TalkClientUpload upload) {}
 }

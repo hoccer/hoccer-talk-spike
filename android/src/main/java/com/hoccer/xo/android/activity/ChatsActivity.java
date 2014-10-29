@@ -298,8 +298,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void shutDownNearbySession() {
         LOG.debug("shutDownNearbySession");
         XoApplication.stopNearbySession();
-        NearbyChatListFragment fragment = (NearbyChatListFragment) getFragmentAt(1);
-        fragment.shutdownNearbyChat();
     }
 
     private boolean isLocationServiceEnabled() {

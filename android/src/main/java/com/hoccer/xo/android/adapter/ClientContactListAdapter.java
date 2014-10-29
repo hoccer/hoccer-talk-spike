@@ -59,81 +59,127 @@ public class ClientContactListAdapter extends ContactListAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
+        ViewHolder viewHolder;
+
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.item_contact_client, null);
+            viewHolder = createAndInitViewHolder(convertView);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
-
-        AvatarView avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
-        TextView contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
-        LinearLayout invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
-        Button acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
-        Button declineButton = (Button) convertView.findViewById(R.id.btn_decline);
-        TextView isInvitedTextView = (TextView) convertView.findViewById(R.id.tv_is_invited);
-        TextView isFriendTextView = (TextView) convertView.findViewById(R.id.tv_is_friend);
 
         final TalkClientContact contact = (TalkClientContact) getItem(position);
 
-        avatarView.setContact(contact);
+        updateView(viewHolder, contact);
 
-        contactNameTextView.setText(contact.getNickname());
+        return convertView;
+    }
 
-        acceptButton.setOnClickListener(new View.OnClickListener() {
+    private void updateView(ViewHolder viewHolder, final TalkClientContact contact) {
+        viewHolder.avatarView.setContact(contact);
+        viewHolder.contactNameTextView.setText(contact.getNickname());
+
+        viewHolder.acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 XoApplication.getXoClient().acceptFriend(contact);
             }
         });
-
-        declineButton.setOnClickListener(new View.OnClickListener() {
+        viewHolder.declineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                XoDialogs.showYesNoDialog("ConfirmDeclineClientInvitationDialog",
-                    mActivity.getString(R.string.friend_request_decline_invitation_title),
-                    mActivity.getString(R.string.friend_request_decline_invitation_message, contact.getNickname()),
-                    mActivity,
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            XoApplication.getXoClient().declineFriend(contact);
-                        }
-                    });
+                showConfirmDialog(contact);
             }
         });
 
         TalkRelationship relationship = contact.getClientRelationship();
         if (relationship != null) {
             if (relationship.invitedMe()) {
-                invitedMeLayout.setVisibility(View.VISIBLE);
-                isInvitedTextView.setVisibility(View.GONE);
-                isFriendTextView.setVisibility(View.GONE);
+                updateViewForInvitedMe(viewHolder);
             } else if (relationship.isInvited()) {
-                invitedMeLayout.setVisibility(View.GONE);
-                isInvitedTextView.setVisibility(View.VISIBLE);
-                isFriendTextView.setVisibility(View.GONE);
-            } else if (relationship.isFriend() || relationship.isBlocked()) {
-                invitedMeLayout.setVisibility(View.GONE);
-                isInvitedTextView.setVisibility(View.GONE);
-                isFriendTextView.setVisibility(View.VISIBLE);
-
-                long messageCount = 0;
-                long attachmentCount = 0;
-                try {
-                    messageCount = XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
-                    attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-                String messageAndAttachmentCountInfo = convertView.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
-                isFriendTextView.setText(messageAndAttachmentCountInfo);
-
-                if (relationship.isBlocked()) {
-                    isFriendTextView.setText(convertView.getResources().getString(R.string.blocked_contact));
-                }
+                updateViewForInvited(viewHolder);
+            } else if (relationship.isFriend()) {
+                updateViewForFriend(viewHolder, contact);
+            } else if (relationship.isBlocked()) {
+                updateViewForFriend(viewHolder, contact);
+                updateViewForBlocked(viewHolder);
             }
         }
+    }
 
-        return convertView;
+    private void updateViewForInvitedMe(ViewHolder viewHolder) {
+        viewHolder.invitedMeLayout.setVisibility(View.VISIBLE);
+        viewHolder.isInvitedTextView.setVisibility(View.GONE);
+        viewHolder.isFriendTextView.setVisibility(View.GONE);
+    }
+
+    private void updateViewForInvited(ViewHolder viewHolder) {
+        viewHolder.invitedMeLayout.setVisibility(View.GONE);
+        viewHolder.isInvitedTextView.setVisibility(View.VISIBLE);
+        viewHolder.isFriendTextView.setVisibility(View.GONE);
+    }
+
+    private void updateViewForFriend(ViewHolder viewHolder, TalkClientContact contact) {
+        viewHolder.invitedMeLayout.setVisibility(View.GONE);
+        viewHolder.isInvitedTextView.setVisibility(View.GONE);
+        viewHolder.isFriendTextView.setVisibility(View.VISIBLE);
+
+        String messageAndAttachmentCount = getMessageAndAttachmentCount(contact);
+        viewHolder.isFriendTextView.setText(messageAndAttachmentCount);
+    }
+
+    private String getMessageAndAttachmentCount(TalkClientContact contact) {
+        try {
+            long messageCount = XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
+            long attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
+
+            return mActivity.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
+        } catch (SQLException e) {
+            LOG.error("Error counting messages and attachments for " + contact.getClientId(), e);
+        }
+
+        return "";
+    }
+
+    private void updateViewForBlocked(ViewHolder viewHolder) {
+        viewHolder.isFriendTextView.setText(mActivity.getResources().getString(R.string.blocked_contact));
+    }
+
+    private void showConfirmDialog(final TalkClientContact contact) {
+        XoDialogs.showYesNoDialog("ConfirmDeclineClientInvitationDialog",
+                mActivity.getString(R.string.friend_request_decline_invitation_title),
+                mActivity.getString(R.string.friend_request_decline_invitation_message, contact.getNickname()),
+                mActivity,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        XoApplication.getXoClient().declineFriend(contact);
+                    }
+                });
+    }
+
+    private ViewHolder createAndInitViewHolder(View convertView) {
+        ViewHolder viewHolder;
+        viewHolder = new ViewHolder();
+        viewHolder.avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
+        viewHolder.contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
+        viewHolder.invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
+        viewHolder.acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
+        viewHolder.declineButton = (Button) convertView.findViewById(R.id.btn_decline);
+        viewHolder.isInvitedTextView = (TextView) convertView.findViewById(R.id.tv_is_invited);
+        viewHolder.isFriendTextView = (TextView) convertView.findViewById(R.id.tv_is_friend);
+        return viewHolder;
+    }
+
+    private class ViewHolder {
+        public AvatarView avatarView;
+        public TextView contactNameTextView;
+        public LinearLayout invitedMeLayout;
+        public Button acceptButton;
+        public Button declineButton;
+        public TextView isInvitedTextView;
+        public TextView isFriendTextView;
     }
 }

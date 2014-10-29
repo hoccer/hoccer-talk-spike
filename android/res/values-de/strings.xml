@@ -358,9 +358,7 @@
 
     <string name="placeholder_conversations_text">Lade deine Freunde zum Chatten ein!</string>
     <string name="placeholder_groups_text">Lege Gruppen an um mit vielen Freunden gleichzeitig zu chatten.</string>
-    <string name="tutorial_nearby_anchor">in-der-naehe</string>
-    <string name="placeholder_nearby_text">Warten auf Kontakte %1$s…</string>
-    <string name="placeholder_nearby_link_text">in der Nähe</string>
+    <string name="placeholder_nearby_text">Warten auf Kontakte <![CDATA[<a href="http://faq.hoccer.com/de/tutorial-xo/#in-der-naehe">in der Nähe</a>]]>…</string>
     <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Medien</string>
     <string name="content_audio_by_contact_caption">Medien von %1$s</string>

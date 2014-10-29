@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
@@ -33,19 +34,6 @@ public class GroupContactListAdapter extends ContactListAdapter {
 
     private static final int DISPLAY_NAMES_MAX_LENGTH = 30;
 
-    private static final Predicate<TalkClientContact> IS_NEARBY_GROUP_PREDICATE = new Predicate<TalkClientContact>() {
-        @Override
-        public boolean evaluate(TalkClientContact group) {
-            TalkGroup groupPresence = group.getGroupPresence();
-
-            if (groupPresence != null) {
-                return groupPresence.isTypeNearby();
-            }
-
-            return false;
-        }
-    };
-
     public GroupContactListAdapter(Activity activity) {
         super(activity);
     }
@@ -65,50 +53,47 @@ public class GroupContactListAdapter extends ContactListAdapter {
         }
 
         Collections.sort(joined, CLIENT_CONTACT_COMPARATOR);
-        CollectionUtils.filterInverse(joined, IS_NEARBY_GROUP_PREDICATE);
+        CollectionUtils.filterInverse(joined, TalkClientContactPredicates.IS_NEARBY_GROUP_PREDICATE);
 
         return ListUtils.union(invitedMe, joined);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+
+        ViewHolder viewHolder;
+
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.item_contact_group, null);
+            viewHolder = createAndInitViewHolder(convertView);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
-
-        AvatarView avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
-        TextView contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
-        LinearLayout invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
-        Button acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
-        Button declineButton = (Button) convertView.findViewById(R.id.btn_decline);
-        TextView groupMembersTextView = (TextView) convertView.findViewById(R.id.tv_group_members);
 
         final TalkClientContact group = (TalkClientContact) getItem(position);
 
-        contactNameTextView.setText(group.getNickname());
-        avatarView.setContact(group);
+        updateView(viewHolder, group);
 
-        acceptButton.setOnClickListener(new View.OnClickListener() {
+        return convertView;
+    }
+
+    private void updateView(ViewHolder viewHolder, final TalkClientContact group) {
+        viewHolder.contactNameTextView.setText(group.getNickname());
+        viewHolder.avatarView.setContact(group);
+
+        viewHolder.acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 XoApplication.getXoClient().joinGroup(group.getGroupId());
             }
         });
 
-        declineButton.setOnClickListener(new View.OnClickListener() {
+        viewHolder.declineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                XoDialogs.showYesNoDialog("ConfirmDeclineGroupInvitationDialog",
-                        mActivity.getString(R.string.group_request_decline_invitation_title),
-                        mActivity.getString(R.string.group_request_decline_invitation_message, group.getNickname()),
-                        mActivity,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                XoApplication.getXoClient().leaveGroup(group.getGroupId());
-                            }
-                        });
+                showConfirmDialog(group);
             }
         });
 
@@ -116,16 +101,22 @@ public class GroupContactListAdapter extends ContactListAdapter {
             TalkGroupMember member = group.getGroupMember();
 
             if (member.isInvited()) {
-                invitedMeLayout.setVisibility(View.VISIBLE);
-                groupMembersTextView.setVisibility(View.GONE);
+                updateViewForInvited(viewHolder);
             } else if (member.isJoined()) {
-                invitedMeLayout.setVisibility(View.GONE);
-                groupMembersTextView.setVisibility(View.VISIBLE);
-                groupMembersTextView.setText(getGroupMembersString(group));
+                updateViewForJoined(viewHolder, group);
             }
         }
+    }
 
-        return convertView;
+    private void updateViewForInvited(ViewHolder viewHolder) {
+        viewHolder.invitedMeLayout.setVisibility(View.VISIBLE);
+        viewHolder.groupMembersTextView.setVisibility(View.GONE);
+    }
+
+    private void updateViewForJoined(ViewHolder viewHolder, TalkClientContact group) {
+        viewHolder.invitedMeLayout.setVisibility(View.GONE);
+        viewHolder.groupMembersTextView.setVisibility(View.VISIBLE);
+        viewHolder.groupMembersTextView.setText(getGroupMembersString(group));
     }
 
     private String getGroupMembersString(TalkClientContact group) {
@@ -153,6 +144,19 @@ public class GroupContactListAdapter extends ContactListAdapter {
         return groupMembersString;
     }
 
+    private void showConfirmDialog(final TalkClientContact group) {
+        XoDialogs.showYesNoDialog("ConfirmDeclineGroupInvitationDialog",
+                mActivity.getString(R.string.group_request_decline_invitation_title),
+                mActivity.getString(R.string.group_request_decline_invitation_message, group.getNickname()),
+                mActivity,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        XoApplication.getXoClient().leaveGroup(group.getGroupId());
+                    }
+                });
+    }
+
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
         updateContactsAndView();
@@ -161,5 +165,25 @@ public class GroupContactListAdapter extends ContactListAdapter {
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
         updateContactsAndView();
+    }
+
+    private ViewHolder createAndInitViewHolder(View convertView) {
+        ViewHolder viewHolder = new ViewHolder();
+        viewHolder.avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
+        viewHolder.contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
+        viewHolder.invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
+        viewHolder.acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
+        viewHolder.declineButton = (Button) convertView.findViewById(R.id.btn_decline);
+        viewHolder.groupMembersTextView = (TextView) convertView.findViewById(R.id.tv_group_members);
+        return viewHolder;
+    }
+
+    private class ViewHolder {
+        AvatarView avatarView;
+        TextView contactNameTextView;
+        LinearLayout invitedMeLayout;
+        Button acceptButton;
+        Button declineButton;
+        TextView groupMembersTextView;
     }
 }
