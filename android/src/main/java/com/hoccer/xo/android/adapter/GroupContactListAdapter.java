@@ -60,31 +60,31 @@ public class GroupContactListAdapter extends ContactListAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+
+        ViewHolder viewHolder;
+
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.item_contact_group, null);
+            viewHolder = createAndInitViewHolder(convertView);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
-
-        AvatarView avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
-        TextView contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
-        LinearLayout invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
-        Button acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
-        Button declineButton = (Button) convertView.findViewById(R.id.btn_decline);
-        TextView groupMembersTextView = (TextView) convertView.findViewById(R.id.tv_group_members);
 
         final TalkClientContact group = (TalkClientContact) getItem(position);
 
-        contactNameTextView.setText(group.getNickname());
-        avatarView.setContact(group);
+        viewHolder.contactNameTextView.setText(group.getNickname());
+        viewHolder.avatarView.setContact(group);
 
-        acceptButton.setOnClickListener(new View.OnClickListener() {
+        viewHolder.acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 XoApplication.getXoClient().joinGroup(group.getGroupId());
             }
         });
 
-        declineButton.setOnClickListener(new View.OnClickListener() {
+        viewHolder.declineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 XoDialogs.showYesNoDialog("ConfirmDeclineGroupInvitationDialog",
@@ -104,12 +104,12 @@ public class GroupContactListAdapter extends ContactListAdapter {
             TalkGroupMember member = group.getGroupMember();
 
             if (member.isInvited()) {
-                invitedMeLayout.setVisibility(View.VISIBLE);
-                groupMembersTextView.setVisibility(View.GONE);
+                viewHolder.invitedMeLayout.setVisibility(View.VISIBLE);
+                viewHolder.groupMembersTextView.setVisibility(View.GONE);
             } else if (member.isJoined()) {
-                invitedMeLayout.setVisibility(View.GONE);
-                groupMembersTextView.setVisibility(View.VISIBLE);
-                groupMembersTextView.setText(getGroupMembersString(group));
+                viewHolder.invitedMeLayout.setVisibility(View.GONE);
+                viewHolder.groupMembersTextView.setVisibility(View.VISIBLE);
+                viewHolder.groupMembersTextView.setText(getGroupMembersString(group));
             }
         }
 
@@ -149,5 +149,25 @@ public class GroupContactListAdapter extends ContactListAdapter {
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
         updateContactsAndView();
+    }
+
+    private ViewHolder createAndInitViewHolder(View convertView) {
+        ViewHolder viewHolder = new ViewHolder();
+        viewHolder.avatarView = (AvatarView) convertView.findViewById(R.id.contact_icon);
+        viewHolder.contactNameTextView = (TextView) convertView.findViewById(R.id.contact_name);
+        viewHolder.invitedMeLayout = (LinearLayout) convertView.findViewById(R.id.ll_invited_me);
+        viewHolder.acceptButton = (Button) convertView.findViewById(R.id.btn_accept);
+        viewHolder.declineButton = (Button) convertView.findViewById(R.id.btn_decline);
+        viewHolder.groupMembersTextView = (TextView) convertView.findViewById(R.id.tv_group_members);
+        return viewHolder;
+    }
+
+    private class ViewHolder {
+        AvatarView avatarView;
+        TextView contactNameTextView;
+        LinearLayout invitedMeLayout;
+        Button acceptButton;
+        Button declineButton;
+        TextView groupMembersTextView;
     }
 }
