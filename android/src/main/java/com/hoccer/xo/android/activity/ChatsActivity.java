@@ -85,12 +85,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        registerListeners();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         refreshEnvironmentUpdater(false);
@@ -101,12 +95,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterListeners();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
         unregisterListeners();
     }
 
