@@ -3086,6 +3086,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             TalkKey key = mServerRpc.getKey(client.getClientId(), currentKeyId);
             if (key != null) {
                 try {
+                    mDatabase.refreshClientContact(client);
                     client.setPublicKey(key);
                     mDatabase.savePublicKey(key);
                     mDatabase.saveContact(client);
