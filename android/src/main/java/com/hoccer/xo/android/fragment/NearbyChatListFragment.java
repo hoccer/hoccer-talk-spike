@@ -16,6 +16,7 @@ import com.hoccer.xo.android.adapter.NearbyChatListAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -25,32 +26,25 @@ import java.sql.SQLException;
 
 public class NearbyChatListFragment extends XoListFragment implements IXoContactListener {
     private static final Logger LOG = Logger.getLogger(NearbyChatListFragment.class);
+    private static final Placeholder PLACEHOLDER = new Placeholder(
+            R.drawable.placeholder_nearby,
+            R.drawable.placeholder_nearby_point,
+            R.string.placeholder_nearby_text);
 
     private NearbyChatListAdapter mNearbyAdapter;
     private TalkClientContact mCurrentNearbyGroup;
     private ListView mContactList;
-    private ImageView mPlaceholderImageFrame;
-    private ImageView mPlaceholderImage;
-    private TextView mPlaceholderText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_contacts, container, false);
         mContactList = (ListView) view.findViewById(android.R.id.list);
 
-        mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
-        mPlaceholderImageFrame.setImageResource(R.drawable.placeholder_nearby);
+        PLACEHOLDER.applyToView(view);
 
-        mPlaceholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getXoActivity().getResources(), R.drawable.placeholder_nearby_point, true));
-        } else {
-            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity().getResources(), R.drawable.placeholder_nearby_point, true));
-        }
-
-        mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
-        mPlaceholderText.setMovementMethod(LinkMovementMethod.getInstance());
-        setPlaceholderText();
+        TextView placeholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
+        placeholderText.setMovementMethod(LinkMovementMethod.getInstance());
+        setPlaceholderText(placeholderText);
 
         return view;
     }
@@ -67,9 +61,7 @@ public class NearbyChatListFragment extends XoListFragment implements IXoContact
 
         createAdapter();
 
-        if (isNearbyConversationPossible(mCurrentNearbyGroup)) {
-            activateNearbyChat();
-        } else {
+        if (!isNearbyConversationPossible(mCurrentNearbyGroup)) {
             deactivateNearbyChat();
         }
 
@@ -88,12 +80,12 @@ public class NearbyChatListFragment extends XoListFragment implements IXoContact
         super.onDestroy();
     }
 
-    private void setPlaceholderText() {
+    private void setPlaceholderText(TextView placeholderText) {
         String anchorName = getString(R.string.tutorial_nearby_anchor);
         String link = "<a href=\"" + getResources().getString(R.string.link_tutorial) + "#" + anchorName + "\">" +
                 getResources().getString(R.string.placeholder_nearby_link_text) + "</a>";
         String text = String.format(getString(R.string.placeholder_nearby_text), link);
-        mPlaceholderText.setText(Html.fromHtml(text));
+        placeholderText.setText(Html.fromHtml(text));
     }
 
     private boolean isNearbyConversationPossible(TalkClientContact groupContact) {
@@ -121,13 +113,8 @@ public class NearbyChatListFragment extends XoListFragment implements IXoContact
         return null;
     }
 
-    private void activateNearbyChat() {
-        hidePlaceholder();
-    }
-
     private void deactivateNearbyChat() {
         mCurrentNearbyGroup = null;
-        showPlaceholder();
     }
 
     public void shutdownNearbyChat() {
@@ -160,30 +147,6 @@ public class NearbyChatListFragment extends XoListFragment implements IXoContact
             mNearbyAdapter.unregisterListeners();
             mNearbyAdapter = null;
         }
-    }
-
-    private void showPlaceholder() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mContactList.setVisibility(View.GONE);
-                mPlaceholderImageFrame.setVisibility(View.VISIBLE);
-                mPlaceholderImage.setVisibility(View.VISIBLE);
-                mPlaceholderText.setVisibility(View.VISIBLE);
-            }
-        });
-    }
-
-    private void hidePlaceholder() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-				mPlaceholderImageFrame.setVisibility(View.GONE);
-                mPlaceholderImage.setVisibility(View.GONE);
-                mPlaceholderText.setVisibility(View.GONE);
-                mContactList.setVisibility(View.VISIBLE);
-            }
-        });
     }
 
     @Override
@@ -222,9 +185,7 @@ public class NearbyChatListFragment extends XoListFragment implements IXoContact
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
         if (mCurrentNearbyGroup != null && contact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
-            if (isNearbyConversationPossible(contact)) {
-                activateNearbyChat();
-            } else {
+            if (!isNearbyConversationPossible(contact)) {
                 deactivateNearbyChat();
             }
         }
@@ -237,12 +198,9 @@ public class NearbyChatListFragment extends XoListFragment implements IXoContact
             mCurrentNearbyGroup = currentNearbyGroup;
         }
         if (mCurrentNearbyGroup != null && contact.getGroupId().equals(mCurrentNearbyGroup.getGroupId())) {
-            if (isNearbyConversationPossible(contact)) {
-                activateNearbyChat();
-            } else {
+            if (!isNearbyConversationPossible(contact)) {
                 deactivateNearbyChat();
             }
         }
-
     }
 }
