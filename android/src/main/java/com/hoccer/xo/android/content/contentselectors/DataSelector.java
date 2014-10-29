@@ -15,7 +15,7 @@ public class DataSelector implements IContentSelector {
 
     public DataSelector(Context context) {
         mName = context.getResources().getString(R.string.content_data);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_data, true);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_data, true);
     }
 
     @Override

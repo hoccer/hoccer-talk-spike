@@ -21,7 +21,7 @@ public class MultiImageSelector extends ImageSelector {
     public MultiImageSelector(Context context) {
         super(context);
         mName = context.getResources().getString(R.string.content_multi_images);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_image, true);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_image, true);
     }
 
     @Override

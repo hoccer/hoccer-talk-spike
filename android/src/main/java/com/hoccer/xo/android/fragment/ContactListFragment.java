@@ -5,20 +5,24 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.*;
-import android.widget.*;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
+import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.release.R;
 
 public abstract class ContactListFragment extends SearchableListFragment implements IPagerFragment, IXoContactListener {
 
     private ContactListAdapter mContactListAdapter;
-    private Class<?> mProfileActivityClass;
 
     private int mTabNameId;
+    private Class<?> mProfileActivityClass;
+    private Placeholder mPlaceholder;
 
     private MenuItem mMenuItemPairing;
     private MenuItem mMenuItemNewGroup;
@@ -26,14 +30,21 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private View mTabView;
     private TextView mNotificationBadgeTextView;
 
-    public ContactListFragment(int tabNameId, Class<?> profileActivityClass) {
+    public ContactListFragment(int tabNameId, Class<?> profileActivityClass, Placeholder placeholder) {
         mTabNameId = tabNameId;
         mProfileActivityClass = profileActivityClass;
+        mPlaceholder = placeholder;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_contacts, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mPlaceholder.applyToView(view);
     }
 
     @Override

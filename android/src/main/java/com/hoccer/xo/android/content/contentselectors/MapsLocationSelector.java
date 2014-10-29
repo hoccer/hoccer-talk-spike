@@ -16,7 +16,7 @@ public class MapsLocationSelector implements IContentSelector {
 
     public MapsLocationSelector(Context context) {
         mName = context.getResources().getString(R.string.content_location);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_location, true);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_location, true);
     }
 
     @Override

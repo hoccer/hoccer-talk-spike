@@ -35,7 +35,7 @@ public class NearbyChatListFragment extends XoListFragment implements IXoContact
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_client_contacts, container, false);
+        View view = inflater.inflate(R.layout.fragment_contacts, container, false);
         mContactList = (ListView) view.findViewById(android.R.id.list);
 
         mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
@@ -43,9 +43,9 @@ public class NearbyChatListFragment extends XoListFragment implements IXoContact
 
         mPlaceholderImage = (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_nearby_point, true));
+            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getXoActivity().getResources(), R.drawable.placeholder_nearby_point, true));
         } else {
-            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity(), R.drawable.placeholder_nearby_point, true));
+            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getXoActivity().getResources(), R.drawable.placeholder_nearby_point, true));
         }
 
         mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);

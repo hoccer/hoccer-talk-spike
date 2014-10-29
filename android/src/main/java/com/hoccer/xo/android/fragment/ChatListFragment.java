@@ -48,7 +48,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_client_contacts, container, false);
+        return inflater.inflate(R.layout.fragment_contacts, container, false);
     }
 
     @Override
@@ -61,10 +61,10 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             mPlaceholderImageFrame.setBackground(getResources().getDrawable(R.drawable.placeholder_chats));
-            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
+            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getActivity().getResources(), R.drawable.placeholder_chats_head, true));
         } else {
             mPlaceholderImageFrame.setBackgroundDrawable(getResources().getDrawable(R.drawable.placeholder_chats));
-            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
+            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity().getResources(), R.drawable.placeholder_chats_head, true));
         }
 
         initAdapter();
