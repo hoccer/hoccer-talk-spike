@@ -19,8 +19,7 @@ public class GroupContactListFragment extends ContactListFragment {
     public static final Logger LOG = Logger.getLogger(GroupContactListFragment.class);
 
     public GroupContactListFragment() {
-        mTabNameId = R.string.contacts_tab_groups;
-        mProfileActivityClass = GroupProfileActivity.class;
+        super(R.string.contacts_tab_groups, GroupProfileActivity.class);
     }
 
     @Override

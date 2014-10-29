@@ -19,8 +19,7 @@ public class ClientContactListFragment extends ContactListFragment {
     public static final Logger LOG = Logger.getLogger(ContactListFragment.class);
 
     public ClientContactListFragment() {
-        mTabNameId = R.string.contacts_tab_friends;
-        mProfileActivityClass = SingleProfileActivity.class;
+        super(R.string.contacts_tab_friends, SingleProfileActivity.class);
     }
 
     @Override

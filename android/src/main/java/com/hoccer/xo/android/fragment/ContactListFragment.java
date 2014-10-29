@@ -16,15 +16,20 @@ import com.hoccer.xo.release.R;
 public abstract class ContactListFragment extends SearchableListFragment implements IPagerFragment, IXoContactListener {
 
     private ContactListAdapter mContactListAdapter;
-    protected  Class<?> mProfileActivityClass;
+    private Class<?> mProfileActivityClass;
 
-    protected int mTabNameId;
+    private int mTabNameId;
 
     private MenuItem mMenuItemPairing;
     private MenuItem mMenuItemNewGroup;
 
     private View mTabView;
     private TextView mNotificationBadgeTextView;
+
+    public ContactListFragment(int tabNameId, Class<?> profileActivityClass) {
+        mTabNameId = tabNameId;
+        mProfileActivityClass = profileActivityClass;
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
