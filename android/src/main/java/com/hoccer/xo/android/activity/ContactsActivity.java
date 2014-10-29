@@ -4,8 +4,8 @@ import android.os.Bundle;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
-import com.hoccer.xo.android.fragment.ClientListFragment;
-import com.hoccer.xo.android.fragment.GroupListFragment;
+import com.hoccer.xo.android.fragment.ClientContactListFragment;
+import com.hoccer.xo.android.fragment.GroupContactListFragment;
 import com.hoccer.xo.release.R;
 
 public class ContactsActivity extends ComposableActivity {
@@ -26,8 +26,8 @@ public class ContactsActivity extends ComposableActivity {
                 new MediaPlayerActivityComponent(this),
                 new ViewPagerActivityComponent(this,
                         R.id.pager,
-                        new ClientListFragment(),
-                        new GroupListFragment())
+                        new ClientContactListFragment(),
+                        new GroupContactListFragment())
         };
     }
 

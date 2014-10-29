@@ -27,9 +27,9 @@ import org.apache.log4j.Logger;
 import java.sql.SQLException;
 import java.util.*;
 
-public class GroupListAdapter extends ContactListAdapter {
+public class GroupContactListAdapter extends ContactListAdapter {
 
-    private static final Logger LOG = Logger.getLogger(GroupListAdapter.class);
+    private static final Logger LOG = Logger.getLogger(GroupContactListAdapter.class);
 
     private static final int DISPLAY_NAMES_MAX_LENGTH = 30;
 
@@ -46,7 +46,7 @@ public class GroupListAdapter extends ContactListAdapter {
         }
     };
 
-    public GroupListAdapter(Activity activity) {
+    public GroupContactListAdapter(Activity activity) {
         super(activity);
     }
 

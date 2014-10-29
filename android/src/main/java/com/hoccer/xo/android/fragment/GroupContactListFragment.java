@@ -8,17 +8,17 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
-import com.hoccer.xo.android.adapter.GroupListAdapter;
+import com.hoccer.xo.android.adapter.GroupContactListAdapter;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class GroupListFragment extends ContactListFragment {
+public class GroupContactListFragment extends ContactListFragment {
 
-    public static final Logger LOG = Logger.getLogger(GroupListFragment.class);
+    public static final Logger LOG = Logger.getLogger(GroupContactListFragment.class);
 
-    public GroupListFragment() {
+    public GroupContactListFragment() {
         mTabLayoutId = R.layout.view_contacts_tab_groups;
         mTabNameId = R.string.contacts_tab_groups;
 
@@ -32,7 +32,7 @@ public class GroupListFragment extends ContactListFragment {
 
     @Override
     protected ContactListAdapter createAdapter() {
-        return new GroupListAdapter(getActivity());
+        return new GroupContactListAdapter(getActivity());
     }
 
     @Override

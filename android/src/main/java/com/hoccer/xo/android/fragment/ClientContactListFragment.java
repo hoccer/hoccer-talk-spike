@@ -7,18 +7,18 @@ import android.view.ViewGroup;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
-import com.hoccer.xo.android.adapter.ClientListAdapter;
+import com.hoccer.xo.android.adapter.ClientContactListAdapter;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
-public class ClientListFragment extends ContactListFragment {
+public class ClientContactListFragment extends ContactListFragment {
 
     public static final Logger LOG = Logger.getLogger(ContactListFragment.class);
 
-    public ClientListFragment() {
+    public ClientContactListFragment() {
         mTabLayoutId = R.layout.view_contacts_tab_friends;
         mTabNameId = R.string.contacts_tab_friends;
 
@@ -32,7 +32,7 @@ public class ClientListFragment extends ContactListFragment {
 
     @Override
     protected ContactListAdapter createAdapter() {
-        return new ClientListAdapter(getActivity());
+        return new ClientContactListAdapter(getActivity());
     }
 
     @Override

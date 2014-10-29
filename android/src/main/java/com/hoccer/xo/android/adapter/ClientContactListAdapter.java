@@ -20,16 +20,14 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-public class ClientListAdapter extends ContactListAdapter {
+public class ClientContactListAdapter extends ContactListAdapter {
 
-    private static final Logger LOG = Logger.getLogger(ClientListAdapter.class);
+    private static final Logger LOG = Logger.getLogger(ClientContactListAdapter.class);
 
-    public ClientListAdapter(Activity activity) {
+    public ClientContactListAdapter(Activity activity) {
         super(activity);
     }
 

@@ -14,8 +14,8 @@ import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.*;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.adapter.GroupListAdapter;
-import com.hoccer.xo.android.fragment.GroupListFragment;
+import com.hoccer.xo.android.adapter.GroupContactListAdapter;
+import com.hoccer.xo.android.fragment.GroupContactListFragment;
 
 import java.sql.SQLException;
 
@@ -24,8 +24,8 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
     public static final String GROUP_NAME_PREFIX = "group_name_";
 
     private ContactsActivity activity;
-    private GroupListFragment groupListFragment;
-    private GroupListAdapter groupListAdapter;
+    private GroupContactListFragment mGroupContactListFragment;
+    private GroupContactListAdapter mGroupContactListAdapter;
 
     public ContactsActivityGroupFunctionalTest() {
         super(ContactsActivity.class);
@@ -38,8 +38,8 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
 
         ViewPager viewPager = (ViewPager) activity.findViewById(com.hoccer.xo.release.R.id.pager);
         FragmentPagerAdapter adapter = (FragmentPagerAdapter) viewPager.getAdapter();
-        groupListFragment = (GroupListFragment) adapter.getItem(1);
-        groupListAdapter = (GroupListAdapter) groupListFragment.getListAdapter();
+        mGroupContactListFragment = (GroupContactListFragment) adapter.getItem(1);
+        mGroupContactListAdapter = (GroupContactListAdapter) mGroupContactListFragment.getListAdapter();
 
         XoApplication.getXoClient().getDatabase().eraseAllGroupContacts();
         XoApplication.getXoClient().getDatabase().eraseAllGroupMemberships();
@@ -94,9 +94,9 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
 
         mockGroupRelationship(TalkGroupMember.STATE_INVITED, "1");
 
-        assertEquals(1, groupListAdapter.getCount());
+        assertEquals(1, mGroupContactListAdapter.getCount());
 
-        TalkClientContact group = (TalkClientContact) groupListAdapter.getItem(0);
+        TalkClientContact group = (TalkClientContact) mGroupContactListAdapter.getItem(0);
 
         assertTrue(group.getGroupMember().isInvited());
 
@@ -105,7 +105,7 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
             public void run() {
                 int count = 0;
                 while (count < 1000) {
-                    if (groupListFragment.getListView().getCount() > 0) {
+                    if (mGroupContactListFragment.getListView().getCount() > 0) {
                         ready = true;
                         break;
                     }
@@ -121,11 +121,11 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
 
         Thread.sleep(1100);
         assertTrue(ready);
-        assertEquals(1, groupListFragment.getListView().getCount());
+        assertEquals(1, mGroupContactListFragment.getListView().getCount());
 
         getInstrumentation().waitForIdleSync();
 
-        View itemView = groupListFragment.getListView().getChildAt(0);
+        View itemView = mGroupContactListFragment.getListView().getChildAt(0);
         assertNotNull(itemView);
 
         TextView contactNameTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.contact_name);
@@ -148,9 +148,9 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
 
         mockGroupRelationship(TalkGroupMember.STATE_JOINED, "1");
 
-        assertEquals(1, groupListAdapter.getCount());
+        assertEquals(1, mGroupContactListAdapter.getCount());
 
-        TalkClientContact group = (TalkClientContact) groupListAdapter.getItem(0);
+        TalkClientContact group = (TalkClientContact) mGroupContactListAdapter.getItem(0);
 
         assertTrue(group.getGroupMember().isJoined());
 
@@ -159,7 +159,7 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
             public void run() {
                 int count = 0;
                 while (count < 1000) {
-                    if (groupListFragment.getListView().getCount() > 0) {
+                    if (mGroupContactListFragment.getListView().getCount() > 0) {
                         ready = true;
                         break;
                     }
@@ -175,11 +175,11 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
 
         Thread.sleep(1100);
         assertTrue(ready);
-        assertEquals(1, groupListFragment.getListView().getCount());
+        assertEquals(1, mGroupContactListFragment.getListView().getCount());
 
         getInstrumentation().waitForIdleSync();
 
-        View itemView = groupListFragment.getListView().getChildAt(0);
+        View itemView = mGroupContactListFragment.getListView().getChildAt(0);
         assertNotNull(itemView);
 
         TextView contactNameTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.contact_name);
@@ -213,18 +213,18 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
         mockGroupRelationship(TalkGroupMember.STATE_JOINED, "9", "F");
         mockGroupRelationship(TalkGroupMember.STATE_INVITED, "10", "E");
 
-        assertEquals(10, groupListAdapter.getCount());
+        assertEquals(10, mGroupContactListAdapter.getCount());
 
-        TalkClientContact group1 = (TalkClientContact) groupListAdapter.getItem(0);
-        TalkClientContact group2 = (TalkClientContact) groupListAdapter.getItem(1);
-        TalkClientContact group3 = (TalkClientContact) groupListAdapter.getItem(2);
-        TalkClientContact group4 = (TalkClientContact) groupListAdapter.getItem(3);
-        TalkClientContact group5 = (TalkClientContact) groupListAdapter.getItem(4);
-        TalkClientContact group6 = (TalkClientContact) groupListAdapter.getItem(5);
-        TalkClientContact group7 = (TalkClientContact) groupListAdapter.getItem(6);
-        TalkClientContact group8 = (TalkClientContact) groupListAdapter.getItem(7);
-        TalkClientContact group9 = (TalkClientContact) groupListAdapter.getItem(8);
-        TalkClientContact group10 = (TalkClientContact) groupListAdapter.getItem(9);
+        TalkClientContact group1 = (TalkClientContact) mGroupContactListAdapter.getItem(0);
+        TalkClientContact group2 = (TalkClientContact) mGroupContactListAdapter.getItem(1);
+        TalkClientContact group3 = (TalkClientContact) mGroupContactListAdapter.getItem(2);
+        TalkClientContact group4 = (TalkClientContact) mGroupContactListAdapter.getItem(3);
+        TalkClientContact group5 = (TalkClientContact) mGroupContactListAdapter.getItem(4);
+        TalkClientContact group6 = (TalkClientContact) mGroupContactListAdapter.getItem(5);
+        TalkClientContact group7 = (TalkClientContact) mGroupContactListAdapter.getItem(6);
+        TalkClientContact group8 = (TalkClientContact) mGroupContactListAdapter.getItem(7);
+        TalkClientContact group9 = (TalkClientContact) mGroupContactListAdapter.getItem(8);
+        TalkClientContact group10 = (TalkClientContact) mGroupContactListAdapter.getItem(9);
 
         // invited to group
         assertEquals("A", group1.getNickname());

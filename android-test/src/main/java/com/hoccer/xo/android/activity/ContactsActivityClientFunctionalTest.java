@@ -18,8 +18,8 @@ import com.hoccer.talk.model.TalkKey;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.adapter.ClientListAdapter;
-import com.hoccer.xo.android.fragment.ClientListFragment;
+import com.hoccer.xo.android.adapter.ClientContactListAdapter;
+import com.hoccer.xo.android.fragment.ClientContactListFragment;
 
 import java.sql.SQLException;
 
@@ -28,8 +28,8 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
     public static final String OTHER_CLIENT_NAME_PREFIX = "other_client_name_";
 
     private ContactsActivity activity;
-    private ClientListFragment clientListFragment;
-    private ClientListAdapter clientListAdapter;
+    private ClientContactListFragment mClientContactListFragment;
+    private ClientContactListAdapter mClientContactListAdapter;
 
     public ContactsActivityClientFunctionalTest() {
         super(ContactsActivity.class);
@@ -42,8 +42,8 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
 
         ViewPager viewPager = (ViewPager) activity.findViewById(com.hoccer.xo.release.R.id.pager);
         FragmentPagerAdapter adapter = (FragmentPagerAdapter) viewPager.getAdapter();
-        clientListFragment = (ClientListFragment) adapter.getItem(0);
-        clientListAdapter = (ClientListAdapter) clientListFragment.getListAdapter();
+        mClientContactListFragment = (ClientContactListFragment) adapter.getItem(0);
+        mClientContactListAdapter = (ClientContactListAdapter) mClientContactListFragment.getListAdapter();
 
         XoApplication.getXoClient().getDatabase().eraseAllClientContacts();
         XoApplication.getXoClient().getDatabase().eraseAllRelationships();
@@ -99,20 +99,20 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
 
         mockClientRelationship(TalkRelationship.STATE_INVITED_ME, 1);
 
-        clientListAdapter.onClientRelationshipChanged(null);
+        mClientContactListAdapter.onClientRelationshipChanged(null);
 
-        assertEquals(1, clientListAdapter.getCount());
-        TalkClientContact contact = (TalkClientContact) clientListAdapter.getItem(0);
+        assertEquals(1, mClientContactListAdapter.getCount());
+        TalkClientContact contact = (TalkClientContact) mClientContactListAdapter.getItem(0);
 
         assertTrue(contact.getClientRelationship().invitedMe());
-        assertTrue(clientListAdapter.isEnabled(0));
+        assertTrue(mClientContactListAdapter.isEnabled(0));
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 int count = 0;
                 while (count < 1000) {
-                    if (clientListFragment.getListView().getCount() > 0) {
+                    if (mClientContactListFragment.getListView().getCount() > 0) {
                         ready = true;
                         break;
                     }
@@ -129,11 +129,11 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         Thread.sleep(1100);
 
         assertTrue(ready);
-        assertEquals(1, clientListFragment.getListView().getCount());
+        assertEquals(1, mClientContactListFragment.getListView().getCount());
 
         getInstrumentation().waitForIdleSync();
 
-        final View itemView = clientListFragment.getListView().getChildAt(0);
+        final View itemView = mClientContactListFragment.getListView().getChildAt(0);
         assertNotNull(itemView);
 
         TextView contactNameTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.contact_name);
@@ -166,20 +166,20 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
 
         mockClientRelationship(TalkRelationship.STATE_INVITED, 1);
 
-        clientListAdapter.onClientRelationshipChanged(null);
+        mClientContactListAdapter.onClientRelationshipChanged(null);
 
-        assertEquals(1, clientListAdapter.getCount());
-        TalkClientContact expectedContact = (TalkClientContact) clientListAdapter.getItem(0);
+        assertEquals(1, mClientContactListAdapter.getCount());
+        TalkClientContact expectedContact = (TalkClientContact) mClientContactListAdapter.getItem(0);
 
         assertTrue(expectedContact.getClientRelationship().isInvited());
-        assertTrue(clientListAdapter.isEnabled(0));
+        assertTrue(mClientContactListAdapter.isEnabled(0));
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 int count = 0;
                 while (count < 1000) {
-                    if (clientListFragment.getListView().getCount() > 0) {
+                    if (mClientContactListFragment.getListView().getCount() > 0) {
                         ready = true;
                         break;
                     }
@@ -196,11 +196,11 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         Thread.sleep(1100);
 
         assertTrue(ready);
-        assertEquals(1, clientListFragment.getListView().getCount());
+        assertEquals(1, mClientContactListFragment.getListView().getCount());
 
         getInstrumentation().waitForIdleSync();
 
-        View itemView = clientListFragment.getListView().getChildAt(0);
+        View itemView = mClientContactListFragment.getListView().getChildAt(0);
 
         assertNotNull(itemView);
 
@@ -223,16 +223,16 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
 
         TalkClientContact relatedContact = mockClientRelationship(TalkRelationship.STATE_FRIEND, 1);
 
-        clientListAdapter.onClientRelationshipChanged(null);
-        assertEquals(1, clientListAdapter.getCount());
+        mClientContactListAdapter.onClientRelationshipChanged(null);
+        assertEquals(1, mClientContactListAdapter.getCount());
 
-        TalkClientContact contact = (TalkClientContact) clientListAdapter.getItem(0);
+        TalkClientContact contact = (TalkClientContact) mClientContactListAdapter.getItem(0);
         assertTrue(contact.getClientRelationship().isFriend());
-        assertTrue(clientListAdapter.isEnabled(0));
+        assertTrue(mClientContactListAdapter.isEnabled(0));
 
         getInstrumentation().waitForIdleSync();
 
-        final ListView listView = clientListFragment.getListView();
+        final ListView listView = mClientContactListFragment.getListView();
         final View itemView = listView.getChildAt(0);
         assertNotNull(itemView);
 
@@ -243,7 +243,7 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         getInstrumentation().runOnMainSync(new Runnable() {
             @Override
             public void run() {
-                listView.performItemClick(itemView, 0, clientListAdapter.getItemId(0));
+                listView.performItemClick(itemView, 0, mClientContactListAdapter.getItemId(0));
             }
         });
         getInstrumentation().waitForIdleSync();
@@ -260,11 +260,11 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
 
         mockClientRelationship(TalkRelationship.STATE_INVITED_ME, 1);
 
-        clientListAdapter.onClientRelationshipChanged(null);
+        mClientContactListAdapter.onClientRelationshipChanged(null);
 
         getInstrumentation().waitForIdleSync();
 
-        ListView listView = clientListFragment.getListView();
+        ListView listView = mClientContactListFragment.getListView();
         View itemView = listView.getChildAt(0);
         assertNotNull(itemView);
 
@@ -295,11 +295,11 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
     public void testDeclineClientInvitation() {
         mockClientRelationship(TalkRelationship.STATE_INVITED_ME, 1);
 
-        clientListAdapter.onClientRelationshipChanged(null);
+        mClientContactListAdapter.onClientRelationshipChanged(null);
 
         getInstrumentation().waitForIdleSync();
 
-        View itemView = clientListFragment.getListView().getChildAt(0);
+        View itemView = mClientContactListFragment.getListView().getChildAt(0);
         assertNotNull(itemView);
 
         final Button declineButton = (Button) itemView.findViewById(com.hoccer.xo.release.R.id.btn_decline);
@@ -328,38 +328,38 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         mockClientRelationship(TalkRelationship.STATE_FRIEND, 8, "F");
         mockClientRelationship(TalkRelationship.STATE_FRIEND, 9, "G");
 
-        clientListAdapter.onClientRelationshipChanged(null);
+        mClientContactListAdapter.onClientRelationshipChanged(null);
 
-        assertEquals(9, clientListAdapter.getCount());
+        assertEquals(9, mClientContactListAdapter.getCount());
 
         // invited me contacts - ordered chronologically
-        TalkClientContact contact1 = (TalkClientContact) clientListAdapter.getItem(0);
+        TalkClientContact contact1 = (TalkClientContact) mClientContactListAdapter.getItem(0);
         assertEquals("B", contact1.getName());
 
-        TalkClientContact contact2 = (TalkClientContact) clientListAdapter.getItem(1);
+        TalkClientContact contact2 = (TalkClientContact) mClientContactListAdapter.getItem(1);
         assertEquals("A", contact2.getName());
 
         // invited others - ordered alphabetically
-        TalkClientContact contact3 = (TalkClientContact) clientListAdapter.getItem(2);
+        TalkClientContact contact3 = (TalkClientContact) mClientContactListAdapter.getItem(2);
         assertEquals("C", contact3.getName());
 
-        TalkClientContact contact4 = (TalkClientContact) clientListAdapter.getItem(3);
+        TalkClientContact contact4 = (TalkClientContact) mClientContactListAdapter.getItem(3);
         assertEquals("D", contact4.getName());
 
-        TalkClientContact contact5 = (TalkClientContact) clientListAdapter.getItem(4);
+        TalkClientContact contact5 = (TalkClientContact) mClientContactListAdapter.getItem(4);
         assertEquals("E", contact5.getName());
 
         // friends - ordered alphabetically
-        TalkClientContact contact6 = (TalkClientContact) clientListAdapter.getItem(5);
+        TalkClientContact contact6 = (TalkClientContact) mClientContactListAdapter.getItem(5);
         assertEquals("F", contact6.getName());
 
-        TalkClientContact contact7 = (TalkClientContact) clientListAdapter.getItem(6);
+        TalkClientContact contact7 = (TalkClientContact) mClientContactListAdapter.getItem(6);
         assertEquals("G", contact7.getName());
 
-        TalkClientContact contact8 = (TalkClientContact) clientListAdapter.getItem(7);
+        TalkClientContact contact8 = (TalkClientContact) mClientContactListAdapter.getItem(7);
         assertEquals("H", contact8.getName());
 
-        TalkClientContact contact9 = (TalkClientContact) clientListAdapter.getItem(8);
+        TalkClientContact contact9 = (TalkClientContact) mClientContactListAdapter.getItem(8);
         assertEquals("I", contact9.getName());
     }
 
