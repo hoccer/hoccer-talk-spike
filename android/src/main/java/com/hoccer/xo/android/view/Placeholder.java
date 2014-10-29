@@ -2,6 +2,8 @@ package com.hoccer.xo.android.view;
 
 import android.content.res.Resources;
 import android.os.Build;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -34,6 +36,8 @@ public class Placeholder {
             placeholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(resources, mHeadImageId, true));
         }
 
-        placeholderText.setText(mTextId);
+        String text = resources.getString(mTextId);
+        placeholderText.setMovementMethod(LinkMovementMethod.getInstance());
+        placeholderText.setText(Html.fromHtml(text));
     }
 }

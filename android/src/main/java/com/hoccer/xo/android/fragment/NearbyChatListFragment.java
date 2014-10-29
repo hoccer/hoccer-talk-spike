@@ -1,21 +1,15 @@
 package com.hoccer.xo.android.fragment;
 
-import android.os.Build;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.NearbyChatListAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoListFragment;
-import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -41,11 +35,6 @@ public class NearbyChatListFragment extends XoListFragment implements IXoContact
         mContactList = (ListView) view.findViewById(android.R.id.list);
 
         PLACEHOLDER.applyToView(view);
-
-        TextView placeholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
-        placeholderText.setMovementMethod(LinkMovementMethod.getInstance());
-        setPlaceholderText(placeholderText);
-
         return view;
     }
 
@@ -78,14 +67,6 @@ public class NearbyChatListFragment extends XoListFragment implements IXoContact
         }
         destroyAdapter();
         super.onDestroy();
-    }
-
-    private void setPlaceholderText(TextView placeholderText) {
-        String anchorName = getString(R.string.tutorial_nearby_anchor);
-        String link = "<a href=\"" + getResources().getString(R.string.link_tutorial) + "#" + anchorName + "\">" +
-                getResources().getString(R.string.placeholder_nearby_link_text) + "</a>";
-        String text = String.format(getString(R.string.placeholder_nearby_text), link);
-        placeholderText.setText(Html.fromHtml(text));
     }
 
     private boolean isNearbyConversationPossible(TalkClientContact groupContact) {
