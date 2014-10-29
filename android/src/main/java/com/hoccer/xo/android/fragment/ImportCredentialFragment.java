@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.RegistrationActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
@@ -45,7 +46,7 @@ public class ImportCredentialFragment extends XoFragment {
                                 @Override
                                 public void run() {
                                     LOG.info("Credentials imported successfully");
-                                    progressOverlay.setVisibility(View.GONE);
+                                    getActivity().finish();
                                 }
                             });
                         }
