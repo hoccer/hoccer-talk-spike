@@ -47,7 +47,6 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
     private Filter mFilter = null;
 
     @Nullable
-    private OnItemCountChangedListener mOnItemCountChangedListener;
     private XoClientDatabase mDatabase;
 
     public ChatsAdapter(XoActivity activity) {
@@ -85,23 +84,12 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
                         mChatItems.add(new NearbyGroupChatItem());
                     }
 
-                    checkItemCountAndNotify(oldItemCount);
                     notifyDataSetChanged();
                     reloadFinished();
                 }
             });
         } catch (SQLException e) {
             LOG.error("sql error", e);
-        }
-    }
-
-    public void setOnItemCountChangedListener(OnItemCountChangedListener onItemCountChangedListener) {
-        mOnItemCountChangedListener = onItemCountChangedListener;
-    }
-
-    private void checkItemCountAndNotify(int oldItemCount) {
-        if (mOnItemCountChangedListener != null && oldItemCount != getCount()) {
-            mOnItemCountChangedListener.onItemCountChanged(getCount());
         }
     }
 
@@ -206,8 +194,6 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
                     mChatItems.add(item);
                     refreshTokens(null, false);
                     notifyDataSetChanged();
-
-                    checkItemCountAndNotify(oldItemCount);
                 }
             }
         });
@@ -226,8 +212,6 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
                 }
                 mChatItems.remove(item);
                 notifyDataSetChanged();
-
-                checkItemCountAndNotify(oldItemCount);
             }
         });
     }
@@ -277,8 +261,6 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
                     }
                 }
                 notifyDataSetChanged();
-
-                checkItemCountAndNotify(oldItemCount);
             }
         });
     }
