@@ -14,9 +14,11 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -192,36 +194,24 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
             return;
         }
 
-        List<TalkClientContact> nearbyClients = null;
         try {
-            nearbyClients = mDatabase.findClientsInGroup(group);
-        } catch (SQLException e) {
-            LOG.error("SQL Error while retrieving nearby group contacts.", e);
-        }
+            final List<TalkClientContact> nearbyContacts = mDatabase.findClientsInGroup(group);
+            CollectionUtils.filterInverse(nearbyContacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
 
-        if(nearbyClients != null) {
-            // copy list to final variable and process on UI thread
-            final List<TalkClientContact> finalClientsInGroup = nearbyClients;
+            if (!group.isEmptyGroup()) {
+                group.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
+                nearbyContacts.add(0, group);
+            }
 
             mXoActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mNearbyContacts.clear();
-
-                    if (!group.isEmptyGroup()) {
-                        group.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
-                        mNearbyContacts.add(group);
-                    }
-
-                    for (TalkClientContact contact : finalClientsInGroup) {
-                        if (!contact.isSelf()) {
-                            mNearbyContacts.add(contact);
-                        }
-                    }
-
-                    refreshList();
+                    mNearbyContacts = nearbyContacts;
+                    notifyDataSetChanged();
                 }
             });
+        } catch (SQLException e) {
+            LOG.error("SQL Error while retrieving nearby group contacts.", e);
         }
     }
 
@@ -295,7 +285,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
                     }
                     mNearbyContacts.add(position, conversationContact);
                 }
-                refreshList();
+                notifyDataSetChanged();
             }
         });
     }
