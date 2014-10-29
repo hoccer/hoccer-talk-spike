@@ -135,16 +135,22 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         startActivity(intent);
     }
 
+    @Override
     public void onPageResume() {}
 
+    @Override
     public void onPageSelected() {}
 
+    @Override
     public void onPageUnselected() {}
 
+    @Override
     public void onPagePause() {}
 
+    @Override
     public void onPageScrollStateChanged(int state) {}
 
+    @Override
     public View getCustomTabView(Context context) {
         if (mTabView == null) {
             mTabView = LayoutInflater.from(context).inflate(mTabLayoutId, null);
@@ -153,6 +159,7 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
         return mTabView;
     }
 
+    @Override
     public String getTabName(Resources resources) {
         return resources.getString(mTabNameId);
     }
