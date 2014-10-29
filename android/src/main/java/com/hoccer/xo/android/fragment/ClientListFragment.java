@@ -10,10 +10,13 @@ import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ClientListAdapter;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 
 public class ClientListFragment extends ContactListFragment {
+
+    public static final Logger LOG = Logger.getLogger(ContactListFragment.class);
 
     public ClientListFragment() {
         mTabLayoutId = R.layout.view_contacts_tab_friends;
@@ -38,12 +41,13 @@ public class ClientListFragment extends ContactListFragment {
     }
 
     @Override
-    protected void updateNotificationBadge() {
+    protected int getInvitedMeCount() {
         try {
-            mInvitedMeCount = (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
+            return (int) XoApplication.getXoClient().getDatabase().getCountOfInvitedMeClients();
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error("Error getting invitation count", e);
         }
-        super.updateNotificationBadge();
+
+        return 0;
     }
 }

@@ -27,9 +27,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private View mTabView;
     private TextView mNotificationBadgeTextView;
 
-    protected int mInvitedMeCount = 0;
-
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -68,21 +65,23 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     }
 
     protected void updateNotificationBadge() {
+        final int count = getInvitedMeCount();
+
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mInvitedMeCount > 0) {
+                if (count > 0) {
                     mNotificationBadgeTextView.setVisibility(View.VISIBLE);
 
-                    if (mInvitedMeCount < 10) {
+                    if (count < 10) {
                         mNotificationBadgeTextView.setTextSize(13);
-                    } else if (mInvitedMeCount < 100) {
+                    } else if (count < 100) {
                         mNotificationBadgeTextView.setTextSize(11);
-                    } else if (mInvitedMeCount < 1000) {
+                    } else if (count < 1000) {
                         mNotificationBadgeTextView.setTextSize(9);
                     }
 
-                    mNotificationBadgeTextView.setText(Integer.toString(mInvitedMeCount));
+                    mNotificationBadgeTextView.setText(Integer.toString(count));
                 } else {
                     mNotificationBadgeTextView.setText("");
                     mNotificationBadgeTextView.setVisibility(View.GONE);
@@ -90,6 +89,8 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
             }
         });
     }
+
+    protected abstract int getInvitedMeCount();
 
     @Override
     protected ListAdapter searchInAdapter(String query) {
