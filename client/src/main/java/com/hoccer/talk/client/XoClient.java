@@ -9,12 +9,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.crypto.AESCryptor;
-import com.hoccer.talk.crypto.CryptoJSON;
 import com.hoccer.talk.crypto.RSACryptor;
 import com.hoccer.talk.model.*;
 import com.hoccer.talk.rpc.ITalkRpcClient;
@@ -2910,7 +2907,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                requestClientKey(fContact);
+                updateClientKey(fContact);
             }
         });
         }
@@ -2975,7 +2972,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return wantDownload;
     }
 
-    private void requestClientKey(TalkClientContact client) {
+    private void updateClientKey(TalkClientContact client) {
         String clientId = client.getClientId();
 
         String currentKeyId = client.getClientPresence().getKeyId();
