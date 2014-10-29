@@ -234,20 +234,6 @@ public class NearbyChatsAdapter extends BaseAdapter implements IXoContactListene
         });
     }
 
-    public interface Filter {
-        public boolean shouldShow(TalkClientContact contact);
-    }
-
-    private List<TalkClientContact> filter(List<TalkClientContact> in, Filter filter) {
-        ArrayList<TalkClientContact> res = new ArrayList<TalkClientContact>();
-        for (TalkClientContact contact : in) {
-            if (filter.shouldShow(contact)) {
-                res.add(contact);
-            }
-        }
-        return res;
-    }
-
     private
     @Nullable
     TalkClientContact getActiveNearbyGroup() {
