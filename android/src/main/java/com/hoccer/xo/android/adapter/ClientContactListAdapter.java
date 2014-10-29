@@ -80,6 +80,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private void updateView(ViewHolder viewHolder, final TalkClientContact contact) {
         viewHolder.avatarView.setContact(contact);
         viewHolder.contactNameTextView.setText(contact.getNickname());
+
         viewHolder.acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,35 +97,54 @@ public class ClientContactListAdapter extends ContactListAdapter {
         TalkRelationship relationship = contact.getClientRelationship();
         if (relationship != null) {
             if (relationship.invitedMe()) {
-                viewHolder.invitedMeLayout.setVisibility(View.VISIBLE);
-                viewHolder.isInvitedTextView.setVisibility(View.GONE);
-                viewHolder.isFriendTextView.setVisibility(View.GONE);
+                updateViewForInvitedMe(viewHolder);
             } else if (relationship.isInvited()) {
-                viewHolder.invitedMeLayout.setVisibility(View.GONE);
-                viewHolder.isInvitedTextView.setVisibility(View.VISIBLE);
-                viewHolder.isFriendTextView.setVisibility(View.GONE);
-            } else if (relationship.isFriend() || relationship.isBlocked()) {
-                viewHolder.invitedMeLayout.setVisibility(View.GONE);
-                viewHolder.isInvitedTextView.setVisibility(View.GONE);
-                viewHolder.isFriendTextView.setVisibility(View.VISIBLE);
-
-                long messageCount = 0;
-                long attachmentCount = 0;
-                try {
-                    messageCount = XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
-                    attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-                String messageAndAttachmentCountInfo = mActivity.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
-                viewHolder.isFriendTextView.setText(messageAndAttachmentCountInfo);
-
-                if (relationship.isBlocked()) {
-                    viewHolder.isFriendTextView.setText(mActivity.getResources().getString(R.string.blocked_contact));
-                }
+                updateViewForInvited(viewHolder);
+            } else if (relationship.isFriend()) {
+                updateViewForFriend(viewHolder, contact);
+            } else if (relationship.isBlocked()) {
+                updateViewForFriend(viewHolder, contact);
+                updateViewForBlocked(viewHolder);
             }
         }
+    }
+
+    private void updateViewForInvitedMe(ViewHolder viewHolder) {
+        viewHolder.invitedMeLayout.setVisibility(View.VISIBLE);
+        viewHolder.isInvitedTextView.setVisibility(View.GONE);
+        viewHolder.isFriendTextView.setVisibility(View.GONE);
+    }
+
+    private void updateViewForInvited(ViewHolder viewHolder) {
+        viewHolder.invitedMeLayout.setVisibility(View.GONE);
+        viewHolder.isInvitedTextView.setVisibility(View.VISIBLE);
+        viewHolder.isFriendTextView.setVisibility(View.GONE);
+    }
+
+    private void updateViewForFriend(ViewHolder viewHolder, TalkClientContact contact) {
+        viewHolder.invitedMeLayout.setVisibility(View.GONE);
+        viewHolder.isInvitedTextView.setVisibility(View.GONE);
+        viewHolder.isFriendTextView.setVisibility(View.VISIBLE);
+
+        String messageAndAttachmentCount = getMessageAndAttachmentCount(contact);
+        viewHolder.isFriendTextView.setText(messageAndAttachmentCount);
+    }
+
+    private String getMessageAndAttachmentCount(TalkClientContact contact) {
+        try {
+            long messageCount = XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
+            long attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
+
+            return mActivity.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
+        } catch (SQLException e) {
+            LOG.error("Error counting messages and attachments for " + contact.getClientId(), e);
+        }
+
+        return "";
+    }
+
+    private void updateViewForBlocked(ViewHolder viewHolder) {
+        viewHolder.isFriendTextView.setText(mActivity.getResources().getString(R.string.blocked_contact));
     }
 
     private void showConfirmDialog(final TalkClientContact contact) {
