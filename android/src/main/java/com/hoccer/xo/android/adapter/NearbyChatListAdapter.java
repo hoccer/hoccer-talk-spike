@@ -192,33 +192,33 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
             return;
         }
 
-        List<TalkClientContact> clientsInGroup = null;
+        List<TalkClientContact> nearbyClients = null;
         try {
-            clientsInGroup = mDatabase.findClientsInGroup(group);
-            clientsInGroup.add(0, group);
+            nearbyClients = mDatabase.findClientsInGroup(group);
         } catch (SQLException e) {
             LOG.error("SQL Error while retrieving nearby group contacts.", e);
         }
 
-        if(clientsInGroup != null) {
+        if(nearbyClients != null) {
             // copy list to final variable and process on UI thread
-            final List<TalkClientContact> finalClientsInGroup = clientsInGroup;
+            final List<TalkClientContact> finalClientsInGroup = nearbyClients;
+
             mXoActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mNearbyContacts.clear();
+
+                    if (!group.isEmptyGroup()) {
+                        group.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
+                        mNearbyContacts.add(group);
+                    }
+
                     for (TalkClientContact contact : finalClientsInGroup) {
-                        if (contact.isGroup()) {
-                            if (contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
-                                contact.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
-                                mNearbyContacts.add(contact);
-                            }
-                        } else {
-                            if (!contact.isSelf()) {
-                                mNearbyContacts.add(contact);
-                            }
+                        if (!contact.isSelf()) {
+                            mNearbyContacts.add(contact);
                         }
                     }
+
                     refreshList();
                 }
             });
