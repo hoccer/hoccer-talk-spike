@@ -3122,8 +3122,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("SQL error", e);
         }
 
-        for (int i = 0; i < mContactListeners.size(); i++) {
-            IXoContactListener listener = mContactListeners.get(i);
+        for (final IXoContactListener listener : mContactListeners) {
             listener.onClientRelationshipChanged(clientContact);
         }
     }
