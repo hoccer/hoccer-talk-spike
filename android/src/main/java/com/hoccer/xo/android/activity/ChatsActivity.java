@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -77,7 +76,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        initTabs();
+        initViewPager();
         initActionBar();
         determineRegistrationForEnvironmentUpdates();
         showProfileIfClientIsNotRegistered();
@@ -164,14 +163,11 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             }
         }
     }
-    private void initTabs() {
-        initViewPager(new ChatsPageAdapter(getSupportFragmentManager()));
-    }
 
-    private void initViewPager(PagerAdapter adapter) {
+    private void initViewPager() {
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setOnPageChangeListener(new ConversationsPageListener());
-        mViewPager.setAdapter(adapter);
+        mViewPager.setAdapter(new ChatsPageAdapter(getSupportFragmentManager()));
     }
 
     private void initActionBar() {
