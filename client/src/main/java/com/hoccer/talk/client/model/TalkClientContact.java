@@ -521,8 +521,8 @@ public class TalkClientContact implements Serializable {
     }
 
     @GroupMethodOnly
-    public  boolean isEmptyGroup() {
-        return (getJoinedGroupContacts().size() == 0);
+    public boolean isEmptyGroup() {
+        return getJoinedGroupContacts().isEmpty();
     }
 
     @GroupMethodOnly
