@@ -294,8 +294,8 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private void refreshEnvironmentUpdater(boolean force) {
         LOG.debug("refreshEnvironmentUpdater");
-        Fragment f = getFragmentAt(mViewPager.getCurrentItem());
-        if (f instanceof NearbyChatListFragment) {
+        Fragment fragment = getFragmentAt(mViewPager.getCurrentItem());
+        if (fragment instanceof NearbyChatListFragment) {
             if (mEnvironmentUpdatesEnabled) {
                 if (isLocationServiceEnabled()) {
                     LOG.debug("refreshEnvironmentUpdater:startNearbySession");
@@ -310,8 +310,8 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void shutDownNearbySession() {
         LOG.debug("shutDownNearbySession");
         XoApplication.stopNearbySession();
-        NearbyChatListFragment f = (NearbyChatListFragment) getFragmentAt(1);
-        f.shutdownNearbyChat();
+        NearbyChatListFragment fragment = (NearbyChatListFragment) getFragmentAt(1);
+        fragment.shutdownNearbyChat();
     }
 
     private boolean isLocationServiceEnabled() {
@@ -381,9 +381,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         @Override
         public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            Fragment f = getFragmentAt(tab.getPosition());
-            if (f instanceof SearchableListFragment) {
-                ((SearchableListFragment) f).leaveSearchMode();
+            Fragment fragment = getFragmentAt(tab.getPosition());
+            if (fragment instanceof SearchableListFragment) {
+                ((SearchableListFragment) fragment).leaveSearchMode();
             }
         }
 
