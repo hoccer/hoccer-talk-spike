@@ -9,23 +9,20 @@ import android.view.View;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.adapter.SearchAdapter;
-import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-import java.util.Date;
+public class SmsChatItem extends BaseChatItem implements SearchAdapter.Searchable{
 
-public class SmsContactItem extends BaseContactItem implements SearchAdapter.Searchable{
-
-    private static final Logger LOG = Logger.getLogger(SmsContactItem.class);
+    private static final Logger LOG = Logger.getLogger(SmsChatItem.class);
 
     private Context mContext;
     private TalkClientSmsToken mSmsToken;
     private String mName;
     private String mPhoto;
 
-    public SmsContactItem(TalkClientSmsToken smsToken, Context context) {
+    public SmsChatItem(TalkClientSmsToken smsToken, Context context) {
         mSmsToken = smsToken;
         mContext = context;
         update();

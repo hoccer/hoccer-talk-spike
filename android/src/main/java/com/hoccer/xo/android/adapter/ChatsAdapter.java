@@ -8,10 +8,9 @@ import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.view.model.BaseContactItem;
-import com.hoccer.xo.android.view.model.NearbyGroupContactItem;
-import com.hoccer.xo.android.view.model.SmsContactItem;
-import com.hoccer.xo.android.view.model.TalkClientContactItem;
+import com.hoccer.xo.android.view.model.*;
+import com.hoccer.xo.android.view.model.SmsChatItem;
+import com.hoccer.xo.android.view.model.TalkClientChatItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,12 +25,12 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
 
     private static final Logger LOG = Logger.getLogger(ChatsAdapter.class);
 
-    private static final Comparator<BaseContactItem> LATEST_ITEM_COMPARATOR = new Comparator<BaseContactItem>() {
+    private static final Comparator<BaseChatItem> LATEST_ITEM_COMPARATOR = new Comparator<BaseChatItem>() {
         @Override
-        public int compare(BaseContactItem contactItem1, BaseContactItem contactItem2) {
+        public int compare(BaseChatItem chatItem1, BaseChatItem chatItem2) {
 
-            long value1 = Math.max(contactItem1.getMessageTimeStamp(), contactItem1.getContactCreationTimeStamp());
-            long value2 = Math.max(contactItem2.getMessageTimeStamp(), contactItem2.getContactCreationTimeStamp());
+            long value1 = Math.max(chatItem1.getMessageTimeStamp(), chatItem1.getContactCreationTimeStamp());
+            long value2 = Math.max(chatItem2.getMessageTimeStamp(), chatItem2.getContactCreationTimeStamp());
 
             if (value1 == value2) {
                 return 0;
@@ -42,7 +41,7 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
         }
     };
 
-    final protected List<BaseContactItem> mContactItems = new ArrayList<BaseContactItem>();
+    final protected List<BaseChatItem> mChatItems = new ArrayList<BaseChatItem>();
 
     @Nullable
     private Filter mFilter = null;
@@ -59,10 +58,10 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
         super(activity);
         mDatabase = XoApplication.getXoClient().getDatabase();
         mFilter = filter;
-        loadContacts();
+        loadChatItems();
     }
 
-    public void loadContacts() {
+    public void loadChatItems() {
         try {
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
             final List<TalkClientSmsToken> allSmsTokens = mDatabase.findAllSmsTokens();
@@ -71,19 +70,19 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    final int oldItemCount = mContactItems.size();
-                    mContactItems.clear();
+                    final int oldItemCount = mChatItems.size();
+                    mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
-                        mContactItems.add(new TalkClientContactItem(contact, mActivity));
+                        mChatItems.add(new TalkClientChatItem(contact, mActivity));
                     }
 
                     for (final TalkClientSmsToken smsToken : allSmsTokens) {
-                        mContactItems.add(new SmsContactItem(smsToken, mActivity));
+                        mChatItems.add(new SmsChatItem(smsToken, mActivity));
                     }
 
                     if (nearbyMessageCount > 0) {
-                        mContactItems.add(new NearbyGroupContactItem());
+                        mChatItems.add(new NearbyGroupChatItem());
                     }
 
                     checkItemCountAndNotify(oldItemCount);
@@ -126,7 +125,7 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
 
     @Override
     public void onReloadRequest() {
-        loadContacts();
+        loadChatItems();
         super.onReloadRequest();
     }
 
@@ -136,7 +135,7 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
 
     public void setFilter(Filter filter) {
         this.mFilter = filter;
-        loadContacts();
+        loadChatItems();
     }
 
     private List<TalkClientContact> filter(List<TalkClientContact> in) {
@@ -152,9 +151,9 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
         return res;
     }
 
-    private BaseContactItem findContactItemForContent(Object content) {
-        for (int i = 0; i < mContactItems.size(); i++) {
-            BaseContactItem item = mContactItems.get(i);
+    private BaseChatItem findChatItemForContent(Object content) {
+        for (int i = 0; i < mChatItems.size(); i++) {
+            BaseChatItem item = mChatItems.get(i);
             if (content.equals(item.getContent())) {
                 return item;
             }
@@ -164,18 +163,18 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
 
     @Override
     public void notifyDataSetChanged() {
-        Collections.sort(mContactItems, LATEST_ITEM_COMPARATOR);
+        Collections.sort(mChatItems, LATEST_ITEM_COMPARATOR);
         super.notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return mContactItems.size();
+        return mChatItems.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return mContactItems.get(i);
+        return mChatItems.get(i);
     }
 
     @Override
@@ -185,11 +184,11 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (position >= mContactItems.size()) {
+        if (position >= mChatItems.size()) {
             return convertView;
         }
 
-        return mContactItems.get(position).getView(convertView, parent);
+        return mChatItems.get(position).getView(convertView, parent);
     }
 
     /**
@@ -202,9 +201,9 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
             @Override
             public void run() {
                 if (mFilter.shouldShow(contact)) {
-                    int oldItemCount = mContactItems.size();
-                    TalkClientContactItem item = new TalkClientContactItem(contact, mActivity);
-                    mContactItems.add(item);
+                    int oldItemCount = mChatItems.size();
+                    TalkClientChatItem item = new TalkClientChatItem(contact, mActivity);
+                    mChatItems.add(item);
                     refreshTokens(null, false);
                     notifyDataSetChanged();
 
@@ -219,13 +218,13 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                int oldItemCount = mContactItems.size();
+                int oldItemCount = mChatItems.size();
 
-                BaseContactItem item = findContactItemForContent(contact);
+                BaseChatItem item = findChatItemForContent(contact);
                 if (item == null) {
                     return;
                 }
-                mContactItems.remove(item);
+                mChatItems.remove(item);
                 notifyDataSetChanged();
 
                 checkItemCountAndNotify(oldItemCount);
@@ -238,7 +237,7 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                BaseContactItem item = findContactItemForContent(contact);
+                BaseChatItem item = findChatItemForContent(contact);
                 if (item == null) {
                     return;
                 }
@@ -258,22 +257,22 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
             @Override
             public void run() {
 
-                int oldItemCount = mContactItems.size();
+                int oldItemCount = mChatItems.size();
 
                 if (relationship.isNone()) {
-                    BaseContactItem item = findContactItemForContent(contact);
+                    BaseChatItem item = findChatItemForContent(contact);
                     if (item != null) {
-                        mContactItems.remove(item);
+                        mChatItems.remove(item);
 
                     }
                 } else {
-                    BaseContactItem item = findContactItemForContent(contact);
+                    BaseChatItem item = findChatItemForContent(contact);
                     if (item != null) {
                         item.update();
                     } else {
                         if (mFilter.shouldShow(contact)) {
-                            item = new TalkClientContactItem(contact, mActivity);
-                            mContactItems.add(item);
+                            item = new TalkClientChatItem(contact, mActivity);
+                            mChatItems.add(item);
                         }
                     }
                 }
@@ -292,7 +291,7 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                BaseContactItem item = findContactItemForContent(contact);
+                BaseChatItem item = findChatItemForContent(contact);
                 if (item != null) {
                     item.update();
                     notifyDataSetChanged();
@@ -303,7 +302,7 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
 
     @Override
     public void onGroupMembershipChanged(final TalkClientContact contact) {
-        loadContacts();
+        loadChatItems();
     }
 
     @Override
@@ -328,7 +327,7 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
             if (contact == null) {
                 return;
             }
-            TalkClientContactItem item = (TalkClientContactItem) findContactItemForContent(contact);
+            TalkClientChatItem item = (TalkClientChatItem) findChatItemForContent(contact);
             if (item != null) { // the contact is not in our list so we won't update anything
                 item.update();
 
@@ -368,21 +367,21 @@ public class ChatsAdapter extends XoAdapter implements IXoContactListener, IXoMe
         }
 
         for (TalkClientSmsToken token : tokens) {
-            SmsContactItem item = (SmsContactItem) findContactItemForContent(token);
+            SmsChatItem item = (SmsChatItem) findChatItemForContent(token);
             if (item != null) {
-                mContactItems.remove(item);
+                mChatItems.remove(item);
             }
         }
         for (TalkClientSmsToken token : tokens) {
-            SmsContactItem item = (SmsContactItem) findContactItemForContent(token);
+            SmsChatItem item = (SmsChatItem) findChatItemForContent(token);
             if (item == null) {
-                item = new SmsContactItem(token, mActivity);
+                item = new SmsChatItem(token, mActivity);
             }
-            int index = mContactItems.indexOf(item);
+            int index = mChatItems.indexOf(item);
             if (index > -1) {
-                mContactItems.set(index, item);
+                mChatItems.set(index, item);
             } else {
-                mContactItems.add(item);
+                mChatItems.add(item);
             }
         }
     }

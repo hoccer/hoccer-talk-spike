@@ -17,7 +17,7 @@ import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.dialog.TokenDialog;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.view.model.BaseContactItem;
+import com.hoccer.xo.android.view.model.BaseChatItem;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -67,9 +67,9 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
             mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
         }
 
-        initContactListAdapter();
-        ListView contactList = (ListView) view.findViewById(android.R.id.list);
-        registerForContextMenu(contactList);
+        initAdapter();
+        ListView listView = (ListView) view.findViewById(android.R.id.list);
+        registerForContextMenu(listView);
 
         // initial update
         onItemCountChanged(mAdapter.getCount());
@@ -95,7 +95,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
         super.onResume();
         if (mAdapter != null) {
             mAdapter.onResume();
-            mAdapter.loadContacts();
+            mAdapter.loadChatItems();
         }
     }
 
@@ -112,7 +112,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
         super.onCreateContextMenu(menu, view, menuInfo);
         if(menuInfo != null) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            Object object = ((BaseContactItem) mAdapter.getItem(info.position)).getContent();
+            Object object = ((BaseChatItem) mAdapter.getItem(info.position)).getContent();
             if (object instanceof TalkClientContact) {
                 MenuInflater inflater = getActivity().getMenuInflater();
                 inflater.inflate(R.menu.context_menu_contacts, menu);
@@ -162,7 +162,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
     }
 
     private void deleteChatHistoryAt(int position) {
-        Object item = ((BaseContactItem) mAdapter.getItem(position)).getContent();
+        Object item = ((BaseChatItem) mAdapter.getItem(position)).getContent();
         if (item instanceof TalkClientContact) {
             clearConversationForContact((TalkClientContact) item);
         } else if (item instanceof String) {
@@ -195,7 +195,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
         }
     }
 
-    private void initContactListAdapter() {
+    private void initAdapter() {
         ChatsAdapter.Filter filter = new ChatsAdapter.Filter() {
             @Override
             public boolean shouldShow(TalkClientContact contact) {
@@ -235,7 +235,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
 
-        Object item = ((BaseContactItem)listView.getItemAtPosition(position)).getContent();
+        Object item = ((BaseChatItem)listView.getItemAtPosition(position)).getContent();
         if (item instanceof TalkClientContact) {
             TalkClientContact contact = (TalkClientContact) item;
             if (contact.isGroup() && contact.isGroupInvited()) {

@@ -11,7 +11,7 @@ import android.view.View;
 import java.util.Date;
 
 
-public abstract class BaseContactItem<T> {
+public abstract class BaseChatItem<T> {
 
 
     public abstract void update();
