@@ -2932,11 +2932,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void updateClientPresence(TalkPresence presence, Set<String> fields) {
         LOG.debug("updateClientPresence(" + presence.getClientId() + ")");
+
+        boolean isNewContact = false;
         TalkClientContact clientContact;
         try {
             clientContact = mDatabase.findContactByClientId(presence.getClientId(), false);
             if (clientContact == null) {
                 clientContact = mDatabase.findContactByClientId(presence.getClientId(), true);
+                isNewContact = true;
             }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -2999,6 +3002,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 requestClientKey(fContact);
             }
         });
+        }
+
+        if(isNewContact) {
+            for (final IXoContactListener listener : mContactListeners) {
+                listener.onContactAdded(clientContact);
+            }
         }
 
         for (int i = 0; i < mContactListeners.size(); i++) {
