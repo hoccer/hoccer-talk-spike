@@ -15,7 +15,7 @@
       android:layout_centerHorizontal="true"
       style="@style/ActionBarTabText.Solid.AppBaseTheme"/>
 
-  <TextView
+  <com.hoccer.xo.android.view.NotificationBadgeTextView
       android:id="@+id/tv_contact_invite_notification_badge"
       android:background="@drawable/unread_messages_badge"
       android:layout_alignTop="@android:id/title"

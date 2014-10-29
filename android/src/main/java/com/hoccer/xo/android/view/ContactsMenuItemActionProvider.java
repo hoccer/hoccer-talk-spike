@@ -21,27 +21,10 @@ import java.sql.SQLException;
 
 public class ContactsMenuItemActionProvider extends ActionProvider implements IXoContactListener {
 
-    static final Logger LOG = Logger.getLogger(ContactsMenuItemActionProvider.class);
-
-    private TextView mNotificationBadge;
+    private NotificationBadgeTextView mNotificationBadge;
     private Context mContext;
     private Integer mNotificationCount = 0;
-
-    private Runnable mShowNotificationBadge = new Runnable() {
-        @Override
-        public void run() {
-            setNotificationBadgeTextSize();
-            mNotificationBadge.setText(mNotificationCount.toString());
-            mNotificationBadge.setVisibility(View.VISIBLE);
-        }
-    };
-
-    private Runnable mHideNotificationBadge = new Runnable() {
-        @Override
-        public void run() {
-            mNotificationBadge.setVisibility(View.GONE);
-        }
-    };
+    private View mMenuItemView;
 
     /**
      * Creates a new instance. ActionProvider classes should always implement a
@@ -52,28 +35,22 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
     public ContactsMenuItemActionProvider(Context context) {
         super(context);
         mContext = context;
+        initView();
     }
 
     public void evaluateNotifications() {
-        try {
-            mNotificationCount = XoApplication.getXoClient().getDatabase().getTotalCountOfInvitations();
-            if (mNotificationBadge != null) {
-                updateNotificationBadge();
-            }
-        } catch (SQLException e) {
-            LOG.error("SQL Exception while getting amount of invitation", e);
-        }
+        updateNotificationBadge();
     }
 
     @Override
     public View onCreateActionView() {
-        return initView(mContext);
+        return initView();
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public View onCreateActionView(MenuItem forItem) {
-        return initView(mContext);
+        return initView();
     }
 
     @Override
@@ -92,7 +69,7 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        evaluateNotifications();
+        updateNotificationBadge();
     }
 
     @Override
@@ -100,22 +77,25 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        evaluateNotifications();
+        updateNotificationBadge();
     }
 
-    private View initView(Context context) {
-        View v = LayoutInflater.from(context).inflate(R.layout.view_contacts_menu_item, null);
-        v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startContactsActivity();
-            }
-        });
+    private View initView() {
 
-        mNotificationBadge = (TextView) v.findViewById(R.id.tv_invite_notification_badge);
+        if (mMenuItemView == null) {
+            mMenuItemView = LayoutInflater.from(mContext).inflate(R.layout.view_contacts_menu_item, null);
+            mMenuItemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startContactsActivity();
+                }
+            });
+        }
+
+        mNotificationBadge = (NotificationBadgeTextView) mMenuItemView.findViewById(R.id.tv_invite_notification_badge);
         updateNotificationBadge();
 
-        return v;
+        return mMenuItemView;
     }
 
     private void startContactsActivity() {
@@ -124,21 +104,17 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
     }
 
     private void updateNotificationBadge() {
-        if (mNotificationCount > 0) {
-            runOnMainThread(mShowNotificationBadge);
-        } else if (mNotificationBadge.getVisibility() == View.VISIBLE) {
-            runOnMainThread(mHideNotificationBadge);
-        }
-    }
-
-    private void setNotificationBadgeTextSize() {
-        if (mNotificationCount < 10) {
-            mNotificationBadge.setTextSize(13);
-        } else if (mNotificationCount < 100) {
-            mNotificationBadge.setTextSize(11);
-        } else if (mNotificationCount < 1000) {
-            mNotificationBadge.setTextSize(9);
-        }
+        runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mNotificationCount = XoApplication.getXoClient().getDatabase().getTotalCountOfInvitations();
+                    mNotificationBadge.update(mNotificationCount);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void runOnMainThread(Runnable r) {

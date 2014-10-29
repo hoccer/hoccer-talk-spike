@@ -13,7 +13,7 @@
             android:src="@drawable/ic_contacts"
             android:layout_gravity="center_vertical"/>
 
-    <TextView
+    <com.hoccer.xo.android.view.NotificationBadgeTextView
             android:id="@+id/tv_invite_notification_badge"
             android:layout_marginTop="5dp"
             android:layout_marginLeft="22dp"
@@ -21,4 +21,5 @@
             android:visibility="gone"
             android:background="@drawable/unread_messages_badge"
             style="@style/AppBaseTheme.Contact.UnreadMessagesBadge"/>
+
 </FrameLayout>

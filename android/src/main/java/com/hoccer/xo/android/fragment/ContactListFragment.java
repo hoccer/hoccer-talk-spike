@@ -11,6 +11,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
+import com.hoccer.xo.android.view.NotificationBadgeTextView;
 import com.hoccer.xo.release.R;
 
 public abstract class ContactListFragment extends SearchableListFragment implements IPagerFragment, IXoContactListener {
@@ -24,7 +25,7 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private MenuItem mMenuItemNewGroup;
 
     private View mTabView;
-    private TextView mNotificationBadgeTextView;
+    private NotificationBadgeTextView mNotificationBadgeTextView;
 
     public ContactListFragment(int tabNameId, Class<?> profileActivityClass) {
         mTabNameId = tabNameId;
@@ -46,7 +47,7 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mNotificationBadgeTextView = (TextView) getCustomTabView(getActivity()).findViewById(R.id.tv_contact_invite_notification_badge);
+        mNotificationBadgeTextView = (NotificationBadgeTextView) getCustomTabView(getActivity()).findViewById(R.id.tv_contact_invite_notification_badge);
 
         mContactListAdapter = createAdapter();
         setListAdapter(mContactListAdapter);
@@ -69,27 +70,12 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     }
 
     protected void updateNotificationBadge() {
-        final int count = getInvitedMeCount();
 
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (count > 0) {
-                    mNotificationBadgeTextView.setVisibility(View.VISIBLE);
-
-                    if (count < 10) {
-                        mNotificationBadgeTextView.setTextSize(13);
-                    } else if (count < 100) {
-                        mNotificationBadgeTextView.setTextSize(11);
-                    } else if (count < 1000) {
-                        mNotificationBadgeTextView.setTextSize(9);
-                    }
-
-                    mNotificationBadgeTextView.setText(Integer.toString(count));
-                } else {
-                    mNotificationBadgeTextView.setText("");
-                    mNotificationBadgeTextView.setVisibility(View.GONE);
-                }
+                final int count = getInvitedMeCount();
+                mNotificationBadgeTextView.update(count);
             }
         });
     }
