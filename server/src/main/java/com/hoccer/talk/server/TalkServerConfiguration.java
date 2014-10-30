@@ -31,13 +31,21 @@ public class TalkServerConfiguration {
     private enum PropertyTypes {STRING, BOOLEAN, INTEGER}
 
     private enum ConfigurableProperties {
-        // WEB-SERVER
+        // WEB SERVER
         LISTEN_ADDRESS(PROPERTY_PREFIX + ".listen.address",
                 PropertyTypes.STRING,
                 "localhost"),
         LISTEN_PORT(PROPERTY_PREFIX + ".listen.port",
                 PropertyTypes.INTEGER,
                 8080),
+
+        // MANAGEMENT SERVER
+        MANAGEMENT_LISTEN_ADDRESS(PROPERTY_PREFIX + ".management.listen.address",
+                PropertyTypes.STRING,
+                "localhost"),
+        MANAGEMENT_LISTEN_PORT(PROPERTY_PREFIX + ".management.listen.port",
+                PropertyTypes.INTEGER,
+                9000),
 
         // DATABASE
         DATABASE_BACKEND(PROPERTY_PREFIX + ".db.backend",
@@ -263,6 +271,9 @@ public class TalkServerConfiguration {
         builder.append(                     "\n - WebServer Configuration:");
         builder.append(MessageFormat.format("\n   * listen address:                       ''{0}''", this.getListenAddress()));
         builder.append(MessageFormat.format("\n   * listen port:                          {0}", Long.toString(getListenPort())));
+        builder.append(                     "\n - ManagementServer Configuration:");
+        builder.append(MessageFormat.format("\n   * listen address:                       ''{0}''", this.getManagementListenAddress()));
+        builder.append(MessageFormat.format("\n   * listen port:                          {0}", Long.toString(getManagementListenPort())));
         builder.append(                     "\n - Database Configuration:");
         builder.append(MessageFormat.format("\n   * database backend:                     ''{0}''", this.getDatabaseBackend()));
         builder.append(MessageFormat.format("\n   * jongo host:                           ''{0}''", this.getJongoHost()));
@@ -363,6 +374,14 @@ public class TalkServerConfiguration {
 
     public int getListenPort() {
         return (Integer) ConfigurableProperties.LISTEN_PORT.value;
+    }
+
+    public String getManagementListenAddress() {
+        return (String) ConfigurableProperties.MANAGEMENT_LISTEN_ADDRESS.value;
+    }
+
+    public int getManagementListenPort() {
+        return (Integer) ConfigurableProperties.MANAGEMENT_LISTEN_PORT.value;
     }
 
     public String getDatabaseBackend() {

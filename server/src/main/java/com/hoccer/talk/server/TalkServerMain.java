@@ -16,10 +16,12 @@ import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
 import com.hoccer.talk.server.cryptoutils.*;
 import com.hoccer.talk.servlets.CertificateInfoServlet;
 import com.hoccer.talk.servlets.InvitationServlet;
+import com.hoccer.talk.servlets.PushMessageServlet;
 import com.hoccer.talk.servlets.ServerInfoServlet;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -67,12 +69,17 @@ public class TalkServerMain {
         Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
         setupServerHandlers(webServer, talkServer);
 
+        Server managementServer = new Server(new InetSocketAddress(config.getManagementListenAddress(), config.getManagementListenPort()));
+        setupManagementServerHandlers(managementServer, talkServer);
+
         // TODO: take care of proper signal handling (?) here. We never see the "Server has quit" line, currently.
         // run and stop when interrupted
         try {
             LOG.info("Starting server");
             webServer.start();
+            managementServer.start();
             webServer.join();
+            managementServer.join();
             LOG.info("Server has quit");
         } catch (Exception e) {
             LOG.error("Exception in server", e);
@@ -143,6 +150,17 @@ public class TalkServerMain {
         handlerCollection.addHandler(serverInfoContextHandler);
         handlerCollection.addHandler(metricsContextHandler);
         server.setHandler(handlerCollection);
+    }
+
+    private void setupManagementServerHandlers(Server managementServer, TalkServer talkServer) {
+        ServletContextHandler pushMessageHandler = new ServletContextHandler();
+        pushMessageHandler.setContextPath("/push");
+        pushMessageHandler.setAttribute("server", talkServer);
+        pushMessageHandler.addServlet(PushMessageServlet.class, "/*");
+
+        HandlerCollection handlerCollection = new HandlerCollection();
+        handlerCollection.addHandler(pushMessageHandler);
+        managementServer.setHandler(handlerCollection);
     }
 
     private void migrateDatabase(ITalkServerDatabase database) {
