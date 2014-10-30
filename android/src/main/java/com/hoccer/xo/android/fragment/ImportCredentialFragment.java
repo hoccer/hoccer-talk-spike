@@ -33,7 +33,7 @@ public class ImportCredentialFragment extends XoFragment {
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_import_credential, container, false);
+        return inflater.inflate(R.layout.fragment_import_credentials, container, false);
     }
 
     @Override
