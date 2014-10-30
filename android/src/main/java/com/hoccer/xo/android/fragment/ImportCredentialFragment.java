@@ -50,7 +50,16 @@ public class ImportCredentialFragment extends XoFragment {
             @Override
             public void onClick(final View v) {
                 if (mCredentials != null) {
+
+                    // send disconnect request to import package client
+                    CredentialImporter.sendDisconnectRequestToImportPackageClient(mRegistrationActivity);
+
+                    // set flag to change the srp secret on next login
+//                    CredentialImporter.setSrpChangeOnNextLoginFlag(mRegistrationActivity);
+
+                    // import new credentials
                     XoApplication.getXoClient().importCredentials(mCredentials);
+
                     LOG.info("Credentials imported successfully");
                     getActivity().finish();
                 }
