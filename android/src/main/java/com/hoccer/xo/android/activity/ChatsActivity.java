@@ -89,7 +89,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         super.onResume();
         refreshEnvironmentUpdater(false);
         registerListeners();
-        mContactsMenuItemActionProvider.evaluateNotifications();
+        mContactsMenuItemActionProvider.updateNotificationBadge();
     }
 
     @Override

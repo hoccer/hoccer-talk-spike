@@ -38,10 +38,6 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
         initView();
     }
 
-    public void evaluateNotifications() {
-        updateNotificationBadge();
-    }
-
     @Override
     public View onCreateActionView() {
         return initView();
@@ -80,6 +76,20 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
         updateNotificationBadge();
     }
 
+    public void updateNotificationBadge() {
+        runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mNotificationCount = XoApplication.getXoClient().getDatabase().getTotalCountOfInvitations();
+                    mNotificationBadge.update(mNotificationCount);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     private View initView() {
 
         if (mMenuItemView == null) {
@@ -101,20 +111,6 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
     private void startContactsActivity() {
         Intent intent = new Intent(mContext, ContactsActivity.class);
         mContext.startActivity(intent);
-    }
-
-    private void updateNotificationBadge() {
-        runOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mNotificationCount = XoApplication.getXoClient().getDatabase().getTotalCountOfInvitations();
-                    mNotificationBadge.update(mNotificationCount);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
     private void runOnMainThread(Runnable r) {
