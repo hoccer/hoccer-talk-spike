@@ -166,7 +166,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public void saveClientDownload(TalkClientDownload download) throws SQLException {
         Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
 
-        if(result.isCreated()) {
+        if (result.isCreated()) {
             for (IXoDownloadListener listener : mDownloadListeners) {
                 listener.onDownloadCreated(download);
             }
@@ -180,7 +180,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public void saveClientUpload(TalkClientUpload upload) throws SQLException {
         Dao.CreateOrUpdateStatus result = mClientUploads.createOrUpdate(upload);
 
-        if(result.isCreated()) {
+        if (result.isCreated()) {
             for (IXoUploadListener listener : mUploadListeners) {
                 listener.onUploadCreated(upload);
             }
@@ -245,12 +245,39 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
     }
 
+    public List<TalkClientContact> findClientContactsByState(String state) throws SQLException {
+        QueryBuilder<TalkRelationship, Long> relationships = mRelationships.queryBuilder();
+        relationships.where()
+                .eq("state", state);
+
+        QueryBuilder<TalkClientContact, Integer> contacts = mClientContacts.queryBuilder();
+        contacts.where()
+                .eq("deleted", false);
+
+        return contacts.join(relationships).query();
+    }
+
     public List<TalkClientContact> findAllGroupContacts() throws SQLException {
         return mClientContacts.queryBuilder().where()
                 .eq("contactType", TalkClientContact.TYPE_GROUP)
                 .eq("deleted", false)
                 .and(2)
                 .query();
+    }
+
+    public List<TalkClientContact> findGroupContactsByState(String state) throws SQLException {
+        QueryBuilder<TalkGroupMember, Long> groupMembers = mGroupMembers.queryBuilder();
+        groupMembers.where()
+                .eq("state", state);
+
+        QueryBuilder<TalkClientContact, Integer> contacts = mClientContacts.queryBuilder();
+        contacts.where()
+                .eq("contactType", TalkClientContact.TYPE_GROUP)
+                .isNotNull("groupPresence_id")
+                .eq("deleted", false)
+                .and(3);
+
+        return contacts.join(groupMembers).query();
     }
 
     public int findGroupMemberCountForGroup(TalkClientContact groupContact) throws SQLException {
@@ -321,6 +348,19 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             contact = new TalkClientContact(TalkClientContact.TYPE_CLIENT, clientId);
             mClientContacts.create(contact);
         }
+
+        return contact;
+    }
+
+    public TalkClientContact findDeletedContactByClientId(String clientId) throws SQLException {
+        TalkClientContact contact = null;
+
+        contact = mClientContacts.queryBuilder()
+                .where()
+                .eq("clientId", clientId)
+                .eq("deleted", true)
+                .and(2)
+                .queryForFirst();
 
         return contact;
     }
@@ -535,11 +575,11 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
         List<TalkClientUpload> uploads = mClientUploads.queryBuilder()
-            .where()
-            .eq("mediaType", mediaType)
-            .isNotNull("contentUrl")
-            .and(2)
-            .query();
+                .where()
+                .eq("mediaType", mediaType)
+                .isNotNull("contentUrl")
+                .and(2)
+                .query();
 
         List<TalkClientDownload> downloads = mClientDownloads.queryForEq("mediaType", mediaType);
 
@@ -760,6 +800,22 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return null;
     }
 
+    public int getTotalCountOfInvitations() throws SQLException {
+        return (int) (getCountOfInvitedMeGroups() + getCountOfInvitedMeClients());
+    }
+
+    public long getCountOfInvitedMeClients() throws SQLException {
+        long invitedMeCount = mRelationships.queryBuilder()
+                .where()
+                .eq("state", TalkRelationship.STATE_INVITED_ME)
+                .countOf();
+        return invitedMeCount;
+    }
+
+    public int getCountOfInvitedMeGroups() throws SQLException {
+        return findGroupContactsByState(TalkGroupMember.STATE_INVITED).size();
+    }
+
     public boolean hasPendingFriendRequests() {
         try {
             List<TalkRelationship> invitedRelations = mRelationships.queryBuilder()
@@ -971,10 +1027,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public void deleteTransferAndMessage(XoTransfer transfer) throws SQLException {
         switch (transfer.getDirection()) {
             case UPLOAD:
-                deleteClientUploadAndMessage((TalkClientUpload)transfer);
+                deleteClientUploadAndMessage((TalkClientUpload) transfer);
                 break;
             case DOWNLOAD:
-                deleteClientDownloadAndMessage((TalkClientDownload)transfer);
+                deleteClientDownloadAndMessage((TalkClientDownload) transfer);
                 break;
         }
     }

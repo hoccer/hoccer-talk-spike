@@ -62,16 +62,20 @@ public interface ITalkRpcServer {
      * Register a new client with the given SRP parameters
      */
     String srpRegister(String verifier, String salt);
-
     /**
-     * Initiate SRP login
-     *
-     * Client passes public value A.
-     *
-     * After this call we have a shared secret K.
-     *
-     * @return public value B
+     * Change the SRP parameters for an existing logged in client
      */
+    String srpChangeVerifier(String verifier, String salt);
+
+        /**
+         * Initiate SRP login
+         *
+         * Client passes public value A.
+         *
+         * After this call we have a shared secret K.
+         *
+         * @return public value B
+         */
     String srpPhase1(String clientId, String A);
 
     /**

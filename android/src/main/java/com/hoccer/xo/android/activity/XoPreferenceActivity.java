@@ -185,6 +185,9 @@ public class XoPreferenceActivity extends PreferenceActivity
             preference.setEnabled(false);
             exportData();
             return true;
+        } else if (preference.getKey().equals("preference_database_dump")) {
+            XoImportExportUtils.getInstance().exportDatabaseToFile();
+            return true;
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
@@ -218,7 +221,6 @@ public class XoPreferenceActivity extends PreferenceActivity
             }
         }.execute();
     }
-
 
     private void exportData() {
         new AsyncTask<Void, Void, File>() {

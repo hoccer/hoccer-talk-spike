@@ -94,7 +94,7 @@ public class XoImportExportUtils {
         return exportFile;
     }
 
-    private File exportDatabaseToFile() {
+    public File exportDatabaseToFile() {
         File exportFile = createExportFile("db");
 
         String inFileName = DB_FILEPATH;

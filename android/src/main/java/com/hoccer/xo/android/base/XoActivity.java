@@ -152,7 +152,7 @@ public abstract class XoActivity extends FragmentActivity {
     public static boolean isAppInBackground = false;
     public static boolean isWindowFocused = false;
     public static boolean isMenuOpened = false;
-    public static boolean isBackPressed = false;
+    public static boolean isBackOrUpPressed = false;
     public static boolean isBackgroundActive = false;
 
     protected void applicationWillEnterForeground() {
@@ -254,17 +254,21 @@ public abstract class XoActivity extends FragmentActivity {
 
     @Override
     public void onBackPressed() {
-        if (!(this instanceof ChatsActivity)) {
-            isBackPressed = true;
-        }
+        setBackOrUpPressed();
         super.onBackPressed();
+    }
+
+    private void setBackOrUpPressed() {
+        if (!(this instanceof ChatsActivity)) {
+            isBackOrUpPressed = true;
+        }
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         isWindowFocused = hasFocus;
-        if (isBackPressed && !hasFocus) {
-            isBackPressed = false;
+        if (isBackOrUpPressed && !hasFocus) {
+            isBackOrUpPressed = false;
             isWindowFocused = true;
         }
         super.onWindowFocusChanged(hasFocus);
@@ -610,6 +614,8 @@ public abstract class XoActivity extends FragmentActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && mUpEnabled) {
             Intent upIntent = getParentActivityIntent();
             if (upIntent != null) {
+                setBackOrUpPressed();
+
                 // we have a parent, navigate up
                 if (shouldUpRecreateTask(upIntent)) {
                     // we are not on our own task stack, so create one

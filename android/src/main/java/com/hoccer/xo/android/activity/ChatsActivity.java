@@ -11,15 +11,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -27,25 +26,36 @@ import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.adapter.ChatsPageAdapter;
 import com.hoccer.xo.android.content.Clipboard;
+import com.hoccer.xo.android.content.contentselectors.IContentSelector;
 import com.hoccer.xo.android.content.contentselectors.ImageSelector;
 import com.hoccer.xo.android.content.contentselectors.VideoSelector;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
-public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoContactListener, IXoPairingListener {
+public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
 
     private final static Logger LOG = Logger.getLogger(ChatsActivity.class);
 
     private ViewPager mViewPager;
-    private ActionBar mActionBar;
-    private ChatsPageAdapter mAdapter;
 
     private boolean mEnvironmentUpdatesEnabled;
     private boolean mNoUserInput = false;
     private String mPairingToken;
+    private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
+
+    private SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener  = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals("preference_environment_update")) {
+                mEnvironmentUpdatesEnabled = sharedPreferences.getBoolean("preference_environment_update", true);
+                refreshEnvironmentUpdater(false);
+            }
+        }
+    };
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -59,48 +69,43 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     @Override
     protected int getMenuResource() {
-        return R.menu.fragment_contacts;
+        return R.menu.menu_activity_chats;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String[] tabs = getResources().getStringArray(R.array.tab_names);
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setOnPageChangeListener(new ConversationsPageListener());
-
-        mActionBar = getActionBar();
-        mAdapter = new ChatsPageAdapter(getSupportFragmentManager(), tabs.length);
-        mViewPager.setAdapter(mAdapter);
-        mActionBar.setHomeButtonEnabled(false);
-        mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        for (String tabName : tabs) {
-            mActionBar.addTab(mActionBar.newTab().setText(tabName).setTabListener(new ConversationsTabListener()));
-        }
-
-        SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals("preference_environment_update")) {
-                    mEnvironmentUpdatesEnabled = sharedPreferences.getBoolean("preference_environment_update", true);
-                    refreshEnvironmentUpdater(false);
-                }
-            }
-        };
-        mPreferences.registerOnSharedPreferenceChangeListener(mPreferencesListener);
-        mEnvironmentUpdatesEnabled = mPreferences.getBoolean("preference_environment_update", true);
-
-        getXoClient().registerStateListener(this);
-
-        // if the client is not yet registered start initialization process
-        if (!getXoClient().isRegistered()) {
-            Intent intent = new Intent(this, RegistrationActivity.class);
-            startActivity(intent);
-        }
+        initViewPager();
+        initActionBar();
+        determineRegistrationForEnvironmentUpdates();
+        showProfileIfClientIsNotRegistered();
 
         handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshEnvironmentUpdater(false);
+        registerListeners();
+        mContactsMenuItemActionProvider.updateNotificationBadge();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterListeners();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
+        menu.findItem(R.id.menu_contacts).setActionProvider(mContactsMenuItemActionProvider);
+        menu.findItem(R.id.menu_my_profile).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+        return true;
     }
 
     @Override
@@ -120,35 +125,76 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        refreshEnvironmentUpdater(false);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_audio_attachment_list:
+                startMediaBrowserActivity();
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClientStateChange(XoClient client, int state) {
+        LOG.debug("onClientStateChange:" + state);
+        if (!client.isAwake()) {
+            shutDownNearbySession();
+        } else if (client.isActive()) {
+            refreshEnvironmentUpdater(true);
+
+            if (mPairingToken != null) {
+                performTokenPairing(mPairingToken);
+                mPairingToken = null;
+            }
+        }
+    }
+
+    private void initViewPager() {
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setOnPageChangeListener(new ConversationsPageListener());
+        mViewPager.setAdapter(new ChatsPageAdapter(getSupportFragmentManager()));
+    }
+
+    private void initActionBar() {
+        ActionBar ab = getActionBar();
+        ab.setHomeButtonEnabled(false);
+        ab.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        String[] tabNames = getResources().getStringArray(R.array.tab_names);
+        for (String tabName : tabNames) {
+            ab.addTab(ab.newTab().setText(tabName).setTabListener(new ConversationsTabListener()));
+        }
+
+        mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
+    }
+
+    private void determineRegistrationForEnvironmentUpdates() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        pref.registerOnSharedPreferenceChangeListener(mPreferencesListener);
+        mEnvironmentUpdatesEnabled = pref.getBoolean("preference_environment_update", true);
+    }
+
+    private void showProfileIfClientIsNotRegistered() {
+        if (!getXoClient().isRegistered()) {
+            Intent intent = new Intent(this, SingleProfileActivity.class);
+            intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CREATE_SELF, true);
+            startActivity(intent);
+        }
+    }
+
+    private void registerListeners() {
         getXoClient().registerStateListener(this);
-
-        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-        getXoClient().registerContactListener(this);
-        updateInvitationCount();
-        // TODO: done.
+        if (mContactsMenuItemActionProvider != null) {
+            getXoClient().registerContactListener(mContactsMenuItemActionProvider);
+        }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
+    private void unregisterListeners() {
         getXoClient().unregisterStateListener(this);
-
-        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-        getXoClient().unregisterContactListener(this);
-        // TODO: done.
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        getXoClient().unregisterStateListener(this);
-
-        // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-        getXoClient().unregisterContactListener(this);
-        // TODO: done.
+        if (mContactsMenuItemActionProvider != null) {
+            getXoClient().unregisterContactListener(mContactsMenuItemActionProvider);
+        }
     }
 
     private void handleContactIdIntent(Intent intent) {
@@ -157,37 +203,40 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void handleShareIntent(Intent intent) {
-        String type = intent.getType();
-        Uri contentUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        Uri contentUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        IContentObject contentObject = getContentObject(contentUri, intent.getType());
+        addSharedContentToClipboard(contentObject);
+    }
 
-        // Factory method in IContentSelector expects content to be in intent extra field 'data'
-        Intent dataIntent = new Intent();
-        dataIntent.setData(contentUri);
+    private IContentObject getContentObject(Uri contentUri, String type) {
+        IContentSelector selector = determineContentSelectorForType(type);
 
-        // Use selector mechanism to create IContentObject from share intent
-        IContentObject contentObject = null;
+        // Factory method in IContentSelector expects content to  be in intent extra field 'data'
+        Intent intent = new Intent();
+        intent.setData(contentUri);
+
+        return selector.createObjectFromSelectionResult(this, intent);
+    }
+
+    private IContentSelector determineContentSelectorForType(String type) {
+        IContentSelector selector = null;
         if (type.startsWith("image/")) {
-            contentObject = getImageContentObject(dataIntent);
+            selector = new ImageSelector(this);
         } else if (type.startsWith("video/")) {
-            contentObject = getVideoContentObject(dataIntent);
+            selector = new VideoSelector(this);
         }
 
+        return selector;
+    }
+
+    private void addSharedContentToClipboard(IContentObject contentObject) {
         if (contentObject != null) {
             Clipboard.getInstance().setContent(contentObject);
-            Toast.makeText(this, getString(R.string.toast_stored_external_file_to_clipboard), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.toast_stored_file_in_clipboard), Toast.LENGTH_LONG).show();
+        } else {
+            Clipboard.getInstance().clearContent();
+            Toast.makeText(this, R.string.toast_failed_to_store_file_in_clipboard, Toast.LENGTH_LONG).show();
         }
-    }
-
-    private IContentObject getImageContentObject(Intent dataIntent) {
-        ImageSelector imageSelector = new ImageSelector(this);
-        // a more generic and static way to obtain the ContentObject would be cool
-        return imageSelector.createObjectFromSelectionResult(this, dataIntent);
-    }
-
-    private IContentObject getVideoContentObject(Intent dataIntent) {
-        VideoSelector videoSelector = new VideoSelector(this);
-        // a more generic and static way to obtain the ContentObject would be cool
-        return videoSelector.createObjectFromSelectionResult(this, dataIntent);
     }
 
     private void handleTokenPairingIntent(Intent intent) {
@@ -231,8 +280,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private void refreshEnvironmentUpdater(boolean force) {
         LOG.debug("refreshEnvironmentUpdater");
-        int position = mViewPager.getCurrentItem();
-        Fragment fragment = mAdapter.getItem(position);
+        Fragment fragment = getFragmentAt(mViewPager.getCurrentItem());
         if (fragment instanceof NearbyChatListFragment) {
             if (mEnvironmentUpdatesEnabled) {
                 if (isLocationServiceEnabled()) {
@@ -248,8 +296,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void shutDownNearbySession() {
         LOG.debug("shutDownNearbySession");
         XoApplication.stopNearbySession();
-        NearbyChatListFragment nearbyChatListFragment = (NearbyChatListFragment) mAdapter.getItem(2);
-        nearbyChatListFragment.shutdownNearbyChat();
     }
 
     private boolean isLocationServiceEnabled() {
@@ -276,29 +322,13 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         return true;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        menu.findItem(R.id.menu_audio_attachment_list).setVisible(true);
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.menu_audio_attachment_list:
-                startMediaBrowserActivity();
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void startMediaBrowserActivity() {
+    private void startMediaBrowserActivity() {
         Intent intent = new Intent(this, MediaBrowserActivity.class);
         startActivity(intent);
+    }
+
+    private Fragment getFragmentAt(int position) {
+        return ((FragmentPagerAdapter) mViewPager.getAdapter()).getItem(position);
     }
 
     private class ConversationsPageListener implements ViewPager.OnPageChangeListener {
@@ -317,7 +347,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         public void onPageScrollStateChanged(int state) {
             if (state == ViewPager.SCROLL_STATE_IDLE) {
                 mNoUserInput = true;
-                mActionBar.setSelectedNavigationItem(mViewPager.getCurrentItem());
+                getActionBar().setSelectedNavigationItem(mViewPager.getCurrentItem());
                 mNoUserInput = false;
             }
         }
@@ -335,7 +365,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         @Override
         public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            Fragment fragment = mAdapter.getItem(tab.getPosition());
+            Fragment fragment = getFragmentAt(tab.getPosition());
             if (fragment instanceof SearchableListFragment) {
                 ((SearchableListFragment) fragment).leaveSearchMode();
             }
@@ -346,67 +376,4 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         }
     }
-
-    @Override
-    public void onClientStateChange(XoClient client, int state) {
-        LOG.debug("onClientStateChange:" + state);
-        if (!client.isAwake()) {
-            shutDownNearbySession();
-        } else if (client.isActive()) {
-            refreshEnvironmentUpdater(true);
-
-            if (mPairingToken != null) {
-                performTokenPairing(mPairingToken);
-                mPairingToken = null;
-            }
-        }
-    }
-
-    // TODO: remove this as soon as possible. This is just a quick fix to add an invitation counter to the "INVITATIONS" tab.
-    private void updateInvitationCount() {
-        final int invitationsCount = getXoDatabase().findAllPendingFriendRequests().size();
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                ActionBar.Tab invitationTab = mActionBar.getTabAt(1);
-                String[] tabs = getResources().getStringArray(R.array.tab_names);
-                String tabText = tabs[1];
-
-                if (invitationsCount == 0) {
-                    invitationTab.setText(tabText);
-                } else {
-                    invitationTab.setText(tabText + " (" + invitationsCount + ")");
-                }
-            }
-        });
-
-    }
-
-    @Override
-    public void onContactAdded(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-        updateInvitationCount();
-    }
-
-    @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-    }
-    // TODO: end
 }

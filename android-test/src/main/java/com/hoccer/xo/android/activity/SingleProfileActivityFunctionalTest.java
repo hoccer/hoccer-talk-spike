@@ -9,18 +9,18 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.fragment.SingleProfileFragment;
+import com.hoccer.xo.android.fragment.SingleProfileCreationFragment;
 import org.apache.log4j.Logger;
 
 
-public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<SingleProfileActivity> {
+public class SingleProfileActivityFunctionalTest extends ActivityInstrumentationTestCase2<SingleProfileActivity> {
 
     private static final Logger LOG = Logger.getLogger(SingleProfileActivity.class);
 
     private SingleProfileActivity activity;
-    private SingleProfileFragment singleProfileFragment;
+    private SingleProfileCreationFragment singleProfileCreationFragment;
 
-    public SingleProfileActivityTest() {
+    public SingleProfileActivityFunctionalTest() {
         super(SingleProfileActivity.class);
     }
 
@@ -32,25 +32,22 @@ public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<
         setActivityIntent(intent);
 
         activity = getActivity();
-        singleProfileFragment = (SingleProfileFragment) getActivity().getSupportFragmentManager().
-                findFragmentByTag(SingleProfileActivity.SINGLE_PROFILE_FRAGMENT);
+        singleProfileCreationFragment = (SingleProfileCreationFragment) getActivity().getSupportFragmentManager().
+                findFragmentByTag(SingleProfileActivity.SINGLE_PROFILE_CREATION_FRAGMENT);
     }
 
-    public void testPreConditions() {
+    public void testPreconditions() {
         assertTrue(activity.getIntent().hasExtra(SingleProfileActivity.EXTRA_CLIENT_CREATE_SELF));
-        assertNotNull(singleProfileFragment);
-        assertTrue(singleProfileFragment.isAdded());
-        assertTrue(singleProfileFragment.isVisible());
-        assertTrue(singleProfileFragment.getArguments().getBoolean(SingleProfileFragment.ARG_CREATE_SELF));
+        assertNotNull(singleProfileCreationFragment);
+        assertTrue(singleProfileCreationFragment.isAdded());
+        assertTrue(singleProfileCreationFragment.isVisible());
     }
 
     public void testActionModeUI() {
-        TextView nameText = (TextView) singleProfileFragment.getView().findViewById(com.hoccer.xo.release.R.id.tv_profile_name);
-        EditText editName = (EditText) singleProfileFragment.getView().findViewById(com.hoccer.xo.release.R.id.et_profile_name);
-        RelativeLayout keyContainer = (RelativeLayout) singleProfileFragment.getView().findViewById(com.hoccer.xo.release.R.id.inc_profile_key);
+        TextView nameText = (TextView) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.tv_profile_name);
+        EditText editName = (EditText) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.et_profile_name);
 
-        assertEquals(keyContainer.getVisibility(), View.GONE);
-        assertEquals(nameText.getVisibility(), View.INVISIBLE);
+        assertEquals(nameText.getVisibility(), View.GONE);
         assertEquals(editName.getVisibility(), View.VISIBLE);
         assertEquals(editName.getHint(), activity.getString(com.hoccer.xo.release.R.string.profile_name_hint));
         assertEquals(editName.getText().toString(), "");
@@ -58,7 +55,7 @@ public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<
 
     @UiThreadTest
     public void testOnDestroyActionMode() {
-        final EditText editName = (EditText) singleProfileFragment.getView().findViewById(com.hoccer.xo.release.R.id.et_profile_name);
+        final EditText editName = (EditText) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.et_profile_name);
         final String expectedName = "myName";
         editName.setText(expectedName);
 

@@ -30,12 +30,14 @@
     <string name="menu_reconnect">Reconnect</string>
     <string name="menu_quit">Quit</string>
     <string name="menu_clear_conversation">Clear conversation</string>
+    <string name="menu_contacts">Contacts</string>
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.hoccer.com/tutorial-xo/</string>
     <string name="link_faq">http://faq.hoccer.com/faq-xo/</string>
 
     <!-- Contacts fragment -->
+    <string name="contacts_title">Contacts</string>
     <string name="contacts_category_friends">Friends</string>
     <string name="contacts_category_groups">Groups</string>
     <string name="contacts_empty_info">You have no contacts.</string>
@@ -44,9 +46,24 @@
     <string name="contacts_sms_invitation_description">has sent you an invitation via SMS.
         Do you wish to accept?
     </string>
+    <string name="message_and_attachment_count_info">%1$d messages | %2$d attachments</string>
+    <string name="blocked_contact">Blocked contact</string>
+
+    <!-- Friend decline invitation dialog -->
+    <string name="friend_request_decline_invitation_title">Decline invitation?</string>
+    <string name="friend_request_decline_invitation_message">Do you really want to decline the invitation from %1$s?</string>
+
+    <!-- Groups fragment -->
+    <plurals name="groups_and_x_more">
+        <item quantity="one">and one more</item>
+        <item quantity="other">and %1$d more</item>
+    </plurals>
+
+    <!-- Group decline invitation dialog -->
+    <string name="group_request_decline_invitation_title">Decline group invitation?</string>
+    <string name="group_request_decline_invitation_message">Do you really want to decline the group invitation from %1$s?</string>
 
     <!-- Deleting attachments -->
-
     <string name="dialog_attachment_delete_title">Delete Attachment</string>
     <string name="dialog_attachment_delete_message">Delete selected attachments and related chat messages?</string>
 
@@ -79,7 +96,6 @@
     <!-- Contact list items -->
     <string name="contact_name_new_client">New Friend</string>
     <string name="contact_name_new_group">New Group</string>
-    <string name="contact_status">Hello there!</string>
     <string name="contact_role_owner">Owner</string>
 
     <!-- Composition fragment -->
@@ -149,8 +165,7 @@
     <string name="friend_request_cancel_invitation">Cancel invitation</string>
     <string name="friend_request_accept_invitation">Accept invitation</string>
     <string name="friend_request_decline_invitation">Decline invitation</string>
-    <string name="friend_request_invited_me_description">wants to be your friend.</string>
-    <string name="friend_request_invited_by_you_description">has received an invitation from you.</string>
+    <string name="friend_request_invite_send">Invite sent</string>
 
     <string name="group_name_hint">Group name</string>
     <string name="profile_group_members_title">Members</string>
@@ -364,9 +379,11 @@
 
     <string-array name="tab_names">
         <item>CHATS</item>
-        <item>INVITATIONS</item>
         <item>NEARBY</item>
     </string-array>
+
+    <string name="contacts_tab_friends">FRIENDS</string>
+    <string name="contacts_tab_groups">GROUPS</string>
 
     <string name="qr_code_tab_scan">SCAN</string>
     <string name="qr_code_tab_generate">GENERATE</string>
@@ -375,9 +392,8 @@
 
     <string name="preference_database_title">Local Database</string>
     <string name="placeholder_conversations_text">Invite friends to chat with!</string>
-    <string name="tutorial_nearby_anchor">nearby</string>
-    <string name="placeholder_nearby_text">Waiting for others %1$s…</string>
-    <string name="placeholder_nearby_link_text">nearby</string>
+    <string name="placeholder_groups_text">Create groups to chat with many friends at once.</string>
+    <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#nearby">nearby</a>]]>…</string>
     <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Media</string>
     <string name="content_audio_by_contact_caption">Media from %1$s</string>
@@ -423,7 +439,8 @@
 
     <string name="attachment_failed">Error while downloading File.</string>
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
-    <string name="toast_stored_external_file_to_clipboard">Your file has been stored in the clipboard.</string>
+    <string name="toast_stored_file_in_clipboard">Your file has been stored in the clipboard.</string>
+    <string name="toast_failed_to_store_file_in_clipboard">Sorry, this file could not be stored in the clipboard.</string>
 
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">invite %1$d group members as friend</string>

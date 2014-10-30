@@ -73,13 +73,13 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     @Override
     public void onResume() {
         super.onResume();
-        ((IPagerFragment)mFragments[mViewPager.getCurrentItem()]).onPageSelected();
+        ((IPagerFragment)mFragments[mViewPager.getCurrentItem()]).onPageResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ((IPagerFragment)mFragments[mViewPager.getCurrentItem()]).onPageUnselected();
+        ((IPagerFragment)mFragments[mViewPager.getCurrentItem()]).onPagePause();
     }
 
     @Override
@@ -89,20 +89,6 @@ public class ViewPagerActivityComponent extends ActivityComponent {
 
     public Fragment getSelectedFragment() {
         return mFragments[mViewPager.getCurrentItem()];
-    }
-
-    /*
-     * Returns the first fragment of the given type or null.
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends Fragment> T getFragment(final Class<T> clazz) {
-        for(final Fragment fragment : mFragments) {
-            if(clazz.equals(fragment.getClass())) {
-                return (T)fragment;
-            }
-        }
-
-        return null;
     }
 
     private class PageChangeListener implements ViewPager.OnPageChangeListener {
@@ -129,13 +115,19 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         public void onTabSelected(final ActionBar.Tab tab, final FragmentTransaction ft) {
             final int position = tab.getPosition();
             mViewPager.setCurrentItem(position);
-            ((IPagerFragment)mFragments[position]).onPageSelected();
+
+            IPagerFragment fragment = (IPagerFragment) mFragments[position];
+            fragment.onPageResume();
+            fragment.onPageSelected();
         }
 
         @Override
         public void onTabUnselected(final ActionBar.Tab tab, final FragmentTransaction ft) {
             final int position = tab.getPosition();
-            ((IPagerFragment)mFragments[position]).onPageUnselected();
+
+            IPagerFragment fragment = (IPagerFragment) mFragments[position];
+            fragment.onPageUnselected();
+            fragment.onPagePause();
         }
 
         @Override

@@ -6,7 +6,6 @@ import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.SearchAdapter;
-import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -18,9 +17,9 @@ import java.util.Date;
 import java.util.List;
 
 
-public class NearbyGroupContactItem extends BaseContactItem implements SearchAdapter.Searchable{
+public class NearbyGroupChatItem extends BaseChatItem implements SearchAdapter.Searchable{
 
-    private static final Logger LOG = Logger.getLogger(NearbyGroupContactItem.class);
+    private static final Logger LOG = Logger.getLogger(NearbyGroupChatItem.class);
 
     @Nullable
     private List<TalkClientMessage> mNearbyMessages;
@@ -29,7 +28,7 @@ public class NearbyGroupContactItem extends BaseContactItem implements SearchAda
     private Date mLastMessageTimeStamp = null;
     private String mLastMessageText = "";
 
-    public NearbyGroupContactItem() {
+    public NearbyGroupChatItem() {
         update();
     }
 

@@ -3060,6 +3060,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkClientContact clientContact = null;
         try {
             clientContact = mDatabase.findContactByClientId(relationship.getOtherClientId(), relationship.isRelated());
+            if(clientContact == null) {
+                clientContact = mDatabase.findDeletedContactByClientId(relationship.getOtherClientId());
+            }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
             return;
