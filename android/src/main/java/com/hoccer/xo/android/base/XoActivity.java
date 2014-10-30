@@ -232,14 +232,6 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     @Override
-    protected void onStart() {
-        if (isAppInBackground || isBackgroundActive) {
-            applicationWillEnterForeground();
-        }
-        super.onStart();
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
         if (!isWindowFocused) {
@@ -345,6 +337,11 @@ public abstract class XoActivity extends FragmentActivity {
     protected void onResume() {
         LOG.debug("onResume()");
         super.onResume();
+
+        if (isAppInBackground || isBackgroundActive) {
+            applicationWillEnterForeground();
+        }
+
         checkForCrashesIfEnabled();
 
         // start the backend service and bind to it
