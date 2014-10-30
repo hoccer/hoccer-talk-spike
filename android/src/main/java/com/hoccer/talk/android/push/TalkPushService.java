@@ -29,6 +29,7 @@ public class TalkPushService extends GCMBaseIntentService {
     public static final String EXTRA_GCM_REGISTERED = "com.hoccer.xo.GCM_REGISTERED";
     public static final String EXTRA_GCM_UNREGISTERED = "com.hoccer.xo.GCM_UNREGISTERED";
     public static final String EXTRA_WAKE_CLIENT = "com.hoccer.xo.WAKE_CLIENT";
+    public static final String EXTRA_SHOW_MESSAGE = "com.hoccer.xo.SHOW_MESSAGE";
 
     private static final Logger LOG = Logger.getLogger(TalkPushService.class);
 
@@ -39,8 +40,14 @@ public class TalkPushService extends GCMBaseIntentService {
     @Override
     protected void onMessage(Context context, Intent intent) {
         LOG.info("onMessage(" + intent.toString() + ")");
-        // simply wake the client
-        wakeClient();
+
+        String message = intent.getStringExtra("message");
+
+        if (message != null) {
+            sendServiceIntent(EXTRA_SHOW_MESSAGE, message);
+        } else {
+            wakeClient();
+        }
     }
 
     @Override
