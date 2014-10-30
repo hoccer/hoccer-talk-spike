@@ -39,8 +39,6 @@ public abstract class ContactsAdapter extends XoAdapter
 
     protected final static int VIEW_TYPE_COUNT = 5;
 
-    private OnItemCountChangedListener mOnItemCountChangedListener;
-
     private boolean showNearbyHistory = false;
     private long mNearbyMessagesCount = 0;
 
@@ -127,9 +125,6 @@ public abstract class ContactsAdapter extends XoAdapter
 
                 mClientContacts = newClients;
                 mSmsTokens = newTokens;
-                if(mOnItemCountChangedListener != null && oldItemCount != getCount()) {
-                    mOnItemCountChangedListener.onItemCountChanged(getCount());
-                }
             } catch (SQLException e) {
                 LOG.error("SQL error", e);
             }
@@ -401,10 +396,6 @@ public abstract class ContactsAdapter extends XoAdapter
         separator.setText((String)getItem(position));
     }
 
-    public void setOnItemCountChangedListener(OnItemCountChangedListener onItemCountChangedListener) {
-        mOnItemCountChangedListener = onItemCountChangedListener;
-    }
-
     public String[] getMembersIds() {
         String[] ids = new String[mClientContacts.size()];
         int i = 0;
@@ -417,5 +408,4 @@ public abstract class ContactsAdapter extends XoAdapter
     public interface Filter {
         public boolean shouldShow(TalkClientContact contact);
     }
-
 }

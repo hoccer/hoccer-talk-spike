@@ -31,14 +31,14 @@
             style="@style/AppBaseTheme.Contact.Name"/>
 
     <TextView
-            android:id="@+id/contact_role"
-            android:text="@string/contact_role_owner"
+            android:id="@+id/status"
+            android:gravity="right"
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="visible"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            style="@style/AppBaseTheme.Contact.Name"/>
+            style="@style/AppBaseTheme.Contact.GroupContactStatus"/>
 
 </RelativeLayout>

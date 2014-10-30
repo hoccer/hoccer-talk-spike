@@ -11,14 +11,14 @@ import android.view.View;
 import java.util.Date;
 
 
-public abstract class BaseContactItem<T> {
+public abstract class BaseChatItem<T> {
 
 
     public abstract void update();
 
     public View getView(View view, ViewGroup parent) {
         if(view == null) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact_client, null);
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_client, null);
         }
         return configure(parent.getContext(), view);
     }

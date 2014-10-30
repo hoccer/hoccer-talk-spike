@@ -1,5 +1,7 @@
 package com.hoccer.xo.android.adapter;
 
+import android.content.res.Resources;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -9,6 +11,8 @@ import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
+
+import java.util.ArrayList;
 
 /**
  * Contacts adapter for simple lists
@@ -77,12 +81,26 @@ public class GroupContactsAdapter extends ContactsAdapter {
             }
         });
 
-        TextView roleView = (TextView) view.findViewById(R.id.contact_role);
+        TextView statusView = (TextView) view.findViewById(R.id.status);
+        statusView.setText(getMemberStatus(contact, view.getResources()));
+    }
+
+    private String getMemberStatus(TalkClientContact contact, Resources resources) {
+        ArrayList<String> status = new ArrayList<String>();
+
         if (isContactAdminInGroup(contact, mGroup)) {
-            roleView.setVisibility(View.VISIBLE);
-        } else {
-            roleView.setVisibility(View.GONE);
+            status.add(resources.getString(R.string.contact_role_owner));
         }
+
+        if (contact.isClientGroupInvited(mGroup)) {
+            status.add(resources.getString(R.string.common_group_invite));
+        }
+
+        if (contact.isClientFriend()) {
+            status.add(resources.getString(R.string.common_friend));
+        }
+
+        return TextUtils.join("\n", status);
     }
 
     private boolean isContactAdminInGroup(TalkClientContact contact, TalkClientContact group) {

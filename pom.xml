@@ -70,6 +70,7 @@
     <bouncycastle.version>1.48</bouncycastle.version>
     <commons-codec.version>1.7</commons-codec.version>
     <commons-lang.version>3.3.2</commons-lang.version>
+    <commons-collections.version>4.0</commons-collections.version>
     <bson4jackson.version>2.2.0</bson4jackson.version>
     <apache.httpclient.version>4.0.3</apache.httpclient.version>
     <apache.tika.version>1.4</apache.tika.version>
@@ -94,9 +95,9 @@
     <universal.image.loader.version>1.9.0</universal.image.loader.version>
 
     <!-- Hoccer Release Versions -->
-    <hoccer-talk-server.version>3.0.22</hoccer-talk-server.version>
+    <hoccer-talk-server.version>3.0.23</hoccer-talk-server.version>
     <hoccer-talk-filecache.version>1.0.1</hoccer-talk-filecache.version>
-    <hoccer-talk-android.version>3.0.1-SNAPSHOT</hoccer-talk-android.version>
+    <hoccer-talk-android.version>3.0.2-SNAPSHOT</hoccer-talk-android.version>
   </properties>
 
   <distributionManagement>

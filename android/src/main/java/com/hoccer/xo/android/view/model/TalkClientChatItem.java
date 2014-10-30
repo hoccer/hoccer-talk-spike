@@ -14,7 +14,6 @@ import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.release.R;
-import com.j256.ormlite.field.DatabaseField;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,9 +21,9 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class TalkClientContactItem extends BaseContactItem implements SearchAdapter.Searchable{
+public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Searchable{
 
-    private static final Logger LOG = Logger.getLogger(TalkClientContactItem.class);
+    private static final Logger LOG = Logger.getLogger(TalkClientChatItem.class);
 
     private Context mContext;
     private TalkClientContact mContact;
@@ -35,7 +34,7 @@ public class TalkClientContactItem extends BaseContactItem implements SearchAdap
     private long mUnseenMessageCount = 0;
     private Date mContactCreationTimeStamp = null;
 
-    public TalkClientContactItem(TalkClientContact contact, Context context) {
+    public TalkClientChatItem(TalkClientContact contact, Context context) {
         mContact = contact;
         mContext = context;
         update();

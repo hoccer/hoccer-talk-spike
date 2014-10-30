@@ -65,7 +65,7 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     }
 
     @Override
-    public void onPageSelected() {
+    public void onPageResume() {
         if (!isTokenGenerated()) {
             generateToken();
         }
@@ -74,7 +74,13 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     }
 
     @Override
-    public void onPageUnselected() {
+    public void onPageSelected() {}
+
+    @Override
+    public void onPageUnselected() {}
+
+    @Override
+    public void onPagePause() {
         XoApplication.getXoClient().unregisterContactListener(this);
     }
 

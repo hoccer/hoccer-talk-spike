@@ -30,13 +30,21 @@
         <item name="android:textSize">6pt</item>
     </style>
 
-    <style name="AppBaseTheme.Contact.UnreadMessages" parent="AppBaseTheme.Contact">
+    <style name="AppBaseTheme.Contact.UnreadMessagesChatItem" parent="AppBaseTheme.Contact">
         <item name="android:text">55</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:layout_width">20dp</item>
         <item name="android:layout_height">20dp</item>
-        <item name="android:textSize">13dp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:gravity">center</item>
+    </style>
+
+    <style name="AppBaseTheme.Contact.UnreadMessagesBadge" parent="AppBaseTheme.Contact">
+      <item name="android:textColor">@android:color/white</item>
+      <item name="android:layout_width">18dp</item>
+      <item name="android:layout_height">18dp</item>
+      <item name="android:textSize">13sp</item>
+      <item name="android:gravity">center</item>
     </style>
 
     <style name="AppBaseTheme.Contact.LastMessage" parent="AppBaseTheme.Contact">
@@ -51,6 +59,14 @@
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:layout_marginRight">10dp</item>
         <item name="android:textColor">@android:color/secondary_text_dark</item>
+        <item name="android:textSize">3pt</item>
+    </style>
+
+    <style name="AppBaseTheme.Contact.GroupContactStatus" parent="AppBaseTheme.Contact">
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@android:color/secondary_text_dark</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:layout_margin">2dp</item>
         <item name="android:textSize">3pt</item>
     </style>
 </resources>

@@ -22,8 +22,8 @@
             android:layout_alignTop="@id/contact_icon"
             android:layout_marginRight="-3dp"
             android:visibility="gone"
-            android:background="@drawable/unread_messages"
-            style="@style/AppBaseTheme.Contact.UnreadMessages"/>
+            android:background="@drawable/unread_messages_chat_item"
+            style="@style/AppBaseTheme.Contact.UnreadMessagesChatItem"/>
 
     <TextView
             android:id="@+id/contact_name"
@@ -63,7 +63,7 @@
 
     <TextView
             android:id="@+id/contact_time"
-            android:text="13:37"
+            android:text=""
             android:layout_alignParentRight="true"
             android:layout_alignTop="@id/contact_name"
             android:layout_width="wrap_content"

@@ -216,7 +216,7 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     }
 
     @Override
-    public void onPageSelected() {
+    public void onPageResume() {
         enableAndStartPreview();
     }
 
@@ -229,7 +229,13 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     }
 
     @Override
-    public void onPageUnselected() {
+    public void onPageSelected() {}
+
+    @Override
+    public void onPageUnselected() {}
+
+    @Override
+    public void onPagePause() {
         stopAndDisablePreview();
 
         if (mPairingTokenEditText != null) {

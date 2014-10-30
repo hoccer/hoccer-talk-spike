@@ -13,14 +13,14 @@ import com.hoccer.xo.android.fragment.SingleProfileCreationFragment;
 import org.apache.log4j.Logger;
 
 
-public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<SingleProfileActivity> {
+public class SingleProfileActivityFunctionalTest extends ActivityInstrumentationTestCase2<SingleProfileActivity> {
 
     private static final Logger LOG = Logger.getLogger(SingleProfileActivity.class);
 
     private SingleProfileActivity activity;
     private SingleProfileCreationFragment singleProfileCreationFragment;
 
-    public SingleProfileActivityTest() {
+    public SingleProfileActivityFunctionalTest() {
         super(SingleProfileActivity.class);
     }
 
@@ -36,7 +36,7 @@ public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<
                 findFragmentByTag(SingleProfileActivity.SINGLE_PROFILE_CREATION_FRAGMENT);
     }
 
-    public void testPreConditions() {
+    public void testPreconditions() {
         assertTrue(activity.getIntent().hasExtra(SingleProfileActivity.EXTRA_CLIENT_CREATE_SELF));
         assertNotNull(singleProfileCreationFragment);
         assertTrue(singleProfileCreationFragment.isAdded());
@@ -46,10 +46,8 @@ public class SingleProfileActivityTest extends ActivityInstrumentationTestCase2<
     public void testActionModeUI() {
         TextView nameText = (TextView) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.tv_profile_name);
         EditText editName = (EditText) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.et_profile_name);
-        RelativeLayout keyContainer = (RelativeLayout) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.inc_profile_key);
 
-        assertEquals(keyContainer.getVisibility(), View.GONE);
-        assertEquals(nameText.getVisibility(), View.INVISIBLE);
+        assertEquals(nameText.getVisibility(), View.GONE);
         assertEquals(editName.getVisibility(), View.VISIBLE);
         assertEquals(editName.getHint(), activity.getString(com.hoccer.xo.release.R.string.profile_name_hint));
         assertEquals(editName.getText().toString(), "");

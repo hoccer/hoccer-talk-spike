@@ -25,6 +25,7 @@
 
     <style name="ActionBarTabStyle.AppBaseTheme" parent="@android:style/Widget.Holo.ActionBar.TabView">
         <item name="android:background">@drawable/tab_indicator_ab_appbasetheme</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="DropDownNav.AppBaseTheme" parent="@android:style/Widget.Holo.Spinner">
