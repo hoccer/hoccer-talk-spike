@@ -21,6 +21,8 @@ public class CredentialExportService extends IntentService {
 
     private static final Logger LOG = Logger.getLogger(CredentialExportService.class);
 
+    public static final String INTENT_ACTION_FILTER = "com.hoccer.android.action.EXPORT_DATA";
+
     public static final String EXTRA_RESULT_CREDENTIALS_JSON = "credentialsJson";
 
     public static final String CREDENTIALS_ENCRYPTION_PASSWORD = "4brj3paAr8D2Qvgw";

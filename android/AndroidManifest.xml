@@ -268,14 +268,17 @@
                 android:windowSoftInputMode="adjustResize">
         </activity>
 
-        <!-- Data Export Service -->
+        <!-- Credential Export Service -->
         <service android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportService"/>
 
-        <!-- Data Export Receiver -->
+        <service android:name="com.hoccer.xo.android.credentialtransfer.DisconnectService"/>
+
+        <!-- Credential Transfer Receiver -->
         <receiver
-                android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportReceiver">
+                android:name="com.hoccer.xo.android.credentialtransfer.CredentialTransferReceiver">
             <intent-filter>
-                <action android:name="com.hoccer.xo.android.action.EXPORT_DATA"/>
+                <action android:name="com.hoccer.android.action.EXPORT_DATA"/>
+                <action android:name="com.hoccer.android.action.DISCONNECT"/>
             </intent-filter>
         </receiver>
 

@@ -3,11 +3,13 @@ package com.hoccer.xo.android.credentialtransfer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.preference.PreferenceManager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.crypto.CryptoJSON;
@@ -71,15 +73,14 @@ public class CredentialImporter {
      * @param context  Used to send the import broadcast to the import package.
      * @param listener Gets called on success or failure.
      */
-
     public static void importCredentials(final Context context, final CredentialImportListener listener) {
         LOG.info("Try to import credentials");
         final String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
         if (packageName != null) {
             final Intent intent = new Intent();
-            final String className = CredentialExportReceiver.class.getName();
+            final String className = CredentialTransferReceiver.class.getName();
             intent.setClassName(packageName, className);
-            intent.setAction(packageName + ".action.EXPORT_DATA");
+            intent.setAction(CredentialExportService.INTENT_ACTION_FILTER);
             intent.putExtra("receiver", new CredentialResultReceiver(new Handler(), listener));
             context.sendBroadcast(intent);
         }
@@ -173,5 +174,35 @@ public class CredentialImporter {
                 mListener.onFailure();
             }
         }
+    }
+
+    /**
+     * Sends a client disconnection intent to the other application.
+     *
+     * @param context Used to send the import broadcast to the import package.
+     */
+    public static void sendDisconnectRequestToImportPackageClient(final Context context) {
+        LOG.info("Try to disconnect import package client");
+        final String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
+        if (packageName != null) {
+            final Intent intent = new Intent();
+            final String className = CredentialTransferReceiver.class.getName();
+            intent.setClassName(packageName, className);
+            intent.setAction(DisconnectService.INTENT_ACTION_FILTER);
+            context.sendBroadcast(intent);
+        }
+    }
+
+    /**
+     * Sets a flag in the shared preferences to change the srp secret the next time the client logs in.
+     *
+     * @param context Needed to get the shared preferences.
+     * @see com.hoccer.xo.android.credentialtransfer.SrpChangeListener
+     */
+    public static void setSrpChangeOnNextLoginFlag(final Context context) {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("change_srp_secret", true);
+        editor.apply();
     }
 }
