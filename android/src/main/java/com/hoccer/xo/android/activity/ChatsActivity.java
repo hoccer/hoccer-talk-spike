@@ -177,8 +177,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private void showProfileIfClientIsNotRegistered() {
         if (!getXoClient().isRegistered()) {
-            Intent intent = new Intent(this, SingleProfileActivity.class);
-            intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CREATE_SELF, true);
+            Intent intent = new Intent(this, RegistrationActivity.class);
             startActivity(intent);
         }
     }
