@@ -5,7 +5,8 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
-import com.hoccer.talk.util.CredentialTransfer;
+import com.hoccer.talk.crypto.CryptoJSON;
+import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
@@ -19,6 +20,8 @@ public class CredentialExportService extends IntentService {
     public static final String EXTRA_RESULT_CREDENTIALS_JSON = "credentialsJson";
 
     public static final String CREDENTIALS_ENCRYPTION_PASSWORD = "4brj3paAr8D2Qvgw";
+
+    public static final String CREDENTIALS_CONTENT_TYPE = "credentials";
 
     public CredentialExportService() {
         super("DataExportService");
@@ -45,10 +48,11 @@ public class CredentialExportService extends IntentService {
     private static void exportCredentials(final ResultReceiver resultReceiver) {
         try {
             LOG.info("Exporting credentials");
-            final CredentialTransfer credentialTransfer = new CredentialTransfer(XoApplication.getXoClient());
-            final byte[] credentials = credentialTransfer.getCredentialsAsEncryptedJson(CREDENTIALS_ENCRYPTION_PASSWORD);
+
+            final Credentials credentials = XoApplication.getXoClient().exportCredentials();
+            final byte[] encryptedCredentials = credentials.toEncryptedBytes(CREDENTIALS_ENCRYPTION_PASSWORD);
             final Bundle bundle = new Bundle();
-            bundle.putByteArray(EXTRA_RESULT_CREDENTIALS_JSON, credentials);
+            bundle.putByteArray(EXTRA_RESULT_CREDENTIALS_JSON, encryptedCredentials);
             resultReceiver.send(Activity.RESULT_OK, bundle);
         } catch (final Exception e) {
             resultReceiver.send(Activity.RESULT_CANCELED, null);

@@ -18,6 +18,7 @@ import com.hoccer.talk.rpc.ITalkRpcClient;
 import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.srp.SRP6Parameters;
 import com.hoccer.talk.srp.SRP6VerifyingClient;
+import com.hoccer.talk.util.Credentials;
 import com.j256.ormlite.dao.ForeignCollection;
 import de.undercouch.bson4jackson.BsonFactory;
 import org.apache.commons.codec.binary.Base64;
@@ -440,6 +441,53 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         } else {
             return false;
         }
+    }
+
+    /**
+     * Exports the client credentials.
+     */
+    public Credentials exportCredentials() {
+        final String clientId = mSelfContact.getClientId();
+        final String clientName = mSelfContact.getName();
+        final String password = mSelfContact.getSelf().getSrpSecret();
+        final String salt = mSelfContact.getSelf().getSrpSalt();
+        return new Credentials(clientId, clientName, password, salt);
+    }
+
+    /**
+     * Imports the client credentials.
+     * @note After import the client deletes all contacts and relationsships and reconnects for full sync.
+     */
+    public boolean importCredentials(final Credentials newCredentials) {
+        try {
+            final TalkClientContact selfContact = mSelfContact;
+            final TalkClientSelf self = selfContact.getSelf();
+            self.provideCredentials(newCredentials.getSalt(), newCredentials.getPassword());
+
+            // update client id
+            selfContact.updateSelfRegistered(newCredentials.getClientId());
+
+            // update client name
+            selfContact.getClientPresence().setClientName(newCredentials.getClientName());
+
+            // save credentials and contact
+            mDatabase.saveCredentials(self);
+            mDatabase.savePresence(selfContact.getClientPresence());
+            mDatabase.saveContact(selfContact);
+
+            // remove contacts + groups from DB
+            mDatabase.eraseAllRelationships();
+            mDatabase.eraseAllClientContacts();
+            mDatabase.eraseAllGroupMemberships();
+            mDatabase.eraseAllGroupContacts();
+
+            reconnect("Credentials imported.");
+
+            return true;
+        } catch (final Exception e) {
+            LOG.error("importCredentials", e);
+        }
+        return false;
     }
 
     /**
