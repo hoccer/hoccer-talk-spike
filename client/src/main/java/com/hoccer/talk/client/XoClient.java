@@ -447,6 +447,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      * Exports the client credentials.
      */
     public Credentials exportCredentials() {
+        // return null if this client has never registered
+        if(mSelfContact.getClientId() == null) {
+            return null;
+        }
+
         final String clientId = mSelfContact.getClientId();
         final String clientName = mSelfContact.getName();
         final String password = mSelfContact.getSelf().getSrpSecret();

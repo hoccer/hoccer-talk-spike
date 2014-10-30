@@ -78,21 +78,22 @@ public class CredentialExportService extends IntentService {
     private static byte[] createPayload() {
         try {
             final Credentials credentials = XoApplication.getXoClient().exportCredentials();
+            if(credentials != null) {
+                final ObjectMapper mapper = new ObjectMapper();
+                final ObjectNode rootNode = mapper.createObjectNode();
 
-            final ObjectMapper mapper = new ObjectMapper();
-            final ObjectNode rootNode = mapper.createObjectNode();
+                // write credentials
+                final ObjectNode credentialNode = rootNode.putObject(CREDENTIALS_FIELD_NAME);
+                credentials.toJsonNode(credentialNode);
 
-            // write credentials
-            final ObjectNode credentialNode = rootNode.putObject(CREDENTIALS_FIELD_NAME);
-            credentials.toJsonNode(credentialNode);
+                // write friend contact and joined group count
+                final int clients = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
+                final int groups = XoApplication.getXoClient().getDatabase().findGroupContactsByState(TalkGroupMember.STATE_JOINED).size();
+                rootNode.put(CONTACT_COUNT_FIELD_NAME, clients + groups);
 
-            // write firend contact and joined group count
-            final int clients = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
-            final int groups = XoApplication.getXoClient().getDatabase().findGroupContactsByState(TalkGroupMember.STATE_JOINED).size();
-            rootNode.put(CONTACT_COUNT_FIELD_NAME, clients + groups);
-
-            final String payloadString = mapper.writeValueAsString(rootNode);
-            return CryptoJSON.encrypt(payloadString.getBytes(PAYLOAD_CHARSET), CREDENTIALS_ENCRYPTION_PASSWORD, CREDENTIALS_CONTENT_TYPE);
+                final String payloadString = mapper.writeValueAsString(rootNode);
+                return CryptoJSON.encrypt(payloadString.getBytes(PAYLOAD_CHARSET), CREDENTIALS_ENCRYPTION_PASSWORD, CREDENTIALS_CONTENT_TYPE);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
