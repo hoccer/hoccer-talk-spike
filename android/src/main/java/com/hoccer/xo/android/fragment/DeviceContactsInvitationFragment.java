@@ -62,7 +62,7 @@ public class DeviceContactsInvitationFragment extends SearchableListFragment {
         super.onViewCreated(view, savedInstanceState);
 
         mIsSmsInvitation = getActivity().getIntent().getBooleanExtra(EXTRA_IS_SMS_INVITATION, true);
-        mProgressOverlay = (RelativeLayout) view.findViewById(R.id.rl_progress_overlay);
+        mProgressOverlay = (RelativeLayout) view.findViewById(R.id.ll_in_progress);
 
         final Button inviteButton = (Button) view.findViewById(R.id.bt_continue);
         inviteButton.setOnClickListener(new InviteButtonClickListener());

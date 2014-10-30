@@ -24,10 +24,14 @@ public class ImportCredentialFragment extends XoFragment {
     private static final Logger LOG = Logger.getLogger(ImportCredentialFragment.class);
     private RegistrationActivity mRegistrationActivity;
     private Credentials mCredentials;
-    private View mProgressOverlay;
+    private View mProgressLayout;
     private TextView mUserNameTextView;
     private TextView mContactsCountTextView;
     private LinearLayout mXoProfileLayout;
+    private TextView mImportProfileTextView;
+    private Button mImportButton;
+    private Button mNewClientButton;
+    private Integer mContactCount;
 
 
     @Override
@@ -45,17 +49,17 @@ public class ImportCredentialFragment extends XoFragment {
     public void onViewCreated(final View view, final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mProgressOverlay = view.findViewById(R.id.rl_progress_overlay);
+        mProgressLayout = view.findViewById(R.id.ll_in_progress);
         mUserNameTextView = (TextView) view.findViewById(R.id.tv_user_name);
         mContactsCountTextView = (TextView) view.findViewById(R.id.tv_contacts_count);
         mXoProfileLayout = (LinearLayout) view.findViewById(R.id.ll_xo_profile);
-
-        mProgressOverlay.setVisibility(View.VISIBLE);
+        mImportProfileTextView = (TextView) view.findViewById(R.id.tv_import_profile);
+        mImportButton = (Button) view.findViewById(R.id.btn_import_credentials);
+        mNewClientButton = (Button) getView().findViewById(R.id.btn_create_new_client);
 
         importCredentials();
 
-        final Button importButton = (Button) view.findViewById(R.id.btn_import_credentials);
-        importButton.setOnClickListener(new View.OnClickListener() {
+        mImportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
 
@@ -67,8 +71,7 @@ public class ImportCredentialFragment extends XoFragment {
             }
         });
 
-        final Button newClientButton = (Button) getView().findViewById(R.id.btn_create_new_client);
-        newClientButton.setOnClickListener(new View.OnClickListener() {
+        mNewClientButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
 
@@ -84,17 +87,15 @@ public class ImportCredentialFragment extends XoFragment {
         CredentialImporter.importCredentials(mRegistrationActivity, new CredentialImporter.CredentialImportListener() {
             @Override
             public void onSuccess(final Credentials credentials, final Integer contactCount) {
-                
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
 
                         LOG.info("Credentials import succeeded");
                         mCredentials = credentials;
-                        mUserNameTextView.setText(mCredentials.getClientName());
-                        mContactsCountTextView.setText(contactCount.toString());
-                        mXoProfileLayout.setVisibility(View.VISIBLE);
-                        mProgressOverlay.setVisibility(View.GONE);
+                        mContactCount = contactCount;
+                        updateView();
                     }
                 });
             }
@@ -108,10 +109,20 @@ public class ImportCredentialFragment extends XoFragment {
 
                         LOG.error("Credentials import failed");
                         mRegistrationActivity.startNewClientRegistration();
-                        mProgressOverlay.setVisibility(View.GONE);
+                        mProgressLayout.setVisibility(View.GONE);
                     }
                 });
             }
         });
+    }
+
+    private void updateView() {
+        mUserNameTextView.setText(mCredentials.getClientName());
+        mContactsCountTextView.setText(mContactCount.toString());
+        mProgressLayout.setVisibility(View.GONE);
+        mXoProfileLayout.setVisibility(View.VISIBLE);
+        mImportProfileTextView.setVisibility(View.VISIBLE);
+        mImportButton.setVisibility(View.VISIBLE);
+        mNewClientButton.setVisibility(View.VISIBLE);
     }
 }

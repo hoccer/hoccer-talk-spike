@@ -430,7 +430,7 @@
     <string name="import_or_create_new_profile">Du kannst dein bestehendes Profil weiterverwenden oder ein neues erstellen.</string>
     <string name="import_credentials">Profil importieren</string>
     <string name="new_profile">Neues Profil</string>
-
+    <string name="reading_profile_data">Reading profile data ..</string>
 
     <plurals name="message_count">
         <item quantity="one">1 Nachricht</item>
