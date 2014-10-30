@@ -24,4 +24,5 @@
     <color name="xo_app_attachment_incoming_color">#004ce5</color>
     <color name="xo_app_attachment_outgoing_color">#77000000</color>
     <color name="xo_black_transparency_50_percent">#77000000</color>
+    <color name="well_box_color_default">#f7f7f7</color>
 </resources>
