@@ -496,6 +496,48 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     /**
+     * Requests a new srp secret from the server which should be used from now on.
+     */
+    public boolean changeSrpSecret() {
+        final Digest digest = SRP_DIGEST;
+        final byte[] salt = new byte[digest.getDigestSize()];
+        final byte[] secret = new byte[digest.getDigestSize()];
+        final SRP6VerifierGenerator vg = new SRP6VerifierGenerator();
+
+        vg.init(SRP_PARAMETERS.N, SRP_PARAMETERS.g, digest);
+
+        SRP_RANDOM.nextBytes(salt);
+        SRP_RANDOM.nextBytes(secret);
+
+        final String saltString = new String(Hex.encodeHex(salt));
+        final String secretString = new String(Hex.encodeHex(secret));
+
+        try {
+            final String clientId = mSelfContact.getClientId();
+
+            LOG.debug("Changing srp secret");
+
+            final BigInteger verifier = vg.generateVerifier(salt, clientId.getBytes(), secret);
+
+            mServerRpc.srpChangeVerifier(verifier.toString(16), new String(Hex.encodeHex(salt)));
+
+            mSelfContact.getSelf().provideCredentials(saltString, secretString);
+
+            try {
+                mDatabase.saveCredentials(mSelfContact.getSelf());
+            } catch (SQLException e) {
+                LOG.error("SQL error on saving new srp secret", e);
+            }
+
+            LOG.debug("Srp verifier changed");
+            return true;
+        } catch (JsonRpcClientException e) {
+            LOG.error("Error while performing srp secret change request: ", e);
+            return false;
+        }
+    }
+
+    /**
      * Returns true if the client has been activated
      *
      * This is only true after an explicit call to activate().
