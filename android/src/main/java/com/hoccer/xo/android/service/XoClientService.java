@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import com.google.android.gcm.GCMRegistrar;
 import com.hoccer.talk.android.push.TalkPushService;
 import com.hoccer.talk.client.*;
@@ -64,8 +65,9 @@ public class XoClientService extends Service {
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
     private static final long NOTIFICATION_ALARM_BACKOFF = 10000;
-    private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
     private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
+    private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
+    private static final int NOTIFICATION_PUSH_MESSAGE = 2;
 
     private static final String DEFAULT_TRANSFER_LIMIT = "-1";
 
@@ -230,6 +232,10 @@ public class XoClientService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         LOG.debug("onStartCommand(" + ((intent == null) ? "null" : intent.toString()) + ")");
         if (intent != null) {
+            if (intent.hasExtra(TalkPushService.EXTRA_SHOW_MESSAGE)) {
+                String message = intent.getStringExtra(TalkPushService.EXTRA_SHOW_MESSAGE);
+                createPushMessageNotification(message);
+            }
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
                 wakeClientInBackground();
             }
@@ -731,6 +737,20 @@ public class XoClientService extends Service {
             logMessage.append(holder.getContact().getNickname()).append("(").append(holder.getUnseenMessages().size()).append(") ");
         }
         LOG.debug(logMessage);
+    }
+
+    private void createPushMessageNotification(String message) {
+        Notification notification = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setContentTitle(getResources().getString(R.string.app_name))
+                .setContentText(message)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                    .bigText(message))
+                .build();
+
+        mNotificationManager.notify(message, NOTIFICATION_PUSH_MESSAGE, notification);
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
