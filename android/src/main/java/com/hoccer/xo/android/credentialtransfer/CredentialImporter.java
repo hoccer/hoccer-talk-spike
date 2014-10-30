@@ -60,7 +60,7 @@ public class CredentialImporter {
      * Abstract callback class called upon success or failure of the credential import process.
      */
     public interface CredentialImportListener {
-        public abstract void onSuccess(Credentials credentials, int contactCount);
+        public abstract void onSuccess(Credentials credentials, Integer contactCount);
 
         public abstract void onFailure();
     }

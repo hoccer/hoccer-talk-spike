@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.RegistrationActivity;
@@ -23,6 +25,9 @@ public class ImportCredentialFragment extends XoFragment {
     private RegistrationActivity mRegistrationActivity;
     private Credentials mCredentials;
     private View mProgressOverlay;
+    private TextView mUserNameTextView;
+    private TextView mContactsCountTextView;
+    private LinearLayout mXoProfileLayout;
 
 
     @Override
@@ -41,6 +46,10 @@ public class ImportCredentialFragment extends XoFragment {
         super.onViewCreated(view, savedInstanceState);
 
         mProgressOverlay = view.findViewById(R.id.rl_progress_overlay);
+        mUserNameTextView = (TextView) view.findViewById(R.id.tv_user_name);
+        mContactsCountTextView = (TextView) view.findViewById(R.id.tv_contacts_count);
+        mXoProfileLayout = (LinearLayout) view.findViewById(R.id.ll_xo_profile);
+
         mProgressOverlay.setVisibility(View.VISIBLE);
 
         importCredentials();
@@ -49,6 +58,7 @@ public class ImportCredentialFragment extends XoFragment {
         importButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
+
                 if (mCredentials != null) {
                     XoApplication.getXoClient().importCredentials(mCredentials);
                     LOG.info("Credentials imported successfully");
@@ -73,11 +83,17 @@ public class ImportCredentialFragment extends XoFragment {
     private void importCredentials() {
         CredentialImporter.importCredentials(mRegistrationActivity, new CredentialImporter.CredentialImportListener() {
             @Override
-            public void onSuccess(final Credentials credentials, final int contactCount) {
+            public void onSuccess(final Credentials credentials, final Integer contactCount) {
+                
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
+                        LOG.info("Credentials import succeeded");
                         mCredentials = credentials;
+                        mUserNameTextView.setText(mCredentials.getClientName());
+                        mContactsCountTextView.setText(contactCount.toString());
+                        mXoProfileLayout.setVisibility(View.VISIBLE);
                         mProgressOverlay.setVisibility(View.GONE);
                     }
                 });
@@ -85,10 +101,12 @@ public class ImportCredentialFragment extends XoFragment {
 
             @Override
             public void onFailure() {
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        LOG.info("Credentials import failed");
+
+                        LOG.error("Credentials import failed");
                         mRegistrationActivity.startNewClientRegistration();
                         mProgressOverlay.setVisibility(View.GONE);
                     }
