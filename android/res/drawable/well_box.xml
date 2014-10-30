@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <corners
-        android:bottomLeftRadius="@dimen/well_box_corner_radius"
-        android:bottomRightRadius="@dimen/well_box_corner_radius"
-        android:topLeftRadius="@dimen/well_box_corner_radius"
-        android:topRightRadius="@dimen/well_box_corner_radius" />
+    <corners android:bottomLeftRadius="@dimen/well_box_corner_radius"
+             android:bottomRightRadius="@dimen/well_box_corner_radius"
+             android:topLeftRadius="@dimen/well_box_corner_radius"
+             android:topRightRadius="@dimen/well_box_corner_radius"/>
+    <padding android:left="@dimen/well_box_padding_default"
+             android:top="@dimen/well_box_padding_default"
+             android:right="@dimen/well_box_padding_default"
+             android:bottom="@dimen/well_box_padding_default"/>
     <solid android:color="@color/well_box_color_default"/>
 </shape>

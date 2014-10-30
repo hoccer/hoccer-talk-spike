@@ -13,4 +13,5 @@
     <dimen name="profile_container_margin_vertical">15dp</dimen>
     <dimen name="profile_container_margin_horizontal">30dp</dimen>
     <dimen name="well_box_corner_radius">3dp</dimen>
+    <dimen name="well_box_padding_default">20dp</dimen>
 </resources>
