@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import com.hoccer.talk.util.Credentials;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.RegistrationActivity;
 import com.hoccer.xo.android.base.XoFragment;
@@ -32,19 +34,24 @@ public class ImportCredentialFragment extends XoFragment {
 
         final RegistrationActivity registrationActivity = (RegistrationActivity) getActivity();
         if (registrationActivity != null) {
+
+
             final Button importButton = (Button) view.findViewById(R.id.btn_import_credentials);
             importButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
+
+
                     final View progressOverlay = view.findViewById(R.id.rl_progress_overlay);
                     progressOverlay.setVisibility(View.VISIBLE);
 
                     CredentialImporter.importCredentials(registrationActivity, new CredentialImporter.CredentialImportListener() {
                         @Override
-                        public void onSuccess() {
+                        public void onSuccess(final Credentials credentials, final int contactCount) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    XoApplication.getXoClient().importCredentials(credentials);
                                     LOG.info("Credentials imported successfully");
                                     getActivity().finish();
                                 }

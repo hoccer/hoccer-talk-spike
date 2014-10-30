@@ -69,8 +69,8 @@ public class Credentials {
 
     public String toString(final ObjectMapper mapper) {
         try {
-            final ObjectNode credentialsNode = toJson(mapper);
-            if (credentialsNode != null) {
+            final ObjectNode credentialsNode = mapper.createObjectNode();
+            if (toJsonNode(credentialsNode)) {
                 return mapper.writeValueAsString(credentialsNode);
             }
         } catch (final Exception e) {
@@ -80,21 +80,16 @@ public class Credentials {
         return null;
     }
 
-    public ObjectNode toJson() {
-        return toJson(new ObjectMapper());
-    }
-
-    public ObjectNode toJson(final ObjectMapper mapper) {
+    public boolean toJsonNode(final ObjectNode node) {
         try {
-            final ObjectNode node = mapper.createObjectNode();
             node.put("password", mPassword);
             node.put("salt", mSalt);
             node.put("clientId", mClientId);
             node.put("clientName", mClientName);
-            return node;
+            return true;
         } catch (final Exception e) {
-            LOG.error("toJson", e);
-            return null;
+            LOG.error("toJsonNode", e);
+            return false;
         }
     }
 
@@ -120,7 +115,7 @@ public class Credentials {
         try {
             final JsonNode jsonCredentials = mapper.readTree(jsonCredentialsString);
             if (jsonCredentials != null && jsonCredentials.isObject()) {
-                return fromJson(jsonCredentials);
+                return fromJsonNode(jsonCredentials);
             } else {
                 LOG.error("fromJsonString: Not a json object");
             }
@@ -130,11 +125,7 @@ public class Credentials {
         return null;
     }
 
-    public static Credentials fromJson(final JsonNode jsonCredentials) {
-        return fromJson(jsonCredentials, new ObjectMapper());
-    }
-
-    public static Credentials fromJson(final JsonNode jsonCredentials, final ObjectMapper mapper) {
+    public static Credentials fromJsonNode(final JsonNode jsonCredentials) {
         final JsonNode clientIdNode = jsonCredentials.get("clientId");
         if (clientIdNode == null) {
             LOG.error("Missing clientId node");

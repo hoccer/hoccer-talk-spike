@@ -5,7 +5,11 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.crypto.CryptoJSON;
+import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
@@ -23,9 +27,14 @@ public class CredentialExportService extends IntentService {
 
     public static final String CREDENTIALS_CONTENT_TYPE = "credentials";
 
+    public static final String CREDENTIALS_FIELD_NAME = "credentials";
+
+    public static final String CONTACT_COUNT_FIELD_NAME = "contact_count";
+
+    public static final String PAYLOAD_CHARSET = "UTF-8";
+
     public CredentialExportService() {
         super("DataExportService");
-
     }
 
     @Override
@@ -49,13 +58,45 @@ public class CredentialExportService extends IntentService {
         try {
             LOG.info("Exporting credentials");
 
-            final Credentials credentials = XoApplication.getXoClient().exportCredentials();
-            final byte[] encryptedCredentials = credentials.toEncryptedBytes(CREDENTIALS_ENCRYPTION_PASSWORD);
-            final Bundle bundle = new Bundle();
-            bundle.putByteArray(EXTRA_RESULT_CREDENTIALS_JSON, encryptedCredentials);
-            resultReceiver.send(Activity.RESULT_OK, bundle);
+            final byte[] payload = createPayload();
+            if (payload != null) {
+                final Bundle bundle = new Bundle();
+                bundle.putByteArray(EXTRA_RESULT_CREDENTIALS_JSON, payload);
+
+                // send payload
+                resultReceiver.send(Activity.RESULT_OK, bundle);
+                return;
+            }
         } catch (final Exception e) {
-            resultReceiver.send(Activity.RESULT_CANCELED, null);
+            LOG.error("exportCredentials", e);
         }
+
+        // send failure result
+        resultReceiver.send(Activity.RESULT_CANCELED, null);
+    }
+
+    private static byte[] createPayload() {
+        try {
+            final Credentials credentials = XoApplication.getXoClient().exportCredentials();
+
+            final ObjectMapper mapper = new ObjectMapper();
+            final ObjectNode rootNode = mapper.createObjectNode();
+
+            // write credentials
+            final ObjectNode credentialNode = rootNode.putObject(CREDENTIALS_FIELD_NAME);
+            credentials.toJsonNode(credentialNode);
+
+            // write firend contact and joined group count
+            final int clients = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
+            final int groups = XoApplication.getXoClient().getDatabase().findGroupContactsByState(TalkGroupMember.STATE_JOINED).size();
+            rootNode.put(CONTACT_COUNT_FIELD_NAME, clients + groups);
+
+            final String payloadString = mapper.writeValueAsString(rootNode);
+            return CryptoJSON.encrypt(payloadString.getBytes(PAYLOAD_CHARSET), CREDENTIALS_ENCRYPTION_PASSWORD, CREDENTIALS_CONTENT_TYPE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

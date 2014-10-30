@@ -8,11 +8,12 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.crypto.CryptoJSON;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
-import sun.rmi.runtime.Log;
 
 import java.util.concurrent.TimeUnit;
 
@@ -28,9 +29,10 @@ public class CredentialImporter {
     /**
      * Checks wether the package defined in the configuraiton is installed on the device and support the
      * credential transfer.
-     * @see XoApplication#getConfiguration()#getCredentialImportPackage()
+     *
      * @param context Used to retrieve package information.
      * @return Wether the package is installed or not.
+     * @see XoApplication#getConfiguration()#getCredentialImportPackage()
      */
     public static boolean isCredentialImportPackageInstalled(final Context context) {
         return getCredentialImportPackageInfo(context) != null;
@@ -39,13 +41,14 @@ public class CredentialImporter {
     /**
      * Checks wether the package defined in the configuraiton is installed on the device and support the
      * credential transfer.
-     * @see XoApplication#getConfiguration()#getCredentialImportPackage()
+     *
      * @param context Used to retrieve package information.
      * @return Wether credential import is supported by the credential import package.
+     * @see XoApplication#getConfiguration()#getCredentialImportPackage()
      */
     public static boolean isCredentialImportSupported(final Context context) {
         final PackageInfo packageInfo = getCredentialImportPackageInfo(context);
-        if(packageInfo == null) {
+        if (packageInfo == null) {
             return false;
         }
 
@@ -57,13 +60,15 @@ public class CredentialImporter {
      * Abstract callback class called upon success or failure of the credential import process.
      */
     public interface CredentialImportListener {
-        public abstract void onSuccess();
+        public abstract void onSuccess(Credentials credentials, int contactCount);
+
         public abstract void onFailure();
     }
 
     /**
      * Initiates the import process and returns immediately.
-     * @param context Used to send the import broadcast to the import package.
+     *
+     * @param context  Used to send the import broadcast to the import package.
      * @param listener Gets called on success or failure.
      */
 
@@ -82,6 +87,7 @@ public class CredentialImporter {
 
     /**
      * Returns the package info of the import package if it is found.
+     *
      * @param context Used to retrieve package information.
      * @return The package info instance or null.
      */
@@ -114,7 +120,7 @@ public class CredentialImporter {
             XoApplication.getExecutor().schedule(new Runnable() {
                 @Override
                 public void run() {
-                    if(!mAnswerReceived) {
+                    if (!mAnswerReceived) {
                         mAnswerReceived = true;
                         mListener.onFailure();
                     }
@@ -127,27 +133,44 @@ public class CredentialImporter {
             super.onReceiveResult(resultCode, resultData);
 
             // handle first answer only and avoid execution after timeout
-            if(!mAnswerReceived) {
+            if (!mAnswerReceived) {
                 mAnswerReceived = true;
 
                 if (resultCode == Activity.RESULT_OK && resultData != null) {
                     try {
                         final byte[] encryptedCredentials = resultData.getByteArray(CredentialExportService.EXTRA_RESULT_CREDENTIALS_JSON);
-                        final Credentials credentials = Credentials.fromEncryptedBytes(encryptedCredentials, CredentialExportService.CREDENTIALS_ENCRYPTION_PASSWORD);
-                        XoApplication.getXoClient().importCredentials(credentials);
+                        final byte[] credentialsBytes = CryptoJSON.decrypt(encryptedCredentials, CredentialExportService.CREDENTIALS_ENCRYPTION_PASSWORD, CredentialExportService.CREDENTIALS_CONTENT_TYPE);
+
+                        final ObjectMapper objectMapper = new ObjectMapper();
+                        final JsonNode rootNode = objectMapper.readTree(new String(credentialsBytes, CredentialExportService.PAYLOAD_CHARSET));
+
+                        final JsonNode credentialsNode = rootNode.get(CredentialExportService.CREDENTIALS_FIELD_NAME);
+                        if (credentialsNode == null) {
+                            mListener.onFailure();
+                            return;
+                        }
+
+                        final Credentials credentials = Credentials.fromJsonNode(credentialsNode);
+                        if (credentials == null) {
+                            mListener.onFailure();
+                            return;
+                        }
+
+                        final JsonNode contactCountNode = rootNode.get(CredentialExportService.CONTACT_COUNT_FIELD_NAME);
+                        if (contactCountNode == null) {
+                            mListener.onFailure();
+                            return;
+                        }
+
+                        final int contactCount = contactCountNode.asInt();
+
+                        mListener.onSuccess(credentials, contactCount);
+                        return;
                     } catch (final Exception e) {
                         LOG.error("onReceiveResult", e);
                     }
-
-                    // TODO renew srp secret
-
-                    mListener.onSuccess();
-                } else {
-
-                    // TODO handle error case gracefully
-
-                    mListener.onFailure();
                 }
+                mListener.onFailure();
             }
         }
     }
