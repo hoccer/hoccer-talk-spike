@@ -30,6 +30,8 @@ public class CredentialImporter {
 
     private static final int SUPPORTED_EXPORT_VERSION = 95;
 
+    public static final String CHANGE_SRP_SECRET_PROPERTY = "change_srp_secret";
+
     /**
      * Checks wether the package defined in the configuraiton is installed on the device and support the
      * credential transfer.
@@ -204,7 +206,7 @@ public class CredentialImporter {
     public static void setSrpChangeOnNextLoginFlag(final Context context) {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         final SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("change_srp_secret", true);
+        editor.putBoolean(CHANGE_SRP_SECRET_PROPERTY, true);
         editor.apply();
     }
 }
