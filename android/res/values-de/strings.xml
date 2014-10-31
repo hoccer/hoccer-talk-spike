@@ -431,6 +431,9 @@
     <string name="import_credentials">Profil importieren</string>
     <string name="new_profile">Neues Profil</string>
     <string name="reading_profile_data">Reading profile data ..</string>
+    <string name="existing_hoccer_xo">Hey, wir haben eine existierende Hoccer XO Version gefunden.</string>
+    <string name="update_and_import_profile">Du kannst dein bestehendes Profil weiterverwenden, aber dazu musst du erst Hoccer XO aktualisieren.</string>
+    <string name="update_hoccer_xo">Update Hoccer XO</string>
 
     <plurals name="message_count">
         <item quantity="one">1 Nachricht</item>
