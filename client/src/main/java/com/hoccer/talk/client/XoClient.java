@@ -465,20 +465,19 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      */
     public boolean importCredentials(final Credentials newCredentials) {
         try {
-            final TalkClientContact selfContact = mSelfContact;
-            final TalkClientSelf self = selfContact.getSelf();
+            final TalkClientSelf self = mSelfContact.getSelf();
             self.provideCredentials(newCredentials.getSalt(), newCredentials.getPassword());
 
             // update client id
-            selfContact.updateSelfRegistered(newCredentials.getClientId());
+            mSelfContact.updateSelfRegistered(newCredentials.getClientId());
 
             // update client name
-            selfContact.getClientPresence().setClientName(newCredentials.getClientName());
+            mSelfContact.getClientPresence().setClientName(newCredentials.getClientName());
 
             // save credentials and contact
             mDatabase.saveCredentials(self);
-            mDatabase.savePresence(selfContact.getClientPresence());
-            mDatabase.saveContact(selfContact);
+            mDatabase.savePresence(mSelfContact.getClientPresence());
+            mDatabase.saveContact(mSelfContact);
 
             // remove contacts + groups from DB
             mDatabase.eraseAllRelationships();
@@ -3090,7 +3089,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             if (key != null) {
                 try {
                     mDatabase.savePublicKey(key);
-                    mDatabase.refreshClientContact(client);
                     client.setPublicKey(key);
                     mDatabase.saveContact(client);
                 } catch (SQLException e) {

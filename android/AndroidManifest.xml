@@ -3,7 +3,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.hoccer.xo.release"
 
-          android:versionCode="94"
+          android:versionCode="95"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -193,8 +193,7 @@
         <activity
                 android:name="com.hoccer.xo.android.activity.RegistrationActivity"
                 android:label="@string/actionbar_default_title"
-                android:screenOrientation="portrait"
-                android:windowSoftInputMode="stateHidden">
+                android:screenOrientation="portrait">
         </activity>
 
         <!-- Single Profile activity -->

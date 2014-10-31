@@ -22,11 +22,11 @@ public class SrpChangeListener implements IXoStateListener {
         // if we just successfully logged in
         if (state == XoClient.STATE_SYNCING) {
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-            final boolean changeSrpSecret = preferences.getBoolean("change_srp_secret", false);
+            final boolean changeSrpSecret = preferences.getBoolean(CredentialImporter.CHANGE_SRP_SECRET_PROPERTY, false);
             if (changeSrpSecret) {
                 if(client.changeSrpSecret()) {
                     final SharedPreferences.Editor editor = preferences.edit();
-                    editor.putBoolean("change_srp_secret", false);
+                    editor.putBoolean(CredentialImporter.CHANGE_SRP_SECRET_PROPERTY, false);
                     editor.apply();
 
                     // send disconnect request to import package client

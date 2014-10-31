@@ -191,9 +191,17 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
                 LOG.error("IOException caused by setPreviewDisplay()", e);
             }
 
-            Camera.Parameters parameters = mCamera.getParameters();
-            parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
-            mCamera.setParameters(parameters);
+            try {
+                Camera.Parameters parameters = mCamera.getParameters();
+                parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+                mCamera.setParameters(parameters);
+            } catch (RuntimeException e) {
+                // This is known to happen on Nexus 5 when the soft keyboard comes up.
+                // Ignoring the exception means the preview size will not be correct,
+                // i.e. the camera image will be stretched. Other than that, there is
+                // no harm in ignoring this exception.
+                LOG.warn("Error setting camera parameters", e);
+            }
 
             if (mIsPortraitModeEnabled) {
                 mCamera.setDisplayOrientation(90);
