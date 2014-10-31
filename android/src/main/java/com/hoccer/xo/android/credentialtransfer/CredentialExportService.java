@@ -15,7 +15,7 @@ import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
 /**
- * Exports the credentials.
+ * Exports the credentials and additional account information.
  */
 public class CredentialExportService extends IntentService {
 
@@ -23,15 +23,17 @@ public class CredentialExportService extends IntentService {
 
     public static final String INTENT_ACTION_FILTER = "com.hoccer.android.action.EXPORT_DATA";
 
-    public static final String EXTRA_RESULT_CREDENTIALS_JSON = "credentialsJson";
+    public static final String EXTRA_RECEIVER = "receiver";
+
+    public static final String EXTRA_PAYLOAD = "payload";
+
+    public static final String CREDENTIALS_NODE_NAME = "credentials";
+
+    public static final String CONTACT_COUNT_FIELD_NAME = "contact_count";
 
     public static final String CREDENTIALS_ENCRYPTION_PASSWORD = "4brj3paAr8D2Qvgw";
 
-    public static final String CREDENTIALS_CONTENT_TYPE = "credentials";
-
-    public static final String CREDENTIALS_FIELD_NAME = "credentials";
-
-    public static final String CONTACT_COUNT_FIELD_NAME = "contact_count";
+    public static final String CREDENTIALS_CONTENT_TYPE = "export_payload";
 
     public static final String PAYLOAD_CHARSET = "UTF-8";
 
@@ -41,36 +43,36 @@ public class CredentialExportService extends IntentService {
 
     @Override
     protected void onHandleIntent(final Intent intent) {
-        if (!intent.hasExtra("receiver")) {
+        if (!intent.hasExtra(EXTRA_RECEIVER)) {
             LOG.warn("Export request received from '" + intent.getPackage() + "' but no receiver provided.");
             return;
         }
 
-        final ResultReceiver resultReceiver = intent.getParcelableExtra("receiver");
+        final ResultReceiver resultReceiver = intent.getParcelableExtra(EXTRA_RECEIVER);
 
         if (resultReceiver == null) {
             LOG.warn("Export request received from '" + intent.getPackage() + "' but receiver provided is null.");
             return;
         }
 
-        exportCredentials(resultReceiver);
+        exportPayload(resultReceiver);
     }
 
-    private static void exportCredentials(final ResultReceiver resultReceiver) {
+    private static void exportPayload(final ResultReceiver resultReceiver) {
         try {
-            LOG.info("Exporting credentials");
+            LOG.info("Exporting payload");
 
             final byte[] payload = createPayload();
             if (payload != null) {
                 final Bundle bundle = new Bundle();
-                bundle.putByteArray(EXTRA_RESULT_CREDENTIALS_JSON, payload);
+                bundle.putByteArray(EXTRA_PAYLOAD, payload);
 
                 // send payload
                 resultReceiver.send(Activity.RESULT_OK, bundle);
                 return;
             }
         } catch (final Exception e) {
-            LOG.error("exportCredentials", e);
+            LOG.error("exportPayload", e);
         }
 
         // send failure result
@@ -85,7 +87,7 @@ public class CredentialExportService extends IntentService {
                 final ObjectNode rootNode = mapper.createObjectNode();
 
                 // write credentials
-                final ObjectNode credentialNode = rootNode.putObject(CREDENTIALS_FIELD_NAME);
+                final ObjectNode credentialNode = rootNode.putObject(CREDENTIALS_NODE_NAME);
                 credentials.toJsonNode(credentialNode);
 
                 // write friend contact and joined group count
