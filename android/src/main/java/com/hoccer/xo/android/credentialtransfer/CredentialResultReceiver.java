@@ -51,39 +51,59 @@ public class CredentialResultReceiver extends ResultReceiver {
 
             if (resultCode == Activity.RESULT_OK && resultData != null) {
                 try {
-                    final byte[] encryptedPayload = resultData.getByteArray(CredentialExportService.EXTRA_PAYLOAD);
-                    final byte[] payloadBytes = CryptoJSON.decrypt(encryptedPayload, CredentialExportService.CREDENTIALS_ENCRYPTION_PASSWORD, CredentialExportService.CREDENTIALS_CONTENT_TYPE);
+                    final byte[] payloadBytes = decryptPayload(resultData);
 
                     final ObjectMapper objectMapper = new ObjectMapper();
                     final JsonNode rootNode = objectMapper.readTree(new String(payloadBytes, CredentialExportService.PAYLOAD_CHARSET));
 
-                    final JsonNode credentialsNode = rootNode.get(CredentialExportService.CREDENTIALS_NODE_NAME);
-                    if (credentialsNode == null) {
+                    try {
+                        JsonNode contactCountNode = getContactCount(rootNode);
+                        JsonNode credentialsNode = getCredentialsNode(rootNode);
+                        Credentials credentials = getCredentials(credentialsNode);
+
+                        mListener.onSuccess(credentials, contactCountNode.asInt());
+                        return;
+                    } catch (JsonNodeNotAvailableException e) {
                         mListener.onFailure();
                         return;
                     }
-
-                    final Credentials credentials = Credentials.fromJsonNode(credentialsNode);
-                    if (credentials == null) {
-                        mListener.onFailure();
-                        return;
-                    }
-
-                    final JsonNode contactCountNode = rootNode.get(CredentialExportService.CONTACT_COUNT_FIELD_NAME);
-                    if (contactCountNode == null) {
-                        mListener.onFailure();
-                        return;
-                    }
-
-                    final int contactCount = contactCountNode.asInt();
-
-                    mListener.onSuccess(credentials, contactCount);
-                    return;
                 } catch (final Exception e) {
                     LOG.error("onReceiveResult", e);
                 }
             }
             mListener.onFailure();
         }
+    }
+
+    private JsonNode getContactCount(JsonNode rootNode) throws JsonNodeNotAvailableException {
+        final JsonNode contactCountNode = rootNode.get(CredentialExportService.CONTACT_COUNT_FIELD_NAME);
+        if (contactCountNode == null) {
+            throw new JsonNodeNotAvailableException();
+        }
+        return contactCountNode;
+    }
+
+    private Credentials getCredentials(JsonNode credentialsNode) throws JsonNodeNotAvailableException {
+        final Credentials credentials = Credentials.fromJsonNode(credentialsNode);
+        if (credentials == null) {
+            throw new JsonNodeNotAvailableException();
+        }
+        return credentials;
+    }
+
+    private JsonNode getCredentialsNode(JsonNode rootNode) throws JsonNodeNotAvailableException {
+        final JsonNode credentialsNode = rootNode.get(CredentialExportService.CREDENTIALS_NODE_NAME);
+        if (credentialsNode == null) {
+            throw new JsonNodeNotAvailableException();
+        }
+        return credentialsNode;
+    }
+
+    private byte[] decryptPayload(Bundle resultData) throws Exception {
+        final byte[] encryptedPayload = resultData.getByteArray(CredentialExportService.EXTRA_PAYLOAD);
+        return CryptoJSON.decrypt(encryptedPayload, CredentialExportService.CREDENTIALS_ENCRYPTION_PASSWORD, CredentialExportService.CREDENTIALS_CONTENT_TYPE);
+    }
+
+    private class JsonNodeNotAvailableException extends Throwable {
     }
 }
