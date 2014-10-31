@@ -347,6 +347,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         if (create && contact == null) {
             contact = new TalkClientContact(TalkClientContact.TYPE_CLIENT, clientId);
             mClientContacts.create(contact);
+            contact = findContactById(contact.getClientContactId());
         }
 
         return contact;

@@ -3090,7 +3090,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             if (key != null) {
                 try {
                     mDatabase.savePublicKey(key);
-                    mDatabase.refreshClientContact(client);
                     client.setPublicKey(key);
                     mDatabase.saveContact(client);
                 } catch (SQLException e) {
