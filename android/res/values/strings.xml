@@ -455,6 +455,9 @@
     <string name="import_credentials">Import Credentials</string>
     <string name="new_profile">New Profile</string>
     <string name="reading_profile_data">Reading profile data ..</string>
+    <string name="existing_hoccer_xo">Hey, we\'ve found an existing Hoccer XO version.</string>
+    <string name="update_and_import_profile">You can import your old Profile, but you have to update Hoccer XO first.</string>
+    <string name="update_hoccer_xo">Update Hoccer XO</string>
 
     <plurals name="message_count">
         <item quantity="one">1 Message</item>
