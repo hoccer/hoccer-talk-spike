@@ -28,6 +28,8 @@ public class CredentialImporter {
 
     private static final int CREDENTIAL_RECEIVE_TIMEOUT_SECONDS = 15;
 
+    private static final int SUPPORTED_EXPORT_VERSION = 95;
+
     /**
      * Checks wether the package defined in the configuraiton is installed on the device and support the
      * credential transfer.
@@ -55,7 +57,7 @@ public class CredentialImporter {
         }
 
         final int versionCode = packageInfo.versionCode;
-        return versionCode >= 89;
+        return versionCode >= SUPPORTED_EXPORT_VERSION;
     }
 
     /*
