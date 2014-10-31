@@ -97,7 +97,7 @@ public class CredentialExportService extends IntentService {
                 return CryptoJSON.encrypt(payloadString.getBytes(PAYLOAD_CHARSET), CREDENTIALS_ENCRYPTION_PASSWORD, CREDENTIALS_CONTENT_TYPE);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("createPayload", e);
         }
 
         return null;
