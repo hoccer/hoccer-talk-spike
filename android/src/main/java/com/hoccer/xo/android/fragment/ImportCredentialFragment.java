@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.RegistrationActivity;
@@ -57,7 +58,7 @@ public class ImportCredentialFragment extends XoFragment {
         mImportButton = (Button) view.findViewById(R.id.btn_import_credentials);
         mNewClientButton = (Button) getView().findViewById(R.id.btn_create_new_client);
 
-        importCredentials();
+        readCredentials();
 
         mImportButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,7 +93,7 @@ public class ImportCredentialFragment extends XoFragment {
 
     }
 
-    private void importCredentials() {
+    private void readCredentials() {
         CredentialImporter.importCredentials(mRegistrationActivity, new CredentialImporter.CredentialImportListener() {
             @Override
             public void onSuccess(final Credentials credentials, final Integer contactCount) {
@@ -115,7 +116,6 @@ public class ImportCredentialFragment extends XoFragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
                         LOG.error("Credentials import failed");
                         mRegistrationActivity.startNewClientRegistration();
                         mProgressLayout.setVisibility(View.GONE);
