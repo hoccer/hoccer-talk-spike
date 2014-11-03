@@ -1,5 +1,6 @@
 package com.hoccer.talk.client;
 
+import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.model.*;
 import com.hoccer.talk.util.WeakListenerArray;
@@ -116,10 +117,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mClientSelfs.createOrUpdate(credentials);
     }
 
-    public void savePresence(TalkPresence presence) throws Exception {
+    public void savePresence(TalkPresence presence) throws NoClientIdInPresenceException, SQLException {
         if (presence.getClientId() == null) {
-            // TODO: create own exception!
-            throw new Exception("null client id");
+            throw new NoClientIdInPresenceException("Client id is null for " + presence);
         }
         mPresences.createOrUpdate(presence);
     }
