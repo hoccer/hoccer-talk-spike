@@ -849,11 +849,6 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public void deleteClientHostInfo(TalkClientHostInfo clientHostInfo) {
-        mClientHostInfos.remove("{clientId: #}", clientHostInfo);
-    }
-
-    @Override
     public List<TalkDatabaseMigration> findDatabaseMigrations() {
         List<TalkDatabaseMigration> res = new ArrayList<TalkDatabaseMigration>();
         Iterator<TalkDatabaseMigration> it =

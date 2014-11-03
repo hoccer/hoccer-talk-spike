@@ -146,8 +146,6 @@ public interface ITalkServerDatabase {
 
     public void saveClientHostInfo(TalkClientHostInfo clientHostInfo);
 
-    public void deleteClientHostInfo(TalkClientHostInfo clientHostInfo);
-
     public List<TalkDatabaseMigration> findDatabaseMigrations();
 
     public void saveDatabaseMigration(TalkDatabaseMigration migration);

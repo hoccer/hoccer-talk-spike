@@ -679,11 +679,6 @@ public class OrmliteDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public void deleteClientHostInfo(TalkClientHostInfo clientHostInfo) {
-        // TODO: implement me properly!
-    }
-
-    @Override
     public List<TalkDatabaseMigration> findDatabaseMigrations() {
         // TODO: implement me properly!
         return null;
