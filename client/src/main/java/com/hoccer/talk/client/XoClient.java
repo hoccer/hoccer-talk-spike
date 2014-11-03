@@ -9,18 +9,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.crypto.AESCryptor;
-import com.hoccer.talk.crypto.CryptoJSON;
 import com.hoccer.talk.crypto.RSACryptor;
 import com.hoccer.talk.model.*;
 import com.hoccer.talk.rpc.ITalkRpcClient;
 import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.srp.SRP6Parameters;
 import com.hoccer.talk.srp.SRP6VerifyingClient;
+import com.hoccer.talk.util.Credentials;
 import com.j256.ormlite.dao.ForeignCollection;
 import de.undercouch.bson4jackson.BsonFactory;
 import org.apache.commons.codec.binary.Base64;
@@ -441,6 +440,92 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         if (mIdleTimeout > 0) {
             return (System.currentTimeMillis() - mLastActivity) > (mIdleTimeout * 1000);
         } else {
+            return false;
+        }
+    }
+
+    /**
+     * Exports the client credentials.
+     */
+    public Credentials exportCredentials() {
+        // return null if this client has never registered
+        if(mSelfContact.getClientId() == null) {
+            return null;
+        }
+
+        final String clientId = mSelfContact.getClientId();
+        final String clientName = mSelfContact.getName();
+        final String password = mSelfContact.getSelf().getSrpSecret();
+        final String salt = mSelfContact.getSelf().getSrpSalt();
+        return new Credentials(clientId, clientName, password, salt);
+    }
+
+    /**
+     * Imports the client credentials.
+     * @note After import the client deletes all contacts and relationsships and reconnects for full sync.
+     */
+    public void importCredentials(final Credentials newCredentials) throws SQLException, NoClientIdInPresenceException {
+            final TalkClientSelf self = mSelfContact.getSelf();
+            self.provideCredentials(newCredentials.getSalt(), newCredentials.getPassword());
+
+            // update client id
+            mSelfContact.updateSelfRegistered(newCredentials.getClientId());
+
+            // update client name
+            mSelfContact.getClientPresence().setClientName(newCredentials.getClientName());
+
+            // save credentials and contact
+            mDatabase.saveCredentials(self);
+            mDatabase.savePresence(mSelfContact.getClientPresence());
+            mDatabase.saveContact(mSelfContact);
+
+            // remove contacts + groups from DB
+            mDatabase.eraseAllRelationships();
+            mDatabase.eraseAllClientContacts();
+            mDatabase.eraseAllGroupMemberships();
+            mDatabase.eraseAllGroupContacts();
+
+            reconnect("Credentials imported.");
+    }
+
+    /**
+     * Requests a new srp secret from the server which should be used from now on.
+     */
+    public boolean changeSrpSecret() {
+        final Digest digest = SRP_DIGEST;
+        final byte[] salt = new byte[digest.getDigestSize()];
+        final byte[] secret = new byte[digest.getDigestSize()];
+        final SRP6VerifierGenerator vg = new SRP6VerifierGenerator();
+
+        vg.init(SRP_PARAMETERS.N, SRP_PARAMETERS.g, digest);
+
+        SRP_RANDOM.nextBytes(salt);
+        SRP_RANDOM.nextBytes(secret);
+
+        final String saltString = new String(Hex.encodeHex(salt));
+        final String secretString = new String(Hex.encodeHex(secret));
+
+        try {
+            final String clientId = mSelfContact.getClientId();
+
+            LOG.debug("Changing srp secret");
+
+            final BigInteger verifier = vg.generateVerifier(salt, clientId.getBytes(), secret);
+
+            mServerRpc.srpChangeVerifier(verifier.toString(16), new String(Hex.encodeHex(salt)));
+
+            mSelfContact.getSelf().provideCredentials(saltString, secretString);
+
+            try {
+                mDatabase.saveCredentials(mSelfContact.getSelf());
+            } catch (SQLException e) {
+                LOG.error("SQL error on saving new srp secret", e);
+            }
+
+            LOG.debug("Srp verifier changed");
+            return true;
+        } catch (JsonRpcClientException e) {
+            LOG.error("Error while performing srp secret change request: ", e);
             return false;
         }
     }
@@ -1996,82 +2081,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     }
 
-    private byte[] extractCredentialsAsJson(TalkClientContact selfContact) throws RuntimeException {
-        try {
-            String clientId = selfContact.getClientId();
-            TalkClientSelf self = selfContact.getSelf();
-
-            ObjectMapper jsonMapper = new ObjectMapper();
-            ObjectNode rootNode = jsonMapper.createObjectNode();
-            rootNode.put("password", self.getSrpSecret());
-            rootNode.put("salt", self.getSrpSalt());
-            rootNode.put("clientId", clientId);
-            String jsonString = jsonMapper.writeValueAsString(rootNode);
-            return jsonString.getBytes("UTF-8");
-        } catch (Exception e) {
-            LOG.error("decoder exception in extractCredentials", e);
-            throw new RuntimeException("exception during extractCredentials", e);
-        }
-    }
-
-    public byte[] makeEncryptedCredentialsContainer(String containerPassword) throws Exception {
-        byte[] credentials = extractCredentialsAsJson(getSelfContact());
-        byte[] container = CryptoJSON.encryptedContainer(credentials, containerPassword, "credentials");
-        return container;
-    }
-
-    public boolean setEncryptedCredentialsFromContainer(byte[] jsonContainer, String containerPassword) {
-        try {
-            byte[] credentials = CryptoJSON.decryptedContainer(jsonContainer, containerPassword, "credentials");
-            ObjectMapper jsonMapper = new ObjectMapper();
-            JsonNode json = jsonMapper.readTree(credentials);
-            if (json == null || !json.isObject()) {
-                throw new Exception("setEncryptedCredentialsFromContainer: not a json object");
-            }
-            JsonNode password = json.get("password");
-            if (password == null) {
-                throw new Exception("setEncryptedCredentialsFromContainer: missing password");
-            }
-            JsonNode saltNode = json.get("salt");
-            if (saltNode == null) {
-                throw new Exception("setEncryptedCredentialsFromContainer: missing salt");
-            }
-            JsonNode clientIdNode = json.get("clientId");
-            if (clientIdNode == null) {
-                throw new Exception("parseEncryptedContainer: wrong or missing ciphered content");
-            }
-
-            // Update credentials
-            TalkClientSelf self = getSelfContact().getSelf();
-            self.provideCredentials(saltNode.asText(), password.asText());
-
-            // Update client id
-            TalkClientContact selfContact = getSelfContact();
-            selfContact.updateSelfRegistered(clientIdNode.asText());
-
-            mSelfContact = selfContact;
-
-            // save credentials and contact
-            mDatabase.saveCredentials(self);
-            mDatabase.saveContact(selfContact);
-
-            // remove contacts + groups from DB
-            mDatabase.eraseAllRelationships();
-            mDatabase.eraseAllClientContacts();
-            mDatabase.eraseAllGroupMemberships();
-            mDatabase.eraseAllGroupContacts();
-
-            reconnect("Credentials imported.");
-
-            return true;
-        } catch (SQLException sqlException) {
-            LOG.error("setEncryptedCredentialsFromContainer", sqlException);
-        } catch (Exception e) {
-            LOG.error("setEncryptedCredentialsFromContainer", e);
-        }
-        return false;
-    }
-
     private void performLogin(TalkClientContact selfContact) {
         String clientId = selfContact.getClientId();
         LOG.debug("login: attempting login as " + clientId);
@@ -2919,11 +2928,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void updateClientPresence(TalkPresence presence, Set<String> fields) {
         LOG.debug("updateClientPresence(" + presence.getClientId() + ")");
+
+        boolean isNewContact = false;
         TalkClientContact clientContact;
         try {
             clientContact = mDatabase.findContactByClientId(presence.getClientId(), false);
             if (clientContact == null) {
                 clientContact = mDatabase.findContactByClientId(presence.getClientId(), true);
+                isNewContact = true;
             }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -2983,9 +2995,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                requestClientKey(fContact);
+                updateClientKey(fContact);
             }
         });
+        }
+
+        if(isNewContact) {
+            for (final IXoContactListener listener : mContactListeners) {
+                listener.onContactAdded(clientContact);
+            }
         }
 
         for (int i = 0; i < mContactListeners.size(); i++) {
@@ -3042,7 +3060,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return wantDownload;
     }
 
-    private void requestClientKey(TalkClientContact client) {
+    private void updateClientKey(TalkClientContact client) {
         String clientId = client.getClientId();
 
         String currentKeyId = client.getClientPresence().getKeyId();
@@ -3064,8 +3082,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             TalkKey key = mServerRpc.getKey(client.getClientId(), currentKeyId);
             if (key != null) {
                 try {
-                    client.setPublicKey(key);
                     mDatabase.savePublicKey(key);
+                    client.setPublicKey(key);
                     mDatabase.saveContact(client);
                 } catch (SQLException e) {
                     LOG.error("SQL error", e);
@@ -3102,8 +3120,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("SQL error", e);
         }
 
-        for (int i = 0; i < mContactListeners.size(); i++) {
-            IXoContactListener listener = mContactListeners.get(i);
+        for (final IXoContactListener listener : mContactListeners) {
             listener.onClientRelationshipChanged(clientContact);
         }
     }

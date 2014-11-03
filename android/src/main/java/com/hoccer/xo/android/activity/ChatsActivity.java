@@ -32,6 +32,7 @@ import com.hoccer.xo.android.content.contentselectors.VideoSelector;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.util.SharedPreferencesUtils;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -59,7 +60,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     @Override
     protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
+        return new ActivityComponent[]{new MediaPlayerActivityComponent(this)};
     }
 
     @Override
@@ -79,7 +80,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         initViewPager();
         initActionBar();
         determineRegistrationForEnvironmentUpdates();
-        showProfileIfClientIsNotRegistered();
 
         handleIntent(getIntent());
     }
@@ -87,6 +87,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     protected void onResume() {
         super.onResume();
+        showProfileIfClientIsNotRegistered();
         refreshEnvironmentUpdater(false);
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
@@ -117,11 +118,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             handleTokenPairingIntent(intent);
-        }
-        else if (Intent.ACTION_SEND.equals(intent.getAction())) {
+        } else if (Intent.ACTION_SEND.equals(intent.getAction())) {
             handleShareIntent(intent);
-        }
-        else if (intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
+        } else if (intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             handleContactIdIntent(intent);
         }
     }
@@ -178,11 +177,14 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void showProfileIfClientIsNotRegistered() {
-        if (!getXoClient().isRegistered()) {
-            Intent intent = new Intent(this, SingleProfileActivity.class);
-            intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CREATE_SELF, true);
+        if (!hasUserConfirmedProfile()) {
+            Intent intent = new Intent(this, RegistrationActivity.class);
             startActivity(intent);
         }
+    }
+
+    private boolean hasUserConfirmedProfile() {
+        return SharedPreferencesUtils.hasUserConfirmedProfile(this);
     }
 
     private void registerListeners() {
