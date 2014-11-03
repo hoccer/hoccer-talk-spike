@@ -459,6 +459,11 @@
     <string name="update_and_import_profile">You can import your old Profile, but you have to update Hoccer XO first.</string>
     <string name="update_hoccer_xo">Update Hoccer XO</string>
 
+    <plurals name="contact_count">
+        <item quantity="one">1 Contact</item>
+        <item quantity="other">%d Contacts</item>
+    </plurals>
+
     <plurals name="message_count">
         <item quantity="one">1 Message</item>
         <item quantity="other">%d Messages</item>

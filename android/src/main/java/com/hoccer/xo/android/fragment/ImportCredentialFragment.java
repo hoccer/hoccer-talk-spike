@@ -126,8 +126,10 @@ public class ImportCredentialFragment extends XoFragment {
     }
 
     private void updateView() {
+        String count = getResources().getQuantityString(R.plurals.contact_count, mContactCount, mContactCount);
+        mContactsCountTextView.setText(count);
+
         mUserNameTextView.setText(mCredentials.getClientName());
-        mContactsCountTextView.setText(mContactCount.toString());
         mProgressLayout.setVisibility(View.GONE);
         mXoProfileLayout.setVisibility(View.VISIBLE);
         mImportProfileTextView.setVisibility(View.VISIBLE);
