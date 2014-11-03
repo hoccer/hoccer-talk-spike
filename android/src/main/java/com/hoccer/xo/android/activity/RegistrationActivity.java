@@ -27,15 +27,14 @@ public class RegistrationActivity extends XoActivity {
     protected void onResume() {
         super.onResume();
 
-        // check if we can potentially import credentials
         if (CredentialImporter.isCredentialImportPackageInstalled(this)) {
-            setupImportFragment();
+            startImportFragment();
         } else {
             startNewClientRegistration();
         }
     }
 
-    private void setupImportFragment() {
+    private void startImportFragment() {
         if (CredentialImporter.isCredentialImportSupported(this)) {
             showCredentialImportFragment();
         } else {
