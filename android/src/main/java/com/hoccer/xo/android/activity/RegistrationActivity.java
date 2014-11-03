@@ -65,6 +65,6 @@ public class RegistrationActivity extends XoActivity {
 
     @Override
     public void onBackPressed() {
-        // do nothing if back is pressed
+        // do nothing if back is pressed, because we want to avoid immediate client registration
     }
 }
