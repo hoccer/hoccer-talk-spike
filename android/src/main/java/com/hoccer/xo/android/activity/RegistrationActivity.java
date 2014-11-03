@@ -2,6 +2,7 @@ package com.hoccer.xo.android.activity;
 
 import android.content.Intent;
 import android.support.v4.app.FragmentTransaction;
+import android.view.Menu;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
 import com.hoccer.xo.android.fragment.ImportCredentialFragment;
@@ -32,6 +33,11 @@ public class RegistrationActivity extends XoActivity {
         } else {
             startNewClientRegistration();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return false;
     }
 
     private void startImportFragment() {
