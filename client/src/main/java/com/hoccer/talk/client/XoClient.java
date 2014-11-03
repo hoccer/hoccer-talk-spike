@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.client.model.*;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.crypto.RSACryptor;
@@ -463,8 +464,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      * Imports the client credentials.
      * @note After import the client deletes all contacts and relationsships and reconnects for full sync.
      */
-    public boolean importCredentials(final Credentials newCredentials) {
-        try {
+    public void importCredentials(final Credentials newCredentials) throws SQLException, NoClientIdInPresenceException {
             final TalkClientSelf self = mSelfContact.getSelf();
             self.provideCredentials(newCredentials.getSalt(), newCredentials.getPassword());
 
@@ -486,12 +486,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mDatabase.eraseAllGroupContacts();
 
             reconnect("Credentials imported.");
-
-            return true;
-        } catch (final Exception e) {
-            LOG.error("importCredentials", e);
-        }
-        return false;
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.RegistrationActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
+import com.hoccer.xo.android.util.SharedPreferencesUtils;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -73,7 +76,11 @@ public class ImportCredentialFragment extends XoFragment {
 //                    CredentialImporter.setSrpChangeOnNextLoginFlag(mRegistrationActivity);
 
                     // import new credentials
-                    XoApplication.getXoClient().importCredentials(mCredentials);
+                    try {
+                        XoApplication.getXoClient().importCredentials(mCredentials);
+                    } catch (Exception e) {
+                        LOG.error("Importing credentials failed.", e);
+                    }
 
                     LOG.info("Credentials imported successfully");
                     getActivity().finish();

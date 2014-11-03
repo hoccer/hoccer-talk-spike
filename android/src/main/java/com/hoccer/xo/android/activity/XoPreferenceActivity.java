@@ -12,6 +12,7 @@ import android.os.Message;
 import android.preference.*;
 import android.view.*;
 import android.widget.Toast;
+import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -271,28 +272,30 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void importCredentials(final File credentialsFile, final String password) {
-
         try {
-            final FileInputStream fileInputStream = new FileInputStream(XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);
-
-            final byte[] credentialsData = new byte[(int) credentialsFile.length()];
-            fileInputStream.read(credentialsData);
-
-            final Credentials credentials = Credentials.fromEncryptedBytes(credentialsData, password);
-            final boolean result = XoApplication.getXoClient().importCredentials(credentials);
-            if (result) {
-                Toast.makeText(this, R.string.import_credentials_success, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, R.string.import_credentials_failure, Toast.LENGTH_LONG).show();
-            }
-
+            final Credentials credentials = readCredentialsTransferFile(credentialsFile, password);
+            XoApplication.getXoClient().importCredentials(credentials);
+            Toast.makeText(this, R.string.import_credentials_success, Toast.LENGTH_LONG).show();
         } catch (FileNotFoundException e) {
             LOG.error("Error while importing credentials", e);
             Toast.makeText(this, R.string.cant_find_credentials, Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             LOG.error("Error while importing credentials", e);
             Toast.makeText(this, R.string.import_credentials_failure, Toast.LENGTH_LONG).show();
+        } catch (SQLException e) {
+            LOG.error("Error while importing credentials", e);
+            e.printStackTrace();
+        } catch (NoClientIdInPresenceException e) {
+            LOG.error("Error while importing credentials", e);
+            e.printStackTrace();
         }
+    }
+
+    private Credentials readCredentialsTransferFile(File credentialsFile, String password) throws IOException {
+        final FileInputStream fileInputStream = new FileInputStream(XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);
+        final byte[] credentialsData = new byte[(int) credentialsFile.length()];
+        fileInputStream.read(credentialsData);
+        return Credentials.fromEncryptedBytes(credentialsData, password);
     }
 
     private void doExportCredentials() {
