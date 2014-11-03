@@ -75,20 +75,17 @@ public class CredentialResultReceiver extends ResultReceiver {
         }
     }
 
+    private byte[] decryptPayload(Bundle resultData) throws Exception {
+        final byte[] encryptedPayload = resultData.getByteArray(CredentialExportService.EXTRA_PAYLOAD);
+        return CryptoJSON.decrypt(encryptedPayload, CredentialExportService.CREDENTIALS_ENCRYPTION_PASSWORD, CredentialExportService.CREDENTIALS_CONTENT_TYPE);
+    }
+
     private JsonNode getContactCount(JsonNode rootNode) throws JsonNodeNotAvailableException {
         final JsonNode contactCountNode = rootNode.get(CredentialExportService.CONTACT_COUNT_FIELD_NAME);
         if (contactCountNode == null) {
             throw new JsonNodeNotAvailableException();
         }
         return contactCountNode;
-    }
-
-    private Credentials getCredentials(JsonNode credentialsNode) throws JsonNodeNotAvailableException {
-        final Credentials credentials = Credentials.fromJsonNode(credentialsNode);
-        if (credentials == null) {
-            throw new JsonNodeNotAvailableException();
-        }
-        return credentials;
     }
 
     private JsonNode getCredentialsNode(JsonNode rootNode) throws JsonNodeNotAvailableException {
@@ -99,11 +96,13 @@ public class CredentialResultReceiver extends ResultReceiver {
         return credentialsNode;
     }
 
-    private byte[] decryptPayload(Bundle resultData) throws Exception {
-        final byte[] encryptedPayload = resultData.getByteArray(CredentialExportService.EXTRA_PAYLOAD);
-        return CryptoJSON.decrypt(encryptedPayload, CredentialExportService.CREDENTIALS_ENCRYPTION_PASSWORD, CredentialExportService.CREDENTIALS_CONTENT_TYPE);
+    private Credentials getCredentials(JsonNode credentialsNode) throws JsonNodeNotAvailableException {
+        final Credentials credentials = Credentials.fromJsonNode(credentialsNode);
+        if (credentials == null) {
+            throw new JsonNodeNotAvailableException();
+        }
+        return credentials;
     }
 
-    private class JsonNodeNotAvailableException extends Throwable {
-    }
+    private class JsonNodeNotAvailableException extends Throwable {}
 }
