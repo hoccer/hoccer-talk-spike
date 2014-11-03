@@ -78,6 +78,7 @@ public class ImportCredentialFragment extends XoFragment {
                     // import new credentials
                     try {
                         XoApplication.getXoClient().importCredentials(mCredentials);
+                        saveUserHasConfirmedProfile();
                     } catch (Exception e) {
                         LOG.error("Importing credentials failed.", e);
                     }
@@ -98,6 +99,10 @@ public class ImportCredentialFragment extends XoFragment {
             }
         });
 
+    }
+
+    private void saveUserHasConfirmedProfile() {
+        SharedPreferencesUtils.saveUserHasConfirmedProfile(getActivity());
     }
 
     private void readCredentials() {
