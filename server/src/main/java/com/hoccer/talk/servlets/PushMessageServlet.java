@@ -34,7 +34,8 @@ public class PushMessageServlet extends HttpServlet {
             List<PushMessageJson> messages = mObjectMapper.readValue(request.getReader(), type);
 
             for (PushMessageJson message : messages) {
-                submitPushMessage(mDatabase, message);
+                int count = submitPushMessage(mDatabase, message);
+                response.getWriter().println(count + " clients (" + message.language + ", " + message.clientName + ")");
             }
 
             response.setStatus(200);
@@ -44,14 +45,19 @@ public class PushMessageServlet extends HttpServlet {
         }
     }
 
-    private void submitPushMessage(ITalkServerDatabase database, PushMessageJson message) {
+    private int submitPushMessage(ITalkServerDatabase database, PushMessageJson message) {
+        int count = 0;
+
         for (TalkClient client : database.findAllClients()) {
             TalkClientHostInfo info = database.findClientHostInfoForClient(client.getClientId());
 
             if (shouldClientReceiveMessage(info, message)) {
                 mServer.getPushAgent().submitSystemMessage(client, message.message);
+                count += 1;
             }
         }
+
+        return count;
     }
 
     private boolean shouldClientReceiveMessage(TalkClientHostInfo hostInfo, PushMessageJson message) {
