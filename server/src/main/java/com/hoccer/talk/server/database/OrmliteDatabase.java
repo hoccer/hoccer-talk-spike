@@ -674,6 +674,12 @@ public class OrmliteDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkClientHostInfo> findClientHostInfoByClientLanguageAndClientName(String clientLanguage, String clientName) {
+        // TODO: implement me properly!
+        return null;
+    }
+
+    @Override
     public void saveClientHostInfo(TalkClientHostInfo clientHostInfo) {
         // TODO: implement me properly!
     }

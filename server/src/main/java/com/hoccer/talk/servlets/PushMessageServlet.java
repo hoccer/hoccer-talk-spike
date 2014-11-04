@@ -6,12 +6,14 @@ import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkClientHostInfo;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
+import org.apache.commons.collections4.CollectionUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PushMessageServlet extends HttpServlet {
@@ -46,23 +48,22 @@ public class PushMessageServlet extends HttpServlet {
     }
 
     private int submitPushMessage(ITalkServerDatabase database, PushMessageJson message) {
-        int count = 0;
+        List<TalkClientHostInfo> hostInfos = mDatabase.findClientHostInfoByClientLanguageAndClientName(message.language, message.clientName);
+        List<TalkClient> clients = getClients(hostInfos);
 
-        for (TalkClient client : database.findAllClients()) {
-            TalkClientHostInfo info = database.findClientHostInfoForClient(client.getClientId());
-
-            if (shouldClientReceiveMessage(info, message)) {
-                mServer.getPushAgent().submitSystemMessage(client, message.message);
-                count += 1;
-            }
-        }
-
-        return count;
+        mServer.getPushAgent().submitSystemMessage(clients, message.message);
+        return clients.size();
     }
 
-    private boolean shouldClientReceiveMessage(TalkClientHostInfo hostInfo, PushMessageJson message) {
-        return hostInfo.getClientLanguage().equals(message.language) &&
-                hostInfo.getClientName().equals(message.clientName);
+    private List<TalkClient> getClients(List<TalkClientHostInfo> hostInfos) {
+        List<TalkClient> clients = new ArrayList<TalkClient>();
+
+        for (TalkClientHostInfo hostInfo : hostInfos) {
+            TalkClient client = mDatabase.findClientById(hostInfo.getClientId());
+            CollectionUtils.addIgnoreNull(clients, client);
+        }
+
+        return clients;
     }
 
     public static class PushMessageJson {

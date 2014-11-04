@@ -4,6 +4,7 @@ import com.hoccer.talk.model.*;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.mongodb.*;
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -841,6 +842,16 @@ public class JongoDatabase implements ITalkServerDatabase {
     public TalkClientHostInfo findClientHostInfoForClient(String clientId) {
         return mClientHostInfos.findOne("{clientId: #}", clientId)
                 .as(TalkClientHostInfo.class);
+    }
+
+    @Override
+    public List<TalkClientHostInfo> findClientHostInfoByClientLanguageAndClientName(String clientLanguage, String clientName) {
+        Iterator<TalkClientHostInfo> it = mClientHostInfos
+                .find("{clientLanguage: #, clientName: #}", clientLanguage, clientName)
+                .as(TalkClientHostInfo.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
