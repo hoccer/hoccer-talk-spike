@@ -470,6 +470,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             // update client id
             mSelfContact.updateSelfRegistered(newCredentials.getClientId());
+            mSelfContact.getClientPresence().setClientId(newCredentials.getClientId());
 
             // update client name
             mSelfContact.getClientPresence().setClientName(newCredentials.getClientName());
