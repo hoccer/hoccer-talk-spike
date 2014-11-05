@@ -162,6 +162,13 @@
       <version>2.4</version>
     </dependency>
 
+    <!-- apache commons collections -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>${commons-collections.version}</version>
+    </dependency>
+
     <!-- Jetbrain's Nullable/NotNull Annotations -->
     <dependency>
       <groupId>com.intellij</groupId>
