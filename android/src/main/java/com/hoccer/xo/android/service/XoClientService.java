@@ -742,7 +742,7 @@ public class XoClientService extends Service {
     private void createPushMessageNotification(String message) {
         // create intent
         Intent pushMessageIntent = new Intent(this, ChatsActivity.class);
-        pushMessageIntent.putExtra(IntentHelper.EXTRA_PUSH_MESSAGE_, message);
+        pushMessageIntent.putExtra(IntentHelper.EXTRA_PUSH_MESSAGE, message);
 
         // make a pending intent with correct back-stack
         PendingIntent pendingIntent;
