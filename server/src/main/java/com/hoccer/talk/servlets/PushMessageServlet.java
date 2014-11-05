@@ -36,7 +36,7 @@ public class PushMessageServlet extends HttpServlet {
             List<PushMessageJson> messages = mObjectMapper.readValue(request.getReader(), type);
 
             for (PushMessageJson message : messages) {
-                int count = submitPushMessage(mDatabase, message);
+                int count = submitPushMessage(message);
                 response.getWriter().println(count + " clients (" + message.language + ", " + message.clientName + ")");
             }
 
@@ -47,7 +47,7 @@ public class PushMessageServlet extends HttpServlet {
         }
     }
 
-    private int submitPushMessage(ITalkServerDatabase database, PushMessageJson message) {
+    private int submitPushMessage(PushMessageJson message) {
         List<TalkClientHostInfo> hostInfos = mDatabase.findClientHostInfoByClientLanguageAndClientName(message.language, message.clientName);
         List<TalkClient> clients = getClients(hostInfos);
 
