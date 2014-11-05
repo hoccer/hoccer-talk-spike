@@ -48,7 +48,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
 
-    private SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener  = new SharedPreferences.OnSharedPreferenceChangeListener() {
+    private SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals("preference_environment_update")) {
@@ -122,6 +122,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
             handleShareIntent(intent);
         } else if (intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             handleContactIdIntent(intent);
+        } else if (intent.hasExtra(IntentHelper.EXTRA_PUSH_MESSAGE)) {
+            String message = intent.getStringExtra(IntentHelper.EXTRA_PUSH_MESSAGE);
+            XoDialogs.showOkDialog("PushMessage", "", message, this);
         }
     }
 
