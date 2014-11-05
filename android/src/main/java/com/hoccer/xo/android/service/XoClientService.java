@@ -769,7 +769,7 @@ public class XoClientService extends Service {
                 .build();
 
 
-        mNotificationManager.notify(message, NOTIFICATION_PUSH_MESSAGE, notification);
+        mNotificationManager.notify(NOTIFICATION_PUSH_MESSAGE, notification);
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
