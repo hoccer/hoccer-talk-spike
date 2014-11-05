@@ -48,9 +48,6 @@ public class TalkServerConfiguration {
                 9000),
 
         // DATABASE
-        DATABASE_BACKEND(PROPERTY_PREFIX + ".db.backend",
-                PropertyTypes.STRING,
-                "jongo"),
         JONGO_HOST(PROPERTY_PREFIX + ".jongo.host",
                 PropertyTypes.STRING,
                 "localhost"),
@@ -275,7 +272,6 @@ public class TalkServerConfiguration {
         builder.append(MessageFormat.format("\n   * listen address:                       ''{0}''", this.getManagementListenAddress()));
         builder.append(MessageFormat.format("\n   * listen port:                          {0}", Long.toString(getManagementListenPort())));
         builder.append(                     "\n - Database Configuration:");
-        builder.append(MessageFormat.format("\n   * database backend:                     ''{0}''", this.getDatabaseBackend()));
         builder.append(MessageFormat.format("\n   * jongo host:                           ''{0}''", this.getJongoHost()));
         builder.append(MessageFormat.format("\n   * jongo database:                       ''{0}''", this.getJongoDb()));
         builder.append(MessageFormat.format("\n   * jongo connections/host:               {0}", this.getJongoConnectionsPerHost()));
@@ -382,10 +378,6 @@ public class TalkServerConfiguration {
 
     public int getManagementListenPort() {
         return (Integer) ConfigurableProperties.MANAGEMENT_LISTEN_PORT.value;
-    }
-
-    public String getDatabaseBackend() {
-        return (String) ConfigurableProperties.DATABASE_BACKEND.value;
     }
 
     public String getJongoDb() {

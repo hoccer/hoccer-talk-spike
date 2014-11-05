@@ -8,7 +8,6 @@ import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.hoccer.scm.GitInfo;
 import com.hoccer.talk.server.database.JongoDatabase;
-import com.hoccer.talk.server.database.OrmliteDatabase;
 import com.hoccer.talk.server.database.migrations.DatabaseMigrationManager;
 import com.hoccer.talk.server.push.ApnsConfiguration;
 import com.hoccer.talk.server.push.PushAgent;
@@ -21,7 +20,6 @@ import com.hoccer.talk.servlets.ServerInfoServlet;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -55,8 +53,8 @@ public class TalkServerMain {
 
         checkApnsCertificateExpirationStatus(config);
 
-        // select and instantiate database backend
-        ITalkServerDatabase db = initializeDatabase(config);
+        // instantiate database backend
+        ITalkServerDatabase db = new JongoDatabase(config);
         // ensure that the db is actually online and working
         db.reportPing();
 
@@ -215,17 +213,6 @@ public class TalkServerMain {
         }
 
         return configuration;
-    }
-
-    private ITalkServerDatabase initializeDatabase(TalkServerConfiguration config) {
-        LOG.info("Determining database");
-        String backend = config.getDatabaseBackend();
-        if ("jongo".equals(backend)) {
-            return new JongoDatabase(config);
-        } else if ("ormlite".equals(backend)) {
-            return new OrmliteDatabase();
-        }
-        throw new RuntimeException("Unknown database backend: " + backend);
     }
 
     public static void main(String[] args) {
