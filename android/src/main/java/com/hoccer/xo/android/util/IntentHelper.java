@@ -32,6 +32,7 @@ public class IntentHelper {
     public static final String ACTION_AUDIO_ATTACHMENT_REMOVED = "com.hoccer.xo.android.action.AUDIO_ATTACHMENT_REMOVED_ACTION";
 
     public static final String EXTRA_CONTACT_ID = "com.hoccer.xo.android.extra.CONTACT_ID";
+    public static final String EXTRA_PUSH_MESSAGE = "com.hoccer.xo.android.extra.PUSH_MESSAGE";
     public static final String EXTRA_TALK_CLIENT_MESSAGE_ID = "com.hoccer.xo.android.extra.TALK_CLIENT_MESSAGE_ID";
     public static final String EXTRA_MEDIA_URI = "com.hoccer.xo.android.extra.MEDIA_URI";
 

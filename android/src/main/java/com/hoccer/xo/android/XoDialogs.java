@@ -98,17 +98,25 @@ public class XoDialogs {
     }
 
     public static void showOkDialog(final String tag, final int titleId, final int messageId, final Activity activity) {
-        showOkDialog(tag, titleId, messageId, activity, null);
+        showOkDialog(tag, activity.getString(titleId), activity.getString(messageId), activity, null);
     }
 
     public static void showOkDialog(final String tag, final int titleId, final int messageId, final Activity activity, final DialogInterface.OnClickListener okListener) {
+        showOkDialog(tag, activity.getString(titleId), activity.getString(messageId), activity, okListener);
+    }
+
+    public static void showOkDialog(final String tag, final String title, final String message, final Activity activity) {
+        showOkDialog(tag, title, message, activity, null);
+    }
+
+    public static void showOkDialog(final String tag, final String title, final String message, final Activity activity, final DialogInterface.OnClickListener okListener) {
         DialogFragment dialogFragment = new DialogFragment() {
             @Override
             public Dialog onCreateDialog(Bundle savedInstanceState) {
                 LOG.debug("Creating dialog: " + tag);
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setTitle(titleId);
-                builder.setMessage(messageId);
+                builder.setTitle(title);
+                builder.setMessage(message);
                 builder.setNeutralButton(R.string.common_ok, okListener);
                 return builder.create();
             }
