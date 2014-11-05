@@ -123,8 +123,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         } else if (intent.hasExtra(IntentHelper.EXTRA_CONTACT_ID)) {
             handleContactIdIntent(intent);
         } else if (intent.hasExtra(IntentHelper.EXTRA_PUSH_MESSAGE)) {
-            String message = intent.getStringExtra(IntentHelper.EXTRA_PUSH_MESSAGE);
-            XoDialogs.showOkDialog("PushMessage", "", message, this);
+            handlePushMessageIntent(intent);
         }
     }
 
@@ -207,6 +206,11 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void handleContactIdIntent(Intent intent) {
         int contactId = intent.getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
         showContactConversation(contactId);
+    }
+
+    private void handlePushMessageIntent(Intent intent) {
+        String message = intent.getStringExtra(IntentHelper.EXTRA_PUSH_MESSAGE);
+        XoDialogs.showOkDialog("PushMessage", "", message, this);
     }
 
     private void handleShareIntent(Intent intent) {
