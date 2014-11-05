@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class GcmPushService extends PushService {
-    private static final Logger LOG = Logger.getLogger(GcmPushService.class);
+public class GcmPushProvider extends PushProvider {
+    private static final Logger LOG = Logger.getLogger(GcmPushProvider.class);
 
     private static final Predicate<TalkClient> SUPPORTED_CLIENT_PREDICATE = new Predicate<TalkClient>() {
         @Override
@@ -24,7 +24,7 @@ public class GcmPushService extends PushService {
 
     private final Sender mSender;
 
-    public GcmPushService(Sender sender) {
+    public GcmPushProvider(Sender sender) {
         mSender = sender;
     }
 

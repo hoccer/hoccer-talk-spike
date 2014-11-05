@@ -32,13 +32,13 @@ public class PushAgent {
     private final ITalkServerDatabase mDatabase;
 
     private Sender mGcmSender;
-    private List<PushService> mPushServices;
+    private List<PushProvider> mPushProviders;
 
     public enum APNS_SERVICE_TYPE {
         PRODUCTION, SANDBOX
     }
 
-    private final HashMap<ApnsPushService.Target, ApnsService> mApnsServices = new HashMap<ApnsPushService.Target, ApnsService>();
+    private final HashMap<ApnsPushProvider.Target, ApnsService> mApnsServices = new HashMap<ApnsPushProvider.Target, ApnsService>();
 
     private final Hashtable<String, PushRequest> mOutstanding;
 
@@ -56,7 +56,7 @@ public class PushAgent {
         mDatabase = mServer.getDatabase();
         mConfig = mServer.getConfiguration();
         mOutstanding = new Hashtable<String, PushRequest>();
-        mPushServices = new ArrayList<PushService>();
+        mPushProviders = new ArrayList<PushProvider>();
 
         if (mConfig.isGcmEnabled()) {
             initializeGcm();
@@ -106,8 +106,8 @@ public class PushAgent {
             public void run() {
                 try {
                     LOG.info("pushing message '" + message + "' to " + clients.size() + " clients");
-                    for (PushService service : mPushServices) {
-                        service.pushMessage(clients, message);
+                    for (PushProvider provider : mPushProviders) {
+                        provider.pushMessage(clients, message);
                     }
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
@@ -187,13 +187,13 @@ public class PushAgent {
     }
 
     public ApnsService getApnsService(String clientName, APNS_SERVICE_TYPE type) {
-        return mApnsServices.get(new ApnsPushService.Target(clientName, type));
+        return mApnsServices.get(new ApnsPushProvider.Target(clientName, type));
     }
 
     private void initializeGcm() {
         LOG.info("GCM support enabled");
         mGcmSender = new Sender(mConfig.getGcmApiKey());
-        mPushServices.add(new GcmPushService(mGcmSender));
+        mPushProviders.add(new GcmPushProvider(mGcmSender));
     }
 
     private void initializeApns() {
@@ -208,13 +208,13 @@ public class PushAgent {
             ApnsConfiguration.Certificate sandboxCertificate = apnsConfiguration.getCertificate(PushAgent.APNS_SERVICE_TYPE.SANDBOX);
 
             LOG.info("  * setting up APNS service (clientName: '" + clientName + "', type: '" + APNS_SERVICE_TYPE.PRODUCTION + "')");
-            mApnsServices.put(new ApnsPushService.Target(clientName, APNS_SERVICE_TYPE.PRODUCTION), APNS.newService()
+            mApnsServices.put(new ApnsPushProvider.Target(clientName, APNS_SERVICE_TYPE.PRODUCTION), APNS.newService()
                     .withCert(productionCertificate.getPath(), productionCertificate.getPassword())
                     .withProductionDestination()
                     .build());
 
             LOG.info("  * setting up APNS service (clientName: '" + clientName + "', type: '" + APNS_SERVICE_TYPE.SANDBOX + "')");
-            mApnsServices.put(new ApnsPushService.Target(clientName, APNS_SERVICE_TYPE.SANDBOX), APNS.newService()
+            mApnsServices.put(new ApnsPushProvider.Target(clientName, APNS_SERVICE_TYPE.SANDBOX), APNS.newService()
                     .withCert(sandboxCertificate.getPath(), sandboxCertificate.getPassword())
                     .withSandboxDestination()
                     .build());
@@ -237,14 +237,14 @@ public class PushAgent {
             }, delay, interval, TimeUnit.SECONDS);
         }
 
-        mPushServices.add(new ApnsPushService(mApnsServices, mDatabase, mConfig.getApnsDefaultClientName()));
+        mPushProviders.add(new ApnsPushProvider(mApnsServices, mDatabase, mConfig.getApnsDefaultClientName()));
     }
 
     private void invalidateApns() {
         LOG.info("APNS retrieving inactive devices");
 
-        for (Map.Entry<ApnsPushService.Target, ApnsService> entry : mApnsServices.entrySet()) {
-            ApnsPushService.Target target = entry.getKey();
+        for (Map.Entry<ApnsPushProvider.Target, ApnsService> entry : mApnsServices.entrySet()) {
+            ApnsPushProvider.Target target = entry.getKey();
             ApnsService service = entry.getValue();
 
             LOG.info("  * APNS retrieving inactive devices from " + target.type + " for clientName " + target.clientName);

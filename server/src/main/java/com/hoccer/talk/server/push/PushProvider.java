@@ -7,9 +7,9 @@ import org.apache.log4j.Logger;
 
 import java.util.Collection;
 
-public abstract class PushService {
+public abstract class PushProvider {
 
-    private static final Logger LOG = Logger.getLogger(PushService.class);
+    private static final Logger LOG = Logger.getLogger(PushProvider.class);
 
     public void pushMessage(Collection<TalkClient> clients, String message) {
         Collection<TalkClient> supportedClients = CollectionUtils.select(clients, getSupportedClientPredicate());

@@ -15,8 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.HashMap;
 
-public class ApnsPushService extends PushService {
-    private static final Logger LOG = Logger.getLogger(ApnsPushService.class);
+public class ApnsPushProvider extends PushProvider {
+    private static final Logger LOG = Logger.getLogger(ApnsPushProvider.class);
 
     private static final Predicate<TalkClient> SUPPORTED_CLIENT_PREDICATE = new Predicate<TalkClient>() {
         @Override
@@ -29,7 +29,7 @@ public class ApnsPushService extends PushService {
     private String mDefaultClientName;
     private HashMap<Target, ApnsService> mApnsServices;
 
-    public ApnsPushService(HashMap<Target, ApnsService> apnsServices, ITalkServerDatabase database, String defaultClientName) {
+    public ApnsPushProvider(HashMap<Target, ApnsService> apnsServices, ITalkServerDatabase database, String defaultClientName) {
         mApnsServices = apnsServices;
         mDatabase = database;
         mDefaultClientName = defaultClientName;
