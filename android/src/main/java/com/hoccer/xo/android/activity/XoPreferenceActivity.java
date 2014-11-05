@@ -2,7 +2,6 @@ package com.hoccer.xo.android.activity;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -13,6 +12,8 @@ import android.os.Message;
 import android.preference.*;
 import android.view.*;
 import android.widget.Toast;
+import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
+import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.util.XoImportExportUtils;
@@ -260,7 +261,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
-                        if (password != null && password.length() > 0) {
+                        if (password != null && !password.isEmpty()) {
                             importCredentials(credentialsFile, password);
                         } else {
                             Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
@@ -270,28 +271,31 @@ public class XoPreferenceActivity extends PreferenceActivity
         );
     }
 
-    private void importCredentials(File credentialsFile, String password) {
-
+    private void importCredentials(final File credentialsFile, final String password) {
         try {
-            FileInputStream fileInputStream = new FileInputStream(XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);
-
-            byte[] credentials = new byte[(int) credentialsFile.length()];
-            fileInputStream.read(credentials);
-
-            boolean result = XoApplication.getXoClient().setEncryptedCredentialsFromContainer(credentials, password);
-            if (result) {
-                Toast.makeText(this, R.string.import_credentials_success, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, R.string.import_credentials_failure, Toast.LENGTH_LONG).show();
-            }
-
+            final Credentials credentials = readCredentialsTransferFile(credentialsFile, password);
+            XoApplication.getXoClient().importCredentials(credentials);
+            Toast.makeText(this, R.string.import_credentials_success, Toast.LENGTH_LONG).show();
         } catch (FileNotFoundException e) {
             LOG.error("Error while importing credentials", e);
             Toast.makeText(this, R.string.cant_find_credentials, Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             LOG.error("Error while importing credentials", e);
             Toast.makeText(this, R.string.import_credentials_failure, Toast.LENGTH_LONG).show();
+        } catch (SQLException e) {
+            LOG.error("Error while importing credentials", e);
+            e.printStackTrace();
+        } catch (NoClientIdInPresenceException e) {
+            LOG.error("Error while importing credentials", e);
+            e.printStackTrace();
         }
+    }
+
+    private Credentials readCredentialsTransferFile(File credentialsFile, String password) throws IOException {
+        final FileInputStream fileInputStream = new FileInputStream(XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);
+        final byte[] credentialsData = new byte[(int) credentialsFile.length()];
+        fileInputStream.read(credentialsData);
+        return Credentials.fromEncryptedBytes(credentialsData, password);
     }
 
     private void doExportCredentials() {
@@ -301,7 +305,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
-                        if (password != null && password.length() > 0) {
+                        if (password != null && !password.isEmpty()) {
                             exportCredentials(password);
                         } else {
                             Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
@@ -311,12 +315,12 @@ public class XoPreferenceActivity extends PreferenceActivity
         );
     }
 
-    private void exportCredentials(String password) {
+    private void exportCredentials(final String password) {
         try {
-            byte[] credentialsContainer = XoApplication.getXoClient()
-                    .makeEncryptedCredentialsContainer(password);
+            final Credentials credentials = XoApplication.getXoClient().exportCredentials();
+            final byte[] credentialsContainer = credentials.toEncryptedBytes(password);
 
-            FileOutputStream fos = new FileOutputStream(
+            final FileOutputStream fos = new FileOutputStream(
                     XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);
             fos.write(credentialsContainer);
             fos.flush();

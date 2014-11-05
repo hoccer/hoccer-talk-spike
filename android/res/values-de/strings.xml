@@ -425,6 +425,21 @@
     <string name="profile_chat_info_text">Chat</string>
     <!--<string name="messages_count">%1$s Nachrichten</string>-->
 
+    <!-- Hoccer XO Credentials Import -->
+    <string name="existing_hoccer_xo_profile">Hey, wir haben ein existierendes Hoccer XO Profil gefunden.</string>
+    <string name="import_or_create_new_profile">Du kannst dein bestehendes Profil weiterverwenden oder ein neues erstellen.</string>
+    <string name="import_credentials">Profil importieren</string>
+    <string name="new_profile">Neues Profil</string>
+    <string name="reading_profile_data">Lese Profil Daten ..</string>
+    <string name="existing_hoccer_xo">Hey, wir haben eine existierende Hoccer XO Version gefunden.</string>
+    <string name="update_and_import_profile">Du kannst dein bestehendes Profil weiterverwenden, aber dazu musst du erst Hoccer XO aktualisieren.</string>
+    <string name="update_hoccer_xo">Update Hoccer XO</string>
+
+    <plurals name="contact_count">
+        <item quantity="one">1 Kontakt</item>
+        <item quantity="other">%d Kontakte</item>
+    </plurals>
+
     <plurals name="message_count">
         <item quantity="one">1 Nachricht</item>
         <item quantity="other">%d Nachrichten</item>

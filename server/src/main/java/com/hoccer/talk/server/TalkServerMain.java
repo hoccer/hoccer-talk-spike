@@ -8,7 +8,6 @@ import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.hoccer.scm.GitInfo;
 import com.hoccer.talk.server.database.JongoDatabase;
-import com.hoccer.talk.server.database.OrmliteDatabase;
 import com.hoccer.talk.server.database.migrations.DatabaseMigrationManager;
 import com.hoccer.talk.server.push.ApnsConfiguration;
 import com.hoccer.talk.server.push.PushAgent;
@@ -16,6 +15,7 @@ import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
 import com.hoccer.talk.server.cryptoutils.*;
 import com.hoccer.talk.servlets.CertificateInfoServlet;
 import com.hoccer.talk.servlets.InvitationServlet;
+import com.hoccer.talk.servlets.PushMessageServlet;
 import com.hoccer.talk.servlets.ServerInfoServlet;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -53,8 +53,8 @@ public class TalkServerMain {
 
         checkApnsCertificateExpirationStatus(config);
 
-        // select and instantiate database backend
-        ITalkServerDatabase db = initializeDatabase(config);
+        // instantiate database backend
+        ITalkServerDatabase db = new JongoDatabase(config);
         // ensure that the db is actually online and working
         db.reportPing();
 
@@ -67,12 +67,17 @@ public class TalkServerMain {
         Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
         setupServerHandlers(webServer, talkServer);
 
+        Server managementServer = new Server(new InetSocketAddress(config.getManagementListenAddress(), config.getManagementListenPort()));
+        setupManagementServerHandlers(managementServer, talkServer);
+
         // TODO: take care of proper signal handling (?) here. We never see the "Server has quit" line, currently.
         // run and stop when interrupted
         try {
             LOG.info("Starting server");
             webServer.start();
+            managementServer.start();
             webServer.join();
+            managementServer.join();
             LOG.info("Server has quit");
         } catch (Exception e) {
             LOG.error("Exception in server", e);
@@ -145,6 +150,17 @@ public class TalkServerMain {
         server.setHandler(handlerCollection);
     }
 
+    private void setupManagementServerHandlers(Server managementServer, TalkServer talkServer) {
+        ServletContextHandler pushMessageHandler = new ServletContextHandler();
+        pushMessageHandler.setContextPath("/push");
+        pushMessageHandler.setAttribute("server", talkServer);
+        pushMessageHandler.addServlet(PushMessageServlet.class, "/*");
+
+        HandlerCollection handlerCollection = new HandlerCollection();
+        handlerCollection.addHandler(pushMessageHandler);
+        managementServer.setHandler(handlerCollection);
+    }
+
     private void migrateDatabase(ITalkServerDatabase database) {
         LOG.info("applying database migrations");
         DatabaseMigrationManager migrationManager = new DatabaseMigrationManager(database);
@@ -197,17 +213,6 @@ public class TalkServerMain {
         }
 
         return configuration;
-    }
-
-    private ITalkServerDatabase initializeDatabase(TalkServerConfiguration config) {
-        LOG.info("Determining database");
-        String backend = config.getDatabaseBackend();
-        if ("jongo".equals(backend)) {
-            return new JongoDatabase(config);
-        } else if ("ormlite".equals(backend)) {
-            return new OrmliteDatabase();
-        }
-        throw new RuntimeException("Unknown database backend: " + backend);
     }
 
     public static void main(String[] args) {

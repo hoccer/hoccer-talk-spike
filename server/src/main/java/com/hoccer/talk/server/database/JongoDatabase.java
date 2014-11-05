@@ -4,6 +4,7 @@ import com.hoccer.talk.model.*;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import com.mongodb.*;
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -111,13 +112,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     @NotNull
     public List<TalkClient> findAllClients() {
-        List<TalkClient> res = new ArrayList<TalkClient>();
-        Iterator<TalkClient> it =
-                mClients.find().as(TalkClient.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkClient> it = mClients
+                .find()
+                .as(TalkClient.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
@@ -149,14 +149,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     @NotNull
     public List<TalkMessage> findMessagesWithAttachmentFileId(String fileId) {
-        List<TalkMessage> res = new ArrayList<TalkMessage>();
-        Iterator<TalkMessage> it =
-                mMessages.find("{attachmentFileId:#}", fileId)
-                        .as(TalkMessage.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkMessage> it = mMessages
+                .find("{attachmentFileId:#}", fileId)
+                .as(TalkMessage.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
@@ -179,158 +177,134 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesInState(String state) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{state:#}", state)
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{state:#}", state)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkDelivery> findAllDeliveries() {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find()
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find()
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesInStates(String[] states) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{state: { $in: # } }", Arrays.asList(states))
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{state: { $in: # } }", Arrays.asList(states))
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesInStatesAndAttachmentStates(String[] deliveryStates, String[] attachmentStates) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{state: { $in: # }, attachmentState: {$in: # } }", Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{state: { $in: # }, attachmentState: {$in: # } }", Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
 
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesForClient(String clientId) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{receiverId:#}", clientId)
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{receiverId:#}", clientId)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesFromClient(String clientId) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{senderId:#}", clientId)
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{senderId:#}", clientId)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesForClientInState(String clientId, String state) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{receiverId:#,state:#}", clientId, state)
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{receiverId:#,state:#}", clientId, state)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesForClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{receiverId:#, state: { $in: # }, attachmentState: {$in: # } }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{receiverId:#, state: { $in: # }, attachmentState: {$in: # } }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesFromClientInState(String clientId, String state) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{senderId:#,state:#}", clientId, state)
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{senderId:#,state:#}", clientId, state)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesFromClientInStates(String clientId, String[] deliveryStates) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{senderId:#, state: { $in: # } }", clientId, Arrays.asList(deliveryStates))
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{senderId:#, state: { $in: # } }", clientId, Arrays.asList(deliveryStates))
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesFromClientInDeliveryAndAttachmentStates(String clientId, String[] deliveryStates, String[] attachmentStates) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{senderId:#, state: { $in: # }, attachmentState: {$in: #} }", clientId, Arrays.asList(deliveryStates), Arrays.asList(attachmentStates))
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkDelivery> findDeliveriesForMessage(String messageId) {
-        List<TalkDelivery> res = new ArrayList<TalkDelivery>();
-        Iterator<TalkDelivery> it =
-                mDeliveries.find("{messageId:#}", messageId)
-                        .as(TalkDelivery.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkDelivery> it = mDeliveries
+                .find("{messageId:#}", messageId)
+                .as(TalkDelivery.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
@@ -346,31 +320,33 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     @NotNull
     public List<TalkToken> findTokensByClient(String clientId) {
-        List<TalkToken> res = new ArrayList<TalkToken>();
-        Iterator<TalkToken> it =
-                mTokens.find("{clientId:#}", clientId)
-                        .as(TalkToken.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkToken> it = mTokens
+                .find("{clientId:#}", clientId)
+                .as(TalkToken.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @Nullable
     public TalkToken findTokenByPurposeAndSecret(String purpose, String secret) {
-        TalkToken res = null;
-        Iterator<TalkToken> it =
-                mTokens.find("{purpose:#,secret:#}", purpose, secret)
-                        .as(TalkToken.class).iterator();
+        TalkToken token = null;
+
+        Iterator<TalkToken> it = mTokens
+                .find("{purpose:#,secret:#}", purpose, secret)
+                .as(TalkToken.class)
+                .iterator();
+
         if (it.hasNext()) {
-            res = it.next();
+            token = it.next();
             if (it.hasNext()) {
                 // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
                 throw new RuntimeException("Duplicate token");
             }
         }
-        return res;
+
+        return token;
     }
 
     @Override
@@ -454,14 +430,12 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     @NotNull
     public List<TalkKey> findKeys(String clientId) {
-        List<TalkKey> res = new ArrayList<TalkKey>();
-        Iterator<TalkKey> it =
-                mKeys.find("{clientId:#}", clientId)
-                        .as(TalkKey.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkKey> it = mKeys
+                .find("{clientId:#}", clientId)
+                .as(TalkKey.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
@@ -477,53 +451,45 @@ public class JongoDatabase implements ITalkServerDatabase {
     @Override
     @NotNull
     public List<TalkRelationship> findRelationships(String client) {
-        List<TalkRelationship> res = new ArrayList<TalkRelationship>();
-        Iterator<TalkRelationship> it =
-                mRelationships.find("{clientId:#}", client)
-                        .as(TalkRelationship.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkRelationship> it = mRelationships
+                .find("{clientId:#}", client)
+                .as(TalkRelationship.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkRelationship> findRelationshipsForClientInState(String clientId, String state) {
-        List<TalkRelationship> res = new ArrayList<TalkRelationship>();
-        Iterator<TalkRelationship> it =
-                mRelationships.find("{clientId:#,state:#}", clientId, state)
-                        .as(TalkRelationship.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkRelationship> it = mRelationships
+                .find("{clientId:#,state:#}", clientId, state)
+                .as(TalkRelationship.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkRelationship> findRelationshipsForClientInStates(String clientId, String[] states) {
-        List<TalkRelationship> res = new ArrayList<TalkRelationship>();
-        Iterator<TalkRelationship> it =
-                mRelationships.find("{clientId:#,state:{ $in: # }}", clientId, Arrays.asList(states))
-                        .as(TalkRelationship.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkRelationship> it = mRelationships
+                .find("{clientId:#,state:{ $in: # }}", clientId, Arrays.asList(states))
+                .as(TalkRelationship.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     @NotNull
     public List<TalkRelationship> findRelationshipsByOtherClient(String other) {
-        List<TalkRelationship> res = new ArrayList<TalkRelationship>();
-        Iterator<TalkRelationship> it =
-                mRelationships.find("{otherClientId:#}", other)
-                        .as(TalkRelationship.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkRelationship> it = mRelationships
+                .find("{otherClientId:#}", other)
+                .as(TalkRelationship.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
@@ -535,14 +501,12 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public List<TalkRelationship> findRelationshipsChangedAfter(String client, Date lastKnown) {
-        List<TalkRelationship> res = new ArrayList<TalkRelationship>();
-        Iterator<TalkRelationship> it =
-                mRelationships.find("{clientId:#,lastChanged: {$gt:#}}", client, lastKnown)
-                        .as(TalkRelationship.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkRelationship> it = mRelationships
+                .find("{clientId:#,lastChanged: {$gt:#}}", client, lastKnown)
+                .as(TalkRelationship.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
@@ -616,89 +580,73 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public List<TalkGroupMember> findGroupMembersById(String groupId) {
-        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
-        Iterator<TalkGroupMember> it =
-                mGroupMembers.find("{groupId:#}", groupId)
-                        .as(TalkGroupMember.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkGroupMember> it = mGroupMembers
+                .find("{groupId:#}", groupId)
+                .as(TalkGroupMember.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     public List<TalkGroupMember> findGroupMembersByIdWithStates(String groupId, String[] states) {
+        Iterator<TalkGroupMember> it = mGroupMembers
+                .find("{groupId:#, state: { $in: # }}", groupId, Arrays.asList(states))
+                .as(TalkGroupMember.class)
+                .iterator();
 
-        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
-        Iterator<TalkGroupMember> it =
-                mGroupMembers.find("{groupId:#, state: { $in: # }}", groupId, Arrays.asList(states))
-                        .as(TalkGroupMember.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        return IteratorUtils.toList(it);
     }
 
     @Override
     public List<TalkGroupMember> findGroupMembersByIdWithStatesAndRoles(String groupId, String[] states, String [] roles) {
+        Iterator<TalkGroupMember> it = mGroupMembers
+                .find("{groupId:#, state: { $in: # }, role: {$in: #}", groupId, Arrays.asList(states), Arrays.asList(roles))
+                .as(TalkGroupMember.class)
+                .iterator();
 
-        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
-        Iterator<TalkGroupMember> it =
-                mGroupMembers.find("{groupId:#, state: { $in: # }, role: {$in: #}", groupId, Arrays.asList(states), Arrays.asList(roles))
-                        .as(TalkGroupMember.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        return IteratorUtils.toList(it);
     }
 
 
     @Override
     public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown) {
-        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
-        Iterator<TalkGroupMember> it =
-                mGroupMembers.find("{groupId:#,lastChanged: {$gt:#}}", groupId, lastKnown)
-                        .as(TalkGroupMember.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkGroupMember> it = mGroupMembers
+                .find("{groupId:#,lastChanged: {$gt:#}}", groupId, lastKnown)
+                .as(TalkGroupMember.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     public List<TalkGroupMember> findGroupMembersByIdWithStatesChangedAfter(String groupId, String[] states, Date lastKnown) {
-        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
-        Iterator<TalkGroupMember> it =
-                mGroupMembers.find("{groupId:#, state: { $in: # }, lastChanged: { $gt:# } }", groupId, Arrays.asList(states), lastKnown)
-                        .as(TalkGroupMember.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkGroupMember> it = mGroupMembers
+                .find("{groupId:#, state: { $in: # }, lastChanged: { $gt:# } }", groupId, Arrays.asList(states), lastKnown)
+                .as(TalkGroupMember.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     public List<TalkGroupMember> findGroupMembersForClient(String clientId) {
-        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
-        Iterator<TalkGroupMember> it =
-                mGroupMembers.find("{clientId:#}", clientId)
-                        .as(TalkGroupMember.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkGroupMember> it = mGroupMembers
+                .find("{clientId:#}", clientId)
+                .as(TalkGroupMember.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
     public List<TalkGroupMember> findGroupMembersForClientWithStates(String clientId, String[] states) {
-        List<TalkGroupMember> res = new ArrayList<TalkGroupMember>();
-        Iterator<TalkGroupMember> it =
-                mGroupMembers.find("{clientId:#, state: { $in: # }}", clientId, Arrays.asList(states))
-                        .as(TalkGroupMember.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkGroupMember> it = mGroupMembers
+                .find("{clientId:#, state: { $in: # }}", clientId, Arrays.asList(states))
+                .as(TalkGroupMember.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
@@ -725,14 +673,12 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public List<TalkEnvironment> findEnvironmentsForGroup(String groupId) {
-        List<TalkEnvironment> res = new ArrayList<TalkEnvironment>();
-        Iterator<TalkEnvironment> it =
-                mEnvironments.find("{groupId:#}", groupId)
-                        .as(TalkEnvironment.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
-        return res;
+        Iterator<TalkEnvironment> it = mEnvironments
+                .find("{groupId:#}", groupId)
+                .as(TalkEnvironment.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
     }
 
     @Override
@@ -844,22 +790,29 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
+    public List<TalkClientHostInfo> findClientHostInfoByClientLanguageAndClientName(String clientLanguage, String clientName) {
+        Iterator<TalkClientHostInfo> it = mClientHostInfos
+                .find("{clientLanguage: #, clientName: #}", clientLanguage, clientName)
+                .as(TalkClientHostInfo.class)
+                .iterator();
+
+        return IteratorUtils.toList(it);
+    }
+
+    @Override
     public void saveClientHostInfo(TalkClientHostInfo clientHostInfo) {
         mClientHostInfos.save(clientHostInfo);
     }
 
     @Override
     public List<TalkDatabaseMigration> findDatabaseMigrations() {
-        List<TalkDatabaseMigration> res = new ArrayList<TalkDatabaseMigration>();
-        Iterator<TalkDatabaseMigration> it =
-                mMigrations.find()
-                        .sort("{position: 1}") // retrieve migration sorted
-                        .as(TalkDatabaseMigration.class).iterator();
-        while (it.hasNext()) {
-            res.add(it.next());
-        }
+        Iterator<TalkDatabaseMigration> it = mMigrations
+                .find()
+                .sort("{position: 1}") // retrieve migration sorted
+                .as(TalkDatabaseMigration.class)
+                .iterator();
 
-        return res;
+        return IteratorUtils.toList(it);
     }
 
     // Used for migrations - it bulk updates all specific field values encountered of the field specified with the given new value

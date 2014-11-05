@@ -32,9 +32,9 @@ public class CryptoJSONTest {
         String myClearText = "This is a new Text for testing222";
         byte[] myClearTextData = myClearText.getBytes("UTF-8");
 
-        byte[] encryptedContainer = CryptoJSON.encryptedContainer(myClearTextData, "myPassword", "test");
-        System.out.println("encryptedContainer=" + new String(encryptedContainer, "UTF-8"));
-        byte[] decryptedData = CryptoJSON.decryptedContainer(encryptedContainer, "myPassword", "test");
+        byte[] encryptedContainer = CryptoJSON.encrypt(myClearTextData, "myPassword", "test");
+        System.out.println("createEncryptedContainer=" + new String(encryptedContainer, "UTF-8"));
+        byte[] decryptedData = CryptoJSON.decrypt(encryptedContainer, "myPassword", "test");
         String decryptedString = new String(decryptedData, "UTF-8");
         System.out.println("decryptedString=" + decryptedString);
 

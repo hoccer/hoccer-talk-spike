@@ -600,12 +600,12 @@ public class XoClientService extends Service {
                 }
 
                 // ignore clients with whom we are not befriended
-                if(contact.isClient() && !contact.isClientFriend()) {
+                if (contact.isClient() && !contact.isClientFriend()) {
                     continue;
                 }
 
                 // ignore groups which we are not joined with yet
-                if(contact.isGroup() && !contact.isGroupJoined()) {
+                if (contact.isGroup() && !contact.isGroupJoined()) {
                     continue;
                 }
 
@@ -740,17 +740,36 @@ public class XoClientService extends Service {
     }
 
     private void createPushMessageNotification(String message) {
+        // create intent
+        Intent pushMessageIntent = new Intent(this, ChatsActivity.class);
+        pushMessageIntent.putExtra(IntentHelper.EXTRA_PUSH_MESSAGE, message);
+
+        // make a pending intent with correct back-stack
+        PendingIntent pendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            pendingIntent =
+                    TaskStackBuilder.create(this)
+                            .addParentStack(ChatsActivity.class)
+                            .addNextIntentWithParentStack(pushMessageIntent)
+                            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
+            pendingIntent = PendingIntent
+                    .getActivity(this, 0, pushMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setContentTitle(getResources().getString(R.string.app_name))
+                .setContentIntent(pendingIntent)
                 .setContentText(message)
                 .setStyle(new NotificationCompat.BigTextStyle()
-                    .bigText(message))
+                .bigText(message))
                 .build();
 
-        mNotificationManager.notify(message, NOTIFICATION_PUSH_MESSAGE, notification);
+
+        mNotificationManager.notify(NOTIFICATION_PUSH_MESSAGE, notification);
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
