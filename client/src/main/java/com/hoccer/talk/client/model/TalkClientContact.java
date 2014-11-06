@@ -570,12 +570,6 @@ public class TalkClientContact implements Serializable {
     }
 
     @SelfMethodOnly
-    public void updateSelfConfirmed() {
-        ensureSelf();
-        this.self.confirmRegistration();
-    }
-
-    @SelfMethodOnly
     public void updateSelfRegistered(String clientId) {
         ensureSelf();
         this.clientId = clientId;
