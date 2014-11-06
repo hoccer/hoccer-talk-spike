@@ -1,8 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,13 +8,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.RegistrationActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
-import com.hoccer.xo.android.util.SharedPreferencesUtils;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -78,7 +74,6 @@ public class ImportCredentialFragment extends XoFragment {
                     // import new credentials
                     try {
                         XoApplication.getXoClient().importCredentials(mCredentials);
-                        saveUserHasConfirmedProfile();
                     } catch (Exception e) {
                         LOG.error("Importing credentials failed.", e);
                     }
@@ -99,10 +94,6 @@ public class ImportCredentialFragment extends XoFragment {
             }
         });
 
-    }
-
-    private void saveUserHasConfirmedProfile() {
-        SharedPreferencesUtils.saveUserHasConfirmedProfile(getActivity());
     }
 
     private void readCredentials() {

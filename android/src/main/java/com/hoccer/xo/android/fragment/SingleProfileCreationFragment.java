@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.*;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -16,12 +15,10 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.util.SharedPreferencesUtils;
 import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
-import javax.xml.soap.Text;
 import java.io.File;
 import java.sql.SQLException;
 
@@ -232,12 +229,8 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         mEditName.setVisibility(View.GONE);
         mAvatarImage.setOnClickListener(null);
 
-        mContact.getSelf().setRegistrationName(newUserName);
-        mContact.updateSelfConfirmed();
         getXoClient().register();
         getXoClient().setClientString(newUserName, "happy");
-
-        SharedPreferencesUtils.saveUserHasConfirmedProfile(getActivity());
 
         getActivity().finish();
     }

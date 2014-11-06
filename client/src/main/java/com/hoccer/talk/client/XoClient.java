@@ -465,28 +465,29 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      * @note After import the client deletes all contacts and relationsships and reconnects for full sync.
      */
     public void importCredentials(final Credentials newCredentials) throws SQLException, NoClientIdInPresenceException {
-            final TalkClientSelf self = mSelfContact.getSelf();
-            self.provideCredentials(newCredentials.getSalt(), newCredentials.getPassword());
+        final TalkClientSelf self = mSelfContact.getSelf();
+        self.provideCredentials(newCredentials.getSalt(), newCredentials.getPassword());
+        self.confirmRegistration();
 
-            // update client id
-            mSelfContact.updateSelfRegistered(newCredentials.getClientId());
-            mSelfContact.getClientPresence().setClientId(newCredentials.getClientId());
+        // update client id
+        mSelfContact.updateSelfRegistered(newCredentials.getClientId());
+        mSelfContact.getClientPresence().setClientId(newCredentials.getClientId());
 
-            // update client name
-            mSelfContact.getClientPresence().setClientName(newCredentials.getClientName());
+        // update client name
+        mSelfContact.getClientPresence().setClientName(newCredentials.getClientName());
 
-            // save credentials and contact
-            mDatabase.saveCredentials(self);
-            mDatabase.savePresence(mSelfContact.getClientPresence());
-            mDatabase.saveContact(mSelfContact);
+        // save credentials and contact
+        mDatabase.saveCredentials(self);
+        mDatabase.savePresence(mSelfContact.getClientPresence());
+        mDatabase.saveContact(mSelfContact);
 
-            // remove contacts + groups from DB
-            mDatabase.eraseAllRelationships();
-            mDatabase.eraseAllClientContacts();
-            mDatabase.eraseAllGroupMemberships();
-            mDatabase.eraseAllGroupContacts();
+        // remove contacts + groups from DB
+        mDatabase.eraseAllRelationships();
+        mDatabase.eraseAllClientContacts();
+        mDatabase.eraseAllGroupMemberships();
+        mDatabase.eraseAllGroupContacts();
 
-            reconnect("Credentials imported.");
+        reconnect("Credentials imported.");
     }
 
     /**
@@ -727,6 +728,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void setClientString(String newName, String newStatus) {
         resetIdle();
         try {
+            ensureSelfContact();
+            TalkClientSelf self = mSelfContact.getSelf();
+            if (newName != null) {
+                self.setRegistrationName(newName);
+                self.confirmRegistration();
+            }
+            mDatabase.saveCredentials(self);
+
             TalkPresence presence = mSelfContact.getClientPresence();
             if(presence != null) {
                 if(newName != null) {
@@ -1634,11 +1643,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void scheduleRegistration() {
         LOG.debug("scheduleRegistration()");
         shutdownRegistration();
-        if(!mSelfContact.getSelf().isRegistrationConfirmed()) {
-            LOG.debug("registration not confirmed. Auto-registering.");
-            //return;
-            mSelfContact.updateSelfConfirmed();
-        }
         mRegistrationFuture = mExecutor.schedule(new Runnable() {
             @Override
             public void run() {

@@ -81,7 +81,6 @@ public class CleaningAgent {
         doCleanKeysForClient(clientId);
         doCleanTokensForClient(clientId);
         doCleanRelationshipsForClient(clientId);
-        doCleanClientHostInfoForClient(clientId);
     }
 
     private void scheduleCleanAllDeliveries() {
@@ -289,17 +288,6 @@ public class CleaningAgent {
             }
             mDatabase.deleteRelationship(relationship);
             LOG.debug("deleted relationship from clientId '" + relationship.getClientId() + "' to clientID '" + relationship.getOtherClientId() + "'");
-        }
-    }
-
-    private void doCleanClientHostInfoForClient(String clientId) {
-        LOG.debug("cleaning client host infos for clientId: '" + clientId + "'");
-        final TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(clientId);
-        if (clientHostInfo != null) {
-            mDatabase.deleteClientHostInfo(clientHostInfo);
-            LOG.debug("deleted client host info for clientId: '" + clientId + "'");
-        } else {
-            LOG.debug("unable to find client host info for clientId: '" + clientId + "' - IGNORING");
         }
     }
 

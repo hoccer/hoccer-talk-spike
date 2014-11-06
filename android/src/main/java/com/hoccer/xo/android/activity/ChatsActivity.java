@@ -32,7 +32,6 @@ import com.hoccer.xo.android.content.contentselectors.VideoSelector;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.android.util.SharedPreferencesUtils;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
@@ -179,14 +178,10 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void showProfileIfClientIsNotRegistered() {
-        if (!hasUserConfirmedProfile()) {
+        if (!getXoClient().getSelfContact().getSelf().isRegistrationConfirmed()) {
             Intent intent = new Intent(this, RegistrationActivity.class);
             startActivity(intent);
         }
-    }
-
-    private boolean hasUserConfirmedProfile() {
-        return SharedPreferencesUtils.hasUserConfirmedProfile(this);
     }
 
     private void registerListeners() {
