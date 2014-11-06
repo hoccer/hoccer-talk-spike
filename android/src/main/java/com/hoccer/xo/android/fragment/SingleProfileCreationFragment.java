@@ -229,8 +229,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         mEditName.setVisibility(View.GONE);
         mAvatarImage.setOnClickListener(null);
 
-        mContact.getSelf().setRegistrationName(newUserName);
-        mContact.getSelf().confirmRegistration();
         getXoClient().register();
         getXoClient().setClientString(newUserName, "happy");
 

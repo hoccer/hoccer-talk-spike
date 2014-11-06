@@ -728,6 +728,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void setClientString(String newName, String newStatus) {
         resetIdle();
         try {
+            ensureSelfContact();
+            TalkClientSelf self = mSelfContact.getSelf();
+            if (newName != null) {
+                self.setRegistrationName(newName);
+                self.confirmRegistration();
+            }
+            mDatabase.saveCredentials(self);
+
             TalkPresence presence = mSelfContact.getClientPresence();
             if(presence != null) {
                 if(newName != null) {
