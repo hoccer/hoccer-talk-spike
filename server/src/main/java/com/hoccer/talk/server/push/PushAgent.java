@@ -32,12 +32,13 @@ public class PushAgent {
     private final ITalkServerDatabase mDatabase;
 
     private Sender mGcmSender;
+    private List<PushProvider> mPushProviders;
 
     public enum APNS_SERVICE_TYPE {
         PRODUCTION, SANDBOX
     }
 
-    private final HashMap<String, HashMap<APNS_SERVICE_TYPE, ApnsService>> mApnsServices = new HashMap<String, HashMap<APNS_SERVICE_TYPE, ApnsService>>();
+    private final HashMap<ApnsPushProvider.Target, ApnsService> mApnsServices = new HashMap<ApnsPushProvider.Target, ApnsService>();
 
     private final Hashtable<String, PushRequest> mOutstanding;
 
@@ -55,12 +56,16 @@ public class PushAgent {
         mDatabase = mServer.getDatabase();
         mConfig = mServer.getConfiguration();
         mOutstanding = new Hashtable<String, PushRequest>();
+        mPushProviders = new ArrayList<PushProvider>();
+
         if (mConfig.isGcmEnabled()) {
             initializeGcm();
         }
+
         if (mConfig.isApnsEnabled()) {
             initializeApns();
         }
+
         initializeMetrics(mServer.getMetrics());
     }
 
@@ -95,16 +100,15 @@ public class PushAgent {
                 });
     }
 
-    public void submitSystemMessage(final TalkClient client, final String message) {
-        LOG.info("submitSystemMessage -> clientId: '" + client.getClientId() + "' message: '" + message + "'");
-        final PushMessage pushMessage = new PushMessage(this, client, mDatabase.findClientHostInfoForClient(client.getClientId()), message);
+    public void submitSystemMessage(final Collection<TalkClient> clients, final String message) {
         mExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 try {
-                    LOG.info(" -> initializing Message Push for clientId: '" + client.getClientId() +"'!");
-                    pushMessage.perform();
-                    LOG.info(" -> Message Push done for clientId: '" + client.getClientId() +"'!");
+                    LOG.info("pushing message '" + message + "' to " + clients.size() + " clients");
+                    for (PushProvider provider : mPushProviders) {
+                        provider.pushMessage(clients, message);
+                    }
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
                 }
@@ -183,16 +187,13 @@ public class PushAgent {
     }
 
     public ApnsService getApnsService(String clientName, APNS_SERVICE_TYPE type) {
-        if (mApnsServices.containsKey(clientName)) {
-            return mApnsServices.get(clientName).get(type);
-        }
-
-        return null;
+        return mApnsServices.get(new ApnsPushProvider.Target(clientName, type));
     }
 
     private void initializeGcm() {
         LOG.info("GCM support enabled");
         mGcmSender = new Sender(mConfig.getGcmApiKey());
+        mPushProviders.add(new GcmPushProvider(mGcmSender));
     }
 
     private void initializeApns() {
@@ -206,21 +207,17 @@ public class PushAgent {
             ApnsConfiguration.Certificate productionCertificate = apnsConfiguration.getCertificate(PushAgent.APNS_SERVICE_TYPE.PRODUCTION);
             ApnsConfiguration.Certificate sandboxCertificate = apnsConfiguration.getCertificate(PushAgent.APNS_SERVICE_TYPE.SANDBOX);
 
-            HashMap<APNS_SERVICE_TYPE, ApnsService> services = new HashMap<APNS_SERVICE_TYPE, ApnsService>();
-
             LOG.info("  * setting up APNS service (clientName: '" + clientName + "', type: '" + APNS_SERVICE_TYPE.PRODUCTION + "')");
-            services.put(APNS_SERVICE_TYPE.PRODUCTION, APNS.newService()
+            mApnsServices.put(new ApnsPushProvider.Target(clientName, APNS_SERVICE_TYPE.PRODUCTION), APNS.newService()
                     .withCert(productionCertificate.getPath(), productionCertificate.getPassword())
                     .withProductionDestination()
                     .build());
 
             LOG.info("  * setting up APNS service (clientName: '" + clientName + "', type: '" + APNS_SERVICE_TYPE.SANDBOX + "')");
-            services.put(APNS_SERVICE_TYPE.SANDBOX, APNS.newService()
+            mApnsServices.put(new ApnsPushProvider.Target(clientName, APNS_SERVICE_TYPE.SANDBOX), APNS.newService()
                     .withCert(sandboxCertificate.getPath(), sandboxCertificate.getPassword())
                     .withSandboxDestination()
                     .build());
-
-            mApnsServices.put(clientName, services);
         }
 
         // set up invalidation
@@ -239,30 +236,31 @@ public class PushAgent {
                 }
             }, delay, interval, TimeUnit.SECONDS);
         }
+
+        mPushProviders.add(new ApnsPushProvider(mApnsServices, mDatabase, mConfig.getApnsDefaultClientName()));
     }
 
     private void invalidateApns() {
         LOG.info("APNS retrieving inactive devices");
 
-        for (Map.Entry<String, HashMap<APNS_SERVICE_TYPE, ApnsService>> clientServices : mApnsServices.entrySet()) {
-            String clientName = clientServices.getKey();
+        for (Map.Entry<ApnsPushProvider.Target, ApnsService> entry : mApnsServices.entrySet()) {
+            ApnsPushProvider.Target target = entry.getKey();
+            ApnsService service = entry.getValue();
 
-            for (Map.Entry<APNS_SERVICE_TYPE, ApnsService> entry : clientServices.getValue().entrySet()) {
-                final APNS_SERVICE_TYPE type = entry.getKey();
-                final ApnsService service = entry.getValue();
+            LOG.info("  * APNS retrieving inactive devices from " + target.type + " for clientName " + target.clientName);
+            Map<String, Date> inactive = service.getInactiveDevices();
 
-                LOG.info("  * APNS retrieving inactive devices from " + type + " for clientName " + clientName);
-                final Map<String, Date> inactive = service.getInactiveDevices();
-                if (!inactive.isEmpty()) {
-                    LOG.info("  * APNS reports " + inactive.size() + " inactive devices");
-                    for (String token : inactive.keySet()) {
-                        TalkClient client = mDatabase.findClientByApnsToken(token);
-                        if (client == null) {
-                            LOG.warn("    * APNS invalidates unknown client (token '" + token + "')");
-                        } else {
-                            LOG.info("    * APNS client '" + client.getClientId() + "' invalid since '" + inactive.get(token) + "'");
-                            client.setApnsToken(null);
-                        }
+            if (!inactive.isEmpty()) {
+                LOG.info("  * APNS reports " + inactive.size() + " inactive devices");
+
+                for (String token : inactive.keySet()) {
+                    TalkClient client = mDatabase.findClientByApnsToken(token);
+
+                    if (client == null) {
+                        LOG.warn("    * APNS invalidates unknown client (token '" + token + "')");
+                    } else {
+                        LOG.info("    * APNS client '" + client.getClientId() + "' invalid since '" + inactive.get(token) + "'");
+                        client.setApnsToken(null);
                     }
                 }
             }
