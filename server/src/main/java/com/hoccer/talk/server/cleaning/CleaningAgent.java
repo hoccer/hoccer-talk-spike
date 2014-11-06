@@ -234,7 +234,7 @@ public class CleaningAgent {
         TalkPresence presence = mDatabase.findPresenceForClient(clientId);
         List<TalkKey> keys = mDatabase.findKeys(clientId);
         for (TalkKey key : keys) {
-            if (presence == null || key.getKeyId().equals(presence.getKeyId())) {
+            if (key.getKeyId().equals(presence.getKeyId())) {
                 LOG.debug("keeping " + key.getKeyId() + " because it is used");
                 continue;
             }
