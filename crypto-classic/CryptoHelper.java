@@ -430,18 +430,6 @@ public class CryptoHelper {
 		return toHex(encryptRSA(pub, clear.getBytes()));
 	}
 
-	/*
-	 * saveToFile("public.key", pub.getModulus(), pub.getPublicExponent());
-	 * saveToFile("private.key", priv.getModulus(), priv.getPrivateExponent());
-	 */
-	/*
-	 * public static void saveToFile(String fileName, BigInteger mod, BigInteger
-	 * exp) throws Exception { ObjectOutputStream oout = new ObjectOutputStream(
-	 * new BufferedOutputStream(new FileOutputStream(fileName))); try {
-	 * oout.writeObject(mod); oout.writeObject(exp); } catch (Exception e) {
-	 * throw new Exception("error", e); } finally { oout.close(); } }
-	 */
-
 	public static byte[] concat(byte[] first, byte[] second) {
 		byte[] result = new byte[first.length + second.length];
 		System.arraycopy(first, 0, result, 0, first.length);

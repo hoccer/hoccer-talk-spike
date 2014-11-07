@@ -1,6 +1,9 @@
 package com.hoccer.xo.android.fragment;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
@@ -24,6 +27,8 @@ import java.sql.SQLException;
 
 public class SingleProfileCreationFragment extends XoFragment implements IXoContactListener, View.OnClickListener, ActionMode.Callback {
 
+    private static final String HOCCER_CLASSIC_PREFERENCES = "com.artcom.hoccer_preferences";
+
     private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
 
     private ActionMode mActionMode;
@@ -35,6 +40,26 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
     private TalkClientContact mContact;
     private String mAvatarUrl;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        showWelcomeDialogIfUpdatedFromHoccerClassic();
+    }
+
+    private void showWelcomeDialogIfUpdatedFromHoccerClassic() {
+        if (hasUpdatedFromHoccerClassic()) {
+            XoDialogs.showOkDialog(null, R.string.hoccer_3_0, R.string.welcome_hoccer_classic_users, getActivity());
+        }
+    }
+
+    private boolean hasUpdatedFromHoccerClassic() {
+        SharedPreferences preferences = getActivity().getSharedPreferences(HOCCER_CLASSIC_PREFERENCES, Context.MODE_PRIVATE);
+        if (preferences != null) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -155,7 +180,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         if (mContact.isSelf()) {
             TalkClientUpload avatarUpload = mContact.getAvatarUpload();
             if (avatarUpload != null && avatarUpload.isContentAvailable()) {
-                 mAvatarUrl = avatarUpload.getContentDataUrl();
+                mAvatarUrl = avatarUpload.getContentDataUrl();
             }
         } else {
             TalkClientDownload avatarDownload = mContact.getAvatarDownload();
