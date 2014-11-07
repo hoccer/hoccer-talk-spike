@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Hoccer XO</string>
+    <string name="app_name">${app.name}</string>
 
     <string name="demo_message">Lorem ipsum dolor…</string>
 
@@ -24,18 +24,20 @@
     <string name="menu_profile">Profile</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_music_viewer">Media</string>
-    <string name="menu_about">About Hoccer XO</string>
+    <string name="menu_about">About ${app.name}</string>
     <string name="menu_faq">FAQ</string>
     <string name="menu_tutorial">Tutorial</string>
     <string name="menu_reconnect">Reconnect</string>
     <string name="menu_quit">Quit</string>
     <string name="menu_clear_conversation">Clear conversation</string>
+    <string name="menu_contacts">Contacts</string>
 
     <!-- Tutorial and FAQ links -->
     <string name="link_tutorial">http://faq.hoccer.com/tutorial-xo/</string>
     <string name="link_faq">http://faq.hoccer.com/faq-xo/</string>
 
     <!-- Contacts fragment -->
+    <string name="contacts_title">Contacts</string>
     <string name="contacts_category_friends">Friends</string>
     <string name="contacts_category_groups">Groups</string>
     <string name="contacts_empty_info">You have no contacts.</string>
@@ -44,9 +46,24 @@
     <string name="contacts_sms_invitation_description">has sent you an invitation via SMS.
         Do you wish to accept?
     </string>
+    <string name="message_and_attachment_count_info">%1$d messages | %2$d attachments</string>
+    <string name="blocked_contact">Blocked contact</string>
+
+    <!-- Friend decline invitation dialog -->
+    <string name="friend_request_decline_invitation_title">Decline invitation?</string>
+    <string name="friend_request_decline_invitation_message">Do you really want to decline the invitation from %1$s?</string>
+
+    <!-- Groups fragment -->
+    <plurals name="groups_and_x_more">
+        <item quantity="one">and one more</item>
+        <item quantity="other">and %1$d more</item>
+    </plurals>
+
+    <!-- Group decline invitation dialog -->
+    <string name="group_request_decline_invitation_title">Decline group invitation?</string>
+    <string name="group_request_decline_invitation_message">Do you really want to decline the group invitation from %1$s?</string>
 
     <!-- Deleting attachments -->
-
     <string name="dialog_attachment_delete_title">Delete Attachment</string>
     <string name="dialog_attachment_delete_message">Delete selected attachments and related chat messages?</string>
 
@@ -79,7 +96,6 @@
     <!-- Contact list items -->
     <string name="contact_name_new_client">New Friend</string>
     <string name="contact_name_new_group">New Group</string>
-    <string name="contact_status">Hello there!</string>
     <string name="contact_role_owner">Owner</string>
 
     <!-- Composition fragment -->
@@ -149,8 +165,7 @@
     <string name="friend_request_cancel_invitation">Cancel invitation</string>
     <string name="friend_request_accept_invitation">Accept invitation</string>
     <string name="friend_request_decline_invitation">Decline invitation</string>
-    <string name="friend_request_invited_me_description">wants to be your friend.</string>
-    <string name="friend_request_invited_by_you_description">has received an invitation from you.</string>
+    <string name="friend_request_invite_send">Invite sent</string>
 
     <string name="group_name_hint">Group name</string>
     <string name="profile_group_members_title">Members</string>
@@ -347,9 +362,9 @@
     <string name="contact_item_sent_attachment">Sent %1$s attachment</string>
     <string name="error_avatar_selection">The image you have selected is not suitable as Avatar.</string>
     <string name="error_attachment_selection">The file you have selected cannot be used as an attachment.</string>
-    <string name="sms_invitation_text">Hey! I\'m now using the free app Hoccer XO for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\nxo %3$s</string>
-    <string name="email_invitation_subject">Join me at Hoccer!</string>
-    <string name="email_invitation_text">Hey!&lt;br&gt;I\'m now using the free app Hoccer XO for secure chatting. Download it now and add me as contact:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
+    <string name="sms_invitation_text">Hey! I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\nxo %3$s</string>
+    <string name="email_invitation_subject">Join me at ${app.name}!</string>
+    <string name="email_invitation_text">Hey!&lt;br&gt;I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as contact:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
     <string name="dialog_export_credentials_title">Export credentials</string>
     <string name="export_credentials_success">Successfully saved your credentials.</string>
     <string name="export_credentials_failure">Error while saving your credentials.</string>
@@ -364,9 +379,11 @@
 
     <string-array name="tab_names">
         <item>CHATS</item>
-        <item>INVITATIONS</item>
         <item>NEARBY</item>
     </string-array>
+
+    <string name="contacts_tab_friends">FRIENDS</string>
+    <string name="contacts_tab_groups">GROUPS</string>
 
     <string name="qr_code_tab_scan">SCAN</string>
     <string name="qr_code_tab_generate">GENERATE</string>
@@ -375,10 +392,9 @@
 
     <string name="preference_database_title">Local Database</string>
     <string name="placeholder_conversations_text">Invite friends to chat with!</string>
-    <string name="tutorial_nearby_anchor">nearby</string>
-    <string name="placeholder_nearby_text">Waiting for others %1$s…</string>
-    <string name="placeholder_nearby_link_text">nearby</string>
-    <string name="actionbar_default_title">Hoccer</string>
+    <string name="placeholder_groups_text">Create groups to chat with many friends at once.</string>
+    <string name="placeholder_nearby_text">Waiting for others <![CDATA[<a href="http://faq.hoccer.com/tutorial-xo/#nearby">nearby</a>]]>…</string>
+    <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Media</string>
     <string name="content_audio_by_contact_caption">Media from %1$s</string>
     <string name="nearby_info_usercount">%1$d Users are Nearby</string>
@@ -391,7 +407,7 @@
     <string name="error_send_message_blocked">The contact is blocked. Message will not be sent.</string>
     <string name="invite_several_entries">Has several entries</string>
 
-    <string name="about_advert_text">Hoccer XO \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. Hoccer sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. Hoccer XO provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
+    <string name="about_advert_text">${app.name} \n- your secure multimedia messenger\n\nSecurity, data protection and the protection of privacy are of extreme importance to us. ${app.name} sets new standards in mobile data transmission and puts mobile privacy to a whole new level, due to latest encryption and transmission technologies. ${app.name} provides an easy and unlimited exchange of data between smartphones and tablets, without constraining users to register and enter confidential data.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s (%2$d)</string>
 
     <string name="search_section_caption_contacts">Contacts</string>
@@ -423,10 +439,33 @@
 
     <string name="attachment_failed">Error while downloading File.</string>
     <string name="error_compatible_app_unavailable">No app found to open the selected item.</string>
-    <string name="toast_stored_external_file_to_clipboard">Your file has been stored in the clipboard.</string>
+    <string name="toast_stored_file_in_clipboard">Your file has been stored in the clipboard.</string>
+    <string name="toast_failed_to_store_file_in_clipboard">Sorry, this file could not be stored in the clipboard.</string>
 
     <!-- Nearby all invite texts -->
     <string name="nearby_invite_all">invite %1$d group members as friend</string>
     <string name="nearby_disinvite_all">disinvite %1$d group members as friend</string>
 
+    <string name="profile_chat_info_text">Chat</string>
+    <!--<string name="messages_count">%1$s Messages</string>-->
+
+    <!-- Hoccer XO Credentials Import -->
+    <string name="existing_hoccer_xo_profile">Hey, we\'ve found an existing Hoccer XO Profile you can use.</string>
+    <string name="import_or_create_new_profile">You can import your old Profile or create a fresh new one.</string>
+    <string name="import_credentials">Import Credentials</string>
+    <string name="new_profile">New Profile</string>
+    <string name="reading_profile_data">Reading profile data ..</string>
+    <string name="existing_hoccer_xo">Hey, we\'ve found an existing Hoccer XO version.</string>
+    <string name="update_and_import_profile">You can import your old Profile, but you have to update Hoccer XO first.</string>
+    <string name="update_hoccer_xo">Update Hoccer XO</string>
+
+    <plurals name="contact_count">
+        <item quantity="one">1 Contact</item>
+        <item quantity="other">%d Contacts</item>
+    </plurals>
+
+    <plurals name="message_count">
+        <item quantity="one">1 Message</item>
+        <item quantity="other">%d Messages</item>
+    </plurals>
 </resources>

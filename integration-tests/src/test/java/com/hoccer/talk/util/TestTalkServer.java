@@ -11,7 +11,9 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.websocket.WebSocketHandler;
 
-/** this class just wraps a mongodb, a talkserver and a jetty server in one convenient class for test purposes */
+/**
+ * this class just wraps a mongodb, a talkserver and a jetty server in one convenient class for test purposes
+ */
 public class TestTalkServer {
 
     private final Server s;

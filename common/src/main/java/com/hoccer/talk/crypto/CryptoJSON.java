@@ -5,60 +5,77 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.codec.binary.Base64;
 
-
+/**
+ * Provides utility methods to encrypt/decrypt a given string in/from a encrypted JSON container.
+ */
 public class CryptoJSON {
 
-    public static byte[] encryptedContainer(byte[] plainText, String password, String contentType) throws Exception {
-        byte[] salt = AESCryptor.makeRandomBytes(32);
-        byte[] key = AESCryptor.make256BitKeyFromPassword_PBKDF2WithHmacSHA256(password, salt);
-        byte[] cipherText = AESCryptor.encrypt(key,null,plainText);
-        String cipherTextString = new String(Base64.encodeBase64(cipherText)); // TODO: workaround for library BASE64 < version 1.4
-        String saltString = new String(Base64.encodeBase64(salt)); // TODO: workaround for library BASE64 < version 1.4
+    /**
+     * Creates a JSON container containing the given content.
+     *
+     * @param content     The content to encrypt.
+     * @param password    The password used for encryption.
+     * @param contentType The content type information. This information is added to the container.
+     * @return The byte array of the container.
+     * @throws Exception
+     */
+    public static byte[] encrypt(final byte[] content, final String password, final String contentType) throws Exception {
+        final byte[] salt = AESCryptor.makeRandomBytes(32);
+        final byte[] key = AESCryptor.make256BitKeyFromPassword_PBKDF2WithHmacSHA256(password, salt);
+        final byte[] cipherText = AESCryptor.encrypt(key, null, content);
+        final String cipherTextString = new String(Base64.encodeBase64(cipherText)); // TODO: workaround for library BASE64 < version 1.4
+        final String saltString = new String(Base64.encodeBase64(salt)); // TODO: workaround for library BASE64 < version 1.4
 
-        ObjectMapper jsonMapper = new ObjectMapper();
-        ObjectNode rootNode = jsonMapper.createObjectNode();
+        final ObjectMapper jsonMapper = new ObjectMapper();
+        final ObjectNode rootNode = jsonMapper.createObjectNode();
         rootNode.put("container", "AESPBKDF2");
         rootNode.put("contentType", contentType);
         rootNode.put("salt", saltString);
         rootNode.put("ciphered", cipherTextString);
-        String jsonString = jsonMapper.writeValueAsString(rootNode);
+        final String jsonString = jsonMapper.writeValueAsString(rootNode);
         return jsonString.getBytes("UTF-8");
     }
 
-    public static byte[] decryptedContainer(byte[] jsonContainer, String password, String contentType) throws Exception {
-
-        ObjectMapper jsonMapper = new ObjectMapper();
-        JsonNode json = jsonMapper.readTree(jsonContainer);
-        if (json == null ||  !json.isObject()) {
+    /**
+     * Encrypts the content of the given encrypted container.
+     *
+     * @param container           The byte array of the container.
+     * @param password            The password used to decrypt the container.
+     * @param expectedContentType The expected content type. Needs to match with the container content type.
+     * @return The byte array of the decrypted content.
+     * @throws Exception
+     */
+    public static byte[] decrypt(final byte[] container, final String password, final String expectedContentType) throws Exception {
+        final ObjectMapper jsonMapper = new ObjectMapper();
+        final JsonNode json = jsonMapper.readTree(container);
+        if (json == null || !json.isObject()) {
             throw new Exception("parseEncryptedContainer: not a json object");
         }
-        JsonNode container = json.get("container");
-        if (container == null || !"AESPBKDF2".equals(container.asText())) {
+        final JsonNode containerNode = json.get("container");
+        if (containerNode == null || !"AESPBKDF2".equals(containerNode.asText())) {
             throw new Exception("parseEncryptedContainer: bad or missing container identifier");
         }
-        JsonNode contentTypeNode = json.get("contentType");
-        if (contentTypeNode == null || !contentTypeNode.asText().equals(contentType)) {
+        final JsonNode contentTypeNode = json.get("contentType");
+        if (contentTypeNode == null || !contentTypeNode.asText().equals(expectedContentType)) {
             throw new Exception("parseEncryptedContainer: wrong or missing contentType");
         }
-        JsonNode saltNode = json.get("salt");
-        if (saltNode == null ) {
+        final JsonNode saltNode = json.get("salt");
+        if (saltNode == null) {
             throw new Exception("parseEncryptedContainer: wrong or missing salt");
         }
-        byte[] salt = Base64.decodeBase64(saltNode.asText().getBytes()); // TODO: workaround for library BASE64 < version 1.4
+        final byte[] salt = Base64.decodeBase64(saltNode.asText().getBytes()); // TODO: workaround for library BASE64 < version 1.4
         if (salt.length != 32) {
             throw new Exception("parseEncryptedContainer: bad salt length (must be 32)");
         }
-        JsonNode cipheredNode = json.get("ciphered");
+        final JsonNode cipheredNode = json.get("ciphered");
         if (cipheredNode == null) {
             throw new Exception("parseEncryptedContainer: wrong or missing ciphered content");
         }
-        byte[] ciphered = Base64.decodeBase64(cipheredNode.asText().getBytes()); // TODO: workaround for library BASE64 < version 1.4
+        final byte[] ciphered = Base64.decodeBase64(cipheredNode.asText().getBytes()); // TODO: workaround for library BASE64 < version 1.4
         if (ciphered == null) {
             throw new Exception("parseEncryptedContainer: ciphered content not base64");
         }
-        byte[] key = AESCryptor.make256BitKeyFromPassword_PBKDF2WithHmacSHA256(password, salt);
-        byte[] plainText = AESCryptor.decrypt(key,null,ciphered);
-        return plainText;
+        final byte[] key = AESCryptor.make256BitKeyFromPassword_PBKDF2WithHmacSHA256(password, salt);
+        return AESCryptor.decrypt(key, null, ciphered);
     }
-
 }

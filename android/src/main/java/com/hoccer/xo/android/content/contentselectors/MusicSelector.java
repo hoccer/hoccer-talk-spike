@@ -18,7 +18,7 @@ public class MusicSelector implements IContentSelector {
 
     public MusicSelector(Context context) {
         mName = context.getResources().getString(R.string.content_music);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context, R.drawable.ic_attachment_select_media, true);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_media, true);
     }
 
     @Override

@@ -149,11 +149,10 @@ public abstract class XoActivity extends FragmentActivity {
 
 
     // Application background/foreground observation
-    public static boolean isAppInBackground = false;
-    public static boolean isWindowFocused = false;
-    public static boolean isMenuOpened = false;
-    public static boolean isBackPressed = false;
-    public static boolean isBackgroundActive = false;
+    private static boolean isAppInBackground = false;
+    private static boolean isWindowFocused = false;
+    private static boolean isBackOrUpPressed = false;
+    private static boolean isBackgroundActive = false;
 
     protected void applicationWillEnterForeground() {
         LOG.debug("Application will enter foreground.");
@@ -233,14 +232,6 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     @Override
-    protected void onStart() {
-        if (isAppInBackground || isBackgroundActive) {
-            applicationWillEnterForeground();
-        }
-        super.onStart();
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
         if (!isWindowFocused) {
@@ -254,17 +245,21 @@ public abstract class XoActivity extends FragmentActivity {
 
     @Override
     public void onBackPressed() {
-        if (!(this instanceof ChatsActivity)) {
-            isBackPressed = true;
-        }
+        setBackOrUpPressed();
         super.onBackPressed();
+    }
+
+    private void setBackOrUpPressed() {
+        if (!(this instanceof ChatsActivity)) {
+            isBackOrUpPressed = true;
+        }
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         isWindowFocused = hasFocus;
-        if (isBackPressed && !hasFocus) {
-            isBackPressed = false;
+        if (isBackOrUpPressed && !hasFocus) {
+            isBackOrUpPressed = false;
             isWindowFocused = true;
         }
         super.onWindowFocusChanged(hasFocus);
@@ -301,13 +296,11 @@ public abstract class XoActivity extends FragmentActivity {
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
         // screen state listener
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         mScreenListener = new ScreenReceiver();
         registerReceiver(mScreenListener, filter);
 
         mAlertListener = new XoAlertListener(this);
-
     }
 
     @Override
@@ -344,6 +337,11 @@ public abstract class XoActivity extends FragmentActivity {
     protected void onResume() {
         LOG.debug("onResume()");
         super.onResume();
+
+        if (isAppInBackground || isBackgroundActive) {
+            applicationWillEnterForeground();
+        }
+
         checkForCrashesIfEnabled();
 
         // start the backend service and bind to it
@@ -464,22 +462,14 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     private class ScreenReceiver extends BroadcastReceiver {
-
-        private boolean wasScreenOn = true;
-
         @Override
         public void onReceive(final Context context, final Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                wasScreenOn = false;
-            } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                wasScreenOn = true;
+                if (!isAppInBackground) {
+                    applicationWillEnterBackground();
+                }
             }
         }
-
-        public boolean isScreenOn() {
-            return wasScreenOn;
-        }
-
     }
 
     @Override
@@ -610,6 +600,8 @@ public abstract class XoActivity extends FragmentActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && mUpEnabled) {
             Intent upIntent = getParentActivityIntent();
             if (upIntent != null) {
+                setBackOrUpPressed();
+
                 // we have a parent, navigate up
                 if (shouldUpRecreateTask(upIntent)) {
                     // we are not on our own task stack, so create one
@@ -782,9 +774,6 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
-    }
-
-    public void clipBoardItemSelected(IContentObject contentObject) {
     }
 
     /**

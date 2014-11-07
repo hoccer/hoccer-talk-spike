@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.XoConfiguration;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
@@ -33,7 +32,6 @@ import java.io.FileOutputStream;
 
 public class ChatVideoItem extends ChatMessageItem {
 
-    private RelativeLayout mRootView;
     private String mThumbnailPath;
     private ImageView mTargetView;
     private MediaScannedReceiver mMediaScannedReceiver;
@@ -80,9 +78,6 @@ public class ChatVideoItem extends ChatMessageItem {
             }
         });
 
-        mAttachmentView.setPadding(0, 0, 0, 0);
-        mAttachmentView.setBackgroundDrawable(null);
-
         // calc default view size
         double width_scale_factor = mAvatarView.getVisibility() == View.VISIBLE ? ChatImageItem.WIDTH_AVATAR_SCALE_FACTOR : ChatImageItem.WIDTH_SCALE_FACTOR;
         int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * width_scale_factor);
@@ -91,15 +86,15 @@ public class ChatVideoItem extends ChatMessageItem {
         int height = maxHeight;
 
         // retrieve thumbnail path if not set already
-        if(mThumbnailPath == null) {
+        if (mThumbnailPath == null) {
             mThumbnailPath = retrieveThumbnailPath(Uri.parse(contentObject.getContentDataUrl()));
         }
 
         // adjust width/height based on thumbnail size if it exists
-        if(mThumbnailPath != null) {
+        if (mThumbnailPath != null) {
             // calc image aspect ratio
             Point imageSize = ImageUtils.getImageSize(mThumbnailPath);
-            double aspectRatio = (double)imageSize.x / (double)imageSize.y;
+            double aspectRatio = (double) imageSize.x / (double) imageSize.y;
             Point boundImageSize = ImageUtils.getImageSizeInBounds(aspectRatio, maxWidth, maxHeight);
             width = boundImageSize.x;
             height = boundImageSize.y;
@@ -109,32 +104,39 @@ public class ChatVideoItem extends ChatMessageItem {
         }
 
         // register layout change listener and resize thumbnail view
-        mRootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
-        mRootView.getLayoutParams().width = width;
-        mRootView.getLayoutParams().height = height;
-
-        // load thumbnail with picasso
-        mTargetView = (ImageView) mRootView.findViewById(R.id.iv_picture);
-        Picasso.with(mContext).setLoggingEnabled(XoConfiguration.DEVELOPMENT_MODE_ENABLED);
-        Picasso.with(mContext).load("file://" + mThumbnailPath)
-                .error(R.drawable.ic_img_placeholder_error)
-                .resize(width, height)
-                .centerInside()
-                .into(mTargetView);
+        RelativeLayout rootView = (RelativeLayout) mContentWrapper.findViewById(R.id.rl_root);
+        rootView.getLayoutParams().width = width;
+        rootView.getLayoutParams().height = height;
 
         // set gravity and message bubble mask
-        ImageView bubbleMaskView = (ImageView) mContentWrapper.findViewById(R.id.iv_picture_overlay);
+        ImageView overlayView = (ImageView) mContentWrapper.findViewById(R.id.iv_picture_overlay);
         if (mMessage.isIncoming()) {
             mContentWrapper.setGravity(Gravity.LEFT);
-            bubbleMaskView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
+            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_incoming));
         } else {
             mContentWrapper.setGravity(Gravity.RIGHT);
-            bubbleMaskView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
+            overlayView.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.chat_bubble_inverted_outgoing));
         }
+
+        // we need to copy the background to rootview which will have the correct bubble size
+        rootView.setBackgroundDrawable(mAttachmentView.getBackground());
+        rootView.setPadding(0, 0, 0, 0);
+        mAttachmentView.setBackgroundDrawable(null);
+        mAttachmentView.setPadding(0, 0, 0, 0);
+
+        // load thumbnail with picasso
+        mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
+        Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
+        Picasso.with(mContext).load("file://" + mThumbnailPath)
+                .error(R.drawable.ic_img_placeholder)
+                .resize((int) (width * ChatImageItem.IMAGE_SCALE_FACTOR), (int) (height * ChatImageItem.IMAGE_SCALE_FACTOR))
+                .centerInside()
+                .into(mTargetView);
+        LOG.trace(Picasso.with(mContext).getSnapshot().toString());
     }
 
     private void listenToMediaScannedIntent(boolean doListen) {
-        if(doListen) {
+        if (doListen) {
             if (mMediaScannedReceiver == null) {
                 IntentFilter filter = new IntentFilter(MediaScannedReceiver.class.getName());
                 filter.addAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
@@ -142,7 +144,7 @@ public class ChatVideoItem extends ChatMessageItem {
                 mContext.registerReceiver(mMediaScannedReceiver, filter);
             }
         } else {
-            if(mMediaScannedReceiver != null) {
+            if (mMediaScannedReceiver != null) {
                 mContext.unregisterReceiver(mMediaScannedReceiver);
                 mMediaScannedReceiver = null;
             }
@@ -151,9 +153,8 @@ public class ChatVideoItem extends ChatMessageItem {
 
     @Override
     public void detachView() {
-        // check for null in case display attachment has not yet been called
+        // cancel image loading if in case display attachment has been called
         if (mTargetView != null) {
-            // cancel image loading request
             Picasso.with(mContext).cancelRequest(mTargetView);
         }
         listenToMediaScannedIntent(false);
@@ -192,7 +193,7 @@ public class ChatVideoItem extends ChatMessageItem {
         long videoId = getVideoId(videoUri);
         if (videoId > 0) {
             Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(mContext.getContentResolver(), videoId, MediaStore.Video.Thumbnails.MINI_KIND, new BitmapFactory.Options());
-            if(thumbnail != null) {
+            if (thumbnail != null) {
                 try {
                     thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(thumbnailUri.toString()));
                     return true;
@@ -252,7 +253,7 @@ public class ChatVideoItem extends ChatMessageItem {
     private void onMediaScanned(String uri) {
         // call display attachment again assuming that the file is now known
         // be aware that this callback is invoked on every scan of the target file as long as thumbnail could be created
-        if(uri.equals(mContentObject.getContentUrl())) {
+        if (uri.equals(mContentObject.getContentUrl())) {
             displayAttachment(mContentObject);
             listenToMediaScannedIntent(false);
         }
@@ -262,7 +263,7 @@ public class ChatVideoItem extends ChatMessageItem {
         @Override
         public void onReceive(Context arg0, Intent intent) {
             String uri = intent.getStringExtra(IntentHelper.EXTRA_MEDIA_URI);
-            if(uri != null) {
+            if (uri != null) {
                 onMediaScanned(uri);
             }
         }

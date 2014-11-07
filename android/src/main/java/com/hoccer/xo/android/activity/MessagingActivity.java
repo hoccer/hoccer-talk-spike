@@ -31,8 +31,6 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
 
     Fragment mCurrentFragment;
 
-    private IContentObject mClipboardAttachment;
-
     @Override
     protected ActivityComponent[] createComponents() {
         return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
@@ -95,43 +93,37 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
     }
 
     @Override
-    public void showPopupForMessageItem(ChatMessageItem messageItem, View messageItemView) {
-        IContentObject contentObject = messageItem.getContent();
-        final int messageId = messageItem.getMessage().getClientMessageId();
-        final String messageText = messageItem.getText();
+    public void showPopupForMessageItem(final ChatMessageItem messageItem, View messageItemView) {
         PopupMenu popup = new PopupMenu(this, messageItemView);
-        if (contentObject != null) {
-            if (contentObject.isContentAvailable()) {
-                mClipboardAttachment = contentObject;
-            }
-        }
         popup.getMenuInflater().inflate(R.menu.popup_menu_messaging, popup.getMenu());
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
-                popupItemSelected(item, messageId, messageText);
+                popupItemSelected(item, messageItem);
                 return true;
             }
         });
         popup.show();
     }
 
-    public void popupItemSelected(MenuItem item, int messageId, String text) {
+    private void popupItemSelected(MenuItem item, ChatMessageItem messageItem) {
         switch (item.getItemId()) {
             case R.id.menu_copy_message:
-                if (mClipboardAttachment != null) {
-                    Clipboard clipboard = Clipboard.get(this);
-                    clipboard.storeAttachment(mClipboardAttachment);
-                    mClipboardAttachment = null;
+                if (messageItem.getContent() != null && messageItem.getContent().isContentAvailable()) {
+                    Clipboard.getInstance().setContent(messageItem.getContent());
                 } else {
-                    ClipboardManager clipboardText = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("simple text", text);
-                    clipboardText.setPrimaryClip(clip);
+                    putMessageTextInSystemClipboard(messageItem);
                 }
                 break;
             case R.id.menu_delete_message:
-                getXoClient().deleteMessage(messageId);
+                getXoClient().deleteMessage(messageItem.getMessage());
                 break;
         }
+    }
+
+    private void putMessageTextInSystemClipboard(ChatMessageItem messageItem) {
+        ClipboardManager clipboardText = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("simple text", messageItem.getText());
+        clipboardText.setPrimaryClip(clip);
     }
 
     public void setActionBarText(TalkClientContact contact) {
@@ -142,13 +134,6 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
             title = contact.getNickname();
         }
         mActionBar.setTitle(title);
-    }
-
-    @Override
-    public void clipBoardItemSelected(IContentObject contentObject) {
-        if (mCurrentFragment instanceof MessagingFragment) {
-            ((MessagingFragment) mCurrentFragment).onAttachmentSelected(contentObject);
-        }
     }
 
     @Override

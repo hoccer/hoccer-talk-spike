@@ -10,7 +10,7 @@ public class ClientRegister extends TalkToolClientCommand {
 
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) throws Exception {
-        client.getClient().getSelfContact().updateSelfConfirmed();
+        client.getClient().getSelfContact().getSelf().confirmRegistration();
         client.getClient().register();
     }
 

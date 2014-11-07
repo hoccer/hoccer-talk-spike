@@ -31,6 +31,7 @@ public class TalkRelationship {
         return STATES_VALID_SET.contains(state);
     }
 
+    // needed for ormlight database
     private String _id;
 
     @DatabaseField(generatedId = true)
@@ -50,9 +51,6 @@ public class TalkRelationship {
 
     @DatabaseField
     Date lastChanged;
-
-    public TalkRelationship() {
-    }
 
     @JsonIgnore
     public boolean isRelated() {
@@ -105,7 +103,6 @@ public class TalkRelationship {
         this.otherClientId = otherClientId;
     }
 
-//    @Nullable
     public String getState() {
         return state;
     }

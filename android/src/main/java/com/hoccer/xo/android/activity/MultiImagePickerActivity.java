@@ -19,7 +19,7 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import com.hoccer.xo.android.XoConfiguration;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.SquaredImageView;
 import com.hoccer.xo.android.view.SquaredRelativeLayout;
@@ -229,7 +229,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                         holder.squaredRelativeLayout.setSelected(true);
                         holder.squaredRelativeLayout.setVisibility(View.VISIBLE);
                         mSelectedImages.add(imageUri.toString());
-                        if (XoConfiguration.DEVELOPMENT_MODE_ENABLED) {
+                        if (XoApplication.getConfiguration().isDevelopmentModeEnabled()) {
                             LOG.info("Selected image path: " + imagePath);
                         }
                     } else {

@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import com.google.android.gcm.GCMRegistrar;
 import com.hoccer.talk.android.push.TalkPushService;
 import com.hoccer.talk.client.*;
@@ -64,8 +65,9 @@ public class XoClientService extends Service {
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
     private static final long NOTIFICATION_ALARM_BACKOFF = 10000;
-    private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
     private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
+    private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
+    private static final int NOTIFICATION_PUSH_MESSAGE = 2;
 
     private static final String DEFAULT_TRANSFER_LIMIT = "-1";
 
@@ -230,6 +232,10 @@ public class XoClientService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         LOG.debug("onStartCommand(" + ((intent == null) ? "null" : intent.toString()) + ")");
         if (intent != null) {
+            if (intent.hasExtra(TalkPushService.EXTRA_SHOW_MESSAGE)) {
+                String message = intent.getStringExtra(TalkPushService.EXTRA_SHOW_MESSAGE);
+                createPushMessageNotification(message);
+            }
             if (intent.hasExtra(TalkPushService.EXTRA_WAKE_CLIENT)) {
                 wakeClientInBackground();
             }
@@ -594,12 +600,12 @@ public class XoClientService extends Service {
                 }
 
                 // ignore clients with whom we are not befriended
-                if(contact.isClient() && !contact.isClientFriend()) {
+                if (contact.isClient() && !contact.isClientFriend()) {
                     continue;
                 }
 
                 // ignore groups which we are not joined with yet
-                if(contact.isGroup() && !contact.isGroupJoined()) {
+                if (contact.isGroup() && !contact.isGroupJoined()) {
                     continue;
                 }
 
@@ -731,6 +737,39 @@ public class XoClientService extends Service {
             logMessage.append(holder.getContact().getNickname()).append("(").append(holder.getUnseenMessages().size()).append(") ");
         }
         LOG.debug(logMessage);
+    }
+
+    private void createPushMessageNotification(String message) {
+        // create intent
+        Intent pushMessageIntent = new Intent(this, ChatsActivity.class);
+        pushMessageIntent.putExtra(IntentHelper.EXTRA_PUSH_MESSAGE, message);
+
+        // make a pending intent with correct back-stack
+        PendingIntent pendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            pendingIntent =
+                    TaskStackBuilder.create(this)
+                            .addParentStack(ChatsActivity.class)
+                            .addNextIntentWithParentStack(pushMessageIntent)
+                            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
+            pendingIntent = PendingIntent
+                    .getActivity(this, 0, pushMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
+        Notification notification = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setContentTitle(getResources().getString(R.string.app_name))
+                .setContentIntent(pendingIntent)
+                .setContentText(message)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                .bigText(message))
+                .build();
+
+
+        mNotificationManager.notify(NOTIFICATION_PUSH_MESSAGE, notification);
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {

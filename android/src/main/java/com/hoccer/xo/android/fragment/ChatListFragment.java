@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
@@ -11,13 +10,12 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MessagingActivity;
-import com.hoccer.xo.android.adapter.ChatsAdapter;
-import com.hoccer.xo.android.adapter.OnItemCountChangedListener;
+import com.hoccer.xo.android.adapter.ChatListAdapter;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.dialog.TokenDialog;
-import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.view.model.BaseContactItem;
+import com.hoccer.xo.android.view.Placeholder;
+import com.hoccer.xo.android.view.model.BaseChatItem;
 import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
@@ -25,26 +23,20 @@ import java.lang.ref.WeakReference;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Fragment that shows a list of contacts
- * <p/>
- * This currently shows only contact data but should also be able to show
- * recent conversations for use as a "conversations" view.
- */
-public class ChatListFragment extends SearchableListFragment implements OnItemCountChangedListener {
+public class ChatListFragment extends SearchableListFragment {
 
     private static final Logger LOG = Logger.getLogger(ChatListFragment.class);
+    private static final Placeholder PLACEHOLDER = new Placeholder(
+            R.drawable.placeholder_chats,
+            R.drawable.placeholder_chats_head,
+            R.string.placeholder_conversations_text);
 
     private XoClientDatabase mDatabase;
-    private ChatsAdapter mAdapter;
+    private ChatListAdapter mAdapter;
     private WeakReference<SearchAdapter> mSearchAdapterReference = new WeakReference<SearchAdapter>(null);
 
-    private TextView mPlaceholderText;
-
-    private ImageView mPlaceholderImageFrame;
-    private ImageView mPlaceholderImage;
-    private MenuItem mPairWithContactMenuItem;
-    private MenuItem mAddGroupMenuItem;
+    private MenuItem mMyProfileMenuItem;
+    private MenuItem mContactsMenuItem;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,31 +53,18 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mPlaceholderImageFrame = (ImageView) view.findViewById(R.id.iv_contacts_placeholder_frame);
-        mPlaceholderImage= (ImageView) view.findViewById(R.id.iv_contacts_placeholder);
-        mPlaceholderText = (TextView) view.findViewById(R.id.tv_contacts_placeholder);
+        PLACEHOLDER.applyToView(view);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            mPlaceholderImageFrame.setBackground(getResources().getDrawable(R.drawable.placeholder_chats));
-            mPlaceholderImage.setBackground(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
-        } else {
-            mPlaceholderImageFrame.setBackgroundDrawable(getResources().getDrawable(R.drawable.placeholder_chats));
-            mPlaceholderImage.setBackgroundDrawable(ColorSchemeManager.getRepaintedDrawable(getActivity(), R.drawable.placeholder_chats_head, true));
-        }
-
-        initContactListAdapter();
-        ListView contactList = (ListView) view.findViewById(android.R.id.list);
-        registerForContextMenu(contactList);
-
-        // initial update
-        onItemCountChanged(mAdapter.getCount());
+        initAdapter();
+        ListView listView = (ListView) view.findViewById(android.R.id.list);
+        registerForContextMenu(listView);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        mAddGroupMenuItem = menu.findItem(R.id.menu_new_group);
-        mPairWithContactMenuItem = menu.findItem(R.id.menu_pair);
+        mContactsMenuItem = menu.findItem(R.id.menu_contacts);
+        mMyProfileMenuItem = menu.findItem(R.id.menu_my_profile);
     }
 
     @Override
@@ -101,7 +80,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
         super.onResume();
         if (mAdapter != null) {
             mAdapter.onResume();
-            mAdapter.loadContacts();
+            mAdapter.loadChatItems();
         }
     }
 
@@ -118,7 +97,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
         super.onCreateContextMenu(menu, view, menuInfo);
         if(menuInfo != null) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            Object object = ((BaseContactItem) mAdapter.getItem(info.position)).getContent();
+            Object object = ((BaseChatItem) mAdapter.getItem(info.position)).getContent();
             if (object instanceof TalkClientContact) {
                 MenuInflater inflater = getActivity().getMenuInflater();
                 inflater.inflate(R.menu.context_menu_contacts, menu);
@@ -148,8 +127,8 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
 
     @Override
     protected void onSearchModeEnabled() {
-        mAddGroupMenuItem.setVisible(false);
-        mPairWithContactMenuItem.setVisible(false);
+        mContactsMenuItem.setVisible(false);
+        mMyProfileMenuItem.setVisible(false);
         if (mSearchAdapterReference.get() == null) {
             mSearchAdapterReference = new WeakReference<SearchAdapter>(new SearchAdapter(mAdapter));
 
@@ -158,17 +137,17 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
 
     @Override
     protected void onSearchModeDisabled() {
-        if (mAddGroupMenuItem != null) {
-            mAddGroupMenuItem.setVisible(true);
+        if (mContactsMenuItem != null) {
+            mContactsMenuItem.setVisible(true);
         }
 
-        if (mPairWithContactMenuItem != null) {
-            mPairWithContactMenuItem.setVisible(true);
+        if (mMyProfileMenuItem != null) {
+            mMyProfileMenuItem.setVisible(true);
         }
     }
 
     private void deleteChatHistoryAt(int position) {
-        Object item = ((BaseContactItem) mAdapter.getItem(position)).getContent();
+        Object item = ((BaseChatItem) mAdapter.getItem(position)).getContent();
         if (item instanceof TalkClientContact) {
             clearConversationForContact((TalkClientContact) item);
         } else if (item instanceof String) {
@@ -201,12 +180,12 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
         }
     }
 
-    private void initContactListAdapter() {
-        ChatsAdapter.Filter filter = new ChatsAdapter.Filter() {
+    private void initAdapter() {
+        ChatListAdapter.Filter filter = new ChatListAdapter.Filter() {
             @Override
             public boolean shouldShow(TalkClientContact contact) {
                 if (contact.isGroup()) {
-                    if (contact.isGroupInvolved() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()))) {
+                    if (contact.isGroupJoined() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()))) {
                         return true;
                     }
                 } else if (contact.isClient()) {
@@ -221,9 +200,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
             }
         };
 
-        mAdapter = new ChatsAdapter((XoActivity) getActivity(), filter);
-        mAdapter.onResume();
-        mAdapter.setOnItemCountChangedListener(this);
+        mAdapter = new ChatListAdapter((XoActivity) getActivity(), filter);
         setListAdapter(mAdapter);
     }
 
@@ -242,7 +219,7 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
 
-        Object item = ((BaseContactItem)listView.getItemAtPosition(position)).getContent();
+        Object item = ((BaseChatItem)listView.getItemAtPosition(position)).getContent();
         if (item instanceof TalkClientContact) {
             TalkClientContact contact = (TalkClientContact) item;
             if (contact.isGroup() && contact.isGroupInvited()) {
@@ -262,26 +239,4 @@ public class ChatListFragment extends SearchableListFragment implements OnItemCo
             startActivity(intent);
         }
     }
-
-    @Override
-    public void onItemCountChanged(int count) {
-        if (count > 0) {
-            hidePlaceholder();
-        } else {
-            showPlaceholder();
-        }
-    }
-
-    private void showPlaceholder() {
-        mPlaceholderImageFrame.setVisibility(View.VISIBLE);
-        mPlaceholderImage.setVisibility(View.VISIBLE);
-        mPlaceholderText.setVisibility(View.VISIBLE);
-    }
-
-    private void hidePlaceholder() {
-        mPlaceholderImageFrame.setVisibility(View.GONE);
-        mPlaceholderImage.setVisibility(View.GONE);
-        mPlaceholderText.setVisibility(View.GONE);
-    }
-
 }

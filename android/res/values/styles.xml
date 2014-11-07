@@ -40,6 +40,12 @@
         <item name="android:textColor">#ffffff</item>
     </style>
 
+    <style name="ButtonGrayAppBaseTheme" parent="android:Widget.Button">
+        <item name="android:background">@drawable/appbasetheme_btn_default_gray_holo_light</item>
+        <item name="android:minHeight">48dip</item>
+        <item name="android:minWidth">64dip</item>
+    </style>
+
     <style name="ImageButtonAppBaseTheme" parent="android:Widget.ImageButton">
         <item name="android:background">@drawable/appbasetheme_btn_default_holo_light</item>
     </style>
@@ -62,6 +68,11 @@
     <style name="PopupMenuTextAppearance.AppBaseTheme" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
         <item name="android:textColor">@android:color/primary_text_dark</item>
         <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="ParagraphText">
+        <item name="android:layout_marginBottom">25dp</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
     </style>
 
 </resources>

@@ -27,6 +27,7 @@ public class TalkGroupMember {
             TalkGroupMember.STATE_JOINED
     };
 
+    // needed for ormlight database
     private String _id;
 
     @DatabaseField(generatedId = true)

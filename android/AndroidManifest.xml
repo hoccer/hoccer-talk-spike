@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- NOTE: package name and ${placeholders} are replaced by maven -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.hoccer.xo.release"
 
-          android:versionCode="88"
+          android:versionCode="97"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -63,7 +64,7 @@
     <!-- SMS receive for pairing tokens -->
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <!-- Our own GCM permission -->
-    <uses-permission android:name="com.hoccer.xo.release.permission.C2D_MESSAGE"/>
+    <uses-permission android:name="${apk.package.name}.permission.C2D_MESSAGE"/>
     <!-- Google Play Services / GMaps -->
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
     <!-- GMaps / locations -->
@@ -76,7 +77,7 @@
 
     <!-- Declare permission for controlling our own push package -->
     <permission
-            android:name="com.hoccer.xo.release.permission.C2D_MESSAGE"
+            android:name="${apk.package.name}.permission.C2D_MESSAGE"
             android:protectionLevel="signature"/>
 
     <!-- Declare our application -->
@@ -129,6 +130,14 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="com.hoccer.xo.android.activity.ContactsActivity"
+                  android:label="@string/contacts_title"
+                  android:screenOrientation="portrait"
+                  android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
+        </activity>
 
         <!-- Messaging activity -->
         <activity
@@ -137,17 +146,6 @@
                 android:windowSoftInputMode="stateHidden"
                 android:exported="true"
                 android:configChanges="keyboardHidden|orientation|screenSize">
-        </activity>
-
-        <!-- Clipboard activity -->
-        <activity
-                android:name="com.hoccer.xo.android.activity.ClipboardPreviewActivity"
-                android:label="@string/actionbar_default_title"
-                android:parentActivityName="com.hoccer.xo.android.activity.MessagingActivity"
-                android:windowSoftInputMode="stateHidden">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.MessagingActivity"/>
         </activity>
 
         <!-- MediaBrowserActivity activity -->
@@ -189,6 +187,13 @@
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="com.hoccer.xo.android.activity.AudioAttachmentListActivity"/>
+        </activity>
+
+        <!-- Registration activity -->
+        <activity
+                android:name="com.hoccer.xo.android.activity.RegistrationActivity"
+                android:label="@string/actionbar_default_title"
+                android:screenOrientation="portrait">
         </activity>
 
         <!-- Single Profile activity -->
@@ -261,6 +266,20 @@
                 android:screenOrientation="portrait"
                 android:windowSoftInputMode="adjustResize">
         </activity>
+
+        <!-- Credential Export Service -->
+        <service android:name="com.hoccer.xo.android.credentialtransfer.CredentialExportService"/>
+
+        <service android:name="com.hoccer.xo.android.credentialtransfer.DisconnectService"/>
+
+        <!-- Credential Transfer Receiver -->
+        <receiver
+                android:name="com.hoccer.xo.android.credentialtransfer.CredentialTransferReceiver">
+            <intent-filter>
+                <action android:name="com.hoccer.android.action.EXPORT_DATA"/>
+                <action android:name="com.hoccer.android.action.DISCONNECT"/>
+            </intent-filter>
+        </receiver>
 
         <!-- Connection and delivery service -->
         <service android:name="com.hoccer.xo.android.service.XoClientService"/>

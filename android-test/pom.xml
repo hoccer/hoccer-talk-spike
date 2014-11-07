@@ -17,7 +17,7 @@
 
   <name>Hoccer Talk Tests for Android</name>
   <artifactId>hoccer-talk-android-test</artifactId>
-  <version>2.3.0-SNAPSHOT</version>
+  <version>${hoccer-talk-android.version}</version>
 
   <dependencies>
 
@@ -40,7 +40,7 @@
       <groupId>hoccer</groupId>
       <artifactId>hoccer-talk-android</artifactId>
       <type>apk</type>
-      <version>2.3.0-SNAPSHOT</version>
+      <version>${hoccer-talk-android.version}</version>
     </dependency>
 
     <!-- enable the compiler to find your java classes from the main project-->
@@ -49,7 +49,7 @@
       <artifactId>hoccer-talk-android</artifactId>
       <scope>provided</scope>
       <type>jar</type>
-      <version>2.3.0-SNAPSHOT</version>
+      <version>${hoccer-talk-android.version}</version>
     </dependency>
 
     <!-- exclude (provide) dependencies that are already included in the android apk to prevent duplication error -->
@@ -177,6 +177,13 @@
       <groupId>inter.nal.barcodescanner</groupId>
       <artifactId>zbar</artifactId>
       <version>1.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>${commons-collections.version}</version>
       <scope>provided</scope>
     </dependency>
 

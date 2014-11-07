@@ -10,6 +10,8 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
+import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
+import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
 import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -202,7 +204,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         CONFIGURATION = new XoAndroidClientConfiguration(this);
 
         // initialize logging system
-        XoLogging.initialize(this);
+        XoLogging.initialize(this, CONFIGURATION.getAppName().replace(" ", ""));
 
         // configure ormlite to use log4j
         System.setProperty("com.j256.ormlite.logger.type", "LOG4J");
@@ -285,6 +287,9 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         client.setAttachmentDirectory(getAttachmentDirectory().toString());
         client.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
         CLIENT = client;
+
+        // add srp secret change listener
+        client.registerStateListener(new SrpChangeListener(this));
 
         // create sound pool instance
         SOUND_POOL = new XoSoundPool(this);
