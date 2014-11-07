@@ -27,7 +27,7 @@ import java.sql.SQLException;
 
 public class SingleProfileCreationFragment extends XoFragment implements IXoContactListener, View.OnClickListener, ActionMode.Callback {
 
-    private static final String PREFERENCES = "com.artcom.hoccer_preferences";
+    private static final String HOCCER_CLASSIC_PREFERENCES = "com.artcom.hoccer_preferences";
 
     private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
 
@@ -44,22 +44,21 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        showWelcomeDialogIfUpdatedFromClassic();
+        showWelcomeDialogIfUpdatedFromHoccerClassic();
     }
 
-    private void showWelcomeDialogIfUpdatedFromClassic() {
-        if (hasUpdatedFromClassic()) {
+    private void showWelcomeDialogIfUpdatedFromHoccerClassic() {
+        if (hasUpdatedFromHoccerClassic()) {
             XoDialogs.showOkDialog(null, R.string.hoccer_3_0, R.string.welcome_hoccer_classic_users, getActivity());
         }
     }
 
-    private boolean hasUpdatedFromClassic() {
-        SharedPreferences preferences = getActivity().getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
-        if (preferences.contains("client_uuid")) {
+    private boolean hasUpdatedFromHoccerClassic() {
+        SharedPreferences preferences = getActivity().getSharedPreferences(HOCCER_CLASSIC_PREFERENCES, Context.MODE_PRIVATE);
+        if (preferences != null) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
