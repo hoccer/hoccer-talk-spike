@@ -3,7 +3,7 @@ package com.hoccer.talk.client;
 public abstract class XoDefaultClientConfiguration implements IXoClientConfiguration {
     @Override
     public String getUrlScheme() {
-        return "hxo://";
+        return "hcr://";
     }
 
     @Override
