@@ -6,11 +6,9 @@ import android.os.Build;
 import android.os.Environment;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
-import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
 import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
 import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
@@ -18,11 +16,11 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
-import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -40,6 +38,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static final String DOWNLOADS_DIRECTORY = "downloads";
     private static final String GENERATED_DIRECTORY = "generated";
     private static final String THUMBNAILS_DIRECTORY = "thumbnails";
+
+    public static final String HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY = "hoccer";
 
     /**
      * Background executor thread count
@@ -258,6 +258,9 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
                 .build();
         ImageLoader.getInstance().init(config);
 
+        // if updated from Hoccer Classic
+        renameHoccerClassicAttachmentDirectory();
+
         // set up directories
         LOG.info("setting up directory structure");
         ensureDirectory(getAttachmentDirectory());
@@ -435,5 +438,19 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     public static void enterBackgroundActiveMode() {
         LOG.info("Entered background active mode");
+    }
+
+    private void renameHoccerClassicAttachmentDirectory() {
+
+        if (Arrays.asList(EXTERNAL_STORAGE.list()).contains(HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY)) {
+
+            File classicDir = new File(EXTERNAL_STORAGE, HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY);
+
+            if (classicDir.exists()) {
+                File tempDir = new File(EXTERNAL_STORAGE, "_" + HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY);
+                classicDir.renameTo(tempDir);
+                tempDir.renameTo(getAttachmentDirectory());
+            }
+        }
     }
 }
