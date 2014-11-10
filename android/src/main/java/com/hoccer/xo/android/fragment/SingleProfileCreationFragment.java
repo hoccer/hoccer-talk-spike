@@ -55,10 +55,11 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
     private boolean hasUpdatedFromHoccerClassic() {
         SharedPreferences preferences = getActivity().getSharedPreferences(HOCCER_CLASSIC_PREFERENCES, Context.MODE_PRIVATE);
-        if (preferences != null) {
+        if (preferences.contains("client_uuid")) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     @Override
