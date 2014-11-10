@@ -28,12 +28,12 @@ public abstract class XoDefaultClientConfiguration implements IXoClientConfigura
 
     @Override
     public String getBsonProtocolString() {
-        return "com.hoccer.talk.v4.bson";
+        return "com.hoccer.talk.v5.bson";
     }
 
     @Override
     public String getJsonProtocolString() {
-        return "com.hoccer.talk.v4";
+        return "com.hoccer.talk.v5";
     }
 
     @Override
