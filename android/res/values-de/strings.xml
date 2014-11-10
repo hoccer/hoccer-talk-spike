@@ -45,7 +45,6 @@
     <string name="contacts_sms_invitation_description">hat dir eine SMS-Einladung geschickt.
         Möchtest du die Einladung annehmen?
     </string>
-    <string name="message_and_attachment_count_info">%1$d Nachrichten | %2$d Anhänge</string>
     <string name="blocked_contact">Blockierter Kontakt</string>
 
     <!-- Friend decline invitation dialog -->
@@ -445,5 +444,10 @@
     <plurals name="message_count">
         <item quantity="one">1 Nachricht</item>
         <item quantity="other">%d Nachrichten</item>
+    </plurals>
+
+    <plurals name="attachment_count">
+        <item quantity="one">1 Anhang</item>
+        <item quantity="other">%d Anhänge</item>
     </plurals>
 </resources>
