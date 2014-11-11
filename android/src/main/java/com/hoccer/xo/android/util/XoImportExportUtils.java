@@ -2,7 +2,6 @@ package com.hoccer.xo.android.util;
 
 import android.content.Context;
 import com.hoccer.xo.android.XoApplication;
-import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.sql.SQLException;
@@ -14,9 +13,7 @@ import java.util.zip.ZipOutputStream;
 
 public class XoImportExportUtils {
 
-    public static final String EXPORT_DIRECTORY = "export";
-
-    private static final Logger LOG = Logger.getLogger(XoImportExportUtils.class);
+    public static final String EXPORT_DIRECTORY = "hoccer_export";
 
     private static XoImportExportUtils INSTANCE = null;
 
@@ -138,7 +135,7 @@ public class XoImportExportUtils {
     }
 
     public File createExportFile(String extension) {
-        File directory = new File(XoApplication.getAttachmentDirectory(), XoImportExportUtils.EXPORT_DIRECTORY);
+        File directory = new File(XoApplication.getExternalStorage(), XoImportExportUtils.EXPORT_DIRECTORY);
         if (!directory.exists()) {
             directory.mkdir();
         }

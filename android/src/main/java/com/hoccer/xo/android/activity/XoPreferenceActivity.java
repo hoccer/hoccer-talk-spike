@@ -74,7 +74,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void initDataImportPreferences() {
         final ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
         if (listPreference != null) {
-            File exportDir = new File(XoApplication.getAttachmentDirectory(), XoImportExportUtils.EXPORT_DIRECTORY);
+            File exportDir = new File(XoApplication.getExternalStorage(), XoImportExportUtils.EXPORT_DIRECTORY);
             File[] exportFiles = exportDir.listFiles();
             if (exportFiles != null) {
                 final String[] entries = new String[exportFiles.length];
@@ -200,7 +200,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             protected Boolean doInBackground(Void... params) {
                 try {
-                    File exportDir = new File(XoApplication.getAttachmentDirectory(), XoImportExportUtils.EXPORT_DIRECTORY);
+                    File exportDir = new File(XoApplication.getExternalStorage(), XoImportExportUtils.EXPORT_DIRECTORY);
                     File importFile = new File(exportDir, importFileName);
                     XoImportExportUtils.getInstance(XoPreferenceActivity.this).importDatabaseAndAttachments(importFile);
                 } catch (IOException e) {
