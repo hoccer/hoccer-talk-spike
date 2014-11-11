@@ -214,7 +214,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             protected void onPostExecute(Boolean success) {
                 super.onPostExecute(success);
                 if (success) {
-                    Toast.makeText(getBaseContext(), "Data imported successfully", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getBaseContext(), "Data imported successfully. Please restart app.", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getBaseContext(), "Data import failed", Toast.LENGTH_LONG).show();
                 }
