@@ -132,10 +132,13 @@ public class ClientContactListAdapter extends ContactListAdapter {
 
     private String getMessageAndAttachmentCount(TalkClientContact contact) {
         try {
-            long messageCount = XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
-            long attachmentCount = XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
+            int messageCount = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(contact.getClientContactId());
+            int attachmentCount = (int) XoApplication.getXoClient().getDatabase().getAttachmentCountByContactId(contact.getClientContactId());
 
-            return mActivity.getResources().getString(R.string.message_and_attachment_count_info, messageCount, attachmentCount);
+            String messageCountString = mActivity.getResources().getQuantityString(R.plurals.message_count, messageCount, messageCount);
+            String attachmentCountString = mActivity.getResources().getQuantityString(R.plurals.attachment_count, attachmentCount, attachmentCount);
+
+            return messageCountString + " | " + attachmentCountString;
         } catch (SQLException e) {
             LOG.error("Error counting messages and attachments for " + contact.getClientId(), e);
         }

@@ -69,7 +69,7 @@ public class ImportCredentialFragment extends XoFragment {
                     CredentialImporter.sendDisconnectRequestToImportPackageClient(mRegistrationActivity);
 
                     // set flag to change the srp secret on next login
-//                    CredentialImporter.setSrpChangeOnNextLoginFlag(mRegistrationActivity);
+                    CredentialImporter.setSrpChangeOnNextLoginFlag(mRegistrationActivity);
 
                     // import new credentials
                     try {

@@ -40,11 +40,32 @@ public class TalkRpcConnectionHandler extends WebSocketHandler {
     public static final String TALK_TEXT_PROTOCOL_NAME_V4 = "com.hoccer.talk.v4";
     public static final String TALK_BINARY_PROTOCOL_NAME_V4 = "com.hoccer.talk.v4.bson";
 
+    // Version 5
+    public static final String TALK_TEXT_PROTOCOL_NAME_V5 = "com.hoccer.talk.v5";
+    public static final String TALK_BINARY_PROTOCOL_NAME_V5 = "com.hoccer.talk.v5.bson";
+
+    public static List<String> getLegacyProtocolVersions() {
+        List<String> list = new ArrayList<String>();
+        list.add(TALK_BINARY_PROTOCOL_NAME_V1);
+        list.add(TALK_TEXT_PROTOCOL_NAME_V1);
+        list.add(TALK_BINARY_PROTOCOL_NAME_V2);
+        list.add(TALK_TEXT_PROTOCOL_NAME_V2);
+        list.add(TALK_BINARY_PROTOCOL_NAME_V3);
+        list.add(TALK_TEXT_PROTOCOL_NAME_V3);
+        return list;
+    }
+
     public static List<String> getCurrentProtocolVersions() {
         List<String> list = new ArrayList<String>();
         list.add(TALK_BINARY_PROTOCOL_NAME_V4);
         list.add(TALK_TEXT_PROTOCOL_NAME_V4);
+        list.add(TALK_BINARY_PROTOCOL_NAME_V5);
+        list.add(TALK_TEXT_PROTOCOL_NAME_V5);
         return list;
+    }
+
+    public static boolean isBinaryProtocol(String protocol) {
+        return protocol.endsWith(".bson");
     }
 
     /**
@@ -76,21 +97,20 @@ public class TalkRpcConnectionHandler extends WebSocketHandler {
      */
     @Override
     public WebSocket doWebSocketConnect(HttpServletRequest request, String protocol) {
-        if (TALK_TEXT_PROTOCOL_NAME_V4.equals(protocol)) {
-            return createTalkActiveConnection(request, mTalkServer.getJsonMapper(), false);
-        } else if (TALK_BINARY_PROTOCOL_NAME_V4.equals(protocol)) {
-            return createTalkActiveConnection(request, mTalkServer.getBsonMapper(), true);
-        } else if (TALK_TEXT_PROTOCOL_NAME_V1.equals(protocol) ||
-                TALK_TEXT_PROTOCOL_NAME_V2.equals(protocol) ||
-                TALK_TEXT_PROTOCOL_NAME_V3.equals(protocol)) {
-            // Legacy handler for old clients connecting
-            return createTalkLegacyConnection(request, mTalkServer.getJsonMapper(), false);
-        } else if (TALK_BINARY_PROTOCOL_NAME_V1.equals(protocol) ||
-                TALK_BINARY_PROTOCOL_NAME_V2.equals(protocol) ||
-                TALK_BINARY_PROTOCOL_NAME_V3.equals(protocol)) {
-            // Legacy handler for old clients connecting
-            return createTalkLegacyConnection(request, mTalkServer.getBsonMapper(), true);
+        if (getCurrentProtocolVersions().contains(protocol)) {
+            if (isBinaryProtocol(protocol)) {
+                return createTalkActiveConnection(request, mTalkServer.getBsonMapper(), true);
+            } else {
+                return createTalkActiveConnection(request, mTalkServer.getJsonMapper(), false);
+            }
+        } else if (getLegacyProtocolVersions().contains(protocol)) {
+            if (isBinaryProtocol(protocol)) {
+                return createTalkLegacyConnection(request, mTalkServer.getBsonMapper(), true);
+            } else {
+                return createTalkLegacyConnection(request, mTalkServer.getJsonMapper(), false);
+            }
         }
+
         LOG.info("new connection with unknown protocol '" + protocol + "'");
         return null;
     }

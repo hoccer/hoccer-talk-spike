@@ -46,7 +46,6 @@
     <string name="contacts_sms_invitation_description">has sent you an invitation via SMS.
         Do you wish to accept?
     </string>
-    <string name="message_and_attachment_count_info">%1$d messages | %2$d attachments</string>
     <string name="blocked_contact">Blocked contact</string>
 
     <!-- Friend decline invitation dialog -->
@@ -458,6 +457,8 @@
     <string name="existing_hoccer_xo">Hey, we\'ve found an existing Hoccer XO version.</string>
     <string name="update_and_import_profile">You can import your old Profile, but you have to update Hoccer XO first.</string>
     <string name="update_hoccer_xo">Update Hoccer XO</string>
+    <string name="hoccer_3_0">Hoccer 3.0</string>
+    <string name="welcome_hoccer_classic_users">Hoccer now supports full messaging functions next to nearby data sharing. You can stay anonymous or connect with your friends. Yay.</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
@@ -467,5 +468,10 @@
     <plurals name="message_count">
         <item quantity="one">1 Message</item>
         <item quantity="other">%d Messages</item>
+    </plurals>
+
+    <plurals name="attachment_count">
+        <item quantity="one">1 Attachment</item>
+        <item quantity="other">%d Attachments</item>
     </plurals>
 </resources>
