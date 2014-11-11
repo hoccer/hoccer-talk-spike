@@ -188,7 +188,7 @@ public class TalkServerConfiguration {
         // INVITATIONS
         INVITATION_ALLOWED_URI_SCHEMES(PROPERTY_PREFIX + ".invitation.allowed.uri.schemes",
                 PropertyTypes.STRING,
-                "hxo, hxod"),
+                "hxo, hxod, hcr, hcrd"),
 
         // MISC
         SUPPORT_TAG(PROPERTY_PREFIX + ".support.tag",
