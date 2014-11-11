@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.util;
 
+import android.content.Context;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
@@ -14,18 +15,20 @@ import java.util.zip.ZipOutputStream;
 public class XoImportExportUtils {
 
     public static final String EXPORT_DIRECTORY = "export";
-    public static String DB_FILEPATH = "/data/data/com.hoccer.xo.release/databases/hoccer-talk.db";
 
     private static final Logger LOG = Logger.getLogger(XoImportExportUtils.class);
 
     private static XoImportExportUtils INSTANCE = null;
 
-    private XoImportExportUtils() {
+    private String databaseFilepath;
+
+    private XoImportExportUtils(Context context) {
+        databaseFilepath = "/data/data/" + context.getPackageName() + "/databases/hoccer-talk.db";
     }
 
-    public static XoImportExportUtils getInstance() {
+    public static XoImportExportUtils getInstance(Context context) {
         if (INSTANCE == null) {
-            INSTANCE = new XoImportExportUtils();
+            INSTANCE = new XoImportExportUtils(context);
         }
         return INSTANCE;
     }
@@ -55,8 +58,8 @@ public class XoImportExportUtils {
                 File file = null;
                 String extension = filename.substring(filename.lastIndexOf(".") + 1);
                 if (extension.equals("db")) {
-                    file = new File(DB_FILEPATH);
-                    if (file.exists()){
+                    file = new File(databaseFilepath);
+                    if (file.exists()) {
                         file.delete();
                     }
                 } else {
@@ -97,7 +100,7 @@ public class XoImportExportUtils {
     public File exportDatabaseToFile() {
         File exportFile = createExportFile("db");
 
-        String inFileName = DB_FILEPATH;
+        String inFileName = databaseFilepath;
         File dbFile = new File(inFileName);
         FileInputStream fis = null;
         try {

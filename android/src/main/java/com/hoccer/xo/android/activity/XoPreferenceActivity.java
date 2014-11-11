@@ -187,7 +187,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             exportData();
             return true;
         } else if (preference.getKey().equals("preference_database_dump")) {
-            XoImportExportUtils.getInstance().exportDatabaseToFile();
+            XoImportExportUtils.getInstance(this).exportDatabaseToFile();
             return true;
         }
 
@@ -202,7 +202,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 try {
                     File exportDir = new File(XoApplication.getAttachmentDirectory(), XoImportExportUtils.EXPORT_DIRECTORY);
                     File importFile = new File(exportDir, importFileName);
-                    XoImportExportUtils.getInstance().importDatabaseAndAttachments(importFile);
+                    XoImportExportUtils.getInstance(XoPreferenceActivity.this).importDatabaseAndAttachments(importFile);
                 } catch (IOException e) {
                     LOG.error("Data import failed.", e);
                     return false;
@@ -228,7 +228,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             protected File doInBackground(Void... params) {
                 try {
-                    return XoImportExportUtils.getInstance().exportDatabaseAndAttachments();
+                    return XoImportExportUtils.getInstance(XoPreferenceActivity.this).exportDatabaseAndAttachments();
                 } catch (IOException e) {
                     LOG.error("Data export failed.", e);
                     return null;
