@@ -36,8 +36,8 @@ public class InvitationServlet extends HttpServlet {
 
     private static final HashMap<Platform, String> DOWNLOAD_LINKS = new HashMap<Platform, String>();
     static {
-        DOWNLOAD_LINKS.put(Platform.IOS, "https://itunes.apple.com/app/hoccer-xo/id641387450");
-        DOWNLOAD_LINKS.put(Platform.ANDROID, "https://play.google.com/store/apps/details?id=com.hoccer.xo.release");
+        DOWNLOAD_LINKS.put(Platform.IOS, "https://itunes.apple.com/app/hoccer/id340180776");
+        DOWNLOAD_LINKS.put(Platform.ANDROID, "https://play.google.com/store/apps/details?id=com.artcom.hoccer");
         DOWNLOAD_LINKS.put(Platform.OTHER, "http://hoccer.com");
     }
 

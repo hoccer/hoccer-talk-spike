@@ -237,8 +237,9 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         assertNotNull(itemView);
 
         TextView isInvitedTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_friend);
-        String expected = getActivity().getResources().getString(com.hoccer.xo.release.R.string.message_and_attachment_count_default, 0, 0);
-        assertEquals(expected, isInvitedTextView.getText());
+        String messageCount = getActivity().getResources().getQuantityString(com.hoccer.xo.release.R.plurals.message_count, 0);
+        String attachmentCount = getActivity().getResources().getQuantityString(com.hoccer.xo.release.R.plurals.attachment_count, 0);
+        assertEquals(messageCount + " | " + attachmentCount, isInvitedTextView.getText());
 
         getInstrumentation().runOnMainSync(new Runnable() {
             @Override

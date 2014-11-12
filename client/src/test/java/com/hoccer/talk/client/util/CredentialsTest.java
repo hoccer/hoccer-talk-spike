@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.sql.SQLException;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNull;
 
 public class CredentialsTest {
 
@@ -23,22 +24,24 @@ public class CredentialsTest {
 
     @Test
     public void testCredentialConversion() {
-        final String clientId = "clientId";
-        final String clientName = "clientName";
-        final String password = "password";
-        final String salt = "salt";
+        String clientId = "clientId";
+        String clientName = "clientName";
+        String password = "password";
+        String salt = "salt";
 
-        final Credentials credentials = new Credentials(clientId, clientName, password, salt);
+        Credentials credentials = new Credentials(clientId, password, salt, clientName);
+
         assertEquals(clientId, credentials.getClientId());
         assertEquals(clientName, credentials.getClientName());
         assertEquals(password, credentials.getPassword());
         assertEquals(salt, credentials.getSalt());
 
         // convert to string
-        final String jsonCredentialsString = credentials.toString();
+        String jsonCredentialsString = credentials.toString();
 
         // create new credential instance
-        final Credentials newCredentials = Credentials.fromJsonString(jsonCredentialsString);
+        Credentials newCredentials = Credentials.fromJsonString(jsonCredentialsString);
+
         assertEquals(clientId, newCredentials.getClientId());
         assertEquals(clientName, newCredentials.getClientName());
         assertEquals(password, newCredentials.getPassword());
@@ -46,25 +49,52 @@ public class CredentialsTest {
     }
 
     @Test
-    public void testEncryptedCredentialConversion() {
-        final String clientId = "clientId";
-        final String clientName = "clientName";
-        final String password = "password";
-        final String salt = "salt";
+    public void testCredentialConversionWithoutClientName() {
+        String clientId = "clientId";
+        String password = "password";
+        String salt = "salt";
 
-        final Credentials credentials = new Credentials(clientId, clientName, password, salt);
+        Credentials credentials = new Credentials(clientId, password, salt);
+
+        assertEquals(clientId, credentials.getClientId());
+        assertNull(credentials.getClientName());
+        assertEquals(password, credentials.getPassword());
+        assertEquals(salt, credentials.getSalt());
+
+        // convert to string
+        String jsonCredentialsString = credentials.toString();
+
+        // create new credential instance
+        Credentials newCredentials = Credentials.fromJsonString(jsonCredentialsString);
+
+        assertEquals(clientId, newCredentials.getClientId());
+        assertNull(newCredentials.getClientName());
+        assertEquals(password, newCredentials.getPassword());
+        assertEquals(salt, newCredentials.getSalt());
+    }
+
+    @Test
+    public void testEncryptedCredentialConversion() {
+        String clientId = "clientId";
+        String clientName = "clientName";
+        String password = "password";
+        String salt = "salt";
+
+        Credentials credentials = new Credentials(clientId, password, salt, clientName);
+
         assertEquals(clientId, credentials.getClientId());
         assertEquals(clientName, credentials.getClientName());
         assertEquals(password, credentials.getPassword());
         assertEquals(salt, credentials.getSalt());
 
-        final String encryptionPassword = "encryptionPassword";
+        String encryptionPassword = "encryptionPassword";
 
         // convert to encrypted bytes
-        final byte[] encryptedCredentials = credentials.toEncryptedBytes(encryptionPassword);
+        byte[] encryptedCredentials = credentials.toEncryptedBytes(encryptionPassword);
 
         // create new credential instance
-        final Credentials newCredentials = Credentials.fromEncryptedBytes(encryptedCredentials, encryptionPassword);
+        Credentials newCredentials = Credentials.fromEncryptedBytes(encryptedCredentials, encryptionPassword);
+
         assertEquals(clientId, newCredentials.getClientId());
         assertEquals(clientName, newCredentials.getClientName());
         assertEquals(password, newCredentials.getPassword());
