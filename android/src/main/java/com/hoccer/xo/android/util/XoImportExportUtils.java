@@ -14,6 +14,11 @@ import java.util.zip.ZipOutputStream;
 public class XoImportExportUtils {
 
     public static final String EXPORT_DIRECTORY = "hoccer_export";
+    public static final String FILE_EXTENSION_ZIP = "zip";
+    public static final String FILE_EXTENSION_DB = "db";
+    public static final String TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
+    public static final String HOCCER_EXPORT_FILENAME_PREFIX = "hoccer_export_";
+    public static final String EXPORT_FILE_NAME_PATTERN = HOCCER_EXPORT_FILENAME_PREFIX + "%s.%s";
 
     private static XoImportExportUtils INSTANCE = null;
 
@@ -95,7 +100,7 @@ public class XoImportExportUtils {
     }
 
     public File exportDatabaseToFile() {
-        File exportFile = createExportFile("db");
+        File exportFile = createExportFile(FILE_EXTENSION_DB);
 
         String inFileName = databaseFilepath;
         File dbFile = new File(inFileName);
@@ -139,9 +144,9 @@ public class XoImportExportUtils {
         if (!directory.exists()) {
             directory.mkdir();
         }
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fileName = String.format("hoccer_talk_export_%s.%s", timestamp, extension);
-        return new File(directory, fileName);
+        String timestamp = new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
+        String fileName = String.format(EXPORT_FILE_NAME_PATTERN, timestamp, extension);
+        return new File(XoApplication.getExternalStorage(), fileName);
     }
 
     private void initDatabase() {
