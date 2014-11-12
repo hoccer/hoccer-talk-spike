@@ -13,7 +13,6 @@ import java.util.zip.ZipOutputStream;
 
 public class XoImportExportUtils {
 
-    public static final String EXPORT_DIRECTORY = "hoccer_export";
     public static final String FILE_EXTENSION_ZIP = "zip";
     public static final String FILE_EXTENSION_DB = "db";
     public static final String TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
@@ -86,7 +85,7 @@ public class XoImportExportUtils {
         File attachmentDirectory = XoApplication.getAttachmentDirectory();
         try {
             for (File fileEntry : attachmentDirectory.listFiles()) {
-                if (!fileEntry.isDirectory() && !fileEntry.getName().equals(EXPORT_DIRECTORY)) {
+                if (!fileEntry.isDirectory()) {
                     addZipEntry(zos, fileEntry);
                 }
             }
@@ -140,10 +139,6 @@ public class XoImportExportUtils {
     }
 
     public File createExportFile(String extension) {
-        File directory = new File(XoApplication.getExternalStorage(), XoImportExportUtils.EXPORT_DIRECTORY);
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
         String timestamp = new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
         String fileName = String.format(EXPORT_FILE_NAME_PATTERN, timestamp, extension);
         return new File(XoApplication.getExternalStorage(), fileName);

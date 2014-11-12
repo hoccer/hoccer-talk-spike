@@ -200,8 +200,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             protected Boolean doInBackground(Void... params) {
                 try {
-                    File exportDir = new File(XoApplication.getExternalStorage(), XoImportExportUtils.EXPORT_DIRECTORY);
-                    File importFile = new File(exportDir, importFileName);
+                    File importFile = new File(XoApplication.getExternalStorage(), importFileName);
                     XoImportExportUtils.getInstance(XoPreferenceActivity.this).importDatabaseAndAttachments(importFile);
                 } catch (IOException e) {
                     LOG.error("Data import failed.", e);
