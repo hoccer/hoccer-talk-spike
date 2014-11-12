@@ -1,12 +1,16 @@
 package com.hoccer.xo.android.util;
 
 import android.content.Context;
+import com.hoccer.xo.android.XoAndroidClientConfiguration;
 import com.hoccer.xo.android.XoApplication;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -150,5 +154,22 @@ public class XoImportExportUtils {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<File> getExportFiles() {
+        List<File> exportFiles = new ArrayList<File>();
+
+        File[] files = XoApplication.getExternalStorage().listFiles();
+        if (files != null) {
+            for (File file : files) {
+                String filename = file.getName();
+                String extension = FilenameUtils.getExtension(filename);
+                if (filename.startsWith(HOCCER_EXPORT_FILENAME_PREFIX) && extension.equals(FILE_EXTENSION_ZIP)) {
+                    exportFiles.add(file);
+                }
+            }
+        }
+
+        return exportFiles;
     }
 }

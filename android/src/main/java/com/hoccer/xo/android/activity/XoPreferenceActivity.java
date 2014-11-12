@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.sql.SQLException;
+import java.util.List;
 
 public class XoPreferenceActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -74,19 +75,20 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void initDataImportPreferences() {
         final ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
         if (listPreference != null) {
-            File exportDir = new File(XoApplication.getExternalStorage(), XoImportExportUtils.EXPORT_DIRECTORY);
-            File[] exportFiles = exportDir.listFiles();
-            if (exportFiles != null) {
-                final String[] entries = new String[exportFiles.length];
-                String[] entryValues = new String[exportFiles.length];
-                int index = 0;
-                for (File exportFile : exportDir.listFiles()) {
-                    entries[index] = exportFile.getName();
+            List<File> exportFiles = XoImportExportUtils.getInstance(this).getExportFiles();
+            if (exportFiles != null && !exportFiles.isEmpty()) {
+
+                final String[] entries = new String[exportFiles.size()];
+                final String[] entryValues = new String[exportFiles.size()];
+
+                for (int index = 0; index < exportFiles.size(); index++) {
+                    entries[index] = exportFiles.get(index).getName();
                     entryValues[index] = Integer.toString(index);
-                    index++;
                 }
+
                 listPreference.setEntries(entries);
                 listPreference.setEntryValues(entryValues);
+
                 listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
