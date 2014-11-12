@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.crypto.CryptoJSON;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Wraps the credentials exported from XoClient and provides from/to Json conversion.
@@ -15,25 +16,31 @@ public class Credentials {
 
     private static final Logger LOG = Logger.getLogger(Credentials.class);
 
-    private String mClientId;
+    private final String mClientId;
 
-    private String mClientName;
+    private final String mPassword;
 
-    private String mPassword;
+    private final String mSalt;
 
-    private String mSalt;
+    @Nullable
+    private final String mClientName;
 
-    public Credentials(String clientId, String clientName, String password, String salt) {
+    public Credentials(String clientId, String password, String salt) {
+        this(clientId, password, salt, null);
+    }
+
+    public Credentials(String clientId, String password, String salt, @Nullable String clientName) {
         mClientId = clientId;
-        mClientName = clientName;
         mPassword = password;
         mSalt = salt;
+        mClientName = clientName;
     }
 
     public String getClientId() {
         return mClientId;
     }
 
+    @Nullable
     public String getClientName() {
         return mClientName;
     }
@@ -85,7 +92,11 @@ public class Credentials {
             node.put("password", mPassword);
             node.put("salt", mSalt);
             node.put("clientId", mClientId);
-            node.put("clientName", mClientName);
+
+            if (mClientName != null) {
+                node.put("clientName", mClientName);
+            }
+
             return true;
         } catch (Exception e) {
             LOG.error("toJsonNode", e);
@@ -132,12 +143,6 @@ public class Credentials {
             return null;
         }
 
-        JsonNode clientNameNode = jsonCredentials.get("clientName");
-        if (clientNameNode == null) {
-            LOG.error("Missing clientName node");
-            return null;
-        }
-
         JsonNode passwordNode = jsonCredentials.get("password");
         if (passwordNode == null) {
             LOG.error("Missing password node");
@@ -150,6 +155,12 @@ public class Credentials {
             return null;
         }
 
-        return new Credentials(clientIdNode.asText(), clientNameNode.asText(), passwordNode.asText(), saltNode.asText());
+        String clientName = null;
+        JsonNode clientNameNode = jsonCredentials.get("clientName");
+        if (clientNameNode != null) {
+            clientName = clientNameNode.asText();
+        }
+
+        return new Credentials(clientIdNode.asText(), passwordNode.asText(), saltNode.asText(), clientName);
     }
 }

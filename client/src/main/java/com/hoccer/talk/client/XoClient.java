@@ -453,11 +453,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             return null;
         }
 
-        final String clientId = mSelfContact.getClientId();
-        final String clientName = mSelfContact.getName();
-        final String password = mSelfContact.getSelf().getSrpSecret();
-        final String salt = mSelfContact.getSelf().getSrpSalt();
-        return new Credentials(clientId, clientName, password, salt);
+        String clientId = mSelfContact.getClientId();
+        String password = mSelfContact.getSelf().getSrpSecret();
+        String salt = mSelfContact.getSelf().getSrpSalt();
+        String clientName = mSelfContact.getName();
+
+        return new Credentials(clientId, password, salt, clientName);
     }
 
     /**
@@ -474,7 +475,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         mSelfContact.getClientPresence().setClientId(newCredentials.getClientId());
 
         // update client name
-        mSelfContact.getClientPresence().setClientName(newCredentials.getClientName());
+        String newClientName = newCredentials.getClientName();
+        if (newClientName != null) {
+            mSelfContact.getClientPresence().setClientName(newClientName);
+        }
 
         // save credentials and contact
         mDatabase.saveCredentials(self);
