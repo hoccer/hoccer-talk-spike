@@ -432,7 +432,7 @@
     <string name="reading_profile_data">Lese Profil Daten ..</string>
     <string name="existing_hoccer_xo">Hey, wir haben eine existierende Hoccer XO Version gefunden.</string>
     <string name="update_and_import_profile">Du kannst dein bestehendes Profil weiterverwenden, aber dazu musst du erst Hoccer XO aktualisieren.</string>
-    <string name="update_hoccer_xo">Aktualisiere Hoccer XO</string>
+    <string name="update_hoccer_xo">Aktualisiere Hoccer\u00A0XO</string>
     <string name="hoccer_3_0">Hoccer 3.0</string>
     <string name="welcome_hoccer_classic_users">Hoccer hat jetzt eine komplette Messaging Funktion zusätzlich zum direkten Datenaustausch.\nDu kannst wie bisher anonym Daten im \"in der Nähe\" - Modus austauschen oder dich direkt mit deinen Freunden verbinden.</string>
 
