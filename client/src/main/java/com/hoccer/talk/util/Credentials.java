@@ -15,15 +15,15 @@ public class Credentials {
 
     private static final Logger LOG = Logger.getLogger(Credentials.class);
 
-    private final String mClientId;
+    private String mClientId;
 
-    private final String mClientName;
+    private String mClientName;
 
-    private final String mPassword;
+    private String mPassword;
 
-    private final String mSalt;
+    private String mSalt;
 
-    public Credentials(final String clientId, final String clientName, final String password, final String salt) {
+    public Credentials(String clientId, String clientName, String password, String salt) {
         mClientId = clientId;
         mClientName = clientName;
         mPassword = password;
@@ -46,17 +46,17 @@ public class Credentials {
         return mSalt;
     }
 
-    public byte[] toEncryptedBytes(final String password) {
+    public byte[] toEncryptedBytes(String password) {
         return toEncryptedBytes(password, new ObjectMapper());
     }
 
-    public byte[] toEncryptedBytes(final String password, final ObjectMapper mapper) {
+    public byte[] toEncryptedBytes(String password, ObjectMapper mapper) {
         try {
-            final String credentialsString = toString(mapper);
+            String credentialsString = toString(mapper);
             if (credentialsString != null) {
                 return CryptoJSON.encrypt(credentialsString.getBytes("UTF-8"), password, CREDENTIALS_CONTENT_TYPE);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("toEncryptedBytes", e);
         }
         return null;
@@ -67,84 +67,84 @@ public class Credentials {
         return toString(new ObjectMapper());
     }
 
-    public String toString(final ObjectMapper mapper) {
+    public String toString(ObjectMapper mapper) {
         try {
-            final ObjectNode credentialsNode = mapper.createObjectNode();
+            ObjectNode credentialsNode = mapper.createObjectNode();
             if (toJsonNode(credentialsNode)) {
                 return mapper.writeValueAsString(credentialsNode);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("toJsonString", e);
         }
 
         return null;
     }
 
-    public boolean toJsonNode(final ObjectNode node) {
+    public boolean toJsonNode(ObjectNode node) {
         try {
             node.put("password", mPassword);
             node.put("salt", mSalt);
             node.put("clientId", mClientId);
             node.put("clientName", mClientName);
             return true;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("toJsonNode", e);
             return false;
         }
     }
 
-    public static Credentials fromEncryptedBytes(final byte[] encryptedCredentials, final String password) {
+    public static Credentials fromEncryptedBytes(byte[] encryptedCredentials, String password) {
         return fromEncryptedBytes(encryptedCredentials, password, new ObjectMapper());
     }
 
-    private static Credentials fromEncryptedBytes(final byte[] encryptedCredentials, final String password, final ObjectMapper mapper) {
+    private static Credentials fromEncryptedBytes(byte[] encryptedCredentials, String password, ObjectMapper mapper) {
         try {
-            final byte[] credentialsBytes = CryptoJSON.decrypt(encryptedCredentials, password, CREDENTIALS_CONTENT_TYPE);
+            byte[] credentialsBytes = CryptoJSON.decrypt(encryptedCredentials, password, CREDENTIALS_CONTENT_TYPE);
             return fromJsonString(new String(credentialsBytes, "UTF-8"));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("fromEncryptedBytes", e);
             return null;
         }
     }
 
-    public static Credentials fromJsonString(final String jsonCredentialsString) {
+    public static Credentials fromJsonString(String jsonCredentialsString) {
         return fromJsonString(jsonCredentialsString, new ObjectMapper());
     }
 
-    public static Credentials fromJsonString(final String jsonCredentialsString, final ObjectMapper mapper) {
+    public static Credentials fromJsonString(String jsonCredentialsString, ObjectMapper mapper) {
         try {
-            final JsonNode jsonCredentials = mapper.readTree(jsonCredentialsString);
+            JsonNode jsonCredentials = mapper.readTree(jsonCredentialsString);
             if (jsonCredentials != null && jsonCredentials.isObject()) {
                 return fromJsonNode(jsonCredentials);
             } else {
                 LOG.error("fromJsonString: Not a json object");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error("fromJsonString", e);
         }
         return null;
     }
 
-    public static Credentials fromJsonNode(final JsonNode jsonCredentials) {
-        final JsonNode clientIdNode = jsonCredentials.get("clientId");
+    public static Credentials fromJsonNode(JsonNode jsonCredentials) {
+        JsonNode clientIdNode = jsonCredentials.get("clientId");
         if (clientIdNode == null) {
             LOG.error("Missing clientId node");
             return null;
         }
 
-        final JsonNode clientNameNode = jsonCredentials.get("clientName");
+        JsonNode clientNameNode = jsonCredentials.get("clientName");
         if (clientNameNode == null) {
             LOG.error("Missing clientName node");
             return null;
         }
 
-        final JsonNode passwordNode = jsonCredentials.get("password");
+        JsonNode passwordNode = jsonCredentials.get("password");
         if (passwordNode == null) {
             LOG.error("Missing password node");
             return null;
         }
 
-        final JsonNode saltNode = jsonCredentials.get("salt");
+        JsonNode saltNode = jsonCredentials.get("salt");
         if (saltNode == null) {
             LOG.error("Missing salt node");
             return null;
