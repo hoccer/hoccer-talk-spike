@@ -22,11 +22,11 @@ public class CredentialImporter {
     public static final String CHANGE_SRP_SECRET_PROPERTY = "change_srp_secret";
 
     /**
-     * Checks wether the package defined in the configuraiton is installed on the device and support the
+     * Checks whether the package defined in the configuration is installed on the device and support the
      * credential transfer.
      *
      * @param context Used to retrieve package information.
-     * @return Wether the package is installed or not.
+     * @return Whether the package is installed or not.
      * @see XoApplication#getConfiguration()#getCredentialImportPackage()
      */
     public static boolean isCredentialImportPackageInstalled(final Context context) {
@@ -34,11 +34,11 @@ public class CredentialImporter {
     }
 
     /**
-     * Checks wether the package defined in the configuraiton is installed on the device and support the
+     * Checks whether the package defined in the configuration is installed on the device and support the
      * credential transfer.
      *
      * @param context Used to retrieve package information.
-     * @return Wether credential import is supported by the credential import package.
+     * @return Whether credential import is supported by the credential import package.
      * @see XoApplication#getConfiguration()#getCredentialImportPackage()
      */
     public static boolean isCredentialImportSupported(final Context context) {
