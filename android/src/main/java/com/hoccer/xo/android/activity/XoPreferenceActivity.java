@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.sql.SQLException;
+import java.util.List;
 
 public class XoPreferenceActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -74,19 +75,20 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void initDataImportPreferences() {
         final ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
         if (listPreference != null) {
-            File exportDir = new File(XoApplication.getAttachmentDirectory(), XoImportExportUtils.EXPORT_DIRECTORY);
-            File[] exportFiles = exportDir.listFiles();
-            if (exportFiles != null) {
-                final String[] entries = new String[exportFiles.length];
-                String[] entryValues = new String[exportFiles.length];
-                int index = 0;
-                for (File exportFile : exportDir.listFiles()) {
-                    entries[index] = exportFile.getName();
+            List<File> exportFiles = XoImportExportUtils.getInstance(this).getExportFiles();
+            if (exportFiles != null && !exportFiles.isEmpty()) {
+
+                final String[] entries = new String[exportFiles.size()];
+                final String[] entryValues = new String[exportFiles.size()];
+
+                for (int index = 0; index < exportFiles.size(); index++) {
+                    entries[index] = exportFiles.get(index).getName();
                     entryValues[index] = Integer.toString(index);
-                    index++;
                 }
+
                 listPreference.setEntries(entries);
                 listPreference.setEntryValues(entryValues);
+
                 listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -187,7 +189,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             exportData();
             return true;
         } else if (preference.getKey().equals("preference_database_dump")) {
-            XoImportExportUtils.getInstance().exportDatabaseToFile();
+            XoImportExportUtils.getInstance(this).exportDatabaseToFile();
             return true;
         }
 
@@ -200,9 +202,8 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             protected Boolean doInBackground(Void... params) {
                 try {
-                    File exportDir = new File(XoApplication.getAttachmentDirectory(), XoImportExportUtils.EXPORT_DIRECTORY);
-                    File importFile = new File(exportDir, importFileName);
-                    XoImportExportUtils.getInstance().importDatabaseAndAttachments(importFile);
+                    File importFile = new File(XoApplication.getExternalStorage(), importFileName);
+                    XoImportExportUtils.getInstance(XoPreferenceActivity.this).importDatabaseAndAttachments(importFile);
                 } catch (IOException e) {
                     LOG.error("Data import failed.", e);
                     return false;
@@ -214,7 +215,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             protected void onPostExecute(Boolean success) {
                 super.onPostExecute(success);
                 if (success) {
-                    Toast.makeText(getBaseContext(), "Data imported successfully", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getBaseContext(), "Data imported successfully. Please restart app.", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getBaseContext(), "Data import failed", Toast.LENGTH_LONG).show();
                 }
@@ -228,7 +229,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             protected File doInBackground(Void... params) {
                 try {
-                    return XoImportExportUtils.getInstance().exportDatabaseAndAttachments();
+                    return XoImportExportUtils.getInstance(XoPreferenceActivity.this).exportDatabaseAndAttachments();
                 } catch (IOException e) {
                     LOG.error("Data export failed.", e);
                     return null;

@@ -1,31 +1,39 @@
 package com.hoccer.xo.android.util;
 
+import android.content.Context;
+import com.hoccer.xo.android.XoAndroidClientConfiguration;
 import com.hoccer.xo.android.XoApplication;
-import org.apache.log4j.Logger;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class XoImportExportUtils {
 
-    public static final String EXPORT_DIRECTORY = "export";
-    public static String DB_FILEPATH = "/data/data/com.hoccer.xo.release/databases/hoccer-talk.db";
-
-    private static final Logger LOG = Logger.getLogger(XoImportExportUtils.class);
+    public static final String FILE_EXTENSION_ZIP = "zip";
+    public static final String FILE_EXTENSION_DB = "db";
+    public static final String TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
+    public static final String HOCCER_EXPORT_FILENAME_PREFIX = "hoccer_export_";
+    public static final String EXPORT_FILE_NAME_PATTERN = HOCCER_EXPORT_FILENAME_PREFIX + "%s.%s";
 
     private static XoImportExportUtils INSTANCE = null;
 
-    private XoImportExportUtils() {
+    private String databaseFilepath;
+
+    private XoImportExportUtils(Context context) {
+        databaseFilepath = "/data/data/" + context.getPackageName() + "/databases/hoccer-talk.db";
     }
 
-    public static XoImportExportUtils getInstance() {
+    public static XoImportExportUtils getInstance(Context context) {
         if (INSTANCE == null) {
-            INSTANCE = new XoImportExportUtils();
+            INSTANCE = new XoImportExportUtils(context);
         }
         return INSTANCE;
     }
@@ -55,8 +63,8 @@ public class XoImportExportUtils {
                 File file = null;
                 String extension = filename.substring(filename.lastIndexOf(".") + 1);
                 if (extension.equals("db")) {
-                    file = new File(DB_FILEPATH);
-                    if (file.exists()){
+                    file = new File(databaseFilepath);
+                    if (file.exists()) {
                         file.delete();
                     }
                 } else {
@@ -81,7 +89,7 @@ public class XoImportExportUtils {
         File attachmentDirectory = XoApplication.getAttachmentDirectory();
         try {
             for (File fileEntry : attachmentDirectory.listFiles()) {
-                if (!fileEntry.isDirectory() && !fileEntry.getName().equals(EXPORT_DIRECTORY)) {
+                if (!fileEntry.isDirectory()) {
                     addZipEntry(zos, fileEntry);
                 }
             }
@@ -95,9 +103,9 @@ public class XoImportExportUtils {
     }
 
     public File exportDatabaseToFile() {
-        File exportFile = createExportFile("db");
+        File exportFile = createExportFile(FILE_EXTENSION_DB);
 
-        String inFileName = DB_FILEPATH;
+        String inFileName = databaseFilepath;
         File dbFile = new File(inFileName);
         FileInputStream fis = null;
         try {
@@ -135,13 +143,9 @@ public class XoImportExportUtils {
     }
 
     public File createExportFile(String extension) {
-        File directory = new File(XoApplication.getAttachmentDirectory(), XoImportExportUtils.EXPORT_DIRECTORY);
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fileName = String.format("hoccer_talk_export_%s.%s", timestamp, extension);
-        return new File(directory, fileName);
+        String timestamp = new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
+        String fileName = String.format(EXPORT_FILE_NAME_PATTERN, timestamp, extension);
+        return new File(XoApplication.getExternalStorage(), fileName);
     }
 
     private void initDatabase() {
@@ -150,5 +154,22 @@ public class XoImportExportUtils {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<File> getExportFiles() {
+        List<File> exportFiles = new ArrayList<File>();
+
+        File[] files = XoApplication.getExternalStorage().listFiles();
+        if (files != null) {
+            for (File file : files) {
+                String filename = file.getName();
+                String extension = FilenameUtils.getExtension(filename);
+                if (filename.startsWith(HOCCER_EXPORT_FILENAME_PREFIX) && extension.equals(FILE_EXTENSION_ZIP)) {
+                    exportFiles.add(file);
+                }
+            }
+        }
+
+        return exportFiles;
     }
 }
