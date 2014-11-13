@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.util;
 
 import android.content.Context;
-import com.hoccer.xo.android.XoAndroidClientConfiguration;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.commons.io.FilenameUtils;
 
