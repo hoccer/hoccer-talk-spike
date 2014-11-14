@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 import org.apache.log4j.Logger;
 

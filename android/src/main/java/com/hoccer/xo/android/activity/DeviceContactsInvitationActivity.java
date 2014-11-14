@@ -3,7 +3,7 @@ package com.hoccer.xo.android.activity;
 import android.os.Bundle;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 public class DeviceContactsInvitationActivity extends ComposableActivity {
 

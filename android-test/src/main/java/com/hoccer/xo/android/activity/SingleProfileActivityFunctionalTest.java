@@ -44,18 +44,18 @@ public class SingleProfileActivityFunctionalTest extends ActivityInstrumentation
     }
 
     public void testActionModeUI() {
-        TextView nameText = (TextView) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.tv_profile_name);
-        EditText editName = (EditText) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.et_profile_name);
+        TextView nameText = (TextView) singleProfileCreationFragment.getView().findViewById(com.artcom.hoccer.R.id.tv_profile_name);
+        EditText editName = (EditText) singleProfileCreationFragment.getView().findViewById(com.artcom.hoccer.R.id.et_profile_name);
 
         assertEquals(nameText.getVisibility(), View.GONE);
         assertEquals(editName.getVisibility(), View.VISIBLE);
-        assertEquals(editName.getHint(), activity.getString(com.hoccer.xo.release.R.string.profile_name_hint));
+        assertEquals(editName.getHint(), activity.getString(com.artcom.hoccer.R.string.profile_name_hint));
         assertEquals(editName.getText().toString(), "");
     }
 
     @UiThreadTest
     public void testOnDestroyActionMode() {
-        final EditText editName = (EditText) singleProfileCreationFragment.getView().findViewById(com.hoccer.xo.release.R.id.et_profile_name);
+        final EditText editName = (EditText) singleProfileCreationFragment.getView().findViewById(com.artcom.hoccer.R.id.et_profile_name);
         final String expectedName = "myName";
         editName.setText(expectedName);
 
@@ -69,7 +69,7 @@ public class SingleProfileActivityFunctionalTest extends ActivityInstrumentation
 
     @UiThreadTest
     public void testOnDestroyActionModeWithoutName() {
-        final String expectedName = getActivity().getString(com.hoccer.xo.release.R.string.profile_self_initial_name);
+        final String expectedName = getActivity().getString(com.artcom.hoccer.R.string.profile_self_initial_name);
 
         int closeButtonId = Resources.getSystem().getIdentifier("action_mode_close_button", "id", "android");
         final View closeButton = getActivity().findViewById(closeButtonId);

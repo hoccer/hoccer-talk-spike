@@ -12,7 +12,7 @@ import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener {

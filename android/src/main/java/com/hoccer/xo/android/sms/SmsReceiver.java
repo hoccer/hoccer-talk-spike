@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.telephony.SmsMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.service.XoClientService;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.util.regex.Matcher;

@@ -16,7 +16,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.dialog.TokenDialog;
 import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.android.view.model.BaseChatItem;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.lang.ref.WeakReference;

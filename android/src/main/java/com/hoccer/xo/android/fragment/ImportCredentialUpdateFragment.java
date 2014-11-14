@@ -10,7 +10,7 @@ import android.widget.Button;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.RegistrationActivity;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 /**

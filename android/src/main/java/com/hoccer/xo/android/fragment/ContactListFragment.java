@@ -15,7 +15,7 @@ import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.android.view.NotificationBadgeTextView;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 public abstract class ContactListFragment extends SearchableListFragment implements IPagerFragment, IXoContactListener {
 

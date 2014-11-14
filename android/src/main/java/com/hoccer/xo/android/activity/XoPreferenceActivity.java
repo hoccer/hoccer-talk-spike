@@ -18,7 +18,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.util.XoImportExportUtils;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import net.hockeyapp.android.CrashManager;
 import org.apache.log4j.Logger;
 

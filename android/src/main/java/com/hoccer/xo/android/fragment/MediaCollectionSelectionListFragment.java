@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 public class MediaCollectionSelectionListFragment extends BaseMediaCollectionListFragment {

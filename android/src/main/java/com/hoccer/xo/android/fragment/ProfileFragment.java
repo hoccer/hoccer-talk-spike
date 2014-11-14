@@ -14,7 +14,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;

@@ -2,7 +2,7 @@ package com.hoccer.xo.android.view.model;
 
 import android.view.ViewGroup;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 import android.content.Context;
 import android.view.LayoutInflater;

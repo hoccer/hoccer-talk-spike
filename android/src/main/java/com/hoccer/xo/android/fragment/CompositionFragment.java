@@ -30,7 +30,7 @@ import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;

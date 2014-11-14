@@ -23,7 +23,7 @@ import com.hoccer.xo.android.content.SingleItemPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.DragSortController;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import com.mobeta.android.dslv.DragSortListView;
 import org.apache.log4j.Logger;
 

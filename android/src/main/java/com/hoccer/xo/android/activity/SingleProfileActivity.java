@@ -9,7 +9,7 @@ import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.fragment.SingleProfileCreationFragment;
 import com.hoccer.xo.android.fragment.SingleProfileFragment;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 /**
  * Activity wrapping a single profile fragment

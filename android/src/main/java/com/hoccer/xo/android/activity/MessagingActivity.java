@@ -20,7 +20,7 @@ import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.fragment.*;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 
 public class MessagingActivity extends ComposableActivity implements IMessagingFragmentManager, IProfileFragmentManager {

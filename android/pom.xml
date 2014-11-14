@@ -181,7 +181,7 @@
 
   <properties>
     <!-- Can be overridden by calling `mvn -Denvironment=ENVIRONMENT` -->
-    <environment>xo-development</environment>
+    <environment>development</environment>
     <environment.path>${project.basedir}/environments/${environment}</environment.path>
 
     <!-- Can be overridden by calling `mvn -Dapk.sign=false` -->

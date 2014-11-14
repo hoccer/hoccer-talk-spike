@@ -20,7 +20,7 @@ import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 import java.io.File;
 import java.net.URI;

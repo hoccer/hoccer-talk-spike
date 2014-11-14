@@ -6,7 +6,7 @@ import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ClientContactListAdapter;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.view.Placeholder;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;

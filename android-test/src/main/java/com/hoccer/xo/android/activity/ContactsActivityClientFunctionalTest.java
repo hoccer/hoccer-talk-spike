@@ -40,7 +40,7 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         super.setUp();
         activity = getActivity();
 
-        ViewPager viewPager = (ViewPager) activity.findViewById(com.hoccer.xo.release.R.id.pager);
+        ViewPager viewPager = (ViewPager) activity.findViewById(com.artcom.hoccer.R.id.pager);
         FragmentPagerAdapter adapter = (FragmentPagerAdapter) viewPager.getAdapter();
         mClientContactListFragment = (ClientContactListFragment) adapter.getItem(0);
         mClientContactListAdapter = (ClientContactListAdapter) mClientContactListFragment.getListAdapter();
@@ -57,7 +57,7 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
     }
 
     public void testPreconditions() {
-        ViewPager viewPager = (ViewPager) activity.findViewById(com.hoccer.xo.release.R.id.pager);
+        ViewPager viewPager = (ViewPager) activity.findViewById(com.artcom.hoccer.R.id.pager);
         assertNotNull(viewPager);
 
         FragmentPagerAdapter adapter = (FragmentPagerAdapter) viewPager.getAdapter();
@@ -73,10 +73,10 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
     public void testActionBarMenuItems() {
         assertTrue(activity.getActionBar().isShowing());
 
-        View pairMenuItem = activity.findViewById(com.hoccer.xo.release.R.id.menu_pair);
+        View pairMenuItem = activity.findViewById(com.artcom.hoccer.R.id.menu_pair);
         assertNotNull(pairMenuItem);
 
-        View newGroupMenuItem = activity.findViewById(com.hoccer.xo.release.R.id.menu_new_group);
+        View newGroupMenuItem = activity.findViewById(com.artcom.hoccer.R.id.menu_new_group);
         assertNotNull(newGroupMenuItem);
     }
 
@@ -136,28 +136,28 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         final View itemView = mClientContactListFragment.getListView().getChildAt(0);
         assertNotNull(itemView);
 
-        TextView contactNameTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.contact_name);
+        TextView contactNameTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.contact_name);
         assertEquals(OTHER_CLIENT_NAME_PREFIX + 1, contactNameTextView.getText());
 
-        LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.hoccer.xo.release.R.id.ll_invited_me);
+        LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.artcom.hoccer.R.id.ll_invited_me);
         assertEquals(ViewGroup.VISIBLE, invitedMeLayout.getVisibility());
 
-        Button acceptButton = (Button) itemView.findViewById(com.hoccer.xo.release.R.id.btn_accept);
+        Button acceptButton = (Button) itemView.findViewById(com.artcom.hoccer.R.id.btn_accept);
         assertEquals(View.VISIBLE, acceptButton.getVisibility());
 
-        Button declineButton = (Button) itemView.findViewById(com.hoccer.xo.release.R.id.btn_decline);
+        Button declineButton = (Button) itemView.findViewById(com.artcom.hoccer.R.id.btn_decline);
         assertEquals(View.VISIBLE, declineButton.getVisibility());
 
-        TextView isInvitedTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_invited);
+        TextView isInvitedTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.tv_is_invited);
         assertEquals(View.GONE, isInvitedTextView.getVisibility());
 
-        TextView isFriendTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_friend);
+        TextView isFriendTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.tv_is_friend);
         assertEquals(View.GONE, isFriendTextView.getVisibility());
 
         View tabView = getActivity().getActionBar().getTabAt(0).getCustomView();
         assertNotNull(tabView);
 
-        TextView pendingInvitationsBadgeTextView = (TextView) tabView.findViewById(com.hoccer.xo.release.R.id.tv_contact_invite_notification_badge);
+        TextView pendingInvitationsBadgeTextView = (TextView) tabView.findViewById(com.artcom.hoccer.R.id.tv_contact_invite_notification_badge);
         assertNotNull(pendingInvitationsBadgeTextView);
         assertEquals("1", pendingInvitationsBadgeTextView.getText());
     }
@@ -204,16 +204,16 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
 
         assertNotNull(itemView);
 
-        TextView contactNameTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.contact_name);
+        TextView contactNameTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.contact_name);
         assertEquals(OTHER_CLIENT_NAME_PREFIX + 1, contactNameTextView.getText());
 
-        LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.hoccer.xo.release.R.id.ll_invited_me);
+        LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.artcom.hoccer.R.id.ll_invited_me);
         assertEquals(ViewGroup.GONE, invitedMeLayout.getVisibility());
 
-        TextView isInvitedTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_invited);
+        TextView isInvitedTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.tv_is_invited);
         assertEquals(View.VISIBLE, isInvitedTextView.getVisibility());
 
-        TextView isFriendTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_friend);
+        TextView isFriendTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.tv_is_friend);
         assertEquals(View.GONE, isFriendTextView.getVisibility());
     }
 
@@ -236,9 +236,9 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         final View itemView = listView.getChildAt(0);
         assertNotNull(itemView);
 
-        TextView isInvitedTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_friend);
-        String messageCount = getActivity().getResources().getQuantityString(com.hoccer.xo.release.R.plurals.message_count, 0);
-        String attachmentCount = getActivity().getResources().getQuantityString(com.hoccer.xo.release.R.plurals.attachment_count, 0);
+        TextView isInvitedTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.tv_is_friend);
+        String messageCount = getActivity().getResources().getQuantityString(com.artcom.hoccer.R.plurals.message_count, 0);
+        String attachmentCount = getActivity().getResources().getQuantityString(com.artcom.hoccer.R.plurals.attachment_count, 0);
         assertEquals(messageCount + " | " + attachmentCount, isInvitedTextView.getText());
 
         getInstrumentation().runOnMainSync(new Runnable() {
@@ -269,7 +269,7 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         View itemView = listView.getChildAt(0);
         assertNotNull(itemView);
 
-        final Button acceptButton = (Button) itemView.findViewById(com.hoccer.xo.release.R.id.btn_accept);
+        final Button acceptButton = (Button) itemView.findViewById(com.artcom.hoccer.R.id.btn_accept);
         getInstrumentation().runOnMainSync(new Runnable() {
             @Override
             public void run() {
@@ -286,10 +286,10 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
 //        itemView = listView.getChildAt(0);
 //        assertNotNull(itemView);
 //
-//        LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.hoccer.xo.release.R.id.ll_invited_me);
+//        LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.artcom.hoccer.R.id.ll_invited_me);
 //        assertEquals(ViewGroup.GONE, invitedMeLayout.getVisibility());
 //
-//        TextView isFriendTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_is_friend);
+//        TextView isFriendTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.tv_is_friend);
 //        assertEquals(View.VISIBLE, isFriendTextView.getVisibility());
     }
 
@@ -303,7 +303,7 @@ public class ContactsActivityClientFunctionalTest extends ActivityInstrumentatio
         View itemView = mClientContactListFragment.getListView().getChildAt(0);
         assertNotNull(itemView);
 
-        final Button declineButton = (Button) itemView.findViewById(com.hoccer.xo.release.R.id.btn_decline);
+        final Button declineButton = (Button) itemView.findViewById(com.artcom.hoccer.R.id.btn_decline);
         getInstrumentation().runOnMainSync(new Runnable() {
             @Override
             public void run() {

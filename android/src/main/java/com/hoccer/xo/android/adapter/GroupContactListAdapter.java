@@ -19,7 +19,7 @@ import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.Predicate;

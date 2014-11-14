@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 public class ClipboardSelector implements IContentSelector {

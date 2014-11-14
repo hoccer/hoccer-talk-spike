@@ -22,7 +22,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.sms.SmsReceiver;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.net.URI;

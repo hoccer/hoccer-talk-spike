@@ -5,7 +5,7 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 import java.util.ArrayList;
 import java.util.List;

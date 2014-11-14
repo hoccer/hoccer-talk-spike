@@ -27,17 +27,17 @@ public class ChatsActivityUnitTest extends ActivityUnitTestCase<ChatsActivity> {
 
 
     public void testActionBarMenuLayout() {
-        MenuItem contactsMenuItem = (MenuItem) activity.findViewById(com.hoccer.xo.release.R.id.menu_contacts);
+        MenuItem contactsMenuItem = (MenuItem) activity.findViewById(com.artcom.hoccer.R.id.menu_contacts);
         assertNotNull(contactsMenuItem);
         assertEquals(true, contactsMenuItem.isVisible());
 
-        MenuItem myProfileMenuItem = (MenuItem) activity.findViewById(com.hoccer.xo.release.R.id.menu_my_profile);
+        MenuItem myProfileMenuItem = (MenuItem) activity.findViewById(com.artcom.hoccer.R.id.menu_my_profile);
         assertNotNull(myProfileMenuItem);
         assertEquals(true, myProfileMenuItem.isVisible());
     }
 
     public void testContactsIntentTriggerViaOnClick() {
-        MenuItem contactsMenuItem = (MenuItem) activity.findViewById(com.hoccer.xo.release.R.id.menu_contacts);
+        MenuItem contactsMenuItem = (MenuItem) activity.findViewById(com.artcom.hoccer.R.id.menu_contacts);
 
         activity.onOptionsItemSelected(contactsMenuItem);
 

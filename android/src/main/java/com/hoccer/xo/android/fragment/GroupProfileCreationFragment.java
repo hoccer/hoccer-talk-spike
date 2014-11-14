@@ -25,7 +25,7 @@ import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;

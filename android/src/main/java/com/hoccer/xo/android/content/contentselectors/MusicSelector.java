@@ -9,7 +9,7 @@ import android.provider.MediaStore;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 public class MusicSelector implements IContentSelector {
 

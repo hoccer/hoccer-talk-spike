@@ -10,7 +10,7 @@ import android.provider.ContactsContract;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;

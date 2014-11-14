@@ -9,7 +9,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.fragment.ContactSelectionFragment;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 import java.util.ArrayList;
 

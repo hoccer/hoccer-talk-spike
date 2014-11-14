@@ -21,7 +21,7 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import org.apache.log4j.Logger;
 

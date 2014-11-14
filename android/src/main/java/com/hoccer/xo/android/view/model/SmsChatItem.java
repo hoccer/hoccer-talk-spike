@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 public class SmsChatItem extends BaseChatItem implements SearchAdapter.Searchable{

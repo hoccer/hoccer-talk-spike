@@ -26,7 +26,7 @@ import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;

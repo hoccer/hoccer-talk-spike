@@ -27,7 +27,7 @@ import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ArtworkImageView;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;

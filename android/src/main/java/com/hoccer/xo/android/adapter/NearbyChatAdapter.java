@@ -11,7 +11,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

@@ -7,7 +7,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
