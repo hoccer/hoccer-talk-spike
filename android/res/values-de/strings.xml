@@ -42,9 +42,6 @@
     <string name="contacts_empty_info">Du hast noch keine Kontakte hinzugefügt</string>
     <string name="contacts_empty_pairing">Kontakt hinzufügen</string>
     <string name="dialog_token_invitation_title">Einladung</string>
-    <string name="contacts_sms_invitation_description">hat dir eine SMS-Einladung geschickt.
-        Möchtest du die Einladung annehmen?
-    </string>
     <string name="blocked_contact">Blockierter Kontakt</string>
 
     <!-- Friend decline invitation dialog -->
