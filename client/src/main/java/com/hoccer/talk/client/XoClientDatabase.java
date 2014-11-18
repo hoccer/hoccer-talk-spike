@@ -280,23 +280,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts.join(groupMembers).query();
     }
 
-    public int findGroupMemberCountForGroup(TalkClientContact groupContact) throws SQLException {
-        int count = 0;
-        TalkClientContact contact = mClientContacts.queryBuilder()
-                .where()
-                .eq("clientContactId", groupContact.getClientContactId())
-                .queryForFirst();
-        if (contact != null && contact.isGroup() && contact.getGroupMemberships() != null) {
-            for (TalkClientMembership memberShip : contact.getGroupMemberships()) {
-                TalkGroupMember groupMember = memberShip.getMember();
-                if (groupMember != null && groupMember.isNearby()) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
     public List<TalkClientContact> findClientsInGroup(TalkClientContact groupContact) throws SQLException {
         List<TalkClientContact> allGroupContacts = new ArrayList<TalkClientContact>();
         if (groupContact != null && groupContact.isGroup() && groupContact.getGroupMemberships() != null) {
