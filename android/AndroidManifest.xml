@@ -60,7 +60,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <!-- We read and write contacts -->
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
     <!-- Our own GCM permission -->
     <uses-permission android:name="${apk.package.name}.permission.C2D_MESSAGE"/>
     <!-- Google Play Services / GMaps -->
