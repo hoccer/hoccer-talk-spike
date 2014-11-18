@@ -58,7 +58,7 @@
     <!-- For attachments, also used for logging -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <!-- We read and write contacts -->
+    <!-- We read contacts -->
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <!-- Our own GCM permission -->
     <uses-permission android:name="${apk.package.name}.permission.C2D_MESSAGE"/>
@@ -69,6 +69,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <!-- Wifi-Scanning for location grouping -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <!-- Mediaplayer needs to check if Hoccer is running -->
     <uses-permission android:name="android.permission.GET_TASKS"/>
     <!-- Camera is needed for QR-Code scanning -->
     <uses-permission android:name="android.permission.CAMERA"/>
