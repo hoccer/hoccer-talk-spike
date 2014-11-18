@@ -16,7 +16,9 @@ import com.j256.ormlite.table.TableUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
@@ -42,8 +44,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     Dao<TalkClientDownload, Integer> mClientDownloads;
     Dao<TalkClientUpload, Integer> mClientUploads;
-
-    Dao<TalkClientSmsToken, Integer> mSmsTokens;
 
     Dao<TalkClientMediaCollection, Integer> mMediaCollections;
     Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
@@ -73,8 +73,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         TableUtils.createTable(cs, TalkClientDownload.class);
         TableUtils.createTable(cs, TalkClientUpload.class);
 
-        TableUtils.createTable(cs, TalkClientSmsToken.class);
-
         TableUtils.createTable(cs, TalkClientMediaCollection.class);
         TableUtils.createTable(cs, TalkClientMediaCollectionRelation.class);
     }
@@ -102,8 +100,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
         mClientDownloads = mBackend.getDao(TalkClientDownload.class);
         mClientUploads = mBackend.getDao(TalkClientUpload.class);
-
-        mSmsTokens = mBackend.getDao(TalkClientSmsToken.class);
 
         mMediaCollections = mBackend.getDao(TalkClientMediaCollection.class);
         mMediaCollectionRelations = mBackend.getDao(TalkClientMediaCollectionRelation.class);
@@ -308,10 +304,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             }
         }
         return allGroupContacts;
-    }
-
-    public List<TalkClientSmsToken> findAllSmsTokens() throws SQLException {
-        return mSmsTokens.queryForAll();
     }
 
     public TalkClientContact findSelfContact(boolean create) throws SQLException {
@@ -757,18 +749,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public void saveClientMembership(TalkClientMembership membership) throws SQLException {
         mClientMemberships.createOrUpdate(membership);
-    }
-
-    public TalkClientSmsToken findSmsTokenById(int smsTokenId) throws SQLException {
-        return mSmsTokens.queryForId(smsTokenId);
-    }
-
-    public void saveSmsToken(TalkClientSmsToken token) throws SQLException {
-        mSmsTokens.createOrUpdate(token);
-    }
-
-    public void deleteSmsToken(TalkClientSmsToken token) throws SQLException {
-        mSmsTokens.delete(token);
     }
 
     public List<TalkClientContact> findAllPendingFriendRequests() {

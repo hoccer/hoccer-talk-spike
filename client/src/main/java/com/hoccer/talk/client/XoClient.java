@@ -138,7 +138,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     List<IXoContactListener> mContactListeners = new ArrayList<IXoContactListener>();
     List<IXoMessageListener> mMessageListeners = new ArrayList<IXoMessageListener>();
     List<IXoStateListener> mStateListeners = new ArrayList<IXoStateListener>();
-    List<IXoTokenListener> mTokenListeners = new ArrayList<IXoTokenListener>();
     List<IXoAlertListener> mAlertListeners = new ArrayList<IXoAlertListener>();
 
     Set<String> mGroupKeyUpdateInProgess = new HashSet<String>();
@@ -414,16 +413,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public synchronized void unregisterTransferListener(IXoTransferListenerOld listener) {
         mTransferAgent.unregisterListener(listener);
-    }
-
-    public synchronized void registerTokenListener(IXoTokenListener listener) {
-        if (!mTokenListeners.contains(listener)) {
-            mTokenListeners.add(listener);
-        }
-    }
-
-    public synchronized void unregisterTokenListener(IXoTokenListener listener) {
-        mTokenListeners.remove(listener);
     }
 
     public synchronized void registerAlertListener(IXoAlertListener listener) {
@@ -3438,71 +3427,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public void pauseDownload(TalkClientDownload download) {
         mTransferAgent.pauseDownload(download);
-    }
-
-    public void handleSmsUrl(final String sender, final String body, final String urlString) {
-        LOG.debug("handleSmsUrl(" + sender + "," + urlString + ")");
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                // check if the url is for a pairing token
-                if(urlString.startsWith(mClientConfiguration.getUrlScheme())) {
-                    String token = urlString.substring(mClientConfiguration.getUrlScheme().length());
-                    // build new token object
-                    TalkClientSmsToken tokenObject = new TalkClientSmsToken();
-                    tokenObject.setSender(sender);
-                    tokenObject.setToken(token);
-                    tokenObject.setBody(body);
-                    try {
-                        mDatabase.saveSmsToken(tokenObject);
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-                    // call listeners
-                    notifySmsTokensChanged(true);
-                }
-            }
-        });
-    }
-
-    private void notifySmsTokensChanged(boolean notifyUser) {
-        try {
-            List<TalkClientSmsToken> tokens = mDatabase.findAllSmsTokens();
-            for(IXoTokenListener listener: mTokenListeners) {
-                listener.onTokensChanged(tokens, notifyUser);
-            }
-        } catch (SQLException e) {
-            LOG.error("sql error", e);
-        }
-    }
-
-    public void useSmsToken(final TalkClientSmsToken token) {
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                performTokenPairing(token.getToken());
-                try {
-                    mDatabase.deleteSmsToken(token);
-                } catch (SQLException e) {
-                    LOG.error("sql error", e);
-                }
-                notifySmsTokensChanged(false);
-            }
-        });
-    }
-
-    public void rejectSmsToken(final TalkClientSmsToken token) {
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mDatabase.deleteSmsToken(token);
-                } catch (SQLException e) {
-                    LOG.error("sql error", e);
-                }
-                notifySmsTokensChanged(false);
-            }
-        });
     }
 
     public void markAsSeen(final TalkClientMessage message) {
