@@ -179,7 +179,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         int conversationContactId = mMediaPlayerService.getCurrentConversationContactId();
         TalkClientContact talkClientContact = null;
         try {
-            talkClientContact = XoApplication.getXoClient().getDatabase().findClientContactById(conversationContactId);
+            talkClientContact = XoApplication.getXoClient().getDatabase().findContactById(conversationContactId);
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -127,7 +127,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             }
             int clientContactId = arguments.getInt(ARG_CLIENT_CONTACT_ID);
             try {
-                mGroup = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                mGroup = XoApplication.getXoClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("SQL error while retrieving group contact ", e);
             }

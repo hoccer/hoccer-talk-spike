@@ -203,10 +203,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mClientUploads.refresh(upload);
     }
 
-    public TalkClientContact findClientContactById(int clientContactId) throws SQLException {
-        return mClientContacts.queryForId(clientContactId);
-    }
-
     public List<TalkClientContact> findAllContacts() throws SQLException {
         return mClientContacts.queryBuilder().where()
                 .eq("deleted", false)

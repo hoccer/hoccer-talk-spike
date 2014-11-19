@@ -71,7 +71,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 LOG.error("invalid contact id");
             } else {
                 try {
-                    mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                    mContact = XoApplication.getXoClient().getDatabase().findContactById(clientContactId);
                 } catch (SQLException e) {
                     LOG.error("sql error", e);
                 }

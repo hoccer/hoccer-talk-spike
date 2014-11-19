@@ -2819,7 +2819,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         try {
-            receiver = mDatabase.findClientContactById(receiver.getClientContactId());
+            receiver = mDatabase.findContactById(receiver.getClientContactId());
         } catch (SQLException e) {
             LOG.error("SQL error", e);
             return;
@@ -3392,7 +3392,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 if (member != null && member.isJoinedOrInvited() && ((onlyWithClientIds == null) || clientIdSet.contains(member.getClientId()))) {
                     LOG.debug("joined member contact " + membership.getClientContact().getClientContactId());
                     try {
-                        TalkClientContact client = mDatabase.findClientContactById(membership.getClientContact().getClientContactId());
+                        TalkClientContact client = mDatabase.findContactById(membership.getClientContact().getClientContactId());
                         TalkKey clientPubKey = client.getPublicKey();
                         if (clientPubKey == null) {
                             LOG.warn("no public key for client contact " + client.getClientContactId());

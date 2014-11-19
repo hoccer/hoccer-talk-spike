@@ -76,7 +76,7 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
         if (getArguments() != null && getArguments().containsKey(ARG_CLIENT_CONTACT_ID)) {
             int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
             try {
-                mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                mContact = XoApplication.getXoClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("SQL error while retrieving contact ", e);
             }
