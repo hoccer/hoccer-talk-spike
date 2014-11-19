@@ -16,7 +16,9 @@ import com.j256.ormlite.table.TableUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
@@ -42,8 +44,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     Dao<TalkClientDownload, Integer> mClientDownloads;
     Dao<TalkClientUpload, Integer> mClientUploads;
-
-    Dao<TalkClientSmsToken, Integer> mSmsTokens;
 
     Dao<TalkClientMediaCollection, Integer> mMediaCollections;
     Dao<TalkClientMediaCollectionRelation, Integer> mMediaCollectionRelations;
@@ -73,8 +73,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         TableUtils.createTable(cs, TalkClientDownload.class);
         TableUtils.createTable(cs, TalkClientUpload.class);
 
-        TableUtils.createTable(cs, TalkClientSmsToken.class);
-
         TableUtils.createTable(cs, TalkClientMediaCollection.class);
         TableUtils.createTable(cs, TalkClientMediaCollectionRelation.class);
     }
@@ -102,8 +100,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
         mClientDownloads = mBackend.getDao(TalkClientDownload.class);
         mClientUploads = mBackend.getDao(TalkClientUpload.class);
-
-        mSmsTokens = mBackend.getDao(TalkClientSmsToken.class);
 
         mMediaCollections = mBackend.getDao(TalkClientMediaCollection.class);
         mMediaCollectionRelations = mBackend.getDao(TalkClientMediaCollectionRelation.class);
@@ -308,10 +304,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             }
         }
         return allGroupContacts;
-    }
-
-    public List<TalkClientSmsToken> findAllSmsTokens() throws SQLException {
-        return mSmsTokens.queryForAll();
     }
 
     public TalkClientContact findSelfContact(boolean create) throws SQLException {
@@ -759,18 +751,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mClientMemberships.createOrUpdate(membership);
     }
 
-    public TalkClientSmsToken findSmsTokenById(int smsTokenId) throws SQLException {
-        return mSmsTokens.queryForId(smsTokenId);
-    }
-
-    public void saveSmsToken(TalkClientSmsToken token) throws SQLException {
-        mSmsTokens.createOrUpdate(token);
-    }
-
-    public void deleteSmsToken(TalkClientSmsToken token) throws SQLException {
-        mSmsTokens.delete(token);
-    }
-
     public List<TalkClientContact> findAllPendingFriendRequests() {
         try {
             List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
@@ -966,35 +946,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         deleteBuilder.delete();
     }
 
-    public void migrateAllFilecacheUris() throws SQLException {
-        List<TalkClientMessage> messages = mClientMessages.queryBuilder().where()
-                .isNotNull("attachmentUpload_id")
-                .or()
-                .isNotNull("attachmentDownload_id").query();
-        for (TalkClientMessage message : messages) {
-            TalkClientDownload download = message.getAttachmentDownload();
-            TalkClientUpload upload = message.getAttachmentUpload();
-            if (download != null) {
-                download.setDownloadUrl(migrateFilecacheUrl(download.getDownloadUrl()));
-                mClientDownloads.update(download);
-            }
-            if (upload != null) {
-                upload.setUploadUrl(migrateFilecacheUrl(upload.getUploadUrl()));
-                mClientUploads.update(upload);
-            }
-        }
-    }
-
-    private String migrateFilecacheUrl(String url) {
-        if (url == null) {
-            return null;
-        }
-        String migratedUrl = url.substring(url.indexOf("/", 8));
-        migratedUrl = "https://filecache.talk.hoccer.de:8444" + migratedUrl;
-        LOG.debug("migrated url: " + url + " to: " + migratedUrl);
-        return migratedUrl;
-    }
-
     private void deleteClientUpload(TalkClientUpload upload) throws SQLException {
         int deletedRowsCount = mClientUploads.delete(upload);
 
@@ -1048,75 +999,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         deleteClientDownload(download);
         int messageId = findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
         deleteMessageById(messageId);
-    }
-
-    /* delivered -> deliveredPrivate
-     * confirmed -> deliveredPrivateAcknowledged
-     * aborted -> abortedAcknowledged
-     * failed -> failedAcknowledged */
-    public void migrateDeliveryStates() throws SQLException {
-        List<TalkDelivery> talkDeliveries = mDeliveries.queryForAll();
-        for (TalkDelivery delivery : talkDeliveries) {
-            if (delivery.getState().equals(TalkDelivery.STATE_DELIVERED_OLD)) {
-                delivery.setState(TalkDelivery.STATE_DELIVERED_PRIVATE);
-            } else if (delivery.getState().equals(TalkDelivery.STATE_CONFIRMED_OLD)) {
-                delivery.setState(TalkDelivery.STATE_DELIVERED_PRIVATE_ACKNOWLEDGED);
-            } else if (delivery.getState().equals(TalkDelivery.STATE_ABORTED_OLD)) {
-                delivery.setState(TalkDelivery.STATE_ABORTED_ACKNOWLEDGED);
-            } else if (delivery.getState().equals(TalkDelivery.STATE_FAILED_OLD)) {
-                delivery.setState(TalkDelivery.STATE_FAILED_ACKNOWLEDGED);
-            }
-
-            if (delivery.getMessageId() == null) {
-                saveDelivery(delivery);
-                continue;
-            }
-            TalkClientMessage message = findMessageByMessageId(delivery.getMessageId(), false);
-            if (message != null) {
-                TalkClientUpload upload = message.getAttachmentUpload();
-                TalkClientDownload download;
-                if (upload == null) {
-                    download = message.getAttachmentDownload();
-                    if (download != null) {
-                        migrateTalkClientDownload(delivery, download);
-                    } else { // there is no Attachment in this delivery
-                        delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NONE);
-                    }
-                } else {
-                    migrateTalkClientUpload(delivery, upload);
-                }
-            }
-
-            saveDelivery(delivery);
-        }
-    }
-
-    private void migrateTalkClientUpload(TalkDelivery delivery, TalkClientUpload upload) {
-        switch (upload.getState()) {
-            case COMPLETE:
-                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
-                break;
-            case FAILED:
-                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_UPLOAD_FAILED_ACKNOWLEDGED);
-                break;
-            default:
-                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
-                break;
-        }
-    }
-
-    private void migrateTalkClientDownload(TalkDelivery delivery, TalkClientDownload download) {
-        switch (download.getState()) {
-            case COMPLETE:
-                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_RECEIVED_ACKNOWLEDGED);
-                break;
-            case FAILED:
-                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_DOWNLOAD_FAILED_ACKNOWLEDGED);
-                break;
-            default:
-                delivery.setAttachmentState(TalkDelivery.ATTACHMENT_STATE_NEW);
-                break;
-        }
     }
 
     public void registerUploadListener(IXoUploadListener listener) {

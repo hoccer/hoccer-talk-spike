@@ -4,13 +4,12 @@ import android.content.res.Resources;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMembership;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
-import com.artcom.hoccer.R;
 
 import java.util.ArrayList;
 
@@ -47,11 +46,6 @@ public class GroupContactsAdapter extends ContactsAdapter {
     }
 
     @Override
-    protected int getTokenLayout() {
-        return -1;
-    }
-
-    @Override
     protected int getNearbyHistoryLayout() {
         return -1;
     }
@@ -59,11 +53,6 @@ public class GroupContactsAdapter extends ContactsAdapter {
     @Override
     protected void updateNearbyHistoryLayout(View v) {
 
-    }
-
-    @Override
-    protected void updateToken(View view, TalkClientSmsToken token) {
-        LOG.debug("updateToken(" + token.getSmsTokenId() + ")");
     }
 
     @Override
