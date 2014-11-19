@@ -276,6 +276,30 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts.join(groupMembers).query();
     }
 
+    public List<TalkClientContact> findContactsInGroup(String groupId) throws SQLException {
+        return findContactsInGroupWithState(groupId, TalkGroupMember.STATE_JOINED);
+    }
+
+    public List<TalkClientContact> findContactsInGroupWithState(String groupId, String state) throws SQLException {
+        QueryBuilder<TalkGroupMember, Long> groupMemberQuery = mGroupMembers.queryBuilder();
+        groupMemberQuery.where()
+                .eq("groupId", groupId)
+                .and()
+                .eq("state", state);
+        groupMemberQuery.selectColumns("clientId");
+
+        List<TalkGroupMember> groupMembers = groupMemberQuery.query();
+        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
+        for(TalkGroupMember member : groupMembers) {
+            TalkClientContact contact = findContactByClientId(member.getClientId(), false);
+            if(contact != null) {
+                contacts.add(contact);
+            }
+        }
+
+        return contacts;
+    }
+
     public List<TalkClientContact> findClientsInGroup(TalkClientContact groupContact) throws SQLException {
         List<TalkClientContact> allGroupContacts = new ArrayList<TalkClientContact>();
         if (groupContact != null && groupContact.isGroup() && groupContact.getGroupMemberships() != null) {
@@ -723,8 +747,8 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .queryForFirst();
 
         if (create && res == null) {
-            TalkClientContact groupContact = findClientContactById(groupId);
-            TalkClientContact clientContact = findClientContactById(clientId);
+            TalkClientContact groupContact = findContactById(groupId);
+            TalkClientContact clientContact = findContactById(clientId);
             res = new TalkClientMembership();
             res.setGroupContact(groupContact);
             res.setClientContact(clientContact);
