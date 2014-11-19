@@ -95,7 +95,7 @@
     <universal.image.loader.version>1.9.0</universal.image.loader.version>
 
     <!-- Hoccer Release Versions -->
-    <hoccer-talk-server.version>3.0.25</hoccer-talk-server.version>
+    <hoccer-talk-server.version>3.0.26</hoccer-talk-server.version>
     <hoccer-talk-filecache.version>1.0.1</hoccer-talk-filecache.version>
     <hoccer-talk-android.version>3.1.2-SNAPSHOT</hoccer-talk-android.version>
   </properties>
