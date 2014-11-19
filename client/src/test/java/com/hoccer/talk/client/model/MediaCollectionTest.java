@@ -46,7 +46,7 @@ public class MediaCollectionTest {
             }
         });
 
-        mDatabase.createTables(mConnectionSource);
+        XoClientDatabase.createTables(mConnectionSource);
         mDatabase.initialize();
     }
 
