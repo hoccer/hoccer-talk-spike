@@ -5,9 +5,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
-import com.hoccer.talk.client.IXoTokenListener;
 import com.hoccer.talk.client.IXoTransferListenerOld;
-import com.hoccer.talk.client.model.*;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 
@@ -17,27 +19,24 @@ import java.util.List;
 
 /**
  * Base class for adapters dealing with contacts
- *
+ * <p/>
  * This allows base classes to override the UI for various needs.
- *
+ * <p/>
  * It also has a filter feature that allows restricting the displayed set of contacts.
- *
  */
 public abstract class ContactsAdapter extends XoAdapter
-        implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
+        implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
 
     protected final static long ITEM_ID_UNKNOWN = -1000;
     protected final static long ITEM_ID_CLIENT_HEADER = -1;
     protected final static long ITEM_ID_GROUP_HEADER = -2;
-    protected final static long ITEM_ID_TOKENS_BASE = -10000;
 
     protected final static int VIEW_TYPE_SEPARATOR = 0;
-    protected final static int VIEW_TYPE_CLIENT    = 1;
-    protected final static int VIEW_TYPE_GROUP     = 2;
-    protected final static int VIEW_TYPE_TOKEN     = 3;
-    protected static final int VIEW_TYPE_NEARBY_HISTORY = 4;
+    protected final static int VIEW_TYPE_CLIENT = 1;
+    protected final static int VIEW_TYPE_GROUP = 2;
+    protected static final int VIEW_TYPE_NEARBY_HISTORY = 3;
 
-    protected final static int VIEW_TYPE_COUNT = 5;
+    protected final static int VIEW_TYPE_COUNT = 4;
 
     private boolean showNearbyHistory = false;
     private long mNearbyMessagesCount = 0;
@@ -53,9 +52,6 @@ public abstract class ContactsAdapter extends XoAdapter
 
     Filter mFilter = null;
 
-    protected boolean mShowTokens = false;
-
-    List<TalkClientSmsToken> mSmsTokens = new ArrayList<TalkClientSmsToken>();
     List<TalkClientContact> mClientContacts = new ArrayList<TalkClientContact>();
 
     public Filter getFilter() {
@@ -66,20 +62,11 @@ public abstract class ContactsAdapter extends XoAdapter
         this.mFilter = filter;
     }
 
-    public boolean isShowTokens() {
-        return mShowTokens;
-    }
-
-    public void setShowTokens(boolean mShowTokens) {
-        this.mShowTokens = mShowTokens;
-    }
-
     @Override
     public void onCreate() {
         LOG.debug("onCreate()");
         super.onCreate();
         getXoClient().registerContactListener(this);
-        getXoClient().registerTokenListener(this);
         getXoClient().registerTransferListener(this);
         getXoClient().registerMessageListener(this);
     }
@@ -89,7 +76,6 @@ public abstract class ContactsAdapter extends XoAdapter
         LOG.debug("onDestroy()");
         super.onDestroy();
         getXoClient().unregisterContactListener(this);
-        getXoClient().unregisterTokenListener(this);
         getXoClient().unregisterTransferListener(this);
         getXoClient().unregisterMessageListener(this);
     }
@@ -101,30 +87,22 @@ public abstract class ContactsAdapter extends XoAdapter
         synchronized (this) {
             try {
                 int oldItemCount = getCount();
-                List<TalkClientSmsToken> newTokens = null;
-                if(mShowTokens) {
-                    newTokens = mDatabase.findAllSmsTokens();
-                } else {
-                    newTokens = new ArrayList<TalkClientSmsToken>();
-                }
-
                 List<TalkClientContact> newClients = mDatabase.findAllClientContactsOrderedByRecentMessage();
                 LOG.debug("found " + newClients.size() + " contacts");
 
-                if(mFilter != null) {
+                if (mFilter != null) {
                     newClients = filter(newClients, mFilter);
                 }
                 LOG.debug("filtered " + newClients.size() + " contacts");
 
-                for(TalkClientContact contact: newClients) {
+                for (TalkClientContact contact : newClients) {
                     TalkClientDownload avatarDownload = contact.getAvatarDownload();
-                    if(avatarDownload != null) {
+                    if (avatarDownload != null) {
                         mDatabase.refreshClientDownload(avatarDownload);
                     }
                 }
 
                 mClientContacts = newClients;
-                mSmsTokens = newTokens;
             } catch (SQLException e) {
                 LOG.error("SQL error", e);
             }
@@ -140,8 +118,8 @@ public abstract class ContactsAdapter extends XoAdapter
 
     private List<TalkClientContact> filter(List<TalkClientContact> in, Filter filter) {
         ArrayList<TalkClientContact> res = new ArrayList<TalkClientContact>();
-        for(TalkClientContact contact: in) {
-            if(filter.shouldShow(contact)) {
+        for (TalkClientContact contact : in) {
+            if (filter.shouldShow(contact)) {
                 res.add(contact);
             }
         }
@@ -157,18 +135,22 @@ public abstract class ContactsAdapter extends XoAdapter
     public void onContactRemoved(TalkClientContact contact) {
         requestReload();
     }
+
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
         requestReload();
     }
+
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
         requestReload();
     }
+
     @Override
     public void onGroupPresenceChanged(TalkClientContact contact) {
         requestReload();
     }
+
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
         requestReload();
@@ -178,9 +160,11 @@ public abstract class ContactsAdapter extends XoAdapter
     public void onMessageCreated(TalkClientMessage message) {
         requestReload();
     }
+
     @Override
     public void onMessageDeleted(TalkClientMessage message) {
     }
+
     @Override
     public void onMessageUpdated(TalkClientMessage message) {
     }
@@ -188,12 +172,15 @@ public abstract class ContactsAdapter extends XoAdapter
     @Override
     public void onDownloadRegistered(TalkClientDownload download) {
     }
+
     @Override
     public void onDownloadStarted(TalkClientDownload download) {
     }
+
     @Override
     public void onDownloadProgress(TalkClientDownload download) {
     }
+
     @Override
     public void onDownloadFinished(TalkClientDownload download) {
     }
@@ -204,16 +191,19 @@ public abstract class ContactsAdapter extends XoAdapter
 
     @Override
     public void onDownloadStateChanged(TalkClientDownload download) {
-        if(download.isAvatar() && download.getState() == TalkClientDownload.State.COMPLETE) {
+        if (download.isAvatar() && download.getState() == TalkClientDownload.State.COMPLETE) {
             requestReload();
         }
     }
+
     @Override
     public void onUploadStarted(TalkClientUpload upload) {
     }
+
     @Override
     public void onUploadProgress(TalkClientUpload upload) {
     }
+
     @Override
     public void onUploadFinished(TalkClientUpload upload) {
     }
@@ -223,14 +213,7 @@ public abstract class ContactsAdapter extends XoAdapter
 
     @Override
     public void onUploadStateChanged(TalkClientUpload upload) {
-        if(upload.isAvatar()) {
-            requestReload();
-        }
-    }
-
-    @Override
-    public void onTokensChanged(List<TalkClientSmsToken> tokens, boolean newTokens) {
-        if(mShowTokens) {
+        if (upload.isAvatar()) {
             requestReload();
         }
     }
@@ -248,7 +231,6 @@ public abstract class ContactsAdapter extends XoAdapter
     @Override
     public int getCount() {
         int count = 0;
-        count += mSmsTokens.size();
         count += mClientContacts.size();
 
         // add saved nearby messages
@@ -269,23 +251,12 @@ public abstract class ContactsAdapter extends XoAdapter
 
     @Override
     public Object getItem(int position) {
-        int offset = 0;
-        if(!mSmsTokens.isEmpty()) {
-            int tokenPos = position - offset;
-            if(tokenPos >= 0 && tokenPos < mSmsTokens.size()) {
-                return mSmsTokens.get(tokenPos);
-            }
-            offset += mSmsTokens.size();
+        if (position >= 0 && position < mClientContacts.size()) {
+            return mClientContacts.get(position);
         }
-        if(!mClientContacts.isEmpty()) {
-            int clientPos = position - offset;
-            if(clientPos >= 0 && clientPos < mClientContacts.size()) {
-                return mClientContacts.get(clientPos);
-            }
-            offset += mClientContacts.size();
-        }
+
         // TODO: only if nearby history was found in db
-        if (position == getCount()-1 && mNearbyMessagesCount > 0) {
+        if (position == getCount() - 1 && mNearbyMessagesCount > 0) {
             return new String("nearbyArchived");
         }
         return null;
@@ -293,24 +264,12 @@ public abstract class ContactsAdapter extends XoAdapter
 
     @Override
     public int getItemViewType(int position) {
-        int offset = 0;
-        if(!mSmsTokens.isEmpty()) {
-            int tokenPos = position - offset;
-            if(tokenPos >= 0 && tokenPos < mSmsTokens.size()) {
-                return VIEW_TYPE_TOKEN;
-            }
-            offset += mSmsTokens.size();
-        }
-        if(!mClientContacts.isEmpty()) {
-            int clientPos = position - offset;
-            if(clientPos >= 0 && clientPos < mClientContacts.size()) {
-                return VIEW_TYPE_CLIENT;
-            }
-            offset += mClientContacts.size();
+        if (position >= 0 && position < mClientContacts.size()) {
+            return VIEW_TYPE_CLIENT;
         }
 
         // TODO: only if nearby history was found in db
-        if (position == getCount()-1 && mNearbyMessagesCount > 0) {
+        if (position == getCount() - 1 && mNearbyMessagesCount > 0) {
             return VIEW_TYPE_NEARBY_HISTORY;
         }
         return VIEW_TYPE_SEPARATOR;
@@ -319,18 +278,8 @@ public abstract class ContactsAdapter extends XoAdapter
     @Override
     public long getItemId(int position) {
         Object item = getItem(position);
-        if(item instanceof TalkClientContact) {
-            return ((TalkClientContact)item).getClientContactId();
-        }
-        if(item instanceof TalkClientSmsToken) {
-            return ITEM_ID_TOKENS_BASE + ((TalkClientSmsToken)item).getSmsTokenId();
-        }
-        int offset = 0;
-        if(!mSmsTokens.isEmpty()) {
-            offset += mSmsTokens.size();
-        }
-        if(!mClientContacts.isEmpty()) {
-            offset += mClientContacts.size();
+        if (item instanceof TalkClientContact) {
+            return ((TalkClientContact) item).getClientContactId();
         }
         return ITEM_ID_UNKNOWN;
     }
@@ -340,7 +289,6 @@ public abstract class ContactsAdapter extends XoAdapter
         int type = getItemViewType(position);
 
         View v = convertView;
-
         switch (type) {
             case VIEW_TYPE_CLIENT:
                 if (v == null) {
@@ -360,12 +308,6 @@ public abstract class ContactsAdapter extends XoAdapter
                 }
                 updateSeparator(v, position);
                 break;
-            case VIEW_TYPE_TOKEN:
-                if (v == null) {
-                    v = mInflater.inflate(getTokenLayout(), null);
-                }
-                updateToken(v, (TalkClientSmsToken) getItem(position));
-                break;
             case VIEW_TYPE_NEARBY_HISTORY:
                 if (v == null) {
                     v = mInflater.inflate(getNearbyHistoryLayout(), null);
@@ -381,19 +323,21 @@ public abstract class ContactsAdapter extends XoAdapter
     }
 
     protected abstract int getClientLayout();
+
     protected abstract int getGroupLayout();
+
     protected abstract int getSeparatorLayout();
-    protected abstract int getTokenLayout();
+
     protected abstract int getNearbyHistoryLayout();
 
     protected abstract void updateNearbyHistoryLayout(View v);
+
     protected abstract void updateContact(View view, final TalkClientContact contact);
-    protected abstract void updateToken(View view, final TalkClientSmsToken token);
 
     protected void updateSeparator(View view, int position) {
         LOG.debug("updateSeparator()");
-        TextView separator = (TextView)view;
-        separator.setText((String)getItem(position));
+        TextView separator = (TextView) view;
+        separator.setText((String) getItem(position));
     }
 
     public String[] getMembersIds() {

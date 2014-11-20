@@ -58,11 +58,8 @@
     <!-- For attachments, also used for logging -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <!-- We read and write contacts -->
+    <!-- We read contacts -->
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
-    <!-- SMS receive for pairing tokens -->
-    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <!-- Our own GCM permission -->
     <uses-permission android:name="${apk.package.name}.permission.C2D_MESSAGE"/>
     <!-- Google Play Services / GMaps -->
@@ -72,7 +69,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <!-- Wifi-Scanning for location grouping -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <!-- Mediaplayer needs to check if Hoccer is running -->
     <uses-permission android:name="android.permission.GET_TASKS"/>
+    <!-- Camera is needed for QR-Code scanning -->
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <!-- Declare permission for controlling our own push package -->
@@ -298,17 +297,6 @@
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
                 <!-- Restrict to our own push package -->
                 <category android:name="com.hoccer.talk.android"/>
-            </intent-filter>
-        </receiver>
-
-        <!-- SMS broadcast receiver -->
-        <receiver
-                android:name="com.hoccer.xo.android.sms.SmsReceiver"
-                android:permission="android.permission.BROADCAST_SMS"
-                android:exported="true">
-            <!-- Priority 999 is the maximum priority allowed for applications -->
-            <intent-filter android:priority="999">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
         </receiver>
 

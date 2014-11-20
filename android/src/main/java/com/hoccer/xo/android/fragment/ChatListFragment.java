@@ -3,20 +3,20 @@ package com.hoccer.xo.android.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.*;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.ChatListAdapter;
 import com.hoccer.xo.android.adapter.SearchAdapter;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.dialog.TokenDialog;
 import com.hoccer.xo.android.view.Placeholder;
 import com.hoccer.xo.android.view.model.BaseChatItem;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.lang.ref.WeakReference;
@@ -95,7 +95,7 @@ public class ChatListFragment extends SearchableListFragment {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, view, menuInfo);
-        if(menuInfo != null) {
+        if (menuInfo != null) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
             Object object = ((BaseChatItem) mAdapter.getItem(info.position)).getContent();
             if (object instanceof TalkClientContact) {
@@ -219,7 +219,7 @@ public class ChatListFragment extends SearchableListFragment {
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
 
-        Object item = ((BaseChatItem)listView.getItemAtPosition(position)).getContent();
+        Object item = ((BaseChatItem) listView.getItemAtPosition(position)).getContent();
         if (item instanceof TalkClientContact) {
             TalkClientContact contact = (TalkClientContact) item;
             if (contact.isGroup() && contact.isGroupInvited()) {
@@ -227,11 +227,6 @@ public class ChatListFragment extends SearchableListFragment {
             } else {
                 ((XoActivity) getActivity()).showContactConversation(contact);
             }
-        }
-        if (item instanceof TalkClientSmsToken) {
-            TalkClientSmsToken token = (TalkClientSmsToken) item;
-            new TokenDialog((XoActivity) getActivity(), token).show(getActivity().getFragmentManager(),
-                    "TokenDialog");
         }
         if (item instanceof String) { // item can only be an instance of string if the user pressed on the nearby saved option
             Intent intent = new Intent(getActivity(), MessagingActivity.class);
