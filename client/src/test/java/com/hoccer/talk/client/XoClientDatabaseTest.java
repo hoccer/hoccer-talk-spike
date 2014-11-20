@@ -57,7 +57,7 @@ public class XoClientDatabaseTest {
 
     @Test
     public void test_findContactsInGroupWitState() throws SQLException {
-        LOG.info("test_findContactsInGroup");
+        LOG.info("test_findContactsInGroupWitState");
 
         TalkClientContact groupAdmin = createClientContact("adminClientId");
         TalkClientContact group = createGroup(groupAdmin, "TestGroupId");
@@ -65,14 +65,14 @@ public class XoClientDatabaseTest {
         // add invited clients
         int invitedContactsCount = 4;
         for (int i = 0; i < invitedContactsCount; i++) {
-            TalkClientContact contact = createClientContact(String.valueOf(CLIENT_ID_COUNTER++));
+            TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
             addContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_INVITED);
         }
 
         // add joined clients
         int joinedContactsCount = 2;
         for (int i = 0; i < joinedContactsCount; i++) {
-            TalkClientContact contact = createClientContact(String.valueOf(CLIENT_ID_COUNTER++));
+            TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
             addContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_JOINED);
         }
 
@@ -83,6 +83,33 @@ public class XoClientDatabaseTest {
         // check joined contacts count
         int expectedJoinedContactsCount = joinedContactsCount + 1;
         List<TalkClientContact> joinedContactsInGroup = mDatabase.findContactsInGroupWithState(group.getGroupId(), TalkGroupMember.STATE_JOINED);
+        assertEquals(expectedJoinedContactsCount, joinedContactsInGroup.size());
+    }
+
+    @Test
+    public void test_findContactsInGroup() throws SQLException {
+        LOG.info("test_findContactsInGroup");
+
+        TalkClientContact groupAdmin = createClientContact("adminClientId");
+        TalkClientContact group = createGroup(groupAdmin, "TestGroupId");
+
+        // add invited clients
+        int invitedContactsCount = 4;
+        for (int i = 0; i < invitedContactsCount; i++) {
+            TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
+            addContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_INVITED);
+        }
+
+        // add joined clients
+        int joinedContactsCount = 2;
+        for (int i = 0; i < joinedContactsCount; i++) {
+            TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
+            addContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_JOINED);
+        }
+
+        // check joined contacts count
+        int expectedJoinedContactsCount = joinedContactsCount + 1;
+        List<TalkClientContact> joinedContactsInGroup = mDatabase.findContactsInGroup(group.getGroupId());
         assertEquals(expectedJoinedContactsCount, joinedContactsInGroup.size());
     }
 
