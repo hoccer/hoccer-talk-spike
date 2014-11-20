@@ -233,7 +233,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts.join(relationships).query();
     }
 
-    public List<TalkClientContact> findAllGroupContacts() throws SQLException {
+    public List<TalkClientContact> findAllGroups() throws SQLException {
         return mClientContacts.queryBuilder().where()
                 .eq("contactType", TalkClientContact.TYPE_GROUP)
                 .eq("deleted", false)
@@ -241,7 +241,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
     }
 
-    public List<TalkClientContact> findGroupContactsByState(String state) throws SQLException {
+    public List<TalkClientContact> findGroupsWithSelfState(String state) throws SQLException {
         QueryBuilder<TalkGroupMember, Long> groupMembers = mGroupMembers.queryBuilder();
         groupMembers.where()
                 .eq("state", state);
@@ -798,7 +798,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public int getCountOfInvitedMeGroups() throws SQLException {
-        return findGroupContactsByState(TalkGroupMember.STATE_INVITED).size();
+        return findGroupsWithSelfState(TalkGroupMember.STATE_INVITED).size();
     }
 
     public boolean hasPendingFriendRequests() {
