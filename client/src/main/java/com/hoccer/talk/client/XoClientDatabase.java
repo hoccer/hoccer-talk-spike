@@ -300,19 +300,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts;
     }
 
-    public List<TalkClientContact> findClientsInGroup(TalkClientContact groupContact) throws SQLException {
-        List<TalkClientContact> allGroupContacts = new ArrayList<TalkClientContact>();
-        if (groupContact != null && groupContact.isGroup() && groupContact.getGroupMemberships() != null) {
-            for (TalkClientMembership memberShip : groupContact.getGroupMemberships()) {
-                TalkGroupMember groupMember = memberShip.getMember();
-                if (groupMember != null && groupMember.isJoined()) {
-                    allGroupContacts.add(memberShip.getClientContact());
-                }
-            }
-        }
-        return allGroupContacts;
-    }
-
     public List<TalkClientSmsToken> findAllSmsTokens() throws SQLException {
         return mSmsTokens.queryForAll();
     }
