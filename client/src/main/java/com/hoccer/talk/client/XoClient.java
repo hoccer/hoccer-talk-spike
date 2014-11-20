@@ -3135,36 +3135,31 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void destroyNearbyGroup(TalkClientContact groupContact) {
         LOG.debug("destroying nearby group with id " + groupContact.getGroupId());
 
-        // reset group state
-        TalkGroup groupPresence = groupContact.getGroupPresence();
-        if (groupPresence == null) {
-            LOG.error("Can not destroy nearby group since groupPresence is null");
-            return;
-        }
-
-        groupPresence.setState(TalkGroup.STATE_KEPT);
-
         try {
-            // remove all group members
-            ForeignCollection<TalkClientMembership> groupMemberships = groupContact.getGroupMemberships();
-            if (groupMemberships != null){
-                for (TalkClientMembership membership : groupMemberships) {
+            // reset group state
+            TalkGroup groupPresence = groupContact.getGroupPresence();
+            if (groupPresence == null) {
+                LOG.error("Can not destroy nearby group since groupPresence is null");
+                return;
+            }
+            groupPresence.setState(TalkGroup.STATE_KEPT);
 
-                    // reset nearby status of group member contact
-                    TalkClientContact groupMemberContact = membership.getClientContact();
-                    groupMemberContact.setNearby(false);
-                    mDatabase.saveContact(groupMemberContact);
+            // save group
+            mDatabase.saveContact(groupContact);
+            mDatabase.saveGroup(groupPresence);
 
-                    // reset group membership state
-                    TalkGroupMember member = membership.getMember();
-                    if (member != null) {
-                        member.setState(TalkGroupMember.STATE_NONE);
-                        mDatabase.saveGroupMember(member);
-                    }
-                }
+            // set member states to none
+            List<TalkGroupMember> members = mDatabase.findMembersInGroup(groupContact.getGroupId());
+            for (TalkGroupMember member : members) {
+                member.setState(TalkGroupMember.STATE_NONE);
+                mDatabase.saveGroupMember(member);
+            }
 
-                mDatabase.saveContact(groupContact);
-                mDatabase.saveGroup(groupPresence);
+            // set contact nearby state to false
+            List<TalkClientContact> contacts = mDatabase.findContactsInGroup(groupContact.getGroupId());
+            for (TalkClientContact contact : contacts) {
+                contact.setNearby(false);
+                mDatabase.saveContact(contact);
             }
         } catch (SQLException e) {
             LOG.error("Error while destroying nearby group " + groupContact.getGroupId());
