@@ -14,7 +14,6 @@ import android.widget.TextView;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
-import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -22,7 +21,6 @@ import com.hoccer.xo.android.view.AvatarView;
 import com.artcom.hoccer.R;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.collections4.Predicate;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -45,8 +43,8 @@ public class GroupContactListAdapter extends ContactListAdapter {
 
         try {
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
-            invitedMe = database.findGroupContactsByState(TalkGroupMember.STATE_INVITED);
-            joined = database.findGroupContactsByState(TalkGroupMember.STATE_JOINED);
+            invitedMe = database.findGroupsWithSelfState(TalkGroupMember.STATE_INVITED);
+            joined = database.findGroupsWithSelfState(TalkGroupMember.STATE_JOINED);
         } catch (SQLException e) {
             LOG.error("Could not fetch group contacts", e);
             return Collections.emptyList();
