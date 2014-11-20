@@ -3323,35 +3323,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    private String[] updateableClients(TalkClientContact group, String[] onlyWithClientIds) {
-
-        ArrayList<String> clientIds = new ArrayList<String>();
-        HashSet<String> clientIdSet = new HashSet<String>(Arrays.asList(onlyWithClientIds));
-        ForeignCollection<TalkClientMembership> memberships = group.getGroupMemberships();
-        if (memberships != null) {
-
-            // prepare ArrayList with keys first first
-            for (TalkClientMembership membership : memberships) {
-                TalkGroupMember member = membership.getMember();
-                if (member != null && member.isJoinedOrInvited() && ((onlyWithClientIds == null) || clientIdSet.contains(member.getClientId()))) {
-                    LOG.debug("joined member contact " + membership.getClientContact().getClientContactId());
-                    try {
-                        TalkClientContact client = mDatabase.findContactById(membership.getClientContact().getClientContactId());
-                        TalkKey clientPubKey = client.getPublicKey();
-                        if (clientPubKey == null) {
-                            LOG.warn("no public key for client contact " + client.getClientContactId());
-                        }  else {
-                            clientIds.add(member.getClientId());
-                        }
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-                }
-            }
-        }
-        return clientIds.toArray(new String[]{});
-    }
-
     private void generateGroupKey(TalkClientContact group) {
         try {
             // generate the new key
