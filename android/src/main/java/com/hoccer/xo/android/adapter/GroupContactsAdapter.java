@@ -6,12 +6,11 @@ import android.view.View;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientMembership;
-import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -54,7 +53,6 @@ public class GroupContactsAdapter extends ContactsAdapter {
 
     @Override
     protected void updateNearbyHistoryLayout(View v) {
-
     }
 
     @Override
@@ -95,29 +93,13 @@ public class GroupContactsAdapter extends ContactsAdapter {
     }
 
     private boolean isContactAdminInGroup(TalkClientContact contact, TalkClientContact group) {
-        if (contact.isClient()) {
-            if (group.getGroupMemberships() == null) {
-                return false;
+        try {
+            TalkClientContact admin = mDatabase.findAdminInGroup(group.getGroupId());
+            if (admin != null && contact.getClientId().equals(admin.getClientId())) {
+                return true;
             }
-            for (TalkClientMembership groupMembership : group.getGroupMemberships()) {
-                TalkGroupMember groupMember = groupMembership.getMember();
-                if (groupMember == null) {
-                    continue;
-                }
-                String groupMemberClientId = groupMember.getClientId();
-                String contactClientId = contact.getClientId();
-                if (groupMemberClientId == null || contactClientId == null) {
-                    continue;
-                }
-                if (groupMemberClientId.equals(contactClientId)) {
-                    return groupMember.isAdmin();
-                }
-            }
-        } else if (contact.isSelf()) {
-            TalkGroupMember member = mGroup.getGroupMember();
-            if (member != null) {
-                return member.isAdmin();
-            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return false;
     }
