@@ -13,9 +13,11 @@ import android.text.format.Formatter;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkRelationship;
@@ -30,7 +32,7 @@ import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
-import com.artcom.hoccer.R;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -309,10 +311,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         return false;
     }
 
-    private boolean isEmptyGroup() {
-        return (mContact != null && mContact.isGroup() && mContact.isEmptyGroup());
-    }
-
     private boolean uploadExceedsTransferLimit(List<IContentObject> uploads) {
         int transferLimit = getXoClient().getUploadLimit();
 
@@ -360,11 +358,25 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
             clearComposedMessage();
             return;
 
-        } else if (isEmptyGroup()) {
+        }
+
+        if (mContact.isGroup() && isGroupEmpty(mContact)) {
             showAlertSendMessageNotPossible();
             return;
         }
         sendComposedMessage(messageText, uploads);
+    }
+
+    private static boolean isGroupEmpty(TalkClientContact mContact) {
+        final List<TalkClientContact> otherContactsInGroup;
+        try {
+            otherContactsInGroup = XoApplication.getXoClient().getDatabase().findContactsInGroup(mContact.getGroupId());
+            CollectionUtils.filterInverse(otherContactsInGroup, TalkClientContactPredicates.IS_SELF_PREDICATE);
+            return otherContactsInGroup.isEmpty();
+        } catch (SQLException e) {
+            LOG.error("Error retrieving contacts in group: " + mContact.getGroupId(), e);
+            return true;
+        }
     }
 
     private void processMessage() {
