@@ -26,7 +26,7 @@ public class XoClientDatabaseTest {
 
     private JdbcConnectionSource mConnectionSource;
 
-    private int CLIENT_ID_COUNTER = 0;
+    private int clientIdCounter;
 
     @Before
     public void testSetup() throws Exception {
