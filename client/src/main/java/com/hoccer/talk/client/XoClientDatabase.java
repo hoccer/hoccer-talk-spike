@@ -280,6 +280,37 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts;
     }
 
+    public TalkClientContact findAdminInGroup(String groupId) throws SQLException {
+        List<TalkClientContact> contacts = findContactsInGroupWithRole(groupId, TalkGroupMember.ROLE_ADMIN);
+
+        if(contacts.size() == 1) {
+            return contacts.get(0);
+        } else {
+            LOG.error("Found " + contacts.size() + " admin(s) in group contact with groupId " + groupId);
+            return null;
+        }
+    }
+
+    public List<TalkClientContact> findContactsInGroupWithRole(String groupId, String role) throws SQLException {
+        QueryBuilder<TalkGroupMember, Long> groupMemberQuery = mGroupMembers.queryBuilder();
+        groupMemberQuery.where()
+                .eq("groupId", groupId)
+                .and()
+                .eq("role", role);
+        groupMemberQuery.selectColumns("clientId");
+
+        List<TalkGroupMember> groupMembers = groupMemberQuery.query();
+        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
+        for (TalkGroupMember member : groupMembers) {
+            TalkClientContact contact = findContactByClientId(member.getClientId(), false);
+            if (contact != null) {
+                contacts.add(contact);
+            }
+        }
+
+        return contacts;
+    }
+
     public TalkClientContact findSelfContact(boolean create) throws SQLException {
         TalkClientContact contact = mClientContacts.queryBuilder()
                 .where()

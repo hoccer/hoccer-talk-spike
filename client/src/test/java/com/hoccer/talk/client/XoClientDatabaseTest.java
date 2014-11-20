@@ -113,6 +113,63 @@ public class XoClientDatabaseTest {
         assertEquals(expectedJoinedContactsCount, joinedContactsInGroup.size());
     }
 
+    @Test
+    public void test_findContactsInGroupWitRole() throws SQLException {
+        LOG.info("test_findContactsInGroupWitRole");
+
+        TalkClientContact groupAdmin = createClientContact("adminClientId");
+        TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
+
+        // add invited clients
+        int invitedContactsCount = 2;
+        for (int i = 0; i < invitedContactsCount; i++) {
+            TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
+            addClientContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_INVITED);
+        }
+
+        // add joined clients
+        int joinedContactsCount = 3;
+        for (int i = 0; i < joinedContactsCount; i++) {
+            TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
+            addClientContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_JOINED);
+        }
+
+        // check admin contacts count
+        List<TalkClientContact> adminContacts = mDatabase.findContactsInGroupWithRole(group.getGroupId(), TalkGroupMember.ROLE_ADMIN);
+        assertEquals(1, adminContacts.size());
+        assertEquals(groupAdmin.getClientId(), adminContacts.get(0).getClientId());
+
+        // check member contacts count
+        List<TalkClientContact> memberContacts = mDatabase.findContactsInGroupWithRole(group.getGroupId(), TalkGroupMember.ROLE_MEMBER);
+        assertEquals(joinedContactsCount + invitedContactsCount, memberContacts.size());
+    }
+
+    @Test
+    public void test_findAdminInGroup() throws SQLException {
+        LOG.info("test_findAdminInGroup");
+
+        TalkClientContact groupAdmin = createClientContact("adminClientId");
+        TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
+
+        // add invited clients
+        int invitedContactsCount = 4;
+        for (int i = 0; i < invitedContactsCount; i++) {
+            TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
+            addClientContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_INVITED);
+        }
+
+        // add joined clients
+        int joinedContactsCount = 2;
+        for (int i = 0; i < joinedContactsCount; i++) {
+            TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
+            addClientContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_JOINED);
+        }
+
+        // check admin in group
+        TalkClientContact returnedGroupAdmin = mDatabase.findAdminInGroup(group.getGroupId());
+        assertEquals(groupAdmin.getClientId(), returnedGroupAdmin.getClientId());
+    }
+
     //////// Helper Methods ////////
 
     private TalkClientContact createClientContact(String clientId) throws SQLException {
