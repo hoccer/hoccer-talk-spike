@@ -491,36 +491,6 @@ public class TalkClientContact implements Serializable {
     }
 
     @GroupMethodOnly
-    public TalkClientMembership getSelfClientMembership(XoClient theClient) {
-        ensureGroup();
-        if(!this.isGroupRegistered()) {
-            return null;
-        }
-        try {
-            TalkClientContact contact = theClient.getSelfContact();
-            if (contact != null) {
-                TalkClientMembership membership = theClient.getDatabase().findMembershipByContacts(this.getClientContactId(),contact.getClientContactId(),false);
-                return membership;
-             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-/*
-        ensureGroup();
-        ForeignCollection<TalkClientMembership> memberships = this.getGroupMemberships();
-        if(memberships != null && memberships.size() > 0) {
-            for(TalkClientMembership membership: memberships) {
-                TalkClientContact contact = membership.getClientContact();
-                if (contact != null && contact.isSelf()) {
-                    return membership;
-                }
-            }
-        }
-        */
-        return null;
-    }
-
-    @GroupMethodOnly
     public List<TalkClientContact> getJoinedGroupContactsExceptSelf() {
         ArrayList<TalkClientContact> joinedContacts = new ArrayList<TalkClientContact>();
 
