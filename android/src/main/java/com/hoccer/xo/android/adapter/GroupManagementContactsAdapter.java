@@ -4,10 +4,12 @@ import android.view.View;
 import android.widget.CheckedTextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -21,9 +23,9 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
 
     private static final Logger LOG = Logger.getLogger(GroupManagementContactsAdapter.class);
 
-    private TalkClientContact mGroup;
-    private ArrayList<TalkClientContact> mContactsToInvite;
-    private ArrayList<TalkClientContact> mContactsToKick;
+    private final TalkClientContact mGroup;
+    private final ArrayList<TalkClientContact> mContactsToInvite;
+    private final ArrayList<TalkClientContact> mContactsToKick;
 
     public GroupManagementContactsAdapter(XoActivity activity, TalkClientContact group, ArrayList<TalkClientContact> contactsToInvite, ArrayList<TalkClientContact> contactsToKick) {
         super(activity);
@@ -66,18 +68,24 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         avatarView.setContact(contact);
 
-        if (contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup)) {
-            checkedTextView.setChecked(true);
-        } else {
-            checkedTextView.setChecked(false);
-        }
+        try {
+            TalkGroupMember member = mDatabase.findMemberInGroupWithClientId(mGroup.getGroupId(), contact.getClientId());
+            if (member != null) {
+                if (TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState())) {
+                    checkedTextView.setChecked(true);
+                } else {
+                    checkedTextView.setChecked(false);
+                }
 
-        if (mContactsToInvite.contains(contact)) {
-            checkedTextView.setChecked(true);
-        } else if (mContactsToKick.contains(contact)) {
-            checkedTextView.setChecked(false);
+                if (mContactsToInvite.contains(contact)) {
+                    checkedTextView.setChecked(true);
+                } else if (mContactsToKick.contains(contact)) {
+                    checkedTextView.setChecked(false);
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error(e);
         }
-
     }
 
 }
