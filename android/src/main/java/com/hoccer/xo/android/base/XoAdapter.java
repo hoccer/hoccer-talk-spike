@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class XoAdapter extends BaseAdapter {
 
     private static final long RATE_LIMIT_MSECS = 1000;
+    private static final Logger LOG = Logger.getLogger(XoAdapter.class);
 
     @Nullable
     protected XoActivity mActivity = null;
@@ -52,7 +53,6 @@ public abstract class XoAdapter extends BaseAdapter {
     @Nullable
     private ScheduledFuture<?> mNotifyFuture = null;
 
-    protected Logger LOG = null;
 
     private AdapterReloadListener mAdapterReloadListener;
 
@@ -61,7 +61,6 @@ public abstract class XoAdapter extends BaseAdapter {
     private long mNotifyTimestamp;
 
     public XoAdapter(XoActivity activity) {
-        LOG = Logger.getLogger(getClass());
 
         if (activity != null) {
             mActivity = activity;

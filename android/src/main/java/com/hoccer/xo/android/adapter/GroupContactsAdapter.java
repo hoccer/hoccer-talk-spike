@@ -10,6 +10,7 @@ import com.hoccer.talk.client.model.TalkClientMembership;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 
@@ -22,11 +23,12 @@ import java.util.ArrayList;
  */
 public class GroupContactsAdapter extends ContactsAdapter {
 
+    private static final Logger LOG = Logger.getLogger(GroupContactsAdapter.class);
+
     private TalkClientContact mGroup;
 
     public GroupContactsAdapter(XoActivity activity, TalkClientContact group) {
         super(activity);
-
         mGroup = group;
     }
 

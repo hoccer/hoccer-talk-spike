@@ -6,6 +6,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 
@@ -17,6 +18,8 @@ import java.util.ArrayList;
  * It is used mostly for managing users in a group context.
  */
 public class GroupManagementContactsAdapter extends ContactsAdapter {
+
+    private static final Logger LOG = Logger.getLogger(GroupManagementContactsAdapter.class);
 
     private TalkClientContact mGroup;
     private ArrayList<TalkClientContact> mContactsToInvite;

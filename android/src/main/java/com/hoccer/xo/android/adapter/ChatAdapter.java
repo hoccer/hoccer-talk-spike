@@ -14,6 +14,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ import java.util.List;
  * To configure list items it uses instances of ChatMessageItem and its subtypes.
  */
 public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListenerOld {
+
+    private static final Logger LOG = Logger.getLogger(ChatAdapter.class);
 
     /**
      * Number of TalkClientMessage objects in a batch
