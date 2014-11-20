@@ -60,20 +60,20 @@ public class XoClientDatabaseTest {
         LOG.info("test_findContactsInGroupWitState");
 
         TalkClientContact groupAdmin = createClientContact("adminClientId");
-        TalkClientContact group = createGroup(groupAdmin, "TestGroupId");
+        TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
 
         // add invited clients
         int invitedContactsCount = 4;
         for (int i = 0; i < invitedContactsCount; i++) {
             TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
-            addContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_INVITED);
+            addClientContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_INVITED);
         }
 
         // add joined clients
         int joinedContactsCount = 2;
         for (int i = 0; i < joinedContactsCount; i++) {
             TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
-            addContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_JOINED);
+            addClientContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_JOINED);
         }
 
         // check invited contacts count
@@ -91,20 +91,20 @@ public class XoClientDatabaseTest {
         LOG.info("test_findContactsInGroup");
 
         TalkClientContact groupAdmin = createClientContact("adminClientId");
-        TalkClientContact group = createGroup(groupAdmin, "TestGroupId");
+        TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
 
         // add invited clients
         int invitedContactsCount = 4;
         for (int i = 0; i < invitedContactsCount; i++) {
             TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
-            addContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_INVITED);
+            addClientContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_INVITED);
         }
 
         // add joined clients
         int joinedContactsCount = 2;
         for (int i = 0; i < joinedContactsCount; i++) {
             TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
-            addContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_JOINED);
+            addClientContactToGroup(contact.getClientId(), group.getGroupId(), TalkGroupMember.STATE_JOINED);
         }
 
         // check joined contacts count
@@ -115,22 +115,13 @@ public class XoClientDatabaseTest {
 
     //////// Helper Methods ////////
 
-    private void addContactToGroup(String clientId, String groupId, String state) throws SQLException {
-        TalkGroupMember member = new TalkGroupMember();
-        member.setClientId(clientId);
-        member.setRole(TalkGroupMember.ROLE_MEMBER);
-        member.setState(state);
-        member.setGroupId(groupId);
-        mDatabase.saveGroupMember(member);
-    }
-
     private TalkClientContact createClientContact(String clientId) throws SQLException {
         TalkClientContact contact = new TalkClientContact(TalkClientContact.TYPE_CLIENT, clientId);
         mDatabase.saveContact(contact);
         return contact;
     }
 
-    private TalkClientContact createGroup(TalkClientContact admin, String groupId) throws SQLException {
+    private TalkClientContact createGroupContact(TalkClientContact admin, String groupId) throws SQLException {
         TalkClientContact group = TalkClientContact.createGroupContact();
         group.setCreatedTimeStamp(new Date());
 
@@ -154,5 +145,14 @@ public class XoClientDatabaseTest {
         mDatabase.saveContact(group);
 
         return group;
+    }
+
+    private void addClientContactToGroup(String clientId, String groupId, String state) throws SQLException {
+        TalkGroupMember member = new TalkGroupMember();
+        member.setClientId(clientId);
+        member.setRole(TalkGroupMember.ROLE_MEMBER);
+        member.setState(state);
+        member.setGroupId(groupId);
+        mDatabase.saveGroupMember(member);
     }
 }
