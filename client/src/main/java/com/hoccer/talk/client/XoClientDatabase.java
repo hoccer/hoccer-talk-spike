@@ -1191,7 +1191,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     @Override
     public TalkClientMediaCollection createMediaCollection(String collectionName) throws SQLException {
         TalkClientMediaCollection collection = new TalkClientMediaCollection(collectionName);
-        mMediaCollections.createIfNotExists(collection);
+        mMediaCollections.create(collection);
         collection = prepareMediaCollection(collection);
         for (IXoMediaCollectionListener listener : mMediaCollectionListeners) {
             listener.onMediaCollectionCreated(collection);
