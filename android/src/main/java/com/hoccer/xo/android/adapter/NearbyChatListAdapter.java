@@ -196,7 +196,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
             final List<TalkClientContact> nearbyContacts = mDatabase.findContactsInGroup(group.getGroupId());
             CollectionUtils.filterInverse(nearbyContacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
 
-            if (!group.isEmptyGroup()) {
+            if (!nearbyContacts.isEmpty()) {
                 group.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
                 nearbyContacts.add(0, group);
             }
