@@ -25,7 +25,6 @@ public class UpdateAgent extends NotificationDeferrer {
     private static final ThreadLocal<ArrayList<Runnable>> context = new ThreadLocal<ArrayList<Runnable>>();
 
     private final static Long MAX_ALLOWED_KEY_REQUEST_LATENCY = 10000L;
-    private final TalkServerConfiguration mConfig;
 
     public UpdateAgent(TalkServer server) {
         super(
@@ -33,7 +32,6 @@ public class UpdateAgent extends NotificationDeferrer {
             "update-agent"
         );
         mServer = server;
-        mConfig = mServer.getConfiguration();
         mDatabase = mServer.getDatabase();
     }
 
