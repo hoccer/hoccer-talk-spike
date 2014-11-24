@@ -87,12 +87,28 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mMediaCollectionRelations = mBackend.getDao(TalkClientMediaCollectionRelation.class);
     }
 
+    public void saveCredentials(TalkClientSelf credentials) throws SQLException {
+        mClientSelfs.createOrUpdate(credentials);
+    }
+
+    public void savePublicKey(TalkKey publicKey) throws SQLException {
+        mPublicKeys.createOrUpdate(publicKey);
+    }
+
+    public void savePrivateKey(TalkPrivateKey privateKey) throws SQLException {
+        mPrivateKeys.createOrUpdate(privateKey);
+    }
+
+    ////////////////////////////////////
+    //////// Contact Management ////////
+    ////////////////////////////////////
+
     public void saveContact(TalkClientContact contact) throws SQLException {
         mClientContacts.createOrUpdate(contact);
     }
 
-    public void saveCredentials(TalkClientSelf credentials) throws SQLException {
-        mClientSelfs.createOrUpdate(credentials);
+    public void refreshClientContact(TalkClientContact contact) throws SQLException {
+        mClientContacts.refresh(contact);
     }
 
     public void savePresence(TalkPresence presence) throws NoClientIdInPresenceException, SQLException {
@@ -106,79 +122,66 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mRelationships.createOrUpdate(relationship);
     }
 
-    public void saveGroup(TalkGroup group) throws SQLException {
-        mGroups.createOrUpdate(group);
-    }
+    public TalkClientContact findSelfContact(boolean create) throws SQLException {
+        TalkClientContact contact = mClientContacts.queryBuilder()
+                .where()
+                .eq("contactType", TalkClientContact.TYPE_SELF)
+                .queryForFirst();
 
-    public void saveGroupMember(TalkGroupMember member) throws SQLException {
-        mGroupMembers.createOrUpdate(member);
-    }
-
-    public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
-        mClientMessages.createOrUpdate(message);
-    }
-
-    public void saveMessage(TalkMessage message) throws SQLException {
-        mMessages.createOrUpdate(message);
-    }
-
-    public synchronized void saveDelivery(TalkDelivery delivery) throws SQLException {
-        mDeliveries.createOrUpdate(delivery);
-    }
-
-    public synchronized void updateDelivery(TalkDelivery delivery) throws SQLException {
-        int updatedRows = mDeliveries.update(delivery);
-        if (updatedRows < 1) {
-            throw new SQLException("cant find record for Delivery: " + delivery.getId());
+        if (create && contact == null) {
+            contact = new TalkClientContact(TalkClientContact.TYPE_SELF);
+            mClientContacts.create(contact);
+            contact = findContactById(contact.getClientContactId());
         }
+
+        return contact;
     }
 
-    public void savePublicKey(TalkKey publicKey) throws SQLException {
-        mPublicKeys.createOrUpdate(publicKey);
+    public TalkClientContact findContactById(int contactId) throws SQLException {
+        return mClientContacts.queryForId(contactId);
     }
 
-    public void savePrivateKey(TalkPrivateKey privateKey) throws SQLException {
-        mPrivateKeys.createOrUpdate(privateKey);
-    }
+    public synchronized TalkClientContact findContactByClientId(String clientId, boolean create) throws SQLException {
+        TalkClientContact contact = mClientContacts.queryBuilder()
+                .where()
+                .eq("clientId", clientId)
+                .eq("deleted", false)
+                .and(2)
+                .queryForFirst();
 
-    public void saveClientDownload(TalkClientDownload download) throws SQLException {
-        Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
-
-        if (result.isCreated()) {
-            for (IXoDownloadListener listener : mDownloadListeners) {
-                listener.onDownloadCreated(download);
-            }
-        } else {
-            for (IXoDownloadListener listener : mDownloadListeners) {
-                listener.onDownloadUpdated(download);
-            }
+        if (create && contact == null) {
+            contact = new TalkClientContact(TalkClientContact.TYPE_CLIENT, clientId);
+            mClientContacts.create(contact);
+            contact = findContactById(contact.getClientContactId());
         }
+
+        return contact;
     }
 
-    public void saveClientUpload(TalkClientUpload upload) throws SQLException {
-        Dao.CreateOrUpdateStatus result = mClientUploads.createOrUpdate(upload);
+    public TalkClientContact findDeletedContactByClientId(String clientId) throws SQLException {
+        return mClientContacts.queryBuilder()
+                .where()
+                .eq("clientId", clientId)
+                .eq("deleted", true)
+                .and(2)
+                .queryForFirst();
+    }
 
-        if (result.isCreated()) {
-            for (IXoUploadListener listener : mUploadListeners) {
-                listener.onUploadCreated(upload);
-            }
-        } else {
-            for (IXoUploadListener listener : mUploadListeners) {
-                listener.onUploadUpdated(upload);
-            }
+    public synchronized TalkClientContact findContactByGroupId(String groupId, boolean create) throws SQLException {
+        TalkClientContact contact = mClientContacts.queryBuilder()
+                .where()
+                .eq("groupId", groupId)
+                .eq("deleted", false)
+                .and(2)
+                .queryForFirst();
+
+        if (create && contact == null) {
+            contact = new TalkClientContact(TalkClientContact.TYPE_GROUP, groupId);
+            mClientContacts.create(contact);
+            contact = findContactById(contact.getClientContactId());
         }
-    }
 
-    public void refreshClientContact(TalkClientContact contact) throws SQLException {
-        mClientContacts.refresh(contact);
-    }
-
-    public void refreshClientDownload(TalkClientDownload download) throws SQLException {
-        mClientDownloads.refresh(download);
-    }
-
-    public void refreshClientUpload(TalkClientUpload upload) throws SQLException {
-        mClientUploads.refresh(upload);
+        return contact;
     }
 
     public List<TalkClientContact> findAllContacts() throws SQLException {
@@ -231,6 +234,23 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts.join(relationships).query();
     }
 
+    //////////////////////////////////
+    //////// Group Management ////////
+    //////////////////////////////////
+
+    public void saveGroup(TalkGroup group) throws SQLException {
+        mGroups.createOrUpdate(group);
+    }
+
+    public TalkClientContact findContactByGroupTag(String groupTag) throws SQLException {
+        return mClientContacts.queryBuilder()
+                .where()
+                .eq("groupTag", groupTag)
+                .eq("deleted", false)
+                .and(2)
+                .queryForFirst();
+    }
+
     public List<TalkClientContact> findAllGroups() throws SQLException {
         return mClientContacts.queryBuilder().where()
                 .eq("contactType", TalkClientContact.TYPE_GROUP)
@@ -252,6 +272,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .and(3);
 
         return contacts.join(groupMembers).query();
+    }
+
+    public void saveGroupMember(TalkGroupMember member) throws SQLException {
+        mGroupMembers.createOrUpdate(member);
     }
 
     public List<TalkGroupMember> findMembersInGroup(String groupId) throws SQLException {
@@ -343,75 +367,16 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts;
     }
 
-    public TalkClientContact findSelfContact(boolean create) throws SQLException {
-        TalkClientContact contact = mClientContacts.queryBuilder()
-                .where()
-                .eq("contactType", TalkClientContact.TYPE_SELF)
-                .queryForFirst();
+    ////////////////////////////////////
+    //////// Message Management ////////
+    ////////////////////////////////////
 
-        if (create && contact == null) {
-            contact = new TalkClientContact(TalkClientContact.TYPE_SELF);
-            mClientContacts.create(contact);
-            contact = findContactById(contact.getClientContactId());
-        }
-
-        return contact;
+    public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
+        mClientMessages.createOrUpdate(message);
     }
 
-    public TalkClientContact findContactById(int contactId) throws SQLException {
-        return mClientContacts.queryForId(contactId);
-    }
-
-    public synchronized TalkClientContact findContactByClientId(String clientId, boolean create) throws SQLException {
-        TalkClientContact contact = mClientContacts.queryBuilder()
-                .where()
-                .eq("clientId", clientId)
-                .eq("deleted", false)
-                .and(2)
-                .queryForFirst();
-
-        if (create && contact == null) {
-            contact = new TalkClientContact(TalkClientContact.TYPE_CLIENT, clientId);
-            mClientContacts.create(contact);
-            contact = findContactById(contact.getClientContactId());
-        }
-
-        return contact;
-    }
-
-    public TalkClientContact findDeletedContactByClientId(String clientId) throws SQLException {
-        return mClientContacts.queryBuilder()
-                .where()
-                .eq("clientId", clientId)
-                .eq("deleted", true)
-                .and(2)
-                .queryForFirst();
-    }
-
-    public synchronized TalkClientContact findContactByGroupId(String groupId, boolean create) throws SQLException {
-        TalkClientContact contact = mClientContacts.queryBuilder()
-                .where()
-                .eq("groupId", groupId)
-                .eq("deleted", false)
-                .and(2)
-                .queryForFirst();
-
-        if (create && contact == null) {
-            contact = new TalkClientContact(TalkClientContact.TYPE_GROUP, groupId);
-            mClientContacts.create(contact);
-            contact = findContactById(contact.getClientContactId());
-        }
-
-        return contact;
-    }
-
-    public TalkClientContact findContactByGroupTag(String groupTag) throws SQLException {
-        return mClientContacts.queryBuilder()
-                .where()
-                .eq("groupTag", groupTag)
-                .eq("deleted", false)
-                .and(2)
-                .queryForFirst();
+    public void saveMessage(TalkMessage message) throws SQLException {
+        mMessages.createOrUpdate(message);
     }
 
     public synchronized List<TalkClientMessage> findMessagesForDelivery() throws SQLException {
@@ -574,13 +539,122 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .countOf();
     }
 
-    public long getAttachmentCountByContactId(int contactId) throws SQLException {
-        Where where = mClientMessages.queryBuilder().where();
-        return where.and(where.and(where.eq("conversationContact_id", contactId), where.eq("deleted", false)), where.or(where.isNotNull("attachmentUpload_id"), where.isNotNull("attachmentDownload_id"))).countOf();
+    public TalkClientMessage findClientMessageByTalkClientDownloadId(int attachmentDownloadId) throws SQLException {
+        List<TalkClientMessage> messages = mClientMessages.queryForEq("attachmentDownload_id", attachmentDownloadId);
+        int numberOfMessages = messages.size();
+
+        if (numberOfMessages == 0) {
+            return null;
+        } else {
+            return messages.get(0);
+        }
     }
 
-    public TalkPrivateKey findPrivateKeyByKeyId(String keyId) throws SQLException {
-        return mPrivateKeys.queryBuilder().where().eq("keyId", keyId).queryForFirst();
+    public TalkClientMessage findClientMessageByTalkClientUploadId(int attachmentUploadId) throws SQLException {
+        List<TalkClientMessage> messages = mClientMessages.queryForEq("attachmentUpload_id", attachmentUploadId);
+        int numberOfMessages = messages.size();
+
+        if (numberOfMessages == 0) {
+            return null;
+        } else {
+            return messages.get(0);
+        }
+    }
+
+    public TalkClientMessage findClientMessageById(int clientMessageId) throws SQLException {
+        return mClientMessages.queryForId(clientMessageId);
+    }
+
+    public long findUnseenMessageCountByContactId(int contactId) throws SQLException {
+        return mClientMessages.queryBuilder().where()
+                .eq("conversationContact_id", contactId)
+                .eq("seen", false)
+                .eq("deleted", false)
+                .and(3)
+                .countOf();
+    }
+
+    public TalkClientMessage findLatestMessageByContactId(int contactId) throws SQLException {
+        return mClientMessages.queryBuilder()
+                .orderBy("timestamp", false)
+                .where()
+                .isNotNull("text")
+                .eq("conversationContact_id", contactId)
+                .eq("deleted", false)
+                .and(3)
+                .queryForFirst();
+    }
+
+    public TalkClientMessage findMessageByUploadId(int uploadId) throws SQLException {
+        return mClientMessages.queryBuilder()
+                .where()
+                .eq("attachmentUpload_id", uploadId)
+                .queryForFirst();
+    }
+
+    public TalkClientMessage findMessageByDownloadId(int downloadId) throws SQLException {
+        return mClientMessages.queryBuilder()
+                .where()
+                .eq("attachmentDownload_id", downloadId)
+                .queryForFirst();
+    }
+
+    public List<TalkClientMessage> findUnseenMessages() throws SQLException {
+        return mClientMessages.queryBuilder().orderBy("timestamp", false).
+                where()
+                .eq("seen", false)
+                .eq("deleted", false)
+                .and(2)
+                .query();
+    }
+
+    public TalkClientMessage getClientMessageForDelivery(TalkDelivery delivery) throws SQLException {
+        return mClientMessages.queryBuilder()
+                .where()
+                .eq("messageTag", delivery.getMessageTag())
+                .eq("messageId", delivery.getMessageId())
+                .or(2)
+                .eq("deleted", false)
+                .and(2)
+                .queryForFirst();
+    }
+
+    public TalkClientMessage getClientMessageForUpload(TalkClientUpload upload) throws SQLException {
+        QueryBuilder<TalkClientUpload, Integer> clientUploads = mClientUploads.queryBuilder();
+        clientUploads.where().eq("clientUploadId", upload.getClientUploadId());
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
+        return clientMessages.join(clientUploads).where()
+                .eq("deleted", false)
+                .queryForFirst();
+    }
+
+    public TalkClientMessage getClientMessageForDownload(TalkClientDownload download) throws SQLException {
+        QueryBuilder<TalkClientDownload, Integer> clientDownloads = mClientDownloads.queryBuilder();
+        clientDownloads.where().eq("clientDownloadId", download.getClientDownloadId());
+        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
+        return clientMessages.join(clientDownloads).where()
+                .eq("deleted", false)
+                .queryForFirst();
+    }
+
+    ////////////////////////////////////////////
+    //////// Upload/Download Management ////////
+    ////////////////////////////////////////////
+
+    public void registerUploadListener(IXoUploadListener listener) {
+        mUploadListeners.registerListener(listener);
+    }
+
+    public void unregisterUploadListener(IXoUploadListener listener) {
+        mUploadListeners.unregisterListener(listener);
+    }
+
+    public void registerDownloadListener(IXoDownloadListener listener) {
+        mDownloadListeners.registerListener(listener);
+    }
+
+    public void unregisterDownloadListener(IXoDownloadListener listener) {
+        mDownloadListeners.unregisterListener(listener);
     }
 
     public TalkClientUpload findClientUploadById(int clientUploadId) throws SQLException {
@@ -589,6 +663,52 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public TalkClientDownload findClientDownloadById(int clientDownloadId) throws SQLException {
         return mClientDownloads.queryForId(clientDownloadId);
+    }
+
+    public synchronized void saveDelivery(TalkDelivery delivery) throws SQLException {
+        mDeliveries.createOrUpdate(delivery);
+    }
+
+    public synchronized void updateDelivery(TalkDelivery delivery) throws SQLException {
+        int updatedRows = mDeliveries.update(delivery);
+        if (updatedRows < 1) {
+            throw new SQLException("cant find record for Delivery: " + delivery.getId());
+        }
+    }
+    public void saveClientDownload(TalkClientDownload download) throws SQLException {
+        Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
+
+        if (result.isCreated()) {
+            for (IXoDownloadListener listener : mDownloadListeners) {
+                listener.onDownloadCreated(download);
+            }
+        } else {
+            for (IXoDownloadListener listener : mDownloadListeners) {
+                listener.onDownloadUpdated(download);
+            }
+        }
+    }
+
+    public void saveClientUpload(TalkClientUpload upload) throws SQLException {
+        Dao.CreateOrUpdateStatus result = mClientUploads.createOrUpdate(upload);
+
+        if (result.isCreated()) {
+            for (IXoUploadListener listener : mUploadListeners) {
+                listener.onUploadCreated(upload);
+            }
+        } else {
+            for (IXoUploadListener listener : mUploadListeners) {
+                listener.onUploadUpdated(upload);
+            }
+        }
+    }
+
+    public void refreshClientDownload(TalkClientDownload download) throws SQLException {
+        mClientDownloads.refresh(download);
+    }
+
+    public void refreshClientUpload(TalkClientUpload upload) throws SQLException {
+        mClientUploads.refresh(upload);
     }
 
     public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
@@ -602,6 +722,11 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         List<TalkClientDownload> downloads = mClientDownloads.queryForEq("mediaType", mediaType);
 
         return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
+    }
+
+    public long getAttachmentCountByContactId(int contactId) throws SQLException {
+        Where where = mClientMessages.queryBuilder().where();
+        return where.and(where.and(where.eq("conversationContact_id", contactId), where.eq("deleted", false)), where.or(where.isNotNull("attachmentUpload_id"), where.isNotNull("attachmentDownload_id"))).countOf();
     }
 
     private List<XoTransfer> mergeUploadsAndDownloadsByMessageTimestamp(List<TalkClientUpload> uploads, List<TalkClientDownload> downloads) throws SQLException {
@@ -664,28 +789,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return downloadQb.join(messageQb).query();
     }
 
-    public TalkClientMessage findClientMessageByTalkClientDownloadId(int attachmentDownloadId) throws SQLException {
-        List<TalkClientMessage> messages = mClientMessages.queryForEq("attachmentDownload_id", attachmentDownloadId);
-        int numberOfMessages = messages.size();
-
-        if (numberOfMessages == 0) {
-            return null;
-        } else {
-            return messages.get(0);
-        }
-    }
-
-    public TalkClientMessage findClientMessageByTalkClientUploadId(int attachmentUploadId) throws SQLException {
-        List<TalkClientMessage> messages = mClientMessages.queryForEq("attachmentUpload_id", attachmentUploadId);
-        int numberOfMessages = messages.size();
-
-        if (numberOfMessages == 0) {
-            return null;
-        } else {
-            return messages.get(0);
-        }
-    }
-
     public List<XoTransfer> findAllTransfers() throws SQLException {
         List<TalkClientUpload> uploads = mClientUploads.queryBuilder()
                 .where()
@@ -697,52 +800,45 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
     }
 
-    public TalkClientMessage findClientMessageById(int clientMessageId) throws SQLException {
-        return mClientMessages.queryForId(clientMessageId);
+    public TalkPrivateKey findPrivateKeyByKeyId(String keyId) throws SQLException {
+        return mPrivateKeys.queryBuilder().where().eq("keyId", keyId).queryForFirst();
     }
 
-    public long findUnseenMessageCountByContactId(int contactId) throws SQLException {
-        return mClientMessages.queryBuilder().where()
-                .eq("conversationContact_id", contactId)
-                .eq("seen", false)
-                .eq("deleted", false)
-                .and(3)
-                .countOf();
+    public TalkClientUpload getClientUploadForDelivery(TalkDelivery delivery) throws SQLException {
+        TalkClientMessage message = getClientMessageForDelivery(delivery);
+        if (message != null) {
+            return message.getAttachmentUpload();
+        }
+        return null;
     }
 
-    public TalkClientMessage findLatestMessageByContactId(int contactId) throws SQLException {
-        return mClientMessages.queryBuilder()
-                .orderBy("timestamp", false)
-                .where()
-                .isNotNull("text")
-                .eq("conversationContact_id", contactId)
-                .eq("deleted", false)
-                .and(3)
-                .queryForFirst();
+    public TalkClientDownload getClientDownloadForDelivery(TalkDelivery delivery) throws SQLException {
+        TalkClientMessage message = getClientMessageForDelivery(delivery);
+        if (message != null) {
+            return message.getAttachmentDownload();
+        }
+        return null;
     }
 
-    public TalkClientMessage findMessageByUploadId(int uploadId) throws SQLException {
-        return mClientMessages.queryBuilder()
-                .where()
-                .eq("attachmentUpload_id", uploadId)
-                .queryForFirst();
+    public TalkDelivery deliveryForUpload(TalkClientUpload upload) throws SQLException {
+        TalkClientMessage message = getClientMessageForUpload(upload);
+        if (message != null) {
+            return message.getOutgoingDelivery();
+        }
+        return null;
     }
 
-    public TalkClientMessage findMessageByDownloadId(int downloadId) throws SQLException {
-        return mClientMessages.queryBuilder()
-                .where()
-                .eq("attachmentDownload_id", downloadId)
-                .queryForFirst();
+    public TalkDelivery deliveryForDownload(TalkClientDownload download) throws SQLException {
+        TalkClientMessage message = getClientMessageForDownload(download);
+        if (message != null) {
+            return message.getIncomingDelivery();
+        }
+        return null;
     }
 
-    public List<TalkClientMessage> findUnseenMessages() throws SQLException {
-        return mClientMessages.queryBuilder().orderBy("timestamp", false).
-                where()
-                .eq("seen", false)
-                .eq("deleted", false)
-                .and(2)
-                .query();
-    }
+    ///////////////////////////////////////
+    //////// Invitation Management ////////
+    ///////////////////////////////////////
 
     public List<TalkClientContact> findAllPendingFriendRequests() {
         try {
@@ -804,66 +900,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return false;
     }
 
-    public TalkClientMessage getClientMessageForDelivery(TalkDelivery delivery) throws SQLException {
-        return mClientMessages.queryBuilder()
-                .where()
-                .eq("messageTag", delivery.getMessageTag())
-                .eq("messageId", delivery.getMessageId())
-                .or(2)
-                .eq("deleted", false)
-                .and(2)
-                .queryForFirst();
-    }
-
-    public TalkClientMessage getClientMessageForUpload(TalkClientUpload upload) throws SQLException {
-        QueryBuilder<TalkClientUpload, Integer> clientUploads = mClientUploads.queryBuilder();
-        clientUploads.where().eq("clientUploadId", upload.getClientUploadId());
-        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
-        return clientMessages.join(clientUploads).where()
-                .eq("deleted", false)
-                .queryForFirst();
-    }
-
-    public TalkClientMessage getClientMessageForDownload(TalkClientDownload download) throws SQLException {
-        QueryBuilder<TalkClientDownload, Integer> clientDownloads = mClientDownloads.queryBuilder();
-        clientDownloads.where().eq("clientDownloadId", download.getClientDownloadId());
-        QueryBuilder<TalkClientMessage, Integer> clientMessages = mClientMessages.queryBuilder();
-        return clientMessages.join(clientDownloads).where()
-                .eq("deleted", false)
-                .queryForFirst();
-    }
-
-    public TalkClientUpload getClientUploadForDelivery(TalkDelivery delivery) throws SQLException {
-        TalkClientMessage message = getClientMessageForDelivery(delivery);
-        if (message != null) {
-            return message.getAttachmentUpload();
-        }
-        return null;
-    }
-
-    public TalkClientDownload getClientDownloadForDelivery(TalkDelivery delivery) throws SQLException {
-        TalkClientMessage message = getClientMessageForDelivery(delivery);
-        if (message != null) {
-            return message.getAttachmentDownload();
-        }
-        return null;
-    }
-
-    public TalkDelivery deliveryForUpload(TalkClientUpload upload) throws SQLException {
-        TalkClientMessage message = getClientMessageForUpload(upload);
-        if (message != null) {
-            return message.getOutgoingDelivery();
-        }
-        return null;
-    }
-
-    public TalkDelivery deliveryForDownload(TalkClientDownload download) throws SQLException {
-        TalkClientMessage message = getClientMessageForDownload(download);
-        if (message != null) {
-            return message.getIncomingDelivery();
-        }
-        return null;
-    }
+    /////////////////////////////////////
+    //////// Deletion Management ////////
+    /////////////////////////////////////
 
     public void deleteAllClientContacts() throws SQLException {
         UpdateBuilder<TalkClientContact, Integer> updateBuilder = mClientContacts.updateBuilder();
@@ -986,23 +1025,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         deleteMessageById(messageId);
     }
 
-    public void registerUploadListener(IXoUploadListener listener) {
-        mUploadListeners.registerListener(listener);
-    }
-
-    public void unregisterUploadListener(IXoUploadListener listener) {
-        mUploadListeners.unregisterListener(listener);
-    }
-
-    public void registerDownloadListener(IXoDownloadListener listener) {
-        mDownloadListeners.registerListener(listener);
-    }
-
-    public void unregisterDownloadListener(IXoDownloadListener listener) {
-        mDownloadListeners.unregisterListener(listener);
-    }
-
+    ////////////////////////////////////////////
     //////// MediaCollection Management ////////
+    ////////////////////////////////////////////
 
     @Override
     public TalkClientMediaCollection findMediaCollectionById(Integer id) throws SQLException {
