@@ -432,33 +432,6 @@ public class TalkClientContact implements Serializable {
         this.groupKey = groupKey;
     }
 
-    @GroupMethodOnly
-    public ForeignCollection<TalkClientMembership> getGroupMemberships() {
-        ensureGroup();
-        return groupMemberships;
-    }
-
-    @GroupMethodOnly
-    public List<TalkClientContact> getJoinedGroupContactsExceptSelf() {
-        ArrayList<TalkClientContact> joinedContacts = new ArrayList<TalkClientContact>();
-
-        if (getGroupMemberships() != null) {
-            for (TalkClientMembership membership : getGroupMemberships()) {
-                TalkClientContact contact = membership.getClientContact();
-                TalkGroupMember groupMember = membership.getMember();
-
-                boolean isNotSelf = contact != null && !contact.isSelf();
-                boolean isJoined = groupMember != null && groupMember.isJoined();
-
-                if (isNotSelf && isJoined) {
-                    joinedContacts.add(contact);
-                }
-            }
-        }
-
-        return joinedContacts;
-    }
-
     public boolean isNearby() {
         return isNearby;
     }
