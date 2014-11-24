@@ -291,9 +291,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
         for (TalkGroupMember member : groupMembers) {
             TalkClientContact contact = findContactByClientId(member.getClientId(), false);
-            if (contact != null) {
-                contacts.add(contact);
-            }
+            CollectionUtils.addIgnoreNull(contacts, contact);
         }
 
         return contacts;
@@ -339,9 +337,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
         for (TalkGroupMember member : groupMembers) {
             TalkClientContact contact = findContactByClientId(member.getClientId(), false);
-            if (contact != null) {
-                contacts.add(contact);
-            }
+            CollectionUtils.addIgnoreNull(contacts, contact);
         }
 
         return contacts;
@@ -757,9 +753,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                     .query();
             for (TalkRelationship relationship : relationshipsInvitedMe) {
                 TalkClientContact contact = findContactByClientId(relationship.getOtherClientId(), false);
-                if (contact != null) {
-                    contacts.add(contact);
-                }
+                CollectionUtils.addIgnoreNull(contacts, contact);
             }
 
             List<TalkRelationship> relationshipsInvitedByMe = mRelationships.queryBuilder()
@@ -768,9 +762,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                     .query();
             for (TalkRelationship relationship : relationshipsInvitedByMe) {
                 TalkClientContact contact = findContactByClientId(relationship.getOtherClientId(), false);
-                if (contact != null) {
-                    contacts.add(contact);
-                }
+                CollectionUtils.addIgnoreNull(contacts, contact);
             }
 
             return contacts;
