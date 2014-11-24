@@ -8,6 +8,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.*;
 import android.widget.*;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -25,7 +26,6 @@ import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.artcom.hoccer.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -58,10 +58,33 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     private IContentObject mAvatarToSet;
     private ImageView mAvatarImage;
 
-    private ArrayList<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
-    private ArrayList<TalkClientContact> mContactsToInviteToGroup = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mContactsToInviteToGroup = new ArrayList<TalkClientContact>();
 
-    private boolean mCloneGroupContact = false;
+    private boolean mCloneGroupContact;
+
+    private final ContactsAdapter.Filter mInvitedOrJoinedFilter = new ContactsAdapter.Filter() {
+        @Override
+        public boolean shouldShow(TalkClientContact contact) {
+            try {
+                TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupWithClientId(mGroup.getGroupId(), contact.getClientId());
+                if (member != null) {
+                    return TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState());
+                }
+            } catch (SQLException e) {
+                LOG.error(e);
+            }
+
+            return false;
+        }
+    };
+
+    private final ContactsAdapter.Filter mToBeInvitedFilter = new ContactsAdapter.Filter() {
+        @Override
+        public boolean shouldShow(TalkClientContact contact) {
+            return mContactsToInviteToGroup.contains(contact);
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -159,27 +182,13 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             mGroupMemberAdapter.onResume();
 
             if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
-                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup);
-                    }
-                });
+                mGroupMemberAdapter.setFilter(mInvitedOrJoinedFilter);
             } else if (!mContactsToInviteToGroup.isEmpty()) {
-                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return mContactsToInviteToGroup.contains(contact);
-                    }
-                });
+                mGroupMemberAdapter.setFilter(mToBeInvitedFilter);
             } else {
-                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup);
-                    }
-                });
+                mGroupMemberAdapter.setFilter(mInvitedOrJoinedFilter);
             }
+
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
         mGroupMemberAdapter.requestReload();

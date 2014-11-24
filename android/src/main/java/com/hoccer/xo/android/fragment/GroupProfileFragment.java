@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -24,7 +25,6 @@ import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.artcom.hoccer.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +39,7 @@ import java.util.List;
  * Fragment for display and editing of group profiles.
  */
 public class GroupProfileFragment extends ProfileFragment
-        implements  View.OnClickListener, ActionMode.Callback, AdapterView.OnItemClickListener {
+        implements View.OnClickListener, ActionMode.Callback, AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
 
@@ -74,6 +74,29 @@ public class GroupProfileFragment extends ProfileFragment
     private ArrayList<TalkClientContact> mContactsToInviteToGroup = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
+
+    private final ContactsAdapter.Filter mInvitedOrJoinedFilter = new ContactsAdapter.Filter() {
+        @Override
+        public boolean shouldShow(TalkClientContact contact) {
+            try {
+                TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupWithClientId(mGroup.getGroupId(), contact.getClientId());
+                if (member != null) {
+                    return TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState());
+                }
+            } catch (SQLException e) {
+                LOG.error(e);
+            }
+
+            return false;
+        }
+    };
+
+    private final ContactsAdapter.Filter mToBeInvitedFilter = new ContactsAdapter.Filter() {
+        @Override
+        public boolean shouldShow(TalkClientContact contact) {
+            return mContactsToInviteToGroup.contains(contact);
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -132,27 +155,13 @@ public class GroupProfileFragment extends ProfileFragment
             mGroupMemberAdapter.onResume();
 
             if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
-                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup);
-                    }
-                });
+                mGroupMemberAdapter.setFilter(mInvitedOrJoinedFilter);
             } else if (!mContactsToInviteToGroup.isEmpty()) {
-                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return mContactsToInviteToGroup.contains(contact);
-                    }
-                });
+                mGroupMemberAdapter.setFilter(mToBeInvitedFilter);
             } else {
-                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup);
-                    }
-                });
+                mGroupMemberAdapter.setFilter(mInvitedOrJoinedFilter);
             }
+
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
         mGroupMemberAdapter.requestReload();
@@ -573,7 +582,7 @@ public class GroupProfileFragment extends ProfileFragment
         if (mContactsToDisinviteAsFriend.isEmpty()) {
             int numberOfClients = mContactsToInviteAsFriend.size();
             buttonText = String.format(getString(R.string.nearby_invite_all), numberOfClients);
-            if(numberOfClients > 0) {
+            if (numberOfClients > 0) {
                 mInviteAllButton.setEnabled(true);
             } else {
                 mInviteAllButton.setEnabled(false);
