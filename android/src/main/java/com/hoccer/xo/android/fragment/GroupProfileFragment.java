@@ -43,7 +43,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
 
-    private boolean mBackPressed = false;
+    private boolean mBackPressed;
     public static final String ARG_START_IN_ACTION_MODE = "ARG_START_IN_ACTION_MODE";
 
     public enum Mode {
@@ -70,10 +70,10 @@ public class GroupProfileFragment extends ProfileFragment
 
     private Menu mOptionsMenu;
 
-    private ArrayList<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
-    private ArrayList<TalkClientContact> mContactsToInviteToGroup = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mContactsToInviteToGroup = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
-    private ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
 
     private final ContactsAdapter.Filter mInvitedOrJoinedFilter = new ContactsAdapter.Filter() {
         @Override
