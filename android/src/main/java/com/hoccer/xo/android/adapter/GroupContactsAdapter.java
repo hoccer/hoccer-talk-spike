@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import org.apache.log4j.Logger;
@@ -81,7 +82,7 @@ public class GroupContactsAdapter extends ContactsAdapter {
             status.add(resources.getString(R.string.contact_role_owner));
         }
 
-        if (contact.isClientGroupInvited(mGroup)) {
+        if (isContactInvitedToGroup(contact, mGroup)) {
             status.add(resources.getString(R.string.common_group_invite));
         }
 
@@ -99,7 +100,19 @@ public class GroupContactsAdapter extends ContactsAdapter {
                 return true;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOG.error(e);
+        }
+        return false;
+    }
+
+    private boolean isContactInvitedToGroup(TalkClientContact contact, TalkClientContact group) {
+        try {
+            TalkGroupMember member = mDatabase.findMemberInGroupWithClientId(group.getGroupId(), contact.getClientId());
+            if (member != null && TalkGroupMember.STATE_INVITED.equals(member.getState())) {
+                return true;
+            }
+        } catch (SQLException e) {
+            LOG.error(e);
         }
         return false;
     }
