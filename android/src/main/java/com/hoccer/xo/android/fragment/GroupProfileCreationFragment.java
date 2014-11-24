@@ -255,17 +255,17 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         return mGroup;
     }
 
-    public List<String> getMembersIdsFromGroupContacts(List<TalkClientContact> groupContacts) {
-        List<String> memberIds = new ArrayList<String>();
-        for (TalkClientContact contact : groupContacts) {
-            memberIds.add(contact.getClientId());
+    public static List<String> getClientIdsFromContacts(List<TalkClientContact> contacts) {
+        List<String> ids = new ArrayList<String>(contacts.size());
+        for (TalkClientContact contact : contacts) {
+            ids.add(contact.getClientId());
         }
-        return memberIds;
+        return ids;
     }
 
-    private List<String> getMembersRoles(List<TalkClientContact> groupContacts) {
-        List<String> roles = new ArrayList<String>();
-        for (TalkClientContact contact : groupContacts) {
+    private static List<String> getRolesForContacts(List<TalkClientContact> contacts) {
+        List<String> roles = new ArrayList<String>(contacts.size());
+        for (TalkClientContact groupContact : contacts) {
             roles.add(TalkGroupMember.ROLE_MEMBER);
         }
         return roles;
@@ -282,7 +282,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             }
 
             if (groupContacts != null) {
-                List<String> clientIds = getMembersIdsFromGroupContacts(groupContacts);
+                List<String> clientIds = getClientIdsFromContacts(groupContacts);
                 mCurrentClientsInGroup.addAll(getCurrentContactsFromGroup(clientIds));
                 mContactsToInviteToGroup.addAll(mCurrentClientsInGroup);
             }
@@ -311,8 +311,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 if (mContactsToInviteToGroup.isEmpty()) {
                     getXoClient().createGroup(mGroup);
                 } else {
-                    String[] memberIds = getMembersIdsFromGroupContacts(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
-                    String[] memberRoles = getMembersRoles(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
+                    String[] memberIds = getClientIdsFromContacts(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
+                    String[] memberRoles = getRolesForContacts(mContactsToInviteToGroup).toArray(new String[mContactsToInviteToGroup.size()]);
                     getXoClient().createGroupWithContacts(mGroup, memberIds, memberRoles);
                 }
             }
@@ -343,8 +343,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 .error(R.drawable.avatar_default_group_large)
                 .into(mAvatarImage);
 
-        mGroupMembersTitle.setVisibility(!mCurrentClientsInGroup.isEmpty() ? View.VISIBLE : View.GONE);
-        mGroupMembersList.setVisibility(!mCurrentClientsInGroup.isEmpty() ? View.VISIBLE : View.GONE);
+        mGroupMembersTitle.setVisibility(mCurrentClientsInGroup.isEmpty() ? View.GONE : View.VISIBLE);
+        mGroupMembersList.setVisibility(mCurrentClientsInGroup.isEmpty() ? View.GONE : View.VISIBLE);
 
         String name = mGroupNameEdit.getText().toString();
         mGroupNameEdit.setText(name);
