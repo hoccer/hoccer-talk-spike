@@ -1670,16 +1670,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                                         mDatabase.saveGroup(groupPresence);
                                     }
 
-                                    ForeignCollection<TalkClientMembership> memberships = groupContact.getGroupMemberships();
-                                    for (TalkClientMembership tcm : memberships) {
-                                        TalkGroupMember member = tcm.getMember();
-                                        if (member != null) {
-                                            member.setState(TalkGroupMember.STATE_GROUP_REMOVED);
-                                            mDatabase.saveGroupMember(member);
-                                        }
+                                    // update group member state
+                                    List<TalkGroupMember> members = mDatabase.findMembersInGroup(groupContact.getGroupId());
+                                    for (TalkGroupMember member : members) {
+                                        member.setState(TalkGroupMember.STATE_GROUP_REMOVED);
+                                        mDatabase.saveGroupMember(member);
                                     }
-                                    for (int j = 0; j < mContactListeners.size(); j++) {
-                                        IXoContactListener listener = mContactListeners.get(j);
+
+                                    for (IXoContactListener listener : mContactListeners) {
                                         listener.onGroupMembershipChanged(groupContact);
                                         listener.onGroupPresenceChanged(groupContact);
                                     }
