@@ -468,7 +468,7 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private boolean isCurrentGroup(TalkClientContact contact) {
-        return mGroup != null && mGroup == contact || mGroup.getClientContactId() == contact.getClientContactId();
+        return mGroup != null && (mGroup == contact || mGroup.getClientContactId() == contact.getClientContactId());
     }
 
     private List<TalkClientContact> getCurrentContactsFromGroup(List<String> ids) {
