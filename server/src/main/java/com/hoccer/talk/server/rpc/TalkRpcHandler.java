@@ -18,10 +18,6 @@ import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -1657,7 +1653,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         groupAdmin.setRole(TalkGroupMember.ROLE_ADMIN);
         groupAdmin.setState(TalkGroupMember.STATE_JOINED);
         changedGroup(group, new Date());
-        changedGroupMember(groupAdmin, group.getLastChanged(), true);
+        changedGroupMember(groupAdmin, group.getLastChanged());
         return group.getGroupId();
     }
 
@@ -1706,7 +1702,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         groupAdmin.setGroupId(group.getGroupId());
         groupAdmin.setRole(TalkGroupMember.ROLE_ADMIN);
         groupAdmin.setState(TalkGroupMember.STATE_JOINED);
-        changedGroupMember(groupAdmin, now, true);
+        changedGroupMember(groupAdmin, now);
 
         for (int i = 0; i < members.length;++i) {
             TalkGroupMember groupMember = new TalkGroupMember();
@@ -1714,7 +1710,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             groupMember.setClientId(members[i]);
             groupMember.setRole(roles[i]);
             groupMember.setState(TalkGroupMember.STATE_INVITED);
-            changedGroupMember(groupMember, now, true);
+            changedGroupMember(groupMember, now);
         }
         for (int i = 0; i < members.length;++i) {
             // send the presence of all other group members to the new group member
@@ -1807,7 +1803,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 /*if (member.isAdmin()) {
                     member.setRole(TalkGroupMember.ROLE_MEMBER);
                 }*/
-                changedGroupMember(member, group.getLastChanged(), false);
+                changedGroupMember(member, group.getLastChanged());
             }
         }
     }
@@ -1851,7 +1847,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             member.setClientId(clientId);
             member.setState(TalkGroupMember.STATE_INVITED);
             member.trashPrivate();
-            changedGroupMember(member, new Date(), true);
+            changedGroupMember(member, new Date());
             //  NOTE if this gets removed then the invited users presence might
             //       need touching depending on what the solution to the update problem is
             // notify various things
@@ -1891,7 +1887,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         member.setState(TalkGroupMember.STATE_JOINED);
 
-        changedGroupMember(member, new Date(), false);
+        changedGroupMember(member, new Date());
     }
 
     @Override
@@ -1906,7 +1902,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         // trash keys
         member.trashPrivate();
         // save the whole thing
-        changedGroupMember(member, new Date(), false);
+        changedGroupMember(member, new Date());
     }
 
     @Override
@@ -1925,7 +1921,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         // degrade removed users to member
         targetMember.setRole(TalkGroupMember.ROLE_MEMBER);
         targetMember.trashPrivate();
-        changedGroupMember(targetMember, new Date(), false);
+        changedGroupMember(targetMember, new Date());
     }
 
     @Override
@@ -1941,7 +1937,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             throw new RuntimeException("Invalid role");
         }
         targetMember.setRole(role);
-        changedGroupMember(targetMember, new Date(), false);
+        changedGroupMember(targetMember, new Date());
     }
 
     @Override
@@ -1968,10 +1964,10 @@ public class TalkRpcHandler implements ITalkRpcServer {
         mServer.getUpdateAgent().requestGroupUpdate(group.getGroupId());
     }
 
-    private void changedGroupMember(TalkGroupMember member, Date changed, boolean isNewMember) {
+    private void changedGroupMember(TalkGroupMember member, Date changed) {
         member.setLastChanged(changed);
         mDatabase.saveGroupMember(member);
-        mServer.getUpdateAgent().requestGroupMembershipUpdate(member.getGroupId(), member.getClientId(), isNewMember);
+        mServer.getUpdateAgent().requestGroupMembershipUpdate(member.getGroupId(), member.getClientId());
     }
 
     private void requireGroupAdmin(String groupId) {
@@ -2242,7 +2238,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         groupMember.setRole(TalkGroupMember.ROLE_NEARBY_MEMBER);
         groupMember.setState(TalkGroupMember.STATE_JOINED);
         changedGroup(group, new Date());
-        changedGroupMember(groupMember, group.getLastChanged(), true);
+        changedGroupMember(groupMember, group.getLastChanged());
 
         environment.setGroupId(group.getGroupId());
         environment.setClientId(mConnection.getClientId());
@@ -2264,10 +2260,8 @@ public class TalkRpcHandler implements ITalkRpcServer {
         LOG.info("joinGroupWithEnvironment: joining group "+group.getGroupId()+" with client id '" + mConnection.getClientId() + "'");
 
         TalkGroupMember nearbyMember = mDatabase.findGroupMemberForClient(group.getGroupId(), mConnection.getClientId());
-        boolean isNew = false;
         if (nearbyMember == null) {
             nearbyMember = new TalkGroupMember();
-            isNew = true;
         }
         nearbyMember.setClientId(mConnection.getClientId());
         nearbyMember.setGroupId(group.getGroupId());
@@ -2280,7 +2274,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             mDatabase.saveGroup(group);
         }
         changedGroup(group, new Date());
-        changedGroupMember(nearbyMember, group.getLastChanged(), isNew);
+        changedGroupMember(nearbyMember, group.getLastChanged());
 
         environment.setGroupId(group.getGroupId());
         environment.setClientId(mConnection.getClientId());
@@ -2398,7 +2392,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         // degrade removed users to member
         member.setRole(TalkGroupMember.ROLE_MEMBER);
         member.trashPrivate();
-        changedGroupMember(member, now, false);
+        changedGroupMember(member, now);
     }
 
     private void destroyEnvironment(TalkEnvironment environment) {

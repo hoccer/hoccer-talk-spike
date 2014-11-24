@@ -319,8 +319,7 @@ public class UpdateAgent extends NotificationDeferrer {
         queueOrExecute(context, notification);
     }
 
-    // TODO: optimize update calls based in isNew
-    public void requestGroupMembershipUpdate(final String groupId, final String clientId, final boolean isNew) {
+    public void requestGroupMembershipUpdate(final String groupId, final String clientId) {
         LOG.debug("requestGroupMembershipUpdate for group " + groupId + " client " + clientId);
         Runnable notificationGenerator = new Runnable() {
             @Override
