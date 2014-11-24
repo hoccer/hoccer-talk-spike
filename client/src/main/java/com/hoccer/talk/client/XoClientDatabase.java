@@ -33,7 +33,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     private Dao<TalkRelationship, Long> mRelationships;
     private Dao<TalkGroup, String> mGroups;
     private Dao<TalkGroupMember, Long> mGroupMembers;
-    private Dao<TalkClientMembership, Integer> mClientMemberships;
     private Dao<TalkClientMessage, Integer> mClientMessages;
     private Dao<TalkMessage, String> mMessages;
     private Dao<TalkDelivery, Long> mDeliveries;
@@ -59,7 +58,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         TableUtils.createTable(cs, TalkRelationship.class);
         TableUtils.createTable(cs, TalkGroup.class);
         TableUtils.createTable(cs, TalkGroupMember.class);
-        TableUtils.createTable(cs, TalkClientMembership.class);
         TableUtils.createTable(cs, TalkClientMessage.class);
         TableUtils.createTable(cs, TalkMessage.class);
         TableUtils.createTable(cs, TalkDelivery.class);
@@ -78,7 +76,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mRelationships = mBackend.getDao(TalkRelationship.class);
         mGroups = mBackend.getDao(TalkGroup.class);
         mGroupMembers = mBackend.getDao(TalkGroupMember.class);
-        mClientMemberships = mBackend.getDao(TalkClientMembership.class);
         mClientMessages = mBackend.getDao(TalkClientMessage.class);
         mMessages = mBackend.getDao(TalkMessage.class);
         mDeliveries = mBackend.getDao(TalkDelivery.class);
