@@ -115,7 +115,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public synchronized void saveClientMessage(TalkClientMessage message) throws SQLException {
-        Dao.CreateOrUpdateStatus result = mClientMessages.createOrUpdate(message);
+        mClientMessages.createOrUpdate(message);
     }
 
     public void saveMessage(TalkMessage message) throws SQLException {
