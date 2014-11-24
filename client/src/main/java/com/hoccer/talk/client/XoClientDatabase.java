@@ -283,12 +283,11 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findContactsInGroup(String groupId) throws SQLException {
-        QueryBuilder<TalkGroupMember, Long> groupMemberQuery = mGroupMembers.queryBuilder();
-        groupMemberQuery.where()
-                .eq("groupId", groupId);
-        groupMemberQuery.selectColumns("clientId");
+        List<TalkGroupMember> groupMembers = mGroupMembers.queryBuilder()
+                .selectColumns("clientId").where()
+                .eq("groupId", groupId)
+                .query();
 
-        List<TalkGroupMember> groupMembers = groupMemberQuery.query();
         List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
         for (TalkGroupMember member : groupMembers) {
             TalkClientContact contact = findContactByClientId(member.getClientId(), false);
@@ -330,14 +329,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findContactsInGroupWithRole(String groupId, String role) throws SQLException {
-        QueryBuilder<TalkGroupMember, Long> groupMemberQuery = mGroupMembers.queryBuilder();
-        groupMemberQuery.where()
+        List<TalkGroupMember> groupMembers = mGroupMembers.queryBuilder()
+                .selectColumns("clientId").where()
                 .eq("groupId", groupId)
                 .and()
-                .eq("role", role);
-        groupMemberQuery.selectColumns("clientId");
+                .eq("role", role)
+                .query();
 
-        List<TalkGroupMember> groupMembers = groupMemberQuery.query();
         List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
         for (TalkGroupMember member : groupMembers) {
             TalkClientContact contact = findContactByClientId(member.getClientId(), false);
