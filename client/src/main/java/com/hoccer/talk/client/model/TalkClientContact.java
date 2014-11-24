@@ -250,28 +250,6 @@ public class TalkClientContact implements Serializable {
         return false;
     }
 
-    public boolean isClientGroupInvited(TalkClientContact group) {
-        if(!group.isGroupRegistered()) {
-            return false;
-        }
-        if(!isClient()) {
-            return false;
-        }
-        int myId = getClientContactId();
-        ForeignCollection<TalkClientMembership> memberships = group.getGroupMemberships();
-        if(memberships != null) {
-            for(TalkClientMembership membership: memberships) {
-                TalkGroupMember member = membership.getMember();
-                if(member != null && member.isInvited()) {
-                    if(membership.getClientContact().getClientContactId() == myId) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     public String getName() {
         if(isClient() || isSelf()) {
             if(clientPresence != null) {
