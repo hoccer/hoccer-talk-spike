@@ -13,6 +13,7 @@ import com.j256.ormlite.stmt.UpdateBuilder;
 import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -303,20 +304,18 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findContactsInGroupWithState(String groupId, String state) throws SQLException {
-        QueryBuilder<TalkGroupMember, Long> groupMemberQuery = mGroupMembers.queryBuilder();
-        groupMemberQuery.where()
+        List<TalkGroupMember> groupMembers = mGroupMembers.queryBuilder()
+                .selectColumns("clientId").where()
                 .eq("groupId", groupId)
                 .and()
-                .eq("state", state);
-        groupMemberQuery.selectColumns("clientId");
+                .eq("state", state)
+                .query();
 
-        List<TalkGroupMember> groupMembers = groupMemberQuery.query();
         List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
+
         for (TalkGroupMember member : groupMembers) {
             TalkClientContact contact = findContactByClientId(member.getClientId(), false);
-            if (contact != null) {
-                contacts.add(contact);
-            }
+            CollectionUtils.addIgnoreNull(contacts, contact);
         }
 
         return contacts;
