@@ -20,8 +20,6 @@ import static junit.framework.TestCase.assertEquals;
 
 public class XoClientDatabaseTest {
 
-    private static final Logger LOG = Logger.getLogger(XoClientDatabaseTest.class);
-
     private XoClientDatabase mDatabase;
 
     private JdbcConnectionSource mConnectionSource;
@@ -56,9 +54,7 @@ public class XoClientDatabaseTest {
     }
 
     @Test
-    public void test_findMembersInGroup() throws SQLException {
-        LOG.info("test_findMembersInGroup");
-
+    public void testfindMembersInGroup() throws SQLException {
         TalkClientContact groupAdmin = createClientContact("adminClientId");
         TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
 
@@ -84,9 +80,7 @@ public class XoClientDatabaseTest {
 
 
     @Test
-    public void test_findMembersInGroupWithClientId() throws SQLException {
-        LOG.info("test_findMemberInGroupWithClientId");
-
+    public void testfindMembersInGroupWithClientId() throws SQLException {
         String clientId = "adminClientId";
         TalkClientContact groupAdmin = createClientContact(clientId);
         TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
@@ -97,9 +91,7 @@ public class XoClientDatabaseTest {
     }
 
     @Test
-    public void test_findMembersInGroupWithState() throws SQLException {
-        LOG.info("test_findMembersInGroupWithState");
-
+    public void testfindMembersInGroupWithState() throws SQLException {
         TalkClientContact groupAdmin = createClientContact("adminClientId");
         TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
 
@@ -128,9 +120,7 @@ public class XoClientDatabaseTest {
     }
 
     @Test
-    public void test_findContactsInGroupWitState() throws SQLException {
-        LOG.info("test_findContactsInGroupWitState");
-
+    public void testfindContactsInGroupWitState() throws SQLException {
         TalkClientContact groupAdmin = createClientContact("adminClientId");
         TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
 
@@ -159,9 +149,7 @@ public class XoClientDatabaseTest {
     }
 
     @Test
-    public void test_findContactsInGroup() throws SQLException {
-        LOG.info("test_findContactsInGroup");
-
+    public void testfindContactsInGroup() throws SQLException {
         TalkClientContact groupAdmin = createClientContact("adminClientId");
         TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
 
@@ -186,9 +174,7 @@ public class XoClientDatabaseTest {
     }
 
     @Test
-    public void test_findContactsInGroupWitRole() throws SQLException {
-        LOG.info("test_findContactsInGroupWitRole");
-
+    public void testfindContactsInGroupWitRole() throws SQLException {
         TalkClientContact groupAdmin = createClientContact("adminClientId");
         TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
 
@@ -217,9 +203,7 @@ public class XoClientDatabaseTest {
     }
 
     @Test
-    public void test_findAdminInGroup() throws SQLException {
-        LOG.info("test_findAdminInGroup");
-
+    public void testfindAdminInGroup() throws SQLException {
         TalkClientContact groupAdmin = createClientContact("adminClientId");
         TalkClientContact group = createGroupContact(groupAdmin, "TestGroupId");
 
