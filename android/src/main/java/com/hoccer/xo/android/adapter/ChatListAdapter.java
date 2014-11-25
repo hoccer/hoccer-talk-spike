@@ -291,7 +291,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             TalkClientContact conversationContact = message.getConversationContact();
             TalkClientContact contact;
             if (conversationContact.isGroup()) {
-                contact = mDatabase.findContactByGroupId(conversationContact.getGroupId(), false);
+                contact = mDatabase.findGroupContactByGroupId(conversationContact.getGroupId(), false);
             } else {
                 contact = mDatabase.findContactByClientId(conversationContact.getClientId(), false);
             }
