@@ -89,7 +89,6 @@ public abstract class ContactsAdapter extends XoAdapter
         super.onReloadRequest();
         synchronized (this) {
             try {
-                int oldItemCount = getCount();
                 List<TalkClientContact> newClients = mDatabase.findAllClientContactsOrderedByRecentMessage();
                 LOG.debug("found " + newClients.size() + " contacts");
 
