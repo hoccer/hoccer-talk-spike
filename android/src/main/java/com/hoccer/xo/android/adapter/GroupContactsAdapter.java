@@ -78,12 +78,15 @@ public class GroupContactsAdapter extends ContactsAdapter {
     private String getMemberStatus(TalkClientContact contact, Resources resources) {
         ArrayList<String> status = new ArrayList<String>();
 
-        if (isContactAdminInGroup(contact, mGroup)) {
-            status.add(resources.getString(R.string.contact_role_owner));
-        }
+        // check group membership status if the group is registered already
+        if(mGroup.getGroupId() != null) {
+            if (isContactAdminInGroup(contact, mGroup)) {
+                status.add(resources.getString(R.string.contact_role_owner));
+            }
 
-        if (isContactInvitedToGroup(contact, mGroup)) {
-            status.add(resources.getString(R.string.common_group_invite));
+            if (isContactInvitedToGroup(contact, mGroup)) {
+                status.add(resources.getString(R.string.common_group_invite));
+            }
         }
 
         if (contact.isClientFriend()) {
@@ -100,7 +103,7 @@ public class GroupContactsAdapter extends ContactsAdapter {
                 return true;
             }
         } catch (SQLException e) {
-            LOG.error(e);
+            LOG.error("isContactAdminInGroup", e);
         }
         return false;
     }
@@ -112,7 +115,7 @@ public class GroupContactsAdapter extends ContactsAdapter {
                 return true;
             }
         } catch (SQLException e) {
-            LOG.error(e);
+            LOG.error("isContactInvitedToGroup", e);
         }
         return false;
     }
