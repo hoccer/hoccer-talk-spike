@@ -362,7 +362,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
         return contact;
     }
-    
+
     ////////////////////////////////////
     //////// Message Management ////////
     ////////////////////////////////////
@@ -1125,7 +1125,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return mMediaCollectionRelations;
     }
 
-    // Returns an already cached collection with the same id or the prepared collection
     private TalkClientMediaCollection prepareMediaCollection(TalkClientMediaCollection collection) {
         collection.setDatabase(this);
         return collection;
