@@ -738,8 +738,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
                 mDatabase.savePresence(presence);
 
-                for (int i = 0; i < mContactListeners.size(); i++) {
-                    IXoContactListener listener = mContactListeners.get(i);
+                for (IXoContactListener listener : mContactListeners) {
                     listener.onClientPresenceChanged(mSelfContact);
                 }
 
@@ -771,8 +770,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         scheduleIdle();
                     }
 
-                    for (int i = 0; i < mContactListeners.size(); i++) {
-                        IXoContactListener listener = mContactListeners.get(i);
+                    for (IXoContactListener listener : mContactListeners) {
                         listener.onClientPresenceChanged(mSelfContact);
                     }
 
@@ -814,8 +812,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 mSelfContact.setAvatarUpload(upload);
                 mDatabase.savePresence(presence);
                 mDatabase.saveContact(mSelfContact);
-                for (int i = 0; i < mContactListeners.size(); i++) {
-                    IXoContactListener listener = mContactListeners.get(i);
+                for (IXoContactListener listener : mContactListeners) {
                     listener.onClientPresenceChanged(mSelfContact);
                 }
                 sendPresence();
@@ -848,8 +845,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                        LOG.error("Error while sending new group presence: " , e);
                    }
                }
-               for (int i = 0; i < mContactListeners.size(); i++) {
-                   IXoContactListener listener = mContactListeners.get(i);
+               for (IXoContactListener listener : mContactListeners) {
                    listener.onGroupPresenceChanged(group);
                }
            }
@@ -884,8 +880,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     mDatabase.saveGroup(presence);
                     mDatabase.saveContact(group);
                     mServerRpc.updateGroup(presence);
-                    for (int i = 0; i < mContactListeners.size(); i++) {
-                        IXoContactListener listener = mContactListeners.get(i);
+                    for (IXoContactListener listener : mContactListeners) {
                         listener.onGroupPresenceChanged(group);
                     }
                 }
@@ -952,8 +947,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                             LOG.error("SQL error", e);
                         }
 
-                        for (int i = 0; i < mContactListeners.size(); i++) {
-                            IXoContactListener listener = mContactListeners.get(i);
+                        for (IXoContactListener listener : mContactListeners) {
                             listener.onContactRemoved(contact);
                         }
 
@@ -1097,8 +1091,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
                     LOG.debug("new group contact " + groupContact.getClientContactId());
 
-                    for (int i = 0; i < mContactListeners.size(); i++) {
-                        IXoContactListener listener = mContactListeners.get(i);
+                    for (IXoContactListener listener : mContactListeners) {
                         listener.onContactAdded(groupContact);
                     }
 
@@ -1161,8 +1154,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
                     LOG.debug("new group contact " + groupContact.getClientContactId());
 
-                    for (int i = 0; i < mContactListeners.size(); i++) {
-                        IXoContactListener listener = mContactListeners.get(i);
+                    for (IXoContactListener listener : mContactListeners) {
                         listener.onContactAdded(groupContact);
                     }
 
@@ -2067,8 +2059,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.debug("performDeliveries()");
         LOG.debug(clientMessages.size() + " messages to deliver");
 
-        for (int i = 0; i < clientMessages.size(); i++) {
-            final TalkClientMessage clientMessage = clientMessages.get(i);
+        for (final TalkClientMessage clientMessage : clientMessages) {
             final TalkClientUpload upload = clientMessage.getAttachmentUpload();
             if (upload != null) {
                 upload.register(mTransferAgent);
@@ -2115,9 +2106,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("SQL Error while saving delivery", e);
         }
 
-        int length = resultingDeliveries.length;
-        for(int j = 0; j < length; j++) {
-            updateOutgoingDelivery(resultingDeliveries[j]);
+        for (TalkDelivery resultingDelivery : resultingDeliveries) {
+            updateOutgoingDelivery(resultingDelivery);
         }
     }
 
@@ -2699,7 +2689,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 LOG.error("message salt has wrong size");
                 return;
             }
-            for(int i = 0; i < decryptedKey.length; i++) {
+            for (int i = 0; i < decryptedKey.length; i++) {
                 decryptedKey[i] = (byte)(decryptedKey[i] ^ decodedSalt[i]);
             }
         }
@@ -2814,7 +2804,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 LOG.error("message salt has wrong size");
                 return;
             }
-            for(int i = 0; i < plainKey.length; i++) {
+            for (int i = 0; i < plainKey.length; i++) {
                 plainKey[i] = (byte)(plainKey[i] ^ keySalt[i]);
             }
         }
@@ -2952,8 +2942,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
         }
 
-        for (int i = 0; i < mContactListeners.size(); i++) {
-            IXoContactListener listener = mContactListeners.get(i);
+        for (IXoContactListener listener : mContactListeners) {
             listener.onClientPresenceChanged(clientContact);
         }
     }
@@ -3119,8 +3108,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         LOG.info("updateGroupPresence(" + group.getGroupId() + ") - saved");
 
-        for (int i = 0; i < mContactListeners.size(); i++) {
-            IXoContactListener listener = mContactListeners.get(i);
+        for (IXoContactListener listener : mContactListeners) {
             listener.onGroupPresenceChanged(groupContact);
         }
     }
@@ -3260,8 +3248,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
         }
 
-        for (int i = 0; i < mContactListeners.size(); i++) {
-            IXoContactListener listener = mContactListeners.get(i);
+        for (IXoContactListener listener : mContactListeners) {
             listener.onGroupMembershipChanged(groupContact);
         }
     }
