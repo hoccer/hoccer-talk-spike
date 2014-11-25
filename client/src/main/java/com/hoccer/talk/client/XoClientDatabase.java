@@ -326,15 +326,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findContactsInGroupWithState(String groupId, String state) throws SQLException {
-        List<TalkGroupMember> groupMembers = mGroupMembers.queryBuilder()
-                .selectColumns("clientId").where()
-                .eq("groupId", groupId)
-                .and()
-                .eq("state", state)
-                .query();
+        List<TalkGroupMember> groupMembers = findMembersInGroupWithState(groupId, state);
 
         List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
-
         for (TalkGroupMember member : groupMembers) {
             TalkClientContact contact = findContactByClientId(member.getClientId(), false);
             CollectionUtils.addIgnoreNull(contacts, contact);
