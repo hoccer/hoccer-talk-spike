@@ -256,7 +256,8 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findAllGroups() throws SQLException {
-        return mClientContacts.queryBuilder().where()
+        return mClientContacts.queryBuilder()
+                .where()
                 .eq("contactType", TalkClientContact.TYPE_GROUP)
                 .eq("deleted", false)
                 .and(2)
@@ -283,31 +284,28 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkGroupMember> findMembersInGroup(String groupId) throws SQLException {
-        QueryBuilder<TalkGroupMember, Long> groupMemberQuery = mGroupMembers.queryBuilder();
-        groupMemberQuery.where()
-                .eq("groupId", groupId);
-
-        return groupMemberQuery.query();
+        return mGroupMembers.queryBuilder()
+                .where()
+                .eq("groupId", groupId)
+                .query();
     }
 
     public TalkGroupMember findMemberInGroupWithClientId(String groupId, String clientId) throws SQLException {
-        QueryBuilder<TalkGroupMember, Long> groupMemberQuery = mGroupMembers.queryBuilder();
-        groupMemberQuery.where()
+        return mGroupMembers.queryBuilder()
+                .where()
                 .eq("groupId", groupId)
                 .and()
-                .eq("clientId", clientId);
-
-        return groupMemberQuery.queryForFirst();
+                .eq("clientId", clientId)
+                .queryForFirst();
     }
 
     public List<TalkGroupMember> findMembersInGroupWithState(String groupId, String state) throws SQLException {
-        QueryBuilder<TalkGroupMember, Long> groupMemberQuery = mGroupMembers.queryBuilder();
-        groupMemberQuery.where()
+        return mGroupMembers.queryBuilder()
+                .where()
                 .eq("groupId", groupId)
                 .and()
-                .eq("state", state);
-
-        return groupMemberQuery.query();
+                .eq("state", state)
+                .query();
     }
 
     public List<TalkClientContact> findContactsInGroup(String groupId) throws SQLException {
