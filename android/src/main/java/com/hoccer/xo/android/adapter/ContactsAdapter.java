@@ -89,7 +89,7 @@ public abstract class ContactsAdapter extends XoAdapter
         super.onReloadRequest();
         synchronized (this) {
             try {
-                List<TalkClientContact> newClients = mDatabase.findAllClientContactsOrderedByRecentMessage();
+                List<TalkClientContact> newClients = mDatabase.findAllContactsExceptSelfOrderedByRecentMessage();
                 LOG.debug("found " + newClients.size() + " contacts");
 
                 if (mFilter != null) {

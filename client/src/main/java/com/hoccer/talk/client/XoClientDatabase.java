@@ -190,28 +190,32 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
     }
 
-    public List<TalkClientContact> findAllClientContactsOrderedByRecentMessage() throws SQLException {
-        QueryBuilder<TalkClientMessage, Integer> recentUnreadMessages = mClientMessages.queryBuilder();
-        QueryBuilder<TalkClientContact, Integer> recentSenders = mClientContacts.queryBuilder();
-        recentUnreadMessages.orderBy("timestamp", false);
-        List<TalkClientContact> orderedListOfSenders = recentSenders.join(recentUnreadMessages).where()
+    public List<TalkClientContact> findAllContactsExceptSelfOrderedByRecentMessage() throws SQLException {
+        QueryBuilder<TalkClientMessage, Integer> messageQuery = mClientMessages.queryBuilder();
+        messageQuery.orderBy("timestamp", false);
+
+        QueryBuilder<TalkClientContact, Integer> contactsQuery = mClientContacts.queryBuilder();
+        contactsQuery.where()
                 .eq("deleted", false)
-                .query();
-        List<TalkClientContact> allContacts = mClientContacts.queryBuilder().where()
-                .eq("deleted", false)
-                .query();
-        ArrayList<TalkClientContact> orderedListOfDistinctSenders = new ArrayList<TalkClientContact>();
-        for (int i = 0; i < orderedListOfSenders.size(); i++) {
-            if (!orderedListOfDistinctSenders.contains(orderedListOfSenders.get(i))) {
-                orderedListOfDistinctSenders.add(orderedListOfSenders.get(i));
+                .and()
+                .ne("contactType", TalkClientContact.TYPE_SELF);
+
+        List<TalkClientContact> allContacts = contactsQuery.query();
+        List<TalkClientContact> orderedContacts = contactsQuery.join(messageQuery).query();
+
+        List<TalkClientContact> orderedDistinctContacts = new ArrayList<TalkClientContact>();
+        for (TalkClientContact contact : orderedContacts) {
+            if (!orderedDistinctContacts.contains(contact)) {
+                orderedDistinctContacts.add(contact);
             }
         }
-        for (int i = 0; i < allContacts.size(); i++) {
-            if (!orderedListOfDistinctSenders.contains(allContacts.get(i))) {
-                orderedListOfDistinctSenders.add(allContacts.get(i));
+        // add contacts without message
+        for (TalkClientContact contact : allContacts) {
+            if (!orderedDistinctContacts.contains(contact)) {
+                orderedDistinctContacts.add(contact);
             }
         }
-        return orderedListOfDistinctSenders;
+        return orderedDistinctContacts;
     }
 
     public List<TalkClientContact> findAllClientContacts() throws SQLException {
