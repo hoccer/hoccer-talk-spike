@@ -5,13 +5,11 @@ import android.view.ViewGroup;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.IXoTransferListenerOld;
-import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkRelationship;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.BaseChatItem;
@@ -52,16 +50,12 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     @Nullable
     private Filter mFilter = null;
 
-    @Nullable
-    private XoClientDatabase mDatabase;
-
     public ChatListAdapter(XoActivity activity) {
         this(activity, null);
     }
 
     public ChatListAdapter(XoActivity activity, @Nullable Filter filter) {
         super(activity);
-        mDatabase = XoApplication.getXoClient().getDatabase();
         mFilter = filter;
         loadChatItems();
     }
