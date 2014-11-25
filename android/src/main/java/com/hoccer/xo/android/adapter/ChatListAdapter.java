@@ -232,9 +232,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
-                int oldItemCount = mChatItems.size();
-
                 if (relationship.isNone()) {
                     BaseChatItem item = findChatItemForContent(contact);
                     if (item != null) {
