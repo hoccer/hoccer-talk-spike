@@ -72,24 +72,6 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         }
     }
 
-    // TODO: get back to this implementation soon. Please.
-    /*
-    protected void initialize() {
-        int totalMessageCount = 0;
-        try {
-            totalMessageCount = (int) mDatabase.getMessageCountByContactId(mContact.getClientContactId());
-        } catch (SQLException e) {
-            LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
-        }
-
-        mChatMessageItems = Collections.synchronizedList(new ArrayList<ChatMessageItem>(totalMessageCount));
-        for (int i = 0; i < totalMessageCount; i++) {
-            mChatMessageItems.add(null);
-        }
-        loadNextMessages(mChatMessageItems.size() - (int) BATCH_SIZE);
-    }
-    */
-
     /**
      * Loads a range of TalkClientMessage objects from database starting at a given offset.
      * Range is defined by constant BATCH_SIZE.
