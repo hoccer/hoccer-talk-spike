@@ -86,7 +86,7 @@ public class GroupProfileFragment extends ProfileFragment
                     }
                 }
             } catch (SQLException e) {
-                LOG.error(e);
+                LOG.error("GroupProfileFragment.Filter.shouldShow()", e);
             }
 
             return false;

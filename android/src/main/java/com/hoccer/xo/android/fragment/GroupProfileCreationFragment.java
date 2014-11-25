@@ -72,7 +72,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                     return TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState());
                 }
             } catch (SQLException e) {
-                LOG.error(e);
+                LOG.error("GroupProfileCreationFragment.Filter.shouldShow()", e);
             }
 
             return false;
