@@ -75,13 +75,15 @@ public class GroupProfileFragment extends ProfileFragment
     private final ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
 
-    private final ContactsAdapter.Filter mInvitedOrJoinedFilter = new ContactsAdapter.Filter() {
+    private final ContactsAdapter.Filter mInvitedOrJoinedClientFilter = new ContactsAdapter.Filter() {
         @Override
         public boolean shouldShow(TalkClientContact contact) {
             try {
-                TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupWithClientId(mGroup.getGroupId(), contact.getClientId());
-                if (member != null) {
-                    return TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState());
+                if(contact.isClient()) {
+                    TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupWithClientId(mGroup.getGroupId(), contact.getClientId());
+                    if (member != null) {
+                        return TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState());
+                    }
                 }
             } catch (SQLException e) {
                 LOG.error(e);
@@ -153,11 +155,11 @@ public class GroupProfileFragment extends ProfileFragment
             mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity(), mGroup);
 
             if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
-                mGroupMemberAdapter.setFilter(mInvitedOrJoinedFilter);
+                mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             } else if (!mContactsToInviteToGroup.isEmpty()) {
                 mGroupMemberAdapter.setFilter(mToBeInvitedFilter);
             } else {
-                mGroupMemberAdapter.setFilter(mInvitedOrJoinedFilter);
+                mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             }
 
             mGroupMemberAdapter.onCreate();
