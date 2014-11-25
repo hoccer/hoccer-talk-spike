@@ -3212,40 +3212,43 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             clientContact.setCreatedTimeStamp(new Date());
         }
 
-        // if this concerns our own membership
-        if (clientContact.isSelf()) {
-            LOG.info("groupMember is about us, decrypting group key");
-            try {
-                groupContact.updateGroupMember(member);
-                decryptGroupKey(groupContact, member);
-
-                mDatabase.saveContact(groupContact);
+        try {
+            // update membership in database
+            TalkGroupMember dbMember = mDatabase.findMemberInGroupWithClientId(member.getGroupId(), member.getClientId());
+            if(dbMember != null) {
+                dbMember.updateWith(member);
+                mDatabase.saveGroupMember(dbMember);
+            } else {
                 mDatabase.saveGroupMember(member);
+            }
 
-                // quietly destroy nearby group
-                if (!member.isInvolved()) {
-                    TalkGroup groupPresence = groupContact.getGroupPresence();
-                    if (groupPresence != null && groupPresence.isTypeNearby()) {
-                        destroyNearbyGroup(groupContact);
+            // if this concerns our own membership
+            if (clientContact.isSelf()) {
+                LOG.info("groupMember is about us, decrypting group key");
+                    groupContact.updateGroupMember(member);
+                    decryptGroupKey(groupContact, member);
+
+                    mDatabase.saveContact(groupContact);
+
+                    // quietly destroy nearby group
+                    if (!member.isInvolved()) {
+                        TalkGroup groupPresence = groupContact.getGroupPresence();
+                        if (groupPresence != null && groupPresence.isTypeNearby()) {
+                            destroyNearbyGroup(groupContact);
+                        }
                     }
-                }
-            } catch (SQLException e) {
-                LOG.error("SQL error", e);
             }
-        }
-        // if this concerns the membership of someone else
-        if (clientContact.isClient()) {
-            try {
+            // if this concerns the membership of someone else
+            if (clientContact.isClient()) {
 
-                /* Mark as nearby contact and save to database. */
-                boolean isJoinedInNearbyGroup = groupContact.getGroupPresence() != null && groupContact.getGroupPresence().isTypeNearby() && member.isJoined();
-                clientContact.setNearby(isJoinedInNearbyGroup);
+                    /* Mark as nearby contact and save to database. */
+                    boolean isJoinedInNearbyGroup = groupContact.getGroupPresence() != null && groupContact.getGroupPresence().isTypeNearby() && member.isJoined();
+                    clientContact.setNearby(isJoinedInNearbyGroup);
 
-                mDatabase.saveContact(clientContact);
-                mDatabase.saveGroupMember(member);
-            } catch (SQLException e) {
-                LOG.error("sql error", e);
+                    mDatabase.saveContact(clientContact);
             }
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
         }
 
         for (IXoContactListener listener : mContactListeners) {
