@@ -1922,10 +1922,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         @Override
         public void pushNotRegistered() {
             LOG.debug("server: pushNotRegistered()");
-            // XXX
-            //for(ITalkClientListener listener: mListeners) {
-            //    listener.onPushRegistrationRequested();
-            //}
         }
 
         @Override
