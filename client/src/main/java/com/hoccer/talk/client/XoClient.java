@@ -20,7 +20,6 @@ import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.srp.SRP6Parameters;
 import com.hoccer.talk.srp.SRP6VerifyingClient;
 import com.hoccer.talk.util.Credentials;
-import com.j256.ormlite.dao.ForeignCollection;
 import de.undercouch.bson4jackson.BsonFactory;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -1837,7 +1836,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             boolean isRenewGroupKey = false;
 
             try {
-                groupContact = mDatabase.findContactByGroupId(groupId, false);
+                groupContact = mDatabase.findGroupContactByGroupId(groupId, false);
             } catch (SQLException e) {
                 LOG.error("Error while retrieving group contact from id: " + groupId, e);
             }
@@ -2260,7 +2259,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkClientContact currentNearbyGroup = null;
         try {
             if (mEnvironmentGroupId != null) {
-                currentNearbyGroup = mDatabase.findContactByGroupId(mEnvironmentGroupId, false);
+                currentNearbyGroup = mDatabase.findGroupContactByGroupId(mEnvironmentGroupId, false);
             }
         } catch (SQLException e) {
             LOG.error("SQL Error while retrieving current nearby group ", e);
@@ -2304,7 +2303,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             String groupId = delivery.getGroupId();
             if(groupId != null) {
-                groupContact = mDatabase.findContactByGroupId(groupId, false);
+                groupContact = mDatabase.findGroupContactByGroupId(groupId, false);
                 if(groupContact == null) {
                     LOG.warn("outgoing message for unknown group " + groupId);
                     //TODO: return; ??
@@ -2513,7 +2512,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         try {
             String groupId = delivery.getGroupId();
             if(groupId != null) {
-                groupContact = mDatabase.findContactByGroupId(groupId, false);
+                groupContact = mDatabase.findGroupContactByGroupId(groupId, false);
                 if(groupContact == null) {
                     LOG.warn("incoming message in unknown group " + groupId);
                     return;
@@ -3083,7 +3082,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         try {
             groupContact = mDatabase.findContactByGroupTag(group.getGroupTag());
             if(groupContact == null) {
-                groupContact = mDatabase.findContactByGroupId(group.getGroupId(), true);
+                groupContact = mDatabase.findGroupContactByGroupId(group.getGroupId(), true);
             }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -3184,12 +3183,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkClientContact clientContact;
 
         try {
-            groupContact = mDatabase.findContactByGroupId(member.getGroupId(), false);
+            groupContact = mDatabase.findGroupContactByGroupId(member.getGroupId(), false);
             if (groupContact == null) {
                 boolean createGroup = member.isInvolved() && !member.isGroupRemoved();
                 if (createGroup) {
                     LOG.info("creating group for member in state '" + member.getState() + "' groupId '" + member.getGroupId() + "'");
-                    groupContact = mDatabase.findContactByGroupId(member.getGroupId(), true);
+                    groupContact = mDatabase.findGroupContactByGroupId(member.getGroupId(), true);
                 } else {
                     LOG.warn("ignoring incoming member for unknown group for member in state '" + member.getState() + "' groupId '" + member.getGroupId() + "'");
                     return;

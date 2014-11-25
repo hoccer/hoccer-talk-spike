@@ -19,7 +19,7 @@ public class ClientGroupJoin extends TalkToolClientCommand {
     public void runOnClient(TalkToolContext context, TalkToolClient client) throws Exception {
         TalkClientContact group = null;
         try {
-            group = client.getDatabase().findContactByGroupId(pGroup, false);
+            group = client.getDatabase().findGroupContactByGroupId(pGroup, false);
         } catch (SQLException e) {
             e.printStackTrace();
         }

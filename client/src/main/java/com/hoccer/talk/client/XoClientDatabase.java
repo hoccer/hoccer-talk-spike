@@ -167,23 +167,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .queryForFirst();
     }
 
-    public synchronized TalkClientContact findContactByGroupId(String groupId, boolean create) throws SQLException {
-        TalkClientContact contact = mClientContacts.queryBuilder()
-                .where()
-                .eq("groupId", groupId)
-                .eq("deleted", false)
-                .and(2)
-                .queryForFirst();
-
-        if (create && contact == null) {
-            contact = new TalkClientContact(TalkClientContact.TYPE_GROUP, groupId);
-            mClientContacts.create(contact);
-            contact = findContactById(contact.getClientContactId());
-        }
-
-        return contact;
-    }
-
     public List<TalkClientContact> findAllContacts() throws SQLException {
         return mClientContacts.queryBuilder().where()
                 .eq("deleted", false)
@@ -363,6 +346,23 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts;
     }
 
+    public synchronized TalkClientContact findGroupContactByGroupId(String groupId, boolean create) throws SQLException {
+        TalkClientContact contact = mClientContacts.queryBuilder()
+                .where()
+                .eq("groupId", groupId)
+                .eq("deleted", false)
+                .and(2)
+                .queryForFirst();
+
+        if (create && contact == null) {
+            contact = new TalkClientContact(TalkClientContact.TYPE_GROUP, groupId);
+            mClientContacts.create(contact);
+            contact = findContactById(contact.getClientContactId());
+        }
+
+        return contact;
+    }
+    
     ////////////////////////////////////
     //////// Message Management ////////
     ////////////////////////////////////

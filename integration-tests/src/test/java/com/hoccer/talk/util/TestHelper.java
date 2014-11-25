@@ -87,11 +87,11 @@ public class TestHelper {
     }
 
     public static void inviteToGroup(XoClient invitingClient, XoClient invitedClient, String groupId) throws SQLException, InterruptedException {
-        await("invitingClient knows group via groupId").untilCall(to(invitingClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
+        await("invitingClient knows group via groupId").untilCall(to(invitingClient.getDatabase()).findGroupContactByGroupId(groupId, false), notNullValue());
         invitingClient.inviteClientToGroup(groupId, invitedClient.getSelfContact().getClientId());
 
-        await("invitedClient knows group via groupId").untilCall(to(invitedClient.getDatabase()).findContactByGroupId(groupId, false), notNullValue());
-        TalkClientContact groupContactOfInvitedClient = invitedClient.getDatabase().findContactByGroupId(groupId, false);
+        await("invitedClient knows group via groupId").untilCall(to(invitedClient.getDatabase()).findGroupContactByGroupId(groupId, false), notNullValue());
+        TalkClientContact groupContactOfInvitedClient = invitedClient.getDatabase().findGroupContactByGroupId(groupId, false);
 
         await("invitedClient has received group member update").untilCall(to(groupContactOfInvitedClient).getGroupMember(), notNullValue());
         assertTrue("invitedClient is invited to group", groupContactOfInvitedClient.getGroupMember().isInvited());
@@ -108,7 +108,7 @@ public class TestHelper {
                 new Callable<Boolean>() {
                     @Override
                     public Boolean call() throws Exception {
-                        TalkGroupMember groupMember = joiningClient.getDatabase().findContactByGroupId(groupId, false).getGroupMember();
+                        TalkGroupMember groupMember = joiningClient.getDatabase().findGroupContactByGroupId(groupId, false).getGroupMember();
                         return TalkGroupMember.STATE_JOINED.equals(groupMember.getState()) &&
                                 groupMember.isJoined() &&
                                 groupMember.getEncryptedGroupKey() != null &&

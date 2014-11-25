@@ -24,7 +24,7 @@ public class ClientGroupInvite extends TalkToolClientCommand {
 
         TalkClientContact group = null;
         try {
-            group = client.getDatabase().findContactByGroupId(pGroup, false);
+            group = client.getDatabase().findGroupContactByGroupId(pGroup, false);
         } catch (SQLException e) {
             e.printStackTrace();
         }
