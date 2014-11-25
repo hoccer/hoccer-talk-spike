@@ -151,8 +151,6 @@ public class GroupProfileFragment extends ProfileFragment
 
         if (mGroupMemberAdapter == null) {
             mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity(), mGroup);
-            mGroupMemberAdapter.onCreate();
-            mGroupMemberAdapter.onResume();
 
             if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
                 mGroupMemberAdapter.setFilter(mInvitedOrJoinedFilter);
@@ -162,6 +160,8 @@ public class GroupProfileFragment extends ProfileFragment
                 mGroupMemberAdapter.setFilter(mInvitedOrJoinedFilter);
             }
 
+            mGroupMemberAdapter.onCreate();
+            mGroupMemberAdapter.onResume();
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
         mGroupMemberAdapter.requestReload();
