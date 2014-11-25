@@ -48,7 +48,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     final protected List<BaseChatItem> mChatItems = new ArrayList<BaseChatItem>();
 
     @Nullable
-    private Filter mFilter = null;
+    private Filter mFilter;
 
     public ChatListAdapter(XoActivity activity) {
         this(activity, null);
@@ -243,7 +243,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     if (item != null) {
                         item.update();
                     } else {
-                        if (mFilter.shouldShow(contact)) {
+                        if (mFilter == null || mFilter.shouldShow(contact)) {
                             item = new TalkClientChatItem(contact, mActivity);
                             mChatItems.add(item);
                         }
