@@ -41,19 +41,19 @@ public abstract class ContactsAdapter extends XoAdapter
 
     protected final static int VIEW_TYPE_COUNT = 4;
 
-    private boolean showNearbyHistory = false;
-    private long mNearbyMessagesCount = 0;
+    private boolean showNearbyHistory;
+    private long mNearbyMessagesCount;
 
-    public ContactsAdapter(XoActivity activity) {
+    protected ContactsAdapter(XoActivity activity) {
         super(activity);
     }
 
-    public ContactsAdapter(XoActivity activity, boolean showNearbyHistory) {
+    protected ContactsAdapter(XoActivity activity, boolean showNearbyHistory) {
         super(activity);
         this.showNearbyHistory = showNearbyHistory;
     }
 
-    Filter mFilter = null;
+    Filter mFilter;
 
     List<TalkClientContact> mClientContacts = new ArrayList<TalkClientContact>();
 
@@ -119,7 +119,7 @@ public abstract class ContactsAdapter extends XoAdapter
         });
     }
 
-    private List<TalkClientContact> filter(List<TalkClientContact> in, Filter filter) {
+    private static List<TalkClientContact> filter(List<TalkClientContact> in, Filter filter) {
         ArrayList<TalkClientContact> res = new ArrayList<TalkClientContact>();
         for (TalkClientContact contact : in) {
             if (filter.shouldShow(contact)) {
@@ -260,7 +260,7 @@ public abstract class ContactsAdapter extends XoAdapter
 
         // TODO: only if nearby history was found in db
         if (position == getCount() - 1 && mNearbyMessagesCount > 0) {
-            return new String("nearbyArchived");
+            return "nearbyArchived";
         }
         return null;
     }
