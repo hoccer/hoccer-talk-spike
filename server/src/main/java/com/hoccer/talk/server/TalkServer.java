@@ -237,7 +237,7 @@ public class TalkServer {
         mUpdateAgent = new UpdateAgent(this);
         mPingAgent = new PingAgent(this);
         mCleaningAgent = new CleaningAgent(this);
-        mFilecacheClient = new FilecacheClient(this);
+        mFilecacheClient = new FilecacheClient(this.getConfiguration());
 
         // For instrumenting metrics via JMX
         mJmxReporter = JmxReporter.forRegistry(mMetricsRegistry).build();

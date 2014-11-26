@@ -4,7 +4,8 @@ import better.jsonrpc.client.JsonRpcClient;
 import better.jsonrpc.client.JsonRpcClientException;
 import better.jsonrpc.core.JsonRpcConnection;
 import better.jsonrpc.server.JsonRpcServer;
-import better.jsonrpc.websocket.JsonRpcWsClient;
+import better.jsonrpc.websocket.JettyWebSocket;
+import better.jsonrpc.websocket.JsonRpcWsConnection;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,14 +30,12 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.agreement.srp.SRP6VerifierGenerator;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.eclipse.jetty.websocket.WebSocketClient;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.sql.SQLException;
@@ -115,13 +114,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     XoTransferAgent mTransferAgent;
 
-    /** Factory for underlying websocket connections */
-    WebSocketClientFactory mClientFactory;
-    /** JSON-RPC client instance */
-    protected JsonRpcWsClient mConnection;
-    /* RPC handler for notifications */
+    private JettyWebSocket mWebSocket;
+    protected JsonRpcWsConnection mConnection;
     TalkRpcClientImpl mHandler;
-    /* RPC proxy bound to our server */
     ITalkRpcServer mServerRpc;
 
     /** Executor doing all the heavy network and database work */
@@ -190,14 +185,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("sql error in database initialization", e);
         }
 
-        // create URI object referencing the server
-        URI uri = null;
-        try {
-            uri = new URI(mClientConfiguration.getServerUri());
-        } catch (URISyntaxException e) {
-            LOG.error("uri is wrong", e);
-        }
-
         // create JSON object mapper
         JsonFactory jsonFactory = new JsonFactory();
         mJsonMapper = createObjectMapper(jsonFactory);
@@ -211,10 +198,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
         ObjectMapper rpcMapper = createObjectMapper(rpcFactory);
 
-        // create websocket client
-        WebSocketClient wsClient = host.getWebSocketFactory().newWebSocketClient();
-
-        createJsonRpcClient(uri, wsClient, rpcMapper);
+        createJsonRpcConnection(rpcMapper);
 
         // create client-side RPC handler object
         mHandler = new TalkRpcClientImpl();
@@ -241,13 +225,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         ensureSelfContact();
     }
 
-    protected void createJsonRpcClient(URI uri, WebSocketClient wsClient, ObjectMapper rpcMapper) {
-        String protocol = mClientConfiguration.getUseBsonProtocol()
-                ? mClientConfiguration.getBsonProtocolString()
-                : mClientConfiguration.getJsonProtocolString();
-
-        mConnection = new JsonRpcWsClient(uri, protocol, wsClient, rpcMapper);
-        mConnection.setMaxIdleTime(mClientConfiguration.getConnectionIdleTimeout());
+    private void createJsonRpcConnection(ObjectMapper rpcMapper) {
+        mWebSocket = new JettyWebSocket();
+        mWebSocket.setMaxIdleTime(mClientConfiguration.getConnectionIdleTimeout());
+        mConnection = new JsonRpcWsConnection(mWebSocket, rpcMapper);
         mConnection.setSendKeepAlives(mClientConfiguration.getKeepAliveEnabled());
 
         if(mClientConfiguration.getUseBsonProtocol()) {
@@ -314,17 +295,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public void setEncryptedDownloadDirectory(String encryptedDownloadDirectory) {
         this.mEncryptedDownloadDirectory = encryptedDownloadDirectory;
-    }
-
-    public URI getServiceUri() {
-        return mConnection.getServiceUri();
-    }
-
-    public void setServiceUri(URI serviceUri) {
-        mConnection.setServiceUri(serviceUri);
-        if(mState >= STATE_IDLE) {
-            reconnect("URI changed");
-        }
     }
 
     public IXoClientHost getHost() {
@@ -1498,7 +1468,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void doConnect() {
         LOG.debug("performing connect on connection #" + mConnection.getConnectionId());
         try {
-            mConnection.connect(mClientConfiguration.getConnectTimeout(), TimeUnit.SECONDS);
+            WebSocketClient client = mClientHost.getWebSocketFactory().newWebSocketClient();
+            URI uri = new URI(mClientConfiguration.getServerUri());
+            String protocol = mClientConfiguration.getUseBsonProtocol()
+                    ? mClientConfiguration.getBsonProtocolString()
+                    : mClientConfiguration.getJsonProtocolString();
+
+            mWebSocket.open(client, uri, protocol, mClientConfiguration.getConnectTimeout(), TimeUnit.SECONDS);
         } catch (Exception e) {
             LOG.warn("[connection #" + mConnection.getConnectionId() + "] exception while connecting: ", e);
         }

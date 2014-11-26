@@ -4,14 +4,12 @@ import better.jsonrpc.core.JsonRpcConnection;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.eclipse.jetty.websocket.WebSocket;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class JsonRpcWsConnection extends JsonRpcConnection
-        implements WebSocket, WebSocket.OnTextMessage, WebSocket.OnBinaryMessage {
+public class JsonRpcWsConnection extends JsonRpcConnection implements JsonRpcWebSocketHandler {
 
     private static final String KEEPALIVE_REQUEST_STRING = "k";
     private static final byte[] KEEPALIVE_REQUEST_BINARY = new byte[]{'k'};
@@ -21,22 +19,7 @@ public class JsonRpcWsConnection extends JsonRpcConnection
     /**
      * Currently active websocket connection
      */
-    private Connection mConnection;
-
-    /**
-     * Max idle time for the connection
-     */
-    private int mMaxIdleTime = 300 * 1000;
-
-    /**
-     * Max test message size
-     */
-    private int mMaxTextMessageSize = 1 << 16;
-
-    /**
-     * Max binary message size
-     */
-    private int mMaxBinaryMessageSize = 1 << 16;
+    private JsonRpcWebSocket mWebSocket;
 
     /**
      * Whether to accept binary messages
@@ -63,35 +46,10 @@ public class JsonRpcWsConnection extends JsonRpcConnection
      */
     private boolean mAnswerKeepAlives = false;
 
-    public JsonRpcWsConnection(ObjectMapper mapper) {
+    public JsonRpcWsConnection(JsonRpcWebSocket webSocket, ObjectMapper mapper) {
         super(mapper);
-    }
-
-    public int getMaxIdleTime() {
-        return mMaxIdleTime;
-    }
-
-    public void setMaxIdleTime(int maxIdleTime) {
-        this.mMaxIdleTime = maxIdleTime;
-        applyConnectionParameters();
-    }
-
-    public int getMaxTextMessageSize() {
-        return mMaxTextMessageSize;
-    }
-
-    public void setMaxTextMessageSize(int maxTextMessageSize) {
-        this.mMaxTextMessageSize = maxTextMessageSize;
-        applyConnectionParameters();
-    }
-
-    public int getMaxBinaryMessageSize() {
-        return mMaxBinaryMessageSize;
-    }
-
-    public void setMaxBinaryMessageSize(int maxBinaryMessageSize) {
-        this.mMaxBinaryMessageSize = maxBinaryMessageSize;
-        applyConnectionParameters();
+        mWebSocket = webSocket;
+        mWebSocket.setHandler(this);
     }
 
     public boolean isAcceptBinaryMessages() {
@@ -136,13 +94,13 @@ public class JsonRpcWsConnection extends JsonRpcConnection
 
     @Override
     public boolean isConnected() {
-        return mConnection != null && mConnection.isOpen();
+        return mWebSocket.isOpen();
     }
 
     @Override
     public boolean disconnect() {
-        if (mConnection != null && mConnection.isOpen()) {
-            mConnection.close();
+        if (mWebSocket.isOpen()) {
+            mWebSocket.close();
             return true;
         } else {
             // call listeners again to notify them of connection closure
@@ -152,26 +110,18 @@ public class JsonRpcWsConnection extends JsonRpcConnection
     }
 
     public void transmit(String data) throws IOException {
-        if (mConnection != null) {
-            if ( mConnection.isOpen()) {
-                mConnection.sendMessage(data);
-            } else {
-                throw new IOException("Websocket not open");
-            }
+        if (mWebSocket.isOpen()) {
+            mWebSocket.sendMessage(data);
         } else {
-            throw new IOException("No Websocket");
+            throw new IOException("Websocket not open");
         }
     }
 
     public void transmit(byte[] data, int offset, int length) throws IOException {
-        if (mConnection != null) {
-            if ( mConnection.isOpen()) {
-                mConnection.sendMessage(data, offset, length);
-            } else {
-                throw new IOException("Websocket not open");
-            }
+        if (mWebSocket.isOpen()) {
+            mWebSocket.sendMessage(data, offset, length);
         } else {
-            throw new IOException("No Websocket");
+            throw new IOException("Websocket not open");
         }
     }
 
@@ -189,50 +139,17 @@ public class JsonRpcWsConnection extends JsonRpcConnection
     }
 
     @Override
-    public void onOpen(Connection connection) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("[" + mConnectionId + "] connection open");
-        }
-        super.onOpen();
-        mConnection = connection;
-        applyConnectionParameters();
+    public void handleOpen() {
+        onOpen();
     }
 
     @Override
-    public void onClose(int closeCode, String message) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("[" + mConnectionId + "] connection close " + closeCode + "/" + message);
-        }
-        super.onClose();
-        mConnection = null;
-    }
-
-    private void onMessage(JsonNode message) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("[" + mConnectionId + "] received \"" + message.toString() + "\"");
-        }
-        if (message.isObject()) {
-            ObjectNode messageObj = ObjectNode.class.cast(message);
-
-            // requests and notifications
-            if (messageObj.has("method")) {
-                if (messageObj.has("id")) {
-                    handleRequest(messageObj);
-                } else {
-                    handleNotification(messageObj);
-                }
-            }
-            // responses
-            if (messageObj.has("result") || messageObj.has("error")) {
-                if (messageObj.has("id")) {
-                    handleResponse(messageObj);
-                }
-            }
-        }
+    public void handleClose() {
+        onClose();
     }
 
     @Override
-    public void onMessage(String data) {
+    public void handleTextMessage(String data) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("[" + mConnectionId + "] received string data \"" + data + "\"");
         }
@@ -250,7 +167,7 @@ public class JsonRpcWsConnection extends JsonRpcConnection
             }
             // handle normal payload
             try {
-                onMessage(getMapper().readTree(data));
+                handleJsonMessage(getMapper().readTree(data));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -258,7 +175,7 @@ public class JsonRpcWsConnection extends JsonRpcConnection
     }
 
     @Override
-    public void onMessage(byte[] data, int offset, int length) {
+    public void handleBinaryMessage(byte[] data, int offset, int length) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("[" + mConnectionId + "] received binary data \"" + data.toString() + "\", offset="+offset+", length="+length);
         }
@@ -282,7 +199,7 @@ public class JsonRpcWsConnection extends JsonRpcConnection
             // handle normal payload
             InputStream is = new ByteArrayInputStream(data, offset, length);
             try {
-                onMessage(getMapper().readTree(is));
+                handleJsonMessage(getMapper().readTree(is));
                 is.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -290,11 +207,27 @@ public class JsonRpcWsConnection extends JsonRpcConnection
         }
     }
 
-    private void applyConnectionParameters() {
-        if (mConnection != null) {
-            mConnection.setMaxIdleTime(mMaxIdleTime);
-            mConnection.setMaxTextMessageSize(mMaxTextMessageSize);
-            mConnection.setMaxBinaryMessageSize(mMaxBinaryMessageSize);
+    private void handleJsonMessage(JsonNode message) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("[" + mConnectionId + "] received \"" + message.toString() + "\"");
+        }
+        if (message.isObject()) {
+            ObjectNode messageObj = ObjectNode.class.cast(message);
+
+            // requests and notifications
+            if (messageObj.has("method")) {
+                if (messageObj.has("id")) {
+                    handleRequest(messageObj);
+                } else {
+                    handleNotification(messageObj);
+                }
+            }
+            // responses
+            if (messageObj.has("result") || messageObj.has("error")) {
+                if (messageObj.has("id")) {
+                    handleResponse(messageObj);
+                }
+            }
         }
     }
 
