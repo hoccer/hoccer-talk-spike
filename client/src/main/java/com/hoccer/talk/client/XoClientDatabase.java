@@ -238,9 +238,8 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .queryForFirst();
     }
 
-    public List<TalkClientContact> findAllGroups() throws SQLException {
-        return mClientContacts.queryBuilder()
-                .where()
+    public List<TalkClientContact> findAllGroupContacts() throws SQLException {
+        return mClientContacts.queryBuilder().where()
                 .eq("contactType", TalkClientContact.TYPE_GROUP)
                 .eq("deleted", false)
                 .and(2)
@@ -865,7 +864,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public int getTotalCountOfInvitations() throws SQLException {
-        return (int) (getCountOfInvitedMeGroups() + getCountOfInvitedMeClients());
+        return (int) (getCountOfInvitedMeGroupContacts() + getCountOfInvitedMeClients());
     }
 
     public long getCountOfInvitedMeClients() throws SQLException {
@@ -875,7 +874,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .countOf();
     }
 
-    public int getCountOfInvitedMeGroups() throws SQLException {
+    public int getCountOfInvitedMeGroupContacts() throws SQLException {
         return findGroupContactsByMemberState(TalkGroupMember.STATE_INVITED).size();
     }
 

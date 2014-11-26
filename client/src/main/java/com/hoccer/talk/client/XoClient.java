@@ -1630,7 +1630,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     }
 
                     LOG.debug("sync: syncing group memberships");
-                    List<TalkClientContact> contacts = mDatabase.findAllGroups();
+                    List<TalkClientContact> contacts = mDatabase.findAllGroupContacts();
                     List<TalkClientContact> groupContacts = new ArrayList<TalkClientContact>();
                     List<String> groupIds = new ArrayList<String>();
                     for (TalkClientContact contact : contacts) {

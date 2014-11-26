@@ -36,7 +36,7 @@ public class GroupContactListFragment extends ContactListFragment {
     @Override
     protected int getInvitedMeCount() {
         try {
-            return XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroups();
+            return XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroupContacts();
         } catch (SQLException e) {
             LOG.error("Error getting group invitation count", e);
         }
