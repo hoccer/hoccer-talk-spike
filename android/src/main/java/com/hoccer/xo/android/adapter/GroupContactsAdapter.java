@@ -78,15 +78,12 @@ public class GroupContactsAdapter extends ContactsAdapter {
     private String getMemberStatus(TalkClientContact contact, Resources resources) {
         ArrayList<String> status = new ArrayList<String>();
 
-        // check group membership status if the group is registered already
-        if(mGroup.getGroupId() != null) {
-            if (isContactAdminInGroup(contact, mGroup)) {
-                status.add(resources.getString(R.string.contact_role_owner));
-            }
+        if (isContactAdminInGroup(contact, mGroup)) {
+            status.add(resources.getString(R.string.contact_role_owner));
+        }
 
-            if (isContactInvitedToGroup(contact, mGroup)) {
-                status.add(resources.getString(R.string.common_group_invite));
-            }
+        if (isContactInvitedToGroup(contact, mGroup)) {
+            status.add(resources.getString(R.string.common_group_invite));
         }
 
         if (contact.isClientFriend()) {
@@ -98,9 +95,9 @@ public class GroupContactsAdapter extends ContactsAdapter {
 
     private boolean isContactAdminInGroup(TalkClientContact contact, TalkClientContact group) {
         try {
-            TalkClientContact admin = mDatabase.findAdminInGroup(group.getGroupId());
-            if (admin != null && contact.getClientId().equals(admin.getClientId())) {
-                return true;
+            if(mGroup.getGroupId() != null) {
+                TalkClientContact admin = mDatabase.findAdminInGroup(group.getGroupId());
+                return admin != null && contact.getClientId().equals(admin.getClientId());
             }
         } catch (SQLException e) {
             LOG.error("isContactAdminInGroup", e);
@@ -110,9 +107,11 @@ public class GroupContactsAdapter extends ContactsAdapter {
 
     private boolean isContactInvitedToGroup(TalkClientContact contact, TalkClientContact group) {
         try {
-            TalkGroupMember member = mDatabase.findMemberInGroupByClientId(group.getGroupId(), contact.getClientId());
-            if (member != null && TalkGroupMember.STATE_INVITED.equals(member.getState())) {
-                return true;
+            if(mGroup.getGroupId() != null) {
+                TalkGroupMember member = mDatabase.findMemberInGroupByClientId(group.getGroupId(), contact.getClientId());
+                if (member != null && TalkGroupMember.STATE_INVITED.equals(member.getState())) {
+                    return true;
+                }
             }
         } catch (SQLException e) {
             LOG.error("isContactInvitedToGroup", e);
