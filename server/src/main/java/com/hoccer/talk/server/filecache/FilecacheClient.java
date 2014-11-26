@@ -1,15 +1,13 @@
 package com.hoccer.talk.server.filecache;
 
 import better.jsonrpc.client.JsonRpcClient;
-import better.jsonrpc.websocket.JettyWebSocket;
+import better.jsonrpc.websocket.jetty.JettyWebSocket;
 import better.jsonrpc.websocket.JsonRpcWsConnection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.filecache.rpc.ICacheControl;
 import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.websocket.WebSocketClient;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import java.io.IOException;
 import java.net.URI;

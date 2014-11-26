@@ -4,7 +4,7 @@ import better.jsonrpc.client.JsonRpcClient;
 import better.jsonrpc.client.JsonRpcClientException;
 import better.jsonrpc.core.JsonRpcConnection;
 import better.jsonrpc.server.JsonRpcServer;
-import better.jsonrpc.websocket.JettyWebSocket;
+import better.jsonrpc.websocket.jetty.JettyWebSocket;
 import better.jsonrpc.websocket.JsonRpcWsConnection;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;

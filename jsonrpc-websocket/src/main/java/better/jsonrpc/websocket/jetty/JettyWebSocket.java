@@ -1,5 +1,7 @@
-package better.jsonrpc.websocket;
+package better.jsonrpc.websocket.jetty;
 
+import better.jsonrpc.websocket.JsonRpcWebSocket;
+import better.jsonrpc.websocket.JsonRpcWebSocketHandler;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocketClient;
