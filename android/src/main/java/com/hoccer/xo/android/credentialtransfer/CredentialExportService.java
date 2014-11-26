@@ -92,7 +92,7 @@ public class CredentialExportService extends IntentService {
 
                 // write friend contact and joined group count
                 final int clients = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
-                final int groups = XoApplication.getXoClient().getDatabase().findGroupContactsByState(TalkGroupMember.STATE_JOINED).size();
+                final int groups = XoApplication.getXoClient().getDatabase().findGroupContactsByMemberState(TalkGroupMember.STATE_JOINED).size();
                 rootNode.put(CONTACT_COUNT_FIELD_NAME, clients + groups);
 
                 final String payloadString = mapper.writeValueAsString(rootNode);

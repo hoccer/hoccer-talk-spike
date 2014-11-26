@@ -41,7 +41,7 @@ public class ClientInbox extends TalkToolClientCommand {
             // determine recipient of message
             int conversationContactId = messages.get(i).getConversationContact().getClientContactId();
             // search own contacts for recipient-contact
-            TalkClientContact senderContact = client.getDatabase().findClientContactById(conversationContactId);
+            TalkClientContact senderContact = client.getDatabase().findContactById(conversationContactId);
             String senderId;
             if (senderContact.isGroup()) {
                 senderId = senderContact.getGroupId();

@@ -20,7 +20,6 @@ import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.srp.SRP6Parameters;
 import com.hoccer.talk.srp.SRP6VerifyingClient;
 import com.hoccer.talk.util.Credentials;
-import com.j256.ormlite.dao.ForeignCollection;
 import de.undercouch.bson4jackson.BsonFactory;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -739,8 +738,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
                 mDatabase.savePresence(presence);
 
-                for (int i = 0; i < mContactListeners.size(); i++) {
-                    IXoContactListener listener = mContactListeners.get(i);
+                for (IXoContactListener listener : mContactListeners) {
                     listener.onClientPresenceChanged(mSelfContact);
                 }
 
@@ -772,8 +770,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         scheduleIdle();
                     }
 
-                    for (int i = 0; i < mContactListeners.size(); i++) {
-                        IXoContactListener listener = mContactListeners.get(i);
+                    for (IXoContactListener listener : mContactListeners) {
                         listener.onClientPresenceChanged(mSelfContact);
                     }
 
@@ -815,8 +812,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 mSelfContact.setAvatarUpload(upload);
                 mDatabase.savePresence(presence);
                 mDatabase.saveContact(mSelfContact);
-                for (int i = 0; i < mContactListeners.size(); i++) {
-                    IXoContactListener listener = mContactListeners.get(i);
+                for (IXoContactListener listener : mContactListeners) {
                     listener.onClientPresenceChanged(mSelfContact);
                 }
                 sendPresence();
@@ -849,8 +845,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                        LOG.error("Error while sending new group presence: " , e);
                    }
                }
-               for (int i = 0; i < mContactListeners.size(); i++) {
-                   IXoContactListener listener = mContactListeners.get(i);
+               for (IXoContactListener listener : mContactListeners) {
                    listener.onGroupPresenceChanged(group);
                }
            }
@@ -885,8 +880,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     mDatabase.saveGroup(presence);
                     mDatabase.saveContact(group);
                     mServerRpc.updateGroup(presence);
-                    for (int i = 0; i < mContactListeners.size(); i++) {
-                        IXoContactListener listener = mContactListeners.get(i);
+                    for (IXoContactListener listener : mContactListeners) {
                         listener.onGroupPresenceChanged(group);
                     }
                 }
@@ -953,8 +947,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                             LOG.error("SQL error", e);
                         }
 
-                        for (int i = 0; i < mContactListeners.size(); i++) {
-                            IXoContactListener listener = mContactListeners.get(i);
+                        for (IXoContactListener listener : mContactListeners) {
                             listener.onContactRemoved(contact);
                         }
 
@@ -1092,43 +1085,19 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         mDatabase.saveGroupMember(member);
                         mDatabase.saveGroup(groupPresence);
                         mDatabase.saveContact(groupContact);
-                        TalkClientMembership membership = mDatabase.findMembershipByContacts(
-                                groupContact.getClientContactId(), mSelfContact.getClientContactId(), true);
-                        membership.updateGroupMember(member);
-                        mDatabase.saveClientMembership(membership);
                     } catch (SQLException e) {
                         LOG.error("sql error", e);
                     }
 
                     LOG.debug("new group contact " + groupContact.getClientContactId());
 
-                    for (int i = 0; i < mContactListeners.size(); i++) {
-                        IXoContactListener listener = mContactListeners.get(i);
+                    for (IXoContactListener listener : mContactListeners) {
                         listener.onContactAdded(groupContact);
                     }
 
                     if(avatarUpload != null) {
                         setGroupAvatar(groupContact, avatarUpload);
                     }
-
-                    // start of error checking section, remove when all works
-                    TalkClientMembership membership = null;
-                    try {
-                        LOG.debug("createGroup: looking for membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
-                        membership = mDatabase.findMembershipByContacts(
-                                groupContact.getClientContactId(), mSelfContact.getClientContactId(), false);
-                        if (membership == null) {
-                            LOG.error("createGroup: not found: membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
-                        }
-                        // just for error checking purposes, the following condition should never be true
-                        if (membership != null && (membership.getGroupContact().getContactType() == null || membership.getClientContact().getContactType() == null)) {
-                            LOG.error("createGroup: defective membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
-                        }
-                    } catch (SQLException e) {
-                        LOG.error("SQL error: ", e);
-                    }
-                    // end of error checking section
-
                 } catch (JsonRpcClientException e) {
                     LOG.error("JSON RPC error while creating group: ", e);
                 } catch (Exception e) {
@@ -1179,43 +1148,19 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         mDatabase.saveGroupMember(member);
                         mDatabase.saveGroup(groupPresence);
                         mDatabase.saveContact(groupContact);
-                        TalkClientMembership membership = mDatabase.findMembershipByContacts(
-                                groupContact.getClientContactId(), mSelfContact.getClientContactId(), true);
-                        membership.updateGroupMember(member);
-                        mDatabase.saveClientMembership(membership);
                     } catch (SQLException e) {
                         LOG.error("sql error", e);
                     }
 
                     LOG.debug("new group contact " + groupContact.getClientContactId());
 
-                    for (int i = 0; i < mContactListeners.size(); i++) {
-                        IXoContactListener listener = mContactListeners.get(i);
+                    for (IXoContactListener listener : mContactListeners) {
                         listener.onContactAdded(groupContact);
                     }
 
                     if(avatarUpload != null) {
                         setGroupAvatar(groupContact, avatarUpload);
                     }
-
-                    // start of error checking section, remove when all works
-                    TalkClientMembership membership = null;
-                    try {
-                        LOG.error("createGroup: looking for membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
-                        membership = mDatabase.findMembershipByContacts(
-                                groupContact.getClientContactId(), mSelfContact.getClientContactId(), false);
-                        if (membership == null) {
-                            LOG.error("createGroup: not found: membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
-                        }
-                        // just for error checking purposes, the following condition should never be true
-                        if (membership != null && (membership.getGroupContact().getContactType() == null || membership.getClientContact().getContactType() == null)) {
-                            LOG.error("createGroup: defective membership for group="+groupContact.getClientContactId()+" client="+mSelfContact.getClientContactId());
-                        }
-                    } catch (SQLException e) {
-                        LOG.error("SQL error: ", e);
-                    }
-                    // end of error checking section
-
                 } catch (JsonRpcClientException e) {
                     LOG.error("JSON RPC error while creating group: ", e);
                 }  catch (Exception e) {
@@ -1715,16 +1660,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                                         groupPresence.setState(TalkGroup.STATE_NONE);
                                         mDatabase.saveGroup(groupPresence);
                                     }
-                                    ForeignCollection<TalkClientMembership> memberships = groupContact.getGroupMemberships();
-                                    for (TalkClientMembership tcm : memberships) {
-                                        TalkGroupMember member = tcm.getMember();
-                                        if (member != null) {
-                                            member.setState(TalkGroupMember.STATE_GROUP_REMOVED);
-                                            mDatabase.saveGroupMember(member);
-                                        }
+
+                                    // update group member state
+                                    List<TalkGroupMember> members = mDatabase.findMembersInGroup(groupContact.getGroupId());
+                                    for (TalkGroupMember member : members) {
+                                        member.setState(TalkGroupMember.STATE_GROUP_REMOVED);
+                                        mDatabase.saveGroupMember(member);
                                     }
-                                    for (int j = 0; j < mContactListeners.size(); j++) {
-                                        IXoContactListener listener = mContactListeners.get(j);
+
+                                    for (IXoContactListener listener : mContactListeners) {
                                         listener.onGroupMembershipChanged(groupContact);
                                         listener.onGroupPresenceChanged(groupContact);
                                     }
@@ -1884,7 +1828,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             boolean isRenewGroupKey = false;
 
             try {
-                groupContact = mDatabase.findContactByGroupId(groupId, false);
+                groupContact = mDatabase.findGroupContactByGroupId(groupId, false);
             } catch (SQLException e) {
                 LOG.error("Error while retrieving group contact from id: " + groupId, e);
             }
@@ -1970,10 +1914,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         @Override
         public void pushNotRegistered() {
             LOG.debug("server: pushNotRegistered()");
-            // XXX
-            //for(ITalkClientListener listener: mListeners) {
-            //    listener.onPushRegistrationRequested();
-            //}
         }
 
         @Override
@@ -2119,8 +2059,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.debug("performDeliveries()");
         LOG.debug(clientMessages.size() + " messages to deliver");
 
-        for (int i = 0; i < clientMessages.size(); i++) {
-            final TalkClientMessage clientMessage = clientMessages.get(i);
+        for (final TalkClientMessage clientMessage : clientMessages) {
             final TalkClientUpload upload = clientMessage.getAttachmentUpload();
             if (upload != null) {
                 upload.register(mTransferAgent);
@@ -2167,9 +2106,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("SQL Error while saving delivery", e);
         }
 
-        int length = resultingDeliveries.length;
-        for(int j = 0; j < length; j++) {
-            updateOutgoingDelivery(resultingDeliveries[j]);
+        for (TalkDelivery resultingDelivery : resultingDeliveries) {
+            updateOutgoingDelivery(resultingDelivery);
         }
     }
 
@@ -2307,7 +2245,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkClientContact currentNearbyGroup = null;
         try {
             if (mEnvironmentGroupId != null) {
-                currentNearbyGroup = mDatabase.findContactByGroupId(mEnvironmentGroupId, false);
+                currentNearbyGroup = mDatabase.findGroupContactByGroupId(mEnvironmentGroupId, false);
             }
         } catch (SQLException e) {
             LOG.error("SQL Error while retrieving current nearby group ", e);
@@ -2351,7 +2289,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
             String groupId = delivery.getGroupId();
             if(groupId != null) {
-                groupContact = mDatabase.findContactByGroupId(groupId, false);
+                groupContact = mDatabase.findGroupContactByGroupId(groupId, false);
                 if(groupContact == null) {
                     LOG.warn("outgoing message for unknown group " + groupId);
                     //TODO: return; ??
@@ -2560,7 +2498,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         try {
             String groupId = delivery.getGroupId();
             if(groupId != null) {
-                groupContact = mDatabase.findContactByGroupId(groupId, false);
+                groupContact = mDatabase.findGroupContactByGroupId(groupId, false);
                 if(groupContact == null) {
                     LOG.warn("incoming message in unknown group " + groupId);
                     return;
@@ -2751,7 +2689,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 LOG.error("message salt has wrong size");
                 return;
             }
-            for(int i = 0; i < decryptedKey.length; i++) {
+            for (int i = 0; i < decryptedKey.length; i++) {
                 decryptedKey[i] = (byte)(decryptedKey[i] ^ decodedSalt[i]);
             }
         }
@@ -2808,7 +2746,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         try {
-            receiver = mDatabase.findClientContactById(receiver.getClientContactId());
+            receiver = mDatabase.findContactById(receiver.getClientContactId());
         } catch (SQLException e) {
             LOG.error("SQL error", e);
             return;
@@ -2866,7 +2804,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 LOG.error("message salt has wrong size");
                 return;
             }
-            for(int i = 0; i < plainKey.length; i++) {
+            for (int i = 0; i < plainKey.length; i++) {
                 plainKey[i] = (byte)(plainKey[i] ^ keySalt[i]);
             }
         }
@@ -3004,8 +2942,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
         }
 
-        for (int i = 0; i < mContactListeners.size(); i++) {
-            IXoContactListener listener = mContactListeners.get(i);
+        for (IXoContactListener listener : mContactListeners) {
             listener.onClientPresenceChanged(clientContact);
         }
     }
@@ -3013,7 +2950,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private boolean updateAvatarDownload(TalkClientContact contact, String avatarUrl, String avatarId, Date avatarTimestamp) throws MalformedURLException {
         boolean haveUrl = avatarUrl != null && !avatarUrl.isEmpty();
         if(!haveUrl) {
-            LOG.warn("no avatar url for contact " + contact.getClientContactId());
+            LOG.debug("no avatar url for contact " + contact.getClientContactId());
             contact.setAvatarDownload(null);
             return false;
         }
@@ -3130,7 +3067,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         try {
             groupContact = mDatabase.findContactByGroupTag(group.getGroupTag());
             if(groupContact == null) {
-                groupContact = mDatabase.findContactByGroupId(group.getGroupId(), true);
+                groupContact = mDatabase.findGroupContactByGroupId(group.getGroupId(), true);
             }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -3171,8 +3108,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         LOG.info("updateGroupPresence(" + group.getGroupId() + ") - saved");
 
-        for (int i = 0; i < mContactListeners.size(); i++) {
-            IXoContactListener listener = mContactListeners.get(i);
+        for (IXoContactListener listener : mContactListeners) {
             listener.onGroupPresenceChanged(groupContact);
         }
     }
@@ -3180,36 +3116,31 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void destroyNearbyGroup(TalkClientContact groupContact) {
         LOG.debug("destroying nearby group with id " + groupContact.getGroupId());
 
-        // reset group state
-        TalkGroup groupPresence = groupContact.getGroupPresence();
-        if (groupPresence == null) {
-            LOG.error("Can not destroy nearby group since groupPresence is null");
-            return;
-        }
-
-        groupPresence.setState(TalkGroup.STATE_KEPT);
-
         try {
-            // remove all group members
-            ForeignCollection<TalkClientMembership> groupMemberships = groupContact.getGroupMemberships();
-            if (groupMemberships != null){
-                for (TalkClientMembership membership : groupMemberships) {
+            // reset group state
+            TalkGroup groupPresence = groupContact.getGroupPresence();
+            if (groupPresence == null) {
+                LOG.error("Can not destroy nearby group since groupPresence is null");
+                return;
+            }
+            groupPresence.setState(TalkGroup.STATE_KEPT);
 
-                    // reset nearby status of group member contact
-                    TalkClientContact groupMemberContact = membership.getClientContact();
-                    groupMemberContact.setNearby(false);
-                    mDatabase.saveContact(groupMemberContact);
+            // save group
+            mDatabase.saveContact(groupContact);
+            mDatabase.saveGroup(groupPresence);
 
-                    // reset group membership state
-                    TalkGroupMember member = membership.getMember();
-                    if (member != null) {
-                        member.setState(TalkGroupMember.STATE_NONE);
-                        mDatabase.saveGroupMember(member);
-                    }
-                }
+            // set member states to none
+            List<TalkGroupMember> members = mDatabase.findMembersInGroup(groupContact.getGroupId());
+            for (TalkGroupMember member : members) {
+                member.setState(TalkGroupMember.STATE_NONE);
+                mDatabase.saveGroupMember(member);
+            }
 
-                mDatabase.saveContact(groupContact);
-                mDatabase.saveGroup(groupPresence);
+            // set contact nearby state to false
+            List<TalkClientContact> contacts = mDatabase.findContactsInGroup(groupContact.getGroupId());
+            for (TalkClientContact contact : contacts) {
+                contact.setNearby(false);
+                mDatabase.saveContact(contact);
             }
         } catch (SQLException e) {
             LOG.error("Error while destroying nearby group " + groupContact.getGroupId());
@@ -3236,12 +3167,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkClientContact clientContact;
 
         try {
-            groupContact = mDatabase.findContactByGroupId(member.getGroupId(), false);
+            groupContact = mDatabase.findGroupContactByGroupId(member.getGroupId(), false);
             if (groupContact == null) {
                 boolean createGroup = member.isInvolved() && !member.isGroupRemoved();
                 if (createGroup) {
                     LOG.info("creating group for member in state '" + member.getState() + "' groupId '" + member.getGroupId() + "'");
-                    groupContact = mDatabase.findContactByGroupId(member.getGroupId(), true);
+                    groupContact = mDatabase.findGroupContactByGroupId(member.getGroupId(), true);
                 } else {
                     LOG.warn("ignoring incoming member for unknown group for member in state '" + member.getState() + "' groupId '" + member.getGroupId() + "'");
                     return;
@@ -3281,19 +3212,23 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             clientContact.setCreatedTimeStamp(new Date());
         }
 
-        // if this concerns our own membership
-        if (clientContact.isSelf()) {
-            LOG.info("groupMember is about us, decrypting group key");
-            try {
-                groupContact.updateGroupMember(member);
-                TalkClientMembership membership = mDatabase.findMembershipByContacts(groupContact.getClientContactId(), clientContact.getClientContactId(), true);
-                membership.updateGroupMember(member);
+        try {
+            // update membership in database
+            TalkGroupMember dbMember = mDatabase.findMemberInGroupByClientId(member.getGroupId(), member.getClientId());
+            if(dbMember != null) {
+                dbMember.updateWith(member);
+                mDatabase.saveGroupMember(dbMember);
+            } else {
+                mDatabase.saveGroupMember(member);
+            }
 
+            // if this concerns our own membership
+            if (clientContact.isSelf()) {
+                LOG.info("groupMember is about us, decrypting group key");
+                groupContact.updateGroupMember(member);
                 decryptGroupKey(groupContact, member);
 
-                mDatabase.saveGroupMember(membership.getMember());
                 mDatabase.saveContact(groupContact);
-                mDatabase.saveClientMembership(membership);
 
                 // quietly destroy nearby group
                 if (!member.isInvolved()) {
@@ -3302,37 +3237,20 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         destroyNearbyGroup(groupContact);
                     }
                 }
-
-            } catch (SQLException e) {
-                LOG.error("SQL error", e);
             }
-        }
-        // if this concerns the membership of someone else
-        if (clientContact.isClient()) {
-            try {
-                TalkClientMembership membership = mDatabase.findMembershipByContacts(
-                        groupContact.getClientContactId(), clientContact.getClientContactId(), true);
-                TalkGroupMember oldMember = membership.getMember();
-                LOG.info("old member " + ((oldMember == null) ? "null" : "there"));
-                if (oldMember != null) {
-                    LOG.info("old " + oldMember.getState() + " new " + member.getState());
-                }
-
+            // if this concerns the membership of someone else
+            if (clientContact.isClient()) {
                 /* Mark as nearby contact and save to database. */
                 boolean isJoinedInNearbyGroup = groupContact.getGroupPresence() != null && groupContact.getGroupPresence().isTypeNearby() && member.isJoined();
                 clientContact.setNearby(isJoinedInNearbyGroup);
-                mDatabase.saveContact(clientContact);
 
-                membership.updateGroupMember(member);
-                mDatabase.saveGroupMember(membership.getMember());
-                mDatabase.saveClientMembership(membership);
-            } catch (SQLException e) {
-                LOG.error("sql error", e);
+                mDatabase.saveContact(clientContact);
             }
+        } catch (SQLException e) {
+            LOG.error("sql error", e);
         }
 
-        for (int i = 0; i < mContactListeners.size(); i++) {
-            IXoContactListener listener = mContactListeners.get(i);
+        for (IXoContactListener listener : mContactListeners) {
             listener.onGroupMembershipChanged(groupContact);
         }
     }
@@ -3366,35 +3284,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         } catch (GeneralSecurityException e) {
             LOG.error("error decrypting group key", e);
         }
-    }
-
-    private String[] updateableClients(TalkClientContact group, String[] onlyWithClientIds) {
-
-        ArrayList<String> clientIds = new ArrayList<String>();
-        HashSet<String> clientIdSet = new HashSet<String>(Arrays.asList(onlyWithClientIds));
-        ForeignCollection<TalkClientMembership> memberships = group.getGroupMemberships();
-        if (memberships != null) {
-
-            // prepare ArrayList with keys first first
-            for (TalkClientMembership membership : memberships) {
-                TalkGroupMember member = membership.getMember();
-                if (member != null && member.isJoinedOrInvited() && ((onlyWithClientIds == null) || clientIdSet.contains(member.getClientId()))) {
-                    LOG.debug("joined member contact " + membership.getClientContact().getClientContactId());
-                    try {
-                        TalkClientContact client = mDatabase.findClientContactById(membership.getClientContact().getClientContactId());
-                        TalkKey clientPubKey = client.getPublicKey();
-                        if (clientPubKey == null) {
-                            LOG.warn("no public key for client contact " + client.getClientContactId());
-                        }  else {
-                            clientIds.add(member.getClientId());
-                        }
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-                }
-            }
-        }
-        return clientIds.toArray(new String[]{});
     }
 
     private void generateGroupKey(TalkClientContact group) {

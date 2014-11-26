@@ -57,7 +57,7 @@ public class MessagingFragment extends XoListFragment
         if (getArguments() != null) {
             int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
             try {
-                mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                mContact = XoApplication.getXoClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("sql error", e);
                 return;

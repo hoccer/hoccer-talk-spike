@@ -12,12 +12,15 @@ import com.hoccer.talk.model.TalkGroup;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.artcom.hoccer.R;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NearbyChatAdapter extends ChatAdapter {
+
+    private static final Logger LOG = Logger.getLogger(NearbyChatAdapter.class);
 
     public NearbyChatAdapter(ListView listView, XoActivity activity) {
         super(listView, activity, null);

@@ -14,6 +14,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.*;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,6 +32,8 @@ import java.util.List;
  */
 public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTransferListenerOld {
 
+    private static final Logger LOG = Logger.getLogger(ChatAdapter.class);
+
     /**
      * Number of TalkClientMessage objects in a batch
      */
@@ -47,7 +50,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
 
     protected List<ChatMessageItem> mChatMessageItems;
 
-    private ListView mListView;
+    private final ListView mListView;
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
@@ -61,31 +64,13 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         try {
             final List<TalkClientMessage> messages = mDatabase.findMessagesByContactId(mContact.getClientContactId(), -1, -1);
             mChatMessageItems = Collections.synchronizedList(new ArrayList<ChatMessageItem>(totalMessageCount));
-            for (int i = 0; i < messages.size(); i++) {
-                mChatMessageItems.add(getItemForMessage(messages.get(i)));
+            for (TalkClientMessage message : messages) {
+                mChatMessageItems.add(getItemForMessage(message));
             }
         } catch (SQLException e) {
             LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
         }
     }
-
-    // TODO: get back to this implementation soon. Please.
-    /*
-    protected void initialize() {
-        int totalMessageCount = 0;
-        try {
-            totalMessageCount = (int) mDatabase.getMessageCountByContactId(mContact.getClientContactId());
-        } catch (SQLException e) {
-            LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
-        }
-
-        mChatMessageItems = Collections.synchronizedList(new ArrayList<ChatMessageItem>(totalMessageCount));
-        for (int i = 0; i < totalMessageCount; i++) {
-            mChatMessageItems.add(null);
-        }
-        loadNextMessages(mChatMessageItems.size() - (int) BATCH_SIZE);
-    }
-    */
 
     /**
      * Loads a range of TalkClientMessage objects from database starting at a given offset.
@@ -198,7 +183,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
      * @param message The message to display
      * @return The corresponding ListItemType
      */
-    private ChatItemType getListItemTypeForMessage(TalkClientMessage message) {
+    private static ChatItemType getListItemTypeForMessage(TalkClientMessage message) {
         ChatItemType chatItemType = ChatItemType.ChatItemWithText;
         String contentType = null;
 
@@ -255,7 +240,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         });
     }
 
-    protected boolean isMessageValid(TalkClientMessage message) {
+    protected static boolean isMessageValid(TalkClientMessage message) {
         if (message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
             return true;
         }

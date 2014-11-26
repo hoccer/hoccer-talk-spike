@@ -208,7 +208,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
     private TalkClientContact retrieveContactById(Integer contactId) {
         TalkClientContact contact = null;
         try {
-            contact = mDatabase.findClientContactById(contactId);
+            contact = mDatabase.findContactById(contactId);
         } catch (SQLException e) {
             LOG.error("Contact not found for id: " + contactId, e);
         }

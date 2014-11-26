@@ -5,13 +5,11 @@ import android.view.ViewGroup;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.IXoTransferListenerOld;
-import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkRelationship;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.view.model.BaseChatItem;
@@ -50,10 +48,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     final protected List<BaseChatItem> mChatItems = new ArrayList<BaseChatItem>();
 
     @Nullable
-    private Filter mFilter = null;
-
-    @Nullable
-    private XoClientDatabase mDatabase;
+    private Filter mFilter;
 
     public ChatListAdapter(XoActivity activity) {
         this(activity, null);
@@ -61,7 +56,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
     public ChatListAdapter(XoActivity activity, @Nullable Filter filter) {
         super(activity);
-        mDatabase = XoApplication.getXoClient().getDatabase();
         mFilter = filter;
         loadChatItems();
     }
@@ -238,9 +232,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
-                int oldItemCount = mChatItems.size();
-
                 if (relationship.isNone()) {
                     BaseChatItem item = findChatItemForContent(contact);
                     if (item != null) {
@@ -252,7 +243,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     if (item != null) {
                         item.update();
                     } else {
-                        if (mFilter.shouldShow(contact)) {
+                        if (mFilter == null || mFilter.shouldShow(contact)) {
                             item = new TalkClientChatItem(contact, mActivity);
                             mChatItems.add(item);
                         }
@@ -300,7 +291,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             TalkClientContact conversationContact = message.getConversationContact();
             TalkClientContact contact;
             if (conversationContact.isGroup()) {
-                contact = mDatabase.findContactByGroupId(conversationContact.getGroupId(), false);
+                contact = mDatabase.findGroupContactByGroupId(conversationContact.getGroupId(), false);
             } else {
                 contact = mDatabase.findContactByClientId(conversationContact.getClientId(), false);
             }
