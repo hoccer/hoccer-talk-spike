@@ -25,7 +25,7 @@ public class GroupContactsAdapter extends ContactsAdapter {
 
     private static final Logger LOG = Logger.getLogger(GroupContactsAdapter.class);
 
-    private TalkClientContact mGroup;
+    private final TalkClientContact mGroup;
 
     public GroupContactsAdapter(XoActivity activity, TalkClientContact group) {
         super(activity);
