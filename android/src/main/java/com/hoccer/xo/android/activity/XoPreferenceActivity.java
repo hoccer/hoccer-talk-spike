@@ -16,7 +16,8 @@ import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.util.BackupUtils;
+import com.hoccer.xo.android.backup.Backup;
+import com.hoccer.xo.android.backup.BackupUtils;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.artcom.hoccer.R;
 import net.hockeyapp.android.CrashManager;
@@ -24,7 +25,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -79,8 +79,8 @@ public class XoPreferenceActivity extends PreferenceActivity
         final ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
         if (listPreference != null) {
             BackupUtils backupUtils = new BackupUtils();
-            List<File> exportFiles = backupUtils.getExportFiles();
-            if (exportFiles != null && !exportFiles.isEmpty()) {
+            List<File> exportFiles = backupUtils.getBackupFiles(XoApplication.getExternalStorage());
+            if (!exportFiles.isEmpty()) {
 
                 final String[] entries = new String[exportFiles.size()];
                 final String[] entryValues = new String[exportFiles.size()];
@@ -197,7 +197,7 @@ public class XoPreferenceActivity extends PreferenceActivity
             try {
                 File database = new File("/data/data/" + getPackageName() + "/databases/hoccer-talk.db");
                 String filename = BackupUtils.createUniqueBackupFilename() + ".db";
-                File target =  new File(XoApplication.getExternalStorage(), filename);
+                File target = new File(XoApplication.getExternalStorage(), filename);
                 FileUtils.copyFile(database, target);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -214,14 +214,12 @@ public class XoPreferenceActivity extends PreferenceActivity
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
-                try {
-                    File importFile = new File(XoApplication.getExternalStorage(), importFileName);
-                    BackupUtils backupUtils = new BackupUtils();
-                    backupUtils.importDatabaseAndAttachments(importFile);
-                } catch (IOException e) {
-                    LOG.error("Data import failed.", e);
-                    return false;
-                }
+
+                File importFile = new File(XoApplication.getExternalStorage(), importFileName);
+                BackupUtils backupUtils = new BackupUtils();
+//                Backup backup = backupUtils.extractBackup(importFile);
+//                BackupUtils.importBackup(backup, getDatabasePath(getPackageName()), XoApplication.getAttachmentDirectory());
+
                 return true;
             }
 
@@ -247,7 +245,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                     List<File> attachments = Arrays.asList(XoApplication.getAttachmentDirectory().listFiles());
                     BackupUtils backupUtils = new BackupUtils();
                     String filename = BackupUtils.createUniqueBackupFilename();
-                    File backup =  new File(XoApplication.getExternalStorage(), filename);
+                    File backup = new File(XoApplication.getExternalStorage(), filename);
                     backupUtils.createBackup(backup, database, attachments, "123");
                     return backup;
                 } catch (Exception e) {
