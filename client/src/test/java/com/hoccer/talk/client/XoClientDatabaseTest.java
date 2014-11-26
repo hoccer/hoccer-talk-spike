@@ -80,13 +80,13 @@ public class XoClientDatabaseTest {
     }
 
     @Test
-    public void testFindMembersInGroupWithClientId() throws SQLException {
+    public void testFindMembersInGroupByClientId() throws SQLException {
         TalkGroupMember member = mDatabase.findMemberInGroupByClientId(mGroup.getGroupId(), mGroupAdmin.getClientId());
         assertEquals(mGroupAdmin.getClientId(), member.getClientId());
     }
 
     @Test
-    public void testFindMembersInGroupWithState() throws SQLException {
+    public void testFindMembersInGroupByState() throws SQLException {
         // check invited contacts count
         List<TalkGroupMember> invitedMembersInGroup = mDatabase.findMembersInGroupByState(mGroup.getGroupId(), TalkGroupMember.STATE_INVITED);
         assertEquals(INVITED_CONTACTS, invitedMembersInGroup.size());
@@ -98,7 +98,7 @@ public class XoClientDatabaseTest {
     }
 
     @Test
-    public void testFindContactsInGroupWitState() throws SQLException {
+    public void testFindContactsInGroupByState() throws SQLException {
         // check invited contacts count
         List<TalkClientContact> invitedContactsInGroup = mDatabase.findContactsInGroupByState(mGroup.getGroupId(), TalkGroupMember.STATE_INVITED);
         assertEquals(INVITED_CONTACTS, invitedContactsInGroup.size());
@@ -118,7 +118,7 @@ public class XoClientDatabaseTest {
     }
 
     @Test
-    public void testFindContactsInGroupWitRole() throws SQLException {
+    public void testFindContactsInGroupByRole() throws SQLException {
         // check admin contacts count
         List<TalkClientContact> adminContacts = mDatabase.findContactsInGroupByRole(mGroup.getGroupId(), TalkGroupMember.ROLE_ADMIN);
         assertEquals(1, adminContacts.size());
