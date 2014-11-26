@@ -68,7 +68,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         public boolean shouldShow(TalkClientContact contact) {
             try {
                 if (mGroup.getGroupId() != null && contact.isClient()) {
-                    TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupWithClientId(mGroup.getGroupId(), contact.getClientId());
+                    TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
                     if (member != null) {
                         return TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState());
                     }

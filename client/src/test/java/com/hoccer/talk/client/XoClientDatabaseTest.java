@@ -84,31 +84,31 @@ public class XoClientDatabaseTest {
 
     @Test
     public void testFindMembersInGroupWithClientId() throws SQLException {
-        TalkGroupMember member = mDatabase.findMemberInGroupWithClientId(mGroup.getGroupId(), mGroupAdmin.getClientId());
+        TalkGroupMember member = mDatabase.findMemberInGroupByClientId(mGroup.getGroupId(), mGroupAdmin.getClientId());
         assertEquals(mGroupAdmin.getClientId(), member.getClientId());
     }
 
     @Test
     public void testFindMembersInGroupWithState() throws SQLException {
         // check invited contacts count
-        List<TalkGroupMember> invitedMembersInGroup = mDatabase.findMembersInGroupWithState(mGroup.getGroupId(), TalkGroupMember.STATE_INVITED);
+        List<TalkGroupMember> invitedMembersInGroup = mDatabase.findMembersInGroupByState(mGroup.getGroupId(), TalkGroupMember.STATE_INVITED);
         assertEquals(mInvitedContacts, invitedMembersInGroup.size());
 
         // check joined contacts count
         int expectedJoinedContactsCount = mJoinedContacts + 1;
-        List<TalkGroupMember> joinedMembersInGroup = mDatabase.findMembersInGroupWithState(mGroup.getGroupId(), TalkGroupMember.STATE_JOINED);
+        List<TalkGroupMember> joinedMembersInGroup = mDatabase.findMembersInGroupByState(mGroup.getGroupId(), TalkGroupMember.STATE_JOINED);
         assertEquals(expectedJoinedContactsCount, joinedMembersInGroup.size());
     }
 
     @Test
     public void testFindContactsInGroupWitState() throws SQLException {
         // check invited contacts count
-        List<TalkClientContact> invitedContactsInGroup = mDatabase.findContactsInGroupWithState(mGroup.getGroupId(), TalkGroupMember.STATE_INVITED);
+        List<TalkClientContact> invitedContactsInGroup = mDatabase.findContactsInGroupByState(mGroup.getGroupId(), TalkGroupMember.STATE_INVITED);
         assertEquals(mInvitedContacts, invitedContactsInGroup.size());
 
         // check joined contacts count
         int expectedJoinedContactsCount = mJoinedContacts + 1;
-        List<TalkClientContact> joinedContactsInGroup = mDatabase.findContactsInGroupWithState(mGroup.getGroupId(), TalkGroupMember.STATE_JOINED);
+        List<TalkClientContact> joinedContactsInGroup = mDatabase.findContactsInGroupByState(mGroup.getGroupId(), TalkGroupMember.STATE_JOINED);
         assertEquals(expectedJoinedContactsCount, joinedContactsInGroup.size());
     }
 
@@ -123,12 +123,12 @@ public class XoClientDatabaseTest {
     @Test
     public void testFindContactsInGroupWitRole() throws SQLException {
         // check admin contacts count
-        List<TalkClientContact> adminContacts = mDatabase.findContactsInGroupWithRole(mGroup.getGroupId(), TalkGroupMember.ROLE_ADMIN);
+        List<TalkClientContact> adminContacts = mDatabase.findContactsInGroupByRole(mGroup.getGroupId(), TalkGroupMember.ROLE_ADMIN);
         assertEquals(1, adminContacts.size());
         assertEquals(mGroupAdmin.getClientId(), adminContacts.get(0).getClientId());
 
         // check member contacts count
-        List<TalkClientContact> memberContacts = mDatabase.findContactsInGroupWithRole(mGroup.getGroupId(), TalkGroupMember.ROLE_MEMBER);
+        List<TalkClientContact> memberContacts = mDatabase.findContactsInGroupByRole(mGroup.getGroupId(), TalkGroupMember.ROLE_MEMBER);
         assertEquals(mJoinedContacts + mInvitedContacts, memberContacts.size());
     }
 

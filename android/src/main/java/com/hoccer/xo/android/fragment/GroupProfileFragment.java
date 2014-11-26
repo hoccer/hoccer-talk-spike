@@ -80,7 +80,7 @@ public class GroupProfileFragment extends ProfileFragment
         public boolean shouldShow(TalkClientContact contact) {
             try {
                 if(contact.isClient()) {
-                    TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupWithClientId(mGroup.getGroupId(), contact.getClientId());
+                    TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
                     if (member != null) {
                         return TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState());
                     }

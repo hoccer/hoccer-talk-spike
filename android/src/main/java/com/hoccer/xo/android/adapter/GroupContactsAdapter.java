@@ -110,7 +110,7 @@ public class GroupContactsAdapter extends ContactsAdapter {
 
     private boolean isContactInvitedToGroup(TalkClientContact contact, TalkClientContact group) {
         try {
-            TalkGroupMember member = mDatabase.findMemberInGroupWithClientId(group.getGroupId(), contact.getClientId());
+            TalkGroupMember member = mDatabase.findMemberInGroupByClientId(group.getGroupId(), contact.getClientId());
             if (member != null && TalkGroupMember.STATE_INVITED.equals(member.getState())) {
                 return true;
             }

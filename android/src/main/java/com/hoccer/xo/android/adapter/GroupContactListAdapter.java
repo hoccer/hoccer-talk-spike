@@ -45,8 +45,8 @@ public class GroupContactListAdapter extends ContactListAdapter {
 
         try {
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
-            invitedMe = database.findGroupsWithSelfState(TalkGroupMember.STATE_INVITED);
-            joined = database.findGroupsWithSelfState(TalkGroupMember.STATE_JOINED);
+            invitedMe = database.findGroupContactsByMemberState(TalkGroupMember.STATE_INVITED);
+            joined = database.findGroupContactsByMemberState(TalkGroupMember.STATE_JOINED);
         } catch (SQLException e) {
             LOG.error("Could not fetch group contacts", e);
             return Collections.emptyList();
@@ -123,7 +123,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
         try {
             ArrayDeque<String> displayMembers = new ArrayDeque<String>();
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
-            List<TalkClientContact> joinedContacts = database.findContactsInGroupWithState(group.getGroupId(), TalkGroupMember.STATE_JOINED);
+            List<TalkClientContact> joinedContacts = database.findContactsInGroupByState(group.getGroupId(), TalkGroupMember.STATE_JOINED);
             CollectionUtils.filterInverse(joinedContacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
 
             for (TalkClientContact contact : joinedContacts) {

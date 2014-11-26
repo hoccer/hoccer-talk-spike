@@ -247,7 +247,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
     }
 
-    public List<TalkClientContact> findGroupsWithSelfState(String state) throws SQLException {
+    public List<TalkClientContact> findGroupContactsByMemberState(String state) throws SQLException {
         QueryBuilder<TalkGroupMember, Long> groupMembers = mGroupMembers.queryBuilder();
         groupMembers.where()
                 .eq("state", state);
@@ -273,7 +273,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
     }
 
-    public TalkGroupMember findMemberInGroupWithClientId(String groupId, String clientId) throws SQLException {
+    public TalkGroupMember findMemberInGroupByClientId(String groupId, String clientId) throws SQLException {
         return mGroupMembers.queryBuilder()
                 .where()
                 .eq("groupId", groupId)
@@ -282,7 +282,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .queryForFirst();
     }
 
-    public List<TalkGroupMember> findMembersInGroupWithState(String groupId, String state) throws SQLException {
+    public List<TalkGroupMember> findMembersInGroupByState(String groupId, String state) throws SQLException {
         return mGroupMembers.queryBuilder()
                 .where()
                 .eq("groupId", groupId)
@@ -306,8 +306,8 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts;
     }
 
-    public List<TalkClientContact> findContactsInGroupWithState(String groupId, String state) throws SQLException {
-        List<TalkGroupMember> groupMembers = findMembersInGroupWithState(groupId, state);
+    public List<TalkClientContact> findContactsInGroupByState(String groupId, String state) throws SQLException {
+        List<TalkGroupMember> groupMembers = findMembersInGroupByState(groupId, state);
 
         List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
         for (TalkGroupMember member : groupMembers) {
@@ -319,7 +319,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public TalkClientContact findAdminInGroup(String groupId) throws SQLException {
-        List<TalkClientContact> contacts = findContactsInGroupWithRole(groupId, TalkGroupMember.ROLE_ADMIN);
+        List<TalkClientContact> contacts = findContactsInGroupByRole(groupId, TalkGroupMember.ROLE_ADMIN);
 
         if (contacts.size() == 1) {
             return contacts.get(0);
@@ -329,7 +329,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
     }
 
-    public List<TalkClientContact> findContactsInGroupWithRole(String groupId, String role) throws SQLException {
+    public List<TalkClientContact> findContactsInGroupByRole(String groupId, String role) throws SQLException {
         List<TalkGroupMember> groupMembers = mGroupMembers.queryBuilder()
                 .selectColumns("clientId").where()
                 .eq("groupId", groupId)
@@ -876,7 +876,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public int getCountOfInvitedMeGroups() throws SQLException {
-        return findGroupsWithSelfState(TalkGroupMember.STATE_INVITED).size();
+        return findGroupContactsByMemberState(TalkGroupMember.STATE_INVITED).size();
     }
 
     public boolean hasPendingFriendRequests() {

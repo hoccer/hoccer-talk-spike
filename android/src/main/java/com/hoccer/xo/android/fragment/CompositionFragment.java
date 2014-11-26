@@ -371,7 +371,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private static boolean isGroupEmpty(TalkClientContact contact) {
         final List<TalkClientContact> otherContactsInGroup;
         try {
-            otherContactsInGroup = XoApplication.getXoClient().getDatabase().findContactsInGroupWithState(contact.getGroupId(), TalkGroupMember.STATE_JOINED);
+            otherContactsInGroup = XoApplication.getXoClient().getDatabase().findContactsInGroupByState(contact.getGroupId(), TalkGroupMember.STATE_JOINED);
             CollectionUtils.filterInverse(otherContactsInGroup, TalkClientContactPredicates.IS_SELF_PREDICATE);
             return otherContactsInGroup.isEmpty();
         } catch (SQLException e) {

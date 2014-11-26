@@ -3214,7 +3214,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
         try {
             // update membership in database
-            TalkGroupMember dbMember = mDatabase.findMemberInGroupWithClientId(member.getGroupId(), member.getClientId());
+            TalkGroupMember dbMember = mDatabase.findMemberInGroupByClientId(member.getGroupId(), member.getClientId());
             if(dbMember != null) {
                 dbMember.updateWith(member);
                 mDatabase.saveGroupMember(dbMember);
