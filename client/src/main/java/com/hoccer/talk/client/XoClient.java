@@ -3225,27 +3225,26 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             // if this concerns our own membership
             if (clientContact.isSelf()) {
                 LOG.info("groupMember is about us, decrypting group key");
-                    groupContact.updateGroupMember(member);
-                    decryptGroupKey(groupContact, member);
+                groupContact.updateGroupMember(member);
+                decryptGroupKey(groupContact, member);
 
-                    mDatabase.saveContact(groupContact);
+                mDatabase.saveContact(groupContact);
 
-                    // quietly destroy nearby group
-                    if (!member.isInvolved()) {
-                        TalkGroup groupPresence = groupContact.getGroupPresence();
-                        if (groupPresence != null && groupPresence.isTypeNearby()) {
-                            destroyNearbyGroup(groupContact);
-                        }
+                // quietly destroy nearby group
+                if (!member.isInvolved()) {
+                    TalkGroup groupPresence = groupContact.getGroupPresence();
+                    if (groupPresence != null && groupPresence.isTypeNearby()) {
+                        destroyNearbyGroup(groupContact);
                     }
+                }
             }
             // if this concerns the membership of someone else
             if (clientContact.isClient()) {
+                /* Mark as nearby contact and save to database. */
+                boolean isJoinedInNearbyGroup = groupContact.getGroupPresence() != null && groupContact.getGroupPresence().isTypeNearby() && member.isJoined();
+                clientContact.setNearby(isJoinedInNearbyGroup);
 
-                    /* Mark as nearby contact and save to database. */
-                    boolean isJoinedInNearbyGroup = groupContact.getGroupPresence() != null && groupContact.getGroupPresence().isTypeNearby() && member.isJoined();
-                    clientContact.setNearby(isJoinedInNearbyGroup);
-
-                    mDatabase.saveContact(clientContact);
+                mDatabase.saveContact(clientContact);
             }
         } catch (SQLException e) {
             LOG.error("sql error", e);
