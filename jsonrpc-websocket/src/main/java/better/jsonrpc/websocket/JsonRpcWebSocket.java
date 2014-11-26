@@ -8,6 +8,6 @@ public interface JsonRpcWebSocket {
     boolean isOpen();
     void close();
 
-    void sendMessage(String data) throws IOException;
-    void sendMessage(byte[] data, int offset, int length) throws IOException;
+    void sendTextMessage(String data) throws IOException;
+    void sendBinaryMessage(byte[] data) throws IOException;
 }

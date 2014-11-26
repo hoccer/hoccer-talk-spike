@@ -66,7 +66,7 @@ public class JettyWebSocket implements JsonRpcWebSocket, WebSocket, WebSocket.On
     }
 
     @Override
-    public void sendMessage(String data) throws IOException {
+    public void sendTextMessage(String data) throws IOException {
         if (mConnection != null) {
             mConnection.sendMessage(data);
         } else {
@@ -75,9 +75,9 @@ public class JettyWebSocket implements JsonRpcWebSocket, WebSocket, WebSocket.On
     }
 
     @Override
-    public void sendMessage(byte[] data, int offset, int length) throws IOException {
+    public void sendBinaryMessage(byte[] data) throws IOException {
         if (mConnection != null) {
-            mConnection.sendMessage(data, offset, length);
+            mConnection.sendMessage(data, 0, data.length);
         } else {
             LOG.error("Trying to send message over WebSocket that is not open");
         }

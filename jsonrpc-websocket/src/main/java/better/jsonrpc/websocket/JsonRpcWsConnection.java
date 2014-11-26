@@ -111,15 +111,15 @@ public class JsonRpcWsConnection extends JsonRpcConnection implements JsonRpcWeb
 
     public void transmit(String data) throws IOException {
         if (mWebSocket.isOpen()) {
-            mWebSocket.sendMessage(data);
+            mWebSocket.sendTextMessage(data);
         } else {
             throw new IOException("Websocket not open");
         }
     }
 
-    public void transmit(byte[] data, int offset, int length) throws IOException {
+    public void transmit(byte[] data) throws IOException {
         if (mWebSocket.isOpen()) {
-            mWebSocket.sendMessage(data, offset, length);
+            mWebSocket.sendBinaryMessage(data);
         } else {
             throw new IOException("Websocket not open");
         }
@@ -131,7 +131,7 @@ public class JsonRpcWsConnection extends JsonRpcConnection implements JsonRpcWeb
         }
         if (mSendBinaryMessages) {
             byte[] data = getMapper().writeValueAsBytes(node);
-            transmit(data, 0, data.length);
+            transmit(data);
         } else {
             String data = getMapper().writeValueAsString(node);
             transmit(data);
@@ -185,7 +185,7 @@ public class JsonRpcWsConnection extends JsonRpcConnection implements JsonRpcWeb
                 if (data[offset] == 'k') {
                     if (mAnswerKeepAlives) {
                         try {
-                            transmit(KEEPALIVE_RESPONSE_BINARY, 0, KEEPALIVE_RESPONSE_BINARY.length);
+                            transmit(KEEPALIVE_RESPONSE_BINARY);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -234,7 +234,7 @@ public class JsonRpcWsConnection extends JsonRpcConnection implements JsonRpcWeb
     public void sendKeepAlive() throws IOException {
         if (mSendKeepAlives) {
             if (mSendBinaryMessages) {
-                transmit(KEEPALIVE_REQUEST_BINARY, 0, KEEPALIVE_REQUEST_BINARY.length);
+                transmit(KEEPALIVE_REQUEST_BINARY);
             } else {
                 transmit(KEEPALIVE_REQUEST_STRING);
             }

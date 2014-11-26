@@ -4,8 +4,8 @@ import better.jsonrpc.client.JsonRpcClient;
 import better.jsonrpc.client.JsonRpcClientException;
 import better.jsonrpc.core.JsonRpcConnection;
 import better.jsonrpc.server.JsonRpcServer;
-import better.jsonrpc.websocket.jetty.JettyWebSocket;
 import better.jsonrpc.websocket.JsonRpcWsConnection;
+import better.jsonrpc.websocket.java.JavaWebSocket;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,13 +29,13 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.agreement.srp.SRP6VerifierGenerator;
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.eclipse.jetty.websocket.WebSocketClient;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.sql.SQLException;
@@ -114,7 +114,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     XoTransferAgent mTransferAgent;
 
-    private JettyWebSocket mWebSocket;
+    private JavaWebSocket mWebSocket;
     protected JsonRpcWsConnection mConnection;
     TalkRpcClientImpl mHandler;
     ITalkRpcServer mServerRpc;
@@ -226,8 +226,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void createJsonRpcConnection(ObjectMapper rpcMapper) {
-        mWebSocket = new JettyWebSocket();
-        mWebSocket.setMaxIdleTime(mClientConfiguration.getConnectionIdleTimeout());
+        mWebSocket = new JavaWebSocket(mClientHost.getKeyStore());
+//        mWebSocket.setMaxIdleTime(mClientConfiguration.getConnectionIdleTimeout());
         mConnection = new JsonRpcWsConnection(mWebSocket, rpcMapper);
         mConnection.setSendKeepAlives(mClientConfiguration.getKeepAliveEnabled());
 
@@ -1468,13 +1468,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void doConnect() {
         LOG.debug("performing connect on connection #" + mConnection.getConnectionId());
         try {
-            WebSocketClient client = mClientHost.getWebSocketFactory().newWebSocketClient();
             URI uri = new URI(mClientConfiguration.getServerUri());
             String protocol = mClientConfiguration.getUseBsonProtocol()
                     ? mClientConfiguration.getBsonProtocolString()
                     : mClientConfiguration.getJsonProtocolString();
 
-            mWebSocket.open(client, uri, protocol, mClientConfiguration.getConnectTimeout(), TimeUnit.SECONDS);
+            mWebSocket.open(uri, protocol);
         } catch (Exception e) {
             LOG.warn("[connection #" + mConnection.getConnectionId() + "] exception while connecting: ", e);
         }

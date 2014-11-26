@@ -2,13 +2,14 @@ package com.hoccer.talk.tool.client;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
+import com.hoccer.talk.tool.TalkToolContext;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.KeyStore;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,8 +41,8 @@ public class TalkToolClientHost implements IXoClientHost {
     }
 
     @Override
-    public WebSocketClientFactory getWebSocketFactory() {
-        return mClient.getContext().getWSClientFactory();
+    public KeyStore getKeyStore() {
+        return TalkToolContext.getKeyStore();
     }
 
     @Override
