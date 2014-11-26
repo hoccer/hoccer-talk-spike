@@ -123,8 +123,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public TalkClientContact findSelfContact(boolean create) throws SQLException {
-        TalkClientContact contact = mClientContacts.queryBuilder()
-                .where()
+        TalkClientContact contact = mClientContacts.queryBuilder().where()
                 .eq("contactType", TalkClientContact.TYPE_SELF)
                 .queryForFirst();
 
@@ -142,8 +141,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public synchronized TalkClientContact findContactByClientId(String clientId, boolean create) throws SQLException {
-        TalkClientContact contact = mClientContacts.queryBuilder()
-                .where()
+        TalkClientContact contact = mClientContacts.queryBuilder().where()
                 .eq("clientId", clientId)
                 .eq("deleted", false)
                 .and(2)
@@ -159,8 +157,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public TalkClientContact findDeletedContactByClientId(String clientId) throws SQLException {
-        return mClientContacts.queryBuilder()
-                .where()
+        return mClientContacts.queryBuilder().where()
                 .eq("clientId", clientId)
                 .eq("deleted", true)
                 .and(2)
@@ -230,8 +227,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public TalkClientContact findContactByGroupTag(String groupTag) throws SQLException {
-        return mClientContacts.queryBuilder()
-                .where()
+        return mClientContacts.queryBuilder().where()
                 .eq("groupTag", groupTag)
                 .eq("deleted", false)
                 .and(2)
@@ -266,15 +262,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkGroupMember> findMembersInGroup(String groupId) throws SQLException {
-        return mGroupMembers.queryBuilder()
-                .where()
+        return mGroupMembers.queryBuilder().where()
                 .eq("groupId", groupId)
                 .query();
     }
 
     public TalkGroupMember findMemberInGroupByClientId(String groupId, String clientId) throws SQLException {
-        return mGroupMembers.queryBuilder()
-                .where()
+        return mGroupMembers.queryBuilder().where()
                 .eq("groupId", groupId)
                 .and()
                 .eq("clientId", clientId)
@@ -282,8 +276,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkGroupMember> findMembersInGroupByState(String groupId, String state) throws SQLException {
-        return mGroupMembers.queryBuilder()
-                .where()
+        return mGroupMembers.queryBuilder().where()
                 .eq("groupId", groupId)
                 .and()
                 .eq("state", state)
@@ -346,8 +339,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public synchronized TalkClientContact findGroupContactByGroupId(String groupId, boolean create) throws SQLException {
-        TalkClientContact contact = mClientContacts.queryBuilder()
-                .where()
+        TalkClientContact contact = mClientContacts.queryBuilder().where()
                 .eq("groupId", groupId)
                 .eq("deleted", false)
                 .and(2)
@@ -380,8 +372,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         List<TalkClientMessage> messages = new ArrayList<TalkClientMessage>();
         try {
             for (TalkDelivery newDelivery : newDeliveries) {
-                TalkClientMessage message = mClientMessages.queryBuilder()
-                        .where()
+                TalkClientMessage message = mClientMessages.queryBuilder().where()
                         .eq("deleted", false)
                         .eq("outgoingDelivery" + "_id", newDelivery)
                         .and(2)
@@ -410,8 +401,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public synchronized TalkClientMessage findMessageByMessageId(String messageId, boolean create) throws SQLException {
-        TalkClientMessage message = mClientMessages.queryBuilder()
-                .where()
+        TalkClientMessage message = mClientMessages.queryBuilder().where()
                 .eq("messageId", messageId)
                 .eq("deleted", false)
                 .and(2)
@@ -427,8 +417,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public synchronized TalkClientMessage findMessageByMessageTag(String messageTag, boolean create) throws SQLException {
-        TalkClientMessage message = mClientMessages.queryBuilder()
-                .where()
+        TalkClientMessage message = mClientMessages.queryBuilder().where()
                 .eq("messageTag", messageTag)
                 .eq("deleted", false)
                 .and(2)
@@ -459,10 +448,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientMessage> getAllNearbyGroupMessages() throws SQLException {
-        QueryBuilder<TalkClientMessage, Integer> builder = mClientMessages.queryBuilder();
-        builder.where().eq("deleted", false);
-        builder.orderBy("timestamp", true);
-        List<TalkClientMessage> messages = builder.query();
+        List<TalkClientMessage> messages = mClientMessages.queryBuilder()
+                .orderBy("timestamp", true).where()
+                .eq("deleted", false)
+                .query();
 
         ArrayList<TalkClientMessage> nearbyMessages = new ArrayList<TalkClientMessage>();
         for (TalkClientMessage message : messages) {
@@ -526,8 +515,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public long getMessageCountByContactId(int contactId) throws SQLException {
-        return mClientMessages.queryBuilder()
-                .where()
+        return mClientMessages.queryBuilder().where()
                 .eq("conversationContact_id", contactId)
                 .eq("deleted", false)
                 .and(2)
@@ -571,8 +559,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public TalkClientMessage findLatestMessageByContactId(int contactId) throws SQLException {
         return mClientMessages.queryBuilder()
-                .orderBy("timestamp", false)
-                .where()
+                .orderBy("timestamp", false).where()
                 .isNotNull("text")
                 .eq("conversationContact_id", contactId)
                 .eq("deleted", false)
@@ -581,22 +568,19 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public TalkClientMessage findMessageByUploadId(int uploadId) throws SQLException {
-        return mClientMessages.queryBuilder()
-                .where()
+        return mClientMessages.queryBuilder().where()
                 .eq("attachmentUpload_id", uploadId)
                 .queryForFirst();
     }
 
     public TalkClientMessage findMessageByDownloadId(int downloadId) throws SQLException {
-        return mClientMessages.queryBuilder()
-                .where()
+        return mClientMessages.queryBuilder().where()
                 .eq("attachmentDownload_id", downloadId)
                 .queryForFirst();
     }
 
     public List<TalkClientMessage> findUnseenMessages() throws SQLException {
-        return mClientMessages.queryBuilder().orderBy("timestamp", false).
-                where()
+        return mClientMessages.queryBuilder().orderBy("timestamp", false).where()
                 .eq("seen", false)
                 .eq("deleted", false)
                 .and(2)
@@ -604,8 +588,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public TalkClientMessage getClientMessageForDelivery(TalkDelivery delivery) throws SQLException {
-        return mClientMessages.queryBuilder()
-                .where()
+        return mClientMessages.queryBuilder().where()
                 .eq("messageTag", delivery.getMessageTag())
                 .eq("messageId", delivery.getMessageId())
                 .or(2)
@@ -707,8 +690,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
-        List<TalkClientUpload> uploads = mClientUploads.queryBuilder()
-                .where()
+        List<TalkClientUpload> uploads = mClientUploads.queryBuilder().where()
                 .eq("mediaType", mediaType)
                 .isNotNull("contentUrl")
                 .and(2)
@@ -726,8 +708,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     private List<XoTransfer> mergeUploadsAndDownloadsByMessageTimestamp(List<TalkClientUpload> uploads, List<TalkClientDownload> downloads) throws SQLException {
         List<TalkClientMessage> messages = mClientMessages.queryBuilder()
-                .orderBy("timestamp", false)
-                .where()
+                .orderBy("timestamp", false).where()
                 .isNotNull("attachmentUpload_id")
                 .isNotNull("attachmentDownload_id")
                 .or(2)
@@ -753,8 +734,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public List<TalkClientDownload> findClientDownloadsByContactId(int contactId) throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
         messageQb
-                .orderBy("timestamp", false)
-                .where()
+                .orderBy("timestamp", false).where()
                 .eq("senderContact_id", contactId)
                 .or()
                 .eq("conversationContact_id", contactId);
@@ -769,8 +749,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public List<TalkClientDownload> findClientDownloadsByMediaTypeAndContactId(String mediaType, int contactId) throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
         messageQb
-                .orderBy("timestamp", false)
-                .where()
+                .orderBy("timestamp", false).where()
                 .eq("senderContact_id", contactId)
                 .or()
                 .eq("conversationContact_id", contactId);
@@ -785,8 +764,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<XoTransfer> findAllTransfers() throws SQLException {
-        List<TalkClientUpload> uploads = mClientUploads.queryBuilder()
-                .where()
+        List<TalkClientUpload> uploads = mClientUploads.queryBuilder().where()
                 .isNotNull("contentUrl")
                 .query();
 
@@ -796,7 +774,9 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public TalkPrivateKey findPrivateKeyByKeyId(String keyId) throws SQLException {
-        return mPrivateKeys.queryBuilder().where().eq("keyId", keyId).queryForFirst();
+        return mPrivateKeys.queryBuilder().where()
+                .eq("keyId", keyId)
+                .queryForFirst();
     }
 
     public TalkClientUpload getClientUploadForDelivery(TalkDelivery delivery) throws SQLException {
@@ -838,8 +818,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public List<TalkClientContact> findAllPendingFriendRequests() {
         try {
             List<TalkClientContact> contacts = new ArrayList<TalkClientContact>();
-            List<TalkRelationship> relationshipsInvitedMe = mRelationships.queryBuilder()
-                    .where()
+            List<TalkRelationship> relationshipsInvitedMe = mRelationships.queryBuilder().where()
                     .eq("state", TalkRelationship.STATE_INVITED_ME)
                     .query();
             for (TalkRelationship relationship : relationshipsInvitedMe) {
@@ -847,8 +826,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 CollectionUtils.addIgnoreNull(contacts, contact);
             }
 
-            List<TalkRelationship> relationshipsInvitedByMe = mRelationships.queryBuilder()
-                    .where()
+            List<TalkRelationship> relationshipsInvitedByMe = mRelationships.queryBuilder().where()
                     .eq("state", TalkRelationship.STATE_INVITED)
                     .query();
             for (TalkRelationship relationship : relationshipsInvitedByMe) {
@@ -868,8 +846,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public long getCountOfInvitedMeClients() throws SQLException {
-        return mRelationships.queryBuilder()
-                .where()
+        return mRelationships.queryBuilder().where()
                 .eq("state", TalkRelationship.STATE_INVITED_ME)
                 .countOf();
     }
@@ -880,8 +857,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public boolean hasPendingFriendRequests() {
         try {
-            List<TalkRelationship> invitedRelations = mRelationships.queryBuilder()
-                    .where()
+            List<TalkRelationship> invitedRelations = mRelationships.queryBuilder().where()
                     .eq("state", TalkRelationship.STATE_INVITED_ME)
                     .or()
                     .eq("state", TalkRelationship.STATE_INVITED)
@@ -1058,8 +1034,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public List<TalkClientMediaCollection> findAllMediaCollectionsContainingItem(XoTransfer item) throws SQLException {
         String column = item.isUpload() ? "uploadItem" : "item";
 
-        List<TalkClientMediaCollectionRelation> relations = mMediaCollectionRelations.queryBuilder()
-                .where()
+        List<TalkClientMediaCollectionRelation> relations = mMediaCollectionRelations.queryBuilder().where()
                 .eq(column, item.getUploadOrDownloadId())
                 .query();
 
