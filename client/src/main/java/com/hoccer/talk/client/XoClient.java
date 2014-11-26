@@ -2950,7 +2950,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private boolean updateAvatarDownload(TalkClientContact contact, String avatarUrl, String avatarId, Date avatarTimestamp) throws MalformedURLException {
         boolean haveUrl = avatarUrl != null && !avatarUrl.isEmpty();
         if(!haveUrl) {
-            LOG.warn("no avatar url for contact " + contact.getClientContactId());
+            LOG.debug("no avatar url for contact " + contact.getClientContactId());
             contact.setAvatarDownload(null);
             return false;
         }
