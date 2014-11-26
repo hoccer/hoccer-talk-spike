@@ -50,7 +50,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
 
     protected List<ChatMessageItem> mChatMessageItems;
 
-    private ListView mListView;
+    private final ListView mListView;
 
     public ChatAdapter(ListView listView, XoActivity activity, TalkClientContact contact) {
         super(activity);
@@ -64,8 +64,8 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         try {
             final List<TalkClientMessage> messages = mDatabase.findMessagesByContactId(mContact.getClientContactId(), -1, -1);
             mChatMessageItems = Collections.synchronizedList(new ArrayList<ChatMessageItem>(totalMessageCount));
-            for (int i = 0; i < messages.size(); i++) {
-                mChatMessageItems.add(getItemForMessage(messages.get(i)));
+            for (TalkClientMessage message : messages) {
+                mChatMessageItems.add(getItemForMessage(message));
             }
         } catch (SQLException e) {
             LOG.error("SQLException while loading message count: " + mContact.getClientId(), e);
@@ -183,7 +183,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
      * @param message The message to display
      * @return The corresponding ListItemType
      */
-    private ChatItemType getListItemTypeForMessage(TalkClientMessage message) {
+    private static ChatItemType getListItemTypeForMessage(TalkClientMessage message) {
         ChatItemType chatItemType = ChatItemType.ChatItemWithText;
         String contentType = null;
 
@@ -240,7 +240,7 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
         });
     }
 
-    protected boolean isMessageValid(TalkClientMessage message) {
+    protected static boolean isMessageValid(TalkClientMessage message) {
         if (message.getAttachmentUpload() != null || message.getAttachmentDownload() != null) {
             return true;
         }
