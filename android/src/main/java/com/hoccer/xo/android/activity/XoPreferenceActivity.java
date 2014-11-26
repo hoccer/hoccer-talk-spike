@@ -20,9 +20,11 @@ import com.hoccer.xo.android.util.BackupUtils;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.artcom.hoccer.R;
 import net.hockeyapp.android.CrashManager;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -191,8 +193,16 @@ public class XoPreferenceActivity extends PreferenceActivity
             exportData();
             return true;
         } else if (preference.getKey().equals("preference_database_dump")) {
-            BackupUtils backupUtils = new BackupUtils();
-            backupUtils.exportDatabaseToFile();
+
+            try {
+                File database = new File("/data/data/" + getPackageName() + "/databases/hoccer-talk.db");
+                String filename = BackupUtils.createUniqueBackupFilename() + ".db";
+                File target =  new File(XoApplication.getExternalStorage(), filename);
+                FileUtils.copyFile(database, target);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             return true;
         }
 
@@ -236,7 +246,8 @@ public class XoPreferenceActivity extends PreferenceActivity
                     File database = new File("/data/data/" + getPackageName() + "/databases/hoccer-talk.db");
                     List<File> attachments = Arrays.asList(XoApplication.getAttachmentDirectory().listFiles());
                     BackupUtils backupUtils = new BackupUtils();
-                    File backup = backupUtils.createEmptyBackupFile(XoApplication.getAttachmentDirectory().getPath());
+                    String filename = BackupUtils.createUniqueBackupFilename();
+                    File backup =  new File(XoApplication.getExternalStorage(), filename);
                     backupUtils.createBackup(backup, database, attachments, "123");
                     return backup;
                 } catch (Exception e) {

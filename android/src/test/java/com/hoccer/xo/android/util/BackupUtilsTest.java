@@ -18,8 +18,11 @@ public class BackupUtilsTest {
 
     public static final String RESOURCE_DB_FILE = "/database.db";
     public static final String RESOURCE_ATTACHMENT_FILE_01 = "/attachment_01.txt";
+    public static final String RESOURCE_BACKUP_FILE = "/attachment_01.txt";
+
     public static final String PASSWORD = "12345678";
 
+    private File mBackup;
     private File mDatabase;
     private List<File> mAttachments = new ArrayList<File>();
 
@@ -34,17 +37,21 @@ public class BackupUtilsTest {
         assertNotNull("Database file missing", mDatabase);
 
         mAttachments = getAttachmentFiles();
-        TestCase.assertNotNull(mAttachments);
+        assertNotNull(mAttachments);
         assertFalse("Database file missing", mAttachments.isEmpty());
+
+        mBackup = getDatabaseFile();
+        assertNotNull(mBackup);
     }
 
     @Test
-    public void testCreateDatabaseBackupWithAttachments() throws Exception {
+    public void testCreateDatabaseBackup() throws Exception {
 
-        File backup = mBackupUtils.createEmptyBackupFile(getClass().getResource("").getFile());
+        String filename = BackupUtils.createUniqueBackupFilename() + ".zip";
+        File backup = new File(getClass().getResource("").getFile(), filename);
         assertNotNull(backup);
 
-        mBackupUtils.createBackup(backup, mDatabase, mAttachments, PASSWORD);
+        mBackupUtils.createBackup(backup, mDatabase, PASSWORD);
         assertTrue("Creating backup failed", backup.length() > 0);
 
         boolean deleted = backup.delete();
@@ -52,12 +59,13 @@ public class BackupUtilsTest {
     }
 
     @Test
-    public void testCreateDatabaseBackup() throws Exception {
+    public void testCreateDatabaseBackupWithAttachments() throws Exception {
 
-        File backup = mBackupUtils.createEmptyBackupFile(getClass().getResource("").getFile());
+        String filename = BackupUtils.createUniqueBackupFilename() + ".zip";
+        File backup = new File(getClass().getResource("").getFile(), filename);
         assertNotNull(backup);
 
-        mBackupUtils.createBackup(backup, mDatabase, PASSWORD);
+        mBackupUtils.createBackup(backup, mDatabase, mAttachments, PASSWORD);
         assertTrue("Creating backup failed", backup.length() > 0);
 
         boolean deleted = backup.delete();
@@ -80,5 +88,13 @@ public class BackupUtilsTest {
         List<File> attachmentFiles = new ArrayList<File>();
         attachmentFiles.add(new File(attachmentFileUrl.getFile()));
         return attachmentFiles;
+    }
+
+    private File getBackupFile() {
+
+        URL backupFileUrl = getClass().getResource(RESOURCE_BACKUP_FILE);
+        TestCase.assertNotNull(backupFileUrl);
+
+        return new File(backupFileUrl.getFile());
     }
 }

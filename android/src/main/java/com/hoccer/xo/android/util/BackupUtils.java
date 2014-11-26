@@ -20,7 +20,7 @@ public class BackupUtils {
     public static final String FILE_EXTENSION_DB = "db";
     public static final String TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
     public static final String BACKUP_FILENAME_PREFIX = "hoccer_backup_";
-    public static final String BACKUP_FILENAME_PATTERN = BACKUP_FILENAME_PREFIX + "%s.zip";
+    public static final String BACKUP_FILENAME_PATTERN = BACKUP_FILENAME_PREFIX + "%s";
     private static final String DB_FILE_NAME = "database.db";
 
     private String mDatabaseFilepath;
@@ -116,33 +116,6 @@ public class BackupUtils {
         initDatabase();
     }
 
-
-    public File exportDatabaseToFile() {
-        File exportFile = createEmptyBackupFile(FILE_EXTENSION_DB);
-
-        String inFileName = mDatabaseFilepath;
-        File dbFile = new File(inFileName);
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(dbFile);
-            OutputStream output = new FileOutputStream(exportFile.getAbsolutePath());
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = fis.read(buffer)) > 0) {
-                output.write(buffer, 0, length);
-            }
-            output.flush();
-            output.close();
-            fis.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return exportFile;
-    }
-
     private void addZipEntry(ZipOutputStream zos, File fileEntry) throws IOException {
 
         FileInputStream in = new FileInputStream(fileEntry);
@@ -173,10 +146,9 @@ public class BackupUtils {
         zos.closeEntry();
     }
 
-    public File createEmptyBackupFile(String parent) {
+    public static String createUniqueBackupFilename() {
         String timestamp = new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
-        String fileName = String.format(BACKUP_FILENAME_PATTERN, timestamp);
-        return new File(parent, fileName);
+        return String.format(BACKUP_FILENAME_PATTERN, timestamp);
     }
 
     private void initDatabase() {
