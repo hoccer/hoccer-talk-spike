@@ -85,9 +85,6 @@ public class TalkClientContact implements Serializable {
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkGroupMember groupMember;
 
-    @ForeignCollectionField(eager = false, foreignFieldName = "groupContact")
-    private ForeignCollection<TalkClientMembership> groupMemberships;
-
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkClientDownload avatarDownload;
 
