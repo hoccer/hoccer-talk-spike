@@ -63,13 +63,15 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     private boolean mCloneGroupContact;
 
-    private final ContactsAdapter.Filter mInvitedOrJoinedFilter = new ContactsAdapter.Filter() {
+    private final ContactsAdapter.Filter mInvitedOrJoinedClientFilter = new ContactsAdapter.Filter() {
         @Override
         public boolean shouldShow(TalkClientContact contact) {
             try {
-                TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupWithClientId(mGroup.getGroupId(), contact.getClientId());
-                if (member != null) {
-                    return TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState());
+                if (mGroup.getGroupId() != null && contact.isClient()) {
+                    TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupWithClientId(mGroup.getGroupId(), contact.getClientId());
+                    if (member != null) {
+                        return TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState());
+                    }
                 }
             } catch (SQLException e) {
                 LOG.error("GroupProfileCreationFragment.Filter.shouldShow()", e);
@@ -182,11 +184,11 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             mGroupMemberAdapter.onResume();
 
             if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
-                mGroupMemberAdapter.setFilter(mInvitedOrJoinedFilter);
+                mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             } else if (!mContactsToInviteToGroup.isEmpty()) {
                 mGroupMemberAdapter.setFilter(mToBeInvitedFilter);
             } else {
-                mGroupMemberAdapter.setFilter(mInvitedOrJoinedFilter);
+                mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             }
 
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
