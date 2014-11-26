@@ -16,14 +16,12 @@ import static junit.framework.TestCase.assertFalse;
 public class BackupUtilsTest {
 
     public static final String RESOURCE_DB_FILE = "/database.db";
-    public static final String RESOURCE_DB_FILE_ENCRYPTED = "/database.json";
     public static final String RESOURCE_ATTACHMENT_FILE_01 = "/IMG_20141120_130456_432.jpg";
     public static final String RESOURCE_BACKUP_FILE = "/hoccer_backup_20141126_162118.zip";
 
     public static final String PASSWORD = "12345678";
 
     private static File BACKUP = getResourceFile(RESOURCE_BACKUP_FILE);
-    private static File DATABASE_ENCRYPTED = getResourceFile(RESOURCE_DB_FILE_ENCRYPTED);
     private static File DATABASE = getResourceFile(RESOURCE_DB_FILE);
     private static List<File> ATTACHMENTS = getAttachmentFiles();
 
