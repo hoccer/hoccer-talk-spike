@@ -1,5 +1,7 @@
 package com.hoccer.xo.android.util;
 
+import com.hoccer.xo.android.backup.*;
+import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -8,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
@@ -21,9 +24,9 @@ public class BackupUtilsTest {
 
     public static final String PASSWORD = "12345678";
 
-    private static File BACKUP = getResourceFile(RESOURCE_BACKUP_FILE);
-    private static File DATABASE = getResourceFile(RESOURCE_DB_FILE);
-    private static List<File> ATTACHMENTS = getAttachmentFiles();
+    private static File BACKUP_FILE = getResourceFile(RESOURCE_BACKUP_FILE);
+    private static File DATABASE_FILE = getResourceFile(RESOURCE_DB_FILE);
+    private static List<File> ATTACHMENT_FILES = getAttachmentFiles();
 
     private static File TARGET_DIR = createTargetDirectory();
 
@@ -34,12 +37,12 @@ public class BackupUtilsTest {
 
         mBackupUtils = new BackupUtils();
 
-        assertNotNull("Database file missing", DATABASE);
+        assertNotNull("Database file missing", DATABASE_FILE);
 
-        assertNotNull(ATTACHMENTS);
-        assertFalse("Attachment files missing", ATTACHMENTS.isEmpty());
+        assertNotNull(ATTACHMENT_FILES);
+        assertFalse("Attachment files missing", ATTACHMENT_FILES.isEmpty());
 
-        assertNotNull(BACKUP);
+        assertNotNull(BACKUP_FILE);
 
         assertNotNull(TARGET_DIR);
     }
@@ -51,7 +54,7 @@ public class BackupUtilsTest {
         File backup = new File(getClass().getResource("").getFile(), filename);
         assertNotNull(backup);
 
-        mBackupUtils.createBackup(backup, DATABASE, PASSWORD);
+        mBackupUtils.createBackup(backup, DATABASE_FILE, PASSWORD);
         assertTrue("Creating backup failed", backup.length() > 0);
 
         boolean deleted = backup.delete();
@@ -65,11 +68,19 @@ public class BackupUtilsTest {
         File backup = new File(getClass().getResource("").getFile(), filename);
         assertNotNull(backup);
 
-        mBackupUtils.createBackup(backup, DATABASE, ATTACHMENTS, PASSWORD);
+        mBackupUtils.createBackup(backup, DATABASE_FILE, ATTACHMENT_FILES, PASSWORD);
         assertTrue("Creating backup failed", backup.length() > 0);
 
         boolean deleted = backup.delete();
         assertTrue(deleted);
+    }
+
+    @Test
+    public void testExtractMetadata() throws Exception {
+
+        BackupMetadata metadata = mBackupUtils.extractMetada(BACKUP_FILE);
+        assertNotNull(metadata);
+        assertEquals(BackupType.COMPLETE, metadata.getBackupType());
     }
 
     @Test
@@ -78,7 +89,7 @@ public class BackupUtilsTest {
         File database = new File(TARGET_DIR, "database.db");
         assertNotNull(database);
 
-        mBackupUtils.extractAndDecryptDatabase(BACKUP, database, PASSWORD);
+        mBackupUtils.extractAndDecryptDatabase(BACKUP_FILE, database, PASSWORD);
         assertTrue(database.length() > 0);
 
         boolean deleted = database.delete();
@@ -86,6 +97,7 @@ public class BackupUtilsTest {
     }
 
     private static File getResourceFile(String path) {
+
         URL url = BackupUtilsTest.class.getResource(path);
         assertNotNull(url);
 
