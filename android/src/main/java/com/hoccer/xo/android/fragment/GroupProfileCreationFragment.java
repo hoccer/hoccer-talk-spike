@@ -180,8 +180,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
         if (mGroupMemberAdapter == null) {
             mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity(), mGroup);
-            mGroupMemberAdapter.onCreate();
-            mGroupMemberAdapter.onResume();
 
             if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
                 mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
@@ -191,6 +189,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             }
 
+            mGroupMemberAdapter.onCreate();
+            mGroupMemberAdapter.onResume();
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
         mGroupMemberAdapter.requestReload();
