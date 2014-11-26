@@ -16,7 +16,7 @@ import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.util.XoImportExportUtils;
+import com.hoccer.xo.android.util.BackupUtils;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.artcom.hoccer.R;
 import net.hockeyapp.android.CrashManager;
@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 public class XoPreferenceActivity extends PreferenceActivity
@@ -75,7 +76,8 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void initDataImportPreferences() {
         final ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
         if (listPreference != null) {
-            List<File> exportFiles = XoImportExportUtils.getInstance(this).getExportFiles();
+            BackupUtils backupUtils = new BackupUtils();
+            List<File> exportFiles = backupUtils.getExportFiles();
             if (exportFiles != null && !exportFiles.isEmpty()) {
 
                 final String[] entries = new String[exportFiles.size()];
@@ -189,7 +191,8 @@ public class XoPreferenceActivity extends PreferenceActivity
             exportData();
             return true;
         } else if (preference.getKey().equals("preference_database_dump")) {
-            XoImportExportUtils.getInstance(this).exportDatabaseToFile();
+            BackupUtils backupUtils = new BackupUtils();
+            backupUtils.exportDatabaseToFile();
             return true;
         }
 
@@ -203,7 +206,8 @@ public class XoPreferenceActivity extends PreferenceActivity
             protected Boolean doInBackground(Void... params) {
                 try {
                     File importFile = new File(XoApplication.getExternalStorage(), importFileName);
-                    XoImportExportUtils.getInstance(XoPreferenceActivity.this).importDatabaseAndAttachments(importFile);
+                    BackupUtils backupUtils = new BackupUtils();
+                    backupUtils.importDatabaseAndAttachments(importFile);
                 } catch (IOException e) {
                     LOG.error("Data import failed.", e);
                     return false;
@@ -229,8 +233,13 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             protected File doInBackground(Void... params) {
                 try {
-                    return XoImportExportUtils.getInstance(XoPreferenceActivity.this).exportDatabaseAndAttachments();
-                } catch (IOException e) {
+                    File database = new File("/data/data/" + getPackageName() + "/databases/hoccer-talk.db");
+                    List<File> attachments = Arrays.asList(XoApplication.getAttachmentDirectory().listFiles());
+                    BackupUtils backupUtils = new BackupUtils();
+                    File backup = backupUtils.createEmptyBackupFile(XoApplication.getAttachmentDirectory().getPath());
+                    backupUtils.createBackup(backup, database, attachments, "123");
+                    return backup;
+                } catch (Exception e) {
                     LOG.error("Data export failed.", e);
                     return null;
                 }
