@@ -289,25 +289,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .eq("groupId", groupId)
                 .query();
 
-        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
-        for (TalkGroupMember member : groupMembers) {
-            TalkClientContact contact = findContactByClientId(member.getClientId(), false);
-            CollectionUtils.addIgnoreNull(contacts, contact);
-        }
-
-        return contacts;
+        return getContactsForMembers(groupMembers);
     }
 
     public List<TalkClientContact> findContactsInGroupByState(String groupId, String state) throws SQLException {
         List<TalkGroupMember> groupMembers = findMembersInGroupByState(groupId, state);
 
-        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
-        for (TalkGroupMember member : groupMembers) {
-            TalkClientContact contact = findContactByClientId(member.getClientId(), false);
-            CollectionUtils.addIgnoreNull(contacts, contact);
-        }
-
-        return contacts;
+        return getContactsForMembers(groupMembers);
     }
 
     public TalkClientContact findAdminInGroup(String groupId) throws SQLException {
@@ -329,13 +317,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .eq("role", role)
                 .query();
 
-        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
-        for (TalkGroupMember member : groupMembers) {
-            TalkClientContact contact = findContactByClientId(member.getClientId(), false);
-            CollectionUtils.addIgnoreNull(contacts, contact);
-        }
-
-        return contacts;
+        return getContactsForMembers(groupMembers);
     }
 
     public synchronized TalkClientContact findGroupContactByGroupId(String groupId, boolean create) throws SQLException {
@@ -352,6 +334,15 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
 
         return contact;
+    }
+
+    private List<TalkClientContact> getContactsForMembers(List<TalkGroupMember> groupMembers) throws SQLException {
+        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(groupMembers.size());
+        for (TalkGroupMember member : groupMembers) {
+            TalkClientContact contact = findContactByClientId(member.getClientId(), false);
+            CollectionUtils.addIgnoreNull(contacts, contact);
+        }
+        return contacts;
     }
 
     ////////////////////////////////////
