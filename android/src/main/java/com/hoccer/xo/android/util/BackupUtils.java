@@ -26,21 +26,16 @@ public class BackupUtils {
     private String mDatabaseFilepath;
 
     public void createBackup(File result, File database, List<File> attachments, String password) throws Exception {
-        // 1. encrypt database
-        // 2. write metadata file ?
-        // 3. create zip with database, metadata and attachments
+        // TODO write metadata file
         byte[] encryptedDatabase = encryptFile(database, password);
         createZip(result, encryptedDatabase, attachments);
     }
 
-    public File createBackup(File database, String password) throws Exception {
-        // 1. encrypt database
-        // 2. write metadata file ?
-        // 3. create zip with database, metadata and attachments
+    public void createBackup(File result, File database, String password) throws Exception {
+        // TODO write metadata file
         byte[] encryptedDatabase = encryptFile(database, password);
-        return createZip(encryptedDatabase);
+        createZip(result, encryptedDatabase);
     }
-
 
     private byte[] encryptFile(File input, String password) throws Exception {
 
@@ -57,11 +52,18 @@ public class BackupUtils {
         return CryptoJSON.encrypt(bytes, password, "text/plain");
     }
 
-    private File createZip(byte[] database) {
-        return null;
+    private void createZip(File backup, byte[] database) throws IOException {
+
+        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
+        zos.setLevel(ZipOutputStream.DEFLATED);
+        try {
+            addZipEntry(zos, database, DB_FILE_NAME);
+        } finally {
+            zos.close();
+        }
     }
 
-    private File createZip(File backup, byte[] data, List<File> attachments) throws IOException {
+    private void createZip(File backup, byte[] database, List<File> attachments) throws IOException {
 
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
         zos.setLevel(ZipOutputStream.DEFLATED);
@@ -69,12 +71,10 @@ public class BackupUtils {
             for (File attachment : attachments) {
                 addZipEntry(zos, attachment);
             }
-            addZipEntry(zos, data, DB_FILE_NAME);
+            addZipEntry(zos, database, DB_FILE_NAME);
         } finally {
             zos.close();
         }
-
-        return backup;
     }
 
     public void importDatabaseAndAttachments(File backup) throws IOException {
