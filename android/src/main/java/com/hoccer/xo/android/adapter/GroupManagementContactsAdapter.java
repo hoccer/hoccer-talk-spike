@@ -76,12 +76,12 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
                 } else {
                     checkedTextView.setChecked(false);
                 }
+            }
 
-                if (mContactsToInvite.contains(contact)) {
-                    checkedTextView.setChecked(true);
-                } else if (mContactsToKick.contains(contact)) {
-                    checkedTextView.setChecked(false);
-                }
+            if (mContactsToInvite.contains(contact)) {
+                checkedTextView.setChecked(true);
+            } else if (mContactsToKick.contains(contact)) {
+                checkedTextView.setChecked(false);
             }
         } catch (SQLException e) {
             LOG.error(e);
