@@ -70,7 +70,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                 if (mGroup.getGroupId() != null && contact.isClient()) {
                     TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
                     if (member != null) {
-                        return TalkGroupMember.STATE_INVITED.equals(member.getState()) || TalkGroupMember.STATE_JOINED.equals(member.getState());
+                        return member.isInvited() || member.isJoined();
                     }
                 }
             } catch (SQLException e) {

@@ -109,9 +109,7 @@ public class GroupContactsAdapter extends ContactsAdapter {
         try {
             if(mGroup.getGroupId() != null) {
                 TalkGroupMember member = mDatabase.findMemberInGroupByClientId(group.getGroupId(), contact.getClientId());
-                if (member != null && TalkGroupMember.STATE_INVITED.equals(member.getState())) {
-                    return true;
-                }
+                return member != null && member.isInvited();
             }
         } catch (SQLException e) {
             LOG.error("isContactInvitedToGroup", e);

@@ -109,8 +109,7 @@ public class TestHelper {
                     @Override
                     public Boolean call() throws Exception {
                         TalkGroupMember groupMember = joiningClient.getDatabase().findGroupContactByGroupId(groupId, false).getGroupMember();
-                        return TalkGroupMember.STATE_JOINED.equals(groupMember.getState()) &&
-                                groupMember.isJoined() &&
+                        return  groupMember.isJoined() &&
                                 groupMember.getEncryptedGroupKey() != null &&
                                 groupMember.getMemberKeyId() != null;
                     }
