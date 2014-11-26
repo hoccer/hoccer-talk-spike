@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.util;
 
-import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,20 +10,24 @@ import java.util.List;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertFalse;
 
 
 public class BackupUtilsTest {
 
     public static final String RESOURCE_DB_FILE = "/database.db";
-    public static final String RESOURCE_ATTACHMENT_FILE_01 = "/attachment_01.txt";
-    public static final String RESOURCE_BACKUP_FILE = "/attachment_01.txt";
+    public static final String RESOURCE_DB_FILE_ENCRYPTED = "/database.json";
+    public static final String RESOURCE_ATTACHMENT_FILE_01 = "/IMG_20141120_130456_432.jpg";
+    public static final String RESOURCE_BACKUP_FILE = "/hoccer_backup_20141126_162118.zip";
 
     public static final String PASSWORD = "12345678";
 
-    private File mBackup;
-    private File mDatabase;
-    private List<File> mAttachments = new ArrayList<File>();
+    private static File BACKUP = getResourceFile(RESOURCE_BACKUP_FILE);
+    private static File DATABASE_ENCRYPTED = getResourceFile(RESOURCE_DB_FILE_ENCRYPTED);
+    private static File DATABASE = getResourceFile(RESOURCE_DB_FILE);
+    private static List<File> ATTACHMENTS = getAttachmentFiles();
+
+    private static File TARGET_DIR = createTargetDirectory();
 
     private BackupUtils mBackupUtils;
 
@@ -33,15 +36,14 @@ public class BackupUtilsTest {
 
         mBackupUtils = new BackupUtils();
 
-        mDatabase = getDatabaseFile();
-        assertNotNull("Database file missing", mDatabase);
+        assertNotNull("Database file missing", DATABASE);
 
-        mAttachments = getAttachmentFiles();
-        assertNotNull(mAttachments);
-        assertFalse("Database file missing", mAttachments.isEmpty());
+        assertNotNull(ATTACHMENTS);
+        assertFalse("Attachment files missing", ATTACHMENTS.isEmpty());
 
-        mBackup = getDatabaseFile();
-        assertNotNull(mBackup);
+        assertNotNull(BACKUP);
+
+        assertNotNull(TARGET_DIR);
     }
 
     @Test
@@ -51,7 +53,7 @@ public class BackupUtilsTest {
         File backup = new File(getClass().getResource("").getFile(), filename);
         assertNotNull(backup);
 
-        mBackupUtils.createBackup(backup, mDatabase, PASSWORD);
+        mBackupUtils.createBackup(backup, DATABASE, PASSWORD);
         assertTrue("Creating backup failed", backup.length() > 0);
 
         boolean deleted = backup.delete();
@@ -65,36 +67,46 @@ public class BackupUtilsTest {
         File backup = new File(getClass().getResource("").getFile(), filename);
         assertNotNull(backup);
 
-        mBackupUtils.createBackup(backup, mDatabase, mAttachments, PASSWORD);
+        mBackupUtils.createBackup(backup, DATABASE, ATTACHMENTS, PASSWORD);
         assertTrue("Creating backup failed", backup.length() > 0);
 
         boolean deleted = backup.delete();
         assertTrue(deleted);
     }
 
-    private File getDatabaseFile() {
+    @Test
+    public void testExtractAndDecryptDatabase() throws Exception {
 
-        URL databaseFileUrl = getClass().getResource(RESOURCE_DB_FILE);
-        TestCase.assertNotNull(databaseFileUrl);
+        File database = new File(TARGET_DIR, "database.db");
+        assertNotNull(database);
 
-        return new File(databaseFileUrl.getFile());
+        mBackupUtils.extractAndDecryptDatabase(BACKUP, database, PASSWORD);
+        assertTrue(database.length() > 0);
+
+        boolean deleted = database.delete();
+        assertTrue(deleted);
     }
 
-    private List<File> getAttachmentFiles() {
+    private static File getResourceFile(String path) {
+        URL url = BackupUtilsTest.class.getResource(path);
+        assertNotNull(url);
 
-        URL attachmentFileUrl = getClass().getResource(RESOURCE_ATTACHMENT_FILE_01);
-        TestCase.assertNotNull(attachmentFileUrl);
+        return new File(url.getFile());
+    }
+
+    private static List<File> getAttachmentFiles() {
+
+        URL attachmentFileUrl = BackupUtilsTest.class.getResource(RESOURCE_ATTACHMENT_FILE_01);
+        assertNotNull(attachmentFileUrl);
 
         List<File> attachmentFiles = new ArrayList<File>();
         attachmentFiles.add(new File(attachmentFileUrl.getFile()));
         return attachmentFiles;
     }
 
-    private File getBackupFile() {
-
-        URL backupFileUrl = getClass().getResource(RESOURCE_BACKUP_FILE);
-        TestCase.assertNotNull(backupFileUrl);
-
-        return new File(backupFileUrl.getFile());
+    private static File createTargetDirectory() {
+        File targetDir = new File(BackupUtilsTest.class.getResource("").getFile(), "target");
+        targetDir.mkdir();
+        return targetDir;
     }
 }

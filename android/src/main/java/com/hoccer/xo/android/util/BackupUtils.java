@@ -21,7 +21,8 @@ public class BackupUtils {
     public static final String TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
     public static final String BACKUP_FILENAME_PREFIX = "hoccer_backup_";
     public static final String BACKUP_FILENAME_PATTERN = BACKUP_FILENAME_PREFIX + "%s";
-    private static final String DB_FILE_NAME = "database.db";
+    public static final String DB_CONTENT_TYPE = "database";
+    private static final String DB_FILENAME_ENCRYPTED = "database.json";
 
     private String mDatabaseFilepath;
 
@@ -49,21 +50,21 @@ public class BackupUtils {
         in.close();
         byte[] bytes = baos.toByteArray();
 
-        return CryptoJSON.encrypt(bytes, password, "text/plain");
+        return CryptoJSON.encrypt(bytes, password, DB_CONTENT_TYPE);
     }
 
-    private void createZip(File backup, byte[] database) throws IOException {
+    private void createZip(File backup, byte[] encryptedDatabase) throws IOException {
 
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
         zos.setLevel(ZipOutputStream.DEFLATED);
         try {
-            addZipEntry(zos, database, DB_FILE_NAME);
+            addZipEntry(zos, encryptedDatabase, DB_FILENAME_ENCRYPTED);
         } finally {
             zos.close();
         }
     }
 
-    private void createZip(File backup, byte[] database, List<File> attachments) throws IOException {
+    private void createZip(File backup, byte[] encryptedDatabase, List<File> attachments) throws IOException {
 
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
         zos.setLevel(ZipOutputStream.DEFLATED);
@@ -71,7 +72,7 @@ public class BackupUtils {
             for (File attachment : attachments) {
                 addZipEntry(zos, attachment);
             }
-            addZipEntry(zos, database, DB_FILE_NAME);
+            addZipEntry(zos, encryptedDatabase, DB_FILENAME_ENCRYPTED);
         } finally {
             zos.close();
         }
@@ -105,9 +106,7 @@ public class BackupUtils {
                 } else {
                     file = new File(XoApplication.getAttachmentDirectory(), filename);
                 }
-                FileOutputStream fos = new FileOutputStream(file);
-                fos.write(bytes);
-                fos.close();
+                writeBytesToFile(file, bytes);
             }
         } finally {
             zis.close();
@@ -176,7 +175,42 @@ public class BackupUtils {
         return exportFiles;
     }
 
-//    public static File createBackup() {
-//        return null;
-//    }
+    public void extractAndDecryptDatabase(File backupZip, File target, String password) throws Exception {
+
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupZip));
+        try {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+
+                if (zipEntry.getName().equals(DB_FILENAME_ENCRYPTED)) {
+                    byte[] encrypted = readFileEntry(zis);
+                    byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
+                    writeBytesToFile(target, decrypted);
+
+                    break;
+                }
+            }
+        } finally {
+            zis.close();
+        }
+    }
+
+    private void writeBytesToFile(File databaseTarget, byte[] decrypted) throws IOException {
+        FileOutputStream fos = new FileOutputStream(databaseTarget);
+        fos.write(decrypted);
+        fos.close();
+    }
+
+    private byte[] readFileEntry(ZipInputStream zis) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = zis.read(buffer)) != -1) {
+            out.write(buffer, 0, length);
+        }
+        byte[] bytes = out.toByteArray();
+
+        return bytes;
+    }
+
 }
