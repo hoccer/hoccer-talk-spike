@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.util;
+package com.hoccer.xo.android.backup;
 
 import com.hoccer.talk.crypto.CryptoJSON;
 import com.hoccer.xo.android.XoApplication;
@@ -23,8 +23,7 @@ public class BackupUtils {
     public static final String BACKUP_FILENAME_PATTERN = BACKUP_FILENAME_PREFIX + "%s";
     public static final String DB_CONTENT_TYPE = "database";
     private static final String DB_FILENAME_ENCRYPTED = "database.json";
-
-    private String mDatabaseFilepath;
+    private static final String METADATA_FILENAME = "metadata.json";
 
     public void createBackup(File result, File database, List<File> attachments, String password) throws Exception {
         // TODO write metadata file
@@ -78,43 +77,6 @@ public class BackupUtils {
         }
     }
 
-    public void importDatabaseAndAttachments(File backup) throws IOException {
-        extractAttachmentsAndDatabaseImport(backup);
-    }
-
-    private void extractAttachmentsAndDatabaseImport(File backup) throws IOException {
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(backup));
-        try {
-            ZipEntry ze;
-            while ((ze = zis.getNextEntry()) != null) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                byte[] buffer = new byte[1024];
-                int count;
-                while ((count = zis.read(buffer)) != -1) {
-                    baos.write(buffer, 0, count);
-                }
-                String filename = ze.getName();
-                byte[] bytes = baos.toByteArray();
-
-                File file = null;
-                String extension = filename.substring(filename.lastIndexOf(".") + 1);
-                if (extension.equals("db")) {
-                    file = new File(mDatabaseFilepath);
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                } else {
-                    file = new File(XoApplication.getAttachmentDirectory(), filename);
-                }
-                writeBytesToFile(file, bytes);
-            }
-        } finally {
-            zis.close();
-        }
-
-        initDatabase();
-    }
-
     private void addZipEntry(ZipOutputStream zos, File fileEntry) throws IOException {
 
         FileInputStream in = new FileInputStream(fileEntry);
@@ -145,39 +107,35 @@ public class BackupUtils {
         zos.closeEntry();
     }
 
-    public static String createUniqueBackupFilename() {
-        String timestamp = new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
-        return String.format(BACKUP_FILENAME_PATTERN, timestamp);
+    public Backup extractBackup(File backupFile) throws IOException {
+
+        BackupMetadata metadata = extractMetada(backupFile);
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
+
+        return null;
     }
 
-    private void initDatabase() {
-        try {
-            XoApplication.getXoClient().getDatabase().initialize();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    public BackupMetadata extractMetada(File backupFile) throws IOException {
 
-    public List<File> getExportFiles() {
-        List<File> exportFiles = new ArrayList<File>();
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
+        ZipEntry zipEntry;
+        while ((zipEntry = zis.getNextEntry()) != null) {
 
-        File[] files = XoApplication.getExternalStorage().listFiles();
-        if (files != null) {
-            for (File file : files) {
-                String filename = file.getName();
-                String extension = FilenameUtils.getExtension(filename);
-                if (filename.startsWith(BACKUP_FILENAME_PREFIX) && extension.equals(FILE_EXTENSION_ZIP)) {
-                    exportFiles.add(file);
-                }
+            if (zipEntry.getName().equals(METADATA_FILENAME)) {
+                byte[] bytes = readFileEntry(zis);
+                // convert bytes to json string and parse TODO
+                break;
             }
         }
+        zis.close();
 
-        return exportFiles;
+//        BackupMetadata metadata = extractMetada(zis);
+        return null;
     }
 
-    public void extractAndDecryptDatabase(File backupZip, File target, String password) throws Exception {
+    public void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
 
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupZip));
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
         try {
             ZipEntry zipEntry;
             while ((zipEntry = zis.getNextEntry()) != null) {
@@ -193,6 +151,26 @@ public class BackupUtils {
         } finally {
             zis.close();
         }
+    }
+
+    public List<File> getBackupFiles(File parentDir) {
+
+        List<File> results = new ArrayList<File>();
+
+        if (parentDir != null && parentDir.isDirectory()) {
+
+            File[] files = parentDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    String filename = file.getName();
+                    String extension = FilenameUtils.getExtension(filename);
+                    if (filename.startsWith(BACKUP_FILENAME_PREFIX) && extension.equals(FILE_EXTENSION_ZIP)) {
+                        results.add(file);
+                    }
+                }
+            }
+        }
+        return results;
     }
 
     private void writeBytesToFile(File databaseTarget, byte[] decrypted) throws IOException {
@@ -213,4 +191,12 @@ public class BackupUtils {
         return bytes;
     }
 
+    public static String createUniqueBackupFilename() {
+        String timestamp = new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
+        return String.format(BACKUP_FILENAME_PATTERN, timestamp);
+    }
+
+    public static void importBackup(Backup backup, File databasePath, File attachmentDirectory) {
+
+    }
 }
