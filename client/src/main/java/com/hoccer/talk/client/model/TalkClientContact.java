@@ -13,7 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Date;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * These represent a target of communication
@@ -22,20 +24,15 @@ import java.util.*;
 @DatabaseTable(tableName = "clientContact")
 public class TalkClientContact implements Serializable {
 
-    public @interface ClientMethodOnly {
-    }
+    public @interface ClientMethodOnly {}
 
-    public @interface ClientOrGroupMethodOnly {
-    }
+    public @interface ClientOrGroupMethodOnly {}
 
-    public @interface ClientOrSelfMethodOnly {
-    }
+    public @interface ClientOrSelfMethodOnly {}
 
-    public @interface GroupMethodOnly {
-    }
+    public @interface GroupMethodOnly {}
 
-    public @interface SelfMethodOnly {
-    }
+    public @interface SelfMethodOnly {}
 
     public static final String TYPE_SELF = "self";
     public static final String TYPE_CLIENT = "client";

@@ -500,26 +500,17 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-
-    }
+    public void onContactRemoved(TalkClientContact contact) {}
 
     @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-    }
+    public void onClientPresenceChanged(TalkClientContact contact) {}
 
     @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-
-    }
+    public void onClientRelationshipChanged(TalkClientContact contact) {}
 
     @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-
-    }
+    public void onGroupPresenceChanged(TalkClientContact contact) {}
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-
-    }
+    public void onGroupMembershipChanged(TalkClientContact contact) {}
 }
