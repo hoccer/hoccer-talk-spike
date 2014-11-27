@@ -16,8 +16,7 @@ import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.backup.Backup;
-import com.hoccer.xo.android.backup.BackupUtils;
+import com.hoccer.xo.android.backup.*;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import com.artcom.hoccer.R;
 import net.hockeyapp.android.CrashManager;
@@ -248,6 +247,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                     File backup = new File(XoApplication.getExternalStorage(), filename);
                     String clientName = XoApplication.getXoClient().getSelfContact().getName();
                     backupUtils.createBackup(backup, database, attachments, clientName, "123");
+
                     return backup;
                 } catch (Exception e) {
                     LOG.error("Data export failed.", e);
@@ -293,29 +293,13 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private void importCredentials(final File credentialsFile, final String password) {
         try {
-            final Credentials credentials = readCredentialsTransferFile(credentialsFile, password);
-            XoApplication.getXoClient().importCredentials(credentials);
+            Backup backup = BackupFactory.readBackup(credentialsFile);
+            backup.restore(password);
             Toast.makeText(this, R.string.import_credentials_success, Toast.LENGTH_LONG).show();
-        } catch (FileNotFoundException e) {
-            LOG.error("Error while importing credentials", e);
-            Toast.makeText(this, R.string.cant_find_credentials, Toast.LENGTH_LONG).show();
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Error while importing credentials", e);
             Toast.makeText(this, R.string.import_credentials_failure, Toast.LENGTH_LONG).show();
-        } catch (SQLException e) {
-            LOG.error("Error while importing credentials", e);
-            e.printStackTrace();
-        } catch (NoClientIdInPresenceException e) {
-            LOG.error("Error while importing credentials", e);
-            e.printStackTrace();
         }
-    }
-
-    private Credentials readCredentialsTransferFile(File credentialsFile, String password) throws IOException {
-        final FileInputStream fileInputStream = new FileInputStream(XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);
-        final byte[] credentialsData = new byte[(int) credentialsFile.length()];
-        fileInputStream.read(credentialsData);
-        return Credentials.fromEncryptedBytes(credentialsData, password);
     }
 
     private void doExportCredentials() {
@@ -337,21 +321,11 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     private void exportCredentials(final String password) {
         try {
-            final Credentials credentials = XoApplication.getXoClient().exportCredentials();
-            final byte[] credentialsContainer = credentials.toEncryptedBytes(password);
-
-            final FileOutputStream fos = new FileOutputStream(
-                    XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);
-            fos.write(credentialsContainer);
-            fos.flush();
-            fos.close();
+            BackupFactory.createCredentialsBackup(password);
+            Toast.makeText(this, R.string.export_credentials_success, Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             LOG.error("error while writing credentials container to filesystem.", e);
             Toast.makeText(this, R.string.export_credentials_failure, Toast.LENGTH_LONG).show();
-        } catch (Exception e) {
-            LOG.error("error while generating credentials container", e);
-            Toast.makeText(this, R.string.export_credentials_failure, Toast.LENGTH_LONG).show();
         }
-        Toast.makeText(this, R.string.export_credentials_success, Toast.LENGTH_LONG).show();
     }
 }
