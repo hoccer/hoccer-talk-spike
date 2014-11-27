@@ -146,8 +146,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     /** Last client activity */
     long mLastActivity = 0;
 
-    int mIdleTimeout = 0;
-
     ObjectMapper mJsonMapper;
 
     // temporary group for geolocation grouping
@@ -171,8 +169,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     public void initialize(IXoClientHost host) {
         // remember the host
         mClientHost = host;
-
-        mIdleTimeout = mClientConfiguration.getIdleTimeout();
 
         // fetch executor and db immediately
         mExecutor = host.getBackgroundExecutor();
@@ -339,14 +335,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return stateToString(mState);
     }
 
-    public int getIdleTimeout() {
-        return mIdleTimeout;
-    }
-
-    public void setIdleTimeout(int idleTimeout) {
-        mIdleTimeout = idleTimeout;
-    }
-
     public synchronized void registerStateListener(IXoStateListener listener) {
         if (!mStateListeners.contains(listener)) {
             mStateListeners.add(listener);
@@ -396,8 +384,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public boolean isIdle() {
-        if (mIdleTimeout > 0) {
-            return (System.currentTimeMillis() - mLastActivity) > (mIdleTimeout * 1000);
+        int timeout = mClientConfiguration.getIdleTimeout();
+
+        if (timeout > 0) {
+            return (System.currentTimeMillis() - mLastActivity) > (timeout * 1000);
         } else {
             return false;
         }
@@ -1493,14 +1483,17 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void scheduleIdle() {
         shutdownIdle();
-        if(mState > STATE_CONNECTING && mIdleTimeout > 0) {
+
+        int timeout = mClientConfiguration.getIdleTimeout();
+
+        if (mState > STATE_CONNECTING && timeout > 0) {
             mAutoDisconnectFuture = mExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
                     switchState(STATE_IDLE, "activity timeout");
                     mAutoDisconnectFuture = null;
                 }
-            }, mIdleTimeout, TimeUnit.SECONDS);
+            }, timeout, TimeUnit.SECONDS);
         }
     }
 
