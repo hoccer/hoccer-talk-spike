@@ -4,10 +4,7 @@ import better.cli.CLIContext;
 import better.cli.console.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.client.HttpClientWithKeyStore;
-import com.hoccer.talk.client.XoClientSslConfiguration;
 import com.hoccer.talk.tool.client.TalkToolClient;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import java.io.InputStream;
 import java.security.KeyStore;
