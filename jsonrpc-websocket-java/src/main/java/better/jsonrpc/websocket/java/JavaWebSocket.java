@@ -23,32 +23,27 @@ public class JavaWebSocket implements JsonRpcWebSocket {
 
     private JsonRpcWebSocketHandler mHandler;
     private Client mClient;
-    private KeyStore mKeyStore;
+    private SSLSocketFactory mSSLSocketFactory;
 
     public JavaWebSocket(KeyStore keyStore) {
-        mKeyStore = keyStore;
+        if (keyStore != null) {
+            try {
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                kmf.init(keyStore, null);
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(keyStore);
+
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+                mSSLSocketFactory = sslContext.getSocketFactory();
+            } catch (Exception e) {
+                LOG.error("Error creating SSLSocketFactory", e);
+            }
+        }
     }
 
     public void open(URI serviceUri, String protocol) throws InterruptedException {
         mClient = new Client(serviceUri, protocol);
-
-        if (mKeyStore != null) {
-            try {
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                kmf.init(mKeyStore, null);
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                tmf.init(mKeyStore);
-
-                SSLContext sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-                SSLSocketFactory factory = sslContext.getSocketFactory();
-
-                mClient.setSocket(factory.createSocket());
-            } catch (Exception e) {
-                LOG.error("Error creating SSL socket", e);
-            }
-        }
-
         mClient.connectBlocking();
     }
 
@@ -92,6 +87,14 @@ public class JavaWebSocket implements JsonRpcWebSocket {
     private class Client extends WebSocketClient {
         public Client(URI serviceUri, String protocol) {
             super(serviceUri, new Draft_17(), createHeaders(protocol), 0);
+
+            if ("wss".equals(serviceUri.getScheme()) && mSSLSocketFactory != null) {
+                try {
+                    setSocket(mSSLSocketFactory.createSocket());
+                } catch (IOException e) {
+                    LOG.error("Error creating SSLSocket", e);
+                }
+            }
         }
 
         @Override
