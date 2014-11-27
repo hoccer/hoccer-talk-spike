@@ -131,6 +131,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return new File(EXTERNAL_STORAGE, CONFIGURATION.getAttachmentsDirectory());
     }
 
+    public static File getBackupDirectory() {
+        return new File(EXTERNAL_STORAGE, CONFIGURATION.getBackupDirectory());
+    }
+
     public static File getEncryptedDownloadDirectory() {
         return new File(INTERNAL_STORAGE, DOWNLOADS_DIRECTORY);
     }
@@ -264,6 +268,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // set up directories
         LOG.info("setting up directory structure");
         ensureDirectory(getAttachmentDirectory());
+        ensureDirectory(getBackupDirectory());
         ensureDirectory(getAvatarDirectory());
         ensureDirectory(getGeneratedDirectory());
         ensureNoMedia(getGeneratedDirectory());
