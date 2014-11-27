@@ -223,7 +223,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void createJsonRpcConnection(ObjectMapper rpcMapper) {
         mWebSocket = new JavaWebSocket(mClientHost.getKeyStore());
-//        mWebSocket.setMaxIdleTime(mClientConfiguration.getConnectionIdleTimeout());
         mConnection = new JsonRpcWsConnection(mWebSocket, rpcMapper);
         mConnection.setSendKeepAlives(mClientConfiguration.getKeepAliveEnabled());
 
