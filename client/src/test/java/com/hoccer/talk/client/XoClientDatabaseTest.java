@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 
 public class XoClientDatabaseTest {
 
@@ -71,6 +72,10 @@ public class XoClientDatabaseTest {
     public void testCleanup() throws SQLException {
         mConnectionSource.close();
     }
+
+    ///////////////////////
+    //////// Tests ////////
+    ///////////////////////
 
     @Test
     public void testFindMembersInGroup() throws SQLException {
@@ -136,7 +141,17 @@ public class XoClientDatabaseTest {
         assertEquals(mGroupAdmin.getClientId(), groupAdmin.getClientId());
     }
 
+    @Test
+    public void testCheckForCachedReference() throws SQLException {
+        // check if the contact reference is cached
+        TalkClientContact contact = mDatabase.findContactByClientId("testId", true);
+        TalkClientContact cachedContact = mDatabase.findContactByClientId("testId", false);
+        assertTrue(contact == cachedContact);
+    }
+
+    ////////////////////////////////
     //////// Helper Methods ////////
+    ////////////////////////////////
 
     private TalkClientContact createClientContact(String clientId) throws SQLException {
         TalkClientContact contact = new TalkClientContact(TalkClientContact.TYPE_CLIENT, clientId);
