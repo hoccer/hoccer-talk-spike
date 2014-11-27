@@ -1473,7 +1473,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                     ? mClientConfiguration.getBsonProtocolString()
                     : mClientConfiguration.getJsonProtocolString();
 
-            mWebSocket.open(uri, protocol);
+            mWebSocket.open(uri, protocol, mClientConfiguration.getConnectTimeout() * 1000);
         } catch (Exception e) {
             LOG.warn("[connection #" + mConnection.getConnectionId() + "] exception while connecting: ", e);
         }

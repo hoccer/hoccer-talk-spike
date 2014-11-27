@@ -42,8 +42,8 @@ public class JavaWebSocket implements JsonRpcWebSocket {
         }
     }
 
-    public void open(URI serviceUri, String protocol) throws InterruptedException {
-        mClient = new Client(serviceUri, protocol);
+    public void open(URI serviceUri, String protocol, int timeout) throws InterruptedException {
+        mClient = new Client(serviceUri, protocol, timeout);
         mClient.connectBlocking();
     }
 
@@ -85,8 +85,8 @@ public class JavaWebSocket implements JsonRpcWebSocket {
     }
 
     private class Client extends WebSocketClient {
-        public Client(URI serviceUri, String protocol) {
-            super(serviceUri, new Draft_17(), createHeaders(protocol), 0);
+        public Client(URI serviceUri, String protocol, int connectTimeout) {
+            super(serviceUri, new Draft_17(), createHeaders(protocol), connectTimeout);
 
             if ("wss".equals(serviceUri.getScheme()) && mSSLSocketFactory != null) {
                 try {
