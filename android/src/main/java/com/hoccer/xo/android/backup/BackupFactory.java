@@ -39,19 +39,19 @@ public class BackupFactory {
         return backup;
     }
 
-    public static Backup createCredentialsBackup() {
-        return CredentialsBackup.create();
+    public static Backup createCredentialsBackup(String password) throws IOException {
+        return CredentialsBackup.create(password);
     }
 
-    public static Backup createDatabaseBackup() {
-        return DatabaseBackup.create();
-    }
+//    public static Backup createDatabaseBackup(String password) throws IOException {
+//        return DatabaseBackup.create(password);
+//    }
+//
+//    public static Backup createCompleteBackup(String password) throws IOException {
+//        return CompleteBackup.create(password);
+//    }
 
-    public static Backup createCompleteBackup() {
-        return CompleteBackup.create();
-    }
-
-    public static class BackupTypeNotSupportedException extends Throwable {
+    public static class BackupTypeNotSupportedException extends Exception {
         public BackupTypeNotSupportedException(String message) {
             super(message);
         }

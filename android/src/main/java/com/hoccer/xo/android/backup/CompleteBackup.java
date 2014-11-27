@@ -4,11 +4,16 @@ import java.io.File;
 
 public class CompleteBackup extends DatabaseBackup {
 
-    public CompleteBackup(File backupFile, BackupMetadata metadata) {
+    CompleteBackup(File backupFile, BackupMetadata metadata) {
         super(backupFile, metadata);
     }
 
-    public static CompleteBackup create() {
+    static CompleteBackup create() {
         return null;
+    }
+
+    @Override
+    public void restore(String password) {
+
     }
 }
