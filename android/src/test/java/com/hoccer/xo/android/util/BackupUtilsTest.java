@@ -1,18 +1,16 @@
 package com.hoccer.xo.android.util;
 
 import com.hoccer.xo.android.backup.*;
-import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.*;
 import static junit.framework.TestCase.assertFalse;
 
 
@@ -20,15 +18,16 @@ public class BackupUtilsTest {
 
     public static final String RESOURCE_DB_FILE = "/database.db";
     public static final String RESOURCE_ATTACHMENT_FILE_01 = "/IMG_20141120_130456_432.jpg";
-    public static final String RESOURCE_BACKUP_FILE = "/hoccer_backup_20141126_162118.zip";
+    public static final String RESOURCE_BACKUP_FILE = "/hoccer_backup_20141127_144625.zip";
 
     public static final String PASSWORD = "12345678";
+    public static final String CLIENT_NAME = "clientName";
 
-    private static File BACKUP_FILE = getResourceFile(RESOURCE_BACKUP_FILE);
-    private static File DATABASE_FILE = getResourceFile(RESOURCE_DB_FILE);
-    private static List<File> ATTACHMENT_FILES = getAttachmentFiles();
+    private static final File BACKUP_FILE = getResourceFile(RESOURCE_BACKUP_FILE);
+    private static final File DATABASE_FILE = getResourceFile(RESOURCE_DB_FILE);
+    private static final List<File> ATTACHMENT_FILES = getAttachmentFiles();
 
-    private static File TARGET_DIR = createTargetDirectory();
+    private static final File TARGET_DIR = createTargetDirectory();
 
     private BackupUtils mBackupUtils;
 
@@ -51,13 +50,13 @@ public class BackupUtilsTest {
     public void testCreateDatabaseBackup() throws Exception {
 
         String filename = BackupUtils.createUniqueBackupFilename() + ".zip";
-        File backup = new File(getClass().getResource("").getFile(), filename);
-        assertNotNull(backup);
+        File backupFile = new File(getClass().getResource("").getFile(), filename);
 
-        mBackupUtils.createBackup(backup, DATABASE_FILE, PASSWORD);
-        assertTrue("Creating backup failed", backup.length() > 0);
+        mBackupUtils.createBackup(backupFile, DATABASE_FILE, CLIENT_NAME, PASSWORD);
+        assertTrue("Creating backup failed", backupFile.exists());
+        assertTrue("Creating backup failed", backupFile.length() > 0);
 
-        boolean deleted = backup.delete();
+        boolean deleted = backupFile.delete();
         assertTrue(deleted);
     }
 
@@ -65,22 +64,32 @@ public class BackupUtilsTest {
     public void testCreateDatabaseBackupWithAttachments() throws Exception {
 
         String filename = BackupUtils.createUniqueBackupFilename() + ".zip";
-        File backup = new File(getClass().getResource("").getFile(), filename);
-        assertNotNull(backup);
+        File backupFile = new File(getClass().getResource("").getFile(), filename);
 
-        mBackupUtils.createBackup(backup, DATABASE_FILE, ATTACHMENT_FILES, PASSWORD);
-        assertTrue("Creating backup failed", backup.length() > 0);
+        mBackupUtils.createBackup(backupFile, DATABASE_FILE, ATTACHMENT_FILES, CLIENT_NAME, PASSWORD);
+        assertTrue("Creating backup failed", backupFile.exists());
+        assertTrue("Creating backup failed", backupFile.length() > 0);
 
-        boolean deleted = backup.delete();
+        boolean deleted = backupFile.delete();
         assertTrue(deleted);
     }
 
     @Test
-    public void testExtractMetadata() throws Exception {
+    public void testReadMetadata() throws Exception {
 
-        BackupMetadata metadata = mBackupUtils.extractMetada(BACKUP_FILE);
+        BackupMetadata metadata = mBackupUtils.readMetadata(BACKUP_FILE);
         assertNotNull(metadata);
         assertEquals(BackupType.COMPLETE, metadata.getBackupType());
+        assertEquals(CLIENT_NAME, metadata.getClientName());
+        assertNotNull(metadata.getCreationDate());
+    }
+
+    @Test
+    public void testReadBackup() throws BackupFactory.BackupTypeNotSupportedException, IOException {
+
+        Backup backup = BackupFactory.readBackup(BACKUP_FILE);
+        assertNotNull(backup);
+        assertTrue(backup instanceof CompleteBackup);
     }
 
     @Test
@@ -115,6 +124,7 @@ public class BackupUtilsTest {
     }
 
     private static File createTargetDirectory() {
+
         File targetDir = new File(BackupUtilsTest.class.getResource("").getFile(), "target");
         targetDir.mkdir();
         return targetDir;

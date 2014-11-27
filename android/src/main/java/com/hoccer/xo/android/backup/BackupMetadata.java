@@ -1,32 +1,28 @@
 package com.hoccer.xo.android.backup;
 
+import java.util.Date;
+
 public class BackupMetadata {
 
-    private BackupType backupType;
-    private String username;
-    private String creationDate;
+    private final BackupType mBackupType;
+    private final String mClientName;
+    private final Date mCreationDate;
+
+    public BackupMetadata(BackupType type, String clientName, Date creationDate) {
+        mBackupType = type;
+        mClientName = clientName;
+        mCreationDate = creationDate;
+    }
 
     public BackupType getBackupType() {
-        return backupType;
+        return mBackupType;
     }
 
-    public void setBackupType(BackupType backupType) {
-        this.backupType = backupType;
+    public String getClientName() {
+        return mClientName;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(String creationDate) {
-        this.creationDate = creationDate;
+    public Date getCreationDate() {
+        return mCreationDate;
     }
 }

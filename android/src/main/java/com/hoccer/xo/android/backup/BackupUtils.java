@@ -1,10 +1,13 @@
 package com.hoccer.xo.android.backup;
 
+import com.google.gson.Gson;
 import com.hoccer.talk.crypto.CryptoJSON;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,19 +25,31 @@ public class BackupUtils {
     public static final String BACKUP_FILENAME_PREFIX = "hoccer_backup_";
     public static final String BACKUP_FILENAME_PATTERN = BACKUP_FILENAME_PREFIX + "%s";
     public static final String DB_CONTENT_TYPE = "database";
-    private static final String DB_FILENAME_ENCRYPTED = "database.json";
-    private static final String METADATA_FILENAME = "metadata.json";
+    public static final String DB_FILENAME_ENCRYPTED = "database.json";
+    public static final String METADATA_FILENAME = "metadata.json";
 
-    public void createBackup(File result, File database, List<File> attachments, String password) throws Exception {
-        // TODO write metadata file
+    public void createBackup(File out, File database, List<File> attachments, String clientName, String password) throws Exception {
+
         byte[] encryptedDatabase = encryptFile(database, password);
-        createZip(result, encryptedDatabase, attachments);
+
+        BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, clientName, new Date());
+
+        Gson gson = new Gson();
+        String metadataJson = gson.toJson(metadata);
+
+        createZip(out, encryptedDatabase, attachments, metadataJson);
     }
 
-    public void createBackup(File result, File database, String password) throws Exception {
-        // TODO write metadata file
+    public void createBackup(File out, File database, String clientName, String password) throws Exception {
+
         byte[] encryptedDatabase = encryptFile(database, password);
-        createZip(result, encryptedDatabase);
+
+        BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());
+
+        Gson gson = new Gson();
+        String metadataJson = gson.toJson(metadata);
+
+        createZip(out, encryptedDatabase, metadataJson);
     }
 
     private byte[] encryptFile(File input, String password) throws Exception {
@@ -52,18 +67,19 @@ public class BackupUtils {
         return CryptoJSON.encrypt(bytes, password, DB_CONTENT_TYPE);
     }
 
-    private void createZip(File backup, byte[] encryptedDatabase) throws IOException {
+    private void createZip(File backup, byte[] encryptedDatabase, String metadata) throws IOException {
 
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
         zos.setLevel(ZipOutputStream.DEFLATED);
         try {
             addZipEntry(zos, encryptedDatabase, DB_FILENAME_ENCRYPTED);
+            addMetaDataEntry(zos, metadata);
         } finally {
             zos.close();
         }
     }
 
-    private void createZip(File backup, byte[] encryptedDatabase, List<File> attachments) throws IOException {
+    private void createZip(File backup, byte[] encryptedDatabase, List<File> attachments, String metadata) throws IOException {
 
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
         zos.setLevel(ZipOutputStream.DEFLATED);
@@ -72,14 +88,32 @@ public class BackupUtils {
                 addZipEntry(zos, attachment);
             }
             addZipEntry(zos, encryptedDatabase, DB_FILENAME_ENCRYPTED);
+            addMetaDataEntry(zos, metadata);
         } finally {
             zos.close();
         }
     }
 
+    private void addMetaDataEntry(ZipOutputStream zos, String metadata) throws IOException {
+
+        InputStream in = new ByteArrayInputStream(metadata.getBytes("UTF-8"));
+
+        ZipEntry entry = new ZipEntry(METADATA_FILENAME);
+        zos.putNextEntry(entry);
+
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+            zos.write(buffer, 0, length);
+        }
+        in.close();
+        zos.closeEntry();
+    }
+
     private void addZipEntry(ZipOutputStream zos, File fileEntry) throws IOException {
 
-        FileInputStream in = new FileInputStream(fileEntry);
+        InputStream in = new FileInputStream(fileEntry);
+
         ZipEntry entry = new ZipEntry(fileEntry.getName());
         zos.putNextEntry(entry);
 
@@ -94,7 +128,7 @@ public class BackupUtils {
 
     private void addZipEntry(ZipOutputStream zos, byte[] data, String dataName) throws IOException {
 
-        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        InputStream in = new ByteArrayInputStream(data);
         ZipEntry entry = new ZipEntry(dataName);
         zos.putNextEntry(entry);
 
@@ -107,15 +141,9 @@ public class BackupUtils {
         zos.closeEntry();
     }
 
-    public Backup extractBackup(File backupFile) throws IOException {
+    public BackupMetadata readMetadata(File backupFile) throws IOException {
 
-        BackupMetadata metadata = extractMetada(backupFile);
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
-
-        return null;
-    }
-
-    public BackupMetadata extractMetada(File backupFile) throws IOException {
+        String result = null;
 
         ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
         ZipEntry zipEntry;
@@ -124,13 +152,14 @@ public class BackupUtils {
             if (zipEntry.getName().equals(METADATA_FILENAME)) {
                 byte[] bytes = readFileEntry(zis);
                 // convert bytes to json string and parse TODO
+                result = new String(bytes, "UTF-8");
                 break;
             }
         }
         zis.close();
 
-//        BackupMetadata metadata = extractMetada(zis);
-        return null;
+        Gson gson = new Gson();
+        return gson.fromJson(result, BackupMetadata.class);
     }
 
     public void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {

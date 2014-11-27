@@ -246,7 +246,8 @@ public class XoPreferenceActivity extends PreferenceActivity
                     BackupUtils backupUtils = new BackupUtils();
                     String filename = BackupUtils.createUniqueBackupFilename();
                     File backup = new File(XoApplication.getExternalStorage(), filename);
-                    backupUtils.createBackup(backup, database, attachments, "123");
+                    String clientName = XoApplication.getXoClient().getSelfContact().getName();
+                    backupUtils.createBackup(backup, database, attachments, clientName, "123");
                     return backup;
                 } catch (Exception e) {
                     LOG.error("Data export failed.", e);
