@@ -198,9 +198,9 @@ public class BackupUtils {
         return results;
     }
 
-    private static void writeBytesToFile(File databaseTarget, byte[] decrypted) throws IOException {
-        FileOutputStream fos = new FileOutputStream(databaseTarget);
-        fos.write(decrypted);
+    private static void writeBytesToFile(File targetFile, byte[] decryptedData) throws IOException {
+        FileOutputStream fos = new FileOutputStream(targetFile);
+        fos.write(decryptedData);
         fos.close();
     }
 
