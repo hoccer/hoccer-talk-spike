@@ -47,9 +47,9 @@ public class BackupFactory {
         return DatabaseBackup.create(password);
     }
 
-//    public static Backup createCompleteBackup(String password) throws IOException {
-//        return CompleteBackup.create(password);
-//    }
+    public static Backup createCompleteBackup(String password) throws Exception {
+        return CompleteBackup.create(password);
+    }
 
     public static class BackupTypeNotSupportedException extends Exception {
         public BackupTypeNotSupportedException(String message) {

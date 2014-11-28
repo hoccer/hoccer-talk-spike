@@ -2,6 +2,7 @@ package com.hoccer.xo.android.backup;
 
 import com.google.gson.Gson;
 import com.hoccer.talk.crypto.CryptoJSON;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
@@ -24,7 +25,7 @@ public class BackupUtils {
     public static final String DB_FILENAME_ENCRYPTED = "database.json";
     public static final String METADATA_FILENAME = "metadata.json";
 
-    public static void createBackup(File out, File database, List<File> attachments, BackupMetadata metadata, String password) throws Exception {
+    public static void createBackupFile(File out, File database, List<File> attachments, BackupMetadata metadata, String password) throws Exception {
 
         byte[] encryptedDatabase = encryptFile(database, password);
 
@@ -154,26 +155,6 @@ public class BackupUtils {
         return gson.fromJson(result, BackupMetadata.class);
     }
 
-    public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
-
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
-        try {
-            ZipEntry zipEntry;
-            while ((zipEntry = zis.getNextEntry()) != null) {
-
-                if (zipEntry.getName().equals(DB_FILENAME_ENCRYPTED)) {
-                    byte[] encrypted = readFileEntry(zis);
-                    byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
-                    writeBytesToFile(target, decrypted);
-
-                    break;
-                }
-            }
-        } finally {
-            zis.close();
-        }
-    }
-
     public static List<File> getBackupFiles(File parentDir) {
 
         List<File> results = new ArrayList<File>();
@@ -207,9 +188,8 @@ public class BackupUtils {
         while ((length = zis.read(buffer)) != -1) {
             out.write(buffer, 0, length);
         }
-        byte[] bytes = out.toByteArray();
 
-        return bytes;
+        return out.toByteArray();
     }
 
     public static String createUniqueBackupFilename() {
@@ -219,5 +199,81 @@ public class BackupUtils {
 
     public static void importBackup(File backupFile, File databaseTarget, String password) throws Exception {
         extractAndDecryptDatabase(backupFile, databaseTarget, password);
+    }
+
+    public static void importBackup(File backupFile, File databaseTarget, File attachmentsTargetDir, String password) throws Exception {
+
+        File tempDir = new File(attachmentsTargetDir, "tmp");
+        boolean mkdir = tempDir.mkdir();
+        if (mkdir) {
+            extractAttachments(backupFile, tempDir);
+            // clearTargetDirectory() TODO ??????????
+            moveDirectoryContentsToTarget(tempDir, attachmentsTargetDir);
+            extractAndDecryptDatabase(backupFile, databaseTarget, password);
+        } else {
+            throw new IOException("Failed to create temporary directory " + tempDir.getAbsolutePath());
+        }
+    }
+
+    private static void moveDirectoryContentsToTarget(File srcDir, File targetDir) throws IOException {
+
+        if (targetDir.isDirectory()) {
+            File[] files = srcDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    FileUtils.moveFileToDirectory(file, targetDir, false);
+                }
+            } else {
+                throw new FileNotFoundException("Error resolving attachment files in " + srcDir);
+            }
+        } else {
+            throw new IOException(targetDir + " is not a directory.");
+        }
+    }
+
+    private static void extractAttachments(File backupFile, File tempDir) throws IOException {
+        try {
+            extractAttachmentFiles(backupFile, tempDir);
+        } catch (IOException e) {
+            FileUtils.deleteDirectory(tempDir);
+            throw e;
+        }
+    }
+
+    private static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
+
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
+        try {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+
+                if (zipEntry.getName().equals(DB_FILENAME_ENCRYPTED)) {
+                    byte[] encrypted = readFileEntry(zis);
+                    byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
+                    writeBytesToFile(target, decrypted);
+
+                    break;
+                }
+            }
+        } finally {
+            zis.close();
+        }
+    }
+
+    private static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException {
+
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
+        try {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                if (!zipEntry.getName().equals(DB_FILENAME_ENCRYPTED) && !zipEntry.getName().equals(METADATA_FILENAME)) {
+                    byte[] bytes = readFileEntry(zis);
+                    File file = new File(targetDir, zipEntry.getName());
+                    writeBytesToFile(file, bytes);
+                }
+            }
+        } finally {
+            zis.close();
+        }
     }
 }

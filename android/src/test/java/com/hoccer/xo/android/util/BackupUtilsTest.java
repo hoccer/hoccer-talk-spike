@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.util;
 
 import com.hoccer.xo.android.backup.*;
+import org.apache.commons.io.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,6 +14,8 @@ import java.util.List;
 
 import static junit.framework.Assert.*;
 import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
 
 
 public class BackupUtilsTest {
@@ -67,7 +70,7 @@ public class BackupUtilsTest {
 
         BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, CLIENT_NAME, new Date());
 
-        BackupUtils.createBackup(backupFile, DATABASE_FILE, ATTACHMENT_FILES, metadata, PASSWORD);
+        BackupUtils.createBackupFile(backupFile, DATABASE_FILE, ATTACHMENT_FILES, metadata, PASSWORD);
         assertTrue("Creating backup failed", backupFile.exists());
         assertTrue("Creating backup failed", backupFile.length() > 0);
 
@@ -94,16 +97,29 @@ public class BackupUtilsTest {
     }
 
     @Test
-    public void testExtractAndDecryptDatabase() throws Exception {
+    public void testImportDatabaseBackup() throws Exception {
 
-        File database = new File(TARGET_DIR, "database.db");
-        assertNotNull(database);
+        File databaseTarget = new File(TARGET_DIR, "database.db");
+        assertNotNull(databaseTarget);
 
-        BackupUtils.extractAndDecryptDatabase(BACKUP_FILE, database, PASSWORD);
-        assertTrue(database.length() > 0);
+        BackupUtils.importBackup(BACKUP_FILE, databaseTarget, PASSWORD);
+        assertTrue(databaseTarget.length() > 0);
 
-        boolean deleted = database.delete();
+        boolean deleted = databaseTarget.delete();
         assertTrue(deleted);
+    }
+
+    @Test
+    public void testImportCompleteBackup() throws Exception {
+
+        File databaseTarget = new File(TARGET_DIR, "database.db");
+        assertNotNull(databaseTarget);
+
+        BackupUtils.importBackup(BACKUP_FILE, databaseTarget, TARGET_DIR, PASSWORD);
+        assertTrue(databaseTarget.length() > 0);
+        assertTrue(TARGET_DIR.listFiles().length > 1);
+
+        org.apache.commons.io.FileUtils.cleanDirectory(TARGET_DIR);
     }
 
     private static File getResourceFile(String path) {
