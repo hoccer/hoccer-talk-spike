@@ -72,6 +72,9 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static File INTERNAL_STORAGE = null;
     /** root of app-private cache storage (initialized in onCreate) */
     private static File INTERNAL_CACHE_STORAGE = null;
+
+    private static String PACKAGE_NAME = null;
+
     /** uncaught exception handler for the client and us */
     private static Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER = null;
     private static DisplayImageOptions CONTENT_IMAGE_OPTIONS = null;
@@ -147,7 +150,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return new File(EXTERNAL_STORAGE, CONFIGURATION.getAvatarsDirectory());
     }
 
-
     public static File getThumbnailDirectory() {
         return new File(INTERNAL_STORAGE, THUMBNAILS_DIRECTORY);
     }
@@ -192,6 +194,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return null;
     }
 
+    public static String getHoccerPackageName() {
+        return PACKAGE_NAME;
+    }
+
     @Override
 	public void onCreate() {
 		super.onCreate();
@@ -206,6 +212,9 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         // Initialize configuration
         CONFIGURATION = new XoAndroidClientConfiguration(this);
+
+        // set package name
+        PACKAGE_NAME = getPackageName();
 
         // initialize logging system
         XoLogging.initialize(this, CONFIGURATION.getAppName().replace(" ", ""));
