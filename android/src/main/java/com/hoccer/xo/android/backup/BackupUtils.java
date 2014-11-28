@@ -217,7 +217,7 @@ public class BackupUtils {
         return String.format(BACKUP_FILENAME_PATTERN, timestamp);
     }
 
-    public static void importBackup(Backup backup, File databasePath, File attachmentDirectory) {
-
+    public static void importBackup(File backupFile, File databaseTarget, String password) throws Exception {
+        extractAndDecryptDatabase(backupFile, databaseTarget, password);
     }
 }

@@ -13,6 +13,7 @@ import android.preference.*;
 import android.view.*;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.Backup;
@@ -81,14 +82,14 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void initDataImportPreferences() {
         final ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
         if (listPreference != null) {
-            List<File> exportFiles = BackupUtils.getBackupFiles(XoApplication.getExternalStorage());
-            if (!exportFiles.isEmpty()) {
+            List<File> backups = BackupUtils.getBackupFiles(XoApplication.getBackupDirectory());
+            if (!backups.isEmpty()) {
 
-                final String[] entries = new String[exportFiles.size()];
-                final String[] entryValues = new String[exportFiles.size()];
+                final String[] entries = new String[backups.size()];
+                final String[] entryValues = new String[backups.size()];
 
-                for (int index = 0; index < exportFiles.size(); index++) {
-                    entries[index] = exportFiles.get(index).getName();
+                for (int index = 0; index < backups.size(); index++) {
+                    entries[index] = backups.get(index).getName();
                     entryValues[index] = Integer.toString(index);
                 }
 
@@ -208,12 +209,25 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             protected Boolean doInBackground(Void... params) {
 
-                File importFile = new File(XoApplication.getExternalStorage(), importFileName);
-                BackupUtils backupUtils = new BackupUtils();
-//                Backup backup = backupUtils.extractBackup(importFile);
-//                BackupUtils.importBackup(backup, getDatabasePath(getPackageName()), XoApplication.getAttachmentDirectory());
+                File backupFile = new File(XoApplication.getBackupDirectory(), importFileName);
 
-                return true;
+                try {
+                    Backup backup = BackupFactory.readBackup(backupFile);
+                    backup.restore("abc");
+                    return true;
+                } catch (BackupFactory.BackupTypeNotSupportedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } catch (NoClientIdInPresenceException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                return false;
             }
 
             @Override

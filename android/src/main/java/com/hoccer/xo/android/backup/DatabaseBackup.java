@@ -8,7 +8,9 @@ import java.util.Date;
 
 public class DatabaseBackup extends Backup {
 
-    private final BackupMetadata mMetadata;
+    public static final String DB_PATH_NAME = "/data/data/" + XoApplication.getAppPackageName() + "/databases/hoccer-talk.db";
+
+    protected final BackupMetadata mMetadata;
 
     DatabaseBackup(File backupFile, BackupMetadata metadata) {
         super(backupFile);
@@ -17,7 +19,7 @@ public class DatabaseBackup extends Backup {
 
     static DatabaseBackup create(String password) throws Exception {
 
-        File database = new File("/data/data/" + XoApplication.getHoccerPackageName() + "/databases/hoccer-talk.db");
+        File database = new File(DB_PATH_NAME);
 
         String filename = BackupUtils.createUniqueBackupFilename();
         File backupFile = new File(XoApplication.getBackupDirectory(), filename + ".zip");
@@ -26,8 +28,14 @@ public class DatabaseBackup extends Backup {
         BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());
         BackupUtils.createBackupFile(backupFile, database, metadata, password);
 
+        return new DatabaseBackup(backupFile, metadata);
+    }
 
-        return new DatabaseBackup(backup, metadata);
+    @Override
+    public void restore(String password) throws Exception {
+        File databaseTarget = new File(DB_PATH_NAME);
+        BackupUtils.importBackup(mBackupFile, databaseTarget, password);
+        XoApplication.getXoClient().getDatabase().initialize();
     }
 
     @Nullable
@@ -39,10 +47,5 @@ public class DatabaseBackup extends Backup {
     @Override
     public Date getCreationDate() {
         return mMetadata.getCreationDate();
-    }
-
-    @Override
-    public void restore(String password) {
-
     }
 }
