@@ -4,7 +4,6 @@ import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
@@ -27,4 +26,8 @@ public abstract class Backup {
     }
 
     public abstract void restore(String password) throws IOException, SQLException, NoClientIdInPresenceException;
+
+    public File getFile() {
+        return mBackupFile;
+    };
 }
