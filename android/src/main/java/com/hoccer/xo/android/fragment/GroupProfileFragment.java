@@ -668,19 +668,14 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void updateAvatar(final IContentObject avatar) {
         if (avatar != null) {
-            XoApplication.getExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    LOG.debug("creating avatar upload");
-                    TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
-                    try {
-                        getXoDatabase().saveClientUpload(upload);
-                        getXoClient().setGroupAvatar(mGroup, upload);
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-                }
-            });
+            LOG.debug("creating avatar upload");
+            TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
+            try {
+                getXoDatabase().saveClientUpload(upload);
+                getXoClient().setGroupAvatar(mGroup, upload);
+            } catch (SQLException e) {
+                LOG.error("sql error", e);
+            }
         } else {
             getXoClient().setGroupAvatar(mGroup, null);
         }

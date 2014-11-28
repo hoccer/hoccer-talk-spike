@@ -829,30 +829,35 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void sendGroupPresenceUpdateWithNewAvatar(final TalkClientContact group, final TalkClientUpload upload) {
-        try {
-            TalkGroup presence = group.getGroupPresence();
-            if (presence != null) {
-                if (upload != null) {
-                    String downloadUrl = upload.getDownloadUrl();
-                    presence.setGroupAvatarUrl(downloadUrl);
-                } else {
-                    presence.setGroupAvatarUrl(null);
-                }
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TalkGroup presence = group.getGroupPresence();
+                    if (presence != null) {
+                        if (upload != null) {
+                            String downloadUrl = upload.getDownloadUrl();
+                            presence.setGroupAvatarUrl(downloadUrl);
+                        } else {
+                            presence.setGroupAvatarUrl(null);
+                        }
 
-                group.setAvatarUpload(upload);
-                if (group.isGroupRegistered()) {
-                    mDatabase.saveGroup(presence);
-                    mDatabase.saveContact(group);
-                    mServerRpc.updateGroup(presence);
-                    for (int i = 0; i < mContactListeners.size(); i++) {
-                        IXoContactListener listener = mContactListeners.get(i);
-                        listener.onGroupPresenceChanged(group);
+                        group.setAvatarUpload(upload);
+                        if (group.isGroupRegistered()) {
+                            mDatabase.saveGroup(presence);
+                            mDatabase.saveContact(group);
+                            mServerRpc.updateGroup(presence);
+                            for (int i = 0; i < mContactListeners.size(); i++) {
+                                IXoContactListener listener = mContactListeners.get(i);
+                                listener.onGroupPresenceChanged(group);
+                            }
+                        }
                     }
+                } catch(Exception e){
+                    LOG.error("error creating group avatar", e);
                 }
             }
-        } catch(Exception e){
-            LOG.error("error creating group avatar", e);
-        }
+        });
     }
 
     public String generatePairingToken() {
