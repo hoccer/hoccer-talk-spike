@@ -51,7 +51,7 @@ public class BackupUtilsTest {
 
         BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, CLIENT_NAME, new Date());
 
-        BackupUtils.createBackup(backupFile, DATABASE_FILE, metadata, PASSWORD);
+        BackupUtils.createBackupFile(backupFile, DATABASE_FILE, metadata, PASSWORD);
         assertTrue("Creating backup failed", backupFile.exists());
         assertTrue("Creating backup failed", backupFile.length() > 0);
 

@@ -34,7 +34,7 @@ public class BackupUtils {
         createZip(out, encryptedDatabase, attachments, metadataJson);
     }
 
-    public static void createBackup(File out, File database, BackupMetadata metadata, String password) throws Exception {
+    public static void createBackupFile(File out, File database, BackupMetadata metadata, String password) throws Exception {
 
         byte[] encryptedDatabase = encryptFile(database, password);
 

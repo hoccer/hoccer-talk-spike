@@ -194,7 +194,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         return null;
     }
 
-    public static String getHoccerPackageName() {
+    public static String getAppPackageName() {
         return PACKAGE_NAME;
     }
 

@@ -20,11 +20,12 @@ public class DatabaseBackup extends Backup {
         File database = new File("/data/data/" + XoApplication.getHoccerPackageName() + "/databases/hoccer-talk.db");
 
         String filename = BackupUtils.createUniqueBackupFilename();
-        File backup = new File(XoApplication.getBackupDirectory(), filename + ".zip");
+        File backupFile = new File(XoApplication.getBackupDirectory(), filename + ".zip");
         String clientName = XoApplication.getXoClient().getSelfContact().getName();
-        BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());
 
-        BackupUtils.createBackup(backup, database, metadata, password);
+        BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());
+        BackupUtils.createBackupFile(backupFile, database, metadata, password);
+
 
         return new DatabaseBackup(backup, metadata);
     }
