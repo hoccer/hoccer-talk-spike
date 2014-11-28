@@ -27,7 +27,6 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 public class XoPreferenceActivity extends PreferenceActivity
@@ -80,7 +79,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void initDataImportPreferences() {
-        final ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
+        final ListPreference listPreference = (ListPreference) findPreference("preference_import_backup");
         if (listPreference != null) {
             List<File> backups = BackupUtils.getBackupFiles(XoApplication.getBackupDirectory());
             if (!backups.isEmpty()) {
@@ -100,7 +99,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
                         listPreference.setEnabled(false);
-                        importData(entries[Integer.parseInt((String) newValue)]);
+                        importBackup(entries[Integer.parseInt((String) newValue)]);
                         return true;
                     }
                 });
@@ -191,9 +190,13 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if ("preference_import".equals(preference.getKey())) {
             doImportCredentials();
             return true;
-        } else if ("preference_data_export".equals(preference.getKey())) {
+        } else if ("preference_chats_backup".equals(preference.getKey())) {
             preference.setEnabled(false);
-            exportData();
+            createDatabaseBackup();
+            return true;
+        } else if ("preference_complete_backup".equals(preference.getKey())) {
+            preference.setEnabled(false);
+            createCompleteBackup();
             return true;
         } else if ("preference_database_dump".equals(preference.getKey())) {
             dumpDatabase();
@@ -203,8 +206,24 @@ public class XoPreferenceActivity extends PreferenceActivity
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
 
-    private void importData(final String importFileName) {
+    private void importBackup(final String importFileName) {
+        XoDialogs.showInputPasswordDialog("ImportBackupDialog",
+                R.string.dialog_import_credentials_title,
+                this,
+                new XoDialogs.OnTextSubmittedListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id, String password) {
+                        if (password != null && !password.isEmpty()) {
+                            doImportBackup(importFileName, password);
+                        } else {
+                            Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+        );
+    }
 
+    private void doImportBackup(final String importFileName, final String password) {
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
@@ -213,7 +232,7 @@ public class XoPreferenceActivity extends PreferenceActivity
 
                 try {
                     Backup backup = BackupFactory.readBackup(backupFile);
-                    backup.restore("abc");
+                    backup.restore(password);
                     return true;
                 } catch (BackupFactory.BackupTypeNotSupportedException e) {
                     e.printStackTrace();
@@ -238,17 +257,35 @@ public class XoPreferenceActivity extends PreferenceActivity
                 } else {
                     Toast.makeText(getBaseContext(), "Data import failed", Toast.LENGTH_LONG).show();
                 }
-                findPreference("preference_data_import").setEnabled(true);
+                findPreference("preference_import_backup").setEnabled(true);
             }
         }.execute();
     }
 
-    private void exportData() {
+    private void createDatabaseBackup() {
+
+        XoDialogs.showInputPasswordDialog("CreateDatabaseBackupDialog",
+                R.string.dialog_export_credentials_title,
+                this,
+                new XoDialogs.OnTextSubmittedListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id, String password) {
+                        if (password != null && !password.isEmpty()) {
+                            doCreateDatabaseBackup(password);
+                        } else {
+                            Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+        );
+    }
+
+    private void doCreateDatabaseBackup(final String password) {
         new AsyncTask<Void, Void, Backup>() {
             @Override
             protected Backup doInBackground(Void... params) {
                 try {
-                    return BackupFactory.createDatabaseBackup("abc");
+                    return BackupFactory.createDatabaseBackup(password);
                 } catch (Exception e) {
                     LOG.error("Data export failed.", e);
                     return null;
@@ -263,7 +300,50 @@ public class XoPreferenceActivity extends PreferenceActivity
                 } else {
                     Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
                 }
-                findPreference("preference_data_export").setEnabled(true);
+                findPreference("preference_chats_backup").setEnabled(true);
+            }
+        }.execute();
+    }
+
+    private void createCompleteBackup() {
+
+        XoDialogs.showInputPasswordDialog("CreateDatabaseBackupDialog",
+                R.string.dialog_export_credentials_title,
+                this,
+                new XoDialogs.OnTextSubmittedListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id, String password) {
+                        if (password != null && !password.isEmpty()) {
+                            doCreateCompleteBackup(password);
+                        } else {
+                            Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+        );
+    }
+
+    private void doCreateCompleteBackup(final String password) {
+        new AsyncTask<Void, Void, Backup>() {
+            @Override
+            protected Backup doInBackground(Void... params) {
+                try {
+                    return BackupFactory.createCompleteBackup(password);
+                } catch (Exception e) {
+                    LOG.error("Data export failed.", e);
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Backup backup) {
+                super.onPostExecute(backup);
+                if (backup != null) {
+                    Toast.makeText(getBaseContext(), "Data exported to " + backup.getFile().getAbsolutePath(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
+                }
+                findPreference("preference_complete_backup").setEnabled(true);
             }
         }.execute();
     }

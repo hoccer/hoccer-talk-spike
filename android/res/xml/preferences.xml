@@ -114,6 +114,20 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:title="Backups">
+        <Preference
+                android:key="preference_chats_backup"
+                android:title="Chats"/>
+        <Preference
+                android:key="preference_complete_backup"
+                android:title="Chats with attachments"/>
+        <ListPreference
+                android:key="preference_import_backup"
+                android:title="Import backup"
+                android:defaultValue="0"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/pref_encryption">
 
         <ListPreference
