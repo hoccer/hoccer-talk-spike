@@ -81,8 +81,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void initDataImportPreferences() {
         final ListPreference listPreference = (ListPreference) findPreference("preference_data_import");
         if (listPreference != null) {
-            BackupUtils backupUtils = new BackupUtils();
-            List<File> exportFiles = backupUtils.getBackupFiles(XoApplication.getExternalStorage());
+            List<File> exportFiles = BackupUtils.getBackupFiles(XoApplication.getExternalStorage());
             if (!exportFiles.isEmpty()) {
 
                 final String[] entries = new String[exportFiles.size()];
@@ -246,11 +245,10 @@ public class XoPreferenceActivity extends PreferenceActivity
                 try {
                     File database = new File("/data/data/" + getPackageName() + "/databases/hoccer-talk.db");
                     List<File> attachments = Arrays.asList(XoApplication.getAttachmentDirectory().listFiles());
-                    BackupUtils backupUtils = new BackupUtils();
                     String filename = BackupUtils.createUniqueBackupFilename();
                     File backup = new File(XoApplication.getExternalStorage(), filename);
                     String clientName = XoApplication.getXoClient().getSelfContact().getName();
-                    backupUtils.createBackup(backup, database, attachments, clientName, "123");
+                    BackupUtils.createBackup(backup, database, attachments, clientName, "123");
 
                     return backup;
                 } catch (Exception e) {
