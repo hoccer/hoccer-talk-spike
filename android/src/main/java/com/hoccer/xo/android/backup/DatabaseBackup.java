@@ -21,7 +21,7 @@ public class DatabaseBackup extends Backup {
     @Nullable
     @Override
     public String getClientName() {
-        return null;
+        return mMetadata.getClientName();
     }
 
     @Override
