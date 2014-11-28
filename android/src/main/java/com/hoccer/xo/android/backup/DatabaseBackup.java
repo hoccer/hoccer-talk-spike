@@ -17,13 +17,12 @@ public class DatabaseBackup extends Backup {
         mMetadata = metadata;
     }
 
-    static DatabaseBackup create(String password) throws Exception {
     static Backup create(String password) throws Exception {
 
         File database = new File(DB_PATH_NAME);
 
         String filename = BackupUtils.createUniqueBackupFilename();
-        File backupFile = new File(XoApplication.getBackupDirectory(), filename + ".zip");
+        File backupFile = new File(XoApplication.getBackupDirectory(), filename + "_db.zip");
         String clientName = XoApplication.getXoClient().getSelfContact().getName();
 
         BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());
@@ -36,7 +35,7 @@ public class DatabaseBackup extends Backup {
     public void restore(String password) throws Exception {
         File databaseTarget = new File(DB_PATH_NAME);
         BackupUtils.importBackup(mBackupFile, databaseTarget, password);
-        XoApplication.getXoClient().getDatabase().initialize();
+//        XoApplication.getXoClient().getDatabase().initialize();
     }
 
     @Nullable
