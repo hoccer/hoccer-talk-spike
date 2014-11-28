@@ -194,17 +194,8 @@ public class XoPreferenceActivity extends PreferenceActivity
             preference.setEnabled(false);
             exportData();
             return true;
-        } else if (preference.getKey().equals("preference_database_dump")) {
-
-            try {
-                File database = new File("/data/data/" + getPackageName() + "/databases/hoccer-talk.db");
-                String filename = BackupUtils.createUniqueBackupFilename() + ".db";
-                File target = new File(XoApplication.getExternalStorage(), filename);
-                FileUtils.copyFile(database, target);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+        } else if ("preference_database_dump".equals(preference.getKey())) {
+            dumpDatabase();
             return true;
         }
 
@@ -328,6 +319,17 @@ public class XoPreferenceActivity extends PreferenceActivity
         } catch (IOException e) {
             LOG.error("error while writing credentials container to filesystem.", e);
             Toast.makeText(this, R.string.export_credentials_failure, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void dumpDatabase() {
+        try {
+            File database = new File("/data/data/" + getPackageName() + "/databases/hoccer-talk.db");
+            String filename = BackupUtils.createUniqueBackupFilename() + ".db";
+            File target = new File(XoApplication.getExternalStorage(), filename);
+            FileUtils.copyFile(database, target);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
