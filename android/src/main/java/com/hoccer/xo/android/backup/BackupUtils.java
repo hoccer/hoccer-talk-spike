@@ -2,13 +2,9 @@ package com.hoccer.xo.android.backup;
 
 import com.google.gson.Gson;
 import com.hoccer.talk.crypto.CryptoJSON;
-import com.hoccer.xo.android.XoApplication;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,7 +24,7 @@ public class BackupUtils {
     public static final String DB_FILENAME_ENCRYPTED = "database.json";
     public static final String METADATA_FILENAME = "metadata.json";
 
-    public void createBackup(File out, File database, List<File> attachments, String clientName, String password) throws Exception {
+    public static void createBackup(File out, File database, List<File> attachments, String clientName, String password) throws Exception {
 
         byte[] encryptedDatabase = encryptFile(database, password);
 
@@ -40,7 +36,7 @@ public class BackupUtils {
         createZip(out, encryptedDatabase, attachments, metadataJson);
     }
 
-    public void createBackup(File out, File database, String clientName, String password) throws Exception {
+    public static void createBackup(File out, File database, String clientName, String password) throws Exception {
 
         byte[] encryptedDatabase = encryptFile(database, password);
 
@@ -52,7 +48,7 @@ public class BackupUtils {
         createZip(out, encryptedDatabase, metadataJson);
     }
 
-    private byte[] encryptFile(File input, String password) throws Exception {
+    private static byte[] encryptFile(File input, String password) throws Exception {
 
         FileInputStream in = new FileInputStream(input);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -67,7 +63,7 @@ public class BackupUtils {
         return CryptoJSON.encrypt(bytes, password, DB_CONTENT_TYPE);
     }
 
-    private void createZip(File backup, byte[] encryptedDatabase, String metadata) throws IOException {
+    private static void createZip(File backup, byte[] encryptedDatabase, String metadata) throws IOException {
 
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
         zos.setLevel(ZipOutputStream.DEFLATED);
@@ -79,7 +75,7 @@ public class BackupUtils {
         }
     }
 
-    private void createZip(File backup, byte[] encryptedDatabase, List<File> attachments, String metadata) throws IOException {
+    private static void createZip(File backup, byte[] encryptedDatabase, List<File> attachments, String metadata) throws IOException {
 
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
         zos.setLevel(ZipOutputStream.DEFLATED);
@@ -94,7 +90,7 @@ public class BackupUtils {
         }
     }
 
-    private void addMetaDataEntry(ZipOutputStream zos, String metadata) throws IOException {
+    private static void addMetaDataEntry(ZipOutputStream zos, String metadata) throws IOException {
 
         InputStream in = new ByteArrayInputStream(metadata.getBytes("UTF-8"));
 
@@ -110,7 +106,7 @@ public class BackupUtils {
         zos.closeEntry();
     }
 
-    private void addZipEntry(ZipOutputStream zos, File fileEntry) throws IOException {
+    private static void addZipEntry(ZipOutputStream zos, File fileEntry) throws IOException {
 
         InputStream in = new FileInputStream(fileEntry);
 
@@ -126,7 +122,7 @@ public class BackupUtils {
         zos.closeEntry();
     }
 
-    private void addZipEntry(ZipOutputStream zos, byte[] data, String dataName) throws IOException {
+    private static void addZipEntry(ZipOutputStream zos, byte[] data, String dataName) throws IOException {
 
         InputStream in = new ByteArrayInputStream(data);
         ZipEntry entry = new ZipEntry(dataName);
@@ -141,7 +137,7 @@ public class BackupUtils {
         zos.closeEntry();
     }
 
-    public BackupMetadata readMetadata(File backupFile) throws IOException {
+    public static BackupMetadata readMetadata(File backupFile) throws IOException {
 
         String result = null;
 
@@ -162,7 +158,7 @@ public class BackupUtils {
         return gson.fromJson(result, BackupMetadata.class);
     }
 
-    public void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
+    public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
 
         ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
         try {
@@ -182,7 +178,7 @@ public class BackupUtils {
         }
     }
 
-    public List<File> getBackupFiles(File parentDir) {
+    public static List<File> getBackupFiles(File parentDir) {
 
         List<File> results = new ArrayList<File>();
 
@@ -202,13 +198,13 @@ public class BackupUtils {
         return results;
     }
 
-    private void writeBytesToFile(File databaseTarget, byte[] decrypted) throws IOException {
+    private static void writeBytesToFile(File databaseTarget, byte[] decrypted) throws IOException {
         FileOutputStream fos = new FileOutputStream(databaseTarget);
         fos.write(decrypted);
         fos.close();
     }
 
-    private byte[] readFileEntry(ZipInputStream zis) throws IOException {
+    private static byte[] readFileEntry(ZipInputStream zis) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int length;
