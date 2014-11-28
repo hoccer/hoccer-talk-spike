@@ -47,7 +47,7 @@
 
     <!-- Friend decline invitation dialog -->
     <string name="friend_request_decline_invitation_title">Decline invitation?</string>
-    <string name="friend_request_decline_invitation_message">Do you really want to decline the invitation from %1$s?</string>
+    <string name="friend_request_decline_invitation_message">Do you really want to decline the invitation?</string>
 
     <!-- Groups fragment -->
     <plurals name="groups_and_x_more">

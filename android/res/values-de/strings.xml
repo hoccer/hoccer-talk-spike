@@ -56,7 +56,7 @@
 
     <!-- Group decline invitation dialog -->
     <string name="group_request_decline_invitation_title">Gruppeneinladung ablehnen?</string>
-    <string name="group_request_decline_invitation_message">Möchtest du der Gruppe %1$s wirklich nicht beitreten?</string>
+    <string name="group_request_decline_invitation_message">Möchtest du die Gruppeneinladung wirklich ablehnen?</string>
 
     <!-- Deleting attachments -->
     <string name="dialog_attachment_delete_title">Anhang Löschen</string>
