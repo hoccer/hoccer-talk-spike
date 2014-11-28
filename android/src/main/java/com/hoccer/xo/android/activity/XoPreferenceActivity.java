@@ -230,18 +230,11 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void exportData() {
-        new AsyncTask<Void, Void, File>() {
+        new AsyncTask<Void, Void, Backup>() {
             @Override
-            protected File doInBackground(Void... params) {
+            protected Backup doInBackground(Void... params) {
                 try {
-                    File database = new File("/data/data/" + getPackageName() + "/databases/hoccer-talk.db");
-                    List<File> attachments = Arrays.asList(XoApplication.getAttachmentDirectory().listFiles());
-                    String filename = BackupUtils.createUniqueBackupFilename();
-                    File backup = new File(XoApplication.getExternalStorage(), filename);
-                    String clientName = XoApplication.getXoClient().getSelfContact().getName();
-                    BackupUtils.createBackup(backup, database, attachments, clientName, "123");
-
-                    return backup;
+                    return BackupFactory.createDatabaseBackup("abc");
                 } catch (Exception e) {
                     LOG.error("Data export failed.", e);
                     return null;
@@ -249,10 +242,10 @@ public class XoPreferenceActivity extends PreferenceActivity
             }
 
             @Override
-            protected void onPostExecute(File file) {
-                super.onPostExecute(file);
-                if (file != null) {
-                    Toast.makeText(getBaseContext(), "Data exported to " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            protected void onPostExecute(Backup backup) {
+                super.onPostExecute(backup);
+                if (backup != null) {
+                    Toast.makeText(getBaseContext(), "Data exported to " + backup.getFile().getAbsolutePath(), Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
                 }

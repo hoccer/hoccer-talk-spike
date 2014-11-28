@@ -24,11 +24,9 @@ public class BackupUtils {
     public static final String DB_FILENAME_ENCRYPTED = "database.json";
     public static final String METADATA_FILENAME = "metadata.json";
 
-    public static void createBackup(File out, File database, List<File> attachments, String clientName, String password) throws Exception {
+    public static void createBackup(File out, File database, List<File> attachments, BackupMetadata metadata, String password) throws Exception {
 
         byte[] encryptedDatabase = encryptFile(database, password);
-
-        BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, clientName, new Date());
 
         Gson gson = new Gson();
         String metadataJson = gson.toJson(metadata);
@@ -36,11 +34,9 @@ public class BackupUtils {
         createZip(out, encryptedDatabase, attachments, metadataJson);
     }
 
-    public static void createBackup(File out, File database, String clientName, String password) throws Exception {
+    public static void createBackup(File out, File database, BackupMetadata metadata, String password) throws Exception {
 
         byte[] encryptedDatabase = encryptFile(database, password);
-
-        BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());
 
         Gson gson = new Gson();
         String metadataJson = gson.toJson(metadata);

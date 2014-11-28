@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.backup;
 
+import com.hoccer.xo.android.XoApplication;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -14,8 +15,18 @@ public class DatabaseBackup extends Backup {
         mMetadata = metadata;
     }
 
-    static DatabaseBackup create() {
-        return null;
+    static DatabaseBackup create(String password) throws Exception {
+
+        File database = new File("/data/data/" + XoApplication.getHoccerPackageName() + "/databases/hoccer-talk.db");
+
+        String filename = BackupUtils.createUniqueBackupFilename();
+        File backup = new File(XoApplication.getBackupDirectory(), filename + ".zip");
+        String clientName = XoApplication.getXoClient().getSelfContact().getName();
+        BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());
+
+        BackupUtils.createBackup(backup, database, metadata, password);
+
+        return new DatabaseBackup(backup, metadata);
     }
 
     @Nullable

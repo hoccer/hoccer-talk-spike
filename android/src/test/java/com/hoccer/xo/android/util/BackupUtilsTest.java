@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static junit.framework.Assert.*;
@@ -29,12 +30,8 @@ public class BackupUtilsTest {
 
     private static final File TARGET_DIR = createTargetDirectory();
 
-    private BackupUtils mBackupUtils;
-
     @Before
     public void setup() {
-
-        mBackupUtils = new BackupUtils();
 
         assertNotNull("Database file missing", DATABASE_FILE);
 
@@ -52,7 +49,9 @@ public class BackupUtilsTest {
         String filename = BackupUtils.createUniqueBackupFilename() + ".zip";
         File backupFile = new File(getClass().getResource("").getFile(), filename);
 
-        mBackupUtils.createBackup(backupFile, DATABASE_FILE, CLIENT_NAME, PASSWORD);
+        BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, CLIENT_NAME, new Date());
+
+        BackupUtils.createBackup(backupFile, DATABASE_FILE, metadata, PASSWORD);
         assertTrue("Creating backup failed", backupFile.exists());
         assertTrue("Creating backup failed", backupFile.length() > 0);
 
@@ -66,7 +65,9 @@ public class BackupUtilsTest {
         String filename = BackupUtils.createUniqueBackupFilename() + ".zip";
         File backupFile = new File(getClass().getResource("").getFile(), filename);
 
-        mBackupUtils.createBackup(backupFile, DATABASE_FILE, ATTACHMENT_FILES, CLIENT_NAME, PASSWORD);
+        BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, CLIENT_NAME, new Date());
+
+        BackupUtils.createBackup(backupFile, DATABASE_FILE, ATTACHMENT_FILES, metadata, PASSWORD);
         assertTrue("Creating backup failed", backupFile.exists());
         assertTrue("Creating backup failed", backupFile.length() > 0);
 
@@ -77,7 +78,7 @@ public class BackupUtilsTest {
     @Test
     public void testReadMetadata() throws Exception {
 
-        BackupMetadata metadata = mBackupUtils.readMetadata(BACKUP_FILE);
+        BackupMetadata metadata = BackupUtils.readMetadata(BACKUP_FILE);
         assertNotNull(metadata);
         assertEquals(BackupType.COMPLETE, metadata.getBackupType());
         assertEquals(CLIENT_NAME, metadata.getClientName());
@@ -98,7 +99,7 @@ public class BackupUtilsTest {
         File database = new File(TARGET_DIR, "database.db");
         assertNotNull(database);
 
-        mBackupUtils.extractAndDecryptDatabase(BACKUP_FILE, database, PASSWORD);
+        BackupUtils.extractAndDecryptDatabase(BACKUP_FILE, database, PASSWORD);
         assertTrue(database.length() > 0);
 
         boolean deleted = database.delete();

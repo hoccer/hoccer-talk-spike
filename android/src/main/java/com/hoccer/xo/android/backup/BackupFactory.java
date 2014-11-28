@@ -43,10 +43,10 @@ public class BackupFactory {
         return CredentialsBackup.create(password);
     }
 
-//    public static Backup createDatabaseBackup(String password) throws IOException {
-//        return DatabaseBackup.create(password);
-//    }
-//
+    public static Backup createDatabaseBackup(String password) throws Exception {
+        return DatabaseBackup.create(password);
+    }
+
 //    public static Backup createCompleteBackup(String password) throws IOException {
 //        return CompleteBackup.create(password);
 //    }
