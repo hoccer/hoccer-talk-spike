@@ -17,11 +17,11 @@ public class CredentialsBackup extends Backup {
 
     public static final String BACKUP_FILENAME = "credentials.json";
 
-    CredentialsBackup(File backupFile) {
+    protected CredentialsBackup(File backupFile) {
         super(backupFile);
     }
 
-    static CredentialsBackup create(String password) throws IOException {
+    static Backup create(String password) throws IOException {
         Credentials credentials = XoApplication.getXoClient().exportCredentials();
         final byte[] credentialsContainer = credentials.toEncryptedBytes(password);
 

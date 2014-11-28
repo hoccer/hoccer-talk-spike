@@ -12,12 +12,13 @@ public class DatabaseBackup extends Backup {
 
     protected final BackupMetadata mMetadata;
 
-    DatabaseBackup(File backupFile, BackupMetadata metadata) {
+    protected DatabaseBackup(File backupFile, BackupMetadata metadata) {
         super(backupFile);
         mMetadata = metadata;
     }
 
     static DatabaseBackup create(String password) throws Exception {
+    static Backup create(String password) throws Exception {
 
         File database = new File(DB_PATH_NAME);
 
