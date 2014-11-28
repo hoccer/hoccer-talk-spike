@@ -150,7 +150,7 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("preference_keysize")) {
+        if ("preference_keysize".equals(key)) {
             createDialog();
             regenerateKeys();
         }
@@ -182,13 +182,13 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
-        if (preference.getKey().equals("preference_export")) {
+        if ("preference_export".equals(preference.getKey())) {
             doExportCredentials();
             return true;
-        } else if (preference.getKey().equals("preference_import")) {
+        } else if ("preference_import".equals(preference.getKey())) {
             doImportCredentials();
             return true;
-        } else if (preference.getKey().equals("preference_data_export")) {
+        } else if ("preference_data_export".equals(preference.getKey())) {
             preference.setEnabled(false);
             exportData();
             return true;
