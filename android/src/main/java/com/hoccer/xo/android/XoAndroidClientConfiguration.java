@@ -72,7 +72,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     }
 
     public String getBackupDirectory() {
-        return getAttachmentsDirectory() + File.pathSeparator + "Backups";
+        return getAttachmentsDirectory() + File.separator + "Backups";
     }
     public String getAttachmentsDirectory() {
         return mAppName;
