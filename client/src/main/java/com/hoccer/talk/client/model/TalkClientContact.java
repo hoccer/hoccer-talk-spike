@@ -281,10 +281,6 @@ public class TalkClientContact implements Serializable {
         this.avatarUpload = avatarUpload;
     }
 
-    public void hackSetGroupPresence(TalkGroup group) {
-        this.groupPresence = group;
-    }
-
     private void ensureSelf() {
         if (!isSelf()) {
             throw new RuntimeException("Client is not of type self");
