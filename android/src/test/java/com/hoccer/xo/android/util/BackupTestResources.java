@@ -12,13 +12,13 @@ public class BackupTestResources {
     public static final String RESOURCE_BACKUP_CREDENTIALS_PATH = "/credentials.json";
     public static final String RESOURCE_BACKUP_COMPLETE_PATH = "/hoccer_backup_20141127_144625_with_attachments.zip";
     public static final String RESOURCE_BACKUP_DB_PATH = "/hoccer_backup_20141201_104631_db.zip";
-
     public static final String RESOURCE_DB_FILE = "/database.db";
     public static final String RESOURCE_ATTACHMENT_FILE_01 = "/IMG_20141120_130456_432.jpg";
-    public static final String TARGET_DIR_NAME = "target";
+
+    private static final String ATTACHMENTS_TARGET_DIR_NAME = "attachments_target";
+    private static final String DB_TARGET_FILE_PATH = "/db_target/database.db";
 
     public static File getResourceFile(String path) {
-
         URL url = BackupUtilsTest.class.getResource(path);
         assertNotNull(url);
 
@@ -26,7 +26,6 @@ public class BackupTestResources {
     }
 
     public static List<File> getAttachmentFiles() {
-
         URL attachmentFileUrl = BackupUtilsTest.class.getResource(BackupTestResources.RESOURCE_ATTACHMENT_FILE_01);
         assertNotNull(attachmentFileUrl);
 
@@ -35,11 +34,14 @@ public class BackupTestResources {
         return attachmentFiles;
     }
 
-    public static File createTargetDirectory() {
-
-        File targetDir = new File(BackupUtilsTest.class.getResource("").getFile(), TARGET_DIR_NAME);
+    public static File createAttachmentsTargetDirectory() {
+        File targetDir = new File(BackupUtilsTest.class.getResource("").getFile(), ATTACHMENTS_TARGET_DIR_NAME);
         targetDir.mkdir();
         return targetDir;
+    }
+
+    public static File createDatabaseTargetFile() {
+        return new File(BackupUtilsTest.class.getResource("").getFile(), DB_TARGET_FILE_PATH);
     }
 
 }

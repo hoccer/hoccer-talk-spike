@@ -22,14 +22,14 @@ public class BackupUtilsTest {
     private static final File DATABASE_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_DB_FILE);
     private static final List<File> ATTACHMENT_FILES = BackupTestResources.getAttachmentFiles();
 
-    private static final File TARGET_DIR = BackupTestResources.createTargetDirectory();
+    private static final File ATTACHMENTS_TARGET_DIR = BackupTestResources.createAttachmentsTargetDirectory();
+    private static final File DB_TARGET_FILE = BackupTestResources.createDatabaseTargetFile();
 
     public static final String CLIENT_NAME = "clientName";
     public static final String PASSWORD = "12345678";
 
     @Before
     public void setup() {
-
         assertNotNull("Database file missing", DATABASE_FILE);
 
         assertNotNull(ATTACHMENT_FILES);
@@ -41,12 +41,11 @@ public class BackupUtilsTest {
 
         assertNotNull(BACKUP_DB_FILE);
 
-        assertNotNull(TARGET_DIR);
+        assertNotNull(ATTACHMENTS_TARGET_DIR);
     }
 
     @Test
     public void testCreateDatabaseBackupFile() throws Exception {
-
         String filename = BackupUtils.createUniqueBackupFilename() + ".zip";
         File backupFile = new File(getClass().getResource("").getFile(), filename);
 
@@ -62,7 +61,6 @@ public class BackupUtilsTest {
 
     @Test
     public void testCreateDatabaseBackupFileWithAttachments() throws Exception {
-
         String filename = BackupUtils.createUniqueBackupFilename() + ".zip";
         File backupFile = new File(getClass().getResource("").getFile(), filename);
 
@@ -78,7 +76,6 @@ public class BackupUtilsTest {
 
     @Test
     public void testReadMetadata() throws Exception {
-
         BackupMetadata metadata = BackupUtils.readMetadata(BACKUP_COMPLETE_FILE);
         assertNotNull(metadata);
         assertEquals(BackupType.COMPLETE, metadata.getBackupType());
@@ -88,7 +85,6 @@ public class BackupUtilsTest {
 
     @Test
     public void testGetBackupFiles() {
-
         List<File> backupFiles = BackupUtils.getBackupFiles(BACKUP_COMPLETE_FILE.getParentFile());
         assertEquals(3, backupFiles.size());
         assertTrue(backupFiles.contains(BACKUP_CREDENTIALS_FILE));
@@ -99,26 +95,23 @@ public class BackupUtilsTest {
     @Test
     public void testImportDatabaseBackup() throws Exception {
 
-        File databaseTarget = new File(TARGET_DIR, "database.db");
-        assertNotNull(databaseTarget);
+        BackupUtils.importBackup(BACKUP_DB_FILE, DB_TARGET_FILE, PASSWORD);
+        assertTrue(DB_TARGET_FILE.exists());
+        assertTrue(DB_TARGET_FILE.length() > 0);
 
-        BackupUtils.importBackup(BACKUP_COMPLETE_FILE, databaseTarget, PASSWORD);
-        assertTrue(databaseTarget.length() > 0);
-
-        boolean deleted = databaseTarget.delete();
-        assertTrue(deleted);
+        org.apache.commons.io.FileUtils.deleteDirectory(DB_TARGET_FILE.getParentFile());
     }
 
     @Test
     public void testImportCompleteBackup() throws Exception {
 
-        File databaseTarget = new File(TARGET_DIR, "database.db");
-        assertNotNull(databaseTarget);
+        BackupUtils.importBackup(BACKUP_COMPLETE_FILE, DB_TARGET_FILE, ATTACHMENTS_TARGET_DIR, PASSWORD);
+        assertTrue(DB_TARGET_FILE.exists());
+        assertTrue(DB_TARGET_FILE.length() > 0);
+        assertTrue(ATTACHMENTS_TARGET_DIR.listFiles().length == 1);
+        assertTrue(new File(ATTACHMENTS_TARGET_DIR, BackupTestResources.RESOURCE_ATTACHMENT_FILE_01).exists());
 
-        BackupUtils.importBackup(BACKUP_COMPLETE_FILE, databaseTarget, TARGET_DIR, PASSWORD);
-        assertTrue(databaseTarget.length() > 0);
-        assertTrue(TARGET_DIR.listFiles().length > 1);
-
-        org.apache.commons.io.FileUtils.cleanDirectory(TARGET_DIR);
+        org.apache.commons.io.FileUtils.deleteDirectory(ATTACHMENTS_TARGET_DIR);
+        org.apache.commons.io.FileUtils.deleteDirectory(DB_TARGET_FILE.getParentFile());
     }
 }

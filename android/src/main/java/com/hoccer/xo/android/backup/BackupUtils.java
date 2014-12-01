@@ -28,6 +28,8 @@ public class BackupUtils {
     public static final String METADATA_FILENAME = "metadata.json";
 
     private static final Logger LOG = Logger.getLogger(BackupUtils.class.getName());
+    public static final String TEMP_ATTACHMENTS_DIR_NAME = "tmp_attachments";
+    public static final String TEMP_DB_DIR_NAME = "tmp_db";
 
     private static FileFilter mBackupFileFilter = new FileFilter() {
         @Override
@@ -46,7 +48,8 @@ public class BackupUtils {
             }
             return false;
         }
-    };;
+    };
+    ;
 
     public static void createBackupFile(File out, File database, List<File> attachments, BackupMetadata metadata, String password) throws Exception {
 
@@ -191,6 +194,10 @@ public class BackupUtils {
     }
 
     private static void writeBytesToFile(File targetFile, byte[] decryptedData) throws IOException {
+        if (!targetFile.exists()) {
+            targetFile.getParentFile().mkdirs();
+            targetFile.createNewFile();
+        }
         FileOutputStream fos = new FileOutputStream(targetFile);
         fos.write(decryptedData);
         fos.close();
@@ -218,16 +225,63 @@ public class BackupUtils {
 
     public static void importBackup(File backupFile, File databaseTarget, File attachmentsTargetDir, String password) throws Exception {
 
-        File tempDir = new File(attachmentsTargetDir, "tmp");
-        boolean mkdir = tempDir.mkdir();
-        if (mkdir) {
-            extractAttachments(backupFile, tempDir);
-            // clearTargetDirectory() TODO ??????????
-            moveDirectoryContentsToTarget(tempDir, attachmentsTargetDir);
-            extractAndDecryptDatabase(backupFile, databaseTarget, password);
-        } else {
-            throw new IOException("Failed to create temporary directory " + tempDir.getAbsolutePath());
+        File tempAttachmentsDir = new File(attachmentsTargetDir.getParent(), TEMP_ATTACHMENTS_DIR_NAME);
+        File tempDatabaseFile = new File(attachmentsTargetDir.getParent(), TEMP_DB_DIR_NAME + File.separator + databaseTarget.getName());
+
+        try {
+            if (tempAttachmentsDir.mkdir()) {
+                try {
+                    extractAttachmentFiles(backupFile, tempAttachmentsDir);
+                } catch (Exception e) {
+                    FileUtils.deleteDirectory(tempAttachmentsDir);
+                    throw e;
+                }
+            } else {
+                throw new IOException("Failed to create temporary directory " + tempAttachmentsDir.getAbsolutePath());
+            }
+
+            tempDatabaseFile.getParentFile().mkdirs();
+            tempDatabaseFile.createNewFile();
+            try {
+                extractAndDecryptDatabase(backupFile, tempDatabaseFile, password);
+            } catch (Exception e) {
+                tempDatabaseFile.delete();
+                throw e;
+            }
+
+            // rename target directory to save old attachments
+            File oldAttachmentsDir = new File(attachmentsTargetDir.getPath() + "_" + new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date()));
+            if (oldAttachmentsDir.mkdir()) {
+                attachmentsTargetDir.renameTo(oldAttachmentsDir);
+                attachmentsTargetDir.mkdir();
+            } else {
+                throw new IOException("Failed to create directory for existing attachments " + oldAttachmentsDir.getAbsolutePath());
+            }
+
+            try {
+                moveDirectoryContentsToTarget(tempAttachmentsDir, attachmentsTargetDir);
+            } catch (IOException e) {
+                // restore old attachments
+                moveDirectoryContentsToTarget(oldAttachmentsDir, attachmentsTargetDir);
+                e.printStackTrace();
+                throw e;
+            }
+
+            try {
+                moveFileToTarget(tempDatabaseFile, databaseTarget);
+            } catch (IOException e) {
+                moveDirectoryContentsToTarget(oldAttachmentsDir, attachmentsTargetDir);
+                e.printStackTrace();
+                throw e;
+            }
+        } finally {
+            FileUtils.deleteDirectory(tempDatabaseFile.getParentFile());
+            FileUtils.deleteDirectory(tempAttachmentsDir);
         }
+    }
+
+    private static void moveFileToTarget(File tempDatabaseFile, File databaseTarget) throws IOException {
+        FileUtils.moveFile(tempDatabaseFile, databaseTarget);
     }
 
     private static void moveDirectoryContentsToTarget(File srcDir, File targetDir) throws IOException {
@@ -243,15 +297,6 @@ public class BackupUtils {
             }
         } else {
             throw new IOException(targetDir + " is not a directory.");
-        }
-    }
-
-    private static void extractAttachments(File backupFile, File tempDir) throws IOException {
-        try {
-            extractAttachmentFiles(backupFile, tempDir);
-        } catch (IOException e) {
-            FileUtils.deleteDirectory(tempDir);
-            throw e;
         }
     }
 
