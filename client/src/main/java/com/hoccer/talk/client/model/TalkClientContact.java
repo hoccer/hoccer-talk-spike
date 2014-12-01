@@ -79,9 +79,9 @@ public class TalkClientContact implements Serializable {
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkGroupPresence groupPresence;
 
-    // when contact is a group, groupMember is the own member description
-    @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
-    private TalkGroupMembership groupMember;
+    // when contact is a group, groupMembership is the own member description
+    @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true, columnName = "groupMember_id")
+    private TalkGroupMembership groupMembership;
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkClientDownload avatarDownload;
@@ -194,19 +194,19 @@ public class TalkClientContact implements Serializable {
     }
 
     public boolean isGroupAdmin() {
-        return isGroup() && this.groupMember != null && this.groupMember.isAdmin();
+        return isGroup() && this.groupMembership != null && this.groupMembership.isAdmin();
     }
 
     public boolean isGroupInvolved() {
-        return isGroup() && this.groupMember != null && this.groupMember.isInvolved();
+        return isGroup() && this.groupMembership != null && this.groupMembership.isInvolved();
     }
 
     public boolean isGroupInvited() {
-        return isGroup() && this.groupMember != null && this.groupMember.isInvited();
+        return isGroup() && this.groupMembership != null && this.groupMembership.isInvited();
     }
 
     public boolean isGroupJoined() {
-        return isGroup() && this.groupMember != null && this.groupMember.isJoined();
+        return isGroup() && this.groupMembership != null && this.groupMembership.isJoined();
     }
 
     // returns true if there is actually a group key locally stored
@@ -403,7 +403,7 @@ public class TalkClientContact implements Serializable {
     @GroupMethodOnly
     public TalkGroupMembership getGroupMembership() {
         ensureGroup();
-        return groupMember;
+        return groupMembership;
     }
 
     // the actual group key, Base64-encoded
@@ -513,12 +513,12 @@ public class TalkClientContact implements Serializable {
     @GroupMethodOnly
     public void updateGroupMembership(TalkGroupMembership membership) {
         ensureGroup();
-        if (this.groupMember == null) {
-            this.groupMember = membership;
+        if (this.groupMembership == null) {
+            this.groupMembership = membership;
         } else {
-            this.groupMember.updateWith(membership);
+            this.groupMembership.updateWith(membership);
         }
-        if (this.groupMember.isInvolved()) {
+        if (this.groupMembership.isInvolved()) {
             markAsRelated();
         }
     }
