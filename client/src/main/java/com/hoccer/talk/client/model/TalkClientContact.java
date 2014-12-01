@@ -1,14 +1,8 @@
 package com.hoccer.talk.client.model;
 
-import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.crypto.AESCryptor;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
-import com.hoccer.talk.model.TalkKey;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.talk.model.TalkPrivateKey;
-import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.talk.model.*;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
@@ -19,26 +13,30 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.Date;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * These represent a target of communication
- *
  * This may currently be either a groupPresence or another user.
  */
 @DatabaseTable(tableName = "clientContact")
 public class TalkClientContact implements Serializable {
 
     public @interface ClientMethodOnly {}
+
     public @interface ClientOrGroupMethodOnly {}
+
     public @interface ClientOrSelfMethodOnly {}
+
     public @interface GroupMethodOnly {}
+
     public @interface SelfMethodOnly {}
 
-    public static final String TYPE_SELF   = "self";
+    public static final String TYPE_SELF = "self";
     public static final String TYPE_CLIENT = "client";
-    public static final String TYPE_GROUP  = "group";
+    public static final String TYPE_GROUP = "group";
 
     @DatabaseField(generatedId = true)
     private int clientContactId;
@@ -52,7 +50,6 @@ public class TalkClientContact implements Serializable {
     @DatabaseField
     private boolean everRelated;
 
-
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkKey publicKey;
 
@@ -63,7 +60,6 @@ public class TalkClientContact implements Serializable {
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkClientSelf self;
 
-
     @DatabaseField(canBeNull = true)
     private String clientId;
 
@@ -72,7 +68,6 @@ public class TalkClientContact implements Serializable {
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkRelationship clientRelationship;
-
 
     @DatabaseField(canBeNull = true)
     private String groupId;
@@ -90,10 +85,6 @@ public class TalkClientContact implements Serializable {
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkGroupMember groupMember;
 
-    @ForeignCollectionField(eager = false, foreignFieldName = "groupContact")
-    private ForeignCollection<TalkClientMembership> groupMemberships;
-
-
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkClientDownload avatarDownload;
 
@@ -110,22 +101,18 @@ public class TalkClientContact implements Serializable {
     private Date createdTimeStamp;
 
     public TalkClientContact() {
-        //System.out.println("TalkClientContact(): this="+this);
-        //new Exception().printStackTrace(System.out);
     }
 
     public TalkClientContact(String contactType) {
         this.contactType = contactType;
-        //System.out.println("TalkClientContact(): contactType="+contactType+" this="+this);
     }
 
     public TalkClientContact(String contactType, String id) {
         this(contactType);
-        //System.out.println("TalkClientContact: contactType="+contactType+" id="+id);
-        if(contactType.equals(TYPE_CLIENT) || contactType.equals(TYPE_SELF)) {
+        if (contactType.equals(TYPE_CLIENT) || contactType.equals(TYPE_SELF)) {
             this.clientId = id;
         }
-        if(contactType.equals(TYPE_GROUP)) {
+        if (contactType.equals(TYPE_GROUP)) {
             this.groupId = id;
         }
     }
@@ -156,9 +143,9 @@ public class TalkClientContact implements Serializable {
     }
 
     public IContentObject getAvatar() {
-        if(avatarDownload != null && avatarDownload.isContentAvailable()) {
+        if (avatarDownload != null && avatarDownload.isContentAvailable()) {
             return avatarDownload;
-        } else if(avatarUpload != null && avatarUpload.isContentAvailable()) {
+        } else if (avatarUpload != null && avatarUpload.isContentAvailable()) {
             return avatarUpload;
         }
         return null;
@@ -166,7 +153,7 @@ public class TalkClientContact implements Serializable {
 
     public String getAvatarContentUrl() {
         IContentObject avatar = getAvatar();
-        if(avatar != null) {
+        if (avatar != null) {
             return avatar.getContentDataUrl();
         }
         return null;
@@ -237,11 +224,11 @@ public class TalkClientContact implements Serializable {
     public boolean groupHasValidKey() {
         ensureGroup();
         if (groupHasKey() && getGroupPresence() != null) {
-            byte [] sharedKey = Base64.decodeBase64(this.getGroupKey().getBytes(Charset.forName("UTF-8")));
-            byte [] sharedKeyId = Base64.decodeBase64(this.groupPresence.getSharedKeyId().getBytes(Charset.forName("UTF-8")));
-            byte [] sharedKeySalt = Base64.decodeBase64(this.groupPresence.getSharedKeyIdSalt().getBytes(Charset.forName("UTF-8")));
+            byte[] sharedKey = Base64.decodeBase64(this.getGroupKey().getBytes(Charset.forName("UTF-8")));
+            byte[] sharedKeyId = Base64.decodeBase64(this.groupPresence.getSharedKeyId().getBytes(Charset.forName("UTF-8")));
+            byte[] sharedKeySalt = Base64.decodeBase64(this.groupPresence.getSharedKeyIdSalt().getBytes(Charset.forName("UTF-8")));
             try {
-                byte [] actualSharedKeyId = AESCryptor.calcSymmetricKeyId(sharedKey,sharedKeySalt);
+                byte[] actualSharedKeyId = AESCryptor.calcSymmetricKeyId(sharedKey, sharedKeySalt);
                 return actualSharedKeyId.equals(sharedKey);
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
@@ -250,62 +237,17 @@ public class TalkClientContact implements Serializable {
         return false;
     }
 
-    // return true if the this contact is joined member of group
-    public boolean isClientGroupJoined(TalkClientContact group) {
-        if(!group.isGroupRegistered()) {
-            return false;
-        }
-        if(!isClient()) {
-            return false;
-        }
-        int myId = getClientContactId();
-        ForeignCollection<TalkClientMembership> memberships = group.getGroupMemberships();
-        if(memberships != null) {
-            for(TalkClientMembership membership: memberships) {
-                TalkGroupMember member = membership.getMember();
-                if(member != null && member.isJoined()) {
-                    if(membership.getClientContact().getClientContactId() == myId) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean isClientGroupInvited(TalkClientContact group) {
-        if(!group.isGroupRegistered()) {
-            return false;
-        }
-        if(!isClient()) {
-            return false;
-        }
-        int myId = getClientContactId();
-        ForeignCollection<TalkClientMembership> memberships = group.getGroupMemberships();
-        if(memberships != null) {
-            for(TalkClientMembership membership: memberships) {
-                TalkGroupMember member = membership.getMember();
-                if(member != null && member.isInvited()) {
-                    if(membership.getClientContact().getClientContactId() == myId) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     public String getName() {
-        if(isClient() || isSelf()) {
-            if(clientPresence != null) {
+        if (isClient() || isSelf()) {
+            if (clientPresence != null) {
                 return clientPresence.getClientName();
             }
-            if(isSelf()) {
+            if (isSelf()) {
                 return "<self>";
             }
         }
-        if(isGroup()) {
-            if(groupPresence != null) {
+        if (isGroup()) {
+            if (groupPresence != null) {
                 return groupPresence.getGroupName();
             }
         }
@@ -313,8 +255,8 @@ public class TalkClientContact implements Serializable {
     }
 
     public String getStatus() {
-        if(isClient()) {
-            if(clientPresence != null) {
+        if (isClient()) {
+            if (clientPresence != null) {
                 return clientPresence.getClientStatus();
             }
         }
@@ -346,37 +288,37 @@ public class TalkClientContact implements Serializable {
     }
 
     private void ensureSelf() {
-        if(!isSelf()) {
+        if (!isSelf()) {
             throw new RuntimeException("Client is not of type self");
         }
     }
 
     private void ensureClient() {
-        if(!isClient()) {
+        if (!isClient()) {
             throw new RuntimeException("Client is not of type client");
         }
     }
 
     private void ensureClientOrSelf() {
-        if(!(isClient() || isSelf())) {
+        if (!(isClient() || isSelf())) {
             throw new RuntimeException("Client is not of type client or self");
         }
     }
 
     private void ensureClientOrGroup() {
-        if(!(isClient() || isGroup())) {
+        if (!(isClient() || isGroup())) {
             throw new RuntimeException("Client is not of type client or group");
         }
     }
 
     private void ensureGroup() {
-        if(!isGroup()) {
+        if (!isGroup()) {
             throw new RuntimeException("Client is not of type group");
         }
     }
 
     private void ensureGroupOrSelf() {
-        if(!(isGroup() || isSelf())) {
+        if (!(isGroup() || isSelf())) {
             throw new RuntimeException("Client is not of type group or self");
         }
     }
@@ -403,7 +345,7 @@ public class TalkClientContact implements Serializable {
     }
 
     public String getNickname() {
-        if(nickname == null || nickname.isEmpty()) {
+        if (nickname == null || nickname.isEmpty()) {
             return getName();
         }
         return nickname;
@@ -484,68 +426,6 @@ public class TalkClientContact implements Serializable {
         this.groupKey = groupKey;
     }
 
-    @GroupMethodOnly
-    public ForeignCollection<TalkClientMembership> getGroupMemberships() {
-        ensureGroup();
-        return groupMemberships;
-    }
-
-    @GroupMethodOnly
-    public TalkClientMembership getSelfClientMembership(XoClient theClient) {
-        ensureGroup();
-        if(!this.isGroupRegistered()) {
-            return null;
-        }
-        try {
-            TalkClientContact contact = theClient.getSelfContact();
-            if (contact != null) {
-                TalkClientMembership membership = theClient.getDatabase().findMembershipByContacts(this.getClientContactId(),contact.getClientContactId(),false);
-                return membership;
-             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-/*
-        ensureGroup();
-        ForeignCollection<TalkClientMembership> memberships = this.getGroupMemberships();
-        if(memberships != null && memberships.size() > 0) {
-            for(TalkClientMembership membership: memberships) {
-                TalkClientContact contact = membership.getClientContact();
-                if (contact != null && contact.isSelf()) {
-                    return membership;
-                }
-            }
-        }
-        */
-        return null;
-    }
-
-    @GroupMethodOnly
-    public boolean isEmptyGroup() {
-        return getJoinedGroupContactsExceptSelf().isEmpty();
-    }
-
-    @GroupMethodOnly
-    public List<TalkClientContact> getJoinedGroupContactsExceptSelf() {
-        ArrayList<TalkClientContact> joinedContacts = new ArrayList<TalkClientContact>();
-
-        if (getGroupMemberships() != null) {
-            for (TalkClientMembership membership : getGroupMemberships()) {
-                TalkClientContact contact = membership.getClientContact();
-                TalkGroupMember groupMember = membership.getMember();
-
-                boolean isNotSelf = contact != null && !contact.isSelf();
-                boolean isJoined = groupMember != null && groupMember.isJoined();
-
-                if (isNotSelf && isJoined) {
-                    joinedContacts.add(contact);
-                }
-            }
-        }
-
-        return joinedContacts;
-    }
-
     public boolean isNearby() {
         return isNearby;
     }
@@ -558,11 +438,11 @@ public class TalkClientContact implements Serializable {
     public boolean initializeSelf() {
         boolean changed = false;
         ensureSelf();
-        if(this.self == null) {
+        if (this.self == null) {
             this.self = new TalkClientSelf();
             changed = true;
         }
-        if(this.clientPresence == null) {
+        if (this.clientPresence == null) {
             this.clientPresence = new TalkPresence();
             changed = true;
         }
@@ -590,30 +470,32 @@ public class TalkClientContact implements Serializable {
     @ClientOrSelfMethodOnly
     public void updatePresence(TalkPresence presence) {
         ensureClientOrSelf();
-        if(this.clientPresence == null) {
+        if (this.clientPresence == null) {
             this.clientPresence = presence;
         } else {
             this.clientPresence.updateWith(presence);
         }
     }
+
     @ClientOrSelfMethodOnly
     public void modifyPresence(TalkPresence presence, Set<String> fields) {
         ensureClientOrSelf();
-        if(this.clientPresence == null) {
+        if (this.clientPresence == null) {
             throw new RuntimeException("try to modify empty presence");
         } else {
-            this.clientPresence.updateWith(presence,fields);
+            this.clientPresence.updateWith(presence, fields);
         }
     }
+
     @ClientMethodOnly
     public void updateRelationship(TalkRelationship relationship) {
         ensureClient();
-        if(this.clientRelationship == null) {
+        if (this.clientRelationship == null) {
             this.clientRelationship = relationship;
         } else {
             this.clientRelationship.updateWith(relationship);
         }
-        if(this.clientRelationship.isRelated()) {
+        if (this.clientRelationship.isRelated()) {
             markAsRelated();
         }
     }
@@ -621,11 +503,11 @@ public class TalkClientContact implements Serializable {
     @GroupMethodOnly
     public void updateGroupPresence(TalkGroup group) {
         ensureGroup();
-        if(this.groupPresence == null) {
-            if(group.getGroupId() != null) {
+        if (this.groupPresence == null) {
+            if (group.getGroupId() != null) {
                 groupId = group.getGroupId();
             }
-            if(group.getGroupTag() != null) {
+            if (group.getGroupTag() != null) {
                 groupTag = group.getGroupTag();
             }
             this.groupPresence = group;
@@ -637,12 +519,12 @@ public class TalkClientContact implements Serializable {
     @GroupMethodOnly
     public void updateGroupMember(TalkGroupMember member) {
         ensureGroup();
-        if(this.groupMember == null) {
+        if (this.groupMember == null) {
             this.groupMember = member;
         } else {
             this.groupMember.updateWith(member);
         }
-        if(this.groupMember.isInvolved()) {
+        if (this.groupMember.isInvolved()) {
             markAsRelated();
         }
     }
@@ -656,11 +538,7 @@ public class TalkClientContact implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj != null && obj instanceof TalkClientContact && clientContactId == ((TalkClientContact)obj).clientContactId) {
-            return true;
-        } else {
-            return false;
-        }
+        return obj != null && obj instanceof TalkClientContact && clientContactId == ((TalkClientContact) obj).clientContactId;
     }
 
     @Override

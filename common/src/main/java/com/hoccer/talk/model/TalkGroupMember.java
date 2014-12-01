@@ -97,11 +97,6 @@ public class TalkGroupMember {
     }
 
     @JsonIgnore
-    public boolean isJoinedOrInvited() {
-        return isJoined() || isInvited();
-    }
-
-    @JsonIgnore
     public boolean isGroupRemoved() {
         return this.state.equals(STATE_GROUP_REMOVED);
     }

@@ -46,7 +46,7 @@ public class MediaCollectionTest {
             }
         });
 
-        mDatabase.createTables(mConnectionSource);
+        XoClientDatabase.createTables(mConnectionSource);
         mDatabase.initialize();
     }
 
@@ -57,8 +57,6 @@ public class MediaCollectionTest {
 
     @Test
     public void testCreateCollection() {
-        LOG.info("testCreateCollection");
-
         // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
         final ValueContainer<Boolean> onMediaCollectionDeletedCalled = new ValueContainer<Boolean>(false);
@@ -75,13 +73,7 @@ public class MediaCollectionTest {
         });
 
         String collectionName = "testCreateCollection_collection";
-        TalkClientMediaCollection collection = null;
-        try {
-            collection = mDatabase.createMediaCollection(collectionName);
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-            fail();
-        }
+        TalkClientMediaCollection collection = createCollectionWithItems(collectionName, 0);
 
         assertNotNull(collection);
         assertEquals(collectionName, collection.getName());
@@ -119,16 +111,8 @@ public class MediaCollectionTest {
 
     @Test
     public void testDeleteCollectionByReference() {
-        LOG.info("testDeleteCollectionByReference");
-
         String collectionName = "testDeleteCollectionByReference_collection";
-        TalkClientMediaCollection collection = null;
-        try {
-            collection = mDatabase.createMediaCollection(collectionName);
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-            fail();
-        }
+        TalkClientMediaCollection collection = createCollectionWithItems(collectionName, 0);
 
         // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
@@ -176,16 +160,8 @@ public class MediaCollectionTest {
 
     @Test
     public void testDeleteCollectionById() {
-        LOG.info("testDeleteCollectionById");
-
         String collectionName = "testDeleteCollectionById_collection";
-        TalkClientMediaCollection collection = null;
-        try {
-            collection = mDatabase.createMediaCollection(collectionName);
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-            fail();
-        }
+        TalkClientMediaCollection collection = createCollectionWithItems(collectionName, 0);
 
         // register MediaCollection listener
         final ValueContainer<Boolean> onMediaCollectionCreatedCalled = new ValueContainer<Boolean>(false);
@@ -233,20 +209,8 @@ public class MediaCollectionTest {
 
     @Test
     public void testCreateCollectionFromDatabase() {
-        LOG.info("testCreateCollectionFromDatabase");
-
         String collectionName = "testCreateCollectionFromDatabase";
-        List<XoTransfer> items = createDownloadItems(mDatabase, 5);
-
-        TalkClientMediaCollection collection = null;
-        try {
-            collection = mDatabase.createMediaCollection(collectionName);
-            addItemsToCollection(items, collection);
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-            fail();
-        }
-
+        TalkClientMediaCollection collection = createCollectionWithItems(collectionName, 5);
 
         TalkClientMediaCollection collectionCopy = null;
         try {
@@ -259,27 +223,16 @@ public class MediaCollectionTest {
             fail();
         }
 
-        validateItemsInCollection(items, collectionCopy);
+        validateItemsInCollection(collection.getItems(), collectionCopy);
     }
 
     @Test
     public void testAddItems() {
-        LOG.info("testAddItems");
-
         String collectionName = "testAddItems_collection";
         int itemCount = 5;
-        List<XoTransfer> items = createDownloadItems(mDatabase, itemCount);
+        TalkClientMediaCollection collection = createCollectionWithItems(collectionName, 5);
 
-        TalkClientMediaCollection collection = null;
-        try {
-            collection = mDatabase.createMediaCollection(collectionName);
-            addItemsToCollection(items, collection);
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-            fail();
-        }
-
-        validateItemsInCollection(items, collection);
+        validateItemsInCollection(collection.getItems(), collection);
 
         // check database directly
         List<TalkClientMediaCollectionRelation> relations = findMediaCollectionRelationsOrderedByIndex(mDatabase, collection.getId());
@@ -287,14 +240,12 @@ public class MediaCollectionTest {
         assertEquals(itemCount, relations.size());
         for (int i = 0; i < itemCount; i++) {
             assertEquals(i, relations.get(i).getIndex());
-            assertEquals(items.get(i).getTransferId(), relations.get(i).getTransferItem().getTransferId());
+            assertEquals(collection.getItem(i).getTransferId(), relations.get(i).getTransferItem().getTransferId());
         }
     }
 
     @Test
     public void testInsertItems() {
-        LOG.info("testInsertItems");
-
         String collectionName = "testInsertItems_collection";
 
         TalkClientMediaCollection collection = null;
@@ -343,8 +294,6 @@ public class MediaCollectionTest {
 
     @Test
     public void testRemoveItems() {
-        LOG.info("testRemoveItems");
-
         String collectionName = "testRemoveItems_collection";
 
         TalkClientMediaCollection collection = null;
@@ -449,28 +398,8 @@ public class MediaCollectionTest {
 
     @Test
     public void testClearCollection() {
-        LOG.info("testClearCollection");
-
         String collectionName = "testClearCollection_collection";
-
-        TalkClientMediaCollection collection = null;
-        TalkClientDownload item0 = new TalkClientDownload();
-        TalkClientDownload item1 = new TalkClientDownload();
-        TalkClientDownload item2 = new TalkClientDownload();
-        try {
-            collection = mDatabase.createMediaCollection(collectionName);
-
-            // create some items and addItem to collection
-            mDatabase.saveClientDownload(item0);
-            mDatabase.saveClientDownload(item1);
-            mDatabase.saveClientDownload(item2);
-            collection.addItem(item0);
-            collection.addItem(item1);
-            collection.addItem(item2);
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-            fail();
-        }
+        TalkClientMediaCollection collection = createCollectionWithItems(collectionName, 5);
         collection.clear();
 
         assertEquals(0, collection.size());
@@ -478,8 +407,6 @@ public class MediaCollectionTest {
 
     @Test
     public void testReorderItems() {
-        LOG.info("testReorderItems");
-
         String collectionName = "testReorderItems_collection";
 
         TalkClientMediaCollection collection = null;
@@ -765,31 +692,12 @@ public class MediaCollectionTest {
 
     @Test
     public void testRegisterListener() {
-        LOG.info("testRegisterListener");
-
         final String collectionName = "testRegisterListener_collection";
-        TalkClientMediaCollection collection = null;
-        TalkClientDownload item0 = new TalkClientDownload();
-        TalkClientDownload item1 = new TalkClientDownload();
-        TalkClientDownload item2 = new TalkClientDownload();
-        TalkClientDownload item3 = new TalkClientDownload();
-        TalkClientDownload item4 = new TalkClientDownload();
-        TalkClientDownload item5 = new TalkClientDownload();
+        TalkClientMediaCollection collection = createCollectionWithItems(collectionName, 5);
+
+        TalkClientDownload item = new TalkClientDownload();
         try {
-            collection = mDatabase.createMediaCollection(collectionName);
-
-            mDatabase.saveClientDownload(item0);
-            mDatabase.saveClientDownload(item1);
-            mDatabase.saveClientDownload(item2);
-            mDatabase.saveClientDownload(item3);
-            mDatabase.saveClientDownload(item4);
-            mDatabase.saveClientDownload(item5);
-
-            collection.addItem(item0);
-            collection.addItem(item1);
-            collection.addItem(item2);
-            collection.addItem(item3);
-            collection.addItem(item4);
+            mDatabase.saveClientDownload(item);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -797,9 +705,7 @@ public class MediaCollectionTest {
 
         final String expectedCollectionName = "newCollectionName";
 
-        final TalkClientDownload expectedItemAdded = item5;
         final int expectedItemAddedIndex = 3;
-        final TalkClientDownload expectedItemRemoved = item5;
         final int expectedItemRemovedIndex = 3;
         final int expectedItemOrderFrom = 2;
         final int expectedItemOrderTo = 4;
@@ -807,8 +713,8 @@ public class MediaCollectionTest {
         ListenerTester listenerTester = new ListenerTester(collection);
 
         collection.setName(expectedCollectionName);
-        collection.addItem(3, expectedItemAdded);
-        collection.removeItem(expectedItemRemoved);
+        collection.addItem(3, item);
+        collection.removeItem(item);
         collection.reorderItemIndex(2, 4);
         collection.clear();
 
@@ -824,12 +730,12 @@ public class MediaCollectionTest {
         assertEquals(1, listenerTester.onItemRemovedCalled.size()); // callback is only invoked if MediaCollection instances are cached
         assertEquals(collection, listenerTester.onItemRemovedCalled.get(0).args[0]);
         assertEquals(expectedItemRemovedIndex, listenerTester.onItemRemovedCalled.get(0).args[1]);
-        assertEquals(expectedItemRemoved, listenerTester.onItemRemovedCalled.get(0).args[2]);
+        assertEquals(item, listenerTester.onItemRemovedCalled.get(0).args[2]);
 
         assertEquals(1, listenerTester.onItemAddedCalled.size());
         assertEquals(collection, listenerTester.onItemAddedCalled.get(0).args[0]);
         assertEquals(expectedItemAddedIndex, listenerTester.onItemAddedCalled.get(0).args[1]);
-        assertEquals(expectedItemAdded, listenerTester.onItemAddedCalled.get(0).args[2]);
+        assertEquals(item, listenerTester.onItemAddedCalled.get(0).args[2]);
 
         assertEquals(1, listenerTester.onCollectionClearedCalled.size());
         assertEquals(collection, listenerTester.onItemAddedCalled.get(0).args[0]);
@@ -837,8 +743,6 @@ public class MediaCollectionTest {
 
     @Test
     public void testUnregisterListener() {
-        LOG.info("testUnregisterListener");
-
         final String collectionName = "testUnregisterListener_collection";
         TalkClientMediaCollection collection = null;
         TalkClientDownload item0 = new TalkClientDownload();
@@ -885,8 +789,6 @@ public class MediaCollectionTest {
 
     @Test
     public void testIterator() {
-        LOG.info("testIterator");
-
         final String collectionName = "testIterator_collection";
 
         TalkClientMediaCollection collection = null;
@@ -939,9 +841,8 @@ public class MediaCollectionTest {
 
     @Test
     public void testDeleteDownload() {
-        LOG.info("testDeleteDownload");
-
         final String collectionName = "testDeleteDownload_collection";
+
         TalkClientMediaCollection collection = null;
         TalkClientDownload item0 = new TalkClientDownload();
         TalkClientDownload item1 = new TalkClientDownload();
@@ -985,8 +886,6 @@ public class MediaCollectionTest {
 
     @Test
     public void testGetItems() {
-        LOG.info("testGetItems");
-
         final String collectionName = "testGetItems_collection";
         TalkClientMediaCollection collection = null;
 
@@ -1021,7 +920,22 @@ public class MediaCollectionTest {
     //////// Helper methods ////////
     ////////////////////////////////
 
-    private static List<XoTransfer> createDownloadItems(XoClientDatabase database, int count) {
+    private TalkClientMediaCollection createCollectionWithItems(String collectionName, int itemCount) {
+        List<XoTransfer> items = createDownloadItems(itemCount);
+
+        TalkClientMediaCollection collection;
+        try {
+            collection = mDatabase.createMediaCollection(collectionName);
+            addItemsToCollection(items, collection);
+            return collection;
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            fail();
+        }
+        return null;
+    }
+
+    private List<XoTransfer> createDownloadItems(int count) {
         ArrayList<XoTransfer> list = new ArrayList<XoTransfer>();
 
         try {
@@ -1030,7 +944,7 @@ public class MediaCollectionTest {
 
                 // set unique value on data field to check serialization
                 item.setContentHmac(String.valueOf(i));
-                database.saveClientDownload(item);
+                mDatabase.saveClientDownload(item);
                 list.add(item);
             }
         } catch (SQLException e) {
@@ -1042,8 +956,8 @@ public class MediaCollectionTest {
     }
 
     private static void addItemsToCollection(List<XoTransfer> items, TalkClientMediaCollection collection) {
-        for (int i = 0; i < items.size(); i++) {
-            collection.addItem(items.get(i));
+        for (XoTransfer item : items) {
+            collection.addItem(item);
         }
     }
 

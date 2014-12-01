@@ -57,6 +57,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             // the first database version for "Hoccer" is 21, earlier migrations have been removed
             if (oldVersion < 22) {
                 db.execSQL("DROP TABLE clientSmsToken");
+                db.execSQL("DROP TABLE clientMembership");
             }
         } catch (android.database.SQLException e) {
             LOG.error("sql error upgrading database", e);

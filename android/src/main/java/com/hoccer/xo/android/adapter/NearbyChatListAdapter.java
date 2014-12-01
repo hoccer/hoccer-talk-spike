@@ -15,6 +15,7 @@ import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
+import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import com.artcom.hoccer.R;
@@ -193,10 +194,10 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
         }
 
         try {
-            final List<TalkClientContact> nearbyContacts = mDatabase.findClientsInGroup(group);
+            final List<TalkClientContact> nearbyContacts = mDatabase.findContactsInGroupByState(group.getGroupId(), TalkGroupMember.STATE_JOINED);
             CollectionUtils.filterInverse(nearbyContacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
 
-            if (!group.isEmptyGroup()) {
+            if (!nearbyContacts.isEmpty()) {
                 group.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
                 nearbyContacts.add(0, group);
             }

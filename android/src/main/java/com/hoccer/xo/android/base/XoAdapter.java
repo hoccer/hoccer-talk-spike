@@ -7,7 +7,6 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,68 +15,54 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Base class for list adapters
- *
+ * <p/>
  * This base class implements our own lifecycle for adapters
  * so that they can attach client listeners and manage resources.
- *
+ * <p/>
  * Adapters get the following lifecycle calls, similar to activities:
  * onCreate, onResume, onPause, onDestroy
- *
+ * <p/>
  * Adapter reload is integrated into the lifecycle by implementing
  * an onRequestReload method. The method requestReload may be used
  * to request a reload whenever the adapter becomes active.
- *
+ * <p/>
  * Reloads are rate-limited to a minimum interval to prevent
  * hogging the CPU with superfluous view updates.
  */
 public abstract class XoAdapter extends BaseAdapter {
 
+    private static final Logger LOG = Logger.getLogger(XoAdapter.class);
+
     private static final long RATE_LIMIT_MSECS = 1000;
 
-    @Nullable
-    protected XoActivity mActivity = null;
+    protected final XoActivity mActivity;
 
-    @Nullable
-    protected XoClientDatabase mDatabase = null;
+    protected final XoClientDatabase mDatabase;
 
-    @Nullable
-    protected Resources mResources = null;
+    protected final Resources mResources;
 
-    @Nullable
-    protected LayoutInflater mInflater = null;
+    protected final LayoutInflater mInflater;
 
-    @Nullable
-    private ScheduledExecutorService mExecutor = null;
+    private final ScheduledExecutorService mExecutor;
 
-    @Nullable
-    private ScheduledFuture<?> mNotifyFuture = null;
-
-    protected Logger LOG = null;
+    private ScheduledFuture<?> mNotifyFuture;
 
     private AdapterReloadListener mAdapterReloadListener;
 
-    private boolean mActive = false;
-    private boolean mNeedsReload = false;
+    private boolean mActive;
+    private boolean mNeedsReload;
     private long mNotifyTimestamp;
 
-    public XoAdapter(XoActivity activity) {
-        LOG = Logger.getLogger(getClass());
-
-        if (activity != null) {
-            mActivity = activity;
-            mDatabase = mActivity.getXoDatabase();
-            mInflater = mActivity.getLayoutInflater();
-            mResources = mActivity.getResources();
-            mExecutor = mActivity.getBackgroundExecutor();
-        } else {
-            throw new NullPointerException("Activity cannot be null.");
-        }
+    protected XoAdapter(XoActivity activity) {
+        mActivity = activity;
+        mDatabase = mActivity.getXoDatabase();
+        mInflater = mActivity.getLayoutInflater();
+        mResources = mActivity.getResources();
+        mExecutor = mActivity.getBackgroundExecutor();
     }
 
     public void runOnUiThread(Runnable runnable) {
-        if (mActivity != null) {
-            mActivity.runOnUiThread(runnable);
-        }
+        mActivity.runOnUiThread(runnable);
     }
 
     public XoClient getXoClient() {
@@ -85,10 +70,7 @@ public abstract class XoAdapter extends BaseAdapter {
     }
 
     public File getAvatarDirectory() {
-        if (mActivity != null) {
-            return new File(mActivity.getFilesDir(), "avatars");
-        }
-        return null;
+        return new File(mActivity.getFilesDir(), "avatars");
     }
 
     public AdapterReloadListener getAdapterReloadListener() {
@@ -201,5 +183,4 @@ public abstract class XoAdapter extends BaseAdapter {
 
         public void onAdapterReloadFinished(XoAdapter adapter);
     }
-
 }

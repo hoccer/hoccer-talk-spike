@@ -150,16 +150,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         finishActivityIfContactDeleted();
 
         updateView();
-        updateActionBar();
-    }
-
-    public void updateActionBar() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                getActivity().getActionBar().setTitle(R.string.welcome_to_title);
-            }
-        });
     }
 
     public void finishActivityIfContactDeleted() {

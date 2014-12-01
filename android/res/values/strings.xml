@@ -47,7 +47,7 @@
 
     <!-- Friend decline invitation dialog -->
     <string name="friend_request_decline_invitation_title">Decline invitation?</string>
-    <string name="friend_request_decline_invitation_message">Do you really want to decline the invitation from %1$s?</string>
+    <string name="friend_request_decline_invitation_message">Do you really want to decline the invitation?</string>
 
     <!-- Groups fragment -->
     <plurals name="groups_and_x_more">
@@ -353,14 +353,13 @@
         the fingerprint seen by your friends in your contact card.
     </string>
     <string name="my_profile_title">My profile</string>
-    <string name="welcome_to_title">Welcome to XO!</string>
     <string name="contact_item_received_attachment">Received %1$s attachment</string>
     <string name="contact_item_sent_attachment">Sent %1$s attachment</string>
     <string name="error_avatar_selection">The image you have selected is not suitable as Avatar.</string>
     <string name="error_attachment_selection">The file you have selected cannot be used as an attachment.</string>
-    <string name="sms_invitation_text">Hey! I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\nxo %3$s</string>
+    <string name="sms_invitation_text">Hey! I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as a contact:\n%1$s%2$s\n%3$s</string>
     <string name="email_invitation_subject">Join me at ${app.name}!</string>
-    <string name="email_invitation_text">Hey!&lt;br&gt;I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as contact:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
+    <string name="email_invitation_text">Hey!&lt;br&gt;I\'m now using the free app ${app.name} for secure chatting. Download it now and add me as contact:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;%3$s</string>
     <string name="dialog_export_credentials_title">Export credentials</string>
     <string name="export_credentials_success">Successfully saved your credentials.</string>
     <string name="export_credentials_failure">Error while saving your credentials.</string>

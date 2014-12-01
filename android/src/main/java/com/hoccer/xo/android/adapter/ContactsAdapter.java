@@ -12,6 +12,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ import java.util.List;
 public abstract class ContactsAdapter extends XoAdapter
         implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
 
+    private static final Logger LOG = Logger.getLogger(ContactsAdapter.class);
+
     protected final static long ITEM_ID_UNKNOWN = -1000;
     protected final static long ITEM_ID_CLIENT_HEADER = -1;
     protected final static long ITEM_ID_GROUP_HEADER = -2;
@@ -38,19 +41,19 @@ public abstract class ContactsAdapter extends XoAdapter
 
     protected final static int VIEW_TYPE_COUNT = 4;
 
-    private boolean showNearbyHistory = false;
-    private long mNearbyMessagesCount = 0;
+    private boolean showNearbyHistory;
+    private long mNearbyMessagesCount;
 
-    public ContactsAdapter(XoActivity activity) {
+    protected ContactsAdapter(XoActivity activity) {
         super(activity);
     }
 
-    public ContactsAdapter(XoActivity activity, boolean showNearbyHistory) {
+    protected ContactsAdapter(XoActivity activity, boolean showNearbyHistory) {
         super(activity);
         this.showNearbyHistory = showNearbyHistory;
     }
 
-    Filter mFilter = null;
+    Filter mFilter;
 
     List<TalkClientContact> mClientContacts = new ArrayList<TalkClientContact>();
 
@@ -86,8 +89,7 @@ public abstract class ContactsAdapter extends XoAdapter
         super.onReloadRequest();
         synchronized (this) {
             try {
-                int oldItemCount = getCount();
-                List<TalkClientContact> newClients = mDatabase.findAllClientContactsOrderedByRecentMessage();
+                List<TalkClientContact> newClients = mDatabase.findAllContactsExceptSelfOrderedByRecentMessage();
                 LOG.debug("found " + newClients.size() + " contacts");
 
                 if (mFilter != null) {
@@ -116,7 +118,7 @@ public abstract class ContactsAdapter extends XoAdapter
         });
     }
 
-    private List<TalkClientContact> filter(List<TalkClientContact> in, Filter filter) {
+    private static List<TalkClientContact> filter(List<TalkClientContact> in, Filter filter) {
         ArrayList<TalkClientContact> res = new ArrayList<TalkClientContact>();
         for (TalkClientContact contact : in) {
             if (filter.shouldShow(contact)) {
@@ -257,7 +259,7 @@ public abstract class ContactsAdapter extends XoAdapter
 
         // TODO: only if nearby history was found in db
         if (position == getCount() - 1 && mNearbyMessagesCount > 0) {
-            return new String("nearbyArchived");
+            return "nearbyArchived";
         }
         return null;
     }

@@ -25,7 +25,7 @@ public class ClientDeleteContact extends TalkToolClientCommand {
 
         TalkClientContact contactToBeDeleted = client.getDatabase().findContactByClientId(contactClientId, false);
         if (contactToBeDeleted == null) {
-            contactToBeDeleted = client.getDatabase().findContactByGroupId(contactClientId, false);
+            contactToBeDeleted = client.getDatabase().findGroupContactByGroupId(contactClientId, false);
         }
 
         // Validate that the client knows the contact

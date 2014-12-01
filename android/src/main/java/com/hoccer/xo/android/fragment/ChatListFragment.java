@@ -206,7 +206,7 @@ public class ChatListFragment extends SearchableListFragment {
 
     public void onGroupCreationSucceeded(int contactId) {
         try {
-            TalkClientContact contact = XoApplication.getXoClient().getDatabase().findClientContactById(contactId);
+            TalkClientContact contact = XoApplication.getXoClient().getDatabase().findContactById(contactId);
             if (contact != null) {
                 ((XoActivity) getActivity()).showContactProfile(contact);
             }

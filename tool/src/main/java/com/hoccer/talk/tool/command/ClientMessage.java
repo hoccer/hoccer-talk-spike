@@ -151,7 +151,7 @@ public class ClientMessage extends TalkToolCommand {
         // if nothing found as client it might be a group
         if (contact == null) {
             try {
-                contact = client.getDatabase().findContactByGroupId(clientOrGroupId, false);
+                contact = client.getDatabase().findGroupContactByGroupId(clientOrGroupId, false);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
