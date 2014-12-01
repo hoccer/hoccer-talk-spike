@@ -16,22 +16,14 @@ import static junit.framework.TestCase.*;
 
 public class BackupUtilsTest {
 
+    private static final File BACKUP_CREDENTIALS_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_BACKUP_CREDENTIALS_PATH);
+    private static final File BACKUP_DB_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_BACKUP_DB_PATH);
+    private static final File BACKUP_COMPLETE_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_BACKUP_COMPLETE_PATH);
 
-    public static final String RESOURCE_BACKUP_CREDENTIALS_PATH = "/credentials.json";
-    public static final String RESOURCE_BACKUP_COMPLETE_PATH = "/hoccer_backup_20141127_144625_with_attachments.zip";
-    public static final String RESOURCE_BACKUP_DB_PATH = "/hoccer_backup_20141201_104631_db.zip";
+    private static final File DATABASE_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_DB_FILE);
+    private static final List<File> ATTACHMENT_FILES = BackupTestResources.getAttachmentFiles();
 
-    private static final File BACKUP_CREDENTIALS_FILE = getResourceFile(RESOURCE_BACKUP_CREDENTIALS_PATH);
-    private static final File BACKUP_DB_FILE = getResourceFile(RESOURCE_BACKUP_DB_PATH);
-    private static final File BACKUP_COMPLETE_FILE = getResourceFile(RESOURCE_BACKUP_COMPLETE_PATH);
-
-    public static final String RESOURCE_DB_FILE = "/database.db";
-    public static final String RESOURCE_ATTACHMENT_FILE_01 = "/IMG_20141120_130456_432.jpg";
-
-    private static final File DATABASE_FILE = getResourceFile(RESOURCE_DB_FILE);
-    private static final List<File> ATTACHMENT_FILES = getAttachmentFiles();
-
-    private static final File TARGET_DIR = createTargetDirectory();
+    private static final File TARGET_DIR = BackupTestResources.createTargetDirectory();
 
     public static final String CLIENT_NAME = "clientName";
     public static final String PASSWORD = "12345678";
@@ -137,30 +129,5 @@ public class BackupUtilsTest {
         assertTrue(TARGET_DIR.listFiles().length > 1);
 
         org.apache.commons.io.FileUtils.cleanDirectory(TARGET_DIR);
-    }
-
-    private static File getResourceFile(String path) {
-
-        URL url = BackupUtilsTest.class.getResource(path);
-        assertNotNull(url);
-
-        return new File(url.getFile());
-    }
-
-    private static List<File> getAttachmentFiles() {
-
-        URL attachmentFileUrl = BackupUtilsTest.class.getResource(RESOURCE_ATTACHMENT_FILE_01);
-        assertNotNull(attachmentFileUrl);
-
-        List<File> attachmentFiles = new ArrayList<File>();
-        attachmentFiles.add(new File(attachmentFileUrl.getFile()));
-        return attachmentFiles;
-    }
-
-    private static File createTargetDirectory() {
-
-        File targetDir = new File(BackupUtilsTest.class.getResource("").getFile(), "target");
-        targetDir.mkdir();
-        return targetDir;
     }
 }
