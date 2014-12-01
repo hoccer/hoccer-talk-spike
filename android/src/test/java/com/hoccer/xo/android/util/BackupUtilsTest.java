@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.util;
 
 import com.hoccer.xo.android.backup.*;
-import org.apache.commons.io.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,26 +11,30 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static junit.framework.Assert.*;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 
 
 public class BackupUtilsTest {
 
+
+    public static final String RESOURCE_BACKUP_CREDENTIALS_PATH = "/credentials.json";
+    public static final String RESOURCE_BACKUP_COMPLETE_PATH = "/hoccer_backup_20141127_144625_with_attachments.zip";
+    public static final String RESOURCE_BACKUP_DB_PATH = "/hoccer_backup_20141201_104631_db.zip";
+
+    private static final File BACKUP_CREDENTIALS_FILE = getResourceFile(RESOURCE_BACKUP_CREDENTIALS_PATH);
+    private static final File BACKUP_DB_FILE = getResourceFile(RESOURCE_BACKUP_DB_PATH);
+    private static final File BACKUP_COMPLETE_FILE = getResourceFile(RESOURCE_BACKUP_COMPLETE_PATH);
+
     public static final String RESOURCE_DB_FILE = "/database.db";
     public static final String RESOURCE_ATTACHMENT_FILE_01 = "/IMG_20141120_130456_432.jpg";
-    public static final String RESOURCE_BACKUP_FILE = "/hoccer_backup_20141127_144625.zip";
 
-    public static final String PASSWORD = "12345678";
-    public static final String CLIENT_NAME = "clientName";
-
-    private static final File BACKUP_FILE = getResourceFile(RESOURCE_BACKUP_FILE);
     private static final File DATABASE_FILE = getResourceFile(RESOURCE_DB_FILE);
     private static final List<File> ATTACHMENT_FILES = getAttachmentFiles();
 
     private static final File TARGET_DIR = createTargetDirectory();
+
+    public static final String CLIENT_NAME = "clientName";
+    public static final String PASSWORD = "12345678";
 
     @Before
     public void setup() {
@@ -41,13 +44,17 @@ public class BackupUtilsTest {
         assertNotNull(ATTACHMENT_FILES);
         assertFalse("Attachment files missing", ATTACHMENT_FILES.isEmpty());
 
-        assertNotNull(BACKUP_FILE);
+        assertNotNull(BACKUP_COMPLETE_FILE);
+
+        assertNotNull(BACKUP_CREDENTIALS_FILE);
+
+        assertNotNull(BACKUP_DB_FILE);
 
         assertNotNull(TARGET_DIR);
     }
 
     @Test
-    public void testCreateDatabaseBackup() throws Exception {
+    public void testCreateDatabaseBackupFile() throws Exception {
 
         String filename = BackupUtils.createUniqueBackupFilename() + ".zip";
         File backupFile = new File(getClass().getResource("").getFile(), filename);
@@ -63,7 +70,7 @@ public class BackupUtilsTest {
     }
 
     @Test
-    public void testCreateDatabaseBackupWithAttachments() throws Exception {
+    public void testCreateDatabaseBackupFileWithAttachments() throws Exception {
 
         String filename = BackupUtils.createUniqueBackupFilename() + ".zip";
         File backupFile = new File(getClass().getResource("").getFile(), filename);
@@ -81,7 +88,7 @@ public class BackupUtilsTest {
     @Test
     public void testReadMetadata() throws Exception {
 
-        BackupMetadata metadata = BackupUtils.readMetadata(BACKUP_FILE);
+        BackupMetadata metadata = BackupUtils.readMetadata(BACKUP_COMPLETE_FILE);
         assertNotNull(metadata);
         assertEquals(BackupType.COMPLETE, metadata.getBackupType());
         assertEquals(CLIENT_NAME, metadata.getClientName());
@@ -89,9 +96,19 @@ public class BackupUtilsTest {
     }
 
     @Test
+    public void testGetBackupFiles() {
+
+        List<File> backupFiles = BackupUtils.getBackupFiles(BACKUP_COMPLETE_FILE.getParentFile());
+        assertEquals(3, backupFiles.size());
+        assertTrue(backupFiles.contains(BACKUP_CREDENTIALS_FILE));
+        assertTrue(backupFiles.contains(BACKUP_DB_FILE));
+        assertTrue(backupFiles.contains(BACKUP_COMPLETE_FILE));
+    }
+
+    @Test
     public void testReadBackup() throws BackupFactory.BackupTypeNotSupportedException, IOException {
 
-        Backup backup = BackupFactory.readBackup(BACKUP_FILE);
+        Backup backup = BackupFactory.readBackup(BACKUP_COMPLETE_FILE);
         assertNotNull(backup);
         assertTrue(backup instanceof CompleteBackup);
     }
@@ -102,7 +119,7 @@ public class BackupUtilsTest {
         File databaseTarget = new File(TARGET_DIR, "database.db");
         assertNotNull(databaseTarget);
 
-        BackupUtils.importBackup(BACKUP_FILE, databaseTarget, PASSWORD);
+        BackupUtils.importBackup(BACKUP_COMPLETE_FILE, databaseTarget, PASSWORD);
         assertTrue(databaseTarget.length() > 0);
 
         boolean deleted = databaseTarget.delete();
@@ -115,7 +132,7 @@ public class BackupUtilsTest {
         File databaseTarget = new File(TARGET_DIR, "database.db");
         assertNotNull(databaseTarget);
 
-        BackupUtils.importBackup(BACKUP_FILE, databaseTarget, TARGET_DIR, PASSWORD);
+        BackupUtils.importBackup(BACKUP_COMPLETE_FILE, databaseTarget, TARGET_DIR, PASSWORD);
         assertTrue(databaseTarget.length() > 0);
         assertTrue(TARGET_DIR.listFiles().length > 1);
 

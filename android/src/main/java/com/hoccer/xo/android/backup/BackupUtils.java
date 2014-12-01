@@ -3,11 +3,13 @@ package com.hoccer.xo.android.backup;
 import com.google.gson.Gson;
 import com.hoccer.talk.crypto.CryptoJSON;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -24,6 +26,27 @@ public class BackupUtils {
     public static final String DB_CONTENT_TYPE = "database";
     public static final String DB_FILENAME_ENCRYPTED = "database.json";
     public static final String METADATA_FILENAME = "metadata.json";
+
+    private static final Logger LOG = Logger.getLogger(BackupUtils.class.getName());
+
+    private static FileFilter mBackupFileFilter = new FileFilter() {
+        @Override
+        public boolean accept(File file) {
+            if (file.getName().equals(CredentialsBackup.BACKUP_FILENAME)) {
+                return true;
+            } else if (FileFilterUtils.suffixFileFilter("zip").accept(file)) {
+                try {
+                    BackupMetadata metadata = BackupUtils.readMetadata(file);
+                    if (metadata.getBackupType() != null) {
+                        return true;
+                    }
+                } catch (IOException e) {
+                    LOG.error("Reading metadata file of " + file + " failed");
+                }
+            }
+            return false;
+        }
+    };;
 
     public static void createBackupFile(File out, File database, List<File> attachments, BackupMetadata metadata, String password) throws Exception {
 
@@ -144,7 +167,6 @@ public class BackupUtils {
 
             if (zipEntry.getName().equals(METADATA_FILENAME)) {
                 byte[] bytes = readFileEntry(zis);
-                // convert bytes to json string and parse TODO
                 result = new String(bytes, "UTF-8");
                 break;
             }
@@ -160,16 +182,9 @@ public class BackupUtils {
         List<File> results = new ArrayList<File>();
 
         if (parentDir != null && parentDir.isDirectory()) {
-
-            File[] files = parentDir.listFiles();
+            File[] files = parentDir.listFiles(mBackupFileFilter);
             if (files != null) {
-                for (File file : files) {
-                    String filename = file.getName();
-                    String extension = FilenameUtils.getExtension(filename);
-                    if (filename.startsWith(BACKUP_FILENAME_PREFIX) && extension.equals(FILE_EXTENSION_ZIP)) {
-                        results.add(file);
-                    }
-                }
+                Collections.addAll(results, files);
             }
         }
         return results;
