@@ -78,8 +78,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     };
 
     private int mUploadLimit = -1;
-
     private int mDownloadLimit = -1;
+
+    private Object mGroupCreationLock = new Object();
 
     /** Return the name of the given state */
     public static final String stateToString(int state) {
@@ -1002,127 +1003,29 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
     }
 
-    public void createGroup(final TalkClientContact groupContact) {
-        LOG.debug("createGroup()");
-
-        TalkGroup groupPresence = groupContact.getGroupPresence();
-        if (groupPresence == null) {
-            LOG.error("Can not create group since groupPresence is null.");
-            return;
-        }
-
-        resetIdle();
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    LOG.debug("creating group");
-                    TalkGroup groupPresence = groupContact.getGroupPresence();
-                    TalkClientUpload avatarUpload = groupContact.getAvatarUpload();
-
-                    groupContact.setAvatarUpload(null);
-
-                    TalkGroupMember member = new TalkGroupMember();
-                    member.setClientId(mSelfContact.getClientId());
-                    member.setRole(TalkGroupMember.ROLE_ADMIN);
-                    member.setState(TalkGroupMember.STATE_JOINED);
-                    member.setMemberKeyId(mSelfContact.getPublicKey().getKeyId()); // TODO: make sure all members are properly updated when the public key changes
-                    groupContact.updateGroupMember(member);
-
-                    generateGroupKey(groupContact);
-                    LOG.debug("creating group on server");
-                    String groupId = mServerRpc.createGroup(groupPresence);
-
-                    if(groupId == null) {
-                        return;
-                    }
-
-                    groupPresence.setGroupId(groupId);            // was null
-                    groupPresence.setState(TalkGroup.STATE_NONE); // was null
-                    member.setGroupId(groupId);
-                    groupContact.updateGroupId(groupId);
-                    groupContact.updateGroupPresence(groupPresence);   // was missing
-                    groupContact.setCreatedTimeStamp(new Date());
-
-                    try {
-                        mDatabase.saveGroupMember(member);
-                        mDatabase.saveGroup(groupPresence);
-                        mDatabase.saveContact(groupContact);
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-
-                    LOG.debug("new group contact " + groupContact.getClientContactId());
-
-                    for (IXoContactListener listener : mContactListeners) {
-                        listener.onContactAdded(groupContact);
-                    }
-
-                    if(avatarUpload != null) {
-                        setGroupAvatar(groupContact, avatarUpload);
-                    }
-                } catch (JsonRpcClientException e) {
-                    LOG.error("JSON RPC error while creating group: ", e);
-                } catch (Exception e) {
-                    LOG.error("Error while creating group: ", e);
-                }
-            }
-        });
+    public String createGroup(final String name) {
+        List<String> members = Collections.emptyList();
+        return createGroupWithContacts(name, members);
     }
 
-    public void createGroupWithContacts(final TalkClientContact groupContact, final String[] members, final String[] roles) {
-        LOG.debug("createGroupWithContacts()");
+    public String createGroupWithContacts(final String name, final List<String> members) {
         resetIdle();
+        final String tag = UUID.randomUUID().toString();
+
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    LOG.debug("creating group");
-                    TalkGroup groupPresence = groupContact.getGroupPresence();
-                    TalkClientUpload avatarUpload = groupContact.getAvatarUpload();
-                    groupContact.setAvatarUpload(null);
-
-                    TalkGroupMember member = new TalkGroupMember();
-                    member.setClientId(mSelfContact.getClientId());
-                    member.setRole(TalkGroupMember.ROLE_ADMIN);
-                    member.setState(TalkGroupMember.STATE_JOINED);
-                    member.setMemberKeyId(mSelfContact.getPublicKey().getKeyId()); // TODO: make sure all members are properly updated when the public key changes
-                    groupContact.updateGroupMember(member);
-                    generateGroupKey(groupContact);
                     LOG.debug("creating group on server");
+                    TalkGroup group = mServerRpc.createGroupWithMembers(
+                            TalkGroup.GROUP_TYPE_USER,
+                            tag,
+                            name,
+                            members.toArray(new String[members.size()]),
+                            createMemberRoles(members.size()));
 
-                    String tag = groupContact.getGroupTag();
-                    String name = groupContact.getName();
-                    TalkGroup createdGroup = mServerRpc.createGroupWithMembers(TalkGroup.GROUP_TYPE_USER, tag,
-                            name, members, roles);
-
-                    if(createdGroup == null) {
-                        return;
-                    }
-
-                    groupPresence.setGroupId(createdGroup.getGroupId());
-                    groupPresence.setState(TalkGroup.STATE_NONE);
-                    member.setGroupId(createdGroup.getGroupId());
-                    groupContact.updateGroupId(createdGroup.getGroupId());
-                    groupContact.updateGroupPresence(groupPresence);
-                    groupContact.setCreatedTimeStamp(new Date());
-
-                    try {
-                        mDatabase.saveGroupMember(member);
-                        mDatabase.saveGroup(groupPresence);
-                        mDatabase.saveContact(groupContact);
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-
-                    LOG.debug("new group contact " + groupContact.getClientContactId());
-
-                    for (IXoContactListener listener : mContactListeners) {
-                        listener.onContactAdded(groupContact);
-                    }
-
-                    if(avatarUpload != null) {
-                        setGroupAvatar(groupContact, avatarUpload);
+                    if (group != null) {
+                        updateGroupPresence(group);
                     }
                 } catch (JsonRpcClientException e) {
                     LOG.error("JSON RPC error while creating group: ", e);
@@ -1131,6 +1034,18 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
             }
         });
+
+        return tag;
+    }
+
+    private static String[] createMemberRoles(int count) {
+        String[] roles = new String[count];
+
+        for (int i = 0; i < count; i++) {
+            roles[i] = TalkGroupMember.ROLE_MEMBER;
+        }
+
+        return roles;
     }
 
     public void inviteClientToGroup(final String groupId, final String clientId) {
@@ -3035,17 +2950,22 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.info("updateGroupPresence(" + group.getGroupId() + ")");
 
         TalkClientContact groupContact;
+        boolean isNewGroup = false;
+
         try {
-            groupContact = mDatabase.findContactByGroupTag(group.getGroupTag());
-            if(groupContact == null) {
-                groupContact = mDatabase.findGroupContactByGroupId(group.getGroupId(), true);
+            synchronized (mGroupCreationLock) {
+                groupContact = mDatabase.findGroupContactByGroupId(group.getGroupId(), false);
+                if (groupContact == null) {
+                    groupContact = mDatabase.findGroupContactByGroupId(group.getGroupId(), true);
+                    isNewGroup = true;
+                }
             }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
             return;
         }
 
-        if(groupContact == null) {
+        if (groupContact == null) {
             LOG.warn("gp update for unknown group " + group.getGroupId());
             return;
         }
@@ -3078,6 +2998,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         LOG.info("updateGroupPresence(" + group.getGroupId() + ") - saved");
+
+        if (isNewGroup) {
+            for (IXoContactListener listener : mContactListeners) {
+                listener.onContactAdded(groupContact);
+            }
+        }
 
         for (IXoContactListener listener : mContactListeners) {
             listener.onGroupPresenceChanged(groupContact);
@@ -3138,15 +3064,17 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         TalkClientContact clientContact;
 
         try {
-            groupContact = mDatabase.findGroupContactByGroupId(member.getGroupId(), false);
-            if (groupContact == null) {
-                boolean createGroup = member.isInvolved() && !member.isGroupRemoved();
-                if (createGroup) {
-                    LOG.info("creating group for member in state '" + member.getState() + "' groupId '" + member.getGroupId() + "'");
-                    groupContact = mDatabase.findGroupContactByGroupId(member.getGroupId(), true);
-                } else {
-                    LOG.warn("ignoring incoming member for unknown group for member in state '" + member.getState() + "' groupId '" + member.getGroupId() + "'");
-                    return;
+            synchronized (mGroupCreationLock) {
+                groupContact = mDatabase.findGroupContactByGroupId(member.getGroupId(), false);
+                if (groupContact == null) {
+                    boolean createGroup = member.isInvolved() && !member.isGroupRemoved();
+                    if (createGroup) {
+                        LOG.info("creating group for member in state '" + member.getState() + "' groupId '" + member.getGroupId() + "'");
+                        groupContact = mDatabase.findGroupContactByGroupId(member.getGroupId(), true);
+                    } else {
+                        LOG.warn("ignoring incoming member for unknown group for member in state '" + member.getState() + "' groupId '" + member.getGroupId() + "'");
+                        return;
+                    }
                 }
             }
 

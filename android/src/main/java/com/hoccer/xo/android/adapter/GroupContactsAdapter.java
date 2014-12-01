@@ -10,6 +10,7 @@ import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,11 +26,16 @@ public class GroupContactsAdapter extends ContactsAdapter {
 
     private static final Logger LOG = Logger.getLogger(GroupContactsAdapter.class);
 
-    private final TalkClientContact mGroup;
+    @Nullable
+    private final String mGroupId;
 
-    public GroupContactsAdapter(XoActivity activity, TalkClientContact group) {
+    public GroupContactsAdapter(XoActivity activity) {
+        this(activity, null);
+    }
+
+    public GroupContactsAdapter(XoActivity activity, @Nullable String groupId) {
         super(activity);
-        mGroup = group;
+        mGroupId = groupId;
     }
 
     @Override
@@ -78,11 +84,11 @@ public class GroupContactsAdapter extends ContactsAdapter {
     private String getMemberStatus(TalkClientContact contact, Resources resources) {
         ArrayList<String> status = new ArrayList<String>();
 
-        if (isContactAdminInGroup(contact, mGroup)) {
+        if (isContactAdminInGroup(contact)) {
             status.add(resources.getString(R.string.contact_role_owner));
         }
 
-        if (isContactInvitedToGroup(contact, mGroup)) {
+        if (isContactInvitedToGroup(contact)) {
             status.add(resources.getString(R.string.common_group_invite));
         }
 
@@ -93,10 +99,10 @@ public class GroupContactsAdapter extends ContactsAdapter {
         return TextUtils.join("\n", status);
     }
 
-    private boolean isContactAdminInGroup(TalkClientContact contact, TalkClientContact group) {
+    private boolean isContactAdminInGroup(TalkClientContact contact) {
         try {
-            if(mGroup.getGroupId() != null) {
-                TalkClientContact admin = mDatabase.findAdminInGroup(group.getGroupId());
+            if(mGroupId != null) {
+                TalkClientContact admin = mDatabase.findAdminInGroup(mGroupId);
                 return admin != null && contact.getClientId().equals(admin.getClientId());
             }
         } catch (SQLException e) {
@@ -105,10 +111,10 @@ public class GroupContactsAdapter extends ContactsAdapter {
         return false;
     }
 
-    private boolean isContactInvitedToGroup(TalkClientContact contact, TalkClientContact group) {
+    private boolean isContactInvitedToGroup(TalkClientContact contact) {
         try {
-            if(mGroup.getGroupId() != null) {
-                TalkGroupMember member = mDatabase.findMemberInGroupByClientId(group.getGroupId(), contact.getClientId());
+            if(mGroupId != null) {
+                TalkGroupMember member = mDatabase.findMemberInGroupByClientId(mGroupId, contact.getClientId());
                 return member != null && member.isInvited();
             }
         } catch (SQLException e) {

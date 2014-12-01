@@ -71,7 +71,6 @@ public class GroupProfileFragment extends ProfileFragment
     private Menu mOptionsMenu;
 
     private final ArrayList<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
-    private final ArrayList<TalkClientContact> mContactsToInviteToGroup = new ArrayList<TalkClientContact>();
     private final ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
 
@@ -90,13 +89,6 @@ public class GroupProfileFragment extends ProfileFragment
             }
 
             return false;
-        }
-    };
-
-    private final ContactsAdapter.Filter mToBeInvitedFilter = new ContactsAdapter.Filter() {
-        @Override
-        public boolean shouldShow(TalkClientContact contact) {
-            return mContactsToInviteToGroup.contains(contact);
         }
     };
 
@@ -152,16 +144,8 @@ public class GroupProfileFragment extends ProfileFragment
         }
 
         if (mGroupMemberAdapter == null) {
-            mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity(), mGroup);
-
-            if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
-                mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
-            } else if (!mContactsToInviteToGroup.isEmpty()) {
-                mGroupMemberAdapter.setFilter(mToBeInvitedFilter);
-            } else {
-                mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
-            }
-
+            mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity(), mGroup.getGroupId());
+            mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             mGroupMemberAdapter.onCreate();
             mGroupMemberAdapter.onResume();
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
@@ -459,7 +443,7 @@ public class GroupProfileFragment extends ProfileFragment
         if (mCurrentClientsInGroup.isEmpty()) {
             mCurrentClientsInGroup.addAll(getCurrentContactsFromGroup(Arrays.asList(mGroupMemberAdapter.getMembersIds())));
         }
-        GroupManageDialog dialog = new GroupManageDialog(mGroup, mCurrentClientsInGroup, mContactsToInviteToGroup, false);
+        GroupManageDialog dialog = new GroupManageDialog(mGroup, mCurrentClientsInGroup);
         dialog.setTargetFragment(this, 0);
         dialog.show(getActivity().getSupportFragmentManager(), "GroupManageDialog");
     }
@@ -759,22 +743,12 @@ public class GroupProfileFragment extends ProfileFragment
         inputManager.hideSoftInputFromInputMethod(mNameEditText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 
         if (!mBackPressed) {
-            if (!mContactsToInviteToGroup.isEmpty()) {
-                String newGroupName = mNameEditText.getText().toString();
-                if (mGroup != null && !mGroup.isGroupRegistered()) {
-                    if (newGroupName.isEmpty()) {
-                        newGroupName = getString(R.string.profile_group_permanent_nearby);
-                    }
-                    mGroup.getGroupPresence().setGroupName(newGroupName);
-                    getXoClient().createGroupWithContacts(mGroup, getMembersIds(), getMembersRoles());
-                }
-            } else {
-                String newGroupName = mNameEditText.getText().toString();
-                if (!newGroupName.isEmpty()) {
-                    saveEditedGroup();
-                }
+            String newGroupName = mNameEditText.getText().toString();
+            if (!newGroupName.isEmpty()) {
+                saveEditedGroup();
             }
         }
+
         mBackPressed = false;
         mAvatarImage.setOnClickListener(null);
         mMode = Mode.PROFILE;
@@ -787,23 +761,5 @@ public class GroupProfileFragment extends ProfileFragment
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         TalkClientContact contact = (TalkClientContact) adapterView.getItemAtPosition(i);
         getXoActivity().showContactConversation(contact);
-    }
-
-    private String[] getMembersIds() {
-        String[] ids = new String[mContactsToInviteToGroup.size()];
-        int i = 0;
-        for (TalkClientContact contact : mContactsToInviteToGroup) {
-            ids[i++] = contact.getClientId();
-        }
-        return ids;
-    }
-
-    private String[] getMembersRoles() {
-        String[] roles = new String[mContactsToInviteToGroup.size()];
-        for (int i = 0; i < mContactsToInviteToGroup.size(); ++i) {
-            roles[i] = TalkGroupMember.ROLE_MEMBER;
-        }
-
-        return roles;
     }
 }

@@ -64,7 +64,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    final int oldItemCount = mChatItems.size();
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
@@ -178,7 +177,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             @Override
             public void run() {
                 if (mFilter.shouldShow(contact)) {
-                    int oldItemCount = mChatItems.size();
                     TalkClientChatItem item = new TalkClientChatItem(contact, mActivity);
                     mChatItems.add(item);
                     notifyDataSetChanged();
@@ -192,8 +190,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                int oldItemCount = mChatItems.size();
-
                 BaseChatItem item = findChatItemForContent(contact);
                 if (item == null) {
                     return;

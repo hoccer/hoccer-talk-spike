@@ -20,7 +20,6 @@ public class GroupProfileActivity extends ComposableActivity implements IProfile
 
     /* use this extra to show the given contact */
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
-    public static final String EXTRA_MAKE_FROM_NEARBY = "fromNearby";
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -48,17 +47,15 @@ public class GroupProfileActivity extends ComposableActivity implements IProfile
 
         if (intent != null) {
             if (intent.hasExtra(EXTRA_CLIENT_CREATE_GROUP)) {
-                showCreateGroupProfileFragment(null);
+                showCreateGroupProfileFragment();
             } else if (intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
                 int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
+
                 if (contactId == -1) {
                     LOG.error("invalid contact id");
                 } else {
                     showGroupProfileFragment(contactId, false, false);
                 }
-            } else if (intent.hasExtra(EXTRA_MAKE_FROM_NEARBY)) {
-                String[] clientIds = intent.getStringArrayExtra(EXTRA_MAKE_FROM_NEARBY);
-                showCreateGroupProfileFragment(clientIds);
             }
         }
 
@@ -77,13 +74,8 @@ public class GroupProfileActivity extends ComposableActivity implements IProfile
         super.onPause();
     }
 
-    private void showCreateGroupProfileFragment(String[] clientIds) {
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(GroupProfileCreationFragment.ARG_CREATE_GROUP, true);
-
+    private void showCreateGroupProfileFragment() {
         GroupProfileCreationFragment groupProfileFragment = new GroupProfileCreationFragment();
-        groupProfileFragment.setArguments(bundle);
-
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fl_group_profile_fragment_container, groupProfileFragment);
         ft.commit();
@@ -117,13 +109,9 @@ public class GroupProfileActivity extends ComposableActivity implements IProfile
     }
 
     @Override
-    public void showGroupProfileCreationFragment(int groupContactId, boolean cloneProfile) {
+    public void showGroupProfileCreationFragment(String cloneGroupId) {
         Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileCreationFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
-
-        if (cloneProfile) {
-            bundle.putBoolean(GroupProfileCreationFragment.ARG_CLONE_CURRENT_GROUP, true);
-        }
+        bundle.putString(GroupProfileCreationFragment.ARG_CLONE_GROUP_ID, cloneGroupId);
 
         GroupProfileCreationFragment groupProfileCreationFragment = new GroupProfileCreationFragment();
         groupProfileCreationFragment.setArguments(bundle);

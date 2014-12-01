@@ -20,10 +20,9 @@ public interface IProfileFragmentManager {
     void showGroupProfileFragment(int groupContactId, boolean startInActionMode, boolean addToBackStack);
 
     /**
-     * Displays the GroupProfileCreationFragment with a given client contact id.
+     * Displays the GroupProfileCreationFragment with a given group id.
      *
-     * @param groupContactId The contact id of the group contact to display, can be nil to create a new group.
-     * @param cloneProfile   Set to true if the group from the given groupContactId should be cloned.
+     * @param cloneGroupId The ID of the group contact to clone, can be nil to create a new group.
      */
-    void showGroupProfileCreationFragment(int groupContactId, boolean cloneProfile);
+    void showGroupProfileCreationFragment(String cloneGroupId);
 }

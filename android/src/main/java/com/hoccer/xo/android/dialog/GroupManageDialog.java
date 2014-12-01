@@ -30,16 +30,13 @@ public class GroupManageDialog extends DialogFragment {
     private ArrayList<TalkClientContact> mContactsToInvite;
     private ArrayList<TalkClientContact> mContactsToKick;
     private ArrayList<TalkClientContact> mCurrentContactsInGroup = new ArrayList<TalkClientContact>();
-    private boolean mCloneGroupContact = false;
 
-    public GroupManageDialog(TalkClientContact group, ArrayList<TalkClientContact> currentContactsInGroup, ArrayList<TalkClientContact> contactsFromNearbyToInvite, boolean cloneGroupContact) {
+    public GroupManageDialog(TalkClientContact group, ArrayList<TalkClientContact> currentContactsInGroup) {
         super();
         mGroup = group;
         mContactsToInvite = new ArrayList();
         mContactsToKick = new ArrayList();
         mCurrentContactsInGroup.addAll(currentContactsInGroup);
-        mContactsToInvite.addAll(contactsFromNearbyToInvite);
-        mCloneGroupContact = cloneGroupContact;
     }
 
     @Override
@@ -115,15 +112,11 @@ public class GroupManageDialog extends DialogFragment {
     }
 
     private void updateMemberships() {
-        if (mCloneGroupContact) {
-            ((GroupProfileCreationFragment) getTargetFragment()).updateContactList(mContactsToInvite);
-        } else {
-            for (TalkClientContact contact : mContactsToInvite) {
-                ((XoActivity) getActivity()).getXoClient().inviteClientToGroup(mGroup.getGroupId(), contact.getClientId());
-            }
-            for (TalkClientContact contact : mContactsToKick) {
-                ((XoActivity) getActivity()).getXoClient().kickClientFromGroup(mGroup.getGroupId(), contact.getClientId());
-            }
+        for (TalkClientContact contact : mContactsToInvite) {
+            ((XoActivity) getActivity()).getXoClient().inviteClientToGroup(mGroup.getGroupId(), contact.getClientId());
+        }
+        for (TalkClientContact contact : mContactsToKick) {
+            ((XoActivity) getActivity()).getXoClient().kickClientFromGroup(mGroup.getGroupId(), contact.getClientId());
         }
     }
 

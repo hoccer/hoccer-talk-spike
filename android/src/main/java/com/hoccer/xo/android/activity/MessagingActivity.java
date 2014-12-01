@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
@@ -203,14 +202,11 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
     }
 
     @Override
-    public void showGroupProfileCreationFragment(int groupContactId, boolean cloneProfile) {
+    public void showGroupProfileCreationFragment(String cloneGroupId) {
         mCurrentFragment = new GroupProfileCreationFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileCreationFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
-        if (cloneProfile) {
-            bundle.putBoolean(GroupProfileCreationFragment.ARG_CLONE_CURRENT_GROUP, true);
-        }
+        bundle.putString(GroupProfileCreationFragment.ARG_CLONE_GROUP_ID, cloneGroupId);
         mCurrentFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();

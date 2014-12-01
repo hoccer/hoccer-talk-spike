@@ -33,6 +33,6 @@ public class ITGroupCreation extends IntegrationTest {
     @Test
     public void createGroupTest() throws Exception {
         XoClient client = clients.get("client1");
-        TestHelper.createGroup(client);
+        TestHelper.createGroup(client, "group");
     }
 }
