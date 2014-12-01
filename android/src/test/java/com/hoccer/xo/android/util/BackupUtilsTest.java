@@ -98,14 +98,6 @@ public class BackupUtilsTest {
     }
 
     @Test
-    public void testReadBackup() throws BackupFactory.BackupTypeNotSupportedException, IOException {
-
-        Backup backup = BackupFactory.readBackup(BACKUP_COMPLETE_FILE);
-        assertNotNull(backup);
-        assertTrue(backup instanceof CompleteBackup);
-    }
-
-    @Test
     public void testImportDatabaseBackup() throws Exception {
 
         File databaseTarget = new File(TARGET_DIR, "database.db");
