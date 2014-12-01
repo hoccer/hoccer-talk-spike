@@ -35,7 +35,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.sql.SQLException;
@@ -222,7 +221,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void createJsonRpcConnection(ObjectMapper rpcMapper) {
-        mWebSocket = new JavaWebSocket(mClientHost.getKeyStore());
+        mWebSocket = new JavaWebSocket(mClientHost.getKeyStore(), XoClientSslConfiguration.TLS_CIPHERS);
         mConnection = new JsonRpcWsConnection(mWebSocket, rpcMapper);
         mConnection.setSendKeepAlives(mClientConfiguration.getKeepAliveEnabled());
 

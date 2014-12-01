@@ -7,10 +7,7 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -24,8 +21,9 @@ public class JavaWebSocket implements JsonRpcWebSocket {
     private JsonRpcWebSocketHandler mHandler;
     private Client mClient;
     private SSLSocketFactory mSSLSocketFactory;
+    private final String[] mCipherSuites;
 
-    public JavaWebSocket(KeyStore keyStore) {
+    public JavaWebSocket(KeyStore keyStore, String[] cipherSuites) {
         if (keyStore != null) {
             try {
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
@@ -40,6 +38,8 @@ public class JavaWebSocket implements JsonRpcWebSocket {
                 LOG.error("Error creating SSLSocketFactory", e);
             }
         }
+
+        mCipherSuites = cipherSuites;
     }
 
     public void open(URI serviceUri, String protocol, int timeout) throws InterruptedException {
@@ -90,7 +90,9 @@ public class JavaWebSocket implements JsonRpcWebSocket {
 
             if ("wss".equals(serviceUri.getScheme()) && mSSLSocketFactory != null) {
                 try {
-                    setSocket(mSSLSocketFactory.createSocket());
+                    SSLSocket socket = (SSLSocket) mSSLSocketFactory.createSocket();
+                    socket.setEnabledCipherSuites(mCipherSuites);
+                    setSocket(socket);
                 } catch (IOException e) {
                     LOG.error("Error creating SSLSocket", e);
                 }
