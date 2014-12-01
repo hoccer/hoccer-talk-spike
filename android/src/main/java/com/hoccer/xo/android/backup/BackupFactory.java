@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.backup;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,32 +11,38 @@ public class BackupFactory {
 
     public static Backup readBackup(File backupFile) throws BackupTypeNotSupportedException, IOException {
 
-        String extension = FilenameUtils.getExtension(backupFile.getName());
-
-        Backup backup;
-
-        if ("json".equals(extension)) {
-            backup = new CredentialsBackup(backupFile);
-        } else if ("zip".equals(extension)) {
-
+        if (isJson(backupFile)) {
+            return new CredentialsBackup(backupFile);
+        } else if (isZip(backupFile)) {
             BackupMetadata metadata = BackupUtils.readMetadata(backupFile);
+            return readBackup(backupFile, metadata);
+        } else {
+            throw new IllegalArgumentException("Extension " + FilenameUtils.getExtension(backupFile.getName()) + " of " + backupFile.getName() + "is not supported.");
+        }
+    }
 
-            if (metadata != null) {
-                if (metadata.getBackupType() == BackupType.DATABASE) {
-                    backup = new DatabaseBackup(backupFile, metadata);
-                } else if (metadata.getBackupType() == BackupType.COMPLETE) {
-                    backup = new CompleteBackup(backupFile, metadata);
-                } else {
-                    throw new BackupTypeNotSupportedException("Backup Type '" + metadata.getBackupType() + "' found in " + backupFile.getName() + " not supported");
-                }
+    private static Backup readBackup(File backupFile, BackupMetadata metadata) throws BackupTypeNotSupportedException, FileNotFoundException {
+        Backup backup;
+        if (metadata != null) {
+            if (metadata.getBackupType() == BackupType.DATABASE) {
+                backup = new DatabaseBackup(backupFile, metadata);
+            } else if (metadata.getBackupType() == BackupType.COMPLETE) {
+                backup = new CompleteBackup(backupFile, metadata);
             } else {
-                throw new FileNotFoundException(BackupUtils.METADATA_FILENAME + " not found in " + backupFile.getName());
+                throw new BackupTypeNotSupportedException("Backup Type '" + metadata.getBackupType() + "' found in " + backupFile.getName() + " not supported");
             }
         } else {
-            throw new IllegalArgumentException("Extension " + extension + " of " + backupFile.getName() + "is not supported.");
+            throw new FileNotFoundException(BackupUtils.METADATA_FILENAME + " not found in " + backupFile.getName());
         }
-
         return backup;
+    }
+
+    private static boolean isZip(File backupFile) {
+        return FileFilterUtils.suffixFileFilter("zip").accept(backupFile);
+    }
+
+    private static boolean isJson(File backupFile) {
+        return FileFilterUtils.suffixFileFilter("json").accept(backupFile);
     }
 
     public static Backup createCredentialsBackup(String password) throws IOException {
