@@ -6,7 +6,7 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
 
-@DatabaseTable(tableName = "groupMember")
+@DatabaseTable(tableName = "groupMembership")
 public class TalkGroupMembership {
 
     public static final String STATE_NONE          = "none";
