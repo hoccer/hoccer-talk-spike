@@ -332,7 +332,6 @@
     <string name="up_down_unlimited_option">unbegrenzt</string>
     <string name="up_down_manual_option">manuell</string>
     <string name="my_profile_title">Mein Profil</string>
-    <string name="welcome_to_title">Willkommen bei Hoccer!</string>
     <string name="contact_item_received_attachment">%1$s Datei erhalten</string>
     <string name="contact_item_sent_attachment">%1$s Datei gesendet</string>
     <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar verwenden.</string>
