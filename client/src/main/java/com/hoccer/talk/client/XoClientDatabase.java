@@ -74,7 +74,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mClientSelfs = mBackend.getDao(TalkClientSelf.class);
         mPresences = mBackend.getDao(TalkPresence.class);
         mRelationships = mBackend.getDao(TalkRelationship.class);
-        mGroups = mBackend.getDao(TalkGroupPresence.class);
+        mGroupPresences = mBackend.getDao(TalkGroupPresence.class);
         mGroupMemberships = mBackend.getDao(TalkGroupMembership.class);
         mClientMessages = mBackend.getDao(TalkClientMessage.class);
         mMessages = mBackend.getDao(TalkMessage.class);
