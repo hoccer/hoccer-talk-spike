@@ -1652,7 +1652,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         groupAdmin.setGroupId(groupPresence.getGroupId());
         groupAdmin.setRole(TalkGroupMember.ROLE_ADMIN);
         groupAdmin.setState(TalkGroupMember.STATE_JOINED);
-        changedGroup(groupPresence, new Date());
+        changedGroupPresence(groupPresence, new Date());
         changedGroupMember(groupAdmin, groupPresence.getLastChanged());
         return groupPresence.getGroupId();
     }
@@ -1695,7 +1695,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
 
         Date now = new Date();
-        changedGroup(groupPresence, now);
+        changedGroupPresence(groupPresence, now);
 
         TalkGroupMember groupAdmin = new TalkGroupMember();
         groupAdmin.setClientId(mConnection.getClientId());
@@ -1753,7 +1753,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("updateGroupName(groupId: '" + groupId + "', name: '" + name + "')");
         TalkGroupPresence targetGroupPresence = mDatabase.findGroupPresenceById(groupId);
         targetGroupPresence.setGroupName(name);
-        changedGroup(targetGroupPresence, new Date());
+        changedGroupPresence(targetGroupPresence, new Date());
     }
 
     @Override
@@ -1764,7 +1764,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("updateGroupAvatar(groupId: '" + groupId + "', avatarUrl: '" + avatarUrl + "')");
         TalkGroupPresence targetGroupPresence = mDatabase.findGroupPresenceById(groupId);
         targetGroupPresence.setGroupAvatarUrl(avatarUrl);
-        changedGroup(targetGroupPresence, new Date());
+        changedGroupPresence(targetGroupPresence, new Date());
     }
 
     @Override
@@ -1775,7 +1775,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         TalkGroupPresence targetGroupPresence = mDatabase.findGroupPresenceById(groupPresence.getGroupId());
         targetGroupPresence.setGroupName(groupPresence.getGroupName());
         targetGroupPresence.setGroupAvatarUrl(groupPresence.getGroupAvatarUrl());
-        changedGroup(targetGroupPresence, new Date());
+        changedGroupPresence(targetGroupPresence, new Date());
     }
 
     @Override
@@ -1791,7 +1791,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         // mark the group as deleted
         groupPresence.setState(TalkGroupPresence.STATE_NONE);
-        changedGroup(groupPresence, new Date());
+        changedGroupPresence(groupPresence, new Date());
 
         // walk the group and make everyone have a "none" relationship to it
         List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
@@ -1958,7 +1958,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return res;
     }
 
-    private void changedGroup(TalkGroupPresence groupPresence, Date changed) {
+    private void changedGroupPresence(TalkGroupPresence groupPresence, Date changed) {
         groupPresence.setLastChanged(changed);
         mDatabase.saveGroupPresence(groupPresence);
         mServer.getUpdateAgent().requestGroupUpdate(groupPresence.getGroupId());
@@ -2237,7 +2237,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         groupMember.setGroupId(groupPresence.getGroupId());
         groupMember.setRole(TalkGroupMember.ROLE_NEARBY_MEMBER);
         groupMember.setState(TalkGroupMember.STATE_JOINED);
-        changedGroup(groupPresence, new Date());
+        changedGroupPresence(groupPresence, new Date());
         changedGroupMember(groupMember, groupPresence.getLastChanged());
 
         environment.setGroupId(groupPresence.getGroupId());
@@ -2273,7 +2273,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             groupPresence.setState(TalkGroupPresence.STATE_EXISTS);
             mDatabase.saveGroupPresence(groupPresence);
         }
-        changedGroup(groupPresence, new Date());
+        changedGroupPresence(groupPresence, new Date());
         changedGroupMember(nearbyMember, groupPresence.getLastChanged());
 
         environment.setGroupId(groupPresence.getGroupId());
@@ -2428,9 +2428,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 logCall("destroyEnvironment: last member left, removing group " + groupPresence.getGroupId());
                 // last member removed, remove group
                 groupPresence.setState(TalkGroupPresence.STATE_NONE);
-                changedGroup(groupPresence, now);
+                changedGroupPresence(groupPresence, now);
                 // explicitly request a group updated notification for the last removed client because
-                // calling changedGroup only will not send out "groupUpdated" notifications to members with state "none"
+                // calling changedGroupPresence only will not send out "groupUpdated" notifications to members with state "none"
                 mServer.getUpdateAgent().requestGroupUpdate(groupPresence.getGroupId(), environment.getClientId());
             }
         }
