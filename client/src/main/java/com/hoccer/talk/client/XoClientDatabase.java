@@ -31,7 +31,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     private Dao<TalkClientSelf, Integer> mClientSelfs;
     private Dao<TalkPresence, String> mPresences;
     private Dao<TalkRelationship, Long> mRelationships;
-    private Dao<TalkGroupPresence, String> mGroups;
+    private Dao<TalkGroupPresence, String> mGroupPresences;
     private Dao<TalkGroupMember, Long> mGroupMembers;
     private Dao<TalkClientMessage, Integer> mClientMessages;
     private Dao<TalkMessage, String> mMessages;
@@ -74,7 +74,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mClientSelfs = mBackend.getDao(TalkClientSelf.class);
         mPresences = mBackend.getDao(TalkPresence.class);
         mRelationships = mBackend.getDao(TalkRelationship.class);
-        mGroups = mBackend.getDao(TalkGroupPresence.class);
+        mGroupPresences = mBackend.getDao(TalkGroupPresence.class);
         mGroupMembers = mBackend.getDao(TalkGroupMember.class);
         mClientMessages = mBackend.getDao(TalkClientMessage.class);
         mMessages = mBackend.getDao(TalkMessage.class);
@@ -221,7 +221,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     //////////////////////////////////
 
     public void saveGroupPresence(TalkGroupPresence group) throws SQLException {
-        mGroups.createOrUpdate(group);
+        mGroupPresences.createOrUpdate(group);
     }
 
     public TalkClientContact findContactByGroupTag(String groupTag) throws SQLException {
