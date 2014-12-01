@@ -1,13 +1,12 @@
 package com.hoccer.xo.android.util;
 
-import com.hoccer.xo.android.backup.*;
+import com.hoccer.xo.android.backup.BackupMetadata;
+import com.hoccer.xo.android.backup.BackupType;
+import com.hoccer.xo.android.backup.BackupUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 

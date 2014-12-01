@@ -44,7 +44,6 @@ public class CompleteBackup extends DatabaseBackup {
 
     @Override
     public void restore(String password) throws Exception {
-
         File databaseTarget = new File(DB_PATH_NAME);
         File attachmentsTargetDir = XoApplication.getAttachmentDirectory();
 

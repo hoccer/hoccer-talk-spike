@@ -2,7 +2,6 @@ package com.hoccer.xo.android.util;
 
 import com.hoccer.xo.android.backup.*;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
