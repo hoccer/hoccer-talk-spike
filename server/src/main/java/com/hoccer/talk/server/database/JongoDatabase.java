@@ -49,7 +49,7 @@ public class JongoDatabase implements ITalkServerDatabase {
     private MongoCollection mRelationships;
     private MongoCollection mPresences;
     private MongoCollection mKeys;
-    private MongoCollection mGroups;
+    private MongoCollection mGroupPresences;
     private MongoCollection mGroupMembers;
     private MongoCollection mEnvironments;
     private MongoCollection mClientHostInfos;
@@ -96,7 +96,7 @@ public class JongoDatabase implements ITalkServerDatabase {
         mRelationships = getCollection("relationship");
         mPresences = getCollection("presence");
         mKeys = getCollection("key");
-        mGroups = getCollection("group");
+        mGroupPresences = getCollection("group");
         mGroupMembers = getCollection("groupMember");
         mEnvironments = getCollection("environment");
         mClientHostInfos = getCollection("clientHostInfo");
@@ -522,12 +522,12 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public TalkGroupPresence findGroupPresenceById(String groupId) {
-        return mGroups.findOne("{groupId:#}", groupId).as(TalkGroupPresence.class);
+        return mGroupPresences.findOne("{groupId:#}", groupId).as(TalkGroupPresence.class);
     }
 
     @Override
     public void deleteGroupPresence(TalkGroupPresence groupPresence) {
-        mGroups.remove("{groupId:#}", groupPresence.getGroupId());
+        mGroupPresences.remove("{groupId:#}", groupPresence.getGroupId());
     }
 
 
@@ -575,7 +575,7 @@ public class JongoDatabase implements ITalkServerDatabase {
 
     @Override
     public void saveGroupPresence(TalkGroupPresence groupPresence) {
-        mGroups.save(groupPresence);
+        mGroupPresences.save(groupPresence);
     }
 
     @Override
