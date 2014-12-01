@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Describes the interface of Talk database backends
@@ -102,15 +101,15 @@ public interface ITalkServerDatabase {
 
     public void saveRelationship(TalkRelationship relationship);
 
-    public TalkGroup findGroupById(String groupId);
+    public TalkGroupPresence findGroupPresenceById(String groupId);
 
-    public void deleteGroup(TalkGroup group);
+    public void deleteGroupPresence(TalkGroupPresence groupPresence);
 
-    public List<TalkGroup> findGroupsByClientIdChangedAfter(String clientId, Date lastKnown);
+    public List<TalkGroupPresence> findGroupPresencesByClientIdChangedAfter(String clientId, Date lastKnown);
 
     public List<TalkGroupMember> findGroupMembersByIdWithStatesChangedAfter(String groupId, String[] states, Date lastKnown);
 
-    public void saveGroup(TalkGroup group);
+    public void saveGroupPresence(TalkGroupPresence groupPresence);
 
     public List<TalkGroupMember> findGroupMembersById(String groupId);
 

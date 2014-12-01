@@ -4,7 +4,6 @@ import com.hoccer.talk.model.*;
 import com.hoccer.talk.rpc.ITalkRpcClient;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
-import com.hoccer.talk.server.TalkServerConfiguration;
 import com.hoccer.talk.server.agents.NotificationDeferrer;
 import com.hoccer.talk.server.message.StaticSystemMessage;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
@@ -263,8 +262,8 @@ public class UpdateAgent extends NotificationDeferrer {
             @Override
             public void run() {
                 try {
-                    TalkGroup updatedGroup = mDatabase.findGroupById(groupId);
-                    if (updatedGroup != null) {
+                    TalkGroupPresence updatedGroupPresence = mDatabase.findGroupPresenceById(groupId);
+                    if (updatedGroupPresence != null) {
                         TalkRpcConnection connection = mServer.getClientConnection(clientId);
                         if (connection == null || !connection.isConnected()) {
                             return;
@@ -273,7 +272,7 @@ public class UpdateAgent extends NotificationDeferrer {
                         // Calling Client via RPC
                         ITalkRpcClient rpc = connection.getClientRpc();
                         try {
-                            rpc.groupUpdated(updatedGroup);
+                            rpc.groupUpdated(updatedGroupPresence);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -291,8 +290,8 @@ public class UpdateAgent extends NotificationDeferrer {
             @Override
             public void run() {
                 try {
-                    TalkGroup updatedGroup = mDatabase.findGroupById(groupId);
-                    if (updatedGroup != null) {
+                    TalkGroupPresence updatedGroupPresence = mDatabase.findGroupPresenceById(groupId);
+                    if (updatedGroupPresence != null) {
                         List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
                         for (TalkGroupMember member : members) {
                             if (member.isJoined() || member.isInvited() || member.isGroupRemoved()) {
@@ -304,7 +303,7 @@ public class UpdateAgent extends NotificationDeferrer {
                                 // Calling Client via RPC
                                 ITalkRpcClient rpc = connection.getClientRpc();
                                 try {
-                                    rpc.groupUpdated(updatedGroup);
+                                    rpc.groupUpdated(updatedGroupPresence);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -480,18 +479,18 @@ public class UpdateAgent extends NotificationDeferrer {
 
     private void performCheckAndRequestGroupMemberKeys(String groupId) {
         LOG.debug("performCheckAndRequestGroupMemberKeys for groupId: '" + groupId + "'");
-        TalkGroup group = mDatabase.findGroupById(groupId);
-        if (group != null && group.exists()) {
+        TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(groupId);
+        if (groupPresence != null && groupPresence.exists()) {
 
-            List<TalkGroupMember> members = mDatabase.findGroupMembersByIdWithStates(group.getGroupId(), TalkGroupMember.ACTIVE_STATES);
+            List<TalkGroupMember> members = mDatabase.findGroupMembersByIdWithStates(groupPresence.getGroupId(), TalkGroupMember.ACTIVE_STATES);
             LOG.debug("  * members: " + members.size());
             if (!members.isEmpty()) {
                 List<TalkGroupMember> outOfDateMembers = new ArrayList<TalkGroupMember>();
                 List<TalkGroupMember> keyMasterCandidatesWithCurrentKey = new ArrayList<TalkGroupMember>();
                 List<TalkGroupMember> keyMasterCandidatesWithoutCurrentKey = new ArrayList<TalkGroupMember>();
 
-                String sharedKeyId = group.getSharedKeyId();
-                String sharedKeyIdSalt = group.getSharedKeyIdSalt();
+                String sharedKeyId = groupPresence.getSharedKeyId();
+                String sharedKeyIdSalt = groupPresence.getSharedKeyIdSalt();
                 if (sharedKeyId == null) {
                     // nobody has supplied a group key yet
                     LOG.debug("  * nobody has supplied a group key yet...");
@@ -542,7 +541,7 @@ public class UpdateAgent extends NotificationDeferrer {
                         TalkGroupMember newKeymaster;
                         if (candidatesByLatency.get(0).getRight() < MAX_ALLOWED_KEY_REQUEST_LATENCY) {
                             newKeymaster = candidatesByLatency.get(0).getLeft(); // get the lowest latency candidate
-                            requestGroupKeys(newKeymaster.getClientId(), group.getGroupId(), sharedKeyId, sharedKeyIdSalt, outOfDateMembers);
+                            requestGroupKeys(newKeymaster.getClientId(), groupPresence.getGroupId(), sharedKeyId, sharedKeyIdSalt, outOfDateMembers);
                             return;
                         }
                         // fall through to next block if best candidate does not meet MAX_ALLOWED_KEY_REQUEST_LATENCY
@@ -553,7 +552,7 @@ public class UpdateAgent extends NotificationDeferrer {
                         TalkGroupMember newKeymaster;
                         if (candidatesByLatency.get(0).getRight() < MAX_ALLOWED_KEY_REQUEST_LATENCY) {
                             newKeymaster = candidatesByLatency.get(0).getLeft(); // get the lowest latency candidate
-                            requestGroupKeys(newKeymaster.getClientId(), group.getGroupId(), null, null, outOfDateMembers);
+                            requestGroupKeys(newKeymaster.getClientId(), groupPresence.getGroupId(), null, null, outOfDateMembers);
                             return;
                         }
                         // fall through to next block if best candidate does not meet MAX_ALLOWED_KEY_REQUEST_LATENCY
@@ -614,12 +613,12 @@ public class UpdateAgent extends NotificationDeferrer {
                     connection.resetPriorityPenalty(0L);
                     Date now = new Date();
 
-                    TalkGroup group = mDatabase.findGroupById(forGroupId);
-                    group.setSharedKeyId(forSharedKeyId);
-                    group.setSharedKeyIdSalt(withSharedKeyIdSalt);
-                    group.setLastChanged(now);
-                    LOG.info("requestGroupKeys, for group '" + forGroupId + "' did set sharedKeyId " + group.getSharedKeyId() + ", salt="+group.getSharedKeyIdSalt());
-                    mDatabase.saveGroup(group);
+                    TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(forGroupId);
+                    groupPresence.setSharedKeyId(forSharedKeyId);
+                    groupPresence.setSharedKeyIdSalt(withSharedKeyIdSalt);
+                    groupPresence.setLastChanged(now);
+                    LOG.info("requestGroupKeys, for group '" + forGroupId + "' did set sharedKeyId " + groupPresence.getSharedKeyId() + ", salt="+groupPresence.getSharedKeyIdSalt());
+                    mDatabase.saveGroupPresence(groupPresence);
 
                     for (int i = 0; i < forClientIds.length; ++i) {
                         TalkGroupMember member = mDatabase.findGroupMemberForClient(forGroupId, forClientIds[i]);
@@ -643,7 +642,7 @@ public class UpdateAgent extends NotificationDeferrer {
                                 // we send updates only to those members whose key has changed, so we always send the full update
                                 try {
                                     mrpc.groupMemberUpdated(member);
-                                    mrpc.groupUpdated(group);
+                                    mrpc.groupUpdated(groupPresence);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }

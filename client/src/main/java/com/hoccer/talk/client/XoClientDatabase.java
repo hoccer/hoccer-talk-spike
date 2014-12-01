@@ -31,7 +31,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     private Dao<TalkClientSelf, Integer> mClientSelfs;
     private Dao<TalkPresence, String> mPresences;
     private Dao<TalkRelationship, Long> mRelationships;
-    private Dao<TalkGroup, String> mGroups;
+    private Dao<TalkGroupPresence, String> mGroups;
     private Dao<TalkGroupMember, Long> mGroupMembers;
     private Dao<TalkClientMessage, Integer> mClientMessages;
     private Dao<TalkMessage, String> mMessages;
@@ -56,7 +56,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         TableUtils.createTable(cs, TalkClientSelf.class);
         TableUtils.createTable(cs, TalkPresence.class);
         TableUtils.createTable(cs, TalkRelationship.class);
-        TableUtils.createTable(cs, TalkGroup.class);
+        TableUtils.createTable(cs, TalkGroupPresence.class);
         TableUtils.createTable(cs, TalkGroupMember.class);
         TableUtils.createTable(cs, TalkClientMessage.class);
         TableUtils.createTable(cs, TalkMessage.class);
@@ -74,7 +74,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mClientSelfs = mBackend.getDao(TalkClientSelf.class);
         mPresences = mBackend.getDao(TalkPresence.class);
         mRelationships = mBackend.getDao(TalkRelationship.class);
-        mGroups = mBackend.getDao(TalkGroup.class);
+        mGroups = mBackend.getDao(TalkGroupPresence.class);
         mGroupMembers = mBackend.getDao(TalkGroupMember.class);
         mClientMessages = mBackend.getDao(TalkClientMessage.class);
         mMessages = mBackend.getDao(TalkMessage.class);
@@ -220,7 +220,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     //////// Group Management ////////
     //////////////////////////////////
 
-    public void saveGroup(TalkGroup group) throws SQLException {
+    public void saveGroupPresence(TalkGroupPresence group) throws SQLException {
         mGroups.createOrUpdate(group);
     }
 
@@ -446,7 +446,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             TalkClientContact conversationContact = message.getConversationContact();
             if (conversationContact != null && conversationContact.getContactType() != null) {
                 if (conversationContact.isGroup()) {
-                    TalkGroup groupPresence = conversationContact.getGroupPresence();
+                    TalkGroupPresence groupPresence = conversationContact.getGroupPresence();
                     if (groupPresence != null && groupPresence.isTypeNearby()) {
                         nearbyMessages.add(message);
                     }

@@ -521,61 +521,61 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public TalkGroup findGroupById(String groupId) {
-        return mGroups.findOne("{groupId:#}", groupId).as(TalkGroup.class);
+    public TalkGroupPresence findGroupPresenceById(String groupId) {
+        return mGroups.findOne("{groupId:#}", groupId).as(TalkGroupPresence.class);
     }
 
     @Override
-    public void deleteGroup(TalkGroup group) {
-        mGroups.remove("{groupId:#}", group.getGroupId());
+    public void deleteGroupPresence(TalkGroupPresence groupPresence) {
+        mGroups.remove("{groupId:#}", groupPresence.getGroupId());
     }
 
 
     @Override
-    public List<TalkGroup> findGroupsByClientIdChangedAfter(String clientId, Date lastKnown) {
+    public List<TalkGroupPresence> findGroupPresencesByClientIdChangedAfter(String clientId, Date lastKnown) {
         return findGroupsByClientIdChangedAfterV1(clientId,lastKnown);
     }
 
 
-    private List<TalkGroup> findGroupsByClientIdChangedAfterV1(String clientId, Date lastKnown) {
+    private List<TalkGroupPresence> findGroupsByClientIdChangedAfterV1(String clientId, Date lastKnown) {
         // indirect query
-        List<TalkGroup> res = new ArrayList<TalkGroup>();
+        List<TalkGroupPresence> res = new ArrayList<TalkGroupPresence>();
         List<TalkGroupMember> members = findGroupMembersForClient(clientId);
         for (TalkGroupMember member : members) {
             if (member.isMember() || member.isInvited()) {
-                TalkGroup group = findGroupById(member.getGroupId());
-                if (group == null) {
+                TalkGroupPresence groupPresence = findGroupPresenceById(member.getGroupId());
+                if (groupPresence == null) {
                     // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
                     throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
                 }
-                if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {
-                    res.add(group);
+                if(groupPresence.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || groupPresence.getLastChanged().after(lastKnown)) {
+                    res.add(groupPresence);
                 }
              }
         }
         return res;
     }
 
-    private List<TalkGroup> findGroupsByClientIdChangedAfterV2(String clientId, Date lastKnown) {
+    private List<TalkGroupPresence> findGroupsByClientIdChangedAfterV2(String clientId, Date lastKnown) {
         // indirect query
-        List<TalkGroup> res = new ArrayList<TalkGroup>();
+        List<TalkGroupPresence> res = new ArrayList<TalkGroupPresence>();
         List<TalkGroupMember> members = findGroupMembersByIdWithStates(clientId, new String[]{TalkGroupMember.STATE_JOINED, TalkGroupMember.STATE_INVITED});
         for (TalkGroupMember member : members) {
-                TalkGroup group = findGroupById(member.getGroupId());
-                if (group == null) {
+                TalkGroupPresence groupPresence = findGroupPresenceById(member.getGroupId());
+                if (groupPresence == null) {
                     // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
                     throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
                 }
-                if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {
-                    res.add(group);
+                if(groupPresence.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || groupPresence.getLastChanged().after(lastKnown)) {
+                    res.add(groupPresence);
                 }
         }
         return res;
     }
 
     @Override
-    public void saveGroup(TalkGroup group) {
-        mGroups.save(group);
+    public void saveGroupPresence(TalkGroupPresence groupPresence) {
+        mGroups.save(groupPresence);
     }
 
     @Override

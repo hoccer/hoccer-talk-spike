@@ -14,7 +14,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
@@ -367,7 +367,7 @@ public class GroupProfileFragment extends ProfileFragment
     private void updateGroupName() {
         String name = null;
 
-        TalkGroup groupPresence = mGroup.getGroupPresence();
+        TalkGroupPresence groupPresence = mGroup.getGroupPresence();
         if (groupPresence != null) {
             name = groupPresence.getGroupName();
         }

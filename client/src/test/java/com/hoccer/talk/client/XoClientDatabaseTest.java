@@ -1,7 +1,7 @@
 package com.hoccer.talk.client;
 
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -163,11 +163,11 @@ public class XoClientDatabaseTest {
         TalkClientContact group = TalkClientContact.createGroupContact();
         group.setCreatedTimeStamp(new Date());
 
-        TalkGroup groupPresence = new TalkGroup();
+        TalkGroupPresence groupPresence = new TalkGroupPresence();
         groupPresence.setGroupTag(group.getGroupTag());
         groupPresence.setGroupId(groupId);
         groupPresence.setGroupName("TestGroup");
-        groupPresence.setState(TalkGroup.STATE_EXISTS);
+        groupPresence.setState(TalkGroupPresence.STATE_EXISTS);
         group.updateGroupPresence(groupPresence);
 
         TalkGroupMember member = new TalkGroupMember();
@@ -179,7 +179,7 @@ public class XoClientDatabaseTest {
         group.updateGroupMember(member);
 
         mDatabase.saveGroupMember(member);
-        mDatabase.saveGroup(groupPresence);
+        mDatabase.saveGroupPresence(groupPresence);
         mDatabase.saveContact(group);
 
         return group;

@@ -3,9 +3,8 @@ package com.hoccer.talk.tool.command;
 import better.cli.annotations.CLICommand;
 import better.cli.console.Console;
 import com.beust.jcommander.Parameter;
-import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.tool.TalkToolContext;
 import com.hoccer.talk.tool.client.TalkToolClient;
 import com.hoccer.talk.tool.client.TalkToolClientCommand;
@@ -25,7 +24,7 @@ public class ClientGroupCreate extends TalkToolClientCommand /*implements IXoCon
         TalkClientContact newGroup = TalkClientContact.createGroupContact();
         mGroupTag = newGroup.getGroupTag();
 
-        TalkGroup groupPresence = new TalkGroup();
+        TalkGroupPresence groupPresence = new TalkGroupPresence();
         groupPresence.setGroupTag(newGroup.getGroupTag());
         newGroup.updateGroupPresence(groupPresence);
 

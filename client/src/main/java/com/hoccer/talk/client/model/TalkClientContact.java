@@ -3,9 +3,7 @@ package com.hoccer.talk.client.model;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.*;
-import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.commons.codec.binary.Base64;
 import org.jetbrains.annotations.Nullable;
@@ -79,7 +77,7 @@ public class TalkClientContact implements Serializable {
     private String groupKey;
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
-    private TalkGroup groupPresence;
+    private TalkGroupPresence groupPresence;
 
     // when contact is a group, groupMember is the own member description
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
@@ -192,7 +190,7 @@ public class TalkClientContact implements Serializable {
     }
 
     public boolean isGroupExisting() {
-        return isGroup() && this.groupPresence != null && this.groupPresence.getState().equals(TalkGroup.STATE_EXISTS);
+        return isGroup() && this.groupPresence != null && this.groupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS);
     }
 
     public boolean isGroupAdmin() {
@@ -401,7 +399,7 @@ public class TalkClientContact implements Serializable {
 
     @GroupMethodOnly
     @Nullable
-    public TalkGroup getGroupPresence() {
+    public TalkGroupPresence getGroupPresence() {
         ensureGroup();
         return groupPresence;
     }
@@ -501,18 +499,18 @@ public class TalkClientContact implements Serializable {
     }
 
     @GroupMethodOnly
-    public void updateGroupPresence(TalkGroup group) {
+    public void updateGroupPresence(TalkGroupPresence groupPresence) {
         ensureGroup();
         if (this.groupPresence == null) {
-            if (group.getGroupId() != null) {
-                groupId = group.getGroupId();
+            if (groupPresence.getGroupId() != null) {
+                groupId = groupPresence.getGroupId();
             }
-            if (group.getGroupTag() != null) {
-                groupTag = group.getGroupTag();
+            if (groupPresence.getGroupTag() != null) {
+                groupTag = groupPresence.getGroupTag();
             }
-            this.groupPresence = group;
+            this.groupPresence = groupPresence;
         } else {
-            this.groupPresence.updateWith(group);
+            this.groupPresence.updateWith(groupPresence);
         }
     }
 

@@ -14,7 +14,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -291,7 +291,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         }
 
         mGroup = TalkClientContact.createGroupContact();
-        TalkGroup groupPresence = new TalkGroup();
+        TalkGroupPresence groupPresence = new TalkGroupPresence();
         groupPresence.setGroupTag(mGroup.getGroupTag());
         groupPresence.setGroupName("");
         mGroup.updateGroupPresence(groupPresence);

@@ -3,7 +3,7 @@ package com.hoccer.talk.util;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkGroupMember;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -74,7 +74,7 @@ public class TestHelper {
         TalkClientContact newGroup = TalkClientContact.createGroupContact();
         final String groupTag = newGroup.getGroupTag();
 
-        TalkGroup groupPresence = new TalkGroup();
+        TalkGroupPresence groupPresence = new TalkGroupPresence();
         groupPresence.setGroupTag(newGroup.getGroupTag());
         newGroup.updateGroupPresence(groupPresence);
 
