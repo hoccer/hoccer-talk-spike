@@ -99,10 +99,10 @@ public class ClientStatus extends TalkToolClientCommand {
                     } else {
                         printInd("no presence", 2);
                     }
-                    TalkGroupMember member = contact.getGroupMember();
-                    if (member != null) {
-                        printInd("state: " + member.getState() + ", " +
-                                 "role: " + member.getRole(), 2);
+                    TalkGroupMembership membership = contact.getGroupMembership();
+                    if (membership != null) {
+                        printInd("state: " + membership.getState() + ", " +
+                                 "role: " + membership.getRole(), 2);
                     } else {
                         printInd("no membership", 2);
                     }

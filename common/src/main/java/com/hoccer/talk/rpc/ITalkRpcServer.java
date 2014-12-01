@@ -500,7 +500,7 @@ public interface ITalkRpcServer {
 
     TalkGroupPresence getGroup(String groupId);
 
-    TalkGroupMember getGroupMember(String groupId, String clientId);
+    TalkGroupMembership getGroupMember(String groupId, String clientId);
 
     /** Update group name and group avatar; this function is deprecated, use updateGroupAvatar and updateGroupName instead
      * @param groupPresence is the group to update
@@ -616,7 +616,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects none
      * @talk.errors.server
      */
-    TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown);
+    TalkGroupMembership[] getGroupMembers(String groupId, Date lastKnown);
 
     /** remove (kick) a member from a group
      * @param groupId denotes the group from which the member is to be removed

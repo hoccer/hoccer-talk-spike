@@ -14,8 +14,8 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
-import com.hoccer.talk.model.TalkGroupMember;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
@@ -68,9 +68,9 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
         public boolean shouldShow(TalkClientContact contact) {
             try {
                 if (mGroup.getGroupId() != null && contact.isClient()) {
-                    TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
-                    if (member != null) {
-                        return member.isInvited() || member.isJoined();
+                    TalkGroupMembership membership = getXoActivity().getXoDatabase().findMembershipInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
+                    if (membership != null) {
+                        return membership.isInvited() || membership.isJoined();
                     }
                 }
             } catch (SQLException e) {
@@ -268,7 +268,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     private static List<String> getRolesForContacts(List<TalkClientContact> contacts) {
         List<String> roles = new ArrayList<String>(contacts.size());
         for (TalkClientContact groupContact : contacts) {
-            roles.add(TalkGroupMember.ROLE_MEMBER);
+            roles.add(TalkGroupMembership.ROLE_MEMBER);
         }
         return roles;
     }

@@ -4,7 +4,7 @@ import android.view.View;
 import android.widget.CheckedTextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import org.apache.log4j.Logger;
@@ -69,9 +69,9 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
         avatarView.setContact(contact);
 
         try {
-            TalkGroupMember member = mDatabase.findMemberInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
-            if (member != null) {
-                if (member.isInvited() || member.isJoined()) {
+            TalkGroupMembership membership = mDatabase.findMembershipInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
+            if (membership != null) {
+                if (membership.isInvited() || membership.isJoined()) {
                     checkedTextView.setChecked(true);
                 } else {
                     checkedTextView.setChecked(false);

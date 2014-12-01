@@ -173,7 +173,7 @@ public interface ITalkRpcClient {
     /**
      * Sent to notify an update to a group membership
      *
-     * @param groupMember that has changed
+     * @param membership that has changed
      * @talk.preconditions Client is logged in
      * @talk.preconditions.server group members have been added or removed or changed state
      * @talk.preconditions.client
@@ -186,7 +186,7 @@ public interface ITalkRpcClient {
      * @talk.errors.client
      */
     @JsonRpcNotification
-    void groupMemberUpdated(TalkGroupMember groupMember);
+    void groupMemberUpdated(TalkGroupMembership membership);
 
 
 }

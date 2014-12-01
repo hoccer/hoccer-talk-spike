@@ -107,25 +107,25 @@ public interface ITalkServerDatabase {
 
     public List<TalkGroupPresence> findGroupPresencesByClientIdChangedAfter(String clientId, Date lastKnown);
 
-    public List<TalkGroupMember> findGroupMembersByIdWithStatesChangedAfter(String groupId, String[] states, Date lastKnown);
+    public List<TalkGroupMembership> findGroupMembershipsByIdWithStatesChangedAfter(String groupId, String[] states, Date lastKnown);
 
     public void saveGroupPresence(TalkGroupPresence groupPresence);
 
-    public List<TalkGroupMember> findGroupMembersById(String groupId);
+    public List<TalkGroupMembership> findGroupMembershipsById(String groupId);
 
-    public List<TalkGroupMember> findGroupMembersByIdWithStates(String groupId, String[] states);
+    public List<TalkGroupMembership> findGroupMembershipsByIdWithStates(String groupId, String[] states);
 
-    public List<TalkGroupMember> findGroupMembersByIdWithStatesAndRoles(String groupId, String[] states, String [] roles);
+    public List<TalkGroupMembership> findGroupMembershipsByIdWithStatesAndRoles(String groupId, String[] states, String[] roles);
 
-    public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown);
+    public List<TalkGroupMembership> findGroupMembershipsByIdChangedAfter(String groupId, Date lastKnown);
 
-    public List<TalkGroupMember> findGroupMembersForClient(String clientId);
+    public List<TalkGroupMembership> findGroupMembershipsForClient(String clientId);
 
-    public List<TalkGroupMember> findGroupMembersForClientWithStates(String clientId, String[] states);
+    public List<TalkGroupMembership> findGroupMembershipsForClientWithStates(String clientId, String[] states);
 
-    public TalkGroupMember findGroupMemberForClient(String groupId, String clientId);
+    public TalkGroupMembership findGroupMembershipForClient(String groupId, String clientId);
 
-    public void saveGroupMember(TalkGroupMember groupMember);
+    public void saveGroupMembership(TalkGroupMembership membership);
 
     public void saveEnvironment(TalkEnvironment environment);
 

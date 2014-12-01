@@ -81,7 +81,7 @@ public class TalkClientContact implements Serializable {
 
     // when contact is a group, groupMember is the own member description
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
-    private TalkGroupMember groupMember;
+    private TalkGroupMembership groupMember;
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkClientDownload avatarDownload;
@@ -401,7 +401,7 @@ public class TalkClientContact implements Serializable {
     }
 
     @GroupMethodOnly
-    public TalkGroupMember getGroupMember() {
+    public TalkGroupMembership getGroupMembership() {
         ensureGroup();
         return groupMember;
     }
@@ -511,12 +511,12 @@ public class TalkClientContact implements Serializable {
     }
 
     @GroupMethodOnly
-    public void updateGroupMember(TalkGroupMember member) {
+    public void updateGroupMembership(TalkGroupMembership membership) {
         ensureGroup();
         if (this.groupMember == null) {
-            this.groupMember = member;
+            this.groupMember = membership;
         } else {
-            this.groupMember.updateWith(member);
+            this.groupMember.updateWith(membership);
         }
         if (this.groupMember.isInvolved()) {
             markAsRelated();
