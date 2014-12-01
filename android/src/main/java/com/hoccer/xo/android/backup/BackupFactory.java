@@ -18,8 +18,7 @@ public class BackupFactory {
             backup = new CredentialsBackup(backupFile);
         } else if ("zip".equals(extension)) {
 
-            BackupUtils backupUtils = new BackupUtils();
-            BackupMetadata metadata = backupUtils.readMetadata(backupFile);
+            BackupMetadata metadata = BackupUtils.readMetadata(backupFile);
 
             if (metadata != null) {
                 if (metadata.getBackupType() == BackupType.DATABASE) {
