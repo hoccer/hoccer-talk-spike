@@ -15,6 +15,7 @@ public class BackupTestResources {
 
     public static final String RESOURCE_DB_FILE = "/database.db";
     public static final String RESOURCE_ATTACHMENT_FILE_01 = "/IMG_20141120_130456_432.jpg";
+    public static final String TARGET_DIR_NAME = "target";
 
     public static File getResourceFile(String path) {
 
@@ -36,7 +37,7 @@ public class BackupTestResources {
 
     public static File createTargetDirectory() {
 
-        File targetDir = new File(BackupUtilsTest.class.getResource("").getFile(), "target");
+        File targetDir = new File(BackupUtilsTest.class.getResource("").getFile(), TARGET_DIR_NAME);
         targetDir.mkdir();
         return targetDir;
     }
