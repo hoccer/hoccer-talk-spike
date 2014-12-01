@@ -920,11 +920,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         }
 
                         if (contact.isGroup()) {
-                            if (contact.isGroupJoined() && !(contact.isGroupExisting() && contact.isGroupAdmin())) {
-                                mServerRpc.leaveGroup(contact.getGroupId());
-                            }
                             if (contact.isGroupExisting() && contact.isGroupAdmin()) {
                                 mServerRpc.deleteGroup(contact.getGroupId());
+                            } else if (contact.isGroupJoined()) {
+                                mServerRpc.leaveGroup(contact.getGroupId());
                             }
                         }
                     } catch (Exception e) {
