@@ -6,7 +6,7 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
 
-@DatabaseTable(tableName = "group")
+@DatabaseTable(tableName = "groupPresence")
 public class TalkGroupPresence {
 
     // TODO: define all field strings

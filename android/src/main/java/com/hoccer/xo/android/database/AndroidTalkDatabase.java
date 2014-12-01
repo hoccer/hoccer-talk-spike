@@ -58,6 +58,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             if (oldVersion < 22) {
                 db.execSQL("DROP TABLE clientSmsToken");
                 db.execSQL("DROP TABLE clientMembership");
+                db.execSQL("ALTER TABLE group RENAME TO groupPresence");
             }
         } catch (android.database.SQLException e) {
             LOG.error("sql error upgrading database", e);
