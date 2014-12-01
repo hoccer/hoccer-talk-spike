@@ -50,10 +50,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     @Nullable
     private Filter mFilter;
 
-    public ChatListAdapter(XoActivity activity) {
-        this(activity, null);
-    }
-
     public ChatListAdapter(XoActivity activity, @Nullable Filter filter) {
         super(activity);
         mFilter = filter;
