@@ -3114,17 +3114,19 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         try {
             // update membership in database
             TalkGroupMember dbMember = mDatabase.findMemberInGroupByClientId(member.getGroupId(), member.getClientId());
+
             if(dbMember != null) {
                 dbMember.updateWith(member);
-                mDatabase.saveGroupMember(dbMember);
             } else {
-                mDatabase.saveGroupMember(member);
+                dbMember = member;
             }
+
+            mDatabase.saveGroupMember(dbMember);
 
             // if this concerns our own membership
             if (clientContact.isSelf()) {
                 LOG.info("groupMember is about us, decrypting group key");
-                groupContact.updateGroupMember(member);
+                groupContact.updateGroupMember(dbMember);
                 decryptGroupKey(groupContact, member);
 
                 mDatabase.saveContact(groupContact);
