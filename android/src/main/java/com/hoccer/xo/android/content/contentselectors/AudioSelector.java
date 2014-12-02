@@ -6,17 +6,17 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.artcom.hoccer.R;
 
-public class MusicSelector implements IContentSelector {
+public class AudioSelector implements IContentSelector {
 
-    private String mName;
-    private Drawable mIcon;
+    private final String mName;
+    private final Drawable mIcon;
 
-    public MusicSelector(Context context) {
+    public AudioSelector(Context context) {
         mName = context.getResources().getString(R.string.content_music);
         mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_media, true);
     }
@@ -83,5 +83,4 @@ public class MusicSelector implements IContentSelector {
     public boolean isValidIntent(Context context, Intent intent) {
         return true;
     }
-
 }
