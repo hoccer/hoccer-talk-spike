@@ -1,8 +1,10 @@
 package com.hoccer.xo.android.util;
 
+import org.apache.commons.io.FileUtils;
+
+import com.hoccer.xo.android.backup.BackupUtils;
 import com.hoccer.xo.android.backup.BackupMetadata;
 import com.hoccer.xo.android.backup.BackupType;
-import com.hoccer.xo.android.backup.BackupUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -95,23 +97,10 @@ public class BackupUtilsTest {
     @Test
     public void testImportDatabaseBackup() throws Exception {
 
-        BackupUtils.importBackup(BACKUP_DB_FILE, DB_TARGET_FILE, PASSWORD);
+        BackupUtils.restoreBackup(BACKUP_DB_FILE, DB_TARGET_FILE, PASSWORD);
         assertTrue(DB_TARGET_FILE.exists());
         assertTrue(DB_TARGET_FILE.length() > 0);
 
-        org.apache.commons.io.FileUtils.deleteDirectory(DB_TARGET_FILE.getParentFile());
-    }
-
-    @Test
-    public void testImportCompleteBackup() throws Exception {
-
-        BackupUtils.importBackup(BACKUP_COMPLETE_FILE, DB_TARGET_FILE, ATTACHMENTS_TARGET_DIR, PASSWORD);
-        assertTrue(DB_TARGET_FILE.exists());
-        assertTrue(DB_TARGET_FILE.length() > 0);
-        assertTrue(ATTACHMENTS_TARGET_DIR.listFiles().length == 1);
-        assertTrue(new File(ATTACHMENTS_TARGET_DIR, BackupTestResources.RESOURCE_ATTACHMENT_FILE_01).exists());
-
-        org.apache.commons.io.FileUtils.deleteDirectory(ATTACHMENTS_TARGET_DIR);
-        org.apache.commons.io.FileUtils.deleteDirectory(DB_TARGET_FILE.getParentFile());
+        FileUtils.deleteDirectory(DB_TARGET_FILE.getParentFile());
     }
 }

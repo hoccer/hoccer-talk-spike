@@ -1,0 +1,126 @@
+package com.hoccer.xo.android.backup;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
+
+public class CompleteBackupRestoreOperation {
+
+    private static final Logger LOG = Logger.getLogger(CompleteBackupRestoreOperation.class.getName());
+
+    private final File mBackupFile;
+    private final File mDatabaseTarget;
+    private final File mAttachmentsTargetDir;
+    private final String mPassword;
+
+    private final File mTempAttachmentsDir;
+    private final File mTempDatabaseFile;
+    private File mOldAttachmentsDir;
+    private File mOldDatabaseFile;
+
+    public CompleteBackupRestoreOperation(File backupFile, File databaseTarget, File attachmentsTargetDir, String password) {
+        mBackupFile = backupFile;
+        mDatabaseTarget = databaseTarget;
+        mAttachmentsTargetDir = attachmentsTargetDir;
+        mPassword = password;
+
+        mTempAttachmentsDir = new File(attachmentsTargetDir.getParent(), BackupUtils.TEMP_ATTACHMENTS_DIR_NAME);
+        mTempDatabaseFile = new File(attachmentsTargetDir.getParent(), BackupUtils.TEMP_DB_DIR_NAME + File.separator + databaseTarget.getName());
+    }
+
+    public void invoke() throws IOException {
+        try {
+            restore();
+        } catch (Exception e) {
+            restoreOld();
+        } finally {
+            cleanup();
+        }
+    }
+
+    private void restore() throws Exception {
+        extractAttachmentsToTempDir();
+        extractAndDecryptDatabaseToTempDir();
+        keepCurrentAttachments();
+        keepCurrentDatabase();
+        moveAttachmentsToTargetDir();
+        moveDatabaseToTarget();
+    }
+
+    private void extractAttachmentsToTempDir() throws IOException {
+        FileUtils.forceMkdir(mTempAttachmentsDir);
+        BackupUtils.extractAttachmentFiles(mBackupFile, mTempAttachmentsDir);
+    }
+
+    private void extractAndDecryptDatabaseToTempDir() throws Exception {
+        BackupUtils.extractAndDecryptDatabase(mBackupFile, mTempDatabaseFile, mPassword);
+    }
+
+    private void keepCurrentAttachments() throws IOException {
+        if (mAttachmentsTargetDir.exists()) {
+            mOldAttachmentsDir = new File(mAttachmentsTargetDir.getPath() + "_" + BackupUtils.getTimestamp());
+            FileUtils.moveDirectory(mAttachmentsTargetDir, mOldAttachmentsDir);
+        }
+    }
+
+    private void keepCurrentDatabase() throws IOException {
+        if (mDatabaseTarget.exists()) {
+            mOldDatabaseFile = new File(mDatabaseTarget.getPath() + "." + BackupUtils.getTimestamp());
+            FileUtils.moveFile(mDatabaseTarget, mOldDatabaseFile);
+        }
+    }
+
+    private void moveAttachmentsToTargetDir() throws IOException {
+        FileUtils.moveDirectory(mTempAttachmentsDir, mAttachmentsTargetDir);
+    }
+
+    private void moveDatabaseToTarget() throws IOException {
+        FileUtils.moveFile(mTempDatabaseFile, mDatabaseTarget);
+    }
+
+    private void cleanup() throws IOException {
+        deleteTemp();
+//        deleteOld();      //TODO: discuss if old attachments and db should be kept
+    }
+
+    private void deleteTemp() throws IOException {
+        FileUtils.deleteDirectory(mTempDatabaseFile.getParentFile());
+        FileUtils.deleteDirectory(mTempAttachmentsDir);
+    }
+
+    private void deleteOld() throws IOException {
+        deleteOldDatabase();
+        deleteOldAttachments();
+    }
+
+    private void deleteOldDatabase() throws IOException {
+        if (mOldDatabaseFile.exists()) {
+            FileUtils.forceDelete(mOldDatabaseFile);
+        }
+    }
+
+    private void deleteOldAttachments() throws IOException {
+        if (mOldAttachmentsDir.exists()) {
+            FileUtils.forceDelete(mOldAttachmentsDir);
+        }
+    }
+
+    private void restoreOld() throws IOException {
+        restoreOldDatabase();
+        restoreOldAttachments();
+    }
+
+    private void restoreOldAttachments() throws IOException {
+        if (mOldAttachmentsDir.exists()) {
+            FileUtils.moveDirectory(mOldAttachmentsDir, mAttachmentsTargetDir);
+        }
+    }
+
+    private void restoreOldDatabase() throws IOException {
+        if (mOldDatabaseFile.exists()) {
+            FileUtils.moveFile(mOldDatabaseFile, mDatabaseTarget);
+        }
+    }
+}

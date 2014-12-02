@@ -47,6 +47,6 @@ public class CompleteBackup extends DatabaseBackup {
         File databaseTarget = new File(DB_PATH_NAME);
         File attachmentsTargetDir = XoApplication.getAttachmentDirectory();
 
-        BackupUtils.importBackup(mBackupFile, databaseTarget, attachmentsTargetDir, password);
+        new CompleteBackupRestoreOperation(mBackupFile, databaseTarget, attachmentsTargetDir, password).invoke();
     }
 }

@@ -2,7 +2,6 @@ package com.hoccer.xo.android.backup;
 
 import com.google.gson.Gson;
 import com.hoccer.talk.crypto.CryptoJSON;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.log4j.Logger;
 
@@ -49,7 +48,6 @@ public class BackupUtils {
             return false;
         }
     };
-    ;
 
     public static void createBackupFile(File out, File database, List<File> attachments, BackupMetadata metadata, String password) throws Exception {
 
@@ -193,17 +191,18 @@ public class BackupUtils {
         return results;
     }
 
-    private static void writeBytesToFile(File targetFile, byte[] decryptedData) throws IOException {
+    public static void writeBytesToFile(File targetFile, byte[] decryptedData) throws IOException {
         if (!targetFile.exists()) {
             targetFile.getParentFile().mkdirs();
             targetFile.createNewFile();
         }
-        FileOutputStream fos = new FileOutputStream(targetFile);
-        fos.write(decryptedData);
-        fos.close();
+        FileOutputStream ostream = new FileOutputStream(targetFile);
+        ostream.write(decryptedData);
+//        ostream.getFD().sync();  TODO: throws exception when disk is full, activate if necessary - how to test?
+        ostream.close();
     }
 
-    private static byte[] readFileEntry(ZipInputStream zis) throws IOException {
+    public static byte[] readFileEntry(ZipInputStream zis) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int length;
@@ -215,7 +214,7 @@ public class BackupUtils {
     }
 
     public static String createUniqueBackupFilename() {
-        String timestamp = new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
+        String timestamp = getTimestamp();
         return String.format(BACKUP_FILENAME_PATTERN, timestamp);
     }
 
@@ -223,84 +222,11 @@ public class BackupUtils {
         extractAndDecryptDatabase(backupFile, databaseTarget, password);
     }
 
-    public static void importBackup(File backupFile, File databaseTarget, File attachmentsTargetDir, String password) throws Exception {
-
-        File tempAttachmentsDir = new File(attachmentsTargetDir.getParent(), TEMP_ATTACHMENTS_DIR_NAME);
-        File tempDatabaseFile = new File(attachmentsTargetDir.getParent(), TEMP_DB_DIR_NAME + File.separator + databaseTarget.getName());
-
-        try {
-            if (tempAttachmentsDir.mkdir()) {
-                try {
-                    extractAttachmentFiles(backupFile, tempAttachmentsDir);
-                } catch (Exception e) {
-                    FileUtils.deleteDirectory(tempAttachmentsDir);
-                    throw e;
-                }
-            } else {
-                throw new IOException("Failed to create temporary directory " + tempAttachmentsDir.getAbsolutePath());
-            }
-
-            tempDatabaseFile.getParentFile().mkdirs();
-            tempDatabaseFile.createNewFile();
-            try {
-                extractAndDecryptDatabase(backupFile, tempDatabaseFile, password);
-            } catch (Exception e) {
-                tempDatabaseFile.delete();
-                throw e;
-            }
-
-            // rename target directory to save old attachments
-            File oldAttachmentsDir = new File(attachmentsTargetDir.getPath() + "_" + new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date()));
-            if (oldAttachmentsDir.mkdir()) {
-                attachmentsTargetDir.renameTo(oldAttachmentsDir);
-                attachmentsTargetDir.mkdir();
-            } else {
-                throw new IOException("Failed to create directory for existing attachments " + oldAttachmentsDir.getAbsolutePath());
-            }
-
-            try {
-                moveDirectoryContentsToTarget(tempAttachmentsDir, attachmentsTargetDir);
-            } catch (IOException e) {
-                // restore old attachments
-                moveDirectoryContentsToTarget(oldAttachmentsDir, attachmentsTargetDir);
-                e.printStackTrace();
-                throw e;
-            }
-
-            try {
-                moveFileToTarget(tempDatabaseFile, databaseTarget);
-            } catch (IOException e) {
-                moveDirectoryContentsToTarget(oldAttachmentsDir, attachmentsTargetDir);
-                e.printStackTrace();
-                throw e;
-            }
-        } finally {
-            FileUtils.deleteDirectory(tempDatabaseFile.getParentFile());
-            FileUtils.deleteDirectory(tempAttachmentsDir);
-        }
+    public static String getTimestamp() {
+        return new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
     }
 
-    private static void moveFileToTarget(File tempDatabaseFile, File databaseTarget) throws IOException {
-        FileUtils.moveFile(tempDatabaseFile, databaseTarget);
-    }
-
-    private static void moveDirectoryContentsToTarget(File srcDir, File targetDir) throws IOException {
-
-        if (targetDir.isDirectory()) {
-            File[] files = srcDir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    FileUtils.moveFileToDirectory(file, targetDir, false);
-                }
-            } else {
-                throw new FileNotFoundException("Error resolving attachment files in " + srcDir);
-            }
-        } else {
-            throw new IOException(targetDir + " is not a directory.");
-        }
-    }
-
-    private static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
+    public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
 
         ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
         try {
@@ -320,16 +246,16 @@ public class BackupUtils {
         }
     }
 
-    private static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException {
+    public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException {
 
         ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
         try {
             ZipEntry zipEntry;
             while ((zipEntry = zis.getNextEntry()) != null) {
-                if (!zipEntry.getName().equals(DB_FILENAME_ENCRYPTED) && !zipEntry.getName().equals(METADATA_FILENAME)) {
-                    byte[] bytes = readFileEntry(zis);
+                if (!zipEntry.getName().equals(BackupUtils.DB_FILENAME_ENCRYPTED) && !zipEntry.getName().equals(BackupUtils.METADATA_FILENAME)) {
+                    byte[] bytes = BackupUtils.readFileEntry(zis);
                     File file = new File(targetDir, zipEntry.getName());
-                    writeBytesToFile(file, bytes);
+                    BackupUtils.writeBytesToFile(file, bytes);
                 }
             }
         } finally {
