@@ -44,10 +44,10 @@ public class TalkClientContact implements Serializable {
     @DatabaseField
     private String contactType;
 
-    @DatabaseField
+    @Deprecated @DatabaseField
     private boolean deleted;
 
-    @DatabaseField
+    @Deprecated @DatabaseField
     private boolean everRelated;
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
