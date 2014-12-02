@@ -35,9 +35,7 @@ public class BackupTestResources {
     }
 
     public static File createAttachmentsTargetDirectory() {
-        File targetDir = new File(BackupUtilsTest.class.getResource("").getFile(), ATTACHMENTS_TARGET_DIR_NAME);
-        targetDir.mkdir();
-        return targetDir;
+        return new File(BackupUtilsTest.class.getResource("").getFile(), ATTACHMENTS_TARGET_DIR_NAME);
     }
 
     public static File createDatabaseTargetFile() {
