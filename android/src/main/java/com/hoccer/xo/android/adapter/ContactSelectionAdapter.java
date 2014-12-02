@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +50,7 @@ public class ContactSelectionAdapter extends BaseAdapter {
 
             viewHolder = new ViewHolder();
             viewHolder.contactAvatarView = (AvatarView) (convertView.findViewById(R.id.contact_icon));
-            viewHolder.checkedtNameTextView = (CheckedTextView) (convertView.findViewById(R.id.contact_name_checked));
+            viewHolder.checkedNameTextView = (CheckedTextView) (convertView.findViewById(R.id.contact_name_checked));
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -61,9 +60,9 @@ public class ContactSelectionAdapter extends BaseAdapter {
         viewHolder.contactAvatarView.setContact(contact);
 
         if (contact.isGroup() && contact.getGroupPresence() != null && contact.getGroupPresence().isTypeNearby()) {
-            viewHolder.checkedtNameTextView.setText(R.string.nearby_text);
+            viewHolder.checkedNameTextView.setText(R.string.nearby_text);
         } else {
-            viewHolder.checkedtNameTextView.setText(contact.getNickname());
+            viewHolder.checkedNameTextView.setText(contact.getNickname());
         }
 
         return convertView;
@@ -99,6 +98,6 @@ public class ContactSelectionAdapter extends BaseAdapter {
 
     private class ViewHolder {
         public AvatarView contactAvatarView;
-        public CheckedTextView checkedtNameTextView;
+        public CheckedTextView checkedNameTextView;
     }
 }
