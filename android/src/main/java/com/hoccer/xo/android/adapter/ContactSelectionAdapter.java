@@ -92,8 +92,6 @@ public class ContactSelectionAdapter extends BaseAdapter {
                     .isBlocked())) {
                 shouldShow = true;
             }
-        } else if (contact.isEverRelated()) {
-            shouldShow = true;
         }
 
         return shouldShow;

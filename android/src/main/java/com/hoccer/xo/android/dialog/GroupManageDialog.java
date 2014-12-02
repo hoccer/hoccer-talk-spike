@@ -49,7 +49,7 @@ public class GroupManageDialog extends DialogFragment {
             mAdapter.setFilter(new ContactsAdapter.Filter() {
                 @Override
                 public boolean shouldShow(TalkClientContact contact) {
-                    return mCurrentContactsInGroup.contains(contact) || (contact.isClient() && (contact.isClientRelated() || contact.isEverRelated()));
+                    return mCurrentContactsInGroup.contains(contact) || (contact.isClient() && contact.isClientRelated());
                 }
             });
         }

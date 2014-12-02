@@ -122,14 +122,6 @@ public class TalkClientContact implements Serializable {
         return isSelf() || isGroupAdmin() || (isGroup() && !isGroupRegistered());
     }
 
-    public boolean isEverRelated() {
-        return everRelated;
-    }
-
-    public void markAsRelated() {
-        this.everRelated = true;
-    }
-
     public int getClientContactId() {
         return clientContactId;
     }
@@ -483,9 +475,6 @@ public class TalkClientContact implements Serializable {
         } else {
             this.clientRelationship.updateWith(relationship);
         }
-        if (this.clientRelationship.isRelated()) {
-            markAsRelated();
-        }
     }
 
     @GroupMethodOnly
@@ -511,9 +500,6 @@ public class TalkClientContact implements Serializable {
             this.groupMember = member;
         } else {
             this.groupMember.updateWith(member);
-        }
-        if (this.groupMember.isInvolved()) {
-            markAsRelated();
         }
     }
 
