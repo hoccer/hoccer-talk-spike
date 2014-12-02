@@ -515,8 +515,8 @@ public class XoClientService extends Service {
                     continue;
                 }
 
-                // ignore unseen messages from deleted contacts and contacts we are currently conversing with
-                if (contact.isDeleted() || mCurrentConversationContactId == contact.getClientContactId()) {
+                // ignore unseen messages from contacts we are currently conversing with
+                if (mCurrentConversationContactId == contact.getClientContactId()) {
                     continue;
                 }
 

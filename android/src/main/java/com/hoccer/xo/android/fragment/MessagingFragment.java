@@ -121,10 +121,6 @@ public class MessagingFragment extends XoListFragment
     public void onResume() {
         super.onResume();
 
-        if (mContact.isDeleted()) {
-            getActivity().finish();
-        }
-
         setHasOptionsMenu(true);
         mMessageListView = getListView();
 

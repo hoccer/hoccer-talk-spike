@@ -902,16 +902,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-
                     try {
-                        contact.markAsDeleted();
-
-                        try {
-                            mDatabase.saveContact(contact);
-                        } catch (SQLException e) {
-                            LOG.error("SQL error", e);
-                        }
-
                         for (IXoContactListener listener : mContactListeners) {
                             listener.onContactRemoved(contact);
                         }

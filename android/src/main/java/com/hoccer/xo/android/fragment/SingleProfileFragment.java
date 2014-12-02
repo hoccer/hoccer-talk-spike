@@ -376,17 +376,6 @@ public class SingleProfileFragment extends ProfileFragment
         });
     }
 
-    public void finishActivityIfContactDeleted() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mContact.isDeleted()) {
-                    getActivity().finish();
-                }
-            }
-        });
-    }
-
     @Override
     protected void updateView() {
         updateAvatar();
@@ -576,7 +565,6 @@ public class SingleProfileFragment extends ProfileFragment
                     refreshContact(contact);
                     getActivity().invalidateOptionsMenu();
                     updateActionBar();
-                    finishActivityIfContactDeleted();
                 }
             });
         }
@@ -591,7 +579,6 @@ public class SingleProfileFragment extends ProfileFragment
                     refreshContact(contact);
                     getActivity().invalidateOptionsMenu();
                     updateActionBar();
-                    finishActivityIfContactDeleted();
                 }
             });
         }

@@ -122,14 +122,6 @@ public class TalkClientContact implements Serializable {
         return isSelf() || isGroupAdmin() || (isGroup() && !isGroupRegistered());
     }
 
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void markAsDeleted() {
-        this.deleted = true;
-    }
-
     public boolean isEverRelated() {
         return everRelated;
     }

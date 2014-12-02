@@ -421,11 +421,7 @@ public class GroupProfileFragment extends ProfileFragment
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mGroup.isDeleted()) {
-                    getActivity().finish();
-                } else {
-                    updateView();
-                }
+                updateView();
             }
         });
     }
