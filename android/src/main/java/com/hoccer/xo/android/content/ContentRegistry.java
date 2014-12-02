@@ -18,7 +18,6 @@ import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.IXoFragment;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.contentselectors.*;
-import com.hoccer.xo.android.fragment.CompositionFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import org.apache.log4j.Logger;
 
@@ -263,11 +262,7 @@ public class ContentRegistry {
                     IContentObject contentObject = selector.createObjectFromSelectionResult(fragment.getActivity(), null);
                     ((IXoFragment) fragment).onAttachmentSelected(contentObject);
                 } else {
-                    if (selector instanceof MultiImageSelector) {
-                        startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGE_ATTACHMENTS);
-                    } else {
-                        startExternalActivityForResult(fragment, intent, requestCode);
-                    }
+                    startExternalActivityForResult(fragment, intent, requestCode);
                 }
             }
         });

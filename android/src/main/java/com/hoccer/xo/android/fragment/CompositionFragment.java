@@ -50,10 +50,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private static final Logger LOG = Logger.getLogger(CompositionFragment.class);
 
     public static final String ARG_CLIENT_CONTACT_ID = "com.hoccer.xo.android.fragment.ARG_CLIENT_CONTACT_ID";
-
     public static final int REQUEST_SELECT_ATTACHMENT = 42;
-    public static final int REQUEST_SELECT_IMAGE_ATTACHMENTS = 43;
-
     private static final int STRESS_TEST_MESSAGE_COUNT = 15;
 
     private enum AttachmentSelectionType {
@@ -176,33 +173,28 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        mAttachments.clear();
-        if (resultCode == Activity.RESULT_OK) {
-            switch (requestCode) {
-                case REQUEST_SELECT_ATTACHMENT: {
+        if (requestCode == REQUEST_SELECT_ATTACHMENT) {
+            mAttachments.clear();
+            if (resultCode == Activity.RESULT_OK) {
+                if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
+                    MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
+                    mAttachments = selector.createObjectsFromSelectionResult(getActivity(), intent);
+                } else {
                     IContentSelector selector = mAttachmentSelection.getSelector();
                     IContentObject attachment = selector.createObjectFromSelectionResult(getActivity(), intent);
                     if (attachment != null) {
                         mAttachments.add(attachment);
                     }
                 }
-                break;
-                case REQUEST_SELECT_IMAGE_ATTACHMENTS: {
-                    MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
-                    mAttachments = selector.createObjectsFromSelectionResult(getActivity(), intent);
-                }
-                break;
-                default:
-                    break;
             }
-        }
 
-        if (mAttachments.isEmpty()) {
-            Toast.makeText(getActivity(), R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
-        }
+            if (mAttachments.isEmpty()) {
+                Toast.makeText(getActivity(), R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
+            }
 
-        updateAttachmentButton();
-        updateSendButton();
+            updateAttachmentButton();
+            updateSendButton();
+        }
     }
 
     @Override
