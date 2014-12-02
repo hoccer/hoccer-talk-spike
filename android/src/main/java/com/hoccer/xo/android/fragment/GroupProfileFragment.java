@@ -301,7 +301,6 @@ public class GroupProfileFragment extends ProfileFragment
     protected void updateView() {
         updateAvatar();
         updateChatContainer();
-        updateGroupMembersVisibility();
         updateGroupName();
         updateContentVisibility();
     }
@@ -361,10 +360,6 @@ public class GroupProfileFragment extends ProfileFragment
         }
 
         mNameEditText.setText(name);
-    }
-
-    private void updateGroupMembersVisibility() {
-        mGroupMembersList.setVisibility(mCurrentClientsInGroup.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     private void updateAvatar() {
