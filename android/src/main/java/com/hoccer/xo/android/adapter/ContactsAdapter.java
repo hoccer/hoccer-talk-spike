@@ -12,6 +12,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -342,13 +343,8 @@ public abstract class ContactsAdapter extends XoAdapter
         separator.setText((String) getItem(position));
     }
 
-    public String[] getMembersIds() {
-        String[] ids = new String[mClientContacts.size()];
-        int i = 0;
-        for (TalkClientContact contact : mClientContacts) {
-            ids[i++] = contact.getClientId();
-        }
-        return ids;
+    public List<TalkClientContact> getClientContacts() {
+        return ListUtils.unmodifiableList(mClientContacts);
     }
 
     public interface Filter {

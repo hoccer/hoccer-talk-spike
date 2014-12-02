@@ -33,6 +33,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -69,7 +70,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private Menu mOptionsMenu;
 
-    private final ArrayList<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
+    private List<TalkClientContact> mCurrentClientsInGroup;
     private final ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
 
@@ -420,8 +421,8 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private void manageGroupMembers() {
-        if (mCurrentClientsInGroup.isEmpty()) {
-            mCurrentClientsInGroup.addAll(getCurrentContactsFromGroup(Arrays.asList(mGroupMemberAdapter.getMembersIds())));
+        if (mCurrentClientsInGroup == null) {
+            mCurrentClientsInGroup = mGroupMemberAdapter.getClientContacts();
         }
         GroupManageDialog dialog = new GroupManageDialog(mGroup, mCurrentClientsInGroup);
         dialog.setTargetFragment(this, 0);
@@ -435,21 +436,6 @@ public class GroupProfileFragment extends ProfileFragment
 
     private boolean isCurrentGroup(TalkClientContact contact) {
         return mGroup != null && (mGroup == contact || mGroup.getClientContactId() == contact.getClientContactId());
-    }
-
-    private List<TalkClientContact> getCurrentContactsFromGroup(List<String> ids) {
-        List<TalkClientContact> result = new ArrayList<TalkClientContact>();
-        try {
-            List<TalkClientContact> allContacts = getXoDatabase().findAllClientContacts();
-            for (TalkClientContact contact : allContacts) {
-                if (contact.isClient() && ids.contains(contact.getClientId())) {
-                    result.add(contact);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
     }
 
     @Override
@@ -566,10 +552,8 @@ public class GroupProfileFragment extends ProfileFragment
         if (mGroupMemberAdapter == null) {
             return;
         }
-        List<TalkClientContact> nearbyContacts = getCurrentContactsFromGroup(Arrays.asList(mGroupMemberAdapter.getMembersIds()));
-        int length = nearbyContacts.size();
-        for (int i = 0; i < length; i++) {
-            TalkClientContact contact = nearbyContacts.get(i);
+        List<TalkClientContact> contacts = mGroupMemberAdapter.getClientContacts();
+        for (TalkClientContact contact : contacts) {
             TalkRelationship relationship = contact.getClientRelationship();
             if (relationship == null || !relationship.isRelated()) {
                 mContactsToInviteAsFriend.add(contact);

@@ -19,6 +19,7 @@ import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class GroupManageDialog extends DialogFragment {
 
@@ -29,9 +30,9 @@ public class GroupManageDialog extends DialogFragment {
     private ContactsAdapter mAdapter;
     private ArrayList<TalkClientContact> mContactsToInvite;
     private ArrayList<TalkClientContact> mContactsToKick;
-    private ArrayList<TalkClientContact> mCurrentContactsInGroup = new ArrayList<TalkClientContact>();
+    private List<TalkClientContact> mCurrentContactsInGroup = new ArrayList<TalkClientContact>();
 
-    public GroupManageDialog(TalkClientContact group, ArrayList<TalkClientContact> currentContactsInGroup) {
+    public GroupManageDialog(TalkClientContact group, List<TalkClientContact> currentContactsInGroup) {
         super();
         mGroup = group;
         mContactsToInvite = new ArrayList();
