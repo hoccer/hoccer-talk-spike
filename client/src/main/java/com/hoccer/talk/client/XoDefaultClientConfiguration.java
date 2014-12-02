@@ -62,11 +62,6 @@ public abstract class XoDefaultClientConfiguration implements IXoClientConfigura
     }
 
     @Override
-    public int getConnectionIdleTimeout() {
-        return 900000;
-    }
-
-    @Override
     public float getReconnectBackoffFixedDelay() {
         return 3;
     }

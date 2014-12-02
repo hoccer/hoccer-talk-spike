@@ -4,7 +4,8 @@ import better.jsonrpc.client.JsonRpcClient;
 import better.jsonrpc.client.JsonRpcClientException;
 import better.jsonrpc.core.JsonRpcConnection;
 import better.jsonrpc.server.JsonRpcServer;
-import better.jsonrpc.websocket.JsonRpcWsClient;
+import better.jsonrpc.websocket.JsonRpcWsConnection;
+import better.jsonrpc.websocket.java.JavaWebSocket;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,15 +28,12 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.agreement.srp.SRP6VerifierGenerator;
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.eclipse.jetty.websocket.WebSocketClient;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.sql.SQLException;
@@ -114,13 +112,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     XoTransferAgent mTransferAgent;
 
-    /** Factory for underlying websocket connections */
-    WebSocketClientFactory mClientFactory;
-    /** JSON-RPC client instance */
-    protected JsonRpcWsClient mConnection;
-    /* RPC handler for notifications */
+    private JavaWebSocket mWebSocket;
+    protected JsonRpcWsConnection mConnection;
     TalkRpcClientImpl mHandler;
-    /* RPC proxy bound to our server */
     ITalkRpcServer mServerRpc;
 
     /** Executor doing all the heavy network and database work */
@@ -150,8 +144,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     /** Last client activity */
     long mLastActivity = 0;
 
-    int mIdleTimeout = 0;
-
     ObjectMapper mJsonMapper;
 
     // temporary group for geolocation grouping
@@ -176,8 +168,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         // remember the host
         mClientHost = host;
 
-        mIdleTimeout = mClientConfiguration.getIdleTimeout();
-
         // fetch executor and db immediately
         mExecutor = host.getBackgroundExecutor();
 
@@ -187,14 +177,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             mDatabase.initialize();
         } catch (SQLException e) {
             LOG.error("sql error in database initialization", e);
-        }
-
-        // create URI object referencing the server
-        URI uri = null;
-        try {
-            uri = new URI(mClientConfiguration.getServerUri());
-        } catch (URISyntaxException e) {
-            LOG.error("uri is wrong", e);
         }
 
         // create JSON object mapper
@@ -210,10 +192,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
         ObjectMapper rpcMapper = createObjectMapper(rpcFactory);
 
-        // create websocket client
-        WebSocketClient wsClient = host.getWebSocketFactory().newWebSocketClient();
-
-        createJsonRpcClient(uri, wsClient, rpcMapper);
+        createJsonRpcConnection(rpcMapper);
 
         // create client-side RPC handler object
         mHandler = new TalkRpcClientImpl();
@@ -240,13 +219,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         ensureSelfContact();
     }
 
-    protected void createJsonRpcClient(URI uri, WebSocketClient wsClient, ObjectMapper rpcMapper) {
-        String protocol = mClientConfiguration.getUseBsonProtocol()
-                ? mClientConfiguration.getBsonProtocolString()
-                : mClientConfiguration.getJsonProtocolString();
-
-        mConnection = new JsonRpcWsClient(uri, protocol, wsClient, rpcMapper);
-        mConnection.setMaxIdleTime(mClientConfiguration.getConnectionIdleTimeout());
+    private void createJsonRpcConnection(ObjectMapper rpcMapper) {
+        mWebSocket = new JavaWebSocket(mClientHost.getKeyStore(), XoClientSslConfiguration.TLS_CIPHERS);
+        mConnection = new JsonRpcWsConnection(mWebSocket, rpcMapper);
         mConnection.setSendKeepAlives(mClientConfiguration.getKeepAliveEnabled());
 
         if(mClientConfiguration.getUseBsonProtocol()) {
@@ -315,17 +290,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         this.mEncryptedDownloadDirectory = encryptedDownloadDirectory;
     }
 
-    public URI getServiceUri() {
-        return mConnection.getServiceUri();
-    }
-
-    public void setServiceUri(URI serviceUri) {
-        mConnection.setServiceUri(serviceUri);
-        if(mState >= STATE_IDLE) {
-            reconnect("URI changed");
-        }
-    }
-
     public IXoClientHost getHost() {
         return mClientHost;
     }
@@ -366,14 +330,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
      */
     public synchronized String getStateString() {
         return stateToString(mState);
-    }
-
-    public int getIdleTimeout() {
-        return mIdleTimeout;
-    }
-
-    public void setIdleTimeout(int idleTimeout) {
-        mIdleTimeout = idleTimeout;
     }
 
     public synchronized void registerStateListener(IXoStateListener listener) {
@@ -425,8 +381,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public boolean isIdle() {
-        if (mIdleTimeout > 0) {
-            return (System.currentTimeMillis() - mLastActivity) > (mIdleTimeout * 1000);
+        int timeout = mClientConfiguration.getIdleTimeout();
+
+        if (timeout > 0) {
+            return (System.currentTimeMillis() - mLastActivity) > (timeout * 1000);
         } else {
             return false;
         }
@@ -865,29 +823,35 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     private void sendGroupPresenceUpdateWithNewAvatar(final TalkClientContact group, final TalkClientUpload upload) {
-        try {
-            TalkGroup presence = group.getGroupPresence();
-            if (presence != null) {
-                if (upload != null) {
-                    String downloadUrl = upload.getDownloadUrl();
-                    presence.setGroupAvatarUrl(downloadUrl);
-                } else {
-                    presence.setGroupAvatarUrl(null);
-                }
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TalkGroup presence = group.getGroupPresence();
+                    if (presence != null) {
+                        if (upload != null) {
+                            String downloadUrl = upload.getDownloadUrl();
+                            presence.setGroupAvatarUrl(downloadUrl);
+                        } else {
+                            presence.setGroupAvatarUrl(null);
+                        }
 
-                group.setAvatarUpload(upload);
-                if (group.isGroupRegistered()) {
-                    mDatabase.saveGroup(presence);
-                    mDatabase.saveContact(group);
-                    mServerRpc.updateGroup(presence);
-                    for (IXoContactListener listener : mContactListeners) {
-                        listener.onGroupPresenceChanged(group);
+                        group.setAvatarUpload(upload);
+                        if (group.isGroupRegistered()) {
+                            mDatabase.saveGroup(presence);
+                            mDatabase.saveContact(group);
+                            mServerRpc.updateGroup(presence);
+
+                            for (IXoContactListener listener : mContactListeners) {
+                                listener.onGroupPresenceChanged(group);
+                            }
+                        }
                     }
+                } catch(Exception e){
+                    LOG.error("error creating group avatar", e);
                 }
             }
-        } catch(Exception e){
-            LOG.error("error creating group avatar", e);
-        }
+        });
     }
 
     public String generatePairingToken() {
@@ -1443,7 +1407,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void doConnect() {
         LOG.debug("performing connect on connection #" + mConnection.getConnectionId());
         try {
-            mConnection.connect(mClientConfiguration.getConnectTimeout(), TimeUnit.SECONDS);
+            URI uri = new URI(mClientConfiguration.getServerUri());
+            String protocol = mClientConfiguration.getUseBsonProtocol()
+                    ? mClientConfiguration.getBsonProtocolString()
+                    : mClientConfiguration.getJsonProtocolString();
+
+            mWebSocket.open(uri, protocol, mClientConfiguration.getConnectTimeout() * 1000);
         } catch (Exception e) {
             LOG.warn("[connection #" + mConnection.getConnectionId() + "] exception while connecting: ", e);
         }
@@ -1463,14 +1432,17 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     private void scheduleIdle() {
         shutdownIdle();
-        if(mState > STATE_CONNECTING && mIdleTimeout > 0) {
+
+        int timeout = mClientConfiguration.getIdleTimeout();
+
+        if (mState > STATE_CONNECTING && timeout > 0) {
             mAutoDisconnectFuture = mExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
                     switchState(STATE_IDLE, "activity timeout");
                     mAutoDisconnectFuture = null;
                 }
-            }, mIdleTimeout, TimeUnit.SECONDS);
+            }, timeout, TimeUnit.SECONDS);
         }
     }
 

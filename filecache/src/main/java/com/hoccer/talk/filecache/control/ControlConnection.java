@@ -19,13 +19,11 @@ public class ControlConnection implements ICacheControl {
     int mId = ID_COUNTER.incrementAndGet();
 
     ControlServlet mServlet;
-    JsonRpcConnection mRpcConnection;
     HttpServletRequest mHttpRequest;
     CacheBackend mBackend;
 
-    public ControlConnection(ControlServlet servlet, JsonRpcConnection rpcConnection, HttpServletRequest httpRequest) {
+    public ControlConnection(ControlServlet servlet, HttpServletRequest httpRequest) {
         mServlet = servlet;
-        mRpcConnection = rpcConnection;
         mHttpRequest = httpRequest;
         mBackend = mServlet.getCacheBackend();
         logCall("connection from " + getRemoteAddress());

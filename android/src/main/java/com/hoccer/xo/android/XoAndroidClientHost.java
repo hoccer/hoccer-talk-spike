@@ -1,23 +1,17 @@
 package com.hoccer.xo.android;
 
-import android.content.SharedPreferences;
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.util.TypedValue;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.xo.android.database.AndroidTalkDatabase;
-import com.artcom.hoccer.R;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
-
-import android.content.Context;
-import android.net.Uri;
-import android.preference.PreferenceManager;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyStore;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,7 +20,6 @@ import java.util.concurrent.ScheduledExecutorService;
  * Android-specific implementation of an XO client host
  *
  * This directs the client towards the android-specific ormlite backend,
- * binds it to the right WS socket factory for SSL security
  * and allows the client to read files from content providers.
  */
 public class XoAndroidClientHost implements IXoClientHost {
@@ -64,8 +57,8 @@ public class XoAndroidClientHost implements IXoClientHost {
     }
 
     @Override
-    public WebSocketClientFactory getWebSocketFactory() {
-        return XoSsl.getWebSocketClientFactory();
+    public KeyStore getKeyStore() {
+        return XoSsl.getKeyStore();
     }
 
     @Override

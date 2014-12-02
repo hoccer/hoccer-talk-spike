@@ -18,7 +18,6 @@ public interface IXoClientConfiguration {
 
     public boolean getKeepAliveEnabled();
     public int getKeepAliveInterval();
-    public int getConnectionIdleTimeout();
 
     public float getReconnectBackoffFixedDelay();
     public float getReconnectBackoffVariableFactor();

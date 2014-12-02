@@ -82,7 +82,6 @@ public class XoClientService extends Service {
     private static final String sPreferenceDownloadLimitWifiKey = "preference_download_limit_wifi";
     private static final String sPreferenceImageUploadPixelCountKey = "preference_image_encoding_size";
     private static final String sPreferenceImageUploadQualityKey = "preference_image_encoding_quality";
-    private static final String sPreferenceServiceUriKey = "preference_service_uri";
 
     /**
      * Executor for ourselves and the client
@@ -174,9 +173,7 @@ public class XoClientService extends Service {
         mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals("preference_service_uri")) {
-                    configureServiceUri();
-                } else if (key.equals(sPreferenceDownloadLimitMobileKey)
+                if (key.equals(sPreferenceDownloadLimitMobileKey)
                         || key.equals(sPreferenceDownloadLimitWifiKey)
                         || key.equals(sPreferenceUploadLimitMobileKey)
                         || key.equals(sPreferenceUploadLimitWifiKey)) {
@@ -268,15 +265,6 @@ public class XoClientService extends Service {
     public boolean onUnbind(Intent intent) {
         LOG.debug("onUnbind(" + intent.toString() + ")");
         return super.onUnbind(intent);
-    }
-
-    private void configureServiceUri() {
-        String uriString = mPreferences.getString(sPreferenceServiceUriKey, "");
-        if (uriString.isEmpty()) {
-            uriString = XoApplication.getXoClient().getConfiguration().getServerUri();
-        }
-        URI uri = URI.create(uriString);
-        mClient.setServiceUri(uri);
     }
 
     private void configureAutoTransfers() {

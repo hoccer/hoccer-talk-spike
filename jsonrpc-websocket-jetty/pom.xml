@@ -8,9 +8,9 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>better-jsonrpc-websocket</artifactId>
+  <artifactId>better-jsonrpc-websocket-jetty</artifactId>
 
-  <name>Better JSON-RPC WebSocket Transport</name>
+  <name>Better JSON-RPC WebSocket Transport (Jetty)</name>
 
   <description>
     This package integrates Better JSON-RPC with the Jetty WebSocket implementation.
@@ -26,13 +26,13 @@
   <dependencies>
     <dependency>
       <groupId>hoccer</groupId>
-      <artifactId>better-jsonrpc-common</artifactId>
+      <artifactId>better-jsonrpc-websocket</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-websocket</artifactId>
+      <version>${jetty.version}</version>
     </dependency>
   </dependencies>
   
@@ -49,5 +49,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
