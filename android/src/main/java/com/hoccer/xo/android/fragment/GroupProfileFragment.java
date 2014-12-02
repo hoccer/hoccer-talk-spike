@@ -32,8 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -422,7 +420,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void manageGroupMembers() {
         if (mCurrentClientsInGroup == null) {
-            mCurrentClientsInGroup = mGroupMemberAdapter.getClientContacts();
+            mCurrentClientsInGroup = mGroupMemberAdapter.getContacts();
         }
         GroupManageDialog dialog = new GroupManageDialog(mGroup, mCurrentClientsInGroup);
         dialog.setTargetFragment(this, 0);
@@ -552,7 +550,7 @@ public class GroupProfileFragment extends ProfileFragment
         if (mGroupMemberAdapter == null) {
             return;
         }
-        List<TalkClientContact> contacts = mGroupMemberAdapter.getClientContacts();
+        List<TalkClientContact> contacts = mGroupMemberAdapter.getContacts();
         for (TalkClientContact contact : contacts) {
             TalkRelationship relationship = contact.getClientRelationship();
             if (relationship == null || !relationship.isRelated()) {
