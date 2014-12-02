@@ -228,7 +228,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private void updateAttachmentButton() {
-        if (mAttachments != null && mAttachments.size() > 0) {
+        if (mAttachments != null && !mAttachments.isEmpty()) {
             if (mAttachments.size() > 1) {
                 attachMultipleUploadsButton(mAttachments.size());
             } else {
@@ -590,7 +590,6 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private class SendOversizeAttachmentCallbackHandler implements DialogInterface.OnClickListener {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
-
             validateAndSendComposedMessage();
         }
     }
