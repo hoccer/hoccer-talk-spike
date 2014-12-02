@@ -326,7 +326,7 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
         return (transferLimit >= 0 && fileSize >= transferLimit);
     }
 
-    private long calculateAttachmentSize(List<IContentObject> attachments) {
+    private static long calculateAttachmentSize(List<IContentObject> attachments) {
         long fileSize = 0;
         for (IContentObject upload : attachments) {
             fileSize += upload.getContentLength();
