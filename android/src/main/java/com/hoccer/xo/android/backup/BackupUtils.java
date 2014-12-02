@@ -218,7 +218,7 @@ public class BackupUtils {
         return String.format(BACKUP_FILENAME_PATTERN, timestamp);
     }
 
-    public static void importBackup(File backupFile, File databaseTarget, String password) throws Exception {
+    public static void restoreBackup(File backupFile, File databaseTarget, String password) throws Exception {
         extractAndDecryptDatabase(backupFile, databaseTarget, password);
     }
 

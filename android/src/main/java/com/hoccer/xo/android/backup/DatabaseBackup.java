@@ -34,7 +34,7 @@ public class DatabaseBackup extends Backup {
     @Override
     public void restore(String password) throws Exception {
         File databaseTarget = new File(DB_PATH_NAME);
-        BackupUtils.importBackup(mBackupFile, databaseTarget, password);
+        BackupUtils.restoreBackup(mBackupFile, databaseTarget, password);
 //        XoApplication.getXoClient().getDatabase().initialize();
     }
 
