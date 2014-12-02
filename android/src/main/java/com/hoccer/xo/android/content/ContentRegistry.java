@@ -3,20 +3,22 @@ package com.hoccer.xo.android.content;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.*;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.IXoFragment;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.contentselectors.*;
 import com.hoccer.xo.android.fragment.CompositionFragment;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -196,18 +198,18 @@ public class ContentRegistry {
      * Will create and show a dialog above the given activity
      * that allows the users to select a source for content selection.
      *
-     * @param fragment    that is requesting the selection
+     * @param activity    that is requesting the selection
      * @param requestCode identifying returned intents
      * @return a new selection handle object
      */
-    public ContentSelection selectAttachment(final Fragment fragment, final int requestCode) {
+    public ContentSelection selectAttachment(final Activity activity, final int requestCode) {
         // create handle representing this selection attempt
-        final ContentSelection contentSelection = new ContentSelection(fragment.getActivity());
+        final ContentSelection contentSelection = new ContentSelection(activity);
 
         // collect selection intents and associated information
         final List<Map<String, Object>> options = new ArrayList<Map<String, Object>>();
         for (IContentSelector selector : mAttachmentSelectors) {
-            Map<String, Object> fields = createDataObjectFromContentSelector(fragment.getActivity(), selector);
+            Map<String, Object> fields = createDataObjectFromContentSelector(activity, selector);
             if (fields != null) {
                 options.add(fields);
             }
@@ -215,14 +217,14 @@ public class ContentRegistry {
 
         // Add ClipboardSelector when it has something to process
         if (mClipboardSelector.hasContent()) {
-            Map<String, Object> fields = createDataObjectFromContentSelector(fragment.getActivity(), mClipboardSelector);
+            Map<String, Object> fields = createDataObjectFromContentSelector(activity, mClipboardSelector);
             if (fields != null) {
                 options.add(fields);
             }
         }
 
         // prepare an adapter for the selection options
-        SimpleAdapter adapter = new SimpleAdapter(fragment.getActivity(), options, R.layout.select_content,
+        SimpleAdapter adapter = new SimpleAdapter(activity, options, R.layout.select_content,
                 new String[]{KEY_ICON, KEY_NAME},
                 new int[]{R.id.select_content_icon, R.id.select_content_text});
         adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
@@ -238,7 +240,7 @@ public class ContentRegistry {
         });
 
         // build the selection dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.selectattachment_title);
         builder.setCancelable(true);
         builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
@@ -257,13 +259,13 @@ public class ContentRegistry {
 
                 if (intent == null) {
                     // selectors without intent can return the result immediately
-                    IContentObject contentObject = selector.createObjectFromSelectionResult(fragment.getActivity(), null);
-                    ((IXoFragment)fragment).onAttachmentSelected(contentObject);
+                    IContentObject contentObject = selector.createObjectFromSelectionResult(activity, null);
+                    ((IXoFragment) activity).onAttachmentSelected(contentObject);
                 } else {
                     if (selector instanceof MultiImageSelector) {
-                        startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGE_ATTACHMENTS);
+                        startExternalActivityForResult(activity, intent, CompositionFragment.REQUEST_SELECT_IMAGE_ATTACHMENTS);
                     } else {
-                        startExternalActivityForResult(fragment, intent, requestCode);
+                        startExternalActivityForResult(activity, intent, requestCode);
                     }
                 }
             }
@@ -308,14 +310,14 @@ public class ContentRegistry {
     /**
      * Creates a dialog entry data object from a given IContentSelector.
      *
-     * @param activity that is requesting the selection
+     * @param context  that is requesting the selection
      * @param selector the given IContentSelector
      * @return a Map containing all relevant intent information
      */
-    private static Map<String, Object> createDataObjectFromContentSelector(final Activity activity, final IContentSelector selector) {
-        Intent selectionIntent = selector.createSelectionIntent(activity);
+    private static Map<String, Object> createDataObjectFromContentSelector(final Context context, final IContentSelector selector) {
+        Intent selectionIntent = selector.createSelectionIntent(context);
 
-        if (selectionIntent == null || IntentHelper.isIntentResolvable(selectionIntent, activity)) {
+        if (selectionIntent == null || IntentHelper.isIntentResolvable(selectionIntent, context)) {
             Map<String, Object> fields = new HashMap<String, Object>();
             fields.put(KEY_INTENT, selectionIntent);
             fields.put(KEY_SELECTOR, selector);
@@ -327,15 +329,15 @@ public class ContentRegistry {
         return null;
     }
 
-    private static void startExternalActivityForResult(Fragment fragment, Intent intent, int requestCode) {
-        XoActivity xoActivity = (XoActivity) fragment.getActivity();
+    private static void startExternalActivityForResult(Activity activity, Intent intent, int requestCode) {
+        XoActivity xoActivity = (XoActivity) activity;
 
         if (!xoActivity.canStartActivity(intent)) {
             return;
         }
         xoActivity.setBackgroundActive();
         try {
-            fragment.startActivityForResult(intent, requestCode);
+            activity.startActivityForResult(intent, requestCode);
         } catch (ActivityNotFoundException e) {
             Toast.makeText(xoActivity, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
