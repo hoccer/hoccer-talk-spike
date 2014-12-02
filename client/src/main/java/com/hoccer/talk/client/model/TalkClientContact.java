@@ -119,7 +119,7 @@ public class TalkClientContact implements Serializable {
 
     @SelfMethodOnly
     public boolean isEditable() {
-        return isSelf() || isGroupAdmin() || (isGroup() && !isGroupRegistered());
+        return isSelf() || isGroupAdmin();
     }
 
     public int getClientContactId() {
@@ -165,10 +165,6 @@ public class TalkClientContact implements Serializable {
 
     public boolean isGroup() {
         return this.contactType.equals(TYPE_GROUP);
-    }
-
-    public boolean isGroupRegistered() {
-        return isGroup() && this.groupId != null;
     }
 
     public boolean isGroupExisting() {

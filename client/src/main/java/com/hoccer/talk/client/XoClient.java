@@ -792,18 +792,18 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                    return;
                }
                presence.setGroupName(groupName);
-               if (group.isGroupRegistered()) {
-                   try {
-                       mDatabase.saveGroup(presence);
-                       mDatabase.saveContact(group);
-                       LOG.debug("sending new group presence");
-                       mServerRpc.updateGroup(presence);
-                   } catch (SQLException e) {
-                       LOG.error("sql error", e);
-                   } catch (JsonRpcClientException e) {
-                       LOG.error("Error while sending new group presence: " , e);
-                   }
+
+               try {
+                   mDatabase.saveGroup(presence);
+                   mDatabase.saveContact(group);
+                   LOG.debug("sending new group presence");
+                   mServerRpc.updateGroup(presence);
+               } catch (SQLException e) {
+                   LOG.error("sql error", e);
+               } catch (JsonRpcClientException e) {
+                   LOG.error("Error while sending new group presence: " , e);
                }
+
                for (IXoContactListener listener : mContactListeners) {
                    listener.onGroupPresenceChanged(group);
                }
@@ -838,14 +838,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         }
 
                         group.setAvatarUpload(upload);
-                        if (group.isGroupRegistered()) {
-                            mDatabase.saveGroup(presence);
-                            mDatabase.saveContact(group);
-                            mServerRpc.updateGroup(presence);
+                        mDatabase.saveGroup(presence);
+                        mDatabase.saveContact(group);
+                        mServerRpc.updateGroup(presence);
 
-                            for (IXoContactListener listener : mContactListeners) {
-                                listener.onGroupPresenceChanged(group);
-                            }
+                        for (IXoContactListener listener : mContactListeners) {
+                            listener.onGroupPresenceChanged(group);
                         }
                     }
                 } catch(Exception e){

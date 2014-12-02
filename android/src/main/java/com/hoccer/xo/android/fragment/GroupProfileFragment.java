@@ -58,7 +58,6 @@ public class GroupProfileFragment extends ProfileFragment
     private ImageView mAvatarImage;
     private Button mInviteAllButton;
     private LinearLayout mGroupMembersContainer;
-    private TextView mGroupMembersTitle;
     private ListView mGroupMembersList;
 
     @Nullable
@@ -101,7 +100,6 @@ public class GroupProfileFragment extends ProfileFragment
 
         mAvatarImage = (ImageView) view.findViewById(R.id.profile_group_profile_image);
         mGroupMembersContainer = (LinearLayout) view.findViewById(R.id.profile_group_members_container);
-        mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
         mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
 
         mNameText = (TextView) view.findViewById(R.id.profile_group_name);
@@ -109,12 +107,8 @@ public class GroupProfileFragment extends ProfileFragment
         mNameEditText.setFocusableInTouchMode(true);
         mNameEditText.setOnKeyListener(new BackPressListener());
 
-
         mInviteAllButton = (Button) view.findViewById(R.id.profile_group_button_invite_all);
         mInviteAllButton.setOnClickListener(this);
-        mGroupMembersContainer = (LinearLayout) view.findViewById(R.id.profile_group_members_container);
-        mGroupMembersTitle = (TextView) mGroupMembersContainer.findViewById(R.id.profile_group_members_title);
-        mGroupMembersList = (ListView) mGroupMembersContainer.findViewById(R.id.profile_group_members_list);
 
         return view;
     }
@@ -313,12 +307,8 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private void updateChatContainer() {
-        if (mGroup.isGroupRegistered()) {
-            updateMessageText();
-            mChatContainer.setVisibility(View.VISIBLE);
-        } else {
-            mChatContainer.setVisibility(View.GONE);
-        }
+        mChatContainer.setVisibility(View.VISIBLE);
+        updateMessageText();
     }
 
     @Override
@@ -374,8 +364,7 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private void updateGroupMembersVisibility() {
-        mGroupMembersTitle.setVisibility(mGroup.isGroupRegistered() ? View.VISIBLE : View.GONE);
-        mGroupMembersList.setVisibility(mGroup.isGroupRegistered() || !mCurrentClientsInGroup.isEmpty() ? View.VISIBLE : View.GONE);
+        mGroupMembersList.setVisibility(mCurrentClientsInGroup.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
     private void updateAvatar() {
