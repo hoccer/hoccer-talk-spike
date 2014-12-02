@@ -17,10 +17,10 @@ import java.io.File;
 
 public class ImageSelector implements IContentSelector {
 
-    private Logger LOG = Logger.getLogger(ImageSelector.class);
+    private static final Logger LOG = Logger.getLogger(ImageSelector.class);
 
-    protected String mName;
-    protected Drawable mIcon;
+    private final String mName;
+    private final Drawable mIcon;
 
     public ImageSelector(Context context) {
         mName = context.getResources().getString(R.string.content_images);
@@ -62,7 +62,7 @@ public class ImageSelector implements IContentSelector {
         return creator.apply(context, intent);
     }
 
-    protected IContentCreator findContentObjectCreator(Uri selectedContent) {
+    protected static IContentCreator findContentObjectCreator(Uri selectedContent) {
         String contentString = selectedContent.toString();
         if (isPicasaContent(contentString)) {
             return new PicasaContentObjectCreator();
@@ -106,7 +106,7 @@ public class ImageSelector implements IContentSelector {
         return false;
     }
 
-    public Intent createCropIntent(Context context, Uri data) {
+    public static Intent createCropIntent(Uri data) {
         Intent intent = new Intent("com.android.camera.action.CROP", android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
         intent.setDataAndType(data, "image/*");
@@ -123,5 +123,4 @@ public class ImageSelector implements IContentSelector {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tmpFile));
         return intent;
     }
-
 }
