@@ -179,10 +179,6 @@ public class TalkClientContact implements Serializable {
         return isClient() && this.clientRelationship != null && this.clientRelationship.isFriend();
     }
 
-    public boolean isClientBlocked() {
-        return isClient() && this.clientRelationship != null && this.clientRelationship.isBlocked();
-    }
-
     public boolean isGroup() {
         return this.contactType.equals(TYPE_GROUP);
     }
