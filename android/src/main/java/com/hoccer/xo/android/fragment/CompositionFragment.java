@@ -581,6 +581,8 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
                 case 1:
                     clearAttachment();
                     break;
+                default:
+                    break;
             }
         }
     }
