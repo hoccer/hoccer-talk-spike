@@ -441,12 +441,12 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     }
 
     private void compressAndSendAttachments(List<IContentObject> contentObjects) {
-        AsyncTask asyncTask = new AsyncTask<Object, Void, List<IContentObject>>() {
+        AsyncTask<List<IContentObject>, Void, List<IContentObject>> asyncTask = new AsyncTask<List<IContentObject>, Void, List<IContentObject>>() {
 
             @Override
-            protected List<IContentObject> doInBackground(Object... objects) {
+            protected List<IContentObject> doInBackground(List<IContentObject>... objects) {
 
-                List<IContentObject> contentObjects = (List<IContentObject>) objects[0];
+                List<IContentObject> contentObjects = objects[0];
 
                 List<IContentObject> result = new ArrayList<IContentObject>();
                 for (IContentObject contentObject : contentObjects) {
