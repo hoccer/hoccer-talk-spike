@@ -21,12 +21,12 @@ public class DatabaseBackup extends Backup {
 
         File database = new File(DB_PATH_NAME);
 
-        String filename = BackupUtils.createUniqueBackupFilename();
+        String filename = BackupFileUtils.createUniqueBackupFilename();
         File backupFile = new File(XoApplication.getBackupDirectory(), filename + "_db.zip");
         String clientName = XoApplication.getXoClient().getSelfContact().getName();
 
         BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());
-        BackupUtils.createBackupFile(backupFile, database, metadata, password);
+        BackupFileUtils.createBackupFile(backupFile, database, metadata, password);
 
         return new DatabaseBackup(backupFile, metadata);
     }
@@ -34,7 +34,7 @@ public class DatabaseBackup extends Backup {
     @Override
     public void restore(String password) throws Exception {
         File databaseTarget = new File(DB_PATH_NAME);
-        BackupUtils.restoreBackup(mBackupFile, databaseTarget, password);
+        BackupFileUtils.restoreBackup(mBackupFile, databaseTarget, password);
 //        XoApplication.getXoClient().getDatabase().initialize();
     }
 

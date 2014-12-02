@@ -19,14 +19,14 @@ public class BackupTestResources {
     private static final String DB_TARGET_FILE_PATH = "/db_target/database.db";
 
     public static File getResourceFile(String path) {
-        URL url = BackupUtilsTest.class.getResource(path);
+        URL url = BackupFileUtilsTest.class.getResource(path);
         assertNotNull(url);
 
         return new File(url.getFile());
     }
 
     public static List<File> getAttachmentFiles() {
-        URL attachmentFileUrl = BackupUtilsTest.class.getResource(BackupTestResources.RESOURCE_ATTACHMENT_FILE_01);
+        URL attachmentFileUrl = BackupFileUtilsTest.class.getResource(BackupTestResources.RESOURCE_ATTACHMENT_FILE_01);
         assertNotNull(attachmentFileUrl);
 
         List<File> attachmentFiles = new ArrayList<File>();
@@ -35,11 +35,11 @@ public class BackupTestResources {
     }
 
     public static File createAttachmentsTargetDirectory() {
-        return new File(BackupUtilsTest.class.getResource("").getFile(), ATTACHMENTS_TARGET_DIR_NAME);
+        return new File(BackupFileUtilsTest.class.getResource("").getFile(), ATTACHMENTS_TARGET_DIR_NAME);
     }
 
     public static File createDatabaseTargetFile() {
-        return new File(BackupUtilsTest.class.getResource("").getFile(), DB_TARGET_FILE_PATH);
+        return new File(BackupFileUtilsTest.class.getResource("").getFile(), DB_TARGET_FILE_PATH);
     }
 
 }

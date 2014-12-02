@@ -16,7 +16,7 @@ public class CompleteBackup extends DatabaseBackup {
     }
 
     public static Backup create(String password) throws Exception {
-        String filename = BackupUtils.createUniqueBackupFilename();
+        String filename = BackupFileUtils.createUniqueBackupFilename();
         File backupFile = new File(XoApplication.getBackupDirectory(), filename + "_with_attachments.zip");
 
         File database = new File(DB_PATH_NAME);
@@ -37,7 +37,7 @@ public class CompleteBackup extends DatabaseBackup {
             attachments = Arrays.asList(files);
         }
 
-        BackupUtils.createBackupFile(backupFile, database, attachments, metadata, password);
+        BackupFileUtils.createBackupFile(backupFile, database, attachments, metadata, password);
 
         return new CompleteBackup(backupFile, metadata);
     }

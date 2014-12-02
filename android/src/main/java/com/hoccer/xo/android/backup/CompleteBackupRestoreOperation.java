@@ -26,8 +26,8 @@ public class CompleteBackupRestoreOperation {
         mAttachmentsTargetDir = attachmentsTargetDir;
         mPassword = password;
 
-        mTempAttachmentsDir = new File(attachmentsTargetDir.getParent(), BackupUtils.TEMP_ATTACHMENTS_DIR_NAME);
-        mTempDatabaseFile = new File(attachmentsTargetDir.getParent(), BackupUtils.TEMP_DB_DIR_NAME + File.separator + databaseTarget.getName());
+        mTempAttachmentsDir = new File(attachmentsTargetDir.getParent(), BackupFileUtils.TEMP_ATTACHMENTS_DIR_NAME);
+        mTempDatabaseFile = new File(attachmentsTargetDir.getParent(), BackupFileUtils.TEMP_DB_DIR_NAME + File.separator + databaseTarget.getName());
     }
 
     public void invoke() throws IOException {
@@ -51,23 +51,23 @@ public class CompleteBackupRestoreOperation {
 
     private void extractAttachmentsToTempDir() throws IOException {
         FileUtils.forceMkdir(mTempAttachmentsDir);
-        BackupUtils.extractAttachmentFiles(mBackupFile, mTempAttachmentsDir);
+        BackupFileUtils.extractAttachmentFiles(mBackupFile, mTempAttachmentsDir);
     }
 
     private void extractAndDecryptDatabaseToTempDir() throws Exception {
-        BackupUtils.extractAndDecryptDatabase(mBackupFile, mTempDatabaseFile, mPassword);
+        BackupFileUtils.extractAndDecryptDatabase(mBackupFile, mTempDatabaseFile, mPassword);
     }
 
     private void keepCurrentAttachments() throws IOException {
         if (mAttachmentsTargetDir.exists()) {
-            mOldAttachmentsDir = new File(mAttachmentsTargetDir.getPath() + "_" + BackupUtils.getTimestamp());
+            mOldAttachmentsDir = new File(mAttachmentsTargetDir.getPath() + "_" + BackupFileUtils.getTimestamp());
             FileUtils.moveDirectory(mAttachmentsTargetDir, mOldAttachmentsDir);
         }
     }
 
     private void keepCurrentDatabase() throws IOException {
         if (mDatabaseTarget.exists()) {
-            mOldDatabaseFile = new File(mDatabaseTarget.getPath() + "." + BackupUtils.getTimestamp());
+            mOldDatabaseFile = new File(mDatabaseTarget.getPath() + "." + BackupFileUtils.getTimestamp());
             FileUtils.moveFile(mDatabaseTarget, mOldDatabaseFile);
         }
     }

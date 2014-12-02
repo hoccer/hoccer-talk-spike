@@ -18,7 +18,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.Backup;
 import com.hoccer.xo.android.backup.BackupFactory;
-import com.hoccer.xo.android.backup.BackupUtils;
+import com.hoccer.xo.android.backup.BackupFileUtils;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
 import org.apache.commons.io.FileUtils;
@@ -81,7 +81,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void initDataImportPreferences() {
         final ListPreference listPreference = (ListPreference) findPreference("preference_import_backup");
         if (listPreference != null) {
-            List<File> backups = BackupUtils.getBackupFiles(XoApplication.getBackupDirectory());
+            List<File> backups = BackupFileUtils.getBackupFiles(XoApplication.getBackupDirectory());
             if (!backups.isEmpty()) {
 
                 final String[] entries = new String[backups.size()];
@@ -412,7 +412,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void dumpDatabase() {
         try {
             File database = new File("/data/data/" + getPackageName() + "/databases/hoccer-talk.db");
-            String filename = BackupUtils.createUniqueBackupFilename() + ".db";
+            String filename = BackupFileUtils.createUniqueBackupFilename() + ".db";
             File target = new File(XoApplication.getExternalStorage(), filename);
             FileUtils.copyFile(database, target);
         } catch (IOException e) {

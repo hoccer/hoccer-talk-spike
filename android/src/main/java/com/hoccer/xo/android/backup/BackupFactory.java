@@ -14,7 +14,7 @@ public class BackupFactory {
         if (isJson(backupFile)) {
             return new CredentialsBackup(backupFile);
         } else if (isZip(backupFile)) {
-            BackupMetadata metadata = BackupUtils.readMetadata(backupFile);
+            BackupMetadata metadata = BackupFileUtils.readMetadata(backupFile);
             return readBackup(backupFile, metadata);
         } else {
             throw new IllegalArgumentException("Extension " + FilenameUtils.getExtension(backupFile.getName()) + " of " + backupFile.getName() + "is not supported.");
@@ -32,7 +32,7 @@ public class BackupFactory {
                 throw new BackupTypeNotSupportedException("Backup Type '" + metadata.getBackupType() + "' found in " + backupFile.getName() + " not supported");
             }
         } else {
-            throw new FileNotFoundException(BackupUtils.METADATA_FILENAME + " not found in " + backupFile.getName());
+            throw new FileNotFoundException(BackupFileUtils.METADATA_FILENAME + " not found in " + backupFile.getName());
         }
         return backup;
     }

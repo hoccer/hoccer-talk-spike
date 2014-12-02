@@ -15,7 +15,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-public class BackupUtils {
+public class BackupFileUtils {
 
     public static final String FILE_EXTENSION_ZIP = "zip";
     public static final String FILE_EXTENSION_DB = "db";
@@ -26,7 +26,7 @@ public class BackupUtils {
     public static final String DB_FILENAME_ENCRYPTED = "database.json";
     public static final String METADATA_FILENAME = "metadata.json";
 
-    private static final Logger LOG = Logger.getLogger(BackupUtils.class.getName());
+    private static final Logger LOG = Logger.getLogger(BackupFileUtils.class.getName());
     public static final String TEMP_ATTACHMENTS_DIR_NAME = "tmp_attachments";
     public static final String TEMP_DB_DIR_NAME = "tmp_db";
 
@@ -37,7 +37,7 @@ public class BackupUtils {
                 return true;
             } else if (FileFilterUtils.suffixFileFilter("zip").accept(file)) {
                 try {
-                    BackupMetadata metadata = BackupUtils.readMetadata(file);
+                    BackupMetadata metadata = BackupFileUtils.readMetadata(file);
                     if (metadata.getBackupType() != null) {
                         return true;
                     }
@@ -252,10 +252,10 @@ public class BackupUtils {
         try {
             ZipEntry zipEntry;
             while ((zipEntry = zis.getNextEntry()) != null) {
-                if (!zipEntry.getName().equals(BackupUtils.DB_FILENAME_ENCRYPTED) && !zipEntry.getName().equals(BackupUtils.METADATA_FILENAME)) {
-                    byte[] bytes = BackupUtils.readFileEntry(zis);
+                if (!zipEntry.getName().equals(BackupFileUtils.DB_FILENAME_ENCRYPTED) && !zipEntry.getName().equals(BackupFileUtils.METADATA_FILENAME)) {
+                    byte[] bytes = BackupFileUtils.readFileEntry(zis);
                     File file = new File(targetDir, zipEntry.getName());
-                    BackupUtils.writeBytesToFile(file, bytes);
+                    BackupFileUtils.writeBytesToFile(file, bytes);
                 }
             }
         } finally {
