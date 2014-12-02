@@ -89,9 +89,9 @@ public class ContentRegistry {
         initializeSelector(new ImageSelector(mContext));
         initializeSelector(new MultiImageSelector(mContext));
         initializeSelector(new VideoSelector(mContext));
-        initializeSelector(new MusicSelector(mContext));
+        initializeSelector(new AudioSelector(mContext));
         initializeSelector(new ContactSelector(mContext));
-        initializeSelector(new MapsLocationSelector(mContext));
+        initializeSelector(new LocationSelector(mContext));
         initializeSelector(new CaptureSelector(mContext));
 
         mClipboardSelector = new ClipboardSelector(mContext);
