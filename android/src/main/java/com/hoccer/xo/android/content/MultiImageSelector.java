@@ -52,28 +52,28 @@ public class MultiImageSelector extends ImageSelector {
         return intent;
     }
 
-    @Nullable
     public ArrayList<IContentObject> createObjectsFromSelectionResult(Context context, Intent intent) {
+        ArrayList<IContentObject> result = new ArrayList<IContentObject>();
         if(!isValidIntent(context, intent)) {
-            return null;
+            return result;
         }
-        String[] uris = intent.getStringArrayExtra(MultiImagePickerActivity.EXTRA_IMAGES);
-        ArrayList<IContentObject> selected = new ArrayList<IContentObject>();
 
+        String[] uris = intent.getStringArrayExtra(MultiImagePickerActivity.EXTRA_IMAGES);
         for (String uri : uris) {
             IContentCreator creator = findContentObjectCreator(Uri.parse(uri));
             if (creator == null) {
                 LOG.warn("No IContentCreator found for url '" + uri + "'");
-                return null;
+                return result;
             }
+
             Intent dataIntent = new Intent();
             dataIntent.setDataAndType(Uri.parse(uri), "image/*");
             SelectedContent selectedContent = creator.apply(context, dataIntent);
             if (selectedContent != null) {
-                selected.add(selectedContent);
+                result.add(selectedContent);
             }
         }
-        return selected;
-    }
 
+        return result;
+    }
 }
