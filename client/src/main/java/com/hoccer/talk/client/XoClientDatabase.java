@@ -142,8 +142,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public synchronized TalkClientContact findContactByClientId(String clientId, boolean create) throws SQLException {
         TalkClientContact contact = mClientContacts.queryBuilder().where()
                 .eq("clientId", clientId)
-                .eq("deleted", false)
-                .and(2)
                 .queryForFirst();
 
         if (create && contact == null) {
@@ -154,18 +152,8 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contact;
     }
 
-    public TalkClientContact findDeletedContactByClientId(String clientId) throws SQLException {
-        return mClientContacts.queryBuilder().where()
-                .eq("clientId", clientId)
-                .eq("deleted", true)
-                .and(2)
-                .queryForFirst();
-    }
-
     public List<TalkClientContact> findAllContacts() throws SQLException {
-        return mClientContacts.queryBuilder().where()
-                .eq("deleted", false)
-                .query();
+        return mClientContacts.queryForAll();
     }
 
     public List<TalkClientContact> findAllContactsExceptSelfOrderedByRecentMessage() throws SQLException {
@@ -173,10 +161,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         messageQuery.orderBy("timestamp", false);
 
         QueryBuilder<TalkClientContact, Integer> contactsQuery = mClientContacts.queryBuilder();
-        contactsQuery.where()
-                .eq("deleted", false)
-                .and()
-                .ne("contactType", TalkClientContact.TYPE_SELF);
+        contactsQuery.where().ne("contactType", TalkClientContact.TYPE_SELF);
 
         List<TalkClientContact> allContacts = contactsQuery.query();
         List<TalkClientContact> orderedContacts = contactsQuery.join(messageQuery).query();
@@ -197,22 +182,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findAllClientContacts() throws SQLException {
-        return mClientContacts.queryBuilder().where()
-                .eq("contactType", TalkClientContact.TYPE_CLIENT)
-                .eq("deleted", false)
-                .and(2)
-                .query();
+        return mClientContacts.queryForEq("contactType", TalkClientContact.TYPE_CLIENT);
     }
 
     public List<TalkClientContact> findClientContactsByState(String state) throws SQLException {
         QueryBuilder<TalkRelationship, Long> relationships = mRelationships.queryBuilder();
-        relationships.where()
-                .eq("state", state);
+        relationships.where().eq("state", state);
 
         QueryBuilder<TalkClientContact, Integer> contacts = mClientContacts.queryBuilder();
-        contacts.where()
-                .eq("deleted", false);
-
         return contacts.join(relationships).query();
     }
 
@@ -227,17 +204,11 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public TalkClientContact findContactByGroupTag(String groupTag) throws SQLException {
         return mClientContacts.queryBuilder().where()
                 .eq("groupTag", groupTag)
-                .eq("deleted", false)
-                .and(2)
                 .queryForFirst();
     }
 
     public List<TalkClientContact> findAllGroupContacts() throws SQLException {
-        return mClientContacts.queryBuilder().where()
-                .eq("contactType", TalkClientContact.TYPE_GROUP)
-                .eq("deleted", false)
-                .and(2)
-                .query();
+        return mClientContacts.queryForEq("contactType", TalkClientContact.TYPE_GROUP);
     }
 
     public List<TalkClientContact> findGroupContactsByMemberState(String state) throws SQLException {
@@ -248,9 +219,8 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         QueryBuilder<TalkClientContact, Integer> contacts = mClientContacts.queryBuilder();
         contacts.where()
                 .eq("contactType", TalkClientContact.TYPE_GROUP)
-                .isNotNull("groupPresence_id")
-                .eq("deleted", false)
-                .and(3);
+                .and()
+                .isNotNull("groupPresence_id");
 
         return contacts.join(groupMembers).query();
     }
@@ -321,8 +291,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public synchronized TalkClientContact findGroupContactByGroupId(String groupId, boolean create) throws SQLException {
         TalkClientContact contact = mClientContacts.queryBuilder().where()
                 .eq("groupId", groupId)
-                .eq("deleted", false)
-                .and(2)
                 .queryForFirst();
 
         if (create && contact == null) {
@@ -863,24 +831,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     //////// Deletion Management ////////
     /////////////////////////////////////
 
-    public void deleteAllClientContacts() throws SQLException {
-        UpdateBuilder<TalkClientContact, Integer> updateBuilder = mClientContacts.updateBuilder();
-        updateBuilder.updateColumnValue("deleted", true).where()
-                .eq("deleted", false)
-                .eq("contactType", TalkClientContact.TYPE_CLIENT)
-                .and(2);
-        updateBuilder.update();
-    }
-
-    public void deleteAllGroupContacts() throws SQLException {
-        UpdateBuilder<TalkClientContact, Integer> updateBuilder = mClientContacts.updateBuilder();
-        updateBuilder.updateColumnValue("deleted", true).where()
-                .eq("deleted", false)
-                .eq("contactType", TalkClientContact.TYPE_GROUP)
-                .and(2);
-        updateBuilder.update();
-    }
-
     public void deleteMessageById(int messageId) throws SQLException {
         UpdateBuilder<TalkClientMessage, Integer> updateBuilder = mClientMessages.updateBuilder();
         updateBuilder.updateColumnValue("deleted", true).where()
@@ -903,19 +853,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public void eraseAllClientContacts() throws SQLException {
         DeleteBuilder<TalkClientContact, Integer> deleteBuilder = mClientContacts.deleteBuilder();
-        deleteBuilder.where()
-                .eq("deleted", false)
-                .eq("contactType", TalkClientContact.TYPE_CLIENT)
-                .and(2);
+        deleteBuilder.where().eq("contactType", TalkClientContact.TYPE_CLIENT);
         deleteBuilder.delete();
     }
 
     public void eraseAllGroupContacts() throws SQLException {
         DeleteBuilder<TalkClientContact, Integer> deleteBuilder = mClientContacts.deleteBuilder();
-        deleteBuilder.where()
-                .eq("deleted", false)
-                .eq("contactType", TalkClientContact.TYPE_GROUP)
-                .and(2);
+        deleteBuilder.where().eq("contactType", TalkClientContact.TYPE_GROUP);
         deleteBuilder.delete();
     }
 
