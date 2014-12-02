@@ -36,7 +36,7 @@ public class ContentRegistry {
 
     private static final Logger LOG = Logger.getLogger(ContentRegistry.class);
 
-    private static ContentRegistry INSTANCE = null;
+    private static ContentRegistry mInstance;
 
     /**
      * Get the content registry singleton
@@ -50,10 +50,10 @@ public class ContentRegistry {
      * @return the content registry
      */
     public static synchronized ContentRegistry get(Context applicationContext) {
-        if (INSTANCE == null) {
-            INSTANCE = new ContentRegistry(applicationContext);
+        if (mInstance == null) {
+            mInstance = new ContentRegistry(applicationContext);
         }
-        return INSTANCE;
+        return mInstance;
     }
 
     /**
@@ -114,21 +114,21 @@ public class ContentRegistry {
         }
     }
 
-    public String getContentDescription(IContentObject object) {
+    public static String getContentDescription(IContentObject object) {
         String mediaTypeString = "Unknown file";
         String mediaType = object.getContentMediaType();
         if (mediaType != null) {
-            if (mediaType.equals("image")) {
+            if ("image".equals(mediaType)) {
                 mediaTypeString = "Image";
-            } else if (mediaType.equals("audio")) {
+            } else if ("audio".equals(mediaType)) {
                 mediaTypeString = "Audio";
-            } else if (mediaType.equals("video")) {
+            } else if ("video".equals(mediaType)) {
                 mediaTypeString = "Video";
-            } else if (mediaType.equals("contact")) {
+            } else if ("contact".equals(mediaType)) {
                 mediaTypeString = "Contact";
-            } else if (mediaType.equals("location")) {
+            } else if ("location".equals(mediaType)) {
                 mediaTypeString = "Location";
-            } else if (mediaType.equals("data")) {
+            } else if ("data".equals(mediaType)) {
                 mediaTypeString = "Data";
             }
         }
@@ -180,7 +180,7 @@ public class ContentRegistry {
      * @param intent    returned from the selector
      * @return content object for selected avatar
      */
-    public IContentObject createSelectedAvatar(ContentSelection selection, Intent intent) {
+    public static IContentObject createSelectedAvatar(ContentSelection selection, Intent intent) {
         return selection.getSelector().createObjectFromSelectionResult(selection.getActivity(), intent);
     }
 
@@ -312,7 +312,7 @@ public class ContentRegistry {
      * @param selector the given IContentSelector
      * @return a Map containing all relevant intent information
      */
-    private Map<String, Object> createDataObjectFromContentSelector(final Activity activity, final IContentSelector selector) {
+    private static Map<String, Object> createDataObjectFromContentSelector(final Activity activity, final IContentSelector selector) {
         Intent selectionIntent = selector.createSelectionIntent(activity);
 
         if (selectionIntent == null || IntentHelper.isIntentResolvable(selectionIntent, activity)) {
@@ -327,7 +327,7 @@ public class ContentRegistry {
         return null;
     }
 
-    private void startExternalActivityForResult(Fragment fragment, Intent intent, int requestCode) {
+    private static void startExternalActivityForResult(Fragment fragment, Intent intent, int requestCode) {
         XoActivity xoActivity = (XoActivity) fragment.getActivity();
 
         if (!xoActivity.canStartActivity(intent)) {
@@ -341,5 +341,4 @@ public class ContentRegistry {
             e.printStackTrace();
         }
     }
-
 }
