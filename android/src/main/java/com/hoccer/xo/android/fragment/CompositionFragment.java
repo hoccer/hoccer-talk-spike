@@ -56,12 +56,12 @@ public class CompositionFragment extends XoFragment implements View.OnClickListe
     private TextWatcher mTextWatcher;
     private ImageButton mSendButton;
     private TalkClientContact mContact;
-    private String mLastMessage = null;
+    private String mLastMessage;
     private ImageButton mAddAttachmentButton;
 
     private List<IContentObject> mAttachments;
 
-    private ContentSelection mAttachmentSelection = null;
+    private ContentSelection mAttachmentSelection;
     private Button mAddAttachmentsButton;
 
     @Override
