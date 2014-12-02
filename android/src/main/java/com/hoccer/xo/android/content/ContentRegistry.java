@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
@@ -198,18 +199,18 @@ public class ContentRegistry {
      * Will create and show a dialog above the given activity
      * that allows the users to select a source for content selection.
      *
-     * @param activity    that is requesting the selection
+     * @param fragment    that is requesting the selection
      * @param requestCode identifying returned intents
      * @return a new selection handle object
      */
-    public ContentSelection selectAttachment(final Activity activity, final int requestCode) {
+    public ContentSelection selectAttachment(final Fragment fragment, final int requestCode) {
         // create handle representing this selection attempt
-        final ContentSelection contentSelection = new ContentSelection(activity);
+        final ContentSelection contentSelection = new ContentSelection(fragment.getActivity());
 
         // collect selection intents and associated information
         final List<Map<String, Object>> options = new ArrayList<Map<String, Object>>();
         for (IContentSelector selector : mAttachmentSelectors) {
-            Map<String, Object> fields = createDataObjectFromContentSelector(activity, selector);
+            Map<String, Object> fields = createDataObjectFromContentSelector(fragment.getActivity(), selector);
             if (fields != null) {
                 options.add(fields);
             }
@@ -217,14 +218,14 @@ public class ContentRegistry {
 
         // Add ClipboardSelector when it has something to process
         if (mClipboardSelector.hasContent()) {
-            Map<String, Object> fields = createDataObjectFromContentSelector(activity, mClipboardSelector);
+            Map<String, Object> fields = createDataObjectFromContentSelector(fragment.getActivity(), mClipboardSelector);
             if (fields != null) {
                 options.add(fields);
             }
         }
 
         // prepare an adapter for the selection options
-        SimpleAdapter adapter = new SimpleAdapter(activity, options, R.layout.select_content,
+        SimpleAdapter adapter = new SimpleAdapter(fragment.getActivity(), options, R.layout.select_content,
                 new String[]{KEY_ICON, KEY_NAME},
                 new int[]{R.id.select_content_icon, R.id.select_content_text});
         adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
@@ -240,7 +241,7 @@ public class ContentRegistry {
         });
 
         // build the selection dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getActivity());
         builder.setTitle(R.string.selectattachment_title);
         builder.setCancelable(true);
         builder.setNegativeButton(R.string.common_cancel, new DialogInterface.OnClickListener() {
@@ -259,13 +260,13 @@ public class ContentRegistry {
 
                 if (intent == null) {
                     // selectors without intent can return the result immediately
-                    IContentObject contentObject = selector.createObjectFromSelectionResult(activity, null);
-                    ((IXoFragment) activity).onAttachmentSelected(contentObject);
+                    IContentObject contentObject = selector.createObjectFromSelectionResult(fragment.getActivity(), null);
+                    ((IXoFragment) fragment).onAttachmentSelected(contentObject);
                 } else {
                     if (selector instanceof MultiImageSelector) {
-                        startExternalActivityForResult(activity, intent, CompositionFragment.REQUEST_SELECT_IMAGE_ATTACHMENTS);
+                        startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGE_ATTACHMENTS);
                     } else {
-                        startExternalActivityForResult(activity, intent, requestCode);
+                        startExternalActivityForResult(fragment, intent, requestCode);
                     }
                 }
             }
@@ -279,32 +280,6 @@ public class ContentRegistry {
 
         // return the selection handle
         return contentSelection;
-    }
-
-    /**
-     * Create a content object from an intent returned by content selection
-     * <p/>
-     * Activities should call this when they receive results with the request
-     * code they associate with content selection (as given to selectAttachment).
-     *
-     * @param selection handle for the in-progress content selection
-     * @param intent    returned from the selector
-     * @return content object for selected content
-     */
-    public IContentObject createSelectedAttachment(ContentSelection selection, Intent intent) {
-        IContentSelector selector = selection.getSelector();
-        if (selector != null) {
-            return selector.createObjectFromSelectionResult(selection.getActivity(), intent);
-        }
-        return null;
-    }
-
-    public ArrayList<IContentObject> createSelectedImagesAttachment(ContentSelection selection, Intent intent) {
-        MultiImageSelector selector = (MultiImageSelector) selection.getSelector();
-        if(selector != null) {
-            return selector.createObjectsFromSelectionResult(selection.getActivity(), intent);
-        }
-        return null;
     }
 
     /**
@@ -329,15 +304,15 @@ public class ContentRegistry {
         return null;
     }
 
-    private static void startExternalActivityForResult(Activity activity, Intent intent, int requestCode) {
-        XoActivity xoActivity = (XoActivity) activity;
+    private static void startExternalActivityForResult(Fragment fragment, Intent intent, int requestCode) {
+        XoActivity xoActivity = (XoActivity) fragment.getActivity();
 
         if (!xoActivity.canStartActivity(intent)) {
             return;
         }
         xoActivity.setBackgroundActive();
         try {
-            activity.startActivityForResult(intent, requestCode);
+            fragment.startActivityForResult(intent, requestCode);
         } catch (ActivityNotFoundException e) {
             Toast.makeText(xoActivity, R.string.error_compatible_app_unavailable, Toast.LENGTH_LONG).show();
             e.printStackTrace();
