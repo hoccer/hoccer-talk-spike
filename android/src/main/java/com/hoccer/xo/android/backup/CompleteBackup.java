@@ -1,9 +1,12 @@
 package com.hoccer.xo.android.backup;
 
+import android.os.Environment;
+import android.os.StatFs;
 import com.hoccer.xo.android.XoApplication;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -18,6 +21,7 @@ public class CompleteBackup extends DatabaseBackup {
     public static Backup create(String password) throws Exception {
         String filename = BackupFileUtils.createUniqueBackupFilename();
         File backupFile = new File(XoApplication.getBackupDirectory(), filename + "_with_attachments.zip");
+        backupFile.createNewFile();
 
         File database = new File(DB_PATH_NAME);
 
