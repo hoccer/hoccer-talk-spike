@@ -483,6 +483,7 @@ public class GroupProfileFragment extends ProfileFragment
                     refreshContact(contact);
                     updateActionBar();
                     updateInviteButton();
+                    configureOptionsMenuItems(mOptionsMenu);
                 }
             });
         }
@@ -497,6 +498,7 @@ public class GroupProfileFragment extends ProfileFragment
                     refreshContact(contact);
                     updateActionBar();
                     updateInviteButton();
+                    configureOptionsMenuItems(mOptionsMenu);
                 }
             });
         }
