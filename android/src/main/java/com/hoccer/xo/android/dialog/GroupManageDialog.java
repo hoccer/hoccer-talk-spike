@@ -10,12 +10,11 @@ import android.widget.AdapterView;
 import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupManagementContactsAdapter;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.fragment.GroupProfileCreationFragment;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
