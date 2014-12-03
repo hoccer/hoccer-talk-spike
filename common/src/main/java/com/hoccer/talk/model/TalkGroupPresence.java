@@ -10,30 +10,20 @@ import java.util.Date;
 public class TalkGroupPresence {
 
     // TODO: define all field strings
-    public static final String FIELD_GROUP_ID         = "groupId";
-    public static final String FIELD_GROUP_NAME       = "groupName";
-    public static final String FIELD_GROUP_TAG        = "groupTag";
-    public static final String FIELD_GROUP_TYPE       = "groupType";
+    public static final String FIELD_GROUP_ID = "groupId";
+    public static final String FIELD_GROUP_NAME = "groupName";
+    public static final String FIELD_GROUP_TAG = "groupTag";
+    public static final String FIELD_GROUP_TYPE = "groupType";
     public static final String FIELD_GROUP_AVATAR_URL = "groupAvatarUrl";
-    public static final String FIELD_STATE            = "state";
-    public static final String FIELD_LAST_CHANGED     = "lastChanged";
+    public static final String FIELD_STATE = "state";
+    public static final String FIELD_LAST_CHANGED = "lastChanged";
 
-    public static final String STATE_NONE   = "none";
+    public static final String STATE_NONE = "none";
     public static final String STATE_EXISTS = "exists";
     public static final String STATE_KEPT = "kept";
 
-    public static final String GROUP_TYPE_USER   = "user";
+    public static final String GROUP_TYPE_USER = "user";
     public static final String GROUP_TYPE_NEARBY = "nearby";
-
-
-    public static boolean isValidState(String state) {
-        if(state != null) {
-            if(state.equals(STATE_NONE) || state.equals(STATE_EXISTS)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     // needed for ormlight database
     private String _id;
@@ -76,22 +66,22 @@ public class TalkGroupPresence {
 
     @JsonIgnore
     public boolean isTypeNearby() {
-        return (this.groupType != null) && this.groupType.equals(GROUP_TYPE_NEARBY);
+        return GROUP_TYPE_NEARBY.equals(this.groupType);
     }
 
     @JsonIgnore
     public boolean isTypeUser() {
-        return (this.groupType != null) && this.groupType.equals(GROUP_TYPE_USER);
+        return GROUP_TYPE_USER.equals(this.groupType);
     }
 
     @JsonIgnore
     public boolean exists() {
-        return (this.state != null) && this.state.equals(STATE_EXISTS);
+        return STATE_EXISTS.equals(this.state);
     }
 
     @JsonIgnore
     public boolean isKept() {
-        return (this.state != null) && this.state.equals(STATE_KEPT);
+        return STATE_KEPT.equals(this.state);
     }
 
     public String getGroupId() {
@@ -193,17 +183,17 @@ public class TalkGroupPresence {
     }
 
     @JsonIgnore
-    public void updateWith(TalkGroupPresence g) {
-        this.setGroupId(g.getGroupId());
-        this.setGroupName(g.getGroupName());
-        this.setGroupAvatarUrl(g.getGroupAvatarUrl());
-        this.setState(g.getState());
-        this.setLastChanged(g.getLastChanged());
-        this.setGroupType(g.getGroupType());
-        this.setSharedKeyId(g.getSharedKeyId());
-        this.setSharedKeyIdSalt(g.getSharedKeyIdSalt());
-        this.setKeySupplier(g.getKeySupplier());
-        this.setKeyDate(g.getKeyDate());
+    public void updateWith(TalkGroupPresence groupPresence) {
+        this.setGroupId(groupPresence.getGroupId());
+        this.setGroupName(groupPresence.getGroupName());
+        this.setGroupAvatarUrl(groupPresence.getGroupAvatarUrl());
+        this.setState(groupPresence.getState());
+        this.setLastChanged(groupPresence.getLastChanged());
+        this.setGroupType(groupPresence.getGroupType());
+        this.setSharedKeyId(groupPresence.getSharedKeyId());
+        this.setSharedKeyIdSalt(groupPresence.getSharedKeyIdSalt());
+        this.setKeySupplier(groupPresence.getKeySupplier());
+        this.setKeyDate(groupPresence.getKeyDate());
         this.setGroupKeyUpdateInProgress(this.getGroupKeyUpdateInProgress());
     }
 }
