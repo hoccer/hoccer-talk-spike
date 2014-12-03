@@ -196,16 +196,11 @@ public class GroupProfileFragment extends ProfileFragment
         MenuItem joinGroupItem = menu.findItem(R.id.menu_group_profile_join);
         MenuItem leaveGroupItem = menu.findItem(R.id.menu_group_profile_leave);
         MenuItem listAttachmentsItem = menu.findItem(R.id.menu_audio_attachment_list);
-        MenuItem createPermanentGroupItem = menu.findItem(R.id.menu_group_profile_create_permanent_group);
 
         editGroupItem.setVisible(false);
         rejectInvitationItem.setVisible(false);
         joinGroupItem.setVisible(false);
         leaveGroupItem.setVisible(false);
-
-        if (createPermanentGroupItem != null) {
-            createPermanentGroupItem.setVisible(false);
-        }
 
         if (mGroup.getGroupPresence() != null && !mGroup.getGroupPresence().isTypeNearby()) {
             if (mGroup.isEditable()) {
