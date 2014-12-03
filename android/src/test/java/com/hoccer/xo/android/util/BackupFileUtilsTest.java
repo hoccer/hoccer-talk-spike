@@ -98,7 +98,6 @@ public class BackupFileUtilsTest {
 
     @Test
     public void testImportDatabaseBackup() throws Exception {
-
         BackupFileUtils.restoreBackup(BACKUP_DB_FILE, DB_TARGET_FILE, PASSWORD);
         assertTrue(DB_TARGET_FILE.exists());
         assertTrue(DB_TARGET_FILE.length() > 0);
@@ -108,7 +107,6 @@ public class BackupFileUtilsTest {
 
     @Test
     public void testGetUncompressedSizeOfZipFile() throws IOException {
-
         long uncompressedSize = BackupFileUtils.getUncompressedSize(BACKUP_DB_FILE);
         assertTrue(uncompressedSize > 0);
     }

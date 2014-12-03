@@ -48,7 +48,6 @@ public class BackupFileUtils {
     };
 
     public static void createBackupFile(File out, File database, List<File> attachments, BackupMetadata metadata, String password) throws Exception {
-
         byte[] encryptedDatabase = encryptFile(database, password);
 
         Gson gson = new Gson();
@@ -58,7 +57,6 @@ public class BackupFileUtils {
     }
 
     public static void createBackupFile(File out, File database, BackupMetadata metadata, String password) throws Exception {
-
         byte[] encryptedDatabase = encryptFile(database, password);
 
         Gson gson = new Gson();
@@ -68,7 +66,6 @@ public class BackupFileUtils {
     }
 
     private static byte[] encryptFile(File input, String password) throws Exception {
-
         FileInputStream in = new FileInputStream(input);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
@@ -83,7 +80,6 @@ public class BackupFileUtils {
     }
 
     private static void createZip(File backup, byte[] encryptedDatabase, String metadata) throws IOException {
-
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
         zos.setLevel(ZipOutputStream.DEFLATED);
         try {
@@ -95,7 +91,6 @@ public class BackupFileUtils {
     }
 
     private static void createZip(File backup, byte[] encryptedDatabase, List<File> attachments, String metadata) throws IOException {
-
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
         zos.setLevel(ZipOutputStream.DEFLATED);
         try {
@@ -110,7 +105,6 @@ public class BackupFileUtils {
     }
 
     private static void addMetaDataEntry(ZipOutputStream zos, String metadata) throws IOException {
-
         InputStream in = new ByteArrayInputStream(metadata.getBytes("UTF-8"));
 
         ZipEntry entry = new ZipEntry(METADATA_FILENAME);
@@ -126,7 +120,6 @@ public class BackupFileUtils {
     }
 
     private static void addZipEntry(ZipOutputStream zos, File fileEntry) throws IOException {
-
         InputStream in = new FileInputStream(fileEntry);
 
         ZipEntry entry = new ZipEntry(fileEntry.getName());
@@ -142,7 +135,6 @@ public class BackupFileUtils {
     }
 
     private static void addZipEntry(ZipOutputStream zos, byte[] data, String dataName) throws IOException {
-
         InputStream in = new ByteArrayInputStream(data);
         ZipEntry entry = new ZipEntry(dataName);
         zos.putNextEntry(entry);
@@ -157,7 +149,6 @@ public class BackupFileUtils {
     }
 
     public static BackupMetadata readMetadata(File backupFile) throws IOException {
-
         String result = null;
 
         ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
@@ -177,7 +168,6 @@ public class BackupFileUtils {
     }
 
     public static List<File> getBackupFiles(File parentDir) {
-
         List<File> results = new ArrayList<File>();
 
         if (parentDir != null && parentDir.isDirectory()) {
@@ -225,7 +215,6 @@ public class BackupFileUtils {
     }
 
     public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
-
         ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
         try {
             ZipEntry zipEntry;
@@ -245,7 +234,6 @@ public class BackupFileUtils {
     }
 
     public static long getUncompressedSize(File zipFile) throws IOException {
-
         long uncompressedSize = 0;
         try {
             ZipFile zf = new ZipFile(zipFile);
@@ -261,7 +249,6 @@ public class BackupFileUtils {
     }
 
     public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException {
-
         ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
         try {
             ZipEntry zipEntry;
