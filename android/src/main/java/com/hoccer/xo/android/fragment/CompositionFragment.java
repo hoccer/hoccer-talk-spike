@@ -173,18 +173,16 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == REQUEST_SELECT_ATTACHMENT) {
+        if (requestCode == REQUEST_SELECT_ATTACHMENT && resultCode == Activity.RESULT_OK) {
             mAttachments.clear();
-            if (resultCode == Activity.RESULT_OK) {
-                if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
-                    MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
-                    mAttachments = selector.createObjectsFromSelectionResult(getActivity(), intent);
-                } else {
-                    IContentSelector selector = mAttachmentSelection.getSelector();
-                    IContentObject attachment = selector.createObjectFromSelectionResult(getActivity(), intent);
-                    if (attachment != null) {
-                        mAttachments.add(attachment);
-                    }
+            if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
+                MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
+                mAttachments = selector.createObjectsFromSelectionResult(getActivity(), intent);
+            } else {
+                IContentSelector selector = mAttachmentSelection.getSelector();
+                IContentObject attachment = selector.createObjectFromSelectionResult(getActivity(), intent);
+                if (attachment != null) {
+                    mAttachments.add(attachment);
                 }
             }
 
