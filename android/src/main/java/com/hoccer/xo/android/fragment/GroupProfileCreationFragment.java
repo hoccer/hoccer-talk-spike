@@ -4,7 +4,9 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.*;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
@@ -12,7 +14,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
@@ -24,7 +26,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Fragment for display and editing of group profiles.
@@ -57,7 +61,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
             if (groupId != null) {
                 try {
-                    mContactsToInvite = getXoDatabase().findContactsInGroupByState(groupId, TalkGroupMember.STATE_JOINED);
+                    mContactsToInvite = getXoDatabase().findContactsInGroupByState(groupId, TalkGroupMembership.STATE_JOINED);
                     CollectionUtils.filterInverse(mContactsToInvite, TalkClientContactPredicates.IS_SELF_PREDICATE);
                 } catch (SQLException e) {
                     LOG.error("Error finding contacts in group", e);

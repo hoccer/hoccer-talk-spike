@@ -3,9 +3,7 @@ package com.hoccer.talk.client.model;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.*;
-import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.commons.codec.binary.Base64;
 import org.jetbrains.annotations.Nullable;
@@ -79,11 +77,11 @@ public class TalkClientContact implements Serializable {
     private String groupKey;
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
-    private TalkGroup groupPresence;
+    private TalkGroupPresence groupPresence;
 
-    // when contact is a group, groupMember is the own member description
-    @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
-    private TalkGroupMember groupMember;
+    // when contact is a group, groupMembership is the own member description
+    @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true, columnName = "groupMember_id")
+    private TalkGroupMembership groupMembership;
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
     private TalkClientDownload avatarDownload;
@@ -168,23 +166,23 @@ public class TalkClientContact implements Serializable {
     }
 
     public boolean isGroupExisting() {
-        return isGroup() && this.groupPresence != null && this.groupPresence.getState().equals(TalkGroup.STATE_EXISTS);
+        return isGroup() && this.groupPresence != null && this.groupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS);
     }
 
     public boolean isGroupAdmin() {
-        return isGroup() && this.groupMember != null && this.groupMember.isAdmin();
+        return isGroup() && this.groupMembership != null && this.groupMembership.isAdmin();
     }
 
     public boolean isGroupInvolved() {
-        return isGroup() && this.groupMember != null && this.groupMember.isInvolved();
+        return isGroup() && this.groupMembership != null && this.groupMembership.isInvolved();
     }
 
     public boolean isGroupInvited() {
-        return isGroup() && this.groupMember != null && this.groupMember.isInvited();
+        return isGroup() && this.groupMembership != null && this.groupMembership.isInvited();
     }
 
     public boolean isGroupJoined() {
-        return isGroup() && this.groupMember != null && this.groupMember.isJoined();
+        return isGroup() && this.groupMembership != null && this.groupMembership.isJoined();
     }
 
     // returns true if there is actually a group key locally stored
@@ -257,10 +255,6 @@ public class TalkClientContact implements Serializable {
     public void setAvatarUpload(TalkClientUpload avatarUpload) {
         ensureGroupOrSelf();
         this.avatarUpload = avatarUpload;
-    }
-
-    public void hackSetGroupPresence(TalkGroup group) {
-        this.groupPresence = group;
     }
 
     private void ensureSelf() {
@@ -377,15 +371,15 @@ public class TalkClientContact implements Serializable {
 
     @GroupMethodOnly
     @Nullable
-    public TalkGroup getGroupPresence() {
+    public TalkGroupPresence getGroupPresence() {
         ensureGroup();
         return groupPresence;
     }
 
     @GroupMethodOnly
-    public TalkGroupMember getGroupMember() {
+    public TalkGroupMembership getGroupMembership() {
         ensureGroup();
-        return groupMember;
+        return groupMembership;
     }
 
     // the actual group key, Base64-encoded
@@ -474,28 +468,28 @@ public class TalkClientContact implements Serializable {
     }
 
     @GroupMethodOnly
-    public void updateGroupPresence(TalkGroup group) {
+    public void updateGroupPresence(TalkGroupPresence groupPresence) {
         ensureGroup();
         if (this.groupPresence == null) {
-            if (group.getGroupId() != null) {
-                groupId = group.getGroupId();
+            if (groupPresence.getGroupId() != null) {
+                groupId = groupPresence.getGroupId();
             }
-            if (group.getGroupTag() != null) {
-                groupTag = group.getGroupTag();
+            if (groupPresence.getGroupTag() != null) {
+                groupTag = groupPresence.getGroupTag();
             }
-            this.groupPresence = group;
+            this.groupPresence = groupPresence;
         } else {
-            this.groupPresence.updateWith(group);
+            this.groupPresence.updateWith(groupPresence);
         }
     }
 
     @GroupMethodOnly
-    public void updateGroupMember(TalkGroupMember member) {
+    public void updateGroupMembership(TalkGroupMembership membership) {
         ensureGroup();
-        if (this.groupMember == null) {
-            this.groupMember = member;
+        if (this.groupMembership == null) {
+            this.groupMembership = membership;
         } else {
-            this.groupMember.updateWith(member);
+            this.groupMembership.updateWith(membership);
         }
     }
 

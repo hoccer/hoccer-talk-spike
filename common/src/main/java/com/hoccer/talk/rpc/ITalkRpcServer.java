@@ -6,10 +6,10 @@ import java.util.Date;
 
 /**
  * This is the RPC interface exposed by the talk server
- * 
+ *
  * It contains all methods that the client can invoke
  * while connected to the server.
- * 
+ *
  * @author ingo
  */
 // Suppress unused warnings since they are external API entry points and are called from the outside via JsonRpc (via Websockets)
@@ -473,7 +473,7 @@ public interface ITalkRpcServer {
 
     /**
      * Create a new group on the server
-     * @param group is a record describing the group parameters
+     * @param groupPresence is a record describing the group parameters
      * @return the id assigned to the group
      * @talk.preconditions client must be logged in
      * @talk.preconditions.server none
@@ -484,9 +484,9 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      **/
     @Deprecated
-    String createGroup(TalkGroup group);
+    String createGroup(TalkGroupPresence groupPresence);
 
-    TalkGroup createGroupWithMembers(String groupType, String groupTag, String groupName, String[] members, String[] roles);
+    TalkGroupPresence createGroupWithMembers(String groupType, String groupTag, String groupName, String[] members, String[] roles);
 
     /** Retrieve array of groups changed after given date
      * @param lastKnown is the date in milliseconds since start of year 1970
@@ -498,14 +498,14 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects none
      * @talk.errors.server
      */
-    TalkGroup[] getGroups(Date lastKnown);
+    TalkGroupPresence[] getGroups(Date lastKnown);
 
-    TalkGroup getGroup(String groupId);
+    TalkGroupPresence getGroup(String groupId);
 
-    TalkGroupMember getGroupMember(String groupId, String clientId);
+    TalkGroupMembership getGroupMember(String groupId, String clientId);
 
     /** Update group name and group avatar; this function is deprecated, use updateGroupAvatar and updateGroupName instead
-     * @param group is the group to update
+     * @param groupPresence is the group to update
      * @talk.preconditions client must be logged in, connected client must be admin member of the group
      * @talk.preconditions.server
      * @talk.preconditions.client
@@ -515,7 +515,7 @@ public interface ITalkRpcServer {
      * @talk.errors.server
      * @talk.todo remove from API
      */
-    void updateGroup(TalkGroup group);
+    void updateGroup(TalkGroupPresence groupPresence);
 
     /** delete group with given id
      * @param groupId denotes the group to delete
@@ -618,7 +618,7 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects none
      * @talk.errors.server
      */
-    TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown);
+    TalkGroupMembership[] getGroupMembers(String groupId, Date lastKnown);
 
     /** remove (kick) a member from a group
      * @param groupId denotes the group from which the member is to be removed

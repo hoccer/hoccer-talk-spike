@@ -6,8 +6,8 @@ import android.preference.PreferenceManager;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
@@ -63,12 +63,14 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             if (oldVersion < 22) {
                 db.execSQL("DROP TABLE clientSmsToken");
                 db.execSQL("DROP TABLE clientMembership");
+                db.execSQL("ALTER TABLE 'group' RENAME TO 'groupPresence'");
+                db.execSQL("ALTER TABLE 'groupMember' RENAME TO 'groupMembership'");
 
                 deleteDuplicateGroupContacts();
-                deleteGroupMembersForDeletedGroups();
+                deleteGroupMembershipsForDeletedGroups();
                 deleteGroupContactsForDeletedGroups();
                 deleteGroupPresencesForDeletedGroups();
-            }
+             }
         } catch (android.database.SQLException e) {
             LOG.error("Android SQL error upgrading database", e);
         } catch (SQLException e) {
@@ -90,14 +92,14 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         deleteBuilder.delete();
     }
 
-    private void deleteGroupMembersForDeletedGroups() throws SQLException {
-        Dao<TalkGroupMember, ?> groupMembers = getDao(TalkGroupMember.class);
-        DeleteBuilder<TalkGroupMember, ?> deleteBuilder = groupMembers.deleteBuilder();
+    private void deleteGroupMembershipsForDeletedGroups() throws SQLException {
+        Dao<TalkGroupMembership, ?> memberships = getDao(TalkGroupMembership.class);
+        DeleteBuilder<TalkGroupMembership, ?> deleteBuilder = memberships.deleteBuilder();
 
-        Dao<TalkGroup, ?> groups = getDao(TalkGroup.class);
-        QueryBuilder<TalkGroup, ?> deletedGroupIds = groups.queryBuilder();
+        Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
+        QueryBuilder<TalkGroupPresence, ?> deletedGroupIds = groupPresences.queryBuilder();
         deletedGroupIds.selectColumns("groupId").where()
-                .eq("state", TalkGroup.STATE_NONE);
+                .eq("state", TalkGroupPresence.STATE_NONE);
 
         deleteBuilder.where().in("groupId", deletedGroupIds);
         deleteBuilder.delete();
@@ -107,20 +109,20 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         Dao<TalkClientContact, ?> contacts = getDao(TalkClientContact.class);
         DeleteBuilder<TalkClientContact, ?> deleteBuilder = contacts.deleteBuilder();
 
-        Dao<TalkGroup, ?> groups = getDao(TalkGroup.class);
-        QueryBuilder<TalkGroup, ?> deletedGroupIds = groups.queryBuilder();
+        Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
+        QueryBuilder<TalkGroupPresence, ?> deletedGroupIds = groupPresences.queryBuilder();
         deletedGroupIds.selectColumns("groupId").where()
-                .eq("state", TalkGroup.STATE_NONE);
+                .eq("state", TalkGroupPresence.STATE_NONE);
 
         deleteBuilder.where().in("groupId", deletedGroupIds);
         deleteBuilder.delete();
     }
 
     private void deleteGroupPresencesForDeletedGroups() throws SQLException {
-        Dao<TalkGroup, ?> groups = getDao(TalkGroup.class);
-        DeleteBuilder<TalkGroup, ?> deleteBuilder = groups.deleteBuilder();
+        Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
+        DeleteBuilder<TalkGroupPresence, ?> deleteBuilder = groupPresences.deleteBuilder();
 
-        deleteBuilder.where().eq("state", TalkGroup.STATE_NONE);
+        deleteBuilder.where().eq("state", TalkGroupPresence.STATE_NONE);
         deleteBuilder.delete();
     }
 }

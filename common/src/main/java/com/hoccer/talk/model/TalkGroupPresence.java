@@ -6,8 +6,8 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
 
-@DatabaseTable(tableName = "group")
-public class TalkGroup {
+@DatabaseTable(tableName = "groupPresence")
+public class TalkGroupPresence {
 
     // TODO: define all field strings
     public static final String FIELD_GROUP_ID         = "groupId";
@@ -193,7 +193,7 @@ public class TalkGroup {
     }
 
     @JsonIgnore
-    public void updateWith(TalkGroup g) {
+    public void updateWith(TalkGroupPresence g) {
         this.setGroupId(g.getGroupId());
         this.setGroupName(g.getGroupName());
         this.setGroupAvatarUrl(g.getGroupAvatarUrl());
