@@ -4,7 +4,6 @@ import com.hoccer.talk.model.*;
 import com.hoccer.talk.rpc.ITalkRpcClient;
 import com.hoccer.talk.server.ITalkServerDatabase;
 import com.hoccer.talk.server.TalkServer;
-import com.hoccer.talk.server.TalkServerConfiguration;
 import com.hoccer.talk.server.agents.NotificationDeferrer;
 import com.hoccer.talk.server.message.StaticSystemMessage;
 import com.hoccer.talk.server.rpc.TalkRpcConnection;
@@ -60,13 +59,13 @@ public class UpdateAgent extends NotificationDeferrer {
                     }
                     ITalkRpcClient rpc = conn.getClientRpc();
                     try {
-                        TalkGroupMember member = mDatabase.findGroupMemberForClient(groupId, clientId);
-                        if (member.isInvited() || member.isJoined()) {
-                            List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-                            for (TalkGroupMember otherMember : members) {
-                                if (!clientId.equals(otherMember.getClientId())) {
-                                    if (otherMember.isJoined() || otherMember.isInvited()) {
-                                        String otherClientId = otherMember.getClientId();
+                        TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(groupId, clientId);
+                        if (membership.isInvited() || membership.isJoined()) {
+                            List<TalkGroupMembership> otherMemberships = mDatabase.findGroupMembershipsById(groupId);
+                            for (TalkGroupMembership otherMembership : otherMemberships) {
+                                if (!clientId.equals(otherMembership.getClientId())) {
+                                    if (otherMembership.isJoined() || otherMembership.isInvited()) {
+                                        String otherClientId = otherMembership.getClientId();
                                         LOG.debug("RPUFG: delivering presence of " + otherClientId + " to "+clientId);
                                         TalkPresence presence = mDatabase.findPresenceForClient(otherClientId);
                                         if (presence.getConnectionStatus() == null) {
@@ -75,14 +74,14 @@ public class UpdateAgent extends NotificationDeferrer {
                                         // Calling Client via RPC
                                         rpc.presenceUpdated(presence);
                                     } else {
-                                        LOG.debug("RPUFG: target " + otherMember.getClientId() + " is not invited or joined");
+                                        LOG.debug("RPUFG: target " + otherMembership.getClientId() + " is not invited or joined");
                                     }
                                 } else {
-                                    LOG.debug("RPUFG: not sending presence update for group " + member.getGroupId()+" to self "+clientId);
+                                    LOG.debug("RPUFG: not sending presence update for group " + membership.getGroupId()+" to self "+clientId);
                                 }
                             }
                         } else {
-                            LOG.debug("RPUFG: not invited or joined in group " + member.getGroupId());
+                            LOG.debug("RPUFG: not invited or joined in group " + membership.getGroupId());
                         }
                     } catch (Throwable t) {
                         LOG.error("exception in runnable", t);
@@ -169,18 +168,18 @@ public class UpdateAgent extends NotificationDeferrer {
             }
         }
         // collect clientIds known through groups
-        List<TalkGroupMember> ownMembers = mDatabase.findGroupMembersForClient(selfClientId);
-        for (TalkGroupMember ownMember : ownMembers) {
-            String groupId = ownMember.getGroupId();
-            if (ownMember.isJoined() || ownMember.isInvited()) {
+        List<TalkGroupMembership> ownMemberships = mDatabase.findGroupMembershipsForClient(selfClientId);
+        for (TalkGroupMembership ownMembership : ownMemberships) {
+            String groupId = ownMembership.getGroupId();
+            if (ownMembership.isJoined() || ownMembership.isInvited()) {
                 LOG.trace(tag + "scanning group " + groupId);
-                List<TalkGroupMember> otherMembers = mDatabase.findGroupMembersById(groupId);
-                for (TalkGroupMember otherMember : otherMembers) {
-                    if (otherMember.isJoined() || otherMember.isInvited()) { // MARK
-                        LOG.trace(tag + "including group member " + otherMember.getClientId());
-                        clientIds.add(otherMember.getClientId());
+                List<TalkGroupMembership> otherMemberships = mDatabase.findGroupMembershipsById(groupId);
+                for (TalkGroupMembership otherMembership : otherMemberships) {
+                    if (otherMembership.isJoined() || otherMembership.isInvited()) { // MARK
+                        LOG.trace(tag + "including group member " + otherMembership.getClientId());
+                        clientIds.add(otherMembership.getClientId());
                     } else {
-                        LOG.trace(tag + "not including group member " + otherMember.getClientId() + " in state " + otherMember.getState());
+                        LOG.trace(tag + "not including group member " + otherMembership.getClientId() + " in state " + otherMembership.getState());
                     }
                 }
             }
@@ -263,8 +262,8 @@ public class UpdateAgent extends NotificationDeferrer {
             @Override
             public void run() {
                 try {
-                    TalkGroup updatedGroup = mDatabase.findGroupById(groupId);
-                    if (updatedGroup != null) {
+                    TalkGroupPresence updatedGroupPresence = mDatabase.findGroupPresenceById(groupId);
+                    if (updatedGroupPresence != null) {
                         TalkRpcConnection connection = mServer.getClientConnection(clientId);
                         if (connection == null || !connection.isConnected()) {
                             return;
@@ -273,7 +272,7 @@ public class UpdateAgent extends NotificationDeferrer {
                         // Calling Client via RPC
                         ITalkRpcClient rpc = connection.getClientRpc();
                         try {
-                            rpc.groupUpdated(updatedGroup);
+                            rpc.groupUpdated(updatedGroupPresence);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -291,12 +290,12 @@ public class UpdateAgent extends NotificationDeferrer {
             @Override
             public void run() {
                 try {
-                    TalkGroup updatedGroup = mDatabase.findGroupById(groupId);
-                    if (updatedGroup != null) {
-                        List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-                        for (TalkGroupMember member : members) {
-                            if (member.isJoined() || member.isInvited() || member.isGroupRemoved()) {
-                                TalkRpcConnection connection = mServer.getClientConnection(member.getClientId());
+                    TalkGroupPresence updatedGroupPresence = mDatabase.findGroupPresenceById(groupId);
+                    if (updatedGroupPresence != null) {
+                        List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
+                        for (TalkGroupMembership membership : memberships) {
+                            if (membership.isJoined() || membership.isInvited() || membership.isGroupRemoved()) {
+                                TalkRpcConnection connection = mServer.getClientConnection(membership.getClientId());
                                 if (connection == null || !connection.isConnected()) {
                                     continue;
                                 }
@@ -304,7 +303,7 @@ public class UpdateAgent extends NotificationDeferrer {
                                 // Calling Client via RPC
                                 ITalkRpcClient rpc = connection.getClientRpc();
                                 try {
-                                    rpc.groupUpdated(updatedGroup);
+                                    rpc.groupUpdated(updatedGroupPresence);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -325,40 +324,40 @@ public class UpdateAgent extends NotificationDeferrer {
             @Override
             public void run() {
                 try {
-                    TalkGroupMember updatedMember = mDatabase.findGroupMemberForClient(groupId, clientId);
-                    if (updatedMember == null) {
+                    TalkGroupMembership updatedMembership = mDatabase.findGroupMembershipForClient(groupId, clientId);
+                    if (updatedMembership == null) {
                         LOG.debug("requestGroupMembershipUpdate updatedMember is null");
                         return;
                     }
-                    TalkGroupMember foreignMember = new TalkGroupMember();
-                    foreignMember.foreignUpdateWith(updatedMember);
+                    TalkGroupMembership foreignMembership = new TalkGroupMembership();
+                    foreignMembership.foreignUpdateWith(updatedMembership);
 
-                    List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-                    LOG.debug("requestGroupMembershipUpdate found " + members.size() + " members");
+                    List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
+                    LOG.debug("requestGroupMembershipUpdate found " + memberships.size() + " members");
                     boolean someOneWasNotified = false;
-                    for (TalkGroupMember member : members) {
-                        if (member.isJoined() || member.isInvited() || member.isGroupRemoved() || member.getClientId().equals(clientId)) {
-                            TalkRpcConnection connection = mServer.getClientConnection(member.getClientId());
+                    for (TalkGroupMembership membership : memberships) {
+                        if (membership.isJoined() || membership.isInvited() || membership.isGroupRemoved() || membership.getClientId().equals(clientId)) {
+                            TalkRpcConnection connection = mServer.getClientConnection(membership.getClientId());
                             if (connection == null || !connection.isConnected()) {
-                                LOG.debug("requestGroupMembershipUpdate - refrain from updating not connected member client " + member.getClientId());
+                                LOG.debug("requestGroupMembershipUpdate - refrain from updating not connected member client " + membership.getClientId());
                                 continue;
                             }
 
                             // Calling Client via RPC
                             ITalkRpcClient rpc = connection.getClientRpc();
                             try {
-                                if (member.getClientId().equals(clientId)) {
+                                if (membership.getClientId().equals(clientId)) {
                                     // is own membership
-                                    rpc.groupMemberUpdated(updatedMember);
+                                    rpc.groupMemberUpdated(updatedMembership);
                                 } else {
-                                    rpc.groupMemberUpdated(foreignMember);
+                                    rpc.groupMemberUpdated(foreignMembership);
                                 }
                                 someOneWasNotified = true;
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         } else {
-                            LOG.debug("requestGroupMembershipUpdate - not updating client " + member.getClientId() + ", state=" + member.getState() + ", self=" + member.getClientId().equals(clientId));
+                            LOG.debug("requestGroupMembershipUpdate - not updating client " + membership.getClientId() + ", state=" + membership.getState() + ", self=" + membership.getClientId().equals(clientId));
                         }
                     }
                     if (someOneWasNotified) {
@@ -379,31 +378,31 @@ public class UpdateAgent extends NotificationDeferrer {
             @Override
             public void run() {
                 try {
-                    TalkGroupMember newMember = mDatabase.findGroupMemberForClient(groupId, newMemberClientId);
-                    if (newMember == null) {
+                    TalkGroupMembership newMembership = mDatabase.findGroupMembershipForClient(groupId, newMemberClientId);
+                    if (newMembership == null) {
                         LOG.debug("requestGroupMembershipUpdateForNewMember can't find newMember, is null");
                         return;
                     }
-                    List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-                    LOG.debug("requestGroupMembershipUpdateForNewMember found " + members.size() + " members");
-                    TalkRpcConnection connection = mServer.getClientConnection(newMember.getClientId());
+                    List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
+                    LOG.debug("requestGroupMembershipUpdateForNewMember found " + memberships.size() + " members");
+                    TalkRpcConnection connection = mServer.getClientConnection(newMembership.getClientId());
                     if (connection == null || !connection.isConnected()) {
-                        LOG.debug("requestGroupMembershipUpdateForNewMember - new client no longer connected " + newMember.getClientId());
+                        LOG.debug("requestGroupMembershipUpdateForNewMember - new client no longer connected " + newMembership.getClientId());
                         return;
                     }
                     // Calling Client via RPC
                     ITalkRpcClient rpc = connection.getClientRpc();
-                    for (TalkGroupMember member : members) {
+                    for (TalkGroupMembership membership : memberships) {
                         // do not send out updates for own membership or dead members
-                        if (!member.getClientId().equals(newMemberClientId) && (member.isJoined() || member.isInvited())) {
+                        if (!membership.getClientId().equals(newMemberClientId) && (membership.isJoined() || membership.isInvited())) {
                             try {
-                                member.setEncryptedGroupKey(null);
-                                rpc.groupMemberUpdated(member);
+                                membership.setEncryptedGroupKey(null);
+                                rpc.groupMemberUpdated(membership);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         } else {
-                            LOG.debug("requestGroupMembershipUpdateForNewMember - not updating with member " + member.getClientId() + ", state=" + member.getState());
+                            LOG.debug("requestGroupMembershipUpdateForNewMember - not updating with member " + membership.getClientId() + ", state=" + membership.getState());
                         }
                     }
                 } catch (Throwable t) {
@@ -414,26 +413,26 @@ public class UpdateAgent extends NotificationDeferrer {
         queueOrExecute(context, notificationGenerator);
     }
 
-    public ArrayList<Pair<TalkGroupMember, Long>> membersSortedByLatency(List<TalkGroupMember> members) {
+    public ArrayList<Pair<TalkGroupMembership, Long>> membershipsSortedByLatency(List<TalkGroupMembership> memberships) {
 
-        Map<TalkGroupMember, Long> membersByLatency = new HashMap<TalkGroupMember, Long>();
-        for (TalkGroupMember m : members) {
-            TalkRpcConnection connection = mServer.getClientConnection(m.getClientId());
+        Map<TalkGroupMembership, Long> membershipsByLatency = new HashMap<TalkGroupMembership, Long>();
+        for (TalkGroupMembership membership : memberships) {
+            TalkRpcConnection connection = mServer.getClientConnection(membership.getClientId());
             if (connection != null) {
                 // if we dont have a latency, assume something bad
                 Long latency = connection.getLastPingLatency();
                 if (latency != null) {
-                    membersByLatency.put(m, latency + connection.getCurrentPriorityPenalty());
+                    membershipsByLatency.put(membership, latency + connection.getCurrentPriorityPenalty());
                 } else {
-                    membersByLatency.put(m, 5000L + connection.getCurrentPriorityPenalty());
+                    membershipsByLatency.put(membership, 5000L + connection.getCurrentPriorityPenalty());
                 }
             }
         }
-        membersByLatency = MapUtil.sortByValue(membersByLatency);
+        membershipsByLatency = MapUtil.sortByValue(membershipsByLatency);
 
-        ArrayList<Pair<TalkGroupMember, Long>> result = new ArrayList<Pair<TalkGroupMember, Long>>();
-        for (Map.Entry<TalkGroupMember, Long> entry : membersByLatency.entrySet()) {
-            result.add(new ImmutablePair<TalkGroupMember, Long>(entry.getKey(), entry.getValue()));
+        ArrayList<Pair<TalkGroupMembership, Long>> result = new ArrayList<Pair<TalkGroupMembership, Long>>();
+        for (Map.Entry<TalkGroupMembership, Long> entry : membershipsByLatency.entrySet()) {
+            result.add(new ImmutablePair<TalkGroupMembership, Long>(entry.getKey(), entry.getValue()));
         }
         return result;
     }
@@ -480,102 +479,102 @@ public class UpdateAgent extends NotificationDeferrer {
 
     private void performCheckAndRequestGroupMemberKeys(String groupId) {
         LOG.debug("performCheckAndRequestGroupMemberKeys for groupId: '" + groupId + "'");
-        TalkGroup group = mDatabase.findGroupById(groupId);
-        if (group != null && group.exists()) {
+        TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(groupId);
+        if (groupPresence != null && groupPresence.exists()) {
 
-            List<TalkGroupMember> members = mDatabase.findGroupMembersByIdWithStates(group.getGroupId(), TalkGroupMember.ACTIVE_STATES);
-            LOG.debug("  * members: " + members.size());
-            if (!members.isEmpty()) {
-                List<TalkGroupMember> outOfDateMembers = new ArrayList<TalkGroupMember>();
-                List<TalkGroupMember> keyMasterCandidatesWithCurrentKey = new ArrayList<TalkGroupMember>();
-                List<TalkGroupMember> keyMasterCandidatesWithoutCurrentKey = new ArrayList<TalkGroupMember>();
+            List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsByIdWithStates(groupPresence.getGroupId(), TalkGroupMembership.ACTIVE_STATES);
+            LOG.debug("  * members: " + memberships.size());
+            if (!memberships.isEmpty()) {
+                List<TalkGroupMembership> outOfDateMemberships = new ArrayList<TalkGroupMembership>();
+                List<TalkGroupMembership> keyMasterCandidatesWithCurrentKey = new ArrayList<TalkGroupMembership>();
+                List<TalkGroupMembership> keyMasterCandidatesWithoutCurrentKey = new ArrayList<TalkGroupMembership>();
 
-                String sharedKeyId = group.getSharedKeyId();
-                String sharedKeyIdSalt = group.getSharedKeyIdSalt();
+                String sharedKeyId = groupPresence.getSharedKeyId();
+                String sharedKeyIdSalt = groupPresence.getSharedKeyIdSalt();
                 if (sharedKeyId == null) {
                     // nobody has supplied a group key yet
                     LOG.debug("  * nobody has supplied a group key yet...");
-                    for (TalkGroupMember m : members) {
-                        TalkPresence presence = mDatabase.findPresenceForClient(m.getClientId());
+                    for (TalkGroupMembership membership : memberships) {
+                        TalkPresence presence = mDatabase.findPresenceForClient(membership.getClientId());
                         if (presence != null && presence.getKeyId() != null) {
-                            if (m.isMember() && mServer.isClientReady(m.getClientId())) {
-                                keyMasterCandidatesWithoutCurrentKey.add(m);
+                            if (membership.isMember() && mServer.isClientReady(membership.getClientId())) {
+                                keyMasterCandidatesWithoutCurrentKey.add(membership);
                             }
-                            outOfDateMembers.add(m);
+                            outOfDateMemberships.add(membership);
                         } else {
-                            LOG.error("checkAndRequestGroupMemberKeys: no presence for client " + m.getClientId() + ", member of group " + groupId);
+                            LOG.error("checkAndRequestGroupMemberKeys: no presence for client " + membership.getClientId() + ", member of group " + groupId);
                         }
                     }
                 } else {
                     // there is a group key
                     LOG.debug("  * There is a group key...");
-                    for (TalkGroupMember m : members) {
-                        TalkPresence presence = mDatabase.findPresenceForClient(m.getClientId());
+                    for (TalkGroupMembership membership : memberships) {
+                        TalkPresence presence = mDatabase.findPresenceForClient(membership.getClientId());
                         if (presence != null && presence.getKeyId() != null) {
-                            if (!sharedKeyId.equals(m.getSharedKeyId()) || !m.getMemberKeyId().equals(presence.getKeyId())) {
+                            if (!sharedKeyId.equals(membership.getSharedKeyId()) || !membership.getMemberKeyId().equals(presence.getKeyId())) {
                                 // member has not the current key
-                                LOG.debug("  * Member "+m.getClientId()+" has not the current group key");
-                                outOfDateMembers.add(m);
-                                if (m.isMember() && mServer.isClientReady(m.getClientId())) {
-                                    LOG.debug("  * Member "+m.getClientId()+" is ready and active and added to keyMasterCandidatesWithoutCurrentKey");
-                                    keyMasterCandidatesWithoutCurrentKey.add(m);
+                                LOG.debug("  * Member "+membership.getClientId()+" has not the current group key");
+                                outOfDateMemberships.add(membership);
+                                if (membership.isMember() && mServer.isClientReady(membership.getClientId())) {
+                                    LOG.debug("  * Member "+membership.getClientId()+" is ready and active and added to keyMasterCandidatesWithoutCurrentKey");
+                                    keyMasterCandidatesWithoutCurrentKey.add(membership);
                                 }
                             } else {
                                 // member has the current key
-                                LOG.debug("  * Member "+m.getClientId()+" has the current group key");
-                                if (m.isMember() && mServer.isClientReady(m.getClientId())) {
-                                    LOG.debug("  * Member "+m.getClientId()+" is ready and active and added to keyMasterCandidatesWithCurrentKey");
-                                    keyMasterCandidatesWithCurrentKey.add(m);
+                                LOG.debug("  * Member "+membership.getClientId()+" has the current group key");
+                                if (membership.isMember() && mServer.isClientReady(membership.getClientId())) {
+                                    LOG.debug("  * Member "+membership.getClientId()+" is ready and active and added to keyMasterCandidatesWithCurrentKey");
+                                    keyMasterCandidatesWithCurrentKey.add(membership);
                                 }
                             }
                         } else {
-                            LOG.error("checkAndRequestGroupMemberKeys:(2) no presence for client " + m.getClientId() + ", member of group " + groupId);
+                            LOG.error("checkAndRequestGroupMemberKeys:(2) no presence for client " + membership.getClientId() + ", member of group " + groupId);
                         }
                     }
                 }
-                if (!outOfDateMembers.isEmpty()) {
-                    LOG.debug("  * There are members (" + outOfDateMembers.size() + ") without a current group key - need to issue a rekeying...");
+                if (!outOfDateMemberships.isEmpty()) {
+                    LOG.debug("  * There are members (" + outOfDateMemberships.size() + ") without a current group key - need to issue a rekeying...");
                     // we need request some keys
                     if (!keyMasterCandidatesWithCurrentKey.isEmpty()) {
                         // prefer candidates that already have a key
-                        ArrayList<Pair<TalkGroupMember, Long>> candidatesByLatency = membersSortedByLatency(keyMasterCandidatesWithCurrentKey);
-                        TalkGroupMember newKeymaster;
+                        ArrayList<Pair<TalkGroupMembership, Long>> candidatesByLatency = membershipsSortedByLatency(keyMasterCandidatesWithCurrentKey);
+                        TalkGroupMembership newKeymaster;
                         if (candidatesByLatency.get(0).getRight() < MAX_ALLOWED_KEY_REQUEST_LATENCY) {
                             newKeymaster = candidatesByLatency.get(0).getLeft(); // get the lowest latency candidate
-                            requestGroupKeys(newKeymaster.getClientId(), group.getGroupId(), sharedKeyId, sharedKeyIdSalt, outOfDateMembers);
+                            requestGroupKeys(newKeymaster.getClientId(), groupPresence.getGroupId(), sharedKeyId, sharedKeyIdSalt, outOfDateMemberships);
                             return;
                         }
                         // fall through to next block if best candidate does not meet MAX_ALLOWED_KEY_REQUEST_LATENCY
                     }
                     if (!keyMasterCandidatesWithoutCurrentKey.isEmpty()) {
                         // nobody with a current key is online, but we have other admins online, so purchase a new group key
-                        ArrayList<Pair<TalkGroupMember, Long>> candidatesByLatency = membersSortedByLatency(keyMasterCandidatesWithoutCurrentKey);
-                        TalkGroupMember newKeymaster;
+                        ArrayList<Pair<TalkGroupMembership, Long>> candidatesByLatency = membershipsSortedByLatency(keyMasterCandidatesWithoutCurrentKey);
+                        TalkGroupMembership newKeymaster;
                         if (candidatesByLatency.get(0).getRight() < MAX_ALLOWED_KEY_REQUEST_LATENCY) {
                             newKeymaster = candidatesByLatency.get(0).getLeft(); // get the lowest latency candidate
-                            requestGroupKeys(newKeymaster.getClientId(), group.getGroupId(), null, null, outOfDateMembers);
+                            requestGroupKeys(newKeymaster.getClientId(), groupPresence.getGroupId(), null, null, outOfDateMemberships);
                             return;
                         }
                         // fall through to next block if best candidate does not meet MAX_ALLOWED_KEY_REQUEST_LATENCY
                     }
                     // we have out of date key members, but no suitable candidate for group key generation
-                    LOG.warn("performCheckAndRequestGroupMemberKeys:" + outOfDateMembers.size() + " members have no key in group " + groupId + ", but no suitable keymaster available");
+                    LOG.warn("performCheckAndRequestGroupMemberKeys:" + outOfDateMemberships.size() + " members have no key in group " + groupId + ", but no suitable keymaster available");
                 }
             }
         }
     }
 
-    private void requestGroupKeys(String fromClientId, String forGroupId, String forSharedKeyId, String withSharedKeyIdSalt, List<TalkGroupMember> forOutOfDateMembers) {
+    private void requestGroupKeys(String fromClientId, String forGroupId, String forSharedKeyId, String withSharedKeyIdSalt, List<TalkGroupMembership> forOutOfDateMemberships) {
         ArrayList<String> forClientIdsList = new ArrayList<String>();
         ArrayList<String> withPublicKeyIdsList = new ArrayList<String>();
-        for (TalkGroupMember member : forOutOfDateMembers) {
-            TalkPresence presence = mDatabase.findPresenceForClient(member.getClientId());
+        for (TalkGroupMembership membership : forOutOfDateMemberships) {
+            TalkPresence presence = mDatabase.findPresenceForClient(membership.getClientId());
             if (presence != null && presence.getKeyId() != null) {
                 withPublicKeyIdsList.add(presence.getKeyId());
-                forClientIdsList.add(member.getClientId());
-                LOG.info("requestGroupKeys, added client='" + member.getClientId() + "', keyId='" + presence.getKeyId() + "'");
+                forClientIdsList.add(membership.getClientId());
+                LOG.info("requestGroupKeys, added client='" + membership.getClientId() + "', keyId='" + presence.getKeyId() + "'");
             } else {
-                LOG.error("requestGroupKeys, failed to add client='" + member.getClientId() + "'");
+                LOG.error("requestGroupKeys, failed to add client='" + membership.getClientId() + "'");
             }
         }
         if (!withPublicKeyIdsList.isEmpty() && withPublicKeyIdsList.size() == forClientIdsList.size()) {
@@ -614,27 +613,27 @@ public class UpdateAgent extends NotificationDeferrer {
                     connection.resetPriorityPenalty(0L);
                     Date now = new Date();
 
-                    TalkGroup group = mDatabase.findGroupById(forGroupId);
-                    group.setSharedKeyId(forSharedKeyId);
-                    group.setSharedKeyIdSalt(withSharedKeyIdSalt);
-                    group.setLastChanged(now);
-                    LOG.info("requestGroupKeys, for group '" + forGroupId + "' did set sharedKeyId " + group.getSharedKeyId() + ", salt="+group.getSharedKeyIdSalt());
-                    mDatabase.saveGroup(group);
+                    TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(forGroupId);
+                    groupPresence.setSharedKeyId(forSharedKeyId);
+                    groupPresence.setSharedKeyIdSalt(withSharedKeyIdSalt);
+                    groupPresence.setLastChanged(now);
+                    LOG.info("requestGroupKeys, for group '" + forGroupId + "' did set sharedKeyId " + groupPresence.getSharedKeyId() + ", salt="+groupPresence.getSharedKeyIdSalt());
+                    mDatabase.saveGroupPresence(groupPresence);
 
                     for (int i = 0; i < forClientIds.length; ++i) {
-                        TalkGroupMember member = mDatabase.findGroupMemberForClient(forGroupId, forClientIds[i]);
-                        member.setSharedKeyId(forSharedKeyId);
-                        member.setSharedKeyIdSalt(withSharedKeyIdSalt);
-                        LOG.info("requestGroupKeys, for member '" + member.getClientId() + "' did set sharedKeyId " + member.getSharedKeyId() + ", salt="+member.getSharedKeyIdSalt());
-                        member.setMemberKeyId(withPublicKeyIds[i]);
-                        member.setEncryptedGroupKey(newKeyBoxes[i]);
-                        member.setKeySupplier(fromClientId);
-                        member.setSharedKeyDate(now); // TODO: remove this and other fields no longer required
-                        member.setLastChanged(now);
-                        mDatabase.saveGroupMember(member);
+                        TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(forGroupId, forClientIds[i]);
+                        membership.setSharedKeyId(forSharedKeyId);
+                        membership.setSharedKeyIdSalt(withSharedKeyIdSalt);
+                        LOG.info("requestGroupKeys, for member '" + membership.getClientId() + "' did set sharedKeyId " + membership.getSharedKeyId() + ", salt="+membership.getSharedKeyIdSalt());
+                        membership.setMemberKeyId(withPublicKeyIds[i]);
+                        membership.setEncryptedGroupKey(newKeyBoxes[i]);
+                        membership.setKeySupplier(fromClientId);
+                        membership.setSharedKeyDate(now); // TODO: remove this and other fields no longer required
+                        membership.setLastChanged(now);
+                        mDatabase.saveGroupMembership(membership);
                         // now perform a groupMemberUpdate for the affected client so he gets the new key
                         // but only if it is not the member we got the key from
-                        if (!member.getClientId().equals(fromClientId)) {
+                        if (!membership.getClientId().equals(fromClientId)) {
                             // Note: we notify the client directly from this thread, we are the UpdateAgent anyway
                             // and we have all the information fresh and right here
                             TalkRpcConnection memberConnection = mServer.getClientConnection(forClientIds[i]);
@@ -642,8 +641,8 @@ public class UpdateAgent extends NotificationDeferrer {
                                 ITalkRpcClient mrpc = memberConnection.getClientRpc();
                                 // we send updates only to those members whose key has changed, so we always send the full update
                                 try {
-                                    mrpc.groupMemberUpdated(member);
-                                    mrpc.groupUpdated(group);
+                                    mrpc.groupMemberUpdated(membership);
+                                    mrpc.groupUpdated(groupPresence);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }

@@ -455,12 +455,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 mDatabase.findRelationshipsChangedAfter(mConnection.getClientId(), lastKnown);
 
         // build the result array
-        TalkRelationship[] res = new TalkRelationship[relationships.size()];
+        TalkRelationship[] result = new TalkRelationship[relationships.size()];
         int idx = 0;
         for (TalkRelationship r : relationships) {
-            res[idx++] = r;
+            result[idx++] = r;
         }
-        return res;
+        return result;
     }
 
     @Override
@@ -546,19 +546,19 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireIdentification(true);
         logCall("getPresences(lastKnown: '" + lastKnown + "')");
 
-        List<TalkPresence> pres = mDatabase.findPresencesChangedAfter(mConnection.getClientId(), lastKnown);
+        List<TalkPresence> presences = mDatabase.findPresencesChangedAfter(mConnection.getClientId(), lastKnown);
         // update connection status and convert results to array
-        TalkPresence[] res = new TalkPresence[pres.size()];
-        for (int i = 0; i < res.length; i++) {
-            TalkPresence p = pres.get(i);
-            if (p.getConnectionStatus() == null) {
-                p.setConnectionStatus(mServer.isClientConnected(p.getClientId())
+        TalkPresence[] result = new TalkPresence[presences.size()];
+        for (int i = 0; i < result.length; i++) {
+            TalkPresence presence = presences.get(i);
+            if (presence.getConnectionStatus() == null) {
+                presence.setConnectionStatus(mServer.isClientConnected(presence.getClientId())
                         ? TalkPresence.CONN_STATUS_ONLINE : TalkPresence.CONN_STATUS_OFFLINE);
             }
-            res[i] = pres.get(i);
+            result[i] = presences.get(i);
         }
 
-        return res;
+        return result;
     }
 
     private void checkMembershipKeysForClient(String clientId) {
@@ -576,7 +576,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
     private void checkMembershipKeysForClient(String clientId, String keyId) {
         LOG.debug("checkMembershipKeysForClient id "+clientId+", keyid "+keyId);
-        final List<TalkGroupMember> myMemberships = mDatabase.findGroupMembersForClientWithStates(clientId, TalkGroupMember.ACTIVE_STATES);
+        final List<TalkGroupMembership> myMemberships = mDatabase.findGroupMembershipsForClientWithStates(clientId, TalkGroupMembership.ACTIVE_STATES);
 
         if (myMemberships != null && myMemberships.size()>0) {
             final TalkKey key = mDatabase.findKey(mConnection.getClientId(), keyId);
@@ -587,21 +587,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
                 throw new RuntimeException("checkMembershipKeyForClient: key with id "+keyId+" is empty for client "+clientId);
             }
 
-            for (TalkGroupMember groupMember : myMemberships) {
-                TalkGroup group = mDatabase.findGroupById(groupMember.getGroupId());
+            for (TalkGroupMembership membership : myMemberships) {
+                TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(membership.getGroupId());
                 boolean outDated = false;
-                if (!keyId.equals(groupMember.getMemberKeyId())) {
+                if (!keyId.equals(membership.getMemberKeyId())) {
                     outDated = true;
-                } else if (group.getSharedKeyId() == null || group.getSharedKeyId().length() == 0) {
+                } else if (groupPresence.getSharedKeyId() == null || groupPresence.getSharedKeyId().length() == 0) {
                     outDated = true;
-                } else if (!group.getSharedKeyId().equals(groupMember.getSharedKeyId())) {
+                } else if (!groupPresence.getSharedKeyId().equals(membership.getSharedKeyId())) {
                     outDated = true;
                 }
                 if (outDated) {
-                    LOG.debug("checkMembershipKeysForClient id "+clientId+", outdated keyid "+keyId+", requesting key update for group "+groupMember.getGroupId());
-                    mServer.getUpdateAgent().checkAndRequestGroupMemberKeys(groupMember.getGroupId());
+                    LOG.debug("checkMembershipKeysForClient id "+clientId+", outdated keyid "+keyId+", requesting key update for group "+membership.getGroupId());
+                    mServer.getUpdateAgent().checkAndRequestGroupMemberKeys(membership.getGroupId());
                 } else {
-                    LOG.debug("checkMembershipKeysForClient id "+clientId+", keyid "+keyId+", key ok for group "+groupMember.getGroupId());
+                    LOG.debug("checkMembershipKeysForClient id "+clientId+", keyid "+keyId+", key ok for group "+membership.getGroupId());
                 }
             }
         }
@@ -653,11 +653,11 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (relationship != null && (relationship.isFriend() || relationship.invitedMe())) {
             key = mDatabase.findKey(clientId, keyId);
         } else {
-            List<TalkGroupMember> members = mDatabase.findGroupMembersForClient(mConnection.getClientId());
-            for (TalkGroupMember member : members) {
-                if (member.isJoined() || member.isInvited()) {
-                    TalkGroupMember otherMember = mDatabase.findGroupMemberForClient(member.getGroupId(), clientId);
-                    if (otherMember != null && (otherMember.isJoined() || otherMember.isInvited())) {
+            List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsForClient(mConnection.getClientId());
+            for (TalkGroupMembership membership : memberships) {
+                if (membership.isJoined() || membership.isInvited()) {
+                    TalkGroupMembership otherMembership = mDatabase.findGroupMembershipForClient(membership.getGroupId(), clientId);
+                    if (otherMembership != null && (otherMembership.isJoined() || otherMembership.isInvited())) {
                         key = mDatabase.findKey(clientId, keyId);
                         break;
                     }
@@ -1221,15 +1221,15 @@ public class TalkRpcHandler implements ITalkRpcServer {
             String groupId = delivery.getGroupId();
 
             // check that group exists
-            TalkGroup group = mDatabase.findGroupById(groupId);
-            if (group == null) {
+            TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(groupId);
+            if (groupPresence == null) {
                 LOG.info("delivery rejected: no such group");
                 delivery.setState(TalkDelivery.STATE_FAILED);
                 delivery.setReason("no such group");
             } else {
                 // check that sender is member of group
-                TalkGroupMember clientMember = mDatabase.findGroupMemberForClient(groupId, senderId);
-                if (clientMember == null || !clientMember.isMember()) {
+                TalkGroupMembership clientMembership = mDatabase.findGroupMembershipForClient(groupId, senderId);
+                if (clientMembership == null || !clientMembership.isMember()) {
                     LOG.info("delivery rejected: sender is not group member");
                     delivery.setState(TalkDelivery.STATE_FAILED);
                     delivery.setReason("sender is not group member");
@@ -1238,12 +1238,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
             if (!TalkDelivery.STATE_FAILED.equals(delivery.getState())) {
                 // deliver to each group member
-                List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-                for (TalkGroupMember member : members) {
-                    if (member.getClientId().equals(senderId)) {
+                List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
+                for (TalkGroupMembership membership : memberships) {
+                    if (membership.getClientId().equals(senderId)) {
                         continue;
                     }
-                    if (!member.isJoined()) {
+                    if (!membership.isJoined()) {
                         continue;
                     }
 
@@ -1252,19 +1252,19 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     memberDelivery.setMessageTag(delivery.getMessageTag());
                     memberDelivery.setGroupId(groupId);
                     memberDelivery.setSenderId(senderId);
-                    memberDelivery.setKeyId(member.getMemberKeyId());
-                    memberDelivery.setKeyCiphertext(member.getEncryptedGroupKey());
-                    memberDelivery.setReceiverId(member.getClientId());
+                    memberDelivery.setKeyId(membership.getMemberKeyId());
+                    memberDelivery.setKeyCiphertext(membership.getEncryptedGroupKey());
+                    memberDelivery.setReceiverId(membership.getClientId());
                     memberDelivery.setAttachmentState(delivery.getAttachmentState());
                     memberDelivery.setTimeAccepted(currentDate);
 
-                    if (member.getEncryptedGroupKey() == null) {
-                        LOG.warn("have no group key, discarding group message " + message.getMessageId() + " for client " + member.getClientId() + " group " + groupId);
+                    if (membership.getEncryptedGroupKey() == null) {
+                        LOG.warn("have no group key, discarding group message " + message.getMessageId() + " for client " + membership.getClientId() + " group " + groupId);
                         memberDelivery.setState(TalkDelivery.STATE_FAILED);
                         memberDelivery.setReason("no group key for receiver available");
-                    } else if (member.getSharedKeyId() != null && message.getSharedKeyId() != null && !member.getSharedKeyId().equals(message.getSharedKeyId())) {
-                        LOG.warn("message key id and member shared key id mismatch, discarding group message " + message.getMessageId() + " for client " + member.getClientId() + " group " + groupId);
-                        LOG.warn("message.sharedKeyId=" + message.getSharedKeyId() + " member.sharedKeyId= " + member.getSharedKeyId() + " group.sharedKeyId= " + group.getSharedKeyId());
+                    } else if (membership.getSharedKeyId() != null && message.getSharedKeyId() != null && !membership.getSharedKeyId().equals(message.getSharedKeyId())) {
+                        LOG.warn("message key id and member shared key id mismatch, discarding group message " + message.getMessageId() + " for client " + membership.getClientId() + " group " + groupId);
+                        LOG.warn("message.sharedKeyId=" + message.getSharedKeyId() + " member.sharedKeyId= " + membership.getSharedKeyId() + " group.sharedKeyId= " + groupPresence.getSharedKeyId());
                         memberDelivery.setState(TalkDelivery.STATE_FAILED);
                         memberDelivery.setReason("group key for receiver is not current");
                     } else {
@@ -1272,9 +1272,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         boolean success = checkOneDelivery(message, memberDelivery);
                         if (success) {
                             memberDelivery.setState(TalkDelivery.STATE_DELIVERING);
-                            LOG.info("delivering message " + message.getMessageId() + " for client " + member.getClientId() + " group " + groupId + " sharedKeyId=" + message.getSharedKeyId() + ", member sharedKeyId=" + member.getSharedKeyId());
+                            LOG.info("delivering message " + message.getMessageId() + " for client " + membership.getClientId() + " group " + groupId + " sharedKeyId=" + message.getSharedKeyId() + ", member sharedKeyId=" + membership.getSharedKeyId());
                         } else {
-                            LOG.info("failed message " + message.getMessageId() + " for client " + member.getClientId() + " group " + groupId + " sharedKeyId=" + message.getSharedKeyId() + ", member sharedKeyId=" + member.getSharedKeyId());
+                            LOG.info("failed message " + message.getMessageId() + " for client " + membership.getClientId() + " group " + groupId + " sharedKeyId=" + message.getSharedKeyId() + ", member sharedKeyId=" + membership.getSharedKeyId());
                         }
                     }
                     // set delivery timestamps
@@ -1319,21 +1319,21 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     private boolean areRelatedViaGroupMembership(String clientId1, String clientId2) {
-        final List<TalkGroupMember> client1Groupmembers = mDatabase.findGroupMembersForClient(clientId1);
+        final List<TalkGroupMembership> client1GroupMemberships = mDatabase.findGroupMembershipsForClient(clientId1);
         final List<String> client1GroupIds = new ArrayList<String>();
-        for (TalkGroupMember groupMember : client1Groupmembers) {
-            LOG.debug("  * client1 membership state in group: '" + groupMember.getGroupId() + "':" + groupMember.getState());
-            if (groupMember.isJoined()) {
-                client1GroupIds.add(groupMember.getGroupId());
+        for (TalkGroupMembership membership : client1GroupMemberships) {
+            LOG.debug("  * client1 membership state in group: '" + membership.getGroupId() + "':" + membership.getState());
+            if (membership.isJoined()) {
+                client1GroupIds.add(membership.getGroupId());
             }
         }
 
-        final List<TalkGroupMember> client2Groupmembers = mDatabase.findGroupMembersForClient(clientId2);
-        for (TalkGroupMember groupMember : client2Groupmembers) {
-            LOG.debug("  * client2 membership state in group: '" + groupMember.getGroupId() + "':" + groupMember.getState());
-            if (client1GroupIds.indexOf(groupMember.getGroupId()) != -1 &&
-                    groupMember.isJoined()) {
-                LOG.info("clients '" + clientId1 + "' and '" + clientId2 + "' are both joined in group! (groupId: '" + groupMember.getGroupId() + "')");
+        final List<TalkGroupMembership> client2GroupMemberships = mDatabase.findGroupMembershipsForClient(clientId2);
+        for (TalkGroupMembership membership : client2GroupMemberships) {
+            LOG.debug("  * client2 membership state in group: '" + membership.getGroupId() + "':" + membership.getState());
+            if (client1GroupIds.indexOf(membership.getGroupId()) != -1 &&
+                    membership.isJoined()) {
+                LOG.info("clients '" + clientId1 + "' and '" + clientId2 + "' are both joined in group! (groupId: '" + membership.getGroupId() + "')");
                 return true;
             }
         }
@@ -1563,7 +1563,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
                     mServer.getDeliveryAgent().requestDelivery(delivery.getSenderId(), false);
                     changed = true;
                  }
-                
+
                 // note: there are currently no states in nextUnknownInState,
                 // so the following body in the next if-statement
                 // currently should never be executed and is in here
@@ -1642,26 +1642,26 @@ public class TalkRpcHandler implements ITalkRpcServer {
     }
 
     @Override
-    public String createGroup(TalkGroup group) {
+    public String createGroup(TalkGroupPresence groupPresence) {
         requireIdentification(true);
-        logCall("createGroup(groupTag: '" + group.getGroupTag() + "')");
-        group.setGroupId(UUID.randomUUID().toString());
-        group.setState(TalkGroup.STATE_EXISTS);
-        TalkGroupMember groupAdmin = new TalkGroupMember();
-        groupAdmin.setClientId(mConnection.getClientId());
-        groupAdmin.setGroupId(group.getGroupId());
-        groupAdmin.setRole(TalkGroupMember.ROLE_ADMIN);
-        groupAdmin.setState(TalkGroupMember.STATE_JOINED);
-        changedGroup(group, new Date());
-        changedGroupMember(groupAdmin, group.getLastChanged());
-        return group.getGroupId();
+        logCall("createGroup(groupTag: '" + groupPresence.getGroupTag() + "')");
+        groupPresence.setGroupId(UUID.randomUUID().toString());
+        groupPresence.setState(TalkGroupPresence.STATE_EXISTS);
+        TalkGroupMembership adminMembership = new TalkGroupMembership();
+        adminMembership.setClientId(mConnection.getClientId());
+        adminMembership.setGroupId(groupPresence.getGroupId());
+        adminMembership.setRole(TalkGroupMembership.ROLE_ADMIN);
+        adminMembership.setState(TalkGroupMembership.STATE_JOINED);
+        changedGroupPresence(groupPresence, new Date());
+        changedGroupMembership(adminMembership, groupPresence.getLastChanged());
+        return groupPresence.getGroupId();
     }
 
     @Override
-    public TalkGroup createGroupWithMembers(String groupType, String groupTag, String groupName, String[] members, String[] roles) {
+    public TalkGroupPresence createGroupWithMembers(String groupType, String groupTag, String groupName, String[] members, String[] roles) {
         requireIdentification(true);
         logCall("createGroupWithMembers(groupName: '"+groupName +"', groupTag='" + groupTag + "')");
-        if (!TalkGroup.GROUP_TYPE_USER.equals(groupType)) {
+        if (!TalkGroupPresence.GROUP_TYPE_USER.equals(groupType)) {
             throw new RuntimeException("illegal group type:"+groupType);
         }
         if (groupName == null || groupTag == null || groupName.length() > 32) {
@@ -1670,12 +1670,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (groupName.length() > 32) {
             throw new RuntimeException("group name too long (>32)");
         }
-        TalkGroup group = new TalkGroup();
-        group.setGroupId(UUID.randomUUID().toString());
-        group.setState(TalkGroup.STATE_EXISTS);
-        group.setGroupType(groupType);
-        group.setGroupName(groupName);
-        group.setGroupTag(groupTag);
+        TalkGroupPresence groupPresence = new TalkGroupPresence();
+        groupPresence.setGroupId(UUID.randomUUID().toString());
+        groupPresence.setState(TalkGroupPresence.STATE_EXISTS);
+        groupPresence.setGroupType(groupType);
+        groupPresence.setGroupName(groupName);
+        groupPresence.setGroupTag(groupTag);
 
         if (members.length != roles.length) {
             throw new RuntimeException("number of members != number of roles");
@@ -1689,60 +1689,60 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
 
         for (String role : roles) {
-            if (!TalkGroupMember.isValidRole(role))  {
+            if (!TalkGroupMembership.isValidRole(role))  {
                 throw new RuntimeException("Invalid role:"+role);
             }
         }
 
         Date now = new Date();
-        changedGroup(group, now);
+        changedGroupPresence(groupPresence, now);
 
-        TalkGroupMember groupAdmin = new TalkGroupMember();
-        groupAdmin.setClientId(mConnection.getClientId());
-        groupAdmin.setGroupId(group.getGroupId());
-        groupAdmin.setRole(TalkGroupMember.ROLE_ADMIN);
-        groupAdmin.setState(TalkGroupMember.STATE_JOINED);
-        changedGroupMember(groupAdmin, now);
+        TalkGroupMembership adminMembership = new TalkGroupMembership();
+        adminMembership.setClientId(mConnection.getClientId());
+        adminMembership.setGroupId(groupPresence.getGroupId());
+        adminMembership.setRole(TalkGroupMembership.ROLE_ADMIN);
+        adminMembership.setState(TalkGroupMembership.STATE_JOINED);
+        changedGroupMembership(adminMembership, now);
 
         for (int i = 0; i < members.length;++i) {
-            TalkGroupMember groupMember = new TalkGroupMember();
-            groupMember.setGroupId(group.getGroupId());
-            groupMember.setClientId(members[i]);
-            groupMember.setRole(roles[i]);
-            groupMember.setState(TalkGroupMember.STATE_INVITED);
-            changedGroupMember(groupMember, now);
+            TalkGroupMembership membership = new TalkGroupMembership();
+            membership.setGroupId(groupPresence.getGroupId());
+            membership.setClientId(members[i]);
+            membership.setRole(roles[i]);
+            membership.setState(TalkGroupMembership.STATE_INVITED);
+            changedGroupMembership(membership, now);
         }
         for (int i = 0; i < members.length;++i) {
             // send the presence of all other group members to the new group member
-            mServer.getUpdateAgent().requestPresenceUpdateForClientOfMembersOfGroup(members[i], group.getGroupId());
+            mServer.getUpdateAgent().requestPresenceUpdateForClientOfMembersOfGroup(members[i], groupPresence.getGroupId());
         }
-        return group;
+        return groupPresence;
     }
 
     @Override
-    public TalkGroup[] getGroups(Date lastKnown) {
+    public TalkGroupPresence[] getGroups(Date lastKnown) {
         requireIdentification(true);
         logCall("getGroups(lastKnown: '" + lastKnown + "')");
-        List<TalkGroup> groups = mDatabase.findGroupsByClientIdChangedAfter(mConnection.getClientId(), lastKnown);
-        TalkGroup[] res = new TalkGroup[groups.size()];
-        for (int i = 0; i < res.length; i++) {
-            res[i] = groups.get(i);
+        List<TalkGroupPresence> groupPresences = mDatabase.findGroupPresencesByClientIdChangedAfter(mConnection.getClientId(), lastKnown);
+        TalkGroupPresence[] result = new TalkGroupPresence[groupPresences.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = groupPresences.get(i);
         }
-        return res;
+        return result;
     }
 
     @Override
-    public TalkGroup getGroup(String groupId) {
+    public TalkGroupPresence getGroup(String groupId) {
         requireIdentification(true);
         logCall("getGroup(id: '" + groupId + "')");
-        return mDatabase.findGroupById(groupId);
+        return mDatabase.findGroupPresenceById(groupId);
     }
 
     @Override
-    public TalkGroupMember getGroupMember(String groupId, String clientId) {
+    public TalkGroupMembership getGroupMember(String groupId, String clientId) {
         requireIdentification(true);
         logCall("getGroupMember(groupId: '" + groupId + ", clientId:" + clientId + "')");
-        return mDatabase.findGroupMemberForClient(groupId, clientId);
+        return mDatabase.findGroupMembershipForClient(groupId, clientId);
     }
 
     @Override
@@ -1751,9 +1751,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireGroupAdmin(groupId);
         //requireNotNearbyGroupType(groupId);
         logCall("updateGroupName(groupId: '" + groupId + "', name: '" + name + "')");
-        TalkGroup targetGroup = mDatabase.findGroupById(groupId);
-        targetGroup.setGroupName(name);
-        changedGroup(targetGroup, new Date());
+        TalkGroupPresence targetGroupPresence = mDatabase.findGroupPresenceById(groupId);
+        targetGroupPresence.setGroupName(name);
+        changedGroupPresence(targetGroupPresence, new Date());
     }
 
     @Override
@@ -1762,20 +1762,20 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireGroupAdmin(groupId);
         //requireNotNearbyGroupType(groupId);
         logCall("updateGroupAvatar(groupId: '" + groupId + "', avatarUrl: '" + avatarUrl + "')");
-        TalkGroup targetGroup = mDatabase.findGroupById(groupId);
-        targetGroup.setGroupAvatarUrl(avatarUrl);
-        changedGroup(targetGroup, new Date());
+        TalkGroupPresence targetGroupPresence = mDatabase.findGroupPresenceById(groupId);
+        targetGroupPresence.setGroupAvatarUrl(avatarUrl);
+        changedGroupPresence(targetGroupPresence, new Date());
     }
 
     @Override
-    public void updateGroup(TalkGroup group) {
+    public void updateGroup(TalkGroupPresence groupPresence) {
         requireIdentification(true);
-        requireGroupAdmin(group.getGroupId());
-        logCall("updateGroup(groupId: '" + group.getGroupId() + "')");
-        TalkGroup targetGroup = mDatabase.findGroupById(group.getGroupId());
-        targetGroup.setGroupName(group.getGroupName());
-        targetGroup.setGroupAvatarUrl(group.getGroupAvatarUrl());
-        changedGroup(targetGroup, new Date());
+        requireGroupAdmin(groupPresence.getGroupId());
+        logCall("updateGroup(groupId: '" + groupPresence.getGroupId() + "')");
+        TalkGroupPresence targetGroupPresence = mDatabase.findGroupPresenceById(groupPresence.getGroupId());
+        targetGroupPresence.setGroupName(groupPresence.getGroupName());
+        targetGroupPresence.setGroupAvatarUrl(groupPresence.getGroupAvatarUrl());
+        changedGroupPresence(targetGroupPresence, new Date());
     }
 
     @Override
@@ -1784,36 +1784,36 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireGroupAdmin(groupId);
         logCall("deleteGroup(groupId: '" + groupId + "')");
 
-        TalkGroup group = mDatabase.findGroupById(groupId);
-        if (group == null) {
+        TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(groupId);
+        if (groupPresence == null) {
             throw new RuntimeException("Group does not exist");
         }
 
         // mark the group as deleted
-        group.setState(TalkGroup.STATE_NONE);
-        changedGroup(group, new Date());
+        groupPresence.setState(TalkGroupPresence.STATE_NONE);
+        changedGroupPresence(groupPresence, new Date());
 
         // walk the group and make everyone have a "none" relationship to it
-        List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-        for (TalkGroupMember member : members) {
-            if (member.isInvited() || member.isJoined()) {
-                member.setState(TalkGroupMember.STATE_GROUP_REMOVED);
+        List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
+        for (TalkGroupMembership membership : memberships) {
+            if (membership.isInvited() || membership.isJoined()) {
+                membership.setState(TalkGroupMembership.STATE_GROUP_REMOVED);
 
                 // TODO: check if degrade role of admins is advisable
                 /*if (member.isAdmin()) {
                     member.setRole(TalkGroupMember.ROLE_MEMBER);
                 }*/
-                changedGroupMember(member, group.getLastChanged());
+                changedGroupMembership(membership, groupPresence.getLastChanged());
             }
         }
     }
 
     // touch presences of all members
     private void touchGroupMemberPresences(String groupId) {
-        List<TalkGroupMember> members = mDatabase.findGroupMembersById(groupId);
-        for (TalkGroupMember m : members) {
-            if (m.isInvited() || m.isJoined()) {
-                TalkPresence p = mDatabase.findPresenceForClient(m.getClientId());
+        List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsById(groupId);
+        for (TalkGroupMembership membership : memberships) {
+            if (membership.isInvited() || membership.isJoined()) {
+                TalkPresence p = mDatabase.findPresenceForClient(membership.getClientId());
                 if (p != null) {
                     p.setTimestamp(new Date());
                     mDatabase.savePresence(p);
@@ -1836,18 +1836,18 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
         // XXX need to apply blocklist here?
         // get or create the group member
-        TalkGroupMember member = mDatabase.findGroupMemberForClient(groupId, clientId);
-        if (member == null) {
-            member = new TalkGroupMember();
+        TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(groupId, clientId);
+        if (membership == null) {
+            membership = new TalkGroupMembership();
         }
         // perform the invite
-        if (member.getState().equals(TalkGroupMember.STATE_NONE)) {
+        if (membership.getState().equals(TalkGroupMembership.STATE_NONE)) {
             // set up the member
-            member.setGroupId(groupId);
-            member.setClientId(clientId);
-            member.setState(TalkGroupMember.STATE_INVITED);
-            member.trashPrivate();
-            changedGroupMember(member, new Date());
+            membership.setGroupId(groupId);
+            membership.setClientId(clientId);
+            membership.setState(TalkGroupMembership.STATE_INVITED);
+            membership.trashPrivate();
+            changedGroupMembership(membership, new Date());
             //  NOTE if this gets removed then the invited users presence might
             //       need touching depending on what the solution to the update problem is
             // notify various things
@@ -1872,37 +1872,37 @@ public class TalkRpcHandler implements ITalkRpcServer {
 
         String clientId = mConnection.getClientId();
 
-        TalkGroupMember member = mDatabase.findGroupMemberForClient(groupId, clientId);
-        if (member == null) {
+        TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(groupId, clientId);
+        if (membership == null) {
             throw new RuntimeException("Group does not exist");
         }
 
-        if (member.getState().equals(TalkGroupMember.STATE_JOINED)) {
+        if (membership.getState().equals(TalkGroupMembership.STATE_JOINED)) {
             throw new RuntimeException("Already a member of the group");
         }
 
-        if (!member.getState().equals(TalkGroupMember.STATE_INVITED)) {
+        if (!membership.getState().equals(TalkGroupMembership.STATE_INVITED)) {
             throw new RuntimeException("Not invited to group");
         }
 
-        member.setState(TalkGroupMember.STATE_JOINED);
+        membership.setState(TalkGroupMembership.STATE_JOINED);
 
-        changedGroupMember(member, new Date());
+        changedGroupMembership(membership, new Date());
     }
 
     @Override
     public void leaveGroup(String groupId) {
         requireIdentification(true);
-        TalkGroupMember member = requiredGroupInvitedOrMember(groupId);
+        TalkGroupMembership membership = requiredGroupInvitedOrMember(groupId);
         logCall("leaveGroup(groupId: '" + groupId + "')");
         // set membership state to NONE
-        member.setState(TalkGroupMember.STATE_NONE);
+        membership.setState(TalkGroupMembership.STATE_NONE);
         // degrade anyone who leaves to member
-        member.setRole(TalkGroupMember.ROLE_MEMBER);
+        membership.setRole(TalkGroupMembership.ROLE_MEMBER);
         // trash keys
-        member.trashPrivate();
+        membership.trashPrivate();
         // save the whole thing
-        changedGroupMember(member, new Date());
+        changedGroupMembership(membership, new Date());
     }
 
     @Override
@@ -1912,16 +1912,16 @@ public class TalkRpcHandler implements ITalkRpcServer {
         //requireNotNearbyGroupType(groupId);
         logCall("removeGroupMember(groupId: '" + groupId + "' / clientId: '" + clientId + "')");
 
-        TalkGroupMember targetMember = mDatabase.findGroupMemberForClient(groupId, clientId);
-        if (targetMember == null) {
+        TalkGroupMembership targetMembership = mDatabase.findGroupMembershipForClient(groupId, clientId);
+        if (targetMembership == null) {
             throw new RuntimeException("Client is not a member of group");
         }
         // set membership state to NONE
-        targetMember.setState(TalkGroupMember.STATE_NONE);
+        targetMembership.setState(TalkGroupMembership.STATE_NONE);
         // degrade removed users to member
-        targetMember.setRole(TalkGroupMember.ROLE_MEMBER);
-        targetMember.trashPrivate();
-        changedGroupMember(targetMember, new Date());
+        targetMembership.setRole(TalkGroupMembership.ROLE_MEMBER);
+        targetMembership.trashPrivate();
+        changedGroupMembership(targetMembership, new Date());
     }
 
     @Override
@@ -1929,59 +1929,59 @@ public class TalkRpcHandler implements ITalkRpcServer {
         requireIdentification(true);
         requireGroupAdmin(groupId);
         logCall("updateGroupRole(groupId: '" + groupId + "' / clientId: '" + clientId + "', role: '" + role + "')");
-        TalkGroupMember targetMember = mDatabase.findGroupMemberForClient(groupId, clientId);
-        if (targetMember == null) {
+        TalkGroupMembership targetMembership = mDatabase.findGroupMembershipForClient(groupId, clientId);
+        if (targetMembership == null) {
             throw new RuntimeException("Client is not a member of group");
         }
-        if (!TalkGroupMember.isValidRole(role)) {
+        if (!TalkGroupMembership.isValidRole(role)) {
             throw new RuntimeException("Invalid role");
         }
-        targetMember.setRole(role);
-        changedGroupMember(targetMember, new Date());
+        targetMembership.setRole(role);
+        changedGroupMembership(targetMembership, new Date());
     }
 
     @Override
-    public TalkGroupMember[] getGroupMembers(String groupId, Date lastKnown) {
+    public TalkGroupMembership[] getGroupMembers(String groupId, Date lastKnown) {
         requireIdentification(true);
         requiredGroupInvitedOrMember(groupId);
         logCall("getGroupMembers(groupId: '" + groupId + "' / lastKnown: '" + lastKnown + "')");
 
-        List<TalkGroupMember> members = mDatabase.findGroupMembersByIdChangedAfter(groupId, lastKnown);
-        TalkGroupMember[] res = new TalkGroupMember[members.size()];
-        for (int i = 0; i < res.length; i++) {
-            TalkGroupMember m = members.get(i);
-            if (!m.getClientId().equals(mConnection.getClientId())) {
-                m.setEncryptedGroupKey(null);
+        List<TalkGroupMembership> memberships = mDatabase.findGroupMembershipsByIdChangedAfter(groupId, lastKnown);
+        TalkGroupMembership[] result = new TalkGroupMembership[memberships.size()];
+        for (int i = 0; i < result.length; i++) {
+            TalkGroupMembership membership = memberships.get(i);
+            if (!membership.getClientId().equals(mConnection.getClientId())) {
+                membership.setEncryptedGroupKey(null);
             }
-            res[i] = m;
+            result[i] = membership;
         }
-        return res;
+        return result;
     }
 
-    private void changedGroup(TalkGroup group, Date changed) {
-        group.setLastChanged(changed);
-        mDatabase.saveGroup(group);
-        mServer.getUpdateAgent().requestGroupUpdate(group.getGroupId());
+    private void changedGroupPresence(TalkGroupPresence groupPresence, Date changed) {
+        groupPresence.setLastChanged(changed);
+        mDatabase.saveGroupPresence(groupPresence);
+        mServer.getUpdateAgent().requestGroupUpdate(groupPresence.getGroupId());
     }
 
-    private void changedGroupMember(TalkGroupMember member, Date changed) {
-        member.setLastChanged(changed);
-        mDatabase.saveGroupMember(member);
-        mServer.getUpdateAgent().requestGroupMembershipUpdate(member.getGroupId(), member.getClientId());
+    private void changedGroupMembership(TalkGroupMembership membership, Date changed) {
+        membership.setLastChanged(changed);
+        mDatabase.saveGroupMembership(membership);
+        mServer.getUpdateAgent().requestGroupMembershipUpdate(membership.getGroupId(), membership.getClientId());
     }
 
     private void requireGroupAdmin(String groupId) {
-        TalkGroupMember gm = mDatabase.findGroupMemberForClient(groupId, mConnection.getClientId());
-        if (gm != null && gm.isAdmin()) {
+        TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(groupId, mConnection.getClientId());
+        if (membership != null && membership.isAdmin()) {
             return;
         }
         throw new RuntimeException("Client is not an admin in group with id: '" + groupId + "'");
     }
 
-    private TalkGroupMember requiredGroupInvitedOrMember(String groupId) {
-        TalkGroupMember gm = mDatabase.findGroupMemberForClient(groupId, mConnection.getClientId());
-        if (gm != null && (gm.isInvited() || gm.isMember())) {
-            return gm;
+    private TalkGroupMembership requiredGroupInvitedOrMember(String groupId) {
+        TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(groupId, mConnection.getClientId());
+        if (membership != null && (membership.isInvited() || membership.isMember())) {
+            return membership;
         }
         throw new RuntimeException("Client is not a member in group with id: '" + groupId + "'");
     }
@@ -1990,7 +1990,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         // perspectively we should evolve a permission model to enable checking of WHO is allowed to do WHAT in which CONTEXT
         // e.g. client (permission depending on role) inviteGroupMembers to Group (permission depending on type)
         // for now we just check for nearby groups...
-        TalkGroup group = mDatabase.findGroupById(groupId);
+        TalkGroup group = mDatabase.findGroupPresenceById(groupId);
         if (group.isTypeNearby()) {
             throw new RuntimeException("Group type is: nearby. not allowed.");
         }
@@ -2221,26 +2221,26 @@ public class TalkRpcHandler implements ITalkRpcServer {
     */
     private void createGroupWithEnvironment(TalkEnvironment environment) {
         LOG.info("createGroupWithEnvironment: creating new group for client with id '" + mConnection.getClientId() + "'");
-        TalkGroup group = new TalkGroup();
-        group.setGroupTag(UUID.randomUUID().toString());
-        group.setGroupId(UUID.randomUUID().toString());
-        group.setState(TalkGroup.STATE_EXISTS);
+        TalkGroupPresence groupPresence = new TalkGroupPresence();
+        groupPresence.setGroupTag(UUID.randomUUID().toString());
+        groupPresence.setGroupId(UUID.randomUUID().toString());
+        groupPresence.setState(TalkGroupPresence.STATE_EXISTS);
         if (environment.getName() == null) {
-            group.setGroupName(environment.getType() + "-" + group.getGroupId().substring(group.getGroupId().length() - 8));
+            groupPresence.setGroupName(environment.getType() + "-" + groupPresence.getGroupId().substring(groupPresence.getGroupId().length() - 8));
         } else {
-            group.setGroupName(environment.getName());
+            groupPresence.setGroupName(environment.getName());
         }
-        group.setGroupType(environment.getType());
+        groupPresence.setGroupType(environment.getType());
         LOG.info("updateEnvironment: creating new group for client with id '" + mConnection.getClientId() + "' with type " + environment.getType());
-        TalkGroupMember groupMember = new TalkGroupMember();
-        groupMember.setClientId(mConnection.getClientId());
-        groupMember.setGroupId(group.getGroupId());
-        groupMember.setRole(TalkGroupMember.ROLE_NEARBY_MEMBER);
-        groupMember.setState(TalkGroupMember.STATE_JOINED);
-        changedGroup(group, new Date());
-        changedGroupMember(groupMember, group.getLastChanged());
+        TalkGroupMembership membership = new TalkGroupMembership();
+        membership.setClientId(mConnection.getClientId());
+        membership.setGroupId(groupPresence.getGroupId());
+        membership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
+        membership.setState(TalkGroupMembership.STATE_JOINED);
+        changedGroupPresence(groupPresence, new Date());
+        changedGroupMembership(membership, groupPresence.getLastChanged());
 
-        environment.setGroupId(group.getGroupId());
+        environment.setGroupId(groupPresence.getGroupId());
         environment.setClientId(mConnection.getClientId());
         mDatabase.saveEnvironment(environment);
 
@@ -2252,38 +2252,38 @@ public class TalkRpcHandler implements ITalkRpcServer {
             environment.setGroupId(potentiallyOtherGroupId);
 
             // Now perform a hard-delete of old group - notifications have not yet been sent out, so this is ok
-            mDatabase.deleteGroup(group);
+            mDatabase.deleteGroupPresence(groupPresence);
         }
     }
 
-    private void joinGroupWithEnvironment(TalkGroup group, TalkEnvironment environment) {
-        LOG.info("joinGroupWithEnvironment: joining group "+group.getGroupId()+" with client id '" + mConnection.getClientId() + "'");
+    private void joinGroupWithEnvironment(TalkGroupPresence groupPresence, TalkEnvironment environment) {
+        LOG.info("joinGroupWithEnvironment: joining group " + groupPresence.getGroupId() + " with client id '" + mConnection.getClientId() + "'");
 
-        TalkGroupMember nearbyMember = mDatabase.findGroupMemberForClient(group.getGroupId(), mConnection.getClientId());
-        if (nearbyMember == null) {
-            nearbyMember = new TalkGroupMember();
+        TalkGroupMembership nearbyMembership = mDatabase.findGroupMembershipForClient(groupPresence.getGroupId(), mConnection.getClientId());
+        if (nearbyMembership == null) {
+            nearbyMembership = new TalkGroupMembership();
         }
-        nearbyMember.setClientId(mConnection.getClientId());
-        nearbyMember.setGroupId(group.getGroupId());
-        nearbyMember.setRole(TalkGroupMember.ROLE_NEARBY_MEMBER);
+        nearbyMembership.setClientId(mConnection.getClientId());
+        nearbyMembership.setGroupId(groupPresence.getGroupId());
+        nearbyMembership.setRole(TalkGroupMembership.ROLE_NEARBY_MEMBER);
         // TODO: Idea: if we would only invite here the client would only receive nearby group messages after joining, which
         // the clients could do on their discretion
-        nearbyMember.setState(TalkGroupMember.STATE_JOINED);
-        if (!group.getState().equals(TalkGroup.STATE_EXISTS)) {
-            group.setState(TalkGroup.STATE_EXISTS);
-            mDatabase.saveGroup(group);
+        nearbyMembership.setState(TalkGroupMembership.STATE_JOINED);
+        if (!groupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
+            groupPresence.setState(TalkGroupPresence.STATE_EXISTS);
+            mDatabase.saveGroupPresence(groupPresence);
         }
-        changedGroup(group, new Date());
-        changedGroupMember(nearbyMember, group.getLastChanged());
+        changedGroupPresence(groupPresence, new Date());
+        changedGroupMembership(nearbyMembership, groupPresence.getLastChanged());
 
-        environment.setGroupId(group.getGroupId());
+        environment.setGroupId(groupPresence.getGroupId());
         environment.setClientId(mConnection.getClientId());
         mDatabase.saveEnvironment(environment);
 
-        touchGroupMemberPresences(group.getGroupId());
-        mServer.getUpdateAgent().requestGroupUpdate(group.getGroupId(), mConnection.getClientId());
-        mServer.getUpdateAgent().requestGroupMembershipUpdatesForNewMember(group.getGroupId(), mConnection.getClientId());
-        mServer.getUpdateAgent().requestPresenceUpdateForClientOfMembersOfGroup(mConnection.getClientId(), group.getGroupId());
+        touchGroupMemberPresences(groupPresence.getGroupId());
+        mServer.getUpdateAgent().requestGroupUpdate(groupPresence.getGroupId(), mConnection.getClientId());
+        mServer.getUpdateAgent().requestGroupMembershipUpdatesForNewMember(groupPresence.getGroupId(), mConnection.getClientId());
+        mServer.getUpdateAgent().requestPresenceUpdateForClientOfMembersOfGroup(mConnection.getClientId(), groupPresence.getGroupId());
         mServer.getUpdateAgent().requestPresenceUpdate(mConnection.getClientId(), null);
     }
 
@@ -2330,19 +2330,19 @@ public class TalkRpcHandler implements ITalkRpcServer {
         for (TalkEnvironment te : matching) {
             if (te.getClientId().equals(mConnection.getClientId())) {
                 // there is already a matching environment for us
-                TalkGroupMember myMemberShip = mDatabase.findGroupMemberForClient(te.getGroupId(), te.getClientId());
-                TalkGroup myGroup = mDatabase.findGroupById(te.getGroupId());
-                if (myMemberShip != null && myGroup != null) {
-                    if (myMemberShip.isNearby() && myMemberShip.isJoined() && myGroup.getState().equals(TalkGroup.STATE_EXISTS)) {
+                TalkGroupMembership myMembership = mDatabase.findGroupMembershipForClient(te.getGroupId(), te.getClientId());
+                TalkGroupPresence myGroupPresence = mDatabase.findGroupPresenceById(te.getGroupId());
+                if (myMembership != null && myGroupPresence != null) {
+                    if (myMembership.isNearby() && myMembership.isJoined() && myGroupPresence.getState().equals(TalkGroupPresence.STATE_EXISTS)) {
                         // everything seems fine, but are we in the largest group?
                         if (environmentsPerGroup.size() > 1) {
                             if (!environmentsPerGroup.get(0).getLeft().equals(te.getGroupId())) {
                                 // we are not in the largest group, lets move over
                                 destroyEnvironment(myEnvironment);
                                 // join the largest group
-                                TalkGroup largestGroup = mDatabase.findGroupById(environmentsPerGroup.get(0).getLeft());
-                                joinGroupWithEnvironment(largestGroup, environment);
-                                return largestGroup.getGroupId();
+                                TalkGroupPresence largestGroupPresence = mDatabase.findGroupPresenceById(environmentsPerGroup.get(0).getLeft());
+                                joinGroupWithEnvironment(largestGroupPresence, environment);
+                                return largestGroupPresence.getGroupId();
                             }
                         }
                         // group membership has not changed, we are still fine
@@ -2359,13 +2359,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
                         }
                         myEnvironment.updateWith(environment);
                         mDatabase.saveEnvironment(myEnvironment);
-                        return myGroup.getGroupId();
+                        return myGroupPresence.getGroupId();
                     }
                     // there is a group and a membership, but they seem to be tombstones, so lets ignore them, just get rid of the bad environment
                     mDatabase.deleteEnvironment(te);
-                    TalkGroup largestGroup = mDatabase.findGroupById(environmentsPerGroup.get(0).getLeft());
-                    joinGroupWithEnvironment(largestGroup, environment);
-                    return largestGroup.getGroupId();
+                    TalkGroupPresence largestGroupPresence = mDatabase.findGroupPresenceById(environmentsPerGroup.get(0).getLeft());
+                    joinGroupWithEnvironment(largestGroupPresence, environment);
+                    return largestGroupPresence.getGroupId();
                 }
             }
         }
@@ -2376,35 +2376,35 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
         if (!matching.isEmpty()) {
             // join the largest group
-            TalkGroup largestGroup = mDatabase.findGroupById(environmentsPerGroup.get(0).getLeft());
-            joinGroupWithEnvironment(largestGroup, environment);
-            return largestGroup.getGroupId();
+            TalkGroupPresence largestGroupPresence = mDatabase.findGroupPresenceById(environmentsPerGroup.get(0).getLeft());
+            joinGroupWithEnvironment(largestGroupPresence, environment);
+            return largestGroupPresence.getGroupId();
         }
         // we are alone or first at the location, lets create a new group
         createGroupWithEnvironment(environment);
         return environment.getGroupId();
     }
 
-    private void removeGroupMember(TalkGroupMember member, Date now) {
+    private void removeGroupMembership(TalkGroupMembership membership, Date now) {
         // remove my membership
         // set membership state to NONE
-        member.setState(TalkGroupMember.STATE_NONE);
+        membership.setState(TalkGroupMembership.STATE_NONE);
         // degrade removed users to member
-        member.setRole(TalkGroupMember.ROLE_MEMBER);
-        member.trashPrivate();
-        changedGroupMember(member, now);
+        membership.setRole(TalkGroupMembership.ROLE_MEMBER);
+        membership.trashPrivate();
+        changedGroupMembership(membership, now);
     }
 
     private void destroyEnvironment(TalkEnvironment environment) {
         logCall("destroyEnvironment(" + environment + ")");
-        TalkGroup group = mDatabase.findGroupById(environment.getGroupId());
-        TalkGroupMember member = mDatabase.findGroupMemberForClient(environment.getGroupId(), environment.getClientId());
-        if (member != null && member.getState().equals(TalkGroupMember.STATE_JOINED)) {
+        TalkGroupPresence groupPresence = mDatabase.findGroupPresenceById(environment.getGroupId());
+        TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(environment.getGroupId(), environment.getClientId());
+        if (membership != null && membership.getState().equals(TalkGroupMembership.STATE_JOINED)) {
             Date now = new Date();
-            removeGroupMember(member, now);
-            String[] states = {TalkGroupMember.STATE_JOINED};
-            List<TalkGroupMember> membersLeft = mDatabase.findGroupMembersByIdWithStates(environment.getGroupId(), states);
-            logCall("destroyEnvironment: membersLeft: " + membersLeft.size());
+            removeGroupMembership(membership, now);
+            String[] states = {TalkGroupMembership.STATE_JOINED};
+            List<TalkGroupMembership> membershipsLeft = mDatabase.findGroupMembershipsByIdWithStates(environment.getGroupId(), states);
+            logCall("destroyEnvironment: membersLeft: " + membershipsLeft.size());
 
             // clean up other offline members that somehow might be stuck in the group
             // although this should never happen except on crash or server restart
@@ -2412,26 +2412,26 @@ public class TalkRpcHandler implements ITalkRpcServer {
             // we already have a list of all remaining members, so it will be faster
             // and should cause less trouble than doing it on joining
             int removedCount = 0;
-            for (int i = 0; i < membersLeft.size(); ++i) {
+            for (int i = 0; i < membershipsLeft.size(); ++i) {
                 // cleanup other offline members
-                TalkGroupMember otherMember = membersLeft.get(i);
-                boolean isConnected = mServer.isClientConnected(otherMember.getClientId());
+                TalkGroupMembership otherMembership = membershipsLeft.get(i);
+                boolean isConnected = mServer.isClientConnected(otherMembership.getClientId());
                 if (!isConnected) {
                     // remove offline member from group
-                    removeGroupMember(otherMember, now);
+                    removeGroupMembership(otherMembership, now);
                     ++removedCount;
                 }
             }
             logCall("destroyEnvironment: offline members removed: " + removedCount);
 
-            if (membersLeft.size() - removedCount <= 0) {
-                logCall("destroyEnvironment: last member left, removing group " + group.getGroupId());
+            if (membershipsLeft.size() - removedCount <= 0) {
+                logCall("destroyEnvironment: last member left, removing group " + groupPresence.getGroupId());
                 // last member removed, remove group
-                group.setState(TalkGroup.STATE_NONE);
-                changedGroup(group, now);
+                groupPresence.setState(TalkGroupPresence.STATE_NONE);
+                changedGroupPresence(groupPresence, now);
                 // explicitly request a group updated notification for the last removed client because
-                // calling changedGroup only will not send out "groupUpdated" notifications to members with state "none"
-                mServer.getUpdateAgent().requestGroupUpdate(group.getGroupId(), environment.getClientId());
+                // calling changedGroupPresence only will not send out "groupUpdated" notifications to members with state "none"
+                mServer.getUpdateAgent().requestGroupUpdate(groupPresence.getGroupId(), environment.getClientId());
             }
         }
         mDatabase.deleteEnvironment(environment);
@@ -2461,7 +2461,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         String clientId = mConnection.getClientId();
 
         for (String groupId : groupIds) {
-            TalkGroupMember membership = mDatabase.findGroupMemberForClient(groupId, clientId);
+            TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(groupId, clientId);
             if (membership != null && (membership.isInvited() || membership.isMember())) {
                 result.add(true);
             } else {
@@ -2479,13 +2479,13 @@ public class TalkRpcHandler implements ITalkRpcServer {
         logCall("areMembersOfGroup(groupId: '"+groupId+"clientIds '" + Arrays.toString(clientIds) + "'");
 
         String myClientId = mConnection.getClientId();
-        TalkGroupMember myMembership = mDatabase.findGroupMemberForClient(groupId, myClientId);
+        TalkGroupMembership myMembership = mDatabase.findGroupMembershipForClient(groupId, myClientId);
         if (!(myMembership != null && (myMembership.isInvited() || myMembership.isMember()))) {
             throw new RuntimeException("not allowed, you are not a member of this group");
         }
 
         for (String clientId : clientIds) {
-            TalkGroupMember membership = mDatabase.findGroupMemberForClient(groupId, clientId);
+            TalkGroupMembership membership = mDatabase.findGroupMembershipForClient(groupId, clientId);
             if (membership != null && (membership.isInvited() || membership.isMember())) {
                 result.add(true);
             } else {
@@ -2496,7 +2496,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         return result.toArray(new Boolean[result.size()]);
     }
 
-    // return true if for each client the caller is related to by a relationsShip or by an active group membership
+    // return true if for each client the caller is related to by a relationship or by an active group membership
     @Override
     public Boolean[] isContactOf(String[] clientIds) {
         requireIdentification(true);
@@ -2511,12 +2511,12 @@ public class TalkRpcHandler implements ITalkRpcServer {
             myContactIds.add(relationship.getOtherClientId());
         }
 
-        final List<TalkGroupMember> myMemberships = mDatabase.findGroupMembersForClientWithStates(clientId, TalkGroupMember.ACTIVE_STATES);
+        final List<TalkGroupMembership> clientMemberships = mDatabase.findGroupMembershipsForClientWithStates(clientId, TalkGroupMembership.ACTIVE_STATES);
 
-        for (TalkGroupMember groupMember : myMemberships) {
-            final List<TalkGroupMember> myGroupContacts = mDatabase.findGroupMembersByIdWithStates(groupMember.getGroupId(),TalkGroupMember.ACTIVE_STATES);
-            for (TalkGroupMember member : myGroupContacts) {
-                myContactIds.add(member.getClientId());
+        for (TalkGroupMembership clientMembership : clientMemberships) {
+            final List<TalkGroupMembership> myGroupContacts = mDatabase.findGroupMembershipsByIdWithStates(clientMembership.getGroupId(), TalkGroupMembership.ACTIVE_STATES);
+            for (TalkGroupMembership membership : myGroupContacts) {
+                myContactIds.add(membership.getClientId());
             }
         }
 

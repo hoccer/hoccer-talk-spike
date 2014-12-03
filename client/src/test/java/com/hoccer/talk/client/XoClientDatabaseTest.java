@@ -1,8 +1,8 @@
 package com.hoccer.talk.client;
 
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -58,13 +58,13 @@ public class XoClientDatabaseTest {
         // add invited clients
         for (int i = 0; i < INVITED_CONTACTS; i++) {
             TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
-            addClientContactToGroup(contact.getClientId(), mGroup.getGroupId(), TalkGroupMember.STATE_INVITED);
+            addClientContactToGroup(contact.getClientId(), mGroup.getGroupId(), TalkGroupMembership.STATE_INVITED);
         }
 
         // add joined clients
         for (int i = 0; i < JOINED_CONTACTS; i++) {
             TalkClientContact contact = createClientContact(String.valueOf(clientIdCounter++));
-            addClientContactToGroup(contact.getClientId(), mGroup.getGroupId(), TalkGroupMember.STATE_JOINED);
+            addClientContactToGroup(contact.getClientId(), mGroup.getGroupId(), TalkGroupMembership.STATE_JOINED);
         }
     }
 
@@ -78,39 +78,39 @@ public class XoClientDatabaseTest {
     ///////////////////////
 
     @Test
-    public void testFindMembersInGroup() throws SQLException {
-        int expectedMembersInGroup = INVITED_CONTACTS + JOINED_CONTACTS + 1;
-        List<TalkGroupMember> membersInGroup = mDatabase.findMembersInGroup(mGroup.getGroupId());
-        assertEquals(expectedMembersInGroup, membersInGroup.size());
+    public void testFindMembershipsInGroup() throws SQLException {
+        int expectedMembershipsInGroup = INVITED_CONTACTS + JOINED_CONTACTS + 1;
+        List<TalkGroupMembership> membershipsInGroup = mDatabase.findMembershipsInGroup(mGroup.getGroupId());
+        assertEquals(expectedMembershipsInGroup, membershipsInGroup.size());
     }
 
     @Test
-    public void testFindMembersInGroupByClientId() throws SQLException {
-        TalkGroupMember member = mDatabase.findMemberInGroupByClientId(mGroup.getGroupId(), mGroupAdmin.getClientId());
-        assertEquals(mGroupAdmin.getClientId(), member.getClientId());
+    public void testFindMembershipsInGroupByClientId() throws SQLException {
+        TalkGroupMembership membership = mDatabase.findMembershipInGroupByClientId(mGroup.getGroupId(), mGroupAdmin.getClientId());
+        assertEquals(mGroupAdmin.getClientId(), membership.getClientId());
     }
 
     @Test
-    public void testFindMembersInGroupByState() throws SQLException {
+    public void testFindMembershipsInGroupByState() throws SQLException {
         // check invited contacts count
-        List<TalkGroupMember> invitedMembersInGroup = mDatabase.findMembersInGroupByState(mGroup.getGroupId(), TalkGroupMember.STATE_INVITED);
-        assertEquals(INVITED_CONTACTS, invitedMembersInGroup.size());
+        List<TalkGroupMembership> invitedMembershipsInGroup = mDatabase.findMembershipsInGroupByState(mGroup.getGroupId(), TalkGroupMembership.STATE_INVITED);
+        assertEquals(INVITED_CONTACTS, invitedMembershipsInGroup.size());
 
         // check joined contacts count
         int expectedJoinedContactsCount = JOINED_CONTACTS + 1;
-        List<TalkGroupMember> joinedMembersInGroup = mDatabase.findMembersInGroupByState(mGroup.getGroupId(), TalkGroupMember.STATE_JOINED);
-        assertEquals(expectedJoinedContactsCount, joinedMembersInGroup.size());
+        List<TalkGroupMembership> joinedMembershipsInGroup = mDatabase.findMembershipsInGroupByState(mGroup.getGroupId(), TalkGroupMembership.STATE_JOINED);
+        assertEquals(expectedJoinedContactsCount, joinedMembershipsInGroup.size());
     }
 
     @Test
     public void testFindContactsInGroupByState() throws SQLException {
         // check invited contacts count
-        List<TalkClientContact> invitedContactsInGroup = mDatabase.findContactsInGroupByState(mGroup.getGroupId(), TalkGroupMember.STATE_INVITED);
+        List<TalkClientContact> invitedContactsInGroup = mDatabase.findContactsInGroupByState(mGroup.getGroupId(), TalkGroupMembership.STATE_INVITED);
         assertEquals(INVITED_CONTACTS, invitedContactsInGroup.size());
 
         // check joined contacts count
         int expectedJoinedContactsCount = JOINED_CONTACTS + 1;
-        List<TalkClientContact> joinedContactsInGroup = mDatabase.findContactsInGroupByState(mGroup.getGroupId(), TalkGroupMember.STATE_JOINED);
+        List<TalkClientContact> joinedContactsInGroup = mDatabase.findContactsInGroupByState(mGroup.getGroupId(), TalkGroupMembership.STATE_JOINED);
         assertEquals(expectedJoinedContactsCount, joinedContactsInGroup.size());
     }
 
@@ -125,12 +125,12 @@ public class XoClientDatabaseTest {
     @Test
     public void testFindContactsInGroupByRole() throws SQLException {
         // check admin contacts count
-        List<TalkClientContact> adminContacts = mDatabase.findContactsInGroupByRole(mGroup.getGroupId(), TalkGroupMember.ROLE_ADMIN);
+        List<TalkClientContact> adminContacts = mDatabase.findContactsInGroupByRole(mGroup.getGroupId(), TalkGroupMembership.ROLE_ADMIN);
         assertEquals(1, adminContacts.size());
         assertEquals(mGroupAdmin.getClientId(), adminContacts.get(0).getClientId());
 
         // check member contacts count
-        List<TalkClientContact> memberContacts = mDatabase.findContactsInGroupByRole(mGroup.getGroupId(), TalkGroupMember.ROLE_MEMBER);
+        List<TalkClientContact> memberContacts = mDatabase.findContactsInGroupByRole(mGroup.getGroupId(), TalkGroupMembership.ROLE_MEMBER);
         assertEquals(JOINED_CONTACTS + INVITED_CONTACTS, memberContacts.size());
     }
 
@@ -163,34 +163,34 @@ public class XoClientDatabaseTest {
         TalkClientContact group = TalkClientContact.createGroupContact();
         group.setCreatedTimeStamp(new Date());
 
-        TalkGroup groupPresence = new TalkGroup();
+        TalkGroupPresence groupPresence = new TalkGroupPresence();
         groupPresence.setGroupTag(group.getGroupTag());
         groupPresence.setGroupId(groupId);
         groupPresence.setGroupName("TestGroup");
-        groupPresence.setState(TalkGroup.STATE_EXISTS);
+        groupPresence.setState(TalkGroupPresence.STATE_EXISTS);
         group.updateGroupPresence(groupPresence);
 
-        TalkGroupMember member = new TalkGroupMember();
-        member.setClientId(admin.getClientId());
-        member.setRole(TalkGroupMember.ROLE_ADMIN);
-        member.setState(TalkGroupMember.STATE_JOINED);
-        member.setMemberKeyId("TestKey");
-        member.setGroupId(groupId);
-        group.updateGroupMember(member);
+        TalkGroupMembership membership = new TalkGroupMembership();
+        membership.setClientId(admin.getClientId());
+        membership.setRole(TalkGroupMembership.ROLE_ADMIN);
+        membership.setState(TalkGroupMembership.STATE_JOINED);
+        membership.setMemberKeyId("TestKey");
+        membership.setGroupId(groupId);
+        group.updateGroupMembership(membership);
 
-        mDatabase.saveGroupMember(member);
-        mDatabase.saveGroup(groupPresence);
+        mDatabase.saveGroupMembership(membership);
+        mDatabase.saveGroupPresence(groupPresence);
         mDatabase.saveContact(group);
 
         return group;
     }
 
     private void addClientContactToGroup(String clientId, String groupId, String state) throws SQLException {
-        TalkGroupMember member = new TalkGroupMember();
-        member.setClientId(clientId);
-        member.setRole(TalkGroupMember.ROLE_MEMBER);
-        member.setState(state);
-        member.setGroupId(groupId);
-        mDatabase.saveGroupMember(member);
+        TalkGroupMembership membership = new TalkGroupMembership();
+        membership.setClientId(clientId);
+        membership.setRole(TalkGroupMembership.ROLE_MEMBER);
+        membership.setState(state);
+        membership.setGroupId(groupId);
+        mDatabase.saveGroupMembership(membership);
     }
 }

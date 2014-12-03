@@ -6,12 +6,12 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
 
-@DatabaseTable(tableName = "groupMember")
-public class TalkGroupMember {
+@DatabaseTable(tableName = "groupMembership")
+public class TalkGroupMembership {
 
-    public static final String STATE_NONE          = "none";
-    public static final String STATE_INVITED       = "invited";
-    public static final String STATE_JOINED        = "joined";
+    public static final String STATE_NONE = "none";
+    public static final String STATE_INVITED = "invited";
+    public static final String STATE_JOINED = "joined";
     public static final String STATE_GROUP_REMOVED = "groupRemoved";
 
     public static final String ROLE_ADMIN = "admin";
@@ -23,8 +23,8 @@ public class TalkGroupMember {
     }
 
     public static final String[] ACTIVE_STATES = {
-            TalkGroupMember.STATE_INVITED,
-            TalkGroupMember.STATE_JOINED
+            TalkGroupMembership.STATE_INVITED,
+            TalkGroupMembership.STATE_JOINED
     };
 
     // needed for ormlight database
@@ -66,7 +66,7 @@ public class TalkGroupMember {
     @DatabaseField
     Date lastChanged;
 
-    public TalkGroupMember() {
+    public TalkGroupMembership() {
         this.role = ROLE_MEMBER;
         this.state = STATE_NONE;
     }
@@ -196,34 +196,28 @@ public class TalkGroupMember {
     }
 
     @JsonIgnore
-    public void updateWith(TalkGroupMember m) {
-        this.setClientId(m.getClientId());
-        this.setGroupId(m.getGroupId());
-        this.setRole(m.getRole());
-        this.setState(m.getState());
-        this.setMemberKeyId(m.getMemberKeyId());
-        this.setEncryptedGroupKey(m.getEncryptedGroupKey());
-        this.setLastChanged(m.getLastChanged());
-        this.setSharedKeyId(m.getSharedKeyId());
-        this.setSharedKeyIdSalt(m.getSharedKeyIdSalt());
-        this.setKeySupplier(m.getKeySupplier());
-        this.setSharedKeyDate(m.getSharedKeyDate());
+    public void updateWith(TalkGroupMembership membership) {
+        this.setClientId(membership.getClientId());
+        this.setGroupId(membership.getGroupId());
+        this.setRole(membership.getRole());
+        this.setState(membership.getState());
+        this.setMemberKeyId(membership.getMemberKeyId());
+        this.setEncryptedGroupKey(membership.getEncryptedGroupKey());
+        this.setLastChanged(membership.getLastChanged());
+        this.setSharedKeyId(membership.getSharedKeyId());
+        this.setSharedKeyIdSalt(membership.getSharedKeyIdSalt());
+        this.setKeySupplier(membership.getKeySupplier());
+        this.setSharedKeyDate(membership.getSharedKeyDate());
     }
 
     // only copies the field where a foreign member is interested in
     @JsonIgnore
-    public void foreignUpdateWith(TalkGroupMember m) {
-        this.setClientId(m.getClientId());
-        this.setGroupId(m.getGroupId());
-        this.setRole(m.getRole());
-        this.setState(m.getState());
-        //this.setMemberKeyId(m.getMemberKeyId());
-        //this.setEncryptedGroupKey(m.getEncryptedGroupKey());
-        this.setLastChanged(m.getLastChanged());
-        //this.setSharedKeyId(m.getSharedKeyId());
-        //this.setSharedKeyIdSalt(m.getSharedKeyIdSalt());
-        //this.setKeySupplier(m.getKeySupplier());
-        //this.setSharedKeyDate(m.getSharedKeyDate());
+    public void foreignUpdateWith(TalkGroupMembership membership) {
+        this.setClientId(membership.getClientId());
+        this.setGroupId(membership.getGroupId());
+        this.setRole(membership.getRole());
+        this.setState(membership.getState());
+        this.setLastChanged(membership.getLastChanged());
     }
 
     @JsonIgnore
@@ -235,5 +229,4 @@ public class TalkGroupMember {
         this.setEncryptedGroupKey(null);
         this.setKeySupplier(null);
     }
-
-    }
+}
