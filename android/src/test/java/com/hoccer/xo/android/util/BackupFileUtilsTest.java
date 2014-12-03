@@ -9,9 +9,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
 
 
@@ -102,5 +104,12 @@ public class BackupFileUtilsTest {
         assertTrue(DB_TARGET_FILE.length() > 0);
 
         FileUtils.deleteDirectory(DB_TARGET_FILE.getParentFile());
+    }
+
+    @Test
+    public void testGetUncompressedSizeOfZipFile() throws IOException {
+
+        long uncompressedSize = BackupFileUtils.getUncompressedSize(BACKUP_DB_FILE);
+        assertTrue(uncompressedSize > 0);
     }
 }

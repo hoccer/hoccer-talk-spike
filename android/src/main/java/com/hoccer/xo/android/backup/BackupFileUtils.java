@@ -7,11 +7,9 @@ import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -244,6 +242,22 @@ public class BackupFileUtils {
         } finally {
             zis.close();
         }
+    }
+
+    public static long getUncompressedSize(File zipFile) throws IOException {
+
+        long uncompressedSize = 0;
+        try {
+            ZipFile zf = new ZipFile(zipFile);
+            Enumeration e = zf.entries();
+            while (e.hasMoreElements()) {
+                ZipEntry ze = (ZipEntry) e.nextElement();
+                uncompressedSize = uncompressedSize + ze.getSize();
+            }
+        } catch (IOException ex) {
+            System.err.println(ex);
+        }
+        return uncompressedSize;
     }
 
     public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException {
