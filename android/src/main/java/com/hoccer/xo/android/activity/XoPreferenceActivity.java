@@ -19,6 +19,7 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.Backup;
 import com.hoccer.xo.android.backup.BackupFactory;
 import com.hoccer.xo.android.backup.BackupFileUtils;
+import com.hoccer.xo.android.backup.CompleteBackup;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
 import org.apache.commons.io.FileUtils;
@@ -82,28 +83,26 @@ public class XoPreferenceActivity extends PreferenceActivity
         final ListPreference listPreference = (ListPreference) findPreference("preference_import_backup");
         if (listPreference != null) {
             List<File> backups = BackupFileUtils.getBackupFiles(XoApplication.getBackupDirectory());
-            if (!backups.isEmpty()) {
 
-                final String[] entries = new String[backups.size()];
-                final String[] entryValues = new String[backups.size()];
+            final String[] entries = new String[backups.size()];
+            final String[] entryValues = new String[backups.size()];
 
-                for (int index = 0; index < backups.size(); index++) {
-                    entries[index] = backups.get(index).getName();
-                    entryValues[index] = Integer.toString(index);
-                }
-
-                listPreference.setEntries(entries);
-                listPreference.setEntryValues(entryValues);
-
-                listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                    @Override
-                    public boolean onPreferenceChange(Preference preference, Object newValue) {
-                        listPreference.setEnabled(false);
-                        importBackup(entries[Integer.parseInt((String) newValue)]);
-                        return true;
-                    }
-                });
+            for (int index = 0; index < backups.size(); index++) {
+                entries[index] = backups.get(index).getName();
+                entryValues[index] = Integer.toString(index);
             }
+
+            listPreference.setEntries(entries);
+            listPreference.setEntryValues(entryValues);
+
+            listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    listPreference.setEnabled(false);
+                    importBackup(entries[Integer.parseInt((String) newValue)]);
+                    return true;
+                }
+            });
         }
     }
 
@@ -241,6 +240,8 @@ public class XoPreferenceActivity extends PreferenceActivity
                 } catch (SQLException e) {
                     e.printStackTrace();
                 } catch (NoClientIdInPresenceException e) {
+                    e.printStackTrace();
+                } catch (CompleteBackup.NotEnoughDiskSpaceAvailable e) {
                     e.printStackTrace();
                 } catch (Exception e) {
                     e.printStackTrace();
