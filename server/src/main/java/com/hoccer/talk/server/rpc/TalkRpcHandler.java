@@ -550,9 +550,9 @@ public class TalkRpcHandler implements ITalkRpcServer {
         // update connection status and convert results to array
         TalkPresence[] result = new TalkPresence[presences.size()];
         for (int i = 0; i < result.length; i++) {
-            TalkPresence p = presences.get(i);
-            if (p.getConnectionStatus() == null) {
-                p.setConnectionStatus(mServer.isClientConnected(p.getClientId())
+            TalkPresence presence = presences.get(i);
+            if (presence.getConnectionStatus() == null) {
+                presence.setConnectionStatus(mServer.isClientConnected(presence.getClientId())
                         ? TalkPresence.CONN_STATUS_ONLINE : TalkPresence.CONN_STATUS_OFFLINE);
             }
             result[i] = presences.get(i);

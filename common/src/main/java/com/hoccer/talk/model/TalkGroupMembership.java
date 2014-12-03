@@ -9,9 +9,9 @@ import java.util.Date;
 @DatabaseTable(tableName = "groupMembership")
 public class TalkGroupMembership {
 
-    public static final String STATE_NONE          = "none";
-    public static final String STATE_INVITED       = "invited";
-    public static final String STATE_JOINED        = "joined";
+    public static final String STATE_NONE = "none";
+    public static final String STATE_INVITED = "invited";
+    public static final String STATE_JOINED = "joined";
     public static final String STATE_GROUP_REMOVED = "groupRemoved";
 
     public static final String ROLE_ADMIN = "admin";
@@ -217,13 +217,7 @@ public class TalkGroupMembership {
         this.setGroupId(membership.getGroupId());
         this.setRole(membership.getRole());
         this.setState(membership.getState());
-        //this.setMemberKeyId(m.getMemberKeyId());
-        //this.setEncryptedGroupKey(m.getEncryptedGroupKey());
         this.setLastChanged(membership.getLastChanged());
-        //this.setSharedKeyId(m.getSharedKeyId());
-        //this.setSharedKeyIdSalt(m.getSharedKeyIdSalt());
-        //this.setKeySupplier(m.getKeySupplier());
-        //this.setSharedKeyDate(m.getSharedKeyDate());
     }
 
     @JsonIgnore
@@ -235,5 +229,4 @@ public class TalkGroupMembership {
         this.setEncryptedGroupKey(null);
         this.setKeySupplier(null);
     }
-
-    }
+}
