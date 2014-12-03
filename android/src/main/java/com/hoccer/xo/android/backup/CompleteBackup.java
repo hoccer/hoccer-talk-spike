@@ -43,10 +43,30 @@ public class CompleteBackup extends DatabaseBackup {
     }
 
     @Override
-    public void restore(String password) throws Exception {
+    public void restore(String password) throws IOException, NotEnoughDiskSpaceAvailable {
+        ensureEnoughDiskSpaceAvailable();
+
         File databaseTarget = new File(DB_PATH_NAME);
         File attachmentsTargetDir = XoApplication.getAttachmentDirectory();
-
         new CompleteBackupRestoreOperation(mBackupFile, databaseTarget, attachmentsTargetDir, password).invoke();
+    }
+
+    private void ensureEnoughDiskSpaceAvailable() throws IOException, NotEnoughDiskSpaceAvailable {
+        long requiredDiskSpace = BackupFileUtils.getUncompressedSize(mBackupFile);
+        long availableDiskSpace = getAvailableDiskStorage();
+        if (requiredDiskSpace < availableDiskSpace) {
+            throw new NotEnoughDiskSpaceAvailable(requiredDiskSpace, availableDiskSpace);
+        }
+    }
+
+    private long getAvailableDiskStorage() {
+        StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+        return (long)stat.getAvailableBlocks() * (long)stat.getBlockSize();
+    }
+
+    public class NotEnoughDiskSpaceAvailable extends Exception {
+        private NotEnoughDiskSpaceAvailable(long requiredDiskSpace, long availableDiskStorage) {
+            super("Not enough free disk space available. Required: " + requiredDiskSpace + "Available: " + availableDiskStorage);
+        }
     }
 }
