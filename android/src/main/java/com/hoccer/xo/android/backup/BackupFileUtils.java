@@ -131,31 +131,19 @@ public class BackupFileUtils {
             ZipEntry entry = entries.nextElement();
             if (entry.getName().equals(METADATA_FILENAME)) {
                 InputStream is = zipFile.getInputStream(entry);
-                byte[] bytes = readInputStream(is);
+                byte[] bytes = IOUtils.toByteArray(is);
                 is.close();
                 result = new String(bytes, "UTF-8");
                 break;
             }
         }
 
-        if(result == null) {
+        if (result == null) {
             throw new FileNotFoundException(BackupFileUtils.METADATA_FILENAME + " not found in " + backupFile.getName());
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(result, BackupMetadata.class);
-    }
-
-    public static byte[] readInputStream(InputStream is) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length = is.read(buffer);
-        while (length != -1) {
-            out.write(buffer, 0, length);
-            length = is.read(buffer);
-        }
-
-        return out.toByteArray();
     }
 
     public static Map<File, BackupMetadata> getBackupFiles(File dir) {
@@ -209,7 +197,7 @@ public class BackupFileUtils {
             if (entry.getName().equals(DB_FILENAME_ENCRYPTED)) {
 
                 InputStream is = zipFile.getInputStream(entry);
-                byte[] encrypted = readInputStream(is);
+                byte[] encrypted = IOUtils.toByteArray(is);
                 is.close();
 
                 byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
