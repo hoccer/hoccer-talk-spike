@@ -25,7 +25,7 @@ public class DatabaseBackup extends Backup {
         String clientName = XoApplication.getXoClient().getSelfContact().getName();
 
         BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());
-        BackupFileUtils.createBackupFile(backupFile, database, metadata, password);
+        BackupFileUtils.createBackupFile(backupFile, metadata, database, password);
 
         return new DatabaseBackup(backupFile, metadata);
     }

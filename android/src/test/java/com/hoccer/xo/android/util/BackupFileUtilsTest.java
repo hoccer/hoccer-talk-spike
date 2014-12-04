@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.util;
 
 import com.hoccer.xo.android.backup.BackupFileUtils;
-import junit.framework.Assert;
 import org.apache.commons.io.FileUtils;
 
 import com.hoccer.xo.android.backup.BackupMetadata;
@@ -58,7 +57,7 @@ public class BackupFileUtilsTest {
 
         BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, CLIENT_NAME, new Date());
 
-        BackupFileUtils.createBackupFile(backupFile, DATABASE_FILE, metadata, PASSWORD);
+        BackupFileUtils.createBackupFile(backupFile, metadata, DATABASE_FILE, PASSWORD);
         assertTrue("Creating backup failed", backupFile.exists());
         assertTrue("Creating backup failed", backupFile.length() > 0);
 
@@ -73,7 +72,7 @@ public class BackupFileUtilsTest {
 
         BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, CLIENT_NAME, new Date());
 
-        BackupFileUtils.createBackupFile(backupFile, DATABASE_FILE, ATTACHMENT_FILES, metadata, PASSWORD);
+        BackupFileUtils.createBackupFile(backupFile, metadata, DATABASE_FILE, PASSWORD, ATTACHMENT_FILES);
         assertTrue("Creating backup failed", backupFile.exists());
         assertTrue("Creating backup failed", backupFile.length() > 0);
 

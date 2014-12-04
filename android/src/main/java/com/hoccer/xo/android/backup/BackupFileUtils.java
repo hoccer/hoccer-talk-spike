@@ -28,22 +28,17 @@ public class BackupFileUtils {
     public static final String TEMP_ATTACHMENTS_DIR_NAME = "tmp_attachments";
     public static final String TEMP_DB_DIR_NAME = "tmp_db";
 
-    public static void createBackupFile(File out, File database, List<File> attachments, BackupMetadata metadata, String password) throws Exception {
-        byte[] encryptedDatabase = encryptFile(database, password);
-
-        ObjectMapper mapper = new ObjectMapper();
-        String metadataJson = mapper.writeValueAsString(metadata);
-
-        createZip(out, encryptedDatabase, metadataJson, attachments);
+    public static void createBackupFile(File out, BackupMetadata metadata, File database, String password) throws Exception {
+        createBackupFile(out, metadata, database, password, Collections.<File>emptyList());
     }
 
-    public static void createBackupFile(File out, File database, BackupMetadata metadata, String password) throws Exception {
+    public static void createBackupFile(File out, BackupMetadata metadata, File database, String password, List<File> attachments) throws Exception {
         byte[] encryptedDatabase = encryptFile(database, password);
 
         ObjectMapper mapper = new ObjectMapper();
         String metadataJson = mapper.writeValueAsString(metadata);
 
-        createZip(out, encryptedDatabase, metadataJson);
+        createZip(out, metadataJson, encryptedDatabase, attachments);
     }
 
     private static byte[] encryptFile(File input, String password) throws Exception {
@@ -53,43 +48,39 @@ public class BackupFileUtils {
         return CryptoJSON.encrypt(bytes, password, DB_CONTENT_TYPE);
     }
 
-    private static void createZip(File backup, byte[] encryptedDatabase, String metadata) throws IOException {
-        createZip(backup, encryptedDatabase, metadata, Collections.<File>emptyList());
-    }
-
-    private static void createZip(File backup, byte[] encryptedDatabase, String metadata, List<File> attachments) throws IOException {
-        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
+    private static void createZip(File zipFile, String metadata, byte[] encryptedDatabase, List<File> attachments) throws IOException {
+        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile));
         zos.setLevel(ZipOutputStream.DEFLATED);
         try {
             for (File attachment : attachments) {
-                addZipEntry(attachment, zos);
+                addZipEntry(zos, attachment);
             }
-            addZipEntry(DB_FILENAME_ENCRYPTED, encryptedDatabase, zos);
-            addZipEntry(METADATA_FILENAME, metadata, zos);
+            addZipEntry(zos, DB_FILENAME_ENCRYPTED, encryptedDatabase);
+            addZipEntry(zos, METADATA_FILENAME, metadata);
         } finally {
             zos.close();
         }
     }
 
-    private static void addZipEntry(String filename, String data, ZipOutputStream zos) throws IOException {
+    private static void addZipEntry(ZipOutputStream zos, String filename, String data) throws IOException {
         InputStream in = new ByteArrayInputStream(data.getBytes("UTF-8"));
-        addZipEntry(filename, in, zos);
+        addZipEntry(zos, filename, in);
         in.close();
     }
 
-    private static void addZipEntry(File file, ZipOutputStream zos) throws IOException {
+    private static void addZipEntry(ZipOutputStream zos, File file) throws IOException {
         InputStream in = new FileInputStream(file);
-        addZipEntry(file.getName(), in, zos);
+        addZipEntry(zos, file.getName(), in);
         in.close();
     }
 
-    private static void addZipEntry(String filename, byte[] data, ZipOutputStream zos) throws IOException {
+    private static void addZipEntry(ZipOutputStream zos, String filename, byte[] data) throws IOException {
         InputStream in = new ByteArrayInputStream(data);
-        addZipEntry(filename, in, zos);
+        addZipEntry(zos, filename, in);
         in.close();
     }
 
-    private static void addZipEntry(String filename, InputStream data, ZipOutputStream zos) throws IOException {
+    private static void addZipEntry(ZipOutputStream zos, String filename, InputStream data) throws IOException {
         ZipEntry entry = new ZipEntry(filename);
         zos.putNextEntry(entry);
         IOUtils.copy(data, zos);

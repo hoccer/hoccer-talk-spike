@@ -41,7 +41,7 @@ public class CompleteBackup extends DatabaseBackup {
             attachments = Arrays.asList(files);
         }
 
-        BackupFileUtils.createBackupFile(backupFile, database, attachments, metadata, password);
+        BackupFileUtils.createBackupFile(backupFile, metadata, database, password, attachments);
 
         return new CompleteBackup(backupFile, metadata);
     }
