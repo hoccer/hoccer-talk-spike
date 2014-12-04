@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.crypto.CryptoJSON;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -28,23 +27,6 @@ public class BackupFileUtils {
     private static final Logger LOG = Logger.getLogger(BackupFileUtils.class.getName());
     public static final String TEMP_ATTACHMENTS_DIR_NAME = "tmp_attachments";
     public static final String TEMP_DB_DIR_NAME = "tmp_db";
-
-    private static FileFilter mBackupFileFilter = new FileFilter() {
-        @Override
-        public boolean accept(File file) {
-            if (FileFilterUtils.suffixFileFilter(FILE_EXTENSION_ZIP).accept(file)) {
-                try {
-                    BackupMetadata metadata = readMetadata(file);
-                    if (metadata != null) {
-                        return true;
-                    }
-                } catch (IOException e) {
-                    LOG.error("Reading metadata file of " + file + " failed");
-                }
-            }
-            return false;
-        }
-    };
 
     public static void createBackupFile(File out, File database, List<File> attachments, BackupMetadata metadata, String password) throws Exception {
         byte[] encryptedDatabase = encryptFile(database, password);
