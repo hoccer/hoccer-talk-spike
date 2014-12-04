@@ -18,11 +18,10 @@ public class DatabaseBackup extends Backup {
     }
 
     static Backup create(String password) throws Exception {
-
         File database = new File(DB_PATH_NAME);
 
         String filename = BackupFileUtils.createUniqueBackupFilename();
-        File backupFile = new File(XoApplication.getBackupDirectory(), filename + "_db.zip");
+        File backupFile = new File(XoApplication.getBackupDirectory(), filename + "." + BackupFileUtils.FILE_EXTENSION_ZIP);
         String clientName = XoApplication.getXoClient().getSelfContact().getName();
 
         BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, clientName, new Date());

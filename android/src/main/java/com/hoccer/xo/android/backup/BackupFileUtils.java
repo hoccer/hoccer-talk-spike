@@ -34,7 +34,7 @@ public class BackupFileUtils {
 //            if (file.getName().equals(CredentialsBackup.BACKUP_FILENAME)) {
 //                return true;
 //            }
-            if (FileFilterUtils.suffixFileFilter("zip").accept(file)) {
+            if (FileFilterUtils.suffixFileFilter(FILE_EXTENSION_ZIP).accept(file)) {
                 try {
                     BackupMetadata metadata = readMetadata(file);
                     if (metadata != null) {
