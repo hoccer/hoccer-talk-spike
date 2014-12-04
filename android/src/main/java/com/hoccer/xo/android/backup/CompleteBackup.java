@@ -58,7 +58,7 @@ public class CompleteBackup extends DatabaseBackup {
     private void ensureEnoughDiskSpaceAvailable() throws IOException, NotEnoughDiskSpaceAvailable {
         long requiredDiskSpace = BackupFileUtils.getUncompressedSize(mBackupFile);
         long availableDiskSpace = getAvailableDiskStorage();
-        if (requiredDiskSpace < availableDiskSpace) {
+        if (requiredDiskSpace > availableDiskSpace) {
             throw new NotEnoughDiskSpaceAvailable(requiredDiskSpace, availableDiskSpace);
         }
     }
