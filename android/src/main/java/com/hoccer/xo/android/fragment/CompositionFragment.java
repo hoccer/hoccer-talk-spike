@@ -54,15 +54,15 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private static final int STRESS_TEST_MESSAGE_COUNT = 15;
 
     private enum AttachmentSelectionType {
-        None,
-        Image,
-        Video,
-        Audio,
-        Contact,
-        Location,
-        Data,
-        Multiple,
-        Error
+        NONE,
+        IMAGE,
+        VIDEO,
+        AUDIO,
+        CONTACT,
+        LOCATION,
+        DATA,
+        MULTIPLE,
+        ERROR
     }
 
     private TextView mAttachmentButtonText;
@@ -144,15 +144,15 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private void initializeAttachmentTypeViews(View view) {
         mAttachmentTypeViews = new EnumMap<AttachmentSelectionType, View>(AttachmentSelectionType.class);
-        mAttachmentTypeViews.put(AttachmentSelectionType.None, view.findViewById(R.id.iv_attachment_none));
-        mAttachmentTypeViews.put(AttachmentSelectionType.Image, view.findViewById(R.id.iv_attachment_image));
-        mAttachmentTypeViews.put(AttachmentSelectionType.Video, view.findViewById(R.id.iv_attachment_video));
-        mAttachmentTypeViews.put(AttachmentSelectionType.Audio, view.findViewById(R.id.iv_attachment_audio));
-        mAttachmentTypeViews.put(AttachmentSelectionType.Contact, view.findViewById(R.id.iv_attachment_contact));
-        mAttachmentTypeViews.put(AttachmentSelectionType.Location, view.findViewById(R.id.iv_attachment_location));
-        mAttachmentTypeViews.put(AttachmentSelectionType.Data, view.findViewById(R.id.iv_attachment_data));
-        mAttachmentTypeViews.put(AttachmentSelectionType.Multiple, view.findViewById(R.id.iv_attachment_multiple));
-        mAttachmentTypeViews.put(AttachmentSelectionType.Error, view.findViewById(R.id.iv_attachment_error));
+        mAttachmentTypeViews.put(AttachmentSelectionType.NONE, view.findViewById(R.id.iv_attachment_none));
+        mAttachmentTypeViews.put(AttachmentSelectionType.IMAGE, view.findViewById(R.id.iv_attachment_image));
+        mAttachmentTypeViews.put(AttachmentSelectionType.VIDEO, view.findViewById(R.id.iv_attachment_video));
+        mAttachmentTypeViews.put(AttachmentSelectionType.AUDIO, view.findViewById(R.id.iv_attachment_audio));
+        mAttachmentTypeViews.put(AttachmentSelectionType.CONTACT, view.findViewById(R.id.iv_attachment_contact));
+        mAttachmentTypeViews.put(AttachmentSelectionType.LOCATION, view.findViewById(R.id.iv_attachment_location));
+        mAttachmentTypeViews.put(AttachmentSelectionType.DATA, view.findViewById(R.id.iv_attachment_data));
+        mAttachmentTypeViews.put(AttachmentSelectionType.MULTIPLE, view.findViewById(R.id.iv_attachment_multiple));
+        mAttachmentTypeViews.put(AttachmentSelectionType.ERROR, view.findViewById(R.id.iv_attachment_error));
     }
 
     @Override
@@ -243,26 +243,26 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private void updateAttachmentButton() {
         if (mAttachments.isEmpty()) {
-            updateAttachmentButtonImage(AttachmentSelectionType.None);
+            updateAttachmentButtonImage(AttachmentSelectionType.NONE);
         } else if (mAttachments.size() > 1) {
-            updateAttachmentButtonImage(AttachmentSelectionType.Multiple);
+            updateAttachmentButtonImage(AttachmentSelectionType.MULTIPLE);
         } else {
             String contentType = mAttachments.get(0).getContentMediaType();
 
             if (ContentMediaType.IMAGE.equals(contentType)) {
-                updateAttachmentButtonImage(AttachmentSelectionType.Image);
+                updateAttachmentButtonImage(AttachmentSelectionType.IMAGE);
             } else if (ContentMediaType.VIDEO.equals(contentType)) {
-                updateAttachmentButtonImage(AttachmentSelectionType.Video);
+                updateAttachmentButtonImage(AttachmentSelectionType.VIDEO);
             } else if (ContentMediaType.VCARD.equals(contentType)) {
-                updateAttachmentButtonImage(AttachmentSelectionType.Contact);
+                updateAttachmentButtonImage(AttachmentSelectionType.CONTACT);
             } else if (ContentMediaType.LOCATION.equals(contentType)) {
-                updateAttachmentButtonImage(AttachmentSelectionType.Location);
+                updateAttachmentButtonImage(AttachmentSelectionType.LOCATION);
             } else if (ContentMediaType.DATA.equals(contentType)) {
-                updateAttachmentButtonImage(AttachmentSelectionType.Data);
+                updateAttachmentButtonImage(AttachmentSelectionType.DATA);
             } else if (ContentMediaType.AUDIO.equals(contentType)) {
-                updateAttachmentButtonImage(AttachmentSelectionType.Audio);
+                updateAttachmentButtonImage(AttachmentSelectionType.AUDIO);
             } else {
-                updateAttachmentButtonImage(AttachmentSelectionType.Error);
+                updateAttachmentButtonImage(AttachmentSelectionType.ERROR);
             }
         }
     }
@@ -275,7 +275,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
         mAttachmentTypeViews.get(type).setVisibility(View.VISIBLE);
 
-        if (type == AttachmentSelectionType.Multiple) {
+        if (type == AttachmentSelectionType.MULTIPLE) {
             mAttachmentButtonText.setText(String.valueOf(mAttachments.size()));
         } else {
             mAttachmentButtonText.setText("");
