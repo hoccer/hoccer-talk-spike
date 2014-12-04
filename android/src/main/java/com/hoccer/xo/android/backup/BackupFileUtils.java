@@ -179,16 +179,23 @@ public class BackupFileUtils {
         return out.toByteArray();
     }
 
-    public static List<File> getBackupFiles(File dir) {
-        List<File> results = new ArrayList<File>();
+    public static Map<File, BackupMetadata> getBackupFiles(File dir) {
+        Map<File, BackupMetadata> backupfiles = new HashMap<File, BackupMetadata>();
 
-        if (dir != null && dir.isDirectory()) {
-            File[] files = dir.listFiles(mBackupFileFilter);
-            if (files != null) {
-                Collections.addAll(results, files);
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                try {
+                    BackupMetadata metadata = readMetadata(file);
+                    if (metadata != null) {
+                        backupfiles.put(file, metadata);
+                    }
+                } catch (IOException e) {
+                    LOG.info("Ignoring non backup file: " + file.getAbsolutePath());
+                }
             }
         }
-        return results;
+        return backupfiles;
     }
 
     public static void writeBytesToFile(File targetFile, byte[] bytes) throws IOException {

@@ -16,10 +16,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.backup.Backup;
-import com.hoccer.xo.android.backup.BackupFactory;
-import com.hoccer.xo.android.backup.BackupFileUtils;
-import com.hoccer.xo.android.backup.CompleteBackup;
+import com.hoccer.xo.android.backup.*;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
 import org.apache.commons.io.FileUtils;
@@ -29,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public class XoPreferenceActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -82,14 +80,16 @@ public class XoPreferenceActivity extends PreferenceActivity
     private void initDataImportPreferences() {
         final ListPreference listPreference = (ListPreference) findPreference("preference_import_backup");
         if (listPreference != null) {
-            List<File> backups = BackupFileUtils.getBackupFiles(XoApplication.getBackupDirectory());
+            Map<File, BackupMetadata> backups = BackupFileUtils.getBackupFiles(XoApplication.getBackupDirectory());
 
             final String[] entries = new String[backups.size()];
             final String[] entryValues = new String[backups.size()];
 
-            for (int index = 0; index < backups.size(); index++) {
-                entries[index] = backups.get(index).getName();
+            int index = 0;
+            for (File file : backups.keySet()) {
+                entries[index] = file.getName();
                 entryValues[index] = Integer.toString(index);
+                index++;
             }
 
             listPreference.setEntries(entries);

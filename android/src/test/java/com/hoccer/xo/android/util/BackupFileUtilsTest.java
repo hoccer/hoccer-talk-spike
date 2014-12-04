@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.util;
 
 import com.hoccer.xo.android.backup.BackupFileUtils;
+import junit.framework.Assert;
 import org.apache.commons.io.FileUtils;
 
 import com.hoccer.xo.android.backup.BackupMetadata;
@@ -12,9 +13,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertEquals;
 
 
 public class BackupFileUtilsTest {
@@ -88,12 +91,11 @@ public class BackupFileUtilsTest {
     }
 
     @Test
-    public void testGetBackupFiles() {
-        List<File> backupFiles = BackupFileUtils.getBackupFiles(BACKUP_COMPLETE_FILE.getParentFile());
-        assertEquals(3, backupFiles.size());
-        assertTrue(backupFiles.contains(BACKUP_CREDENTIALS_FILE));
-        assertTrue(backupFiles.contains(BACKUP_DB_FILE));
-        assertTrue(backupFiles.contains(BACKUP_COMPLETE_FILE));
+    public void testGetBackupFilesMetadata() {
+        Map<File, BackupMetadata> backupFiles = BackupFileUtils.getBackupFiles(BackupTestResources.getResourceDir());
+        assertEquals(2, backupFiles.size());
+        assertEquals(BackupType.DATABASE, backupFiles.get(BACKUP_DB_FILE).getBackupType());
+        assertEquals(BackupType.COMPLETE, backupFiles.get(BACKUP_COMPLETE_FILE).getBackupType());
     }
 
     @Test

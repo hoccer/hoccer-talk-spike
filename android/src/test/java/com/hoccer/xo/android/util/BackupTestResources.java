@@ -25,6 +25,13 @@ public class BackupTestResources {
         return new File(url.getFile());
     }
 
+    public static File getResourceDir() {
+        URL url = BackupFileUtilsTest.class.getResource(RESOURCE_BACKUP_COMPLETE_PATH);
+        assertNotNull(url);
+
+        return new File(url.getFile()).getParentFile();
+    }
+
     public static List<File> getAttachmentFiles() {
         URL attachmentFileUrl = BackupFileUtilsTest.class.getResource(BackupTestResources.RESOURCE_ATTACHMENT_FILE_01);
         assertNotNull(attachmentFileUrl);
@@ -41,5 +48,4 @@ public class BackupTestResources {
     public static File createDatabaseTargetFile() {
         return new File(BackupFileUtilsTest.class.getResource("").getFile(), DB_TARGET_FILE_PATH);
     }
-
 }
