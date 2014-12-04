@@ -11,7 +11,7 @@ public class BackupTestResources {
 
     public static final String RESOURCE_BACKUP_CREDENTIALS_PATH = "/credentials.json";
     public static final String RESOURCE_BACKUP_COMPLETE_PATH = "/hoccer_backup_20141204_114641_with_attachments.zip";
-    public static final String RESOURCE_BACKUP_DB_PATH = "/hoccer_backup_20141204_114424_db.zip";
+    public static final String RESOURCE_BACKUP_DB_PATH = "/hoccer_backup_20141204_125159_db.zip";
     public static final String RESOURCE_DB_FILE = "/database.db";
     public static final String RESOURCE_ATTACHMENT_FILE_01 = "/IMG_20141120_130456_432.jpg";
 
