@@ -65,6 +65,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         ERROR
     }
 
+    private TextFieldWatcher mTextFieldWatcher;
     private TextView mAttachmentButtonText;
     private EditText mTextField;
     private ImageButton mSendButton;
@@ -122,6 +123,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                 return false;
             }
         });
+
+        mTextFieldWatcher = new TextFieldWatcher();
     }
 
     private void initializeSendButton(View view) {
@@ -176,7 +179,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         if (requestCode == REQUEST_SELECT_ATTACHMENT) {
             mAttachments.clear();
 
-            if(resultCode == Activity.RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK) {
                 if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
                     MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
                     mAttachments = selector.createObjectsFromSelectionResult(getActivity(), intent);
@@ -208,19 +211,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             processMessage();
         }
     }
-
-    TextWatcher mTextFieldWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            updateSendButton();
-        }
-    };
 
     private void updateSendButton() {
         boolean enabled = (isComposed() || (XoApplication.getConfiguration().isDevelopmentModeEnabled() && mLastMessage != null));
@@ -551,6 +541,19 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                 clearComposedMessage();
             }
             return longPressHandled;
+        }
+    }
+
+    private class TextFieldWatcher implements TextWatcher {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            updateSendButton();
         }
     }
 
