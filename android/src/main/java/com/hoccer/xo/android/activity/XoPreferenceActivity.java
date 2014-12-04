@@ -190,11 +190,9 @@ public class XoPreferenceActivity extends PreferenceActivity
             showImportCredentialsDialog();
             return true;
         } else if ("preference_chats_backup".equals(preference.getKey())) {
-            preference.setEnabled(false);
             showDatabaseBackupDialog();
             return true;
         } else if ("preference_complete_backup".equals(preference.getKey())) {
-            preference.setEnabled(false);
             showCompleteBackupDialog();
             return true;
         } else if ("preference_database_dump".equals(preference.getKey())) {
