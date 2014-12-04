@@ -119,20 +119,18 @@ public class ContentRegistry {
     public static String getContentDescription(IContentObject object) {
         String mediaTypeString = "Unknown file";
         String mediaType = object.getContentMediaType();
-        if (mediaType != null) {
-            if ("image".equals(mediaType)) {
-                mediaTypeString = "Image";
-            } else if ("audio".equals(mediaType)) {
-                mediaTypeString = "Audio";
-            } else if ("video".equals(mediaType)) {
-                mediaTypeString = "Video";
-            } else if ("contact".equals(mediaType)) {
-                mediaTypeString = "Contact";
-            } else if ("location".equals(mediaType)) {
-                mediaTypeString = "Location";
-            } else if ("data".equals(mediaType)) {
-                mediaTypeString = "Data";
-            }
+        if ("image".equals(mediaType)) {
+            mediaTypeString = "Image";
+        } else if ("audio".equals(mediaType)) {
+            mediaTypeString = "Audio";
+        } else if ("video".equals(mediaType)) {
+            mediaTypeString = "Video";
+        } else if ("contact".equals(mediaType)) {
+            mediaTypeString = "Contact";
+        } else if ("location".equals(mediaType)) {
+            mediaTypeString = "Location";
+        } else if ("data".equals(mediaType)) {
+            mediaTypeString = "Data";
         }
 
         String sizeString = "";
