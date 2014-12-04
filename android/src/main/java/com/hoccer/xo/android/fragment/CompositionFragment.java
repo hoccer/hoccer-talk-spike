@@ -173,21 +173,24 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == REQUEST_SELECT_ATTACHMENT && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_SELECT_ATTACHMENT) {
             mAttachments.clear();
-            if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
-                MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
-                mAttachments = selector.createObjectsFromSelectionResult(getActivity(), intent);
-            } else {
-                IContentSelector selector = mAttachmentSelection.getSelector();
-                IContentObject attachment = selector.createObjectFromSelectionResult(getActivity(), intent);
-                if (attachment != null) {
-                    mAttachments.add(attachment);
-                }
-            }
 
-            if (mAttachments.isEmpty()) {
-                Toast.makeText(getActivity(), R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
+            if(resultCode == Activity.RESULT_OK) {
+                if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
+                    MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
+                    mAttachments = selector.createObjectsFromSelectionResult(getActivity(), intent);
+                } else {
+                    IContentSelector selector = mAttachmentSelection.getSelector();
+                    IContentObject attachment = selector.createObjectFromSelectionResult(getActivity(), intent);
+                    if (attachment != null) {
+                        mAttachments.add(attachment);
+                    }
+                }
+
+                if (mAttachments.isEmpty()) {
+                    Toast.makeText(getActivity(), R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
+                }
             }
 
             updateAttachmentButton();
@@ -508,7 +511,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                     public void onClick(DialogInterface dialog, int id, int selectedItem) {
                         switch (selectedItem) {
                             case 0:
-                                clearAttachment();
                                 showSelectAttachmentDialog();
                                 break;
                             case 1:
