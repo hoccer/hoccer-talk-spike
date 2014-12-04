@@ -10,15 +10,16 @@ import java.io.IOException;
 public class BackupFactory {
 
     public static Backup readBackup(File backupFile) throws BackupTypeNotSupportedException, IOException {
-
         if (isJson(backupFile)) {
             return new CredentialsBackup(backupFile);
-        } else if (isZip(backupFile)) {
+        }
+
+        if (isZip(backupFile)) {
             BackupMetadata metadata = BackupFileUtils.readMetadata(backupFile);
             return readBackup(backupFile, metadata);
-        } else {
-            throw new IllegalArgumentException("Extension " + FilenameUtils.getExtension(backupFile.getName()) + " of " + backupFile.getName() + "is not supported.");
         }
+
+        throw new IllegalArgumentException("Extension " + FilenameUtils.getExtension(backupFile.getName()) + " of " + backupFile.getName() + "is not supported.");
     }
 
     private static Backup readBackup(File backupFile, BackupMetadata metadata) throws BackupTypeNotSupportedException, FileNotFoundException {
