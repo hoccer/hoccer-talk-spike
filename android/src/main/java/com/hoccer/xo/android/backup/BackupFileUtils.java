@@ -34,7 +34,7 @@ public class BackupFileUtils {
         ObjectMapper mapper = new ObjectMapper();
         String metadataJson = mapper.writeValueAsString(metadata);
 
-        createZip(out, encryptedDatabase, attachments, metadataJson);
+        createZip(out, encryptedDatabase, metadataJson, attachments);
     }
 
     public static void createBackupFile(File out, File database, BackupMetadata metadata, String password) throws Exception {
@@ -54,71 +54,45 @@ public class BackupFileUtils {
     }
 
     private static void createZip(File backup, byte[] encryptedDatabase, String metadata) throws IOException {
-        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
-        zos.setLevel(ZipOutputStream.DEFLATED);
-        try {
-            addZipEntry(zos, encryptedDatabase, DB_FILENAME_ENCRYPTED);
-            addMetaDataEntry(zos, metadata);
-        } finally {
-            zos.close();
-        }
+        createZip(backup, encryptedDatabase, metadata, Collections.<File>emptyList());
     }
 
-    private static void createZip(File backup, byte[] encryptedDatabase, List<File> attachments, String metadata) throws IOException {
+    private static void createZip(File backup, byte[] encryptedDatabase, String metadata, List<File> attachments) throws IOException {
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(backup));
         zos.setLevel(ZipOutputStream.DEFLATED);
         try {
             for (File attachment : attachments) {
-                addZipEntry(zos, attachment);
+                addZipEntry(attachment, zos);
             }
-            addZipEntry(zos, encryptedDatabase, DB_FILENAME_ENCRYPTED);
-            addMetaDataEntry(zos, metadata);
+            addZipEntry(DB_FILENAME_ENCRYPTED, encryptedDatabase, zos);
+            addZipEntry(METADATA_FILENAME, metadata, zos);
         } finally {
             zos.close();
         }
     }
 
-    private static void addMetaDataEntry(ZipOutputStream zos, String metadata) throws IOException {
-        InputStream in = new ByteArrayInputStream(metadata.getBytes("UTF-8"));
-
-        ZipEntry entry = new ZipEntry(METADATA_FILENAME);
-        zos.putNextEntry(entry);
-
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = in.read(buffer)) > 0) {
-            zos.write(buffer, 0, length);
-        }
+    private static void addZipEntry(String filename, String data, ZipOutputStream zos) throws IOException {
+        InputStream in = new ByteArrayInputStream(data.getBytes("UTF-8"));
+        addZipEntry(filename, in, zos);
         in.close();
-        zos.closeEntry();
     }
 
-    private static void addZipEntry(ZipOutputStream zos, File fileEntry) throws IOException {
-        InputStream in = new FileInputStream(fileEntry);
-
-        ZipEntry entry = new ZipEntry(fileEntry.getName());
-        zos.putNextEntry(entry);
-
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = in.read(buffer)) > 0) {
-            zos.write(buffer, 0, length);
-        }
+    private static void addZipEntry(File file, ZipOutputStream zos) throws IOException {
+        InputStream in = new FileInputStream(file);
+        addZipEntry(file.getName(), in, zos);
         in.close();
-        zos.closeEntry();
     }
 
-    private static void addZipEntry(ZipOutputStream zos, byte[] data, String dataName) throws IOException {
+    private static void addZipEntry(String filename, byte[] data, ZipOutputStream zos) throws IOException {
         InputStream in = new ByteArrayInputStream(data);
-        ZipEntry entry = new ZipEntry(dataName);
-        zos.putNextEntry(entry);
-
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = in.read(buffer)) > 0) {
-            zos.write(buffer, 0, length);
-        }
+        addZipEntry(filename, in, zos);
         in.close();
+    }
+
+    private static void addZipEntry(String filename, InputStream data, ZipOutputStream zos) throws IOException {
+        ZipEntry entry = new ZipEntry(filename);
+        zos.putNextEntry(entry);
+        IOUtils.copy(data, zos);
         zos.closeEntry();
     }
 
