@@ -1,6 +1,6 @@
 package com.hoccer.xo.android.backup;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.crypto.CryptoJSON;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -48,8 +48,8 @@ public class BackupFileUtils {
     public static void createBackupFile(File out, File database, List<File> attachments, BackupMetadata metadata, String password) throws Exception {
         byte[] encryptedDatabase = encryptFile(database, password);
 
-        Gson gson = new Gson();
-        String metadataJson = gson.toJson(metadata);
+        ObjectMapper mapper = new ObjectMapper();
+        String metadataJson = mapper.writeValueAsString(metadata);
 
         createZip(out, encryptedDatabase, attachments, metadataJson);
     }
@@ -57,8 +57,8 @@ public class BackupFileUtils {
     public static void createBackupFile(File out, File database, BackupMetadata metadata, String password) throws Exception {
         byte[] encryptedDatabase = encryptFile(database, password);
 
-        Gson gson = new Gson();
-        String metadataJson = gson.toJson(metadata);
+        ObjectMapper mapper = new ObjectMapper();
+        String metadataJson = mapper.writeValueAsString(metadata);
 
         createZip(out, encryptedDatabase, metadataJson);
     }
@@ -163,8 +163,8 @@ public class BackupFileUtils {
             }
         }
 
-        Gson gson = new Gson();
-        return gson.fromJson(result, BackupMetadata.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(result, BackupMetadata.class);
     }
 
     public static byte[] readInputStream(InputStream is) throws IOException {
