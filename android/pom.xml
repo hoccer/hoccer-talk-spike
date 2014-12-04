@@ -208,8 +208,8 @@
 
   <build>
     <filters>
-      <filter>${environment.path}/environment.properties</filter>
-      <filter>${environment.path}/assets/environment.properties</filter>
+      <filter>${environment.path}/build.properties</filter>
+      <filter>${environment.path}/assets/configuration.properties</filter>
     </filters>
 
     <resources>
@@ -254,7 +254,7 @@
             </goals>
             <configuration>
               <files>
-                <file>${environment.path}/environment.properties</file>
+                <file>${environment.path}/build.properties</file>
               </files>
             </configuration>
           </execution>
