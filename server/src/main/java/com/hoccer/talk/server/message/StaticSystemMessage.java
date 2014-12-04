@@ -2,15 +2,11 @@ package com.hoccer.talk.server.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.floreysoft.jmte.Engine;
-import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkClientHostInfo;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 public class StaticSystemMessage {
 
@@ -18,8 +14,8 @@ public class StaticSystemMessage {
 
     public static enum Message {
         UPDATE_NAGGING(
-                "Bitte XO updaten und die aktuellste Version aus deinem App Store installieren! Ältere Versionen werden nicht mehr unterstützt!", //${if storeLink} Besuche den Store: ${storeLink}${end}",
-                "Please update XO and install the latest version from your App store! Outdated versions are no longer supported!" //${if storeLink} Visit the store: ${storeLink}${end}");
+                "Bitte XO updaten und die aktuellste Version aus deinem App Store installieren! Ältere Versionen werden nicht mehr unterstützt!",
+                "Please update XO and install the latest version from your App store! Outdated versions are no longer supported!"
         ),
         UPDATE_SETTING_ENABLE_MP_MEDIA_ACCESS(
                 "Zugriff auf die Musikbibliothek wurde aktiviert",
@@ -92,15 +88,7 @@ public class StaticSystemMessage {
         LOG.info("generateMessage -clientId: '" + this.mClientId + "' -hostInfo: '" + this.mClientHostInfo + "' -message: '" + this.mMessage);
         dumpHostInfo();
 
-        String template = Message.getMessageForLanguage(this.mMessage, getLanguage());
-
-        Engine engine = new Engine();
-        Map<String, Object> model = new HashMap<String, Object>();
-
-        model.put("language", getLanguage().locale.getLanguage());
-        model.put("storeLink", getStoreLink());
-
-        return engine.transform(template, model);
+        return Message.getMessageForLanguage(this.mMessage, getLanguage());
     }
 
     private Language getLanguage() {
@@ -113,27 +101,5 @@ public class StaticSystemMessage {
             res = DEFAULT_LANGUAGE;
         }
         return res;
-    }
-
-    @Nullable
-    private String getStoreLink() {
-        // TODO this is just a quickshot to get things going. This is in fact more complex.
-        /*
-        * The Url in the respective store is also dependent on e.g. iOS bundleId (clientName)
-        * */
-        if (this.mClientHostInfo == null) {
-            return null;
-        }
-
-        final String systemName = this.mClientHostInfo.getSystemName();
-        if ("iPhone OS".equals(systemName)) {
-            return "https://itunes.apple.com/de/app/hoccer-xo/id641387450?mt=8#";
-        } else if ("Android".equals(systemName)) {
-            return "https://play.google.com/store/apps/details?id=com.hoccer.xo.release";
-        } else if ("TalkTool".equals(systemName)) {
-            return "http://www.hoccer.com";
-        } else {
-            return null;
-        }
     }
 }
