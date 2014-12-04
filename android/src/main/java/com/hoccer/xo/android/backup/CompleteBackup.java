@@ -21,7 +21,6 @@ public class CompleteBackup extends DatabaseBackup {
     public static Backup create(String password) throws Exception {
         String filename = BackupFileUtils.createUniqueBackupFilename();
         File backupFile = new File(XoApplication.getBackupDirectory(), filename + "." + BackupFileUtils.FILE_EXTENSION_ZIP);
-        backupFile.createNewFile();
 
         File database = new File(DB_PATH_NAME);
 
@@ -65,7 +64,7 @@ public class CompleteBackup extends DatabaseBackup {
 
     private long getAvailableDiskStorage() {
         StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-        return (long)stat.getAvailableBlocks() * (long)stat.getBlockSize();
+        return (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
     }
 
     public class NotEnoughDiskSpaceAvailable extends Exception {
