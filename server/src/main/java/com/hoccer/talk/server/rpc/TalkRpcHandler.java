@@ -1664,7 +1664,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (!TalkGroupPresence.GROUP_TYPE_USER.equals(groupType)) {
             throw new RuntimeException("illegal group type:"+groupType);
         }
-        if (groupName == null || groupTag == null || groupName.length() > 32) {
+        if (groupName == null || groupTag == null) {
             throw new RuntimeException("group name or tag missing");
         }
         if (groupName.length() > 32) {
