@@ -121,10 +121,9 @@
         <Preference
                 android:key="preference_complete_backup"
                 android:title="Chats with attachments"/>
-        <ListPreference
+        <Preference
                 android:key="preference_import_backup"
-                android:title="Import backup"
-                android:defaultValue="0"/>
+                android:title="Import backup"/>
     </PreferenceCategory>
 
     <PreferenceCategory

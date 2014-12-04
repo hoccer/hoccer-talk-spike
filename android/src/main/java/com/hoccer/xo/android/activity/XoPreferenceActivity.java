@@ -9,7 +9,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.*;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.view.*;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
@@ -25,6 +28,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +58,6 @@ public class XoPreferenceActivity extends PreferenceActivity
             addPreferencesFromResource(R.xml.preferences);
         }
         getListView().setBackgroundColor(Color.WHITE);
-        initDataImportPreferences();
     }
 
     @Override
@@ -75,35 +78,6 @@ public class XoPreferenceActivity extends PreferenceActivity
     protected void onResume() {
         super.onResume();
         checkForCrashesIfEnabled();
-    }
-
-    private void initDataImportPreferences() {
-        final ListPreference listPreference = (ListPreference) findPreference("preference_import_backup");
-        if (listPreference != null) {
-            Map<File, BackupMetadata> backups = BackupFileUtils.getBackupFiles(XoApplication.getBackupDirectory());
-
-            final String[] entries = new String[backups.size()];
-            final String[] entryValues = new String[backups.size()];
-
-            int index = 0;
-            for (File file : backups.keySet()) {
-                entries[index] = file.getName();
-                entryValues[index] = Integer.toString(index);
-                index++;
-            }
-
-            listPreference.setEntries(entries);
-            listPreference.setEntryValues(entryValues);
-
-            listPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    listPreference.setEnabled(false);
-                    showImportBackupDialog(entries[Integer.parseInt((String) newValue)]);
-                    return true;
-                }
-            });
-        }
     }
 
     private void checkForCrashesIfEnabled() {
@@ -195,6 +169,9 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if ("preference_complete_backup".equals(preference.getKey())) {
             showCompleteBackupDialog();
             return true;
+        } else if ("preference_import_backup".equals(preference.getKey())) {
+            showImportBackupDialog();
+            return true;
         } else if ("preference_database_dump".equals(preference.getKey())) {
             dumpDatabase();
             return true;
@@ -203,26 +180,45 @@ public class XoPreferenceActivity extends PreferenceActivity
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
 
-    private void showImportBackupDialog(final String importFileName) {
-        XoDialogs.showInputPasswordDialog("ImportBackupDialog",
+    private void showImportBackupDialog() {
+
+        Map<File, BackupMetadata> backups = BackupFileUtils.getBackupFiles(XoApplication.getBackupDirectory());
+
+        final List<File> backupFiles = new ArrayList<File>(backups.size());
+        List<String> items = new ArrayList<String>(backups.size());
+        for (Map.Entry<File, BackupMetadata> entry : backups.entrySet()) {
+            backupFiles.add(entry.getKey());
+            items.add(entry.getValue().getBackupType() + " " + entry.getValue().getCreationDate());
+        }
+
+        XoDialogs.showSingleChoiceDialog("ImportBackupDialog",
                 R.string.dialog_import_credentials_title,
+                items.toArray(new String[items.size()]),
                 this,
-                new XoDialogs.OnTextSubmittedListener() {
+                new XoDialogs.OnSingleSelectionFinishedListener() {
+
                     @Override
-                    public void onClick(DialogInterface dialog, int id, String password) {
-                        importBackup(importFileName, password);
+                    public void onClick(DialogInterface dialog, int id, final int selectedItem) {
+                        XoDialogs.showInputPasswordDialog("ImportBackupPasswordDialog",
+                                R.string.dialog_import_credentials_title,
+                                XoPreferenceActivity.this,
+                                new XoDialogs.OnTextSubmittedListener() {
+
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int id, String password) {
+                                        importBackup(backupFiles.get(selectedItem), password);
+                                    }
+                                }
+                        );
                     }
-                }
-        );
+                });
+
     }
 
-    private void importBackup(final String importFileName, final String password) {
+    private void importBackup(final File backupFile, final String password) {
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
-
-                File backupFile = new File(XoApplication.getBackupDirectory(), importFileName);
-
                 try {
                     Backup backup = BackupFactory.readBackup(backupFile);
                     backup.restore(password);
@@ -287,7 +283,6 @@ public class XoPreferenceActivity extends PreferenceActivity
                 super.onPostExecute(backup);
                 if (backup != null) {
                     Toast.makeText(getBaseContext(), "Data exported to " + backup.getFile().getAbsolutePath(), Toast.LENGTH_LONG).show();
-                    initDataImportPreferences();
                 } else {
                     Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
                 }
@@ -326,7 +321,6 @@ public class XoPreferenceActivity extends PreferenceActivity
                 super.onPostExecute(backup);
                 if (backup != null) {
                     Toast.makeText(getBaseContext(), "Data exported to " + backup.getFile().getAbsolutePath(), Toast.LENGTH_LONG).show();
-                    initDataImportPreferences();
                 } else {
                     Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
                 }
