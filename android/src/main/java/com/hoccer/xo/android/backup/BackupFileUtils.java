@@ -147,7 +147,6 @@ public class BackupFileUtils {
     }
 
     public static BackupMetadata readMetadata(File backupFile) throws IOException {
-
         String result = null;
 
         ZipFile zipFile = new ZipFile(backupFile);
@@ -161,6 +160,10 @@ public class BackupFileUtils {
                 result = new String(bytes, "UTF-8");
                 break;
             }
+        }
+
+        if(result == null) {
+            throw new FileNotFoundException(BackupFileUtils.METADATA_FILENAME + " not found in " + backupFile.getName());
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
