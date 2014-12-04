@@ -186,9 +186,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                 } else {
                     IContentSelector selector = mAttachmentSelection.getSelector();
                     IContentObject attachment = selector.createObjectFromSelectionResult(getActivity(), intent);
-                    if (attachment != null) {
-                        mAttachments.add(attachment);
-                    }
+                    CollectionUtils.addIgnoreNull(mAttachments, attachment);
                 }
 
                 if (mAttachments.isEmpty()) {
