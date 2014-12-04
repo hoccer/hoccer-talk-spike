@@ -258,7 +258,6 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void showDatabaseBackupDialog() {
-
         XoDialogs.showInputPasswordDialog("CreateDatabaseBackupDialog",
                 R.string.dialog_export_credentials_title,
                 this,
@@ -298,7 +297,6 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void showCompleteBackupDialog() {
-
         XoDialogs.showInputPasswordDialog("CreateDatabaseBackupDialog",
                 R.string.dialog_export_credentials_title,
                 this,
