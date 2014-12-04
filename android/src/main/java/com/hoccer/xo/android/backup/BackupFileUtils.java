@@ -3,6 +3,7 @@ package com.hoccer.xo.android.backup;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.crypto.CryptoJSON;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.log4j.Logger;
 
@@ -65,15 +66,8 @@ public class BackupFileUtils {
 
     private static byte[] encryptFile(File input, String password) throws Exception {
         FileInputStream in = new FileInputStream(input);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int count;
-        while ((count = in.read(buffer)) != -1) {
-            baos.write(buffer, 0, count);
-        }
+        byte[] bytes = IOUtils.toByteArray(in);
         in.close();
-        byte[] bytes = baos.toByteArray();
-
         return CryptoJSON.encrypt(bytes, password, DB_CONTENT_TYPE);
     }
 
