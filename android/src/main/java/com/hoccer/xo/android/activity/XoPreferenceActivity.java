@@ -210,11 +210,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
-                        if (password != null && !password.isEmpty()) {
-                            doImportBackup(importFileName, password);
-                        } else {
-                            Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
-                        }
+                        importBackup(importFileName, password);
                     }
                 }
         );
@@ -269,11 +265,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
-                        if (password != null && !password.isEmpty()) {
-                            doCreateDatabaseBackup(password);
-                        } else {
-                            Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
-                        }
+                        createDatabaseBackup(password);
                     }
                 }
         );
@@ -313,11 +305,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
-                        if (password != null && !password.isEmpty()) {
-                            doCreateCompleteBackup(password);
-                        } else {
-                            Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
-                        }
+                        createCompleteBackup(password);
                     }
                 }
         );
@@ -362,11 +350,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
-                        if (password != null && !password.isEmpty()) {
-                            importCredentials(credentialsFile, password);
-                        } else {
-                            Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
-                        }
+                        importCredentials(credentialsFile, password);
                     }
                 }
         );
@@ -390,11 +374,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
-                        if (password != null && !password.isEmpty()) {
-                            exportCredentials(password);
-                        } else {
-                            Toast.makeText(XoPreferenceActivity.this, R.string.no_password, Toast.LENGTH_LONG).show();
-                        }
+                        exportCredentials(password);
                     }
                 }
         );
