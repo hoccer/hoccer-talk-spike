@@ -62,12 +62,6 @@ public class BackupFileUtils {
         }
     }
 
-    private static void addZipEntry(ZipOutputStream zos, String filename, String data) throws IOException {
-        InputStream in = new ByteArrayInputStream(data.getBytes("UTF-8"));
-        addZipEntry(zos, filename, in);
-        in.close();
-    }
-
     private static void addZipEntry(ZipOutputStream zos, File file) throws IOException {
         InputStream in = new FileInputStream(file);
         addZipEntry(zos, file.getName(), in);
@@ -76,6 +70,12 @@ public class BackupFileUtils {
 
     private static void addZipEntry(ZipOutputStream zos, String filename, byte[] data) throws IOException {
         InputStream in = new ByteArrayInputStream(data);
+        addZipEntry(zos, filename, in);
+        in.close();
+    }
+
+    private static void addZipEntry(ZipOutputStream zos, String filename, String data) throws IOException {
+        InputStream in = new ByteArrayInputStream(data.getBytes("UTF-8"));
         addZipEntry(zos, filename, in);
         in.close();
     }
