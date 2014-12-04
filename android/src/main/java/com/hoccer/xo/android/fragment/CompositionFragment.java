@@ -244,9 +244,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private void updateAttachmentButton() {
         if (mAttachments.isEmpty()) {
             updateAttachmentButtonImage(AttachmentSelectionType.NONE);
-        } else if (mAttachments.size() > 1) {
-            updateAttachmentButtonImage(AttachmentSelectionType.MULTIPLE);
-        } else {
+        } else if (mAttachments.size() == 1) {
             String contentType = mAttachments.get(0).getContentMediaType();
 
             if (ContentMediaType.IMAGE.equals(contentType)) {
@@ -264,6 +262,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             } else {
                 updateAttachmentButtonImage(AttachmentSelectionType.ERROR);
             }
+        } else {
+            updateAttachmentButtonImage(AttachmentSelectionType.MULTIPLE);
         }
     }
 
