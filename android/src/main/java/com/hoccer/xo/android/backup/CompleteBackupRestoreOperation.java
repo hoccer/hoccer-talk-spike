@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 
 public class CompleteBackupRestoreOperation {
@@ -19,6 +20,17 @@ public class CompleteBackupRestoreOperation {
     private final File mTempDatabaseFile;
     private File mOldAttachmentsDir;
     private File mOldDatabaseFile;
+
+
+    FileFilter mFileFilter = new FileFilter() {
+        @Override
+        public boolean accept(File file) {
+            if (file.isDirectory() && "Backups".equals(file.getName())) {
+                return false;
+            }
+            return true;
+        }
+    };
 
     public CompleteBackupRestoreOperation(File backupFile, File databaseTarget, File attachmentsTargetDir, String password) {
         mBackupFile = backupFile;
@@ -61,7 +73,9 @@ public class CompleteBackupRestoreOperation {
     private void keepCurrentAttachments() throws IOException {
         if (mAttachmentsTargetDir.exists()) {
             mOldAttachmentsDir = new File(mAttachmentsTargetDir.getPath() + "_" + BackupFileUtils.getTimestamp());
-            FileUtils.moveDirectory(mAttachmentsTargetDir, mOldAttachmentsDir);
+            for (File attachment : mAttachmentsTargetDir.listFiles(mFileFilter)) {
+                FileUtils.moveFileToDirectory(attachment, mOldAttachmentsDir, true);
+            }
         }
     }
 
@@ -73,7 +87,9 @@ public class CompleteBackupRestoreOperation {
     }
 
     private void moveAttachmentsToTargetDir() throws IOException {
-        FileUtils.moveDirectory(mTempAttachmentsDir, mAttachmentsTargetDir);
+        for (File attachment : mTempAttachmentsDir.listFiles(mFileFilter)) {
+            FileUtils.moveFileToDirectory(attachment, mAttachmentsTargetDir, true);
+        }
     }
 
     private void moveDatabaseToTarget() throws IOException {
@@ -110,6 +126,7 @@ public class CompleteBackupRestoreOperation {
     private void restoreOld() throws IOException {
         restoreOldDatabase();
         restoreOldAttachments();
+        deleteOld();
     }
 
     private void restoreOldAttachments() throws IOException {
