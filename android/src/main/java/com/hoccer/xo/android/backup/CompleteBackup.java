@@ -1,7 +1,5 @@
 package com.hoccer.xo.android.backup;
 
-import android.os.Environment;
-import android.os.StatFs;
 import com.hoccer.xo.android.XoApplication;
 
 import java.io.File;
@@ -56,15 +54,10 @@ public class CompleteBackup extends DatabaseBackup {
 
     private void ensureEnoughDiskSpaceAvailable() throws IOException, NotEnoughDiskSpaceAvailable {
         long requiredDiskSpace = BackupFileUtils.getUncompressedSize(mBackupFile);
-        long availableDiskSpace = getAvailableDiskStorage();
+        long availableDiskSpace = BackupFileUtils.getAvailableDiskStorage();
         if (requiredDiskSpace > availableDiskSpace) {
             throw new NotEnoughDiskSpaceAvailable(requiredDiskSpace, availableDiskSpace);
         }
-    }
-
-    private long getAvailableDiskStorage() {
-        StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-        return (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
     }
 
     public class NotEnoughDiskSpaceAvailable extends Exception {

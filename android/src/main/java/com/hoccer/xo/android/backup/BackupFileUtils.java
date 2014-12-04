@@ -1,5 +1,7 @@
 package com.hoccer.xo.android.backup;
 
+import android.os.Environment;
+import android.os.StatFs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.crypto.CryptoJSON;
 import org.apache.commons.io.FileUtils;
@@ -182,5 +184,10 @@ public class BackupFileUtils {
                 is.close();
             }
         }
+    }
+
+    public static long getAvailableDiskStorage() {
+        StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+        return (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
     }
 }
