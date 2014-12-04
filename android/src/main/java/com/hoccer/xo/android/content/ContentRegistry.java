@@ -38,7 +38,7 @@ public class ContentRegistry {
 
     private static final Logger LOG = Logger.getLogger(ContentRegistry.class);
 
-    private static ContentRegistry mInstance;
+    private static ContentRegistry sInstance;
 
     /**
      * Get the content registry singleton
@@ -52,10 +52,10 @@ public class ContentRegistry {
      * @return the content registry
      */
     public static synchronized ContentRegistry get(Context applicationContext) {
-        if (mInstance == null) {
-            mInstance = new ContentRegistry(applicationContext);
+        if (sInstance == null) {
+            sInstance = new ContentRegistry(applicationContext);
         }
-        return mInstance;
+        return sInstance;
     }
 
     /**
