@@ -111,23 +111,23 @@ public class BackupFileUtils {
         return objectMapper.readValue(result, BackupMetadata.class);
     }
 
-    public static Map<File, BackupMetadata> getBackupFiles(File dir) {
-        Map<File, BackupMetadata> backupfiles = new HashMap<File, BackupMetadata>();
+    public static List<Backup> getBackups(File dir) {
+        List<Backup> backups = new ArrayList<Backup>();
 
         File[] files = dir.listFiles();
         if (files != null) {
             for (File file : files) {
                 try {
-                    BackupMetadata metadata = readMetadata(file);
-                    if (metadata != null) {
-                        backupfiles.put(file, metadata);
-                    }
+                    Backup backup = BackupFactory.readBackup(file);
+                    backups.add(backup);
                 } catch (IOException e) {
                     LOG.info("Ignoring non backup file: " + file.getAbsolutePath());
+                } catch (BackupFactory.BackupTypeNotSupportedException e) {
+                    e.printStackTrace();
                 }
             }
         }
-        return backupfiles;
+        return backups;
     }
 
     public static String createUniqueBackupFilename() {

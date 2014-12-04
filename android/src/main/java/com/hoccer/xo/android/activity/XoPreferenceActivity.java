@@ -19,7 +19,10 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.backup.*;
+import com.hoccer.xo.android.backup.Backup;
+import com.hoccer.xo.android.backup.BackupFactory;
+import com.hoccer.xo.android.backup.BackupFileUtils;
+import com.hoccer.xo.android.backup.CompleteBackup;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
 import org.apache.commons.io.FileUtils;
@@ -28,9 +31,9 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class XoPreferenceActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -181,14 +184,12 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void showImportBackupDialog() {
+        final List<Backup> backups = BackupFileUtils.getBackups(XoApplication.getBackupDirectory());
 
-        Map<File, BackupMetadata> backups = BackupFileUtils.getBackupFiles(XoApplication.getBackupDirectory());
-
-        final List<File> backupFiles = new ArrayList<File>(backups.size());
         List<String> items = new ArrayList<String>(backups.size());
-        for (Map.Entry<File, BackupMetadata> entry : backups.entrySet()) {
-            backupFiles.add(entry.getKey());
-            items.add(entry.getValue().getBackupType() + " " + entry.getValue().getCreationDate());
+        for (Backup backup : backups) {
+            String timestamp = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss").format(backup.getCreationDate());
+            items.add(timestamp);
         }
 
         XoDialogs.showSingleChoiceDialog("ImportBackupDialog",
@@ -206,7 +207,7 @@ public class XoPreferenceActivity extends PreferenceActivity
 
                                     @Override
                                     public void onClick(DialogInterface dialog, int id, String password) {
-                                        importBackup(backupFiles.get(selectedItem), password);
+                                        importBackup(backups.get(selectedItem), password);
                                     }
                                 }
                         );
@@ -215,12 +216,11 @@ public class XoPreferenceActivity extends PreferenceActivity
 
     }
 
-    private void importBackup(final File backupFile, final String password) {
+    private void importBackup(final Backup backup, final String password) {
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
                 try {
-                    Backup backup = BackupFactory.readBackup(backupFile);
                     backup.restore(password);
                     return true;
                 } catch (BackupFactory.BackupTypeNotSupportedException e) {

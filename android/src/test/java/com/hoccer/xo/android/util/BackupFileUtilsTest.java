@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.util;
 
+import com.hoccer.xo.android.backup.Backup;
 import com.hoccer.xo.android.backup.BackupFileUtils;
 import org.apache.commons.io.FileUtils;
 
@@ -91,10 +92,8 @@ public class BackupFileUtilsTest {
 
     @Test
     public void testGetBackupFilesMetadata() {
-        Map<File, BackupMetadata> backupFiles = BackupFileUtils.getBackupFiles(BackupTestResources.getResourceDir());
+        List<Backup> backupFiles = BackupFileUtils.getBackups(BackupTestResources.getResourceDir());
         assertEquals(2, backupFiles.size());
-        assertEquals(BackupType.DATABASE, backupFiles.get(BACKUP_DB_FILE).getBackupType());
-        assertEquals(BackupType.COMPLETE, backupFiles.get(BACKUP_COMPLETE_FILE).getBackupType());
     }
 
     @Test
