@@ -139,17 +139,6 @@ public class BackupFileUtils {
         return backupfiles;
     }
 
-    public static void writeBytesToFile(File targetFile, byte[] bytes) throws IOException {
-        if (!targetFile.exists()) {
-            targetFile.getParentFile().mkdirs();
-            targetFile.createNewFile();
-        }
-        FileOutputStream ostream = new FileOutputStream(targetFile);
-        ostream.write(bytes);
-//        ostream.getFD().sync();  TODO: throws exception when disk is full, activate if necessary - how to test?
-        ostream.close();
-    }
-
     public static String createUniqueBackupFilename() {
         String timestamp = getTimestamp();
         return String.format(BACKUP_FILENAME_PATTERN, timestamp);
@@ -175,7 +164,7 @@ public class BackupFileUtils {
                 is.close();
 
                 byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
-                writeBytesToFile(target, decrypted);
+                FileUtils.writeByteArrayToFile(target, decrypted);
 
                 break;
             }
