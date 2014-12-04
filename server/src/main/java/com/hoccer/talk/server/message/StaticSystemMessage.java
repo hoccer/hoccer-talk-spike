@@ -69,11 +69,11 @@ public class StaticSystemMessage {
     public final static Language DEFAULT_LANGUAGE = Language.GERMAN;
 
     private final Message mMessage;
-    private final TalkClient mTalkClient;
+    private final String mClientId;
     private final TalkClientHostInfo mClientHostInfo;
 
-    public StaticSystemMessage(TalkClient pTalkClient, @Nullable TalkClientHostInfo pClientHostInfo, Message pMessage) {
-        this.mTalkClient = pTalkClient;
+    public StaticSystemMessage(String pClientId, @Nullable TalkClientHostInfo pClientHostInfo, Message pMessage) {
+        this.mClientId = pClientId;
         this.mClientHostInfo = pClientHostInfo;
         this.mMessage = pMessage;
     }
@@ -89,7 +89,7 @@ public class StaticSystemMessage {
     }
 
     public String generateMessage() {
-        LOG.info("generateMessage -clientId: '" + this.mTalkClient.getClientId() + "' -hostInfo: '" + this.mClientHostInfo + "' -message: '" + this.mMessage);
+        LOG.info("generateMessage -clientId: '" + this.mClientId + "' -hostInfo: '" + this.mClientHostInfo + "' -message: '" + this.mMessage);
         dumpHostInfo();
 
         String template = Message.getMessageForLanguage(this.mMessage, getLanguage());

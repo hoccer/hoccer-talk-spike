@@ -3,6 +3,8 @@ package com.hoccer.talk.server.push;
 import com.hoccer.talk.model.TalkClient;
 import com.hoccer.talk.model.TalkClientHostInfo;
 import com.hoccer.talk.server.ITalkServerDatabase;
+import com.hoccer.talk.server.TalkServer;
+import com.hoccer.talk.server.rpc.TalkRpcConnection;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
 import org.apache.commons.collections4.Predicate;
@@ -25,13 +27,13 @@ public class ApnsPushProvider extends PushProvider {
         }
     };
 
-    private ITalkServerDatabase mDatabase;
+    private TalkServer mServer;
     private String mDefaultClientName;
     private HashMap<Target, ApnsService> mApnsServices;
 
-    public ApnsPushProvider(HashMap<Target, ApnsService> apnsServices, ITalkServerDatabase database, String defaultClientName) {
+    public ApnsPushProvider(HashMap<Target, ApnsService> apnsServices, TalkServer server, String defaultClientName) {
         mApnsServices = apnsServices;
-        mDatabase = database;
+        mServer = server;
         mDefaultClientName = defaultClientName;
     }
 
@@ -45,8 +47,15 @@ public class ApnsPushProvider extends PushProvider {
         MultiValueMap<Target, String> map = new MultiValueMap<Target, String>();
 
         for (TalkClient client : clients) {
-            Target target = getTarget(client);
-            map.put(target, client.getApnsToken());
+            if (isConnected(client)) {
+                mServer.getUpdateAgent().requestUserAlert(client.getClientId(), message);
+            } else {
+                client.setPushAlertMessage(message);
+                mServer.getDatabase().saveClient(client);
+
+                Target target = getTarget(client);
+                map.put(target, client.getApnsToken());
+            }
         }
 
         for (Target target : map.keySet()) {
@@ -60,8 +69,13 @@ public class ApnsPushProvider extends PushProvider {
         }
     }
 
+    private boolean isConnected(TalkClient client) {
+        TalkRpcConnection connection = mServer.getClientConnection(client.getClientId());
+        return connection != null && connection.isConnected();
+    }
+
     private Target getTarget(TalkClient client) {
-        TalkClientHostInfo hostInfo = mDatabase.findClientHostInfoForClient(client.getClientId());
+        TalkClientHostInfo hostInfo = mServer.getDatabase().findClientHostInfoForClient(client.getClientId());
 
         String clientName = mDefaultClientName;
         PushAgent.APNS_SERVICE_TYPE type = PushAgent.APNS_SERVICE_TYPE.PRODUCTION;

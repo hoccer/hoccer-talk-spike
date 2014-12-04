@@ -270,6 +270,13 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
         if (!mTalkClient.isPushCapable()) {
             mClientRpc.pushNotRegistered();
         }
+
+        // display missed push message as an alert
+        if (mTalkClient.getPushAlertMessage() != null) {
+            mServer.getUpdateAgent().requestUserAlert(mTalkClient.getClientId(), mTalkClient.getPushAlertMessage());
+            mTalkClient.setPushAlertMessage(null);
+            mServer.getDatabase().saveClient(mTalkClient);
+        }
     }
 
     /**
