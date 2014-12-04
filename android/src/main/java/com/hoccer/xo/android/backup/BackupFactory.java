@@ -9,6 +9,18 @@ import java.io.IOException;
 
 public class BackupFactory {
 
+    public static Backup createCredentialsBackup(String password) throws IOException {
+        return CredentialsBackup.create(password);
+    }
+
+    public static Backup createDatabaseBackup(String password) throws Exception {
+        return DatabaseBackup.create(password);
+    }
+
+    public static Backup createCompleteBackup(String password) throws Exception {
+        return CompleteBackup.create(password);
+    }
+
     public static Backup readBackup(File backupFile) throws BackupTypeNotSupportedException, IOException {
         if (isJson(backupFile)) {
             return new CredentialsBackup(backupFile);
@@ -22,6 +34,14 @@ public class BackupFactory {
         throw new IllegalArgumentException("Extension " + FilenameUtils.getExtension(backupFile.getName()) + " of " + backupFile.getName() + "is not supported.");
     }
 
+    private static boolean isJson(File backupFile) {
+        return FileFilterUtils.suffixFileFilter("json").accept(backupFile);
+    }
+
+    private static boolean isZip(File backupFile) {
+        return FileFilterUtils.suffixFileFilter("zip").accept(backupFile);
+    }
+
     private static Backup readBackup(File backupFile, BackupMetadata metadata) throws BackupTypeNotSupportedException, FileNotFoundException {
         Backup backup;
         if (metadata.getBackupType() == BackupType.DATABASE) {
@@ -32,26 +52,6 @@ public class BackupFactory {
             throw new BackupTypeNotSupportedException("Backup Type '" + metadata.getBackupType() + "' found in " + backupFile.getName() + " not supported");
         }
         return backup;
-    }
-
-    private static boolean isZip(File backupFile) {
-        return FileFilterUtils.suffixFileFilter("zip").accept(backupFile);
-    }
-
-    private static boolean isJson(File backupFile) {
-        return FileFilterUtils.suffixFileFilter("json").accept(backupFile);
-    }
-
-    public static Backup createCredentialsBackup(String password) throws IOException {
-        return CredentialsBackup.create(password);
-    }
-
-    public static Backup createDatabaseBackup(String password) throws Exception {
-        return DatabaseBackup.create(password);
-    }
-
-    public static Backup createCompleteBackup(String password) throws Exception {
-        return CompleteBackup.create(password);
     }
 
     public static class BackupTypeNotSupportedException extends Exception {
