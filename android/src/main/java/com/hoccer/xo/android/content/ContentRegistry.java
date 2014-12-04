@@ -40,6 +40,12 @@ public class ContentRegistry {
 
     private static ContentRegistry sInstance;
 
+    /* Keys for use with the internal SimpleAdapter in attachment selection */
+    private static final String KEY_ICON = "icon";
+    private static final String KEY_NAME = "name";
+    private static final String KEY_INTENT = "intent";
+    private static final String KEY_SELECTOR = "selector";
+
     /**
      * Get the content registry singleton
      * <p/>
@@ -143,16 +149,6 @@ public class ContentRegistry {
         return mediaTypeString + sizeString;
     }
 
-    public static String humanReadableByteCount(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) {
-            return bytes + " B";
-        }
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
-    }
-
     /**
      * Starts avatar selection
      * <p/>
@@ -183,12 +179,6 @@ public class ContentRegistry {
     public static IContentObject createSelectedAvatar(ContentSelection selection, Intent intent) {
         return selection.getSelector().createObjectFromSelectionResult(selection.getActivity(), intent);
     }
-
-    /* Keys for use with the internal SimpleAdapter in attachment selection */
-    private static final String KEY_ICON = "icon";
-    private static final String KEY_NAME = "name";
-    private static final String KEY_INTENT = "intent";
-    private static final String KEY_SELECTOR = "selector";
 
     /**
      * Starts content selection
@@ -273,6 +263,16 @@ public class ContentRegistry {
 
         // return the selection handle
         return contentSelection;
+    }
+
+    private static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) {
+            return bytes + " B";
+        }
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 
     /**
