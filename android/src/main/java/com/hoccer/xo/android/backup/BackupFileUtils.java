@@ -2,6 +2,7 @@ package com.hoccer.xo.android.backup;
 
 import com.google.gson.Gson;
 import com.hoccer.talk.crypto.CryptoJSON;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.log4j.Logger;
 
@@ -10,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class BackupFileUtils {
@@ -31,12 +31,13 @@ public class BackupFileUtils {
     private static FileFilter mBackupFileFilter = new FileFilter() {
         @Override
         public boolean accept(File file) {
-            if (file.getName().equals(CredentialsBackup.BACKUP_FILENAME)) {
-                return true;
-            } else if (FileFilterUtils.suffixFileFilter("zip").accept(file)) {
+//            if (file.getName().equals(CredentialsBackup.BACKUP_FILENAME)) {
+//                return true;
+//            }
+            if (FileFilterUtils.suffixFileFilter("zip").accept(file)) {
                 try {
-                    BackupMetadata metadata = BackupFileUtils.readMetadata(file);
-                    if (metadata.getBackupType() != null) {
+                    BackupMetadata metadata = readMetadata(file);
+                    if (metadata != null) {
                         return true;
                     }
                 } catch (IOException e) {
