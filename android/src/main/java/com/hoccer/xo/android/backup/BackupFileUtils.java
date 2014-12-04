@@ -31,9 +31,6 @@ public class BackupFileUtils {
     private static FileFilter mBackupFileFilter = new FileFilter() {
         @Override
         public boolean accept(File file) {
-//            if (file.getName().equals(CredentialsBackup.BACKUP_FILENAME)) {
-//                return true;
-//            }
             if (FileFilterUtils.suffixFileFilter(FILE_EXTENSION_ZIP).accept(file)) {
                 try {
                     BackupMetadata metadata = readMetadata(file);
