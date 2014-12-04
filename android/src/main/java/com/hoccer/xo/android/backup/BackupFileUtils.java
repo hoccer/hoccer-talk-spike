@@ -182,11 +182,11 @@ public class BackupFileUtils {
         return out.toByteArray();
     }
 
-    public static List<File> getBackupFiles(File parentDir) {
+    public static List<File> getBackupFiles(File dir) {
         List<File> results = new ArrayList<File>();
 
-        if (parentDir != null && parentDir.isDirectory()) {
-            File[] files = parentDir.listFiles(mBackupFileFilter);
+        if (dir != null && dir.isDirectory()) {
+            File[] files = dir.listFiles(mBackupFileFilter);
             if (files != null) {
                 Collections.addAll(results, files);
             }
