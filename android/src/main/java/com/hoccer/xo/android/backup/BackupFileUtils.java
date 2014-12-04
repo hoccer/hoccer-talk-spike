@@ -140,16 +140,12 @@ public class BackupFileUtils {
     }
 
     public static String createUniqueBackupFilename() {
-        String timestamp = getTimestamp();
+        String timestamp = new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
         return String.format(BACKUP_FILENAME_PATTERN, timestamp);
     }
 
     public static void restoreBackup(File backupFile, File databaseTarget, String password) throws Exception {
         extractAndDecryptDatabase(backupFile, databaseTarget, password);
-    }
-
-    public static String getTimestamp() {
-        return new SimpleDateFormat(TIMESTAMP_FORMAT).format(new Date());
     }
 
     public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
@@ -183,7 +179,6 @@ public class BackupFileUtils {
     }
 
     public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException {
-
         ZipFile zipFile = new ZipFile(backupFile);
         Enumeration<? extends ZipEntry> entries = zipFile.entries();
 

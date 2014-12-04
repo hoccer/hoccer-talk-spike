@@ -6,6 +6,8 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class CompleteBackupRestoreOperation {
 
@@ -72,7 +74,7 @@ public class CompleteBackupRestoreOperation {
 
     private void keepCurrentAttachments() throws IOException {
         if (mAttachmentsTargetDir.exists()) {
-            mOldAttachmentsDir = new File(mAttachmentsTargetDir.getPath() + "_" + BackupFileUtils.getTimestamp());
+            mOldAttachmentsDir = new File(mAttachmentsTargetDir.getPath() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
             for (File attachment : mAttachmentsTargetDir.listFiles(mFileFilter)) {
                 FileUtils.moveFileToDirectory(attachment, mOldAttachmentsDir, true);
             }
@@ -81,7 +83,7 @@ public class CompleteBackupRestoreOperation {
 
     private void keepCurrentDatabase() throws IOException {
         if (mDatabaseTarget.exists()) {
-            mOldDatabaseFile = new File(mDatabaseTarget.getPath() + "." + BackupFileUtils.getTimestamp());
+            mOldDatabaseFile = new File(mDatabaseTarget.getPath() + "." + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
             FileUtils.moveFile(mDatabaseTarget, mOldDatabaseFile);
         }
     }
