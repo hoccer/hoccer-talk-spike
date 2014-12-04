@@ -24,16 +24,12 @@ public class BackupFactory {
 
     private static Backup readBackup(File backupFile, BackupMetadata metadata) throws BackupTypeNotSupportedException, FileNotFoundException {
         Backup backup;
-        if (metadata != null) {
-            if (metadata.getBackupType() == BackupType.DATABASE) {
-                backup = new DatabaseBackup(backupFile, metadata);
-            } else if (metadata.getBackupType() == BackupType.COMPLETE) {
-                backup = new CompleteBackup(backupFile, metadata);
-            } else {
-                throw new BackupTypeNotSupportedException("Backup Type '" + metadata.getBackupType() + "' found in " + backupFile.getName() + " not supported");
-            }
+        if (metadata.getBackupType() == BackupType.DATABASE) {
+            backup = new DatabaseBackup(backupFile, metadata);
+        } else if (metadata.getBackupType() == BackupType.COMPLETE) {
+            backup = new CompleteBackup(backupFile, metadata);
         } else {
-            throw new FileNotFoundException(BackupFileUtils.METADATA_FILENAME + " not found in " + backupFile.getName());
+            throw new BackupTypeNotSupportedException("Backup Type '" + metadata.getBackupType() + "' found in " + backupFile.getName() + " not supported");
         }
         return backup;
     }
