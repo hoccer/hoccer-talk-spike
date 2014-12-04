@@ -4,6 +4,6 @@
 
     <item android:id="@+id/menu_contacts"
           android:title="@string/menu_contacts"
-          android:icon="@drawable/ic_contacts"
+          android:icon="@drawable/ic_action_contacts"
           android:showAsAction="always"/>
 </menu>
