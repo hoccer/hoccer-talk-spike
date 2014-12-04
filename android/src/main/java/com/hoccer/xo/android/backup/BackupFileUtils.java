@@ -149,22 +149,36 @@ public class BackupFileUtils {
     }
 
     public static BackupMetadata readMetadata(File backupFile) throws IOException {
+
         String result = null;
 
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
-        ZipEntry zipEntry;
-        while ((zipEntry = zis.getNextEntry()) != null) {
-
-            if (zipEntry.getName().equals(METADATA_FILENAME)) {
-                byte[] bytes = readFileEntry(zis);
+        ZipFile zipFile = new ZipFile(backupFile);
+        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            if (entry.getName().equals(METADATA_FILENAME)) {
+                InputStream is = zipFile.getInputStream(entry);
+                byte[] bytes = readInputStream(is);
+                is.close();
                 result = new String(bytes, "UTF-8");
                 break;
             }
         }
-        zis.close();
 
         Gson gson = new Gson();
         return gson.fromJson(result, BackupMetadata.class);
+    }
+
+    public static byte[] readInputStream(InputStream is) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int length = is.read(buffer);
+        while (length != -1) {
+            out.write(buffer, 0, length);
+            length = is.read(buffer);
+        }
+
+        return out.toByteArray();
     }
 
     public static List<File> getBackupFiles(File parentDir) {
@@ -179,26 +193,15 @@ public class BackupFileUtils {
         return results;
     }
 
-    public static void writeBytesToFile(File targetFile, byte[] decryptedData) throws IOException {
+    public static void writeBytesToFile(File targetFile, byte[] bytes) throws IOException {
         if (!targetFile.exists()) {
             targetFile.getParentFile().mkdirs();
             targetFile.createNewFile();
         }
         FileOutputStream ostream = new FileOutputStream(targetFile);
-        ostream.write(decryptedData);
+        ostream.write(bytes);
 //        ostream.getFD().sync();  TODO: throws exception when disk is full, activate if necessary - how to test?
         ostream.close();
-    }
-
-    public static byte[] readFileEntry(ZipInputStream zis) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = zis.read(buffer)) != -1) {
-            out.write(buffer, 0, length);
-        }
-
-        return out.toByteArray();
     }
 
     public static String createUniqueBackupFilename() {
@@ -215,52 +218,48 @@ public class BackupFileUtils {
     }
 
     public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
-        try {
-            ZipEntry zipEntry;
-            while ((zipEntry = zis.getNextEntry()) != null) {
+        ZipFile zipFile = new ZipFile(backupFile);
+        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            if (entry.getName().equals(DB_FILENAME_ENCRYPTED)) {
 
-                if (zipEntry.getName().equals(DB_FILENAME_ENCRYPTED)) {
-                    byte[] encrypted = readFileEntry(zis);
-                    byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
-                    writeBytesToFile(target, decrypted);
+                InputStream is = zipFile.getInputStream(entry);
+                byte[] encrypted = readInputStream(is);
+                is.close();
 
-                    break;
-                }
+                byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
+                writeBytesToFile(target, decrypted);
+
+                break;
             }
-        } finally {
-            zis.close();
         }
     }
 
     public static long getUncompressedSize(File zipFile) throws IOException {
         long uncompressedSize = 0;
-        try {
-            ZipFile zf = new ZipFile(zipFile);
-            Enumeration e = zf.entries();
-            while (e.hasMoreElements()) {
-                ZipEntry ze = (ZipEntry) e.nextElement();
-                uncompressedSize = uncompressedSize + ze.getSize();
-            }
-        } catch (IOException ex) {
-            System.err.println(ex);
+        ZipFile zf = new ZipFile(zipFile);
+        Enumeration entries = zf.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry ze = (ZipEntry) entries.nextElement();
+            uncompressedSize = uncompressedSize + ze.getSize();
         }
         return uncompressedSize;
     }
 
     public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException {
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(backupFile));
-        try {
-            ZipEntry zipEntry;
-            while ((zipEntry = zis.getNextEntry()) != null) {
-                if (!zipEntry.getName().equals(BackupFileUtils.DB_FILENAME_ENCRYPTED) && !zipEntry.getName().equals(BackupFileUtils.METADATA_FILENAME)) {
-                    byte[] bytes = BackupFileUtils.readFileEntry(zis);
-                    File file = new File(targetDir, zipEntry.getName());
-                    BackupFileUtils.writeBytesToFile(file, bytes);
-                }
+
+        ZipFile zipFile = new ZipFile(backupFile);
+        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            if (!entry.getName().equals(DB_FILENAME_ENCRYPTED) && !entry.getName().equals(METADATA_FILENAME)) {
+                File file = new File(targetDir, entry.getName());
+                InputStream is = zipFile.getInputStream(entry);
+                FileUtils.copyInputStreamToFile(is, file);
+                is.close();
             }
-        } finally {
-            zis.close();
         }
     }
 }
