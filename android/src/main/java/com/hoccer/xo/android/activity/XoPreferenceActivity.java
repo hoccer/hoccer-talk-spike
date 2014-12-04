@@ -248,7 +248,6 @@ public class XoPreferenceActivity extends PreferenceActivity
                 } else {
                     Toast.makeText(getBaseContext(), "Data import failed", Toast.LENGTH_LONG).show();
                 }
-                findPreference("preference_import_backup").setEnabled(true);
             }
         }.execute();
     }
@@ -286,7 +285,6 @@ public class XoPreferenceActivity extends PreferenceActivity
                 } else {
                     Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
                 }
-                findPreference("preference_chats_backup").setEnabled(true);
             }
         }.execute();
     }
@@ -324,7 +322,6 @@ public class XoPreferenceActivity extends PreferenceActivity
                 } else {
                     Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
                 }
-                findPreference("preference_complete_backup").setEnabled(true);
             }
         }.execute();
     }
