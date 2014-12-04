@@ -25,14 +25,13 @@ public class CompleteBackup extends DatabaseBackup {
         String clientName = XoApplication.getXoClient().getSelfContact().getName();
         BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, clientName, new Date());
 
-        FileFilter filter = new FileFilter() {
+        File[] files = XoApplication.getAttachmentDirectory().listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
                 return file.isFile();
             }
-        };
+        });
 
-        File[] files = XoApplication.getAttachmentDirectory().listFiles(filter);
         List<File> attachments = new ArrayList<File>();
         if (files != null) {
             attachments = Arrays.asList(files);
