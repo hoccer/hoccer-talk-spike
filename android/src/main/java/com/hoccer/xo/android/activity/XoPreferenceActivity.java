@@ -298,6 +298,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 super.onPostExecute(backup);
                 if (backup != null) {
                     Toast.makeText(getBaseContext(), "Data exported to " + backup.getFile().getAbsolutePath(), Toast.LENGTH_LONG).show();
+                    initDataImportPreferences();
                 } else {
                     Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
                 }
@@ -341,6 +342,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 super.onPostExecute(backup);
                 if (backup != null) {
                     Toast.makeText(getBaseContext(), "Data exported to " + backup.getFile().getAbsolutePath(), Toast.LENGTH_LONG).show();
+                    initDataImportPreferences();
                 } else {
                     Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
                 }
