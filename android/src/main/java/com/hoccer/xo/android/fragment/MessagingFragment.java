@@ -314,9 +314,4 @@ public class MessagingFragment extends XoListFragment
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         startActivity(intent);
     }
-
-    @Override
-    public void onAttachmentSelected(IContentObject co) {
-        mCompositionFragment.onAttachmentSelected(co);
-    }
 }

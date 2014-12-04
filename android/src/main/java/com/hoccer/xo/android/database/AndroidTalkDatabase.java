@@ -20,13 +20,13 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
-    private static AndroidTalkDatabase mInstance;
+    private static AndroidTalkDatabase sInstance;
 
     public static AndroidTalkDatabase getInstance(Context applicationContext) {
-        if (mInstance == null) {
-            mInstance = new AndroidTalkDatabase(applicationContext);
+        if (sInstance == null) {
+            sInstance = new AndroidTalkDatabase(applicationContext);
         }
-        return mInstance;
+        return sInstance;
     }
 
     private AndroidTalkDatabase(Context context) {

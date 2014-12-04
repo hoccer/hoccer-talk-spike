@@ -1,69 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/messaging_composer"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/xo_main_background">
-
-  <View
-      android:layout_width="match_parent"
-      android:layout_height="2dp"
-      android:background="@color/xo_compose_message_divider"/>
-
-  <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:gravity="top"
-      android:orientation="horizontal">
-
-    <RelativeLayout
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="5dp"
-        android:layout_gravity="center_vertical">
-
-      <ImageButton
-          android:id="@+id/ib_messaging_composer_add_attachment"
-          android:src="@drawable/ic_attachment"
-          style="?android:attr/borderlessButtonStyle"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:scaleType="centerInside"/>
-
-      <Button android:id="@+id/b_messaging_composer_add_attachments"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              style="?android:attr/borderlessButtonStyle"
-              android:background="@drawable/circle"
-              android:textColor="@color/xo_compose_message_textColor"
-              android:visibility="gone"
-              android:layout_margin="4dp"
-          />
-
-    </RelativeLayout>
-
-    <EditText
-        android:id="@+id/messaging_composer_text"
-        android:inputType="textShortMessage|textMultiLine"
-        android:hint="@string/composition_text_hint"
-        android:singleLine="false"
-        android:maxLines="10"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ll_messaging_composer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_gravity="center_vertical"
-        />
+        android:orientation="vertical"
+        android:background="@color/xo_main_background">
 
-    <ImageButton
-        android:id="@+id/btn_messaging_composer_send"
-        android:src="@drawable/ic_light_social_send_now"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"/>
+    <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/xo_compose_message_divider"/>
 
-  </LinearLayout>
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top"
+            android:orientation="horizontal">
 
+        <RelativeLayout
+                android:id="@+id/rl_attachment_button"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:padding="5dp"
+                android:layout_gravity="center_vertical"
+                style="?android:attr/borderlessButtonStyle">
+
+            <ImageView
+                    android:id="@+id/iv_attachment_none"
+                    android:src="@drawable/ic_attachment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"/>
+
+            <ImageView
+                    android:id="@+id/iv_attachment_image"
+                    android:src="@drawable/ic_light_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"
+                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:visibility="gone"/>
+
+            <ImageView
+                    android:id="@+id/iv_attachment_video"
+                    android:src="@drawable/ic_light_video"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"
+                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:visibility="gone"/>
+
+            <ImageView
+                    android:id="@+id/iv_attachment_audio"
+                    android:src="@drawable/ic_light_video"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"
+                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:visibility="gone"/>
+
+            <ImageView
+                    android:id="@+id/iv_attachment_contact"
+                    android:src="@drawable/ic_light_contact"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"
+                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:visibility="gone"/>
+
+            <ImageView
+                    android:id="@+id/iv_attachment_location"
+                    android:src="@drawable/ic_light_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"
+                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:visibility="gone"/>
+
+            <ImageView
+                    android:id="@+id/iv_attachment_data"
+                    android:src="@drawable/ic_light_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"
+                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:visibility="gone"/>
+
+            <ImageView
+                    android:id="@+id/iv_attachment_multiple"
+                    android:background="@drawable/circle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:layout_margin="4dp"
+                    android:visibility="gone"/>
+
+            <ImageView
+                    android:id="@+id/iv_attachment_error"
+                    android:src="@android:drawable/stat_notify_error"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"
+                    android:tint="@color/xo_app_attachment_incoming_color"
+                    android:visibility="gone"/>
+
+            <TextView
+                    android:id="@+id/tv_attachment_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text=""
+                    android:textColor="@color/xo_compose_message_textColor"/>
+        </RelativeLayout>
+
+        <EditText
+                android:id="@+id/messaging_composer_text"
+                android:inputType="textShortMessage|textMultiLine"
+                android:hint="@string/composition_text_hint"
+                android:singleLine="false"
+                android:maxLines="10"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                />
+
+        <ImageButton
+                android:id="@+id/btn_messaging_composer_send"
+                android:src="@drawable/ic_light_social_send_now"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"/>
+    </LinearLayout>
 </LinearLayout>

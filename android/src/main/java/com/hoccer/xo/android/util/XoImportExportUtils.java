@@ -22,7 +22,7 @@ public class XoImportExportUtils {
     public static final String HOCCER_EXPORT_FILENAME_PREFIX = "hoccer_export_";
     public static final String EXPORT_FILE_NAME_PATTERN = HOCCER_EXPORT_FILENAME_PREFIX + "%s.%s";
 
-    private static XoImportExportUtils INSTANCE = null;
+    private static XoImportExportUtils sInstance;
 
     private String databaseFilepath;
 
@@ -31,10 +31,10 @@ public class XoImportExportUtils {
     }
 
     public static XoImportExportUtils getInstance(Context context) {
-        if (INSTANCE == null) {
-            INSTANCE = new XoImportExportUtils(context);
+        if (sInstance == null) {
+            sInstance = new XoImportExportUtils(context);
         }
-        return INSTANCE;
+        return sInstance;
     }
 
     public File exportDatabaseAndAttachments() throws IOException {

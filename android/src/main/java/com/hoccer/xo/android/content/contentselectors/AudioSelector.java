@@ -4,25 +4,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.provider.MediaStore;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.artcom.hoccer.R;
-import org.apache.log4j.Logger;
 
-public class RingtoneSelector implements IContentSelector {
+public class AudioSelector implements IContentSelector {
 
-    private static final Logger LOG = Logger.getLogger(RingtoneSelector.class);
+    private final String mName;
+    private final Drawable mIcon;
 
-    private String mName;
-    private Drawable mIcon;
-
-    public RingtoneSelector(Context context) {
-        mName = context.getResources().getString(R.string.content_ringtone);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_music, true);
+    public AudioSelector(Context context) {
+        mName = context.getResources().getString(R.string.content_music);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_media, true);
     }
 
     @Override
@@ -37,7 +33,7 @@ public class RingtoneSelector implements IContentSelector {
 
     @Override
     public Intent createSelectionIntent(Context context) {
-        return new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+        return new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
     }
 
     @Override
@@ -47,7 +43,7 @@ public class RingtoneSelector implements IContentSelector {
             return null;
         }
 
-        Uri selectedContent = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+        Uri selectedContent = intent.getData();
         String[] filePathColumn = {
                 MediaStore.Audio.Media.MIME_TYPE,
                 MediaStore.Audio.Media.DATA,
