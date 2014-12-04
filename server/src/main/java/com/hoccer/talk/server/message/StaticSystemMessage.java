@@ -72,10 +72,10 @@ public class StaticSystemMessage {
     private final String mClientId;
     private final TalkClientHostInfo mClientHostInfo;
 
-    public StaticSystemMessage(String pClientId, @Nullable TalkClientHostInfo pClientHostInfo, Message pMessage) {
-        this.mClientId = pClientId;
-        this.mClientHostInfo = pClientHostInfo;
-        this.mMessage = pMessage;
+    public StaticSystemMessage(String clientId, @Nullable TalkClientHostInfo clientHostInfo, Message message) {
+        this.mClientId = clientId;
+        this.mClientHostInfo = clientHostInfo;
+        this.mMessage = message;
     }
 
     private void dumpHostInfo() {
