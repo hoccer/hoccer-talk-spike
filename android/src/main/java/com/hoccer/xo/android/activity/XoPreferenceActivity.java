@@ -99,7 +99,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     listPreference.setEnabled(false);
-                    importBackup(entries[Integer.parseInt((String) newValue)]);
+                    showImportBackupDialog(entries[Integer.parseInt((String) newValue)]);
                     return true;
                 }
             });
@@ -184,18 +184,18 @@ public class XoPreferenceActivity extends PreferenceActivity
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         if ("preference_export".equals(preference.getKey())) {
-            doExportCredentials();
+            showExportCredentialsDialog();
             return true;
         } else if ("preference_import".equals(preference.getKey())) {
-            doImportCredentials();
+            showImportCredentialsDialog();
             return true;
         } else if ("preference_chats_backup".equals(preference.getKey())) {
             preference.setEnabled(false);
-            createDatabaseBackup();
+            showDatabaseBackupDialog();
             return true;
         } else if ("preference_complete_backup".equals(preference.getKey())) {
             preference.setEnabled(false);
-            createCompleteBackup();
+            showCompleteBackupDialog();
             return true;
         } else if ("preference_database_dump".equals(preference.getKey())) {
             dumpDatabase();
@@ -205,7 +205,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
 
-    private void importBackup(final String importFileName) {
+    private void showImportBackupDialog(final String importFileName) {
         XoDialogs.showInputPasswordDialog("ImportBackupDialog",
                 R.string.dialog_import_credentials_title,
                 this,
@@ -222,7 +222,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         );
     }
 
-    private void doImportBackup(final String importFileName, final String password) {
+    private void importBackup(final String importFileName, final String password) {
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
@@ -263,7 +263,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         }.execute();
     }
 
-    private void createDatabaseBackup() {
+    private void showDatabaseBackupDialog() {
 
         XoDialogs.showInputPasswordDialog("CreateDatabaseBackupDialog",
                 R.string.dialog_export_credentials_title,
@@ -281,7 +281,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         );
     }
 
-    private void doCreateDatabaseBackup(final String password) {
+    private void createDatabaseBackup(final String password) {
         new AsyncTask<Void, Void, Backup>() {
             @Override
             protected Backup doInBackground(Void... params) {
@@ -307,7 +307,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         }.execute();
     }
 
-    private void createCompleteBackup() {
+    private void showCompleteBackupDialog() {
 
         XoDialogs.showInputPasswordDialog("CreateDatabaseBackupDialog",
                 R.string.dialog_export_credentials_title,
@@ -325,7 +325,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         );
     }
 
-    private void doCreateCompleteBackup(final String password) {
+    private void createCompleteBackup(final String password) {
         new AsyncTask<Void, Void, Backup>() {
             @Override
             protected Backup doInBackground(Void... params) {
@@ -351,7 +351,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         }.execute();
     }
 
-    private void doImportCredentials() {
+    private void showImportCredentialsDialog() {
         final File credentialsFile = new File(XoApplication.getExternalStorage() + File.separator + CREDENTIALS_TRANSFER_FILE);
         if (credentialsFile == null || !credentialsFile.exists()) {
             Toast.makeText(this, getString(R.string.cant_find_credentials), Toast.LENGTH_LONG).show();
@@ -385,7 +385,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         }
     }
 
-    private void doExportCredentials() {
+    private void showExportCredentialsDialog() {
         XoDialogs.showInputPasswordDialog("ExportCredentialsDialog",
                 R.string.dialog_export_credentials_title,
                 this,
