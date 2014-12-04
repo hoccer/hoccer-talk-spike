@@ -56,7 +56,7 @@ public class BackupFileUtilsTest {
         String filename = BackupFileUtils.createUniqueBackupFilename() + ".zip";
         File backupFile = new File(getClass().getResource("").getFile(), filename);
 
-        BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, CLIENT_NAME, new Date());
+        BackupMetadata metadata = new BackupMetadata(BackupType.DATABASE, CLIENT_NAME, new Date());
 
         BackupFileUtils.createBackupFile(backupFile, DATABASE_FILE, metadata, PASSWORD);
         assertTrue("Creating backup failed", backupFile.exists());
