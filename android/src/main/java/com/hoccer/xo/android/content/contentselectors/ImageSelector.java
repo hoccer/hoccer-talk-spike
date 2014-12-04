@@ -7,10 +7,10 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -19,8 +19,8 @@ public class ImageSelector implements IContentSelector {
 
     private static final Logger LOG = Logger.getLogger(ImageSelector.class);
 
-    private final String mName;
-    private final Drawable mIcon;
+    private String mName;
+    private Drawable mIcon;
 
     public ImageSelector(Context context) {
         mName = context.getResources().getString(R.string.content_images);
@@ -60,6 +60,14 @@ public class ImageSelector implements IContentSelector {
         }
 
         return creator.apply(context, intent);
+    }
+
+    protected void setName(String name) {
+        mName = name;
+    }
+
+    protected void setIcon(Drawable icon) {
+        mIcon = icon;
     }
 
     protected static IContentCreator findContentObjectCreator(Uri selectedContent) {

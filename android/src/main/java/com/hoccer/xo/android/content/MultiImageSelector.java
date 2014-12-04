@@ -2,7 +2,6 @@ package com.hoccer.xo.android.content;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.IContentObject;
@@ -17,23 +16,11 @@ import java.util.ArrayList;
 public class MultiImageSelector extends ImageSelector {
 
     private static final Logger LOG = Logger.getLogger(MultiImageSelector.class);
-    private final String mName;
-    private final Drawable mIcon;
 
     public MultiImageSelector(Context context) {
         super(context);
-        mName = context.getResources().getString(R.string.content_multi_images);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_image, true);
-    }
-
-    @Override
-    public String getName() {
-        return mName;
-    }
-
-    @Override
-    public Drawable getContentIcon() {
-        return mIcon;
+        setName(context.getResources().getString(R.string.content_multi_images));
+        setIcon(ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_image, true));
     }
 
     @Override
