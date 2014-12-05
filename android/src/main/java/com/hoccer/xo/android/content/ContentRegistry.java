@@ -15,7 +15,6 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.base.IXoFragment;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.contentselectors.*;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -247,8 +246,7 @@ public class ContentRegistry {
 
                 if (intent == null) {
                     // selectors without intent can return the result immediately
-                    IContentObject contentObject = selector.createObjectFromSelectionResult(fragment.getActivity(), null);
-                    ((IXoFragment) fragment).onAttachmentSelected(contentObject);
+                    fragment.onActivityResult(requestCode, Activity.RESULT_OK, null);
                 } else {
                     startExternalActivityForResult(fragment, intent, requestCode);
                 }
