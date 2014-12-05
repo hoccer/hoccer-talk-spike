@@ -27,7 +27,7 @@ public class BackupFactory {
         }
 
         if (isZip(backupFile)) {
-            BackupMetadata metadata = BackupFileUtils.readMetadata(backupFile);
+            BackupMetadata metadata = BackupFileUtils.extractMetadata(backupFile);
             return readBackup(backupFile, metadata);
         }
 

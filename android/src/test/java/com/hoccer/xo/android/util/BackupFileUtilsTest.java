@@ -83,7 +83,7 @@ public class BackupFileUtilsTest {
 
     @Test
     public void testReadMetadata() throws Exception {
-        BackupMetadata metadata = BackupFileUtils.readMetadata(BACKUP_COMPLETE_FILE);
+        BackupMetadata metadata = BackupFileUtils.extractMetadata(BACKUP_COMPLETE_FILE);
         assertNotNull(metadata);
         assertEquals(BackupType.COMPLETE, metadata.getBackupType());
         assertEquals(CLIENT_NAME, metadata.getClientName());
@@ -93,7 +93,7 @@ public class BackupFileUtilsTest {
     @Test
     public void testGetBackupFilesMetadata() {
         List<Backup> backupFiles = BackupFileUtils.getBackups(BackupTestResources.getResourceDir());
-        assertEquals(2, backupFiles.size());
+        assertEquals(3, backupFiles.size());
     }
 
     @Test

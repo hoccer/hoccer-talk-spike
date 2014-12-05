@@ -35,15 +35,24 @@ public class BackupFileUtils {
     }
 
     public static void createBackupFile(File out, BackupMetadata metadata, File database, String password, List<File> attachments) throws Exception {
-        byte[] encryptedDatabase = encryptFile(database, password);
+        byte[] encryptedDatabase = readDataFromFileEncrypted(database, password);
 
         ObjectMapper mapper = new ObjectMapper();
         String metadataJson = mapper.writeValueAsString(metadata);
 
-        createZip(out, metadataJson, encryptedDatabase, attachments);
+        try {
+            createZip(out, metadataJson, encryptedDatabase, attachments);
+        } catch (IOException e) {
+            try {
+                FileUtils.forceDelete(out);
+            } catch (IOException e1) {
+                LOG.info("Could not cleanup. Failed to delete " + out.getAbsolutePath() + ":" + e1.getMessage());
+            }
+            throw e;
+        }
     }
 
-    private static byte[] encryptFile(File input, String password) throws Exception {
+    private static byte[] readDataFromFileEncrypted(File input, String password) throws Exception {
         FileInputStream in = new FileInputStream(input);
         byte[] bytes = IOUtils.toByteArray(in);
         in.close();
@@ -89,28 +98,52 @@ public class BackupFileUtils {
         zos.closeEntry();
     }
 
-    public static BackupMetadata readMetadata(File backupFile) throws IOException {
-        String result = null;
+    public static BackupMetadata extractMetadata(File backupFile) throws IOException {
+        ZipFile zipFile = new ZipFile(backupFile);
+        ZipEntry entry = zipFile.getEntry(METADATA_FILENAME);
+        if (entry == null) {
+            throw new FileNotFoundException(METADATA_FILENAME + " not found in " + backupFile.getName());
+        }
 
+        InputStream is = zipFile.getInputStream(entry);
+        ObjectMapper objectMapper = new ObjectMapper();
+        BackupMetadata metadata = objectMapper.readValue(is, BackupMetadata.class);
+        is.close();
+
+        return metadata;
+    }
+
+    public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
+        ZipFile zipFile = new ZipFile(backupFile);
+        ZipEntry entry = zipFile.getEntry(DB_FILENAME_ENCRYPTED);
+        if (entry == null) {
+            throw new FileNotFoundException(DB_FILENAME_ENCRYPTED + " not found in " + backupFile.getName());
+        }
+
+        InputStream is = zipFile.getInputStream(entry);
+        writeDataToFileDecrypted(target, is, password);
+        is.close();
+    }
+
+    private static void writeDataToFileDecrypted(File target, InputStream is, String password) throws Exception {
+        byte[] encrypted = IOUtils.toByteArray(is);
+        byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
+        FileUtils.writeByteArrayToFile(target, decrypted);
+    }
+
+    public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException {
         ZipFile zipFile = new ZipFile(backupFile);
         Enumeration<? extends ZipEntry> entries = zipFile.entries();
+
         while (entries.hasMoreElements()) {
             ZipEntry entry = entries.nextElement();
-            if (entry.getName().equals(METADATA_FILENAME)) {
+            if (!entry.getName().equals(DB_FILENAME_ENCRYPTED) && !entry.getName().equals(METADATA_FILENAME)) {
+                File file = new File(targetDir, entry.getName());
                 InputStream is = zipFile.getInputStream(entry);
-                byte[] bytes = IOUtils.toByteArray(is);
+                FileUtils.copyInputStreamToFile(is, file);
                 is.close();
-                result = new String(bytes, "UTF-8");
-                break;
             }
         }
-
-        if (result == null) {
-            throw new FileNotFoundException(BackupFileUtils.METADATA_FILENAME + " not found in " + backupFile.getName());
-        }
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(result, BackupMetadata.class);
     }
 
     public static List<Backup> getBackups(File dir) {
@@ -137,25 +170,6 @@ public class BackupFileUtils {
         return String.format(BACKUP_FILENAME_PATTERN, timestamp);
     }
 
-    public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
-        ZipFile zipFile = new ZipFile(backupFile);
-        Enumeration<? extends ZipEntry> entries = zipFile.entries();
-        while (entries.hasMoreElements()) {
-            ZipEntry entry = entries.nextElement();
-            if (entry.getName().equals(DB_FILENAME_ENCRYPTED)) {
-
-                InputStream is = zipFile.getInputStream(entry);
-                byte[] encrypted = IOUtils.toByteArray(is);
-                is.close();
-
-                byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
-                FileUtils.writeByteArrayToFile(target, decrypted);
-
-                break;
-            }
-        }
-    }
-
     public static long getUncompressedSize(File zipFile) throws IOException {
         long uncompressedSize = 0;
         ZipFile zf = new ZipFile(zipFile);
@@ -165,21 +179,6 @@ public class BackupFileUtils {
             uncompressedSize = uncompressedSize + ze.getSize();
         }
         return uncompressedSize;
-    }
-
-    public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException {
-        ZipFile zipFile = new ZipFile(backupFile);
-        Enumeration<? extends ZipEntry> entries = zipFile.entries();
-
-        while (entries.hasMoreElements()) {
-            ZipEntry entry = entries.nextElement();
-            if (!entry.getName().equals(DB_FILENAME_ENCRYPTED) && !entry.getName().equals(METADATA_FILENAME)) {
-                File file = new File(targetDir, entry.getName());
-                InputStream is = zipFile.getInputStream(entry);
-                FileUtils.copyInputStreamToFile(is, file);
-                is.close();
-            }
-        }
     }
 
     public static long getAvailableDiskStorage() {
