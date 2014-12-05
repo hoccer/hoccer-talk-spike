@@ -686,7 +686,14 @@ public class UpdateAgent extends NotificationDeferrer {
         clearRequestContext(context);
     }
 
+
     public void requestUserAlert(final String clientId, final StaticSystemMessage.Message message) {
+        TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(clientId);
+        String messageString = new StaticSystemMessage(clientId, clientHostInfo, message).generateMessage();
+        requestUserAlert(clientId, messageString);
+    }
+
+    public void requestUserAlert(final String clientId, final String message) {
         Runnable notificationGenerator = new Runnable() {
             @Override
             public void run() {
@@ -695,14 +702,9 @@ public class UpdateAgent extends NotificationDeferrer {
                     if (conn == null || !conn.isConnected()) {
                         return;
                     }
-                    TalkClient talkClient = mDatabase.findClientById(clientId);
-                    if (talkClient == null) {
-                        return;
-                    }
-                    TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(talkClient.getClientId());
-                    String messageString = new StaticSystemMessage(talkClient, clientHostInfo, message).generateMessage();
+
                     LOG.info("requestUserAlert");
-                    conn.getClientRpc().alertUser(messageString);
+                    conn.getClientRpc().alertUser(message);
                 } catch (Throwable t) {
                     LOG.error("caught and swallowed exception escaping runnable", t);
                 }
@@ -721,13 +723,10 @@ public class UpdateAgent extends NotificationDeferrer {
                     if (conn == null || !conn.isConnected()) {
                         return;
                     }
-                    TalkClient talkClient = mDatabase.findClientById(clientId);
-                    if (talkClient == null) {
-                        return;
-                    }
-                    TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(talkClient.getClientId());
-                    String messageString = new StaticSystemMessage(talkClient, clientHostInfo, message).generateMessage();
-                    //String messageString = "setting '"+setting+"' should be updated to value '"+value+"'";
+
+                    TalkClientHostInfo clientHostInfo = mDatabase.findClientHostInfoForClient(clientId);
+                    String messageString = new StaticSystemMessage(clientId, clientHostInfo, message).generateMessage();
+
                     LOG.info("requestSettingUpdate");
                     conn.getClientRpc().settingsChanged(setting, value, messageString);
                 } catch (Throwable t) {
