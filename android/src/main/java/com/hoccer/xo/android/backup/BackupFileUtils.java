@@ -12,6 +12,7 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
@@ -118,7 +119,7 @@ public class BackupFileUtils {
         return metadata;
     }
 
-    public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws Exception {
+    public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws IOException, CryptoJSON.DecryptionException {
         ZipFile zipFile = new ZipFile(backupFile);
         ZipEntry entry = zipFile.getEntry(DB_FILENAME_ENCRYPTED);
         if (entry == null) {
@@ -130,7 +131,7 @@ public class BackupFileUtils {
         is.close();
     }
 
-    private static void writeDataToFileDecrypted(File target, InputStream is, String password) throws Exception {
+    private static void writeDataToFileDecrypted(File target, InputStream is, String password) throws IOException, CryptoJSON.DecryptionException {
         byte[] encrypted = IOUtils.toByteArray(is);
         byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
         FileUtils.writeByteArrayToFile(target, decrypted);

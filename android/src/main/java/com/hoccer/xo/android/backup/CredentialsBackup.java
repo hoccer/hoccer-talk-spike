@@ -1,13 +1,11 @@
 package com.hoccer.xo.android.backup;
 
-import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.sql.SQLException;
 import java.util.Date;
 
 
@@ -55,7 +53,7 @@ public class CredentialsBackup extends Backup {
     }
 
     @Override
-    public void restore(String password) throws IOException, SQLException, NoClientIdInPresenceException {
+    public void restore(String password) throws Exception {
         InputStream in = new FileInputStream(mBackupFile);
         byte[] credentialsData = new byte[(int) mBackupFile.length()];
         in.read(credentialsData);

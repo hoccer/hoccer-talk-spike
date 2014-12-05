@@ -3,7 +3,6 @@ package com.hoccer.xo.android.backup;
 import com.hoccer.xo.android.XoApplication;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -37,7 +36,7 @@ public class CompleteBackup extends DatabaseBackup {
     }
 
     @Override
-    public void restore(String password) throws IOException, NotEnoughDiskSpaceAvailable {
+    public void restore(String password) throws Exception {
         File databaseTarget = new File(DB_PATH_NAME);
         File attachmentsTargetDir = XoApplication.getAttachmentDirectory();
         new CompleteBackupRestoreOperation(mBackupFile, databaseTarget, attachmentsTargetDir, password).invoke();

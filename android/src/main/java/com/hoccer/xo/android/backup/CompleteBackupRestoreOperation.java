@@ -41,7 +41,7 @@ public class CompleteBackupRestoreOperation {
         mTempDatabaseFile = new File(attachmentsTargetDir.getParent(), TEMP_DB_DIR_NAME + File.separator + databaseTarget.getName());
     }
 
-    public void invoke() throws IOException {
+    public void invoke() throws Exception {
         try {
             restore();
         } catch (Exception e) {
@@ -51,7 +51,7 @@ public class CompleteBackupRestoreOperation {
         }
     }
 
-    private void restore() throws Exception {
+    private void restore() throws IOException, CryptoJSON.DecryptionException {
         extractAttachmentsToTempDir();
         extractAndDecryptDatabaseToTempDir();
         keepCurrentAttachments();
@@ -68,7 +68,7 @@ public class CompleteBackupRestoreOperation {
         BackupFileUtils.extractAttachmentFiles(mBackupFile, mTempAttachmentsDir);
     }
 
-    private void extractAndDecryptDatabaseToTempDir() throws Exception {
+    private void extractAndDecryptDatabaseToTempDir() throws IOException, CryptoJSON.DecryptionException {
         File tempDatabaseDirectory = mTempDatabaseFile.getParentFile();
         if (tempDatabaseDirectory.exists()) {
             FileUtils.forceDelete(tempDatabaseDirectory);
