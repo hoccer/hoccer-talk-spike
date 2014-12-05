@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.backup;
 
+import com.hoccer.talk.crypto.CryptoJSON;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -22,7 +23,6 @@ public class CompleteBackupRestoreOperation {
     private final File mTempDatabaseFile;
     private File mOldAttachmentsDir;
     private File mOldDatabaseFile;
-
 
     private static final FileFilter IS_NOT_DIRECTORY_FILTER = new FileFilter() {
         @Override
