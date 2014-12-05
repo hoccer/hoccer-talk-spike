@@ -15,7 +15,7 @@ public class BackupTestResources {
     public static final String RESOURCE_DB_FILE = "/database.db";
     public static final String RESOURCE_ATTACHMENT_FILE_01 = "/IMG_20141120_130456_432.jpg";
 
-    private static final String ATTACHMENTS_TARGET_DIR_NAME = "attachments_target";
+    private static final String ATTACHMENTS_TARGET_DIR_NAME = "attachments/attachments_target";
     private static final String DB_TARGET_FILE_PATH = "/db_target/database.db";
 
     public static File getResourceFile(String path) {
@@ -41,11 +41,11 @@ public class BackupTestResources {
         return attachmentFiles;
     }
 
-    public static File createAttachmentsTargetDirectory() {
-        return new File(BackupFileUtilsTest.class.getResource("").getFile(), ATTACHMENTS_TARGET_DIR_NAME);
+    public static File getAttachmentsTargetDirectory() {
+        return new File(getResourceDir(), ATTACHMENTS_TARGET_DIR_NAME);
     }
 
-    public static File createDatabaseTargetFile() {
-        return new File(BackupFileUtilsTest.class.getResource("").getFile(), DB_TARGET_FILE_PATH);
+    public static File getDatabaseTargetFile() {
+        return new File(getResourceDir(), DB_TARGET_FILE_PATH);
     }
 }

@@ -28,8 +28,8 @@ public class BackupFileUtilsTest {
     private static final File DATABASE_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_DB_FILE);
     private static final List<File> ATTACHMENT_FILES = BackupTestResources.getAttachmentFiles();
 
-    private static final File ATTACHMENTS_TARGET_DIR = BackupTestResources.createAttachmentsTargetDirectory();
-    private static final File DB_TARGET_FILE = BackupTestResources.createDatabaseTargetFile();
+    private static final File ATTACHMENTS_TARGET_DIR = BackupTestResources.getAttachmentsTargetDirectory();
+    private static final File DB_TARGET_FILE = BackupTestResources.getDatabaseTargetFile();
 
     public static final String CLIENT_NAME = "clientName";
     public static final String PASSWORD = "12345678";
