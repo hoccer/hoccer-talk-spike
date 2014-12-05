@@ -24,13 +24,10 @@ public class CompleteBackupRestoreOperation {
     private File mOldDatabaseFile;
 
 
-    FileFilter mFileFilter = new FileFilter() {
+    private static final FileFilter IS_NOT_DIRECTORY_FILTER = new FileFilter() {
         @Override
         public boolean accept(File file) {
-            if (file.isDirectory() && "Backups".equals(file.getName())) {
-                return false;
-            }
-            return true;
+            return !file.isDirectory();
         }
     };
 
@@ -64,32 +61,36 @@ public class CompleteBackupRestoreOperation {
     }
 
     private void extractAttachmentsToTempDir() throws IOException {
+        if (mTempAttachmentsDir.exists()) {
+            FileUtils.forceDelete(mTempAttachmentsDir);
+        }
         FileUtils.forceMkdir(mTempAttachmentsDir);
         BackupFileUtils.extractAttachmentFiles(mBackupFile, mTempAttachmentsDir);
     }
 
     private void extractAndDecryptDatabaseToTempDir() throws Exception {
+        File tempDatabaseDirectory = mTempDatabaseFile.getParentFile();
+        if (tempDatabaseDirectory.exists()) {
+            FileUtils.forceDelete(tempDatabaseDirectory);
+        }
+        FileUtils.forceMkdir(tempDatabaseDirectory);
         BackupFileUtils.extractAndDecryptDatabase(mBackupFile, mTempDatabaseFile, mPassword);
     }
 
     private void keepCurrentAttachments() throws IOException {
-        if (mAttachmentsTargetDir.exists()) {
-            mOldAttachmentsDir = new File(mAttachmentsTargetDir.getPath() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
-            for (File attachment : mAttachmentsTargetDir.listFiles(mFileFilter)) {
-                FileUtils.moveFileToDirectory(attachment, mOldAttachmentsDir, true);
-            }
+        mOldAttachmentsDir = new File(mAttachmentsTargetDir.getPath() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
+        for (File attachment : mAttachmentsTargetDir.listFiles(IS_NOT_DIRECTORY_FILTER)) {
+            FileUtils.moveFileToDirectory(attachment, mOldAttachmentsDir, true);
         }
     }
 
     private void keepCurrentDatabase() throws IOException {
-        if (mDatabaseTarget.exists()) {
-            mOldDatabaseFile = new File(mDatabaseTarget.getPath() + "." + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
-            FileUtils.moveFile(mDatabaseTarget, mOldDatabaseFile);
-        }
+        mOldDatabaseFile = new File(mDatabaseTarget.getPath() + "." + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
+        FileUtils.moveFile(mDatabaseTarget, mOldDatabaseFile);
     }
 
     private void moveAttachmentsToTargetDir() throws IOException {
-        for (File attachment : mTempAttachmentsDir.listFiles(mFileFilter)) {
+        for (File attachment : mTempAttachmentsDir.listFiles(IS_NOT_DIRECTORY_FILTER)) {
             FileUtils.moveFileToDirectory(attachment, mAttachmentsTargetDir, true);
         }
     }
@@ -100,7 +101,6 @@ public class CompleteBackupRestoreOperation {
 
     private void cleanup() throws IOException {
         deleteTemp();
-//        deleteOld();      //TODO: discuss if old attachments and db should be kept
     }
 
     private void deleteTemp() throws IOException {
