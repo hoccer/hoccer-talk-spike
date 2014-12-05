@@ -198,17 +198,29 @@ public class XoPreferenceActivity extends PreferenceActivity
 
                     @Override
                     public void onClick(DialogInterface dialog, int id, final int selectedItem) {
-                        XoDialogs.showInputPasswordDialog("ImportBackupPasswordDialog",
-                                R.string.dialog_import_credentials_title,
-                                XoPreferenceActivity.this,
-                                new XoDialogs.OnTextSubmittedListener() {
 
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int id, String password) {
-                                        importBackup(backups.get(selectedItem), password);
-                                    }
-                                }
-                        );
+                        Backup backup = backups.get(selectedItem);
+                        try {
+                            if (BackupFileUtils.isEnoughDiskSpaceAvailable(backup.getFile())) {
+                                XoDialogs.showInputPasswordDialog("ImportBackupPasswordDialog",
+                                        R.string.dialog_import_credentials_title,
+                                        XoPreferenceActivity.this,
+                                        new XoDialogs.OnTextSubmittedListener() {
+
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int id, String password) {
+                                                importBackup(backups.get(selectedItem), password);
+                                            }
+                                        }
+                                );
+                            } else {
+                                XoDialogs.showOkDialog("NotEnoughDiskSpaceAvailableDialog",
+                                        R.string.dialog_import_credentials_title,
+                                        R.string.dialog_not_enough_disk_space_dialog, XoPreferenceActivity.this);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
 

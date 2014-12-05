@@ -456,6 +456,11 @@
     <string name="hoccer_3_0">Hoccer 3.0</string>
     <string name="welcome_hoccer_classic_users">Hoccer now supports full messaging functions next to nearby data sharing. You can stay anonymous or connect with your friends. Yay.</string>
 
+    <!-- Backup and Restore -->
+    <string name="dialog_not_enough_disk_space_dialog">Sorry, not enough free disk space available for restoring
+        backup.
+    </string>
+
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
         <item quantity="other">%d Contacts</item>

@@ -432,6 +432,11 @@
     <string name="hoccer_3_0">Hoccer 3.0</string>
     <string name="welcome_hoccer_classic_users">Hoccer hat jetzt eine komplette Messaging Funktion zusätzlich zum direkten Datenaustausch.\nDu kannst wie bisher anonym Daten im \"in der Nähe\" - Modus austauschen oder dich direkt mit deinen Freunden verbinden.</string>
 
+    <!-- Backup and Restore -->
+    <string name="dialog_not_enough_disk_space_dialog">Leider ist nicht genügend Speicherplatz vorhanden um die
+        Sicherung wiederherzustellen.
+    </string>
+
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
         <item quantity="other">%d Kontakte</item>
