@@ -45,7 +45,7 @@ public class CompleteBackupRestoreOperation {
         try {
             restore();
         } catch (Exception e) {
-            restoreOld();
+            rollback();
         } finally {
             cleanup();
         }
@@ -125,19 +125,19 @@ public class CompleteBackupRestoreOperation {
         }
     }
 
-    private void restoreOld() throws IOException {
-        restoreOldDatabase();
-        restoreOldAttachments();
+    private void rollback() throws IOException {
+        rollbackDatabase();
+        rollbackAttachments();
         deleteOld();
     }
 
-    private void restoreOldAttachments() throws IOException {
+    private void rollbackAttachments() throws IOException {
         if (mOldAttachmentsDir.exists()) {
             FileUtils.moveDirectory(mOldAttachmentsDir, mAttachmentsTargetDir);
         }
     }
 
-    private void restoreOldDatabase() throws IOException {
+    private void rollbackDatabase() throws IOException {
         if (mOldDatabaseFile.exists()) {
             FileUtils.moveFile(mOldDatabaseFile, mDatabaseTarget);
         }
