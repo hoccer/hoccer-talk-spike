@@ -16,13 +16,11 @@ import android.preference.PreferenceScreen;
 import android.view.*;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.exceptions.NoClientIdInPresenceException;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.Backup;
 import com.hoccer.xo.android.backup.BackupFactory;
 import com.hoccer.xo.android.backup.BackupFileUtils;
-import com.hoccer.xo.android.backup.CompleteBackup;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
 import org.apache.commons.io.FileUtils;
@@ -221,22 +219,13 @@ public class XoPreferenceActivity extends PreferenceActivity
             @Override
             protected Boolean doInBackground(Void... params) {
                 try {
-                    backup.restore(password);
-                    return true;
-                } catch (BackupFactory.BackupTypeNotSupportedException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } catch (NoClientIdInPresenceException e) {
-                    e.printStackTrace();
-                } catch (CompleteBackup.NotEnoughDiskSpaceAvailable e) {
-                    e.printStackTrace();
+                    if (BackupFileUtils.isEnoughDiskSpaceAvailable(backup.getFile())) {
+                        backup.restore(password);
+                        return true;
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
                 return false;
             }
 

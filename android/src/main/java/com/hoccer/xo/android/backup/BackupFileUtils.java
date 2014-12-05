@@ -190,4 +190,13 @@ public class BackupFileUtils {
         StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
         return (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
     }
+
+    public static boolean isEnoughDiskSpaceAvailable(File backupFile) throws IOException {
+        long requiredDiskSpace = BackupFileUtils.getUncompressedSize(backupFile);
+        long availableDiskSpace = BackupFileUtils.getAvailableDiskStorage();
+        if (requiredDiskSpace < availableDiskSpace) {
+            return true;
+        }
+        return false;
+    }
 }
