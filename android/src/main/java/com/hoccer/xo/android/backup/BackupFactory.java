@@ -31,7 +31,7 @@ public class BackupFactory {
             return readBackup(backupFile, metadata);
         }
 
-        throw new IllegalArgumentException("Extension " + FilenameUtils.getExtension(backupFile.getName()) + " of " + backupFile.getName() + "is not supported.");
+        throw new IOException("Extension " + FilenameUtils.getExtension(backupFile.getName()) + " of " + backupFile.getName() + " is not supported.");
     }
 
     private static boolean isJson(File backupFile) {
