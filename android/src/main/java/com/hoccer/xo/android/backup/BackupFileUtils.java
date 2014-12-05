@@ -27,8 +27,6 @@ public class BackupFileUtils {
     public static final String METADATA_FILENAME = "metadata.json";
 
     private static final Logger LOG = Logger.getLogger(BackupFileUtils.class.getName());
-    public static final String TEMP_ATTACHMENTS_DIR_NAME = "tmp_attachments";
-    public static final String TEMP_DB_DIR_NAME = "tmp_db";
 
     public static final FileFilter IS_FILE_AND_NOT_HIDDEN_FILTER = new FileFilter() {
         @Override

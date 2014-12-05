@@ -12,6 +12,8 @@ import java.util.Date;
 public class CompleteBackupRestoreOperation {
 
     private static final Logger LOG = Logger.getLogger(CompleteBackupRestoreOperation.class.getName());
+    private static final String TEMP_ATTACHMENTS_DIR_NAME = "tmp_attachments";
+    private static final String TEMP_DB_DIR_NAME = "tmp_db";
 
     private final File mBackupFile;
     private final File mDatabaseTarget;
@@ -40,8 +42,8 @@ public class CompleteBackupRestoreOperation {
         mAttachmentsTargetDir = attachmentsTargetDir;
         mPassword = password;
 
-        mTempAttachmentsDir = new File(attachmentsTargetDir.getParent(), BackupFileUtils.TEMP_ATTACHMENTS_DIR_NAME);
-        mTempDatabaseFile = new File(attachmentsTargetDir.getParent(), BackupFileUtils.TEMP_DB_DIR_NAME + File.separator + databaseTarget.getName());
+        mTempAttachmentsDir = new File(attachmentsTargetDir.getParent(), TEMP_ATTACHMENTS_DIR_NAME);
+        mTempDatabaseFile = new File(attachmentsTargetDir.getParent(), TEMP_DB_DIR_NAME + File.separator + databaseTarget.getName());
     }
 
     public void invoke() throws IOException {
