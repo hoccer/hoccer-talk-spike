@@ -23,7 +23,7 @@ public class CredentialsBackup extends Backup {
         Credentials credentials = XoApplication.getXoClient().exportCredentials();
         final byte[] credentialsContainer = credentials.toEncryptedBytes(password);
 
-        if(exists()) {
+        if (exists()) {
             LOG.info("Overwriting existing credentials.json backup file.");
         }
 
