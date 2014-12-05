@@ -46,6 +46,7 @@ public class CompleteBackupRestoreOperation {
             restore();
         } catch (Exception e) {
             rollback();
+            throw e;
         } finally {
             cleanup();
         }
