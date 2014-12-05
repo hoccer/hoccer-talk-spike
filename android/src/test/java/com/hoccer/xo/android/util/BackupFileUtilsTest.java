@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
@@ -97,8 +96,8 @@ public class BackupFileUtilsTest {
     }
 
     @Test
-    public void testImportDatabaseBackup() throws Exception {
-        BackupFileUtils.restoreBackup(BACKUP_DB_FILE, DB_TARGET_FILE, PASSWORD);
+    public void testExtractAndDecryptDatabase() throws Exception {
+        BackupFileUtils.extractAndDecryptDatabase(BACKUP_DB_FILE, DB_TARGET_FILE, PASSWORD);
         assertTrue(DB_TARGET_FILE.exists());
         assertTrue(DB_TARGET_FILE.length() > 0);
 

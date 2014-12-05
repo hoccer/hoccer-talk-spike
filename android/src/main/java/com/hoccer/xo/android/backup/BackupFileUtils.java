@@ -30,6 +30,13 @@ public class BackupFileUtils {
     public static final String TEMP_ATTACHMENTS_DIR_NAME = "tmp_attachments";
     public static final String TEMP_DB_DIR_NAME = "tmp_db";
 
+    public static final FileFilter IS_FILE_AND_NOT_HIDDEN_FILTER = new FileFilter() {
+        @Override
+        public boolean accept(File file) {
+            return file.isFile() && !file.isHidden();
+        }
+    };
+
     public static void createBackupFile(File out, BackupMetadata metadata, File database, String password) throws Exception {
         createBackupFile(out, metadata, database, password, Collections.<File>emptyList());
     }
@@ -149,7 +156,7 @@ public class BackupFileUtils {
     public static List<Backup> getBackups(File dir) {
         List<Backup> backups = new ArrayList<Backup>();
 
-        File[] files = dir.listFiles();
+        File[] files = dir.listFiles(IS_FILE_AND_NOT_HIDDEN_FILTER);
         if (files != null) {
             for (File file : files) {
                 try {
