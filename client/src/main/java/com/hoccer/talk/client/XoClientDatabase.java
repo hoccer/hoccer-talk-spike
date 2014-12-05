@@ -113,7 +113,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public void savePresence(TalkPresence presence) throws NoClientIdInPresenceException, SQLException {
         if (presence.getClientId() == null) {
-            throw new NoClientIdInPresenceException("Client id is null for " + presence);
+            throw new NoClientIdInPresenceException("Client id is null.");
         }
         mPresences.createOrUpdate(presence);
     }
