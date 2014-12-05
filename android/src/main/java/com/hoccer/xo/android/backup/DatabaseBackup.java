@@ -33,7 +33,7 @@ public class DatabaseBackup extends Backup {
     @Override
     public void restore(String password) throws Exception {
         File databaseTarget = new File(DB_PATH_NAME);
-        BackupFileUtils.restoreBackup(mBackupFile, databaseTarget, password);
+        BackupFileUtils.extractAndDecryptDatabase(mBackupFile, databaseTarget, password);
     }
 
     @Nullable
