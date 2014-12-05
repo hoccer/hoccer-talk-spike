@@ -208,29 +208,14 @@ public class CameraPreviewView extends ViewGroup implements SurfaceHolder.Callba
             }
 
             mCamera.startPreview();
-
-            try {
-                mCamera.autoFocus(mAutoFocusCallback);
-            } catch (RuntimeException e) {
-                // autoFocus() throws on Sony Xperia Z3 compact, see #627.
-                LOG.error("Error starting auto-focus", e);
-            }
+            mCamera.autoFocus(mAutoFocusCallback);
         }
     }
 
     public void stopPreview() {
         if (mCamera != null) {
             mAutoFocusHandler.removeCallbacks(mAutoFocusRunnable);
-
-            try {
-                mCamera.cancelAutoFocus();
-            } catch (RuntimeException e) {
-                // If autoFocus() can throw (see above), maybe cancelAutoFocus() can
-                // throw, too. Since we don't have the device here to test, let's better
-                // be safe than sorry.
-                LOG.error("Error stopping auto-focus", e);
-            }
-
+            mCamera.cancelAutoFocus();
             mCamera.stopPreview();
         }
     }
