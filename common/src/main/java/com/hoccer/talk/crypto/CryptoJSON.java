@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.codec.binary.Base64;
 
+import java.io.IOException;
+
 /**
  * Provides utility methods to encrypt/decrypt a given string in/from a encrypted JSON container.
  */
@@ -45,37 +47,51 @@ public class CryptoJSON {
      * @return The byte array of the decrypted content.
      * @throws Exception
      */
-    public static byte[] decrypt(final byte[] container, final String password, final String expectedContentType) throws Exception {
+    public static byte[] decrypt(final byte[] container, final String password, final String expectedContentType) throws IOException, DecryptionException {
         final ObjectMapper jsonMapper = new ObjectMapper();
         final JsonNode json = jsonMapper.readTree(container);
+
         if (json == null || !json.isObject()) {
-            throw new Exception("parseEncryptedContainer: not a json object");
+            throw new IOException("parseEncryptedContainer: not a json object");
         }
         final JsonNode containerNode = json.get("container");
         if (containerNode == null || !"AESPBKDF2".equals(containerNode.asText())) {
-            throw new Exception("parseEncryptedContainer: bad or missing container identifier");
+            throw new IOException("parseEncryptedContainer: bad or missing container identifier");
         }
         final JsonNode contentTypeNode = json.get("contentType");
         if (contentTypeNode == null || !contentTypeNode.asText().equals(expectedContentType)) {
-            throw new Exception("parseEncryptedContainer: wrong or missing contentType");
+            throw new IOException("parseEncryptedContainer: wrong or missing contentType");
         }
         final JsonNode saltNode = json.get("salt");
         if (saltNode == null) {
-            throw new Exception("parseEncryptedContainer: wrong or missing salt");
+            throw new IOException("parseEncryptedContainer: wrong or missing salt");
         }
         final byte[] salt = Base64.decodeBase64(saltNode.asText().getBytes()); // TODO: workaround for library BASE64 < version 1.4
         if (salt.length != 32) {
-            throw new Exception("parseEncryptedContainer: bad salt length (must be 32)");
+            throw new IOException("parseEncryptedContainer: bad salt length (must be 32)");
         }
         final JsonNode cipheredNode = json.get("ciphered");
         if (cipheredNode == null) {
-            throw new Exception("parseEncryptedContainer: wrong or missing ciphered content");
+            throw new IOException("parseEncryptedContainer: wrong or missing ciphered content");
         }
+
         final byte[] ciphered = Base64.decodeBase64(cipheredNode.asText().getBytes()); // TODO: workaround for library BASE64 < version 1.4
         if (ciphered == null) {
-            throw new Exception("parseEncryptedContainer: ciphered content not base64");
+            throw new IOException("parseEncryptedContainer: ciphered content not base64");
         }
-        final byte[] key = AESCryptor.make256BitKeyFromPassword_PBKDF2WithHmacSHA256(password, salt);
-        return AESCryptor.decrypt(key, null, ciphered);
+
+        try {
+            final byte[] key = AESCryptor.make256BitKeyFromPassword_PBKDF2WithHmacSHA256(password, salt);
+            return AESCryptor.decrypt(key, null, ciphered);
+        } catch (Exception e) {
+            throw new DecryptionException(e);
+        }
+    }
+
+    public static class DecryptionException extends Exception {
+        public DecryptionException(Exception e) {
+            super(e.getMessage());
+            setStackTrace(e.getStackTrace());
+        }
     }
 }
