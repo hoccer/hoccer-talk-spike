@@ -153,7 +153,7 @@ public class ClientContactListAdapter extends ContactListAdapter {
     private void showConfirmDialog(final TalkClientContact contact) {
         XoDialogs.showYesNoDialog("ConfirmDeclineClientInvitationDialog",
                 mActivity.getString(R.string.friend_request_decline_invitation_title),
-                mActivity.getString(R.string.friend_request_decline_invitation_message),
+                mActivity.getString(R.string.friend_request_decline_invitation_message, contact.getNickname()),
                 mActivity,
                 new DialogInterface.OnClickListener() {
                     @Override
