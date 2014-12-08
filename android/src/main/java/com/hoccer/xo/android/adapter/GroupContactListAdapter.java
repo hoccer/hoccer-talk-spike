@@ -154,7 +154,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
     private void showConfirmDialog(final TalkClientContact group) {
         XoDialogs.showYesNoDialog("ConfirmDeclineGroupInvitationDialog",
                 mActivity.getString(R.string.group_request_decline_invitation_title),
-                mActivity.getString(R.string.group_request_decline_invitation_message, group.getNickname()),
+                mActivity.getString(R.string.group_request_decline_invitation_message),
                 mActivity,
                 new DialogInterface.OnClickListener() {
                     @Override

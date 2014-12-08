@@ -20,6 +20,4 @@ public interface IXoFragment {
     public void onServiceDisconnected();
 
     public void onAvatarSelected(IContentObject co);
-    public void onAttachmentSelected(IContentObject co);
-
 }

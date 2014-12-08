@@ -75,8 +75,4 @@ public abstract class XoListFragment extends ListFragment implements IXoFragment
     @Override
     public void onAvatarSelected(IContentObject co) {
     }
-
-    @Override
-    public void onAttachmentSelected(IContentObject co) {
-    }
 }
