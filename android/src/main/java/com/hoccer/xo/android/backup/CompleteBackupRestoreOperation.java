@@ -38,7 +38,7 @@ public class CompleteBackupRestoreOperation {
         mPassword = password;
 
         mTempAttachmentsDir = new File(attachmentsTargetDir.getParent(), TEMP_ATTACHMENTS_DIR_NAME);
-        mTempDatabaseFile = new File(attachmentsTargetDir.getParent(), TEMP_DB_DIR_NAME + File.separator + databaseTarget.getName());
+        mTempDatabaseFile = new File(databaseTarget.getParent(), TEMP_DB_DIR_NAME + File.separator + databaseTarget.getName());
     }
 
     public void invoke() throws Exception {
