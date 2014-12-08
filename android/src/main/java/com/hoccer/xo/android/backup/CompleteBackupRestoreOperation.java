@@ -100,47 +100,28 @@ public class CompleteBackupRestoreOperation {
         FileUtils.moveFile(mTempDatabaseFile, mDatabaseTarget);
     }
 
-    private void cleanup() throws IOException {
-        deleteTemp();
+    private void rollback() throws IOException {
+        rollbackDatabase();
+        rollbackAttachments();
     }
 
-    private void deleteTemp() throws IOException {
-        FileUtils.deleteDirectory(mTempDatabaseFile.getParentFile());
-        FileUtils.deleteDirectory(mTempAttachmentsDir);
-    }
-
-    private void deleteOld() throws IOException {
-        deleteOldDatabase();
-        deleteOldAttachments();
-    }
-
-    private void deleteOldDatabase() throws IOException {
-        if (mOldDatabaseFile.exists()) {
-            FileUtils.forceDelete(mOldDatabaseFile);
+    private void rollbackDatabase() throws IOException {
+        if (mOldDatabaseFile != null && mOldDatabaseFile.exists()) {
+            FileUtils.moveFile(mOldDatabaseFile, mDatabaseTarget);
         }
     }
 
-    private void deleteOldAttachments() throws IOException {
-        if (mOldAttachmentsDir.exists()) {
+    private void rollbackAttachments() throws IOException {
+        if (mOldAttachmentsDir != null && mOldAttachmentsDir.exists()) {
+            for (File attachment : mOldAttachmentsDir.listFiles(IS_NOT_DIRECTORY_FILTER)) {
+                FileUtils.moveFileToDirectory(attachment, mAttachmentsTargetDir, true);
+            }
             FileUtils.forceDelete(mOldAttachmentsDir);
         }
     }
 
-    private void rollback() throws IOException {
-        rollbackDatabase();
-        rollbackAttachments();
-        deleteOld();
-    }
-
-    private void rollbackAttachments() throws IOException {
-        if (mOldAttachmentsDir.exists()) {
-            FileUtils.moveDirectory(mOldAttachmentsDir, mAttachmentsTargetDir);
-        }
-    }
-
-    private void rollbackDatabase() throws IOException {
-        if (mOldDatabaseFile.exists()) {
-            FileUtils.moveFile(mOldDatabaseFile, mDatabaseTarget);
-        }
+    private void cleanup() throws IOException {
+        FileUtils.deleteDirectory(mTempDatabaseFile.getParentFile());
+        FileUtils.deleteDirectory(mTempAttachmentsDir);
     }
 }
