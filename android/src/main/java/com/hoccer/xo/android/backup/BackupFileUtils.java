@@ -146,8 +146,11 @@ public class BackupFileUtils {
             if (!entry.getName().equals(DB_FILENAME_ENCRYPTED) && !entry.getName().equals(METADATA_FILENAME)) {
                 File file = new File(targetDir, entry.getName());
                 InputStream is = zipFile.getInputStream(entry);
-                FileUtils.copyInputStreamToFile(is, file);
-                is.close();
+                try {
+                    FileUtils.copyInputStreamToFile(is, file);
+                } finally {
+                    is.close();
+                }
             }
         }
     }
