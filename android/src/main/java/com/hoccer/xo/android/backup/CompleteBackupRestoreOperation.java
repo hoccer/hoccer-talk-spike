@@ -53,12 +53,12 @@ public class CompleteBackupRestoreOperation {
     }
 
     private void restore() throws IOException, CryptoJSON.DecryptionException {
-        extractAttachmentsToTempDir();
         extractAndDecryptDatabaseToTempDir();
-        backupCurrentAttachments();
+        extractAttachmentsToTempDir();
         backupCurrentDatabase();
-        moveAttachmentsToTargetDir();
+        backupCurrentAttachments();
         moveDatabaseToTarget();
+        moveAttachmentsToTargetDir();
     }
 
     private void extractAttachmentsToTempDir() throws IOException {
