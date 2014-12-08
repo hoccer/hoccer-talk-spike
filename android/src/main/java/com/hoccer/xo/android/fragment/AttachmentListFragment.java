@@ -1,13 +1,10 @@
 package com.hoccer.xo.android.fragment;
 
 import android.app.Activity;
-import android.app.SearchManager;
 import android.content.*;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.ListFragment;
 import android.view.*;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
@@ -30,7 +27,7 @@ import com.hoccer.xo.android.content.UserPlaylist;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.ContactOperations;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
@@ -74,7 +71,7 @@ public class AttachmentListFragment extends SearchableListFragment {
             int contactId = getActivity().getIntent().getIntExtra(IntentHelper.EXTRA_CONTACT_ID, -1);
             if (contactId >= 0) {
                 try {
-                    mFilterContact = mDatabase.findClientContactById(contactId);
+                    mFilterContact = mDatabase.findContactById(contactId);
                 } catch (SQLException e) {
                     LOG.warn("Contact with ID " + contactId + " not found");
                 }
@@ -176,7 +173,7 @@ public class AttachmentListFragment extends SearchableListFragment {
                     // send attachment to all selected contacts
                     for (Integer contactId : contactSelections) {
                         try {
-                            TalkClientContact contact = mDatabase.findClientContactById(contactId);
+                            TalkClientContact contact = mDatabase.findContactById(contactId);
                             ContactOperations.sendTransfersToContact(mAttachmentAdapter.getSelectedItems(), contact);
                         } catch (SQLException e) {
                             LOG.error(e.getMessage(), e);

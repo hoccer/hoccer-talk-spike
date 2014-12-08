@@ -42,9 +42,6 @@
     <string name="contacts_empty_info">Du hast noch keine Kontakte hinzugefügt</string>
     <string name="contacts_empty_pairing">Kontakt hinzufügen</string>
     <string name="dialog_token_invitation_title">Einladung</string>
-    <string name="contacts_sms_invitation_description">hat dir eine SMS-Einladung geschickt.
-        Möchtest du die Einladung annehmen?
-    </string>
     <string name="blocked_contact">Blockierter Kontakt</string>
 
     <!-- Friend decline invitation dialog -->
@@ -59,7 +56,7 @@
 
     <!-- Group decline invitation dialog -->
     <string name="group_request_decline_invitation_title">Gruppeneinladung ablehnen?</string>
-    <string name="group_request_decline_invitation_message">Möchtest du der Gruppe %1$s wirklich nicht beitreten?</string>
+    <string name="group_request_decline_invitation_message">Möchtest du die Gruppeneinladung wirklich ablehnen?</string>
 
     <!-- Deleting attachments -->
     <string name="dialog_attachment_delete_title">Anhang Löschen</string>
@@ -335,14 +332,13 @@
     <string name="up_down_unlimited_option">unbegrenzt</string>
     <string name="up_down_manual_option">manuell</string>
     <string name="my_profile_title">Mein Profil</string>
-    <string name="welcome_to_title">Willkommen bei XO!</string>
     <string name="contact_item_received_attachment">%1$s Datei erhalten</string>
     <string name="contact_item_sent_attachment">%1$s Datei gesendet</string>
     <string name="error_avatar_selection">Sie können dieses Bild nicht als Avatar verwenden.</string>
     <string name="error_attachment_selection">Sie können diese Datei nicht als Anhang verwenden.</string>
-    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\nxo %3$s</string>
+    <string name="sms_invitation_text">Hey! Ich nutze die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen: %1$s%2$s\n%3$s</string>
     <string name="email_invitation_subject">Triff mich bei ${app.name}!</string>
-    <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Gratis-App ${app.name} zum sicheren chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;xo %3$s</string>
+    <string name="email_invitation_text">Hey!&lt;br&gt;Ich nutze jetzt die Gratis-App ${app.name} zum sicheren Chatten! Jetzt herunterladen und mich als Kontakt hinzufügen:&lt;br&gt;&lt;a href=\"%1$s%2$s\"&gt;%1$s%2$s&lt;a&gt;&lt;br&gt;&lt;br&gt;%3$s</string>
     <string name="dialog_export_credentials_title">Zugangsdaten exportieren</string>
     <string name="export_credentials_success">Zugangsdaten erfolgreich exportiert.</string>
     <string name="export_credentials_failure">Es ist ein Fehler beim Exportieren der Zugangsdaten aufgetreten.</string>

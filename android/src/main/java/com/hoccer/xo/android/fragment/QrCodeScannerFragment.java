@@ -22,7 +22,7 @@ import android.widget.Toast;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.CameraPreviewView;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import net.sourceforge.zbar.*;
 import org.apache.log4j.Logger;
 

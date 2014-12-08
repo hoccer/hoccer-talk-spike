@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.MediaMetaData;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;

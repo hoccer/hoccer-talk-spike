@@ -6,7 +6,7 @@ import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
 import com.hoccer.xo.android.fragment.QrCodeGeneratorFragment;
 import com.hoccer.xo.android.fragment.QrCodeScannerFragment;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 public class QrCodeActivity extends ComposableActivity {
 

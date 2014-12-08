@@ -63,7 +63,7 @@
     <!-- JSON-RPC library -->
     <dependency>
       <groupId>hoccer</groupId>
-      <artifactId>better-jsonrpc-websocket</artifactId>
+      <artifactId>better-jsonrpc-websocket-jetty</artifactId>
       <version>${better-jsonrpc.version}</version>
     </dependency>
     <!-- Command line parsing -->

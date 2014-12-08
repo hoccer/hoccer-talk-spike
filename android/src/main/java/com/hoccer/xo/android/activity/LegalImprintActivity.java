@@ -2,7 +2,7 @@ package com.hoccer.xo.android.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 
 public class LegalImprintActivity extends Activity {

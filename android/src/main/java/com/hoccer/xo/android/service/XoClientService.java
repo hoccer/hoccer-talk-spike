@@ -13,16 +13,18 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import com.artcom.hoccer.R;
 import com.google.android.gcm.GCMRegistrar;
 import com.hoccer.talk.android.push.TalkPushService;
 import com.hoccer.talk.client.*;
-import com.hoccer.talk.client.model.*;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
-import com.hoccer.xo.android.sms.SmsReceiver;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.net.URI;
@@ -80,7 +82,6 @@ public class XoClientService extends Service {
     private static final String sPreferenceDownloadLimitWifiKey = "preference_download_limit_wifi";
     private static final String sPreferenceImageUploadPixelCountKey = "preference_image_encoding_size";
     private static final String sPreferenceImageUploadQualityKey = "preference_image_encoding_quality";
-    private static final String sPreferenceServiceUriKey = "preference_service_uri";
 
     /**
      * Executor for ourselves and the client
@@ -163,7 +164,6 @@ public class XoClientService extends Service {
 
         if (mClientListener == null) {
             mClientListener = new ClientListener();
-            mClient.registerTokenListener(mClientListener);
             mClient.registerStateListener(mClientListener);
             mClient.registerMessageListener(mClientListener);
             mClient.registerTransferListener(mClientListener);
@@ -173,9 +173,7 @@ public class XoClientService extends Service {
         mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals("preference_service_uri")) {
-                    configureServiceUri();
-                } else if (key.equals(sPreferenceDownloadLimitMobileKey)
+                if (key.equals(sPreferenceDownloadLimitMobileKey)
                         || key.equals(sPreferenceDownloadLimitWifiKey)
                         || key.equals(sPreferenceUploadLimitMobileKey)
                         || key.equals(sPreferenceUploadLimitWifiKey)) {
@@ -213,7 +211,6 @@ public class XoClientService extends Service {
         super.onDestroy();
         unregisterConnectivityReceiver();
         if (mClientListener != null) {
-            mClient.unregisterTokenListener(mClientListener);
             mClient.unregisterStateListener(mClientListener);
             mClient.unregisterMessageListener(mClientListener);
             mClient.unregisterTransferListener(mClientListener);
@@ -245,12 +242,6 @@ public class XoClientService extends Service {
             if (intent.hasExtra(TalkPushService.EXTRA_GCM_UNREGISTERED)) {
                 doUpdateGcm(true);
             }
-            if (intent.hasExtra(SmsReceiver.EXTRA_SMS_URL_RECEIVED)) {
-                String sender = intent.getStringExtra(SmsReceiver.EXTRA_SMS_SENDER);
-                String body = intent.getStringExtra(SmsReceiver.EXTRA_SMS_BODY);
-                String url = intent.getStringExtra(SmsReceiver.EXTRA_SMS_URL_RECEIVED);
-                mClient.handleSmsUrl(sender, body, url);
-            }
         }
         return START_STICKY;
     }
@@ -274,15 +265,6 @@ public class XoClientService extends Service {
     public boolean onUnbind(Intent intent) {
         LOG.debug("onUnbind(" + intent.toString() + ")");
         return super.onUnbind(intent);
-    }
-
-    private void configureServiceUri() {
-        String uriString = mPreferences.getString(sPreferenceServiceUriKey, "");
-        if (uriString.isEmpty()) {
-            uriString = XoApplication.getXoClient().getConfiguration().getServerUri();
-        }
-        URI uri = URI.create(uriString);
-        mClient.setServiceUri(uri);
     }
 
     private void configureAutoTransfers() {
@@ -497,67 +479,6 @@ public class XoClientService extends Service {
         }
     }
 
-    private void updateInvitateNotification(List<TalkClientSmsToken> unconfirmedTokens, boolean doAlarm) {
-        // cancel present notification if everything has been seen
-        // we back off here to prevent interruption of any in-progress alarms
-        if (unconfirmedTokens == null || unconfirmedTokens.isEmpty()) {
-            mNotificationManager.cancel(NOTIFICATION_UNCONFIRMED_INVITATIONS);
-            return;
-        }
-
-        createInvitationNotification(unconfirmedTokens.size(), doAlarm);
-    }
-
-    private void createInvitationNotification(int numUnconfirmed, boolean doAlarm) {
-        // build the notification
-        Notification.Builder builder = new Notification.Builder(this);
-
-        // always set the small icon (should be different depending on if we have a large one)
-        builder.setSmallIcon(R.drawable.ic_notification);
-
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-        builder.setLargeIcon(largeIcon);
-
-        // determine if alarms should be sounded
-        if (doAlarm) {
-            builder.setDefaults(Notification.DEFAULT_ALL);
-        }
-        // set total number of messages of more than one
-        if (numUnconfirmed > 1) {
-            builder.setNumber(numUnconfirmed);
-        }
-        // create pending intent
-        Intent contactsIntent = new Intent(this, ChatsActivity.class);
-        PendingIntent pendingIntent = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            pendingIntent = TaskStackBuilder.create(this).addNextIntent(contactsIntent)
-                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        } else {
-            pendingIntent = PendingIntent
-                    .getActivity(this, 0, contactsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-        builder.setContentIntent(pendingIntent);
-        // set fields
-        if (numUnconfirmed > 1) {
-            builder.setContentTitle(numUnconfirmed + getResources().getString(R.string.unconfirmed_invitations_notification_text));
-        } else {
-            builder.setContentTitle(numUnconfirmed + getResources().getString(R.string.unconfirmed_invitations_notification_text));
-        }
-
-        // finish up
-        Notification notification = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            notification = builder.build();
-        } else {
-            notification = builder.getNotification();
-        }
-        // log about it
-        LOG.debug("invite notification " + notification.toString());
-
-        // update the notification
-        mNotificationManager.notify(NOTIFICATION_UNCONFIRMED_INVITATIONS, notification);
-    }
-
     private void updateUnseenMessageNotification(boolean doAlarm) {
         XoClientDatabase database = mClient.getDatabase();
         List<TalkClientMessage> unseenMessages;
@@ -764,8 +685,7 @@ public class XoClientService extends Service {
                 .setContentTitle(getResources().getString(R.string.app_name))
                 .setContentIntent(pendingIntent)
                 .setContentText(message)
-                .setStyle(new NotificationCompat.BigTextStyle()
-                .bigText(message))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .build();
 
 
@@ -784,7 +704,6 @@ public class XoClientService extends Service {
     private class ClientListener implements
             IXoStateListener,
             IXoMessageListener,
-            IXoTokenListener,
             IXoTransferListenerOld,
             MediaScannerConnection.OnScanCompletedListener {
 
@@ -802,16 +721,6 @@ public class XoClientService extends Service {
                         doUpdateGcm(TalkPushService.GCM_ALWAYS_UPDATE);
                     }
                 });
-            }
-        }
-
-        @Override
-        public void onTokensChanged(List<TalkClientSmsToken> tokens, boolean newTokens) {
-            LOG.debug("onTokensChanged(" + tokens.size() + "," + newTokens + ")");
-            try {
-                updateInvitateNotification(tokens, newTokens);
-            } catch (Throwable t) {
-                LOG.error("exception updating invite notification", t);
             }
         }
 

@@ -21,7 +21,7 @@ import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import org.apache.log4j.Logger;
 
@@ -57,7 +57,7 @@ public class MessagingFragment extends XoListFragment
         if (getArguments() != null) {
             int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
             try {
-                mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                mContact = XoApplication.getXoClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("sql error", e);
                 return;
@@ -313,10 +313,5 @@ public class MessagingFragment extends XoListFragment
         Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());
         startActivity(intent);
-    }
-
-    @Override
-    public void onAttachmentSelected(IContentObject co) {
-        mCompositionFragment.onAttachmentSelected(co);
     }
 }

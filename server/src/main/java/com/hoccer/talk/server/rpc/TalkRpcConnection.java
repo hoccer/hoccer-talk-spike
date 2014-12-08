@@ -2,7 +2,6 @@ package com.hoccer.talk.server.rpc;
 
 import better.jsonrpc.core.JsonRpcConnection;
 import better.jsonrpc.util.ProtocolUtils;
-import better.jsonrpc.websocket.JsonRpcWsConnection;
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.model.TalkClient;
@@ -40,7 +39,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
     /**
      * JSON-RPC connection object
      */
-    private final JsonRpcWsConnection mConnection;
+    private final JsonRpcConnection mConnection;
 
     /**
      * HTTP request that created this WS connection
@@ -90,7 +89,7 @@ public class TalkRpcConnection implements JsonRpcConnection.Listener, JsonRpcCon
      * @param server     that we are part of
      * @param connection that we should handle
      */
-    public TalkRpcConnection(TalkServer server, JsonRpcWsConnection connection, HttpServletRequest request) {
+    public TalkRpcConnection(TalkServer server, JsonRpcConnection connection, HttpServletRequest request) {
         mServer = server;
         mConnection = connection;
         mInitialRequest = request;

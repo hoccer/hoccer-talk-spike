@@ -9,12 +9,13 @@ import android.os.Bundle;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -24,7 +25,6 @@ import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -39,11 +39,11 @@ import java.util.List;
  * Fragment for display and editing of group profiles.
  */
 public class GroupProfileFragment extends ProfileFragment
-        implements  View.OnClickListener, ActionMode.Callback, AdapterView.OnItemClickListener {
+        implements View.OnClickListener, ActionMode.Callback, AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.getLogger(GroupProfileFragment.class);
 
-    private boolean mBackPressed = false;
+    private boolean mBackPressed;
     public static final String ARG_START_IN_ACTION_MODE = "ARG_START_IN_ACTION_MODE";
 
     public enum Mode {
@@ -70,10 +70,35 @@ public class GroupProfileFragment extends ProfileFragment
 
     private Menu mOptionsMenu;
 
-    private ArrayList<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
-    private ArrayList<TalkClientContact> mContactsToInviteToGroup = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mContactsToInviteToGroup = new ArrayList<TalkClientContact>();
+    private final ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
-    private ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
+
+    private final ContactsAdapter.Filter mInvitedOrJoinedClientFilter = new ContactsAdapter.Filter() {
+        @Override
+        public boolean shouldShow(TalkClientContact contact) {
+            try {
+                if(contact.isClient()) {
+                    TalkGroupMembership membership = getXoActivity().getXoDatabase().findMembershipInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
+                    if (membership != null) {
+                        return membership.isInvited() || membership.isJoined();
+                    }
+                }
+            } catch (SQLException e) {
+                LOG.error("GroupProfileFragment.Filter.shouldShow()", e);
+            }
+
+            return false;
+        }
+    };
+
+    private final ContactsAdapter.Filter mToBeInvitedFilter = new ContactsAdapter.Filter() {
+        @Override
+        public boolean shouldShow(TalkClientContact contact) {
+            return mContactsToInviteToGroup.contains(contact);
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -128,31 +153,17 @@ public class GroupProfileFragment extends ProfileFragment
 
         if (mGroupMemberAdapter == null) {
             mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity(), mGroup);
-            mGroupMemberAdapter.onCreate();
-            mGroupMemberAdapter.onResume();
 
             if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
-                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup);
-                    }
-                });
+                mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             } else if (!mContactsToInviteToGroup.isEmpty()) {
-                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return mContactsToInviteToGroup.contains(contact);
-                    }
-                });
+                mGroupMemberAdapter.setFilter(mToBeInvitedFilter);
             } else {
-                mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
-                    @Override
-                    public boolean shouldShow(TalkClientContact contact) {
-                        return contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup);
-                    }
-                });
+                mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
             }
+
+            mGroupMemberAdapter.onCreate();
+            mGroupMemberAdapter.onResume();
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
         mGroupMemberAdapter.requestReload();
@@ -356,7 +367,7 @@ public class GroupProfileFragment extends ProfileFragment
     private void updateGroupName() {
         String name = null;
 
-        TalkGroup groupPresence = mGroup.getGroupPresence();
+        TalkGroupPresence groupPresence = mGroup.getGroupPresence();
         if (groupPresence != null) {
             name = groupPresence.getGroupName();
         }
@@ -459,7 +470,7 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private boolean isCurrentGroup(TalkClientContact contact) {
-        return mGroup != null && mGroup == contact || mGroup.getClientContactId() == contact.getClientContactId();
+        return mGroup != null && (mGroup == contact || mGroup.getClientContactId() == contact.getClientContactId());
     }
 
     private List<TalkClientContact> getCurrentContactsFromGroup(List<String> ids) {
@@ -573,7 +584,7 @@ public class GroupProfileFragment extends ProfileFragment
         if (mContactsToDisinviteAsFriend.isEmpty()) {
             int numberOfClients = mContactsToInviteAsFriend.size();
             buttonText = String.format(getString(R.string.nearby_invite_all), numberOfClients);
-            if(numberOfClients > 0) {
+            if (numberOfClients > 0) {
                 mInviteAllButton.setEnabled(true);
             } else {
                 mInviteAllButton.setEnabled(false);
@@ -668,19 +679,14 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void updateAvatar(final IContentObject avatar) {
         if (avatar != null) {
-            XoApplication.getExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    LOG.debug("creating avatar upload");
-                    TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
-                    try {
-                        getXoDatabase().saveClientUpload(upload);
-                        getXoClient().setGroupAvatar(mGroup, upload);
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-                }
-            });
+            LOG.debug("creating avatar upload");
+            TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
+            try {
+                getXoDatabase().saveClientUpload(upload);
+                getXoClient().setGroupAvatar(mGroup, upload);
+            } catch (SQLException e) {
+                LOG.error("sql error", e);
+            }
         } else {
             getXoClient().setGroupAvatar(mGroup, null);
         }
@@ -795,7 +801,7 @@ public class GroupProfileFragment extends ProfileFragment
     private String[] getMembersRoles() {
         String[] roles = new String[mContactsToInviteToGroup.size()];
         for (int i = 0; i < mContactsToInviteToGroup.size(); ++i) {
-            roles[i] = TalkGroupMember.ROLE_MEMBER;
+            roles[i] = TalkGroupMembership.ROLE_MEMBER;
         }
 
         return roles;

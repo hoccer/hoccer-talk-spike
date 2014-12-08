@@ -1,20 +1,16 @@
 package com.hoccer.talk.client.predicates;
 
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupPresence;
 import org.apache.commons.collections4.Predicate;
 
 public class TalkClientContactPredicates {
     public static final Predicate<TalkClientContact> IS_NEARBY_GROUP_PREDICATE = new Predicate<TalkClientContact>() {
         @Override
         public boolean evaluate(TalkClientContact group) {
-            TalkGroup groupPresence = group.getGroupPresence();
+            TalkGroupPresence groupPresence = group.getGroupPresence();
 
-            if (groupPresence != null) {
-                return groupPresence.isTypeNearby();
-            }
-
-            return false;
+            return groupPresence != null && groupPresence.isTypeNearby();
         }
     };
 

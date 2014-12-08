@@ -3,15 +3,14 @@ package com.hoccer.xo.android.content.contentselectors;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.release.R;
 
 public class DataSelector implements IContentSelector {
 
-    private String mName;
-    private Drawable mIcon;
+    private final String mName;
+    private final Drawable mIcon;
 
     public DataSelector(Context context) {
         mName = context.getResources().getString(R.string.content_data);
@@ -39,13 +38,6 @@ public class DataSelector implements IContentSelector {
 
     @Override
     public IContentObject createObjectFromSelectionResult(Context context, Intent intent) {
-
-        boolean isValidIntent = isValidIntent(context, intent);
-        if (!isValidIntent) {
-            return null;
-        }
-
-        SelectedContent content = null;
         return null;
     }
 

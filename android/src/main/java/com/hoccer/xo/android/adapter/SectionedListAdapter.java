@@ -5,19 +5,15 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SectionedListAdapter extends BaseAdapter {
 
-    private List<Section> mSections = new ArrayList<Section>();
-    private static int TYPE_SECTION_HEADER = 0;
-
-    public SectionedListAdapter() {
-        super();
-    }
+    private final List<Section> mSections = new ArrayList<Section>();
+    private static int sTypeSectionHeader;
 
     public void addSection(String caption, Adapter adapter) {
         mSections.add(new Section(caption, adapter));
@@ -72,11 +68,11 @@ public class SectionedListAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        int typeOffset = TYPE_SECTION_HEADER + 1;
+        int typeOffset = sTypeSectionHeader + 1;
 
         for (Section section : this.mSections) {
             if (position == 0) {
-                return TYPE_SECTION_HEADER;
+                return sTypeSectionHeader;
             }
 
             int size = section.getAdapter().getCount() + 1;
@@ -99,7 +95,7 @@ public class SectionedListAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
-        return getItemViewType(position) != TYPE_SECTION_HEADER;
+        return getItemViewType(position) != sTypeSectionHeader;
     }
 
     @Override

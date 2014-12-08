@@ -2,27 +2,30 @@ package com.hoccer.xo.android.adapter;
 
 import android.view.View;
 import android.widget.CheckedTextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
+import org.apache.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
  * Contacts adapter for group management lists
- *
+ * <p/>
  * This displays the avatar and the name of a contact and a checkbox.
- *
+ * <p/>
  * It is used mostly for managing users in a group context.
- *
  */
 public class GroupManagementContactsAdapter extends ContactsAdapter {
 
-    private TalkClientContact mGroup;
-    private ArrayList<TalkClientContact> mContactsToInvite;
-    private ArrayList<TalkClientContact> mContactsToKick;
+    private static final Logger LOG = Logger.getLogger(GroupManagementContactsAdapter.class);
+
+    private final TalkClientContact mGroup;
+    private final ArrayList<TalkClientContact> mContactsToInvite;
+    private final ArrayList<TalkClientContact> mContactsToKick;
 
     public GroupManagementContactsAdapter(XoActivity activity, TalkClientContact group, ArrayList<TalkClientContact> contactsToInvite, ArrayList<TalkClientContact> contactsToKick) {
         super(activity);
@@ -48,23 +51,12 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
     }
 
     @Override
-    protected int getTokenLayout() {
-        return -1;
-    }
-
-    @Override
     protected int getNearbyHistoryLayout() {
         return -1;
     }
 
     @Override
     protected void updateNearbyHistoryLayout(View v) {
-
-    }
-
-    @Override
-    protected void updateToken(View view, TalkClientSmsToken token) {
-        LOG.debug("updateToken(" + token.getSmsTokenId() + ")");
     }
 
     @Override
@@ -76,18 +68,24 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
         AvatarView avatarView = (AvatarView) view.findViewById(R.id.contact_icon);
         avatarView.setContact(contact);
 
-        if (contact.isClientGroupInvited(mGroup) || contact.isClientGroupJoined(mGroup)) {
-            checkedTextView.setChecked(true);
-        } else {
-            checkedTextView.setChecked(false);
-        }
+        try {
+            TalkGroupMembership membership = mDatabase.findMembershipInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
+            if (membership != null) {
+                if (membership.isInvited() || membership.isJoined()) {
+                    checkedTextView.setChecked(true);
+                } else {
+                    checkedTextView.setChecked(false);
+                }
+            }
 
-        if (mContactsToInvite.contains(contact)) {
-            checkedTextView.setChecked(true);
-        } else if (mContactsToKick.contains(contact)) {
-            checkedTextView.setChecked(false);
+            if (mContactsToInvite.contains(contact)) {
+                checkedTextView.setChecked(true);
+            } else if (mContactsToKick.contains(contact)) {
+                checkedTextView.setChecked(false);
+            }
+        } catch (SQLException e) {
+            LOG.error(e);
         }
-
     }
 
 }

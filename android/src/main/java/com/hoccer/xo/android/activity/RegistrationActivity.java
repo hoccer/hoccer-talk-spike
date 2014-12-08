@@ -7,7 +7,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
 import com.hoccer.xo.android.fragment.ImportCredentialFragment;
 import com.hoccer.xo.android.fragment.ImportCredentialUpdateFragment;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 /**
  * Activity handles credential import procedure or starts the new client registration.

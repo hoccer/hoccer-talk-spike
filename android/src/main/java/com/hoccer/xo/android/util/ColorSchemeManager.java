@@ -5,7 +5,7 @@ import android.content.res.Resources;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 import java.util.HashMap;
 

@@ -7,20 +7,20 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 
 public class ImageSelector implements IContentSelector {
 
-    private Logger LOG = Logger.getLogger(ImageSelector.class);
+    private static final Logger LOG = Logger.getLogger(ImageSelector.class);
 
-    protected String mName;
-    protected Drawable mIcon;
+    private String mName;
+    private Drawable mIcon;
 
     public ImageSelector(Context context) {
         mName = context.getResources().getString(R.string.content_images);
@@ -62,7 +62,15 @@ public class ImageSelector implements IContentSelector {
         return creator.apply(context, intent);
     }
 
-    protected IContentCreator findContentObjectCreator(Uri selectedContent) {
+    protected void setName(String name) {
+        mName = name;
+    }
+
+    protected void setIcon(Drawable icon) {
+        mIcon = icon;
+    }
+
+    protected static IContentCreator findContentObjectCreator(Uri selectedContent) {
         String contentString = selectedContent.toString();
         if (isPicasaContent(contentString)) {
             return new PicasaContentObjectCreator();
@@ -106,7 +114,7 @@ public class ImageSelector implements IContentSelector {
         return false;
     }
 
-    public Intent createCropIntent(Context context, Uri data) {
+    public static Intent createCropIntent(Uri data) {
         Intent intent = new Intent("com.android.camera.action.CROP", android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
         intent.setDataAndType(data, "image/*");
@@ -123,5 +131,4 @@ public class ImageSelector implements IContentSelector {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tmpFile));
         return intent;
     }
-
 }

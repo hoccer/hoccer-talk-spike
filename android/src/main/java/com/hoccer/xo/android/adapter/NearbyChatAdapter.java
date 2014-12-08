@@ -8,16 +8,19 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.model.TalkGroup;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
+import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NearbyChatAdapter extends ChatAdapter {
+
+    private static final Logger LOG = Logger.getLogger(NearbyChatAdapter.class);
 
     public NearbyChatAdapter(ListView listView, XoActivity activity) {
         super(listView, activity, null);
@@ -70,7 +73,7 @@ public class NearbyChatAdapter extends ChatAdapter {
         TalkClientContact conversationContact = message.getConversationContact();
         if (conversationContact != null && conversationContact.getContactType() != null) {
             if (conversationContact.isGroup()) {
-                TalkGroup groupPresence = conversationContact.getGroupPresence();
+                TalkGroupPresence groupPresence = conversationContact.getGroupPresence();
                 if (groupPresence != null && groupPresence.isTypeNearby()) {
                     return true;
                 }

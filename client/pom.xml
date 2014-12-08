@@ -34,7 +34,7 @@
     </dependency>
     <dependency>
       <groupId>hoccer</groupId>
-      <artifactId>better-jsonrpc-websocket</artifactId>
+      <artifactId>better-jsonrpc-websocket-java</artifactId>
       <version>${better-jsonrpc.version}</version>
     </dependency>
     <!-- Logging -->
@@ -66,6 +66,12 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-collections4</artifactId>
       <version>${commons-collections.version}</version>
+    </dependency>
+    <!-- Apache Commons IO -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
     </dependency>
     <!-- Apache Commons Codec (BASE64 and hex encoding) -->
     <dependency>

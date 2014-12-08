@@ -1,20 +1,16 @@
 package com.hoccer.talk.rpc;
 
 import better.jsonrpc.annotations.JsonRpcNotification;
-import com.hoccer.talk.model.TalkDelivery;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
-import com.hoccer.talk.model.TalkMessage;
-import com.hoccer.talk.model.TalkPresence;
-import com.hoccer.talk.model.TalkRelationship;
+import com.hoccer.talk.model.*;
+import com.hoccer.talk.model.TalkGroupPresence;
 
 /**
  * This is the RPC interface exposed by clients.
- * 
+ *
  * Using it, clients get notifications for things
  * they requested using the matching "request*"
  * methods in the server interface.
- * 
+ *
  * @author ingo
  *
  */
@@ -160,7 +156,7 @@ public interface ITalkRpcClient {
     /**
      * Sent to notify that a group for this client has been added or removed or group attributes have changed
      *
-     * @param group that has changed
+     * @param groupPresence that has changed
      * @talk.preconditions Client is logged in
      * @talk.preconditions.server group attributes have changed (member changes not reflected here)
      * @talk.preconditions.client
@@ -172,12 +168,12 @@ public interface ITalkRpcClient {
      * @talk.errors.client
      * */
     @JsonRpcNotification
-    void groupUpdated(TalkGroup group);
+    void groupUpdated(TalkGroupPresence groupPresence);
 
     /**
      * Sent to notify an update to a group membership
      *
-     * @param groupMember that has changed
+     * @param membership that has changed
      * @talk.preconditions Client is logged in
      * @talk.preconditions.server group members have been added or removed or changed state
      * @talk.preconditions.client
@@ -190,7 +186,7 @@ public interface ITalkRpcClient {
      * @talk.errors.client
      */
     @JsonRpcNotification
-    void groupMemberUpdated(TalkGroupMember groupMember);
+    void groupMemberUpdated(TalkGroupMembership membership);
 
 
 }

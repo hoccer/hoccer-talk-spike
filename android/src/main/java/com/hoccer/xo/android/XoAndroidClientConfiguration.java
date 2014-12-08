@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.hoccer.talk.client.XoDefaultClientConfiguration;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -25,10 +25,10 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
         mAppName = context.getString(R.string.app_name);
 
         try {
-            InputStream inputStream = context.getAssets().open("environment.properties");
+            InputStream inputStream = context.getAssets().open("configuration.properties");
             mProperties.load(inputStream);
         } catch (IOException e) {
-            LOG.error("Failed to load environment.properties file", e);
+            LOG.error("Failed to load configuration.properties file", e);
         }
     }
 

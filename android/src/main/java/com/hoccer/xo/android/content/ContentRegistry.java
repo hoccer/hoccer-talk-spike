@@ -3,20 +3,21 @@ package com.hoccer.xo.android.content;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.*;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.base.IXoFragment;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.contentselectors.*;
-import com.hoccer.xo.android.fragment.CompositionFragment;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -36,7 +37,13 @@ public class ContentRegistry {
 
     private static final Logger LOG = Logger.getLogger(ContentRegistry.class);
 
-    private static ContentRegistry INSTANCE = null;
+    private static ContentRegistry sInstance;
+
+    /* Keys for use with the internal SimpleAdapter in attachment selection */
+    private static final String KEY_ICON = "icon";
+    private static final String KEY_NAME = "name";
+    private static final String KEY_INTENT = "intent";
+    private static final String KEY_SELECTOR = "selector";
 
     /**
      * Get the content registry singleton
@@ -50,10 +57,10 @@ public class ContentRegistry {
      * @return the content registry
      */
     public static synchronized ContentRegistry get(Context applicationContext) {
-        if (INSTANCE == null) {
-            INSTANCE = new ContentRegistry(applicationContext);
+        if (sInstance == null) {
+            sInstance = new ContentRegistry(applicationContext);
         }
-        return INSTANCE;
+        return sInstance;
     }
 
     /**
@@ -89,9 +96,9 @@ public class ContentRegistry {
         initializeSelector(new ImageSelector(mContext));
         initializeSelector(new MultiImageSelector(mContext));
         initializeSelector(new VideoSelector(mContext));
-        initializeSelector(new MusicSelector(mContext));
+        initializeSelector(new AudioSelector(mContext));
         initializeSelector(new ContactSelector(mContext));
-        initializeSelector(new MapsLocationSelector(mContext));
+        initializeSelector(new LocationSelector(mContext));
         initializeSelector(new CaptureSelector(mContext));
 
         mClipboardSelector = new ClipboardSelector(mContext);
@@ -114,23 +121,21 @@ public class ContentRegistry {
         }
     }
 
-    public String getContentDescription(IContentObject object) {
+    public static String getContentDescription(IContentObject object) {
         String mediaTypeString = "Unknown file";
         String mediaType = object.getContentMediaType();
-        if (mediaType != null) {
-            if (mediaType.equals("image")) {
-                mediaTypeString = "Image";
-            } else if (mediaType.equals("audio")) {
-                mediaTypeString = "Audio";
-            } else if (mediaType.equals("video")) {
-                mediaTypeString = "Video";
-            } else if (mediaType.equals("contact")) {
-                mediaTypeString = "Contact";
-            } else if (mediaType.equals("location")) {
-                mediaTypeString = "Location";
-            } else if (mediaType.equals("data")) {
-                mediaTypeString = "Data";
-            }
+        if ("image".equals(mediaType)) {
+            mediaTypeString = "Image";
+        } else if ("audio".equals(mediaType)) {
+            mediaTypeString = "Audio";
+        } else if ("video".equals(mediaType)) {
+            mediaTypeString = "Video";
+        } else if ("contact".equals(mediaType)) {
+            mediaTypeString = "Contact";
+        } else if ("location".equals(mediaType)) {
+            mediaTypeString = "Location";
+        } else if ("data".equals(mediaType)) {
+            mediaTypeString = "Data";
         }
 
         String sizeString = "";
@@ -141,16 +146,6 @@ public class ContentRegistry {
         }
 
         return mediaTypeString + sizeString;
-    }
-
-    public static String humanReadableByteCount(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) {
-            return bytes + " B";
-        }
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 
     /**
@@ -180,15 +175,9 @@ public class ContentRegistry {
      * @param intent    returned from the selector
      * @return content object for selected avatar
      */
-    public IContentObject createSelectedAvatar(ContentSelection selection, Intent intent) {
+    public static IContentObject createSelectedAvatar(ContentSelection selection, Intent intent) {
         return selection.getSelector().createObjectFromSelectionResult(selection.getActivity(), intent);
     }
-
-    /* Keys for use with the internal SimpleAdapter in attachment selection */
-    private static final String KEY_ICON = "icon";
-    private static final String KEY_NAME = "name";
-    private static final String KEY_INTENT = "intent";
-    private static final String KEY_SELECTOR = "selector";
 
     /**
      * Starts content selection
@@ -257,14 +246,9 @@ public class ContentRegistry {
 
                 if (intent == null) {
                     // selectors without intent can return the result immediately
-                    IContentObject contentObject = selector.createObjectFromSelectionResult(fragment.getActivity(), null);
-                    ((IXoFragment)fragment).onAttachmentSelected(contentObject);
+                    fragment.onActivityResult(requestCode, Activity.RESULT_OK, null);
                 } else {
-                    if (selector instanceof MultiImageSelector) {
-                        startExternalActivityForResult(fragment, intent, CompositionFragment.REQUEST_SELECT_IMAGE_ATTACHMENTS);
-                    } else {
-                        startExternalActivityForResult(fragment, intent, requestCode);
-                    }
+                    startExternalActivityForResult(fragment, intent, requestCode);
                 }
             }
         });
@@ -279,43 +263,27 @@ public class ContentRegistry {
         return contentSelection;
     }
 
-    /**
-     * Create a content object from an intent returned by content selection
-     * <p/>
-     * Activities should call this when they receive results with the request
-     * code they associate with content selection (as given to selectAttachment).
-     *
-     * @param selection handle for the in-progress content selection
-     * @param intent    returned from the selector
-     * @return content object for selected content
-     */
-    public IContentObject createSelectedAttachment(ContentSelection selection, Intent intent) {
-        IContentSelector selector = selection.getSelector();
-        if (selector != null) {
-            return selector.createObjectFromSelectionResult(selection.getActivity(), intent);
+    private static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) {
+            return bytes + " B";
         }
-        return null;
-    }
-
-    public ArrayList<IContentObject> createSelectedImagesAttachment(ContentSelection selection, Intent intent) {
-        MultiImageSelector selector = (MultiImageSelector) selection.getSelector();
-        if(selector != null) {
-            return selector.createObjectsFromSelectionResult(selection.getActivity(), intent);
-        }
-        return null;
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 
     /**
      * Creates a dialog entry data object from a given IContentSelector.
      *
-     * @param activity that is requesting the selection
+     * @param context  that is requesting the selection
      * @param selector the given IContentSelector
      * @return a Map containing all relevant intent information
      */
-    private Map<String, Object> createDataObjectFromContentSelector(final Activity activity, final IContentSelector selector) {
-        Intent selectionIntent = selector.createSelectionIntent(activity);
+    private static Map<String, Object> createDataObjectFromContentSelector(final Context context, final IContentSelector selector) {
+        Intent selectionIntent = selector.createSelectionIntent(context);
 
-        if (selectionIntent == null || IntentHelper.isIntentResolvable(selectionIntent, activity)) {
+        if (selectionIntent == null || IntentHelper.isIntentResolvable(selectionIntent, context)) {
             Map<String, Object> fields = new HashMap<String, Object>();
             fields.put(KEY_INTENT, selectionIntent);
             fields.put(KEY_SELECTOR, selector);
@@ -327,7 +295,7 @@ public class ContentRegistry {
         return null;
     }
 
-    private void startExternalActivityForResult(Fragment fragment, Intent intent, int requestCode) {
+    private static void startExternalActivityForResult(Fragment fragment, Intent intent, int requestCode) {
         XoActivity xoActivity = (XoActivity) fragment.getActivity();
 
         if (!xoActivity.canStartActivity(intent)) {
@@ -341,5 +309,4 @@ public class ContentRegistry {
             e.printStackTrace();
         }
     }
-
 }

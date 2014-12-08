@@ -8,7 +8,7 @@ import android.os.ResultReceiver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hoccer.talk.crypto.CryptoJSON;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
@@ -92,7 +92,7 @@ public class CredentialExportService extends IntentService {
 
                 // write friend contact and joined group count
                 final int clients = XoApplication.getXoClient().getDatabase().findClientContactsByState(TalkRelationship.STATE_FRIEND).size();
-                final int groups = XoApplication.getXoClient().getDatabase().findGroupContactsByState(TalkGroupMember.STATE_JOINED).size();
+                final int groups = XoApplication.getXoClient().getDatabase().findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED).size();
                 rootNode.put(CONTACT_COUNT_FIELD_NAME, clients + groups);
 
                 final String payloadString = mapper.writeValueAsString(rootNode);

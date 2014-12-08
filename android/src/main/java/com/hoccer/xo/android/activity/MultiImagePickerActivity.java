@@ -23,7 +23,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.view.SquaredImageView;
 import com.hoccer.xo.android.view.SquaredRelativeLayout;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;

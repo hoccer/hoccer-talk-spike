@@ -6,7 +6,7 @@ import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactListAdapter;
 import com.hoccer.xo.android.adapter.GroupContactListAdapter;
 import com.hoccer.xo.android.view.Placeholder;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -36,7 +36,7 @@ public class GroupContactListFragment extends ContactListFragment {
     @Override
     protected int getInvitedMeCount() {
         try {
-            return XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroups();
+            return XoApplication.getXoClient().getDatabase().getCountOfInvitedMeGroupContacts();
         } catch (SQLException e) {
             LOG.error("Error getting group invitation count", e);
         }

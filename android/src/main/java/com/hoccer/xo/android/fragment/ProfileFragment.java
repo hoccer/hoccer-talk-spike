@@ -14,7 +14,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -76,7 +76,7 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
         if (getArguments() != null && getArguments().containsKey(ARG_CLIENT_CONTACT_ID)) {
             int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
             try {
-                mContact = XoApplication.getXoClient().getDatabase().findClientContactById(clientContactId);
+                mContact = XoApplication.getXoClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("SQL error while retrieving contact ", e);
             }

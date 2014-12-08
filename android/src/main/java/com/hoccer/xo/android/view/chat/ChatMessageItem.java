@@ -28,7 +28,7 @@ import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.AvatarView;
 import com.hoccer.xo.android.view.chat.attachments.*;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -463,8 +463,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     private void setContentDescription() {
-        mContentDescription.setText(mContentRegistry.getContentDescription(mContentObject));
-        if (mContentObject.getContentState().equals(ContentState.DOWNLOAD_ON_HOLD)) {
+        mContentDescription.setText(ContentRegistry.getContentDescription(mContentObject));
+        if (mContentObject.getContentState() == ContentState.DOWNLOAD_ON_HOLD) {
             mContentDescription.setVisibility(View.INVISIBLE);
         } else {
             mContentDescription.setVisibility(View.VISIBLE);

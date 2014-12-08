@@ -44,8 +44,8 @@ public abstract class XoListFragment extends ListFragment implements IXoFragment
         LOG.debug("onAttach()");
         super.onAttach(activity);
 
-        if(activity instanceof XoActivity) {
-            mActivity = (XoActivity)activity;
+        if (activity instanceof XoActivity) {
+            mActivity = (XoActivity) activity;
         } else {
             throw new RuntimeException("talk fragments need to be in a talk activity");
         }
@@ -58,7 +58,7 @@ public abstract class XoListFragment extends ListFragment implements IXoFragment
         LOG.debug("onDetach()");
         super.onDetach();
 
-        if(mActivity != null) {
+        if (mActivity != null) {
             mActivity.unregisterXoFragment(this);
             mActivity = null;
         }
@@ -75,9 +75,4 @@ public abstract class XoListFragment extends ListFragment implements IXoFragment
     @Override
     public void onAvatarSelected(IContentObject co) {
     }
-
-    @Override
-    public void onAttachmentSelected(IContentObject co) {
-    }
-
 }

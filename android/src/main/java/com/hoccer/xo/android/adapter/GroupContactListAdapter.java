@@ -11,22 +11,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.collections4.Predicate;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.List;
 
 public class GroupContactListAdapter extends ContactListAdapter {
 
@@ -45,8 +45,8 @@ public class GroupContactListAdapter extends ContactListAdapter {
 
         try {
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
-            invitedMe = database.findGroupContactsByState(TalkGroupMember.STATE_INVITED);
-            joined = database.findGroupContactsByState(TalkGroupMember.STATE_JOINED);
+            invitedMe = database.findGroupContactsByMembershipState(TalkGroupMembership.STATE_INVITED);
+            joined = database.findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
         } catch (SQLException e) {
             LOG.error("Could not fetch group contacts", e);
             return Collections.emptyList();
@@ -97,12 +97,12 @@ public class GroupContactListAdapter extends ContactListAdapter {
             }
         });
 
-        if (group.isGroup() && group.getGroupMember() != null) {
-            TalkGroupMember member = group.getGroupMember();
+        if (group.isGroup() && group.getGroupMembership() != null) {
+            TalkGroupMembership membership = group.getGroupMembership();
 
-            if (member.isInvited()) {
+            if (membership.isInvited()) {
                 updateViewForInvited(viewHolder);
-            } else if (member.isJoined()) {
+            } else if (membership.isJoined()) {
                 updateViewForJoined(viewHolder, group);
             }
         }
@@ -120,34 +120,41 @@ public class GroupContactListAdapter extends ContactListAdapter {
     }
 
     private String getGroupMembersString(TalkClientContact group) {
-        ArrayDeque<String> displayMembers = new ArrayDeque<String>();
-        List<TalkClientContact> joinedContacts = group.getJoinedGroupContactsExceptSelf();
+        try {
+            ArrayDeque<String> displayMembers = new ArrayDeque<String>();
+            XoClientDatabase database = XoApplication.getXoClient().getDatabase();
+            List<TalkClientContact> joinedContacts = database.findContactsInGroupByState(group.getGroupId(), TalkGroupMembership.STATE_JOINED);
+            CollectionUtils.filterInverse(joinedContacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
 
-        for (TalkClientContact contact : joinedContacts) {
-            displayMembers.addLast(contact.getNickname());
+            for (TalkClientContact contact : joinedContacts) {
+                displayMembers.addLast(contact.getNickname());
 
-            if (TextUtils.join(", ", displayMembers).length() > DISPLAY_NAMES_MAX_LENGTH) {
-                displayMembers.removeLast();
-                break;
+                if (TextUtils.join(", ", displayMembers).length() > DISPLAY_NAMES_MAX_LENGTH) {
+                    displayMembers.removeLast();
+                    break;
+                }
             }
+
+            String groupMembersString = TextUtils.join(", ", displayMembers);
+            int moreCount = joinedContacts.size() - displayMembers.size();
+
+            if (moreCount > 0) {
+                Resources resources = mActivity.getResources();
+                String moreString = resources.getQuantityString(R.plurals.groups_and_x_more, moreCount, moreCount);
+                groupMembersString = groupMembersString + " " + moreString;
+            }
+            return groupMembersString;
+        } catch (SQLException e) {
+            LOG.error(e);
         }
 
-        String groupMembersString = TextUtils.join(", ", displayMembers);
-        int moreCount = joinedContacts.size() - displayMembers.size();
-
-        if (moreCount > 0) {
-            Resources resources = mActivity.getResources();
-            String moreString = resources.getQuantityString(R.plurals.groups_and_x_more, moreCount, moreCount);
-            groupMembersString = groupMembersString + " " + moreString;
-        }
-
-        return groupMembersString;
+        return "";
     }
 
     private void showConfirmDialog(final TalkClientContact group) {
         XoDialogs.showYesNoDialog("ConfirmDeclineGroupInvitationDialog",
                 mActivity.getString(R.string.group_request_decline_invitation_title),
-                mActivity.getString(R.string.group_request_decline_invitation_message, group.getNickname()),
+                mActivity.getString(R.string.group_request_decline_invitation_message),
                 mActivity,
                 new DialogInterface.OnClickListener() {
                     @Override

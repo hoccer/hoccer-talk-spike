@@ -6,11 +6,10 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientSmsToken;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.release.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,6 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
 
     public ContactSearchResultAdapter(XoActivity activity) {
         super(activity);
-        setShowTokens(false);
     }
 
     public void searchForContactsByName(String query) {
@@ -33,7 +31,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         if (query.length() > 0) {
             for (TalkClientContact contact : mClientContacts) {
                 // ignore self
-                if(contact.isSelf()) {
+                if (contact.isSelf()) {
                     continue;
                 }
 
@@ -84,11 +82,6 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
     }
 
     @Override
-    protected int getTokenLayout() {
-        return 0;
-    }
-
-    @Override
     protected int getNearbyHistoryLayout() {
         return 0;
     }
@@ -115,10 +108,6 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
             }
         }
 
-    }
-
-    @Override
-    protected void updateToken(View view, TalkClientSmsToken token) {
     }
 
     private Spannable getHighlightedSearchResult(String text) {

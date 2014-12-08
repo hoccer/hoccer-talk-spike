@@ -2,14 +2,18 @@ package com.hoccer.xo.android.adapter;
 
 import android.view.View;
 import android.view.ViewGroup;
-import com.hoccer.talk.client.*;
-import com.hoccer.talk.client.model.*;
+import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.IXoMessageListener;
+import com.hoccer.talk.client.IXoTransferListenerOld;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.client.model.TalkClientDownload;
+import com.hoccer.talk.client.model.TalkClientMessage;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkRelationship;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
-import com.hoccer.xo.android.view.model.*;
-import com.hoccer.xo.android.view.model.SmsChatItem;
+import com.hoccer.xo.android.view.model.BaseChatItem;
+import com.hoccer.xo.android.view.model.NearbyGroupChatItem;
 import com.hoccer.xo.android.view.model.TalkClientChatItem;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 
 
-public class ChatListAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTokenListener, IXoTransferListenerOld {
+public class ChatListAdapter extends XoAdapter implements IXoContactListener, IXoMessageListener, IXoTransferListenerOld {
 
     private static final Logger LOG = Logger.getLogger(ChatListAdapter.class);
 
@@ -44,10 +48,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     final protected List<BaseChatItem> mChatItems = new ArrayList<BaseChatItem>();
 
     @Nullable
-    private Filter mFilter = null;
-
-    @Nullable
-    private XoClientDatabase mDatabase;
+    private Filter mFilter;
 
     public ChatListAdapter(XoActivity activity) {
         this(activity, null);
@@ -55,7 +56,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
     public ChatListAdapter(XoActivity activity, @Nullable Filter filter) {
         super(activity);
-        mDatabase = XoApplication.getXoClient().getDatabase();
         mFilter = filter;
         loadChatItems();
     }
@@ -63,7 +63,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     public void loadChatItems() {
         try {
             final List<TalkClientContact> filteredContacts = filter(mDatabase.findAllContacts());
-            final List<TalkClientSmsToken> allSmsTokens = mDatabase.findAllSmsTokens();
             final long nearbyMessageCount = mDatabase.getNearbyMessageCount();
 
             runOnUiThread(new Runnable() {
@@ -74,10 +73,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
 
                     for (final TalkClientContact contact : filteredContacts) {
                         mChatItems.add(new TalkClientChatItem(contact, mActivity));
-                    }
-
-                    for (final TalkClientSmsToken smsToken : allSmsTokens) {
-                        mChatItems.add(new SmsChatItem(smsToken, mActivity));
                     }
 
                     if (nearbyMessageCount > 0) {
@@ -97,7 +92,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     public void onResume() {
         super.onResume();
         getXoClient().registerContactListener(this);
-        getXoClient().registerTokenListener(this);
         getXoClient().registerTransferListener(this);
         getXoClient().registerMessageListener(this);
     }
@@ -106,7 +100,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     public void onPause() {
         super.onPause();
         getXoClient().unregisterContactListener(this);
-        getXoClient().unregisterTokenListener(this);
         getXoClient().unregisterTransferListener(this);
         getXoClient().unregisterMessageListener(this);
     }
@@ -192,7 +185,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     int oldItemCount = mChatItems.size();
                     TalkClientChatItem item = new TalkClientChatItem(contact, mActivity);
                     mChatItems.add(item);
-                    refreshTokens(null, false);
                     notifyDataSetChanged();
                 }
             }
@@ -240,9 +232,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
-                int oldItemCount = mChatItems.size();
-
                 if (relationship.isNone()) {
                     BaseChatItem item = findChatItemForContent(contact);
                     if (item != null) {
@@ -254,7 +243,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
                     if (item != null) {
                         item.update();
                     } else {
-                        if (mFilter.shouldShow(contact)) {
+                        if (mFilter == null || mFilter.shouldShow(contact)) {
                             item = new TalkClientChatItem(contact, mActivity);
                             mChatItems.add(item);
                         }
@@ -302,7 +291,7 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             TalkClientContact conversationContact = message.getConversationContact();
             TalkClientContact contact;
             if (conversationContact.isGroup()) {
-                contact = mDatabase.findContactByGroupId(conversationContact.getGroupId(), false);
+                contact = mDatabase.findGroupContactByGroupId(conversationContact.getGroupId(), false);
             } else {
                 contact = mDatabase.findContactByClientId(conversationContact.getClientId(), false);
             }
@@ -328,44 +317,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     @Override
     public void onMessageUpdated(TalkClientMessage message) {
         updateItemForMessage(message);
-    }
-
-    @Override
-    public void onTokensChanged(List<TalkClientSmsToken> tokens, boolean newTokens) {
-        refreshTokens(tokens, newTokens);
-        requestReload();
-    }
-
-    private void refreshTokens(List<TalkClientSmsToken> tokens, boolean newTokens) {
-        if (tokens == null) {
-            try {
-                tokens = mDatabase.findAllSmsTokens();
-            } catch (SQLException e) {
-                LOG.error("SQLError while retrieving SMS tokens ", e);
-            }
-        }
-        if (tokens == null) {
-            return;
-        }
-
-        for (TalkClientSmsToken token : tokens) {
-            SmsChatItem item = (SmsChatItem) findChatItemForContent(token);
-            if (item != null) {
-                mChatItems.remove(item);
-            }
-        }
-        for (TalkClientSmsToken token : tokens) {
-            SmsChatItem item = (SmsChatItem) findChatItemForContent(token);
-            if (item == null) {
-                item = new SmsChatItem(token, mActivity);
-            }
-            int index = mChatItems.indexOf(item);
-            if (index > -1) {
-                mChatItems.set(index, item);
-            } else {
-                mChatItems.add(item);
-            }
-        }
     }
 
     @Override

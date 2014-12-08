@@ -18,7 +18,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
@@ -150,16 +150,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         finishActivityIfContactDeleted();
 
         updateView();
-        updateActionBar();
-    }
-
-    public void updateActionBar() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                getActivity().getActionBar().setTitle(R.string.welcome_to_title);
-            }
-        });
     }
 
     public void finishActivityIfContactDeleted() {

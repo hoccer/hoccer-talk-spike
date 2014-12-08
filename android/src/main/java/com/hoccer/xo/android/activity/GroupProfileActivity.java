@@ -8,7 +8,7 @@ import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.fragment.GroupProfileCreationFragment;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 
 /**
  * Activity wrapping a group profile fragment

@@ -40,7 +40,7 @@ import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
-import com.hoccer.xo.release.R;
+import com.artcom.hoccer.R;
 import net.hockeyapp.android.CrashManager;
 import org.apache.log4j.Logger;
 
@@ -314,13 +314,12 @@ public abstract class XoActivity extends FragmentActivity {
 
         if (requestCode == REQUEST_SELECT_AVATAR) {
             if (mAvatarSelection != null) {
-                ImageSelector selector = (ImageSelector) mAvatarSelection.getSelector();
-                startExternalActivityForResult(selector.createCropIntent(this, intent.getData()), REQUEST_CROP_AVATAR);
+                startExternalActivityForResult(ImageSelector.createCropIntent(intent.getData()), REQUEST_CROP_AVATAR);
             }
         } else if (requestCode == REQUEST_CROP_AVATAR) {
             intent = selectedAvatarPreProcessing(intent);
             if (intent != null) {
-                IContentObject contentObject = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection, intent);
+                IContentObject contentObject = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
                 if (contentObject != null) {
                     LOG.debug("selected avatar " + contentObject.getContentDataUrl());
                     for (IXoFragment fragment : mTalkFragments) {

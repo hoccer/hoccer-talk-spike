@@ -36,7 +36,7 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
         super.setUp();
         activity = getActivity();
 
-        ViewPager viewPager = (ViewPager) activity.findViewById(com.hoccer.xo.release.R.id.pager);
+        ViewPager viewPager = (ViewPager) activity.findViewById(com.artcom.hoccer.R.id.pager);
         FragmentPagerAdapter adapter = (FragmentPagerAdapter) viewPager.getAdapter();
         mGroupContactListFragment = (GroupContactListFragment) adapter.getItem(1);
         mGroupContactListAdapter = (GroupContactListAdapter) mGroupContactListFragment.getListAdapter();
@@ -53,7 +53,7 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
     }
 
     public void testPreconditions() {
-        ViewPager viewPager = (ViewPager) activity.findViewById(com.hoccer.xo.release.R.id.pager);
+        ViewPager viewPager = (ViewPager) activity.findViewById(com.artcom.hoccer.R.id.pager);
         assertNotNull(viewPager);
 
         FragmentPagerAdapter adapter = (FragmentPagerAdapter) viewPager.getAdapter();
@@ -69,10 +69,10 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
     public void testActionBarMenuItems() {
         assertTrue(activity.getActionBar().isShowing());
 
-        View pairMenuItem = activity.findViewById(com.hoccer.xo.release.R.id.menu_pair);
+        View pairMenuItem = activity.findViewById(com.artcom.hoccer.R.id.menu_pair);
         assertNotNull(pairMenuItem);
 
-        View newGroupMenuItem = activity.findViewById(com.hoccer.xo.release.R.id.menu_new_group);
+        View newGroupMenuItem = activity.findViewById(com.artcom.hoccer.R.id.menu_new_group);
         assertNotNull(newGroupMenuItem);
     }
 
@@ -128,19 +128,19 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
         View itemView = mGroupContactListFragment.getListView().getChildAt(0);
         assertNotNull(itemView);
 
-        TextView contactNameTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.contact_name);
+        TextView contactNameTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.contact_name);
         assertEquals(GROUP_NAME_PREFIX + 1, contactNameTextView.getText());
 
-        LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.hoccer.xo.release.R.id.ll_invited_me);
+        LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.artcom.hoccer.R.id.ll_invited_me);
         assertEquals(ViewGroup.VISIBLE, invitedMeLayout.getVisibility());
 
-        Button declineButton = (Button) itemView.findViewById(com.hoccer.xo.release.R.id.btn_decline);
+        Button declineButton = (Button) itemView.findViewById(com.artcom.hoccer.R.id.btn_decline);
         assertEquals(View.VISIBLE, declineButton.getVisibility());
 
-        Button acceptButton = (Button) itemView.findViewById(com.hoccer.xo.release.R.id.btn_accept);
+        Button acceptButton = (Button) itemView.findViewById(com.artcom.hoccer.R.id.btn_accept);
         assertEquals(View.VISIBLE, acceptButton.getVisibility());
 
-        TextView groupMembersTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_group_members);
+        TextView groupMembersTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.tv_group_members);
         assertEquals(View.GONE, groupMembersTextView.getVisibility());
     }
 
@@ -182,13 +182,13 @@ public class ContactsActivityGroupFunctionalTest extends ActivityInstrumentation
         View itemView = mGroupContactListFragment.getListView().getChildAt(0);
         assertNotNull(itemView);
 
-        TextView contactNameTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.contact_name);
+        TextView contactNameTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.contact_name);
         assertEquals(GROUP_NAME_PREFIX + 1, contactNameTextView.getText());
 
-        LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.hoccer.xo.release.R.id.ll_invited_me);
+        LinearLayout invitedMeLayout = (LinearLayout) itemView.findViewById(com.artcom.hoccer.R.id.ll_invited_me);
         assertEquals(ViewGroup.GONE, invitedMeLayout.getVisibility());
 
-        TextView groupMembersTextView = (TextView) itemView.findViewById(com.hoccer.xo.release.R.id.tv_group_members);
+        TextView groupMembersTextView = (TextView) itemView.findViewById(com.artcom.hoccer.R.id.tv_group_members);
         assertEquals(View.VISIBLE, groupMembersTextView.getVisibility());
     }
 
