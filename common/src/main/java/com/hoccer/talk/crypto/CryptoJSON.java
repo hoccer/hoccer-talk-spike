@@ -91,6 +91,7 @@ public class CryptoJSON {
     public static class DecryptionException extends Exception {
         public DecryptionException(Exception e) {
             super(e.getMessage());
+            initCause(e);
             setStackTrace(e.getStackTrace());
         }
     }
