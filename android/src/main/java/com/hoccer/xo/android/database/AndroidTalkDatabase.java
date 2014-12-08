@@ -21,7 +21,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
-    private static final int DATABASE_VERSION = 22;
+    private static final int DATABASE_VERSION = 23;
 
     private static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
@@ -65,7 +65,9 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
                 db.execSQL("DROP TABLE clientMembership");
                 db.execSQL("ALTER TABLE 'group' RENAME TO 'groupPresence'");
                 db.execSQL("ALTER TABLE 'groupMember' RENAME TO 'groupMembership'");
+            }
 
+            if (oldVersion < 23) {
                 deleteDuplicateGroupContacts();
                 deleteGroupMembershipsForDeletedGroups();
                 deleteGroupContactsForDeletedGroups();
