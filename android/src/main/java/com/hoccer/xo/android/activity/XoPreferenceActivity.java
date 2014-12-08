@@ -187,7 +187,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         List<String> items = new ArrayList<String>(backups.size());
         for (Backup backup : backups) {
             String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(backup.getCreationDate());
-            items.add(timestamp + " " + BackupFileUtils.getHumanReadableByteCount(backup.getSize(), true));
+            items.add(timestamp + " " + FileUtils.byteCountToDisplaySize(backup.getSize()));
         }
 
         XoDialogs.showSingleChoiceDialog("ImportBackupDialog",
