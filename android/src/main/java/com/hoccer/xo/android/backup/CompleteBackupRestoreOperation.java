@@ -55,8 +55,8 @@ public class CompleteBackupRestoreOperation {
     private void restore() throws IOException, CryptoJSON.DecryptionException {
         extractAttachmentsToTempDir();
         extractAndDecryptDatabaseToTempDir();
-        keepCurrentAttachments();
-        keepCurrentDatabase();
+        backupCurrentAttachments();
+        backupCurrentDatabase();
         moveAttachmentsToTargetDir();
         moveDatabaseToTarget();
     }
@@ -78,14 +78,14 @@ public class CompleteBackupRestoreOperation {
         BackupFileUtils.extractAndDecryptDatabase(mBackupFile, mTempDatabaseFile, mPassword);
     }
 
-    private void keepCurrentAttachments() throws IOException {
+    private void backupCurrentAttachments() throws IOException {
         mOldAttachmentsDir = new File(mAttachmentsTargetDir.getPath() + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
         for (File attachment : mAttachmentsTargetDir.listFiles(IS_NOT_DIRECTORY_FILTER)) {
             FileUtils.moveFileToDirectory(attachment, mOldAttachmentsDir, true);
         }
     }
 
-    private void keepCurrentDatabase() throws IOException {
+    private void backupCurrentDatabase() throws IOException {
         mOldDatabaseFile = new File(mDatabaseTarget.getPath() + "." + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
         FileUtils.moveFile(mDatabaseTarget, mOldDatabaseFile);
     }
