@@ -42,7 +42,7 @@ public class CompleteBackupRestoreOperationTest {
     }
 
     @Test
-    public void testBackupRestoreOperation() throws Exception {
+    public void testRestore() throws Exception {
         new CompleteBackupRestoreOperation(BACKUP_COMPLETE_FILE, DB_TARGET_FILE, ATTACHMENTS_TARGET_DIR, PASSWORD).invoke();
         assertTrue(DB_TARGET_FILE.exists());
         assertTrue(DB_TARGET_FILE.length() > 0);
