@@ -72,7 +72,13 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_create_group_profile, container, false);
+        return inflater.inflate(R.layout.fragment_create_group_profile, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setHasOptionsMenu(true);
 
         mAvatarImageView = (ImageView) view.findViewById(R.id.profile_group_profile_image);
         mGroupNameEdit = (EditText) view.findViewById(R.id.profile_group_name_edit);
@@ -111,14 +117,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             @Override
             public void afterTextChanged(Editable editable) {}
         });
-
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        setHasOptionsMenu(true);
 
         mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity());
         mGroupMemberAdapter.setFilter(new ContactsAdapter.Filter() {
@@ -162,11 +160,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     private void createGroup() {
         String groupName = mGroupNameEdit.getText().toString();
-
-        if (groupName.isEmpty()) {
-            groupName = "";
-        }
-
         List<String> memberIds = getClientIdsForContacts(mContactsToInvite);
         mGroupTag = getXoClient().createGroupWithContacts(groupName, memberIds);
     }
