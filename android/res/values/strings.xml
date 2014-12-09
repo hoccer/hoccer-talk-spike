@@ -138,7 +138,6 @@
     <string name="group_name_hint">Group name</string>
     <string name="profile_group_members_title">Members</string>
     <string name="profile_group_create_button">Create group</string>
-    <string name="profile_group_permanent_nearby">New Group</string>
 
     <!-- Messages -->
     <string name="message_text">Your message text</string>
