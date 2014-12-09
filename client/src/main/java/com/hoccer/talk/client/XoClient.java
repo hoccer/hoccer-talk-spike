@@ -983,7 +983,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         return createGroupWithContacts(name, Collections.<String>emptyList());
     }
 
-    public String createGroupWithContacts(final String name, final List<String> members) {
+    public String createGroupWithContacts(final String name, final List<String> clientIds) {
         resetIdle();
         final String tag = UUID.randomUUID().toString();
 
@@ -996,8 +996,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                             TalkGroupPresence.GROUP_TYPE_USER,
                             tag,
                             name,
-                            members.toArray(new String[members.size()]),
-                            createMemberRoles(members.size()));
+                            clientIds.toArray(new String[clientIds.size()]),
+                            createMemberRoles(clientIds.size()));
 
                     if (groupPresence != null) {
                         updateGroupPresence(groupPresence);
