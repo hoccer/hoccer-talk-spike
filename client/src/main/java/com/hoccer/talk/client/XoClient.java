@@ -1518,7 +1518,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                                     LOG.info("Removing members and group with name="+ groupContact.getNickname());
                                     TalkGroupPresence groupPresence = groupContact.getGroupPresence();
                                     if (groupPresence != null) {
-                                        groupPresence.setState(TalkGroupPresence.STATE_NONE);
+                                        groupPresence.setState(TalkGroupPresence.STATE_DELETED);
                                         mDatabase.saveGroupPresence(groupPresence);
                                     }
 

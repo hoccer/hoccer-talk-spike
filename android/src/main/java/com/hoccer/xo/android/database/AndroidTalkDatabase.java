@@ -101,7 +101,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
         QueryBuilder<TalkGroupPresence, ?> deletedGroupIds = groupPresences.queryBuilder();
         deletedGroupIds.selectColumns("groupId").where()
-                .eq("state", TalkGroupPresence.STATE_NONE);
+                .eq("state", TalkGroupPresence.STATE_DELETED);
 
         deleteMemberships.where().in("groupId", deletedGroupIds);
         deleteMemberships.delete();
@@ -114,7 +114,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
         QueryBuilder<TalkGroupPresence, ?> deletedGroupIds = groupPresences.queryBuilder();
         deletedGroupIds.selectColumns("groupId").where()
-                .eq("state", TalkGroupPresence.STATE_NONE);
+                .eq("state", TalkGroupPresence.STATE_DELETED);
 
         deleteContacts.where().in("groupId", deletedGroupIds);
         deleteContacts.delete();
@@ -124,7 +124,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
         DeleteBuilder<TalkGroupPresence, ?> deleteGroupPresences = groupPresences.deleteBuilder();
 
-        deleteGroupPresences.where().eq("state", TalkGroupPresence.STATE_NONE);
+        deleteGroupPresences.where().eq("state", TalkGroupPresence.STATE_DELETED);
         deleteGroupPresences.delete();
     }
 }
