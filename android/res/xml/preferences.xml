@@ -120,7 +120,8 @@
                 android:title="Chats"/>
         <Preference
                 android:key="preference_complete_backup"
-                android:title="Chats with attachments"/>
+                android:title="Chats with attachments"
+                android:layout="@layout/preference_create_backup"/>
         <Preference
                 android:key="preference_import_backup"
                 android:title="Import backup"/>
