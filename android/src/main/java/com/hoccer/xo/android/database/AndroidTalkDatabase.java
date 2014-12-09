@@ -82,49 +82,49 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private void deleteDuplicateGroupContacts() throws SQLException {
         Dao<TalkClientContact, ?> contacts = getDao(TalkClientContact.class);
-        DeleteBuilder<TalkClientContact, ?> deleteBuilder = contacts.deleteBuilder();
+        DeleteBuilder<TalkClientContact, ?> deleteContacts = contacts.deleteBuilder();
 
-        deleteBuilder.where()
+        deleteContacts.where()
                 .eq("contactType", TalkClientContact.TYPE_GROUP)
                 .and()
                 .isNull("groupTag")
                 .and()
                 .isNull("groupPresence_id");
 
-        deleteBuilder.delete();
+        deleteContacts.delete();
     }
 
     private void deleteGroupMembershipsForDeletedGroups() throws SQLException {
         Dao<TalkGroupMembership, ?> memberships = getDao(TalkGroupMembership.class);
-        DeleteBuilder<TalkGroupMembership, ?> deleteBuilder = memberships.deleteBuilder();
+        DeleteBuilder<TalkGroupMembership, ?> deleteMemberships = memberships.deleteBuilder();
 
         Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
         QueryBuilder<TalkGroupPresence, ?> deletedGroupIds = groupPresences.queryBuilder();
         deletedGroupIds.selectColumns("groupId").where()
                 .eq("state", TalkGroupPresence.STATE_NONE);
 
-        deleteBuilder.where().in("groupId", deletedGroupIds);
-        deleteBuilder.delete();
+        deleteMemberships.where().in("groupId", deletedGroupIds);
+        deleteMemberships.delete();
     }
 
     private void deleteGroupContactsForDeletedGroups() throws SQLException {
         Dao<TalkClientContact, ?> contacts = getDao(TalkClientContact.class);
-        DeleteBuilder<TalkClientContact, ?> deleteBuilder = contacts.deleteBuilder();
+        DeleteBuilder<TalkClientContact, ?> deleteContacts = contacts.deleteBuilder();
 
         Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
         QueryBuilder<TalkGroupPresence, ?> deletedGroupIds = groupPresences.queryBuilder();
         deletedGroupIds.selectColumns("groupId").where()
                 .eq("state", TalkGroupPresence.STATE_NONE);
 
-        deleteBuilder.where().in("groupId", deletedGroupIds);
-        deleteBuilder.delete();
+        deleteContacts.where().in("groupId", deletedGroupIds);
+        deleteContacts.delete();
     }
 
     private void deleteGroupPresencesForDeletedGroups() throws SQLException {
         Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
-        DeleteBuilder<TalkGroupPresence, ?> deleteBuilder = groupPresences.deleteBuilder();
+        DeleteBuilder<TalkGroupPresence, ?> deleteGroupPresences = groupPresences.deleteBuilder();
 
-        deleteBuilder.where().eq("state", TalkGroupPresence.STATE_NONE);
-        deleteBuilder.delete();
+        deleteGroupPresences.where().eq("state", TalkGroupPresence.STATE_NONE);
+        deleteGroupPresences.delete();
     }
 }

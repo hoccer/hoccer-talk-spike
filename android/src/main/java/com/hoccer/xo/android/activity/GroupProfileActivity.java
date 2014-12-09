@@ -47,7 +47,7 @@ public class GroupProfileActivity extends ComposableActivity implements IProfile
 
         if (intent != null) {
             if (intent.hasExtra(EXTRA_CLIENT_CREATE_GROUP)) {
-                showCreateGroupProfileFragment();
+                showGroupProfileCreationFragment();
             } else if (intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
                 int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
 
@@ -74,7 +74,7 @@ public class GroupProfileActivity extends ComposableActivity implements IProfile
         super.onPause();
     }
 
-    private void showCreateGroupProfileFragment() {
+    private void showGroupProfileCreationFragment() {
         GroupProfileCreationFragment groupProfileFragment = new GroupProfileCreationFragment();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fl_group_profile_fragment_container, groupProfileFragment);
