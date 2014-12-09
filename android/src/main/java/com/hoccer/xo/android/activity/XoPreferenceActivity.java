@@ -1,14 +1,10 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.*;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -18,9 +14,7 @@ import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
-import com.hoccer.xo.android.backup.Backup;
-import com.hoccer.xo.android.backup.BackupFactory;
-import com.hoccer.xo.android.backup.BackupFileUtils;
+import com.hoccer.xo.android.backup.*;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
 import org.apache.commons.io.FileUtils;
@@ -260,34 +254,10 @@ public class XoPreferenceActivity extends PreferenceActivity
                 new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
-                        createDatabaseBackup(password);
+                        createBackup(password, BackupType.DATABASE);
                     }
                 }
         );
-    }
-
-    private void createDatabaseBackup(final String password) {
-        new AsyncTask<Void, Void, Backup>() {
-            @Override
-            protected Backup doInBackground(Void... params) {
-                try {
-                    return BackupFactory.createDatabaseBackup(password);
-                } catch (Exception e) {
-                    LOG.error("Data export failed.", e);
-                    return null;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Backup backup) {
-                super.onPostExecute(backup);
-                if (backup != null) {
-                    Toast.makeText(getBaseContext(), "Data exported to " + backup.getFile().getAbsolutePath(), Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
-                }
-            }
-        }.execute();
     }
 
     private void showCompleteBackupDialog() {
@@ -297,34 +267,34 @@ public class XoPreferenceActivity extends PreferenceActivity
                 new XoDialogs.OnTextSubmittedListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id, String password) {
-                        createCompleteBackup(password);
+                        createBackup(password, BackupType.COMPLETE);
                     }
                 }
         );
     }
 
-    private void createCompleteBackup(final String password) {
-        new AsyncTask<Void, Void, Backup>() {
+    private void createBackup(final String password, BackupType type) {
+        ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
-            protected Backup doInBackground(Void... params) {
-                try {
-                    return BackupFactory.createCompleteBackup(password);
-                } catch (Exception e) {
-                    LOG.error("Data export failed.", e);
-                    return null;
-                }
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                BackupService.BackupServiceBinder binder = (BackupService.BackupServiceBinder) service;
+                BackupService backupService = binder.getService();
             }
 
             @Override
-            protected void onPostExecute(Backup backup) {
-                super.onPostExecute(backup);
-                if (backup != null) {
-                    Toast.makeText(getBaseContext(), "Data exported to " + backup.getFile().getAbsolutePath(), Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getBaseContext(), "Data export failed", Toast.LENGTH_LONG).show();
-                }
+            public void onServiceDisconnected(ComponentName name) {
             }
-        }.execute();
+        };
+
+        Bundle bundle = new Bundle();
+        bundle.putString("type", type.toString());
+        bundle.putString("password", password);
+
+        Intent intent = new Intent(this, BackupService.class);
+        intent.putExtras(bundle);
+
+        startService(intent);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private void showImportCredentialsDialog() {
