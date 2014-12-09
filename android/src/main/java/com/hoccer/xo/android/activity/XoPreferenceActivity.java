@@ -9,12 +9,15 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.*;
+import android.widget.Button;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.*;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
 import org.apache.commons.io.FileUtils;
@@ -39,6 +42,11 @@ public class XoPreferenceActivity extends PreferenceActivity
     private Handler mDialogDismisser;
 
     private Dialog mWaitingDialog;
+    private boolean mBackupServiceBound;
+    private BackupService mBackupService;
+
+    private BroadcastReceiver mBroadcastReceiver;
+    private ServiceConnection mServiceConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +61,25 @@ public class XoPreferenceActivity extends PreferenceActivity
             addPreferencesFromResource(R.xml.preferences);
         }
         getListView().setBackgroundColor(Color.WHITE);
+
+        createBroadcastReceiver();
+    }
+
+    private void createBroadcastReceiver() {
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                getListView().findViewById(R.id.rl_default_preference).setVisibility(View.VISIBLE);
+                getListView().findViewById(R.id.rl_in_progress).setVisibility(View.GONE);
+//                mBackupService.unbindService(mServiceConnection);
+            }
+        };
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(IntentHelper.ACTION_BACKUP_SUCCEEDED);
+        intentFilter.addAction(IntentHelper.ACTION_BACKUP_FAILED);
+        intentFilter.addAction(IntentHelper.ACTION_BACKUP_CANCELED);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     @Override
@@ -274,15 +301,18 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void createBackup(final String password, BackupType type) {
-        ServiceConnection serviceConnection = new ServiceConnection() {
+
+        mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 BackupService.BackupServiceBinder binder = (BackupService.BackupServiceBinder) service;
-                BackupService backupService = binder.getService();
+                mBackupService = binder.getService();
+                mBackupServiceBound = true;
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
+                mBackupServiceBound = false;
             }
         };
 
@@ -294,7 +324,20 @@ public class XoPreferenceActivity extends PreferenceActivity
         intent.putExtras(bundle);
 
         startService(intent);
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+
+        getListView().findViewById(R.id.rl_default_preference).setVisibility(View.GONE);
+        getListView().findViewById(R.id.rl_in_progress).setVisibility(View.VISIBLE);
+
+        Button cancelBtn = (Button) getListView().findViewById(R.id.btn_cancel);
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mBackupServiceBound) {
+                    mBackupService.cancel();
+                }
+            }
+        });
     }
 
     private void showImportCredentialsDialog() {
