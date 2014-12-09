@@ -68,7 +68,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private Menu mOptionsMenu;
 
-    private List<TalkClientContact> mCurrentClientsInGroup;
+    private List<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
     private final ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
 
@@ -414,8 +414,8 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private void manageGroupMembers() {
-        if (mCurrentClientsInGroup == null) {
-            mCurrentClientsInGroup = mGroupMemberAdapter.getContacts();
+        if (mCurrentClientsInGroup.isEmpty()) {
+            mCurrentClientsInGroup.addAll(mGroupMemberAdapter.getContacts());
         }
         GroupManageDialog dialog = new GroupManageDialog(mGroup, mCurrentClientsInGroup);
         dialog.setTargetFragment(this, 0);
