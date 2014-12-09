@@ -493,13 +493,6 @@ public class TalkClientContact implements Serializable {
         }
     }
 
-    public static TalkClientContact createGroupContact() {
-        String groupTag = UUID.randomUUID().toString();
-        TalkClientContact groupContact = new TalkClientContact(TYPE_GROUP);
-        groupContact.updateGroupTag(groupTag);
-        return groupContact;
-    }
-
     @Override
     public boolean equals(Object obj) {
         return obj != null && obj instanceof TalkClientContact && clientContactId == ((TalkClientContact) obj).clientContactId;
