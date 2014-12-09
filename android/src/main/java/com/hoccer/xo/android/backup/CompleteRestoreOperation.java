@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class CompleteBackupRestoreOperation {
+public class CompleteRestoreOperation {
 
     private static final String TEMP_ATTACHMENTS_DIR_NAME = "tmp_attachments";
     private static final String TEMP_DB_DIR_NAME = "tmp_db";
@@ -31,7 +31,7 @@ public class CompleteBackupRestoreOperation {
         }
     };
 
-    public CompleteBackupRestoreOperation(File backupFile, File databaseTarget, File attachmentsTargetDir, String password) {
+    public CompleteRestoreOperation(File backupFile, File databaseTarget, File attachmentsTargetDir, String password) {
         mBackupFile = backupFile;
         mDatabaseTarget = databaseTarget;
         mAttachmentsTargetDir = attachmentsTargetDir;
@@ -52,7 +52,7 @@ public class CompleteBackupRestoreOperation {
         }
     }
 
-    private void restore() throws IOException, CryptoJSON.DecryptionException {
+    private void restore() throws IOException, CryptoJSON.DecryptionException, InterruptedException {
         extractAndDecryptDatabaseToTempDir();
         extractAttachmentsToTempDir();
         backupCurrentDatabase();
@@ -61,7 +61,7 @@ public class CompleteBackupRestoreOperation {
         moveAttachmentsToTargetDir();
     }
 
-    private void extractAttachmentsToTempDir() throws IOException {
+    private void extractAttachmentsToTempDir() throws IOException, InterruptedException {
         if (mTempAttachmentsDir.exists()) {
             FileUtils.forceDelete(mTempAttachmentsDir);
         }

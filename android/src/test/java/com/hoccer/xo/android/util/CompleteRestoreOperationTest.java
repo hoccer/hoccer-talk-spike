@@ -1,8 +1,8 @@
 package com.hoccer.xo.android.util;
 
+import com.hoccer.xo.android.backup.CompleteRestoreOperation;
 import org.apache.commons.io.FileUtils;
 
-import com.hoccer.xo.android.backup.CompleteBackupRestoreOperation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 
 
-public class CompleteBackupRestoreOperationTest {
+public class CompleteRestoreOperationTest {
 
     private static final File BACKUP_COMPLETE_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_BACKUP_COMPLETE_PATH);
 
@@ -43,7 +43,7 @@ public class CompleteBackupRestoreOperationTest {
 
     @Test
     public void testRestore() throws Exception {
-        new CompleteBackupRestoreOperation(BACKUP_COMPLETE_FILE, DB_TARGET_FILE, ATTACHMENTS_TARGET_DIR, PASSWORD).invoke();
+        new CompleteRestoreOperation(BACKUP_COMPLETE_FILE, DB_TARGET_FILE, ATTACHMENTS_TARGET_DIR, PASSWORD).invoke();
         assertTrue(DB_TARGET_FILE.exists());
         assertTrue(DB_TARGET_FILE.length() > 0);
         assertTrue(ATTACHMENTS_TARGET_DIR.listFiles().length == 1);

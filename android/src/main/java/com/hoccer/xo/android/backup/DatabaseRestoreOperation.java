@@ -6,7 +6,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 
-public class DatabaseBackupRestoreOperation {
+public class DatabaseRestoreOperation {
 
     public static final String TMP_EXTENSION = ".tmp";
 
@@ -16,7 +16,7 @@ public class DatabaseBackupRestoreOperation {
 
     private File mDatabaseTemp;
 
-    public DatabaseBackupRestoreOperation(File backupFile, File databaseTarget, String password) {
+    public DatabaseRestoreOperation(File backupFile, File databaseTarget, String password) {
         mBackupFile = backupFile;
         mDatabaseTarget = databaseTarget;
         mPassword = password;

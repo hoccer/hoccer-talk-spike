@@ -37,7 +37,7 @@ public class DatabaseBackup extends Backup {
     @Override
     public void restore(String password) throws Exception {
         File databaseTarget = new File(DB_PATH_NAME);
-        new DatabaseBackupRestoreOperation(mBackupFile, databaseTarget, password).invoke();
+        new DatabaseRestoreOperation(mBackupFile, databaseTarget, password).invoke();
     }
 
     @Nullable

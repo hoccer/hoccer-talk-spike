@@ -39,6 +39,6 @@ public class CompleteBackup extends DatabaseBackup {
     public void restore(String password) throws Exception {
         File databaseTarget = new File(DB_PATH_NAME);
         File attachmentsTargetDir = XoApplication.getAttachmentDirectory();
-        new CompleteBackupRestoreOperation(mBackupFile, databaseTarget, attachmentsTargetDir, password).invoke();
+        new CompleteRestoreOperation(mBackupFile, databaseTarget, attachmentsTargetDir, password).invoke();
     }
 }

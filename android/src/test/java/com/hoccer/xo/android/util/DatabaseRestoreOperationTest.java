@@ -1,6 +1,6 @@
 package com.hoccer.xo.android.util;
 
-import com.hoccer.xo.android.backup.DatabaseBackupRestoreOperation;
+import com.hoccer.xo.android.backup.DatabaseRestoreOperation;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -13,7 +13,7 @@ import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 
 
-public class DatabaseBackupRestoreOperationTest {
+public class DatabaseRestoreOperationTest {
 
     private static final File BACKUP_COMPLETE_FILE = BackupTestResources.getResourceFile(BackupTestResources.RESOURCE_BACKUP_COMPLETE_PATH);
 
@@ -36,7 +36,7 @@ public class DatabaseBackupRestoreOperationTest {
 
     @Test
     public void testRestore() throws Exception {
-        new DatabaseBackupRestoreOperation(BACKUP_COMPLETE_FILE, DB_TARGET_FILE, PASSWORD).invoke();
+        new DatabaseRestoreOperation(BACKUP_COMPLETE_FILE, DB_TARGET_FILE, PASSWORD).invoke();
         assertTrue(DB_TARGET_FILE.exists());
         assertTrue(DB_TARGET_FILE.length() > 0);
     }
