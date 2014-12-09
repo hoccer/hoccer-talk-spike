@@ -174,9 +174,6 @@
     <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Gruppe löschen</string>
     <string name="dialog_delete_group_message">Bist du dir sicher, dass du die Gruppe löschen möchtest?</string>
-    <string name="dialog_reject_group_invitation_title">Einladung ablehnen</string>
-    <string name="dialog_reject_group_invitation_message">Bist du dir sicher, dass du die Einladung ablehnen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können.
-    </string>
     <string name="dialog_leave_group_title">Gruppe verlassen</string>
     <string name="dialog_leave_group_message">Bist du dir sicher, dass du die Gruppe verlassen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können.
     </string>
@@ -189,8 +186,6 @@
     </string>
     <string name="menu_group_delete_profile">Gruppe schließen</string>
     <string name="menu_group_edit_profile">Gruppe bearbeiten</string>
-    <string name="menu_group_profile_reject_invitation">Einladung ablehnen</string>
-    <string name="menu_group_profile_join">Gruppe beitreten</string>
     <string name="menu_group_profile_leave">Gruppe verlassen</string>
     <string name="menu_group_profile_permanent">Permanente Gruppe erstellen</string>
 

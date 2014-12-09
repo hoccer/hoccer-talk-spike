@@ -192,14 +192,10 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void configureOptionsMenuItems(Menu menu) {
         MenuItem editGroupItem = menu.findItem(R.id.menu_group_profile_edit);
-        MenuItem rejectInvitationItem = menu.findItem(R.id.menu_group_profile_reject_invitation);
-        MenuItem joinGroupItem = menu.findItem(R.id.menu_group_profile_join);
         MenuItem leaveGroupItem = menu.findItem(R.id.menu_group_profile_leave);
         MenuItem listAttachmentsItem = menu.findItem(R.id.menu_audio_attachment_list);
 
         editGroupItem.setVisible(false);
-        rejectInvitationItem.setVisible(false);
-        joinGroupItem.setVisible(false);
         leaveGroupItem.setVisible(false);
 
         if (mGroup.getGroupPresence() != null && !mGroup.getGroupPresence().isTypeNearby()) {
@@ -208,10 +204,7 @@ public class GroupProfileFragment extends ProfileFragment
                 listAttachmentsItem.setVisible(true);
             } else {
                 editGroupItem.setVisible(false);
-                if (mGroup.isGroupInvited()) {
-                    rejectInvitationItem.setVisible(true);
-                    joinGroupItem.setVisible(true);
-                } else if (mGroup.isGroupJoined()) {
+                if (mGroup.isGroupJoined()) {
                     leaveGroupItem.setVisible(true);
                     listAttachmentsItem.setVisible(true);
                 }
@@ -225,29 +218,6 @@ public class GroupProfileFragment extends ProfileFragment
         switch (item.getItemId()) {
             case R.id.menu_group_profile_edit:
                 getActivity().startActionMode(this);
-                isSelectionHandled = true;
-                break;
-            case R.id.menu_group_profile_reject_invitation:
-                XoDialogs.showYesNoDialog("RejectGroupInvitationDialog",
-                        R.string.dialog_reject_group_invitation_title,
-                        R.string.dialog_reject_group_invitation_message,
-                        getXoActivity(),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                getXoActivity().getXoClient().leaveGroup(mGroup.getGroupId());
-                                getActivity().finish();
-                            }
-                        },
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                            }
-                        });
-                isSelectionHandled = true;
-                break;
-            case R.id.menu_group_profile_join:
-                joinGroup();
                 isSelectionHandled = true;
                 break;
             case R.id.menu_group_profile_leave:
@@ -420,11 +390,6 @@ public class GroupProfileFragment extends ProfileFragment
         GroupManageDialog dialog = new GroupManageDialog(mGroup, mCurrentClientsInGroup);
         dialog.setTargetFragment(this, 0);
         dialog.show(getActivity().getSupportFragmentManager(), "GroupManageDialog");
-    }
-
-    private void joinGroup() {
-        getXoClient().joinGroup(mGroup.getGroupId());
-        getActivity().finish();
     }
 
     private boolean isCurrentGroup(TalkClientContact contact) {
