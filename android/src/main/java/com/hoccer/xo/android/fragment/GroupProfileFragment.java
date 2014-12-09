@@ -121,11 +121,7 @@ public class GroupProfileFragment extends ProfileFragment
     @Override
     public void onResume() {
         super.onResume();
-
-        if (mGroup != null) {
-            mMode = Mode.PROFILE;
-            refreshContact(mGroup);
-        }
+        mMode = Mode.PROFILE;
 
         Bundle arguments = getArguments();
         if (arguments != null) {
@@ -150,8 +146,7 @@ public class GroupProfileFragment extends ProfileFragment
             mGroupMembersList.setOnItemClickListener(null);
         }
 
-        updateInviteButton();
-        updateActionBar();
+        updateWithContact(mGroup);
     }
 
     @Override
@@ -445,9 +440,7 @@ public class GroupProfileFragment extends ProfileFragment
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    refreshContact(contact);
-                    updateActionBar();
-                    updateInviteButton();
+                    updateWithContact(contact);
                     configureOptionsMenuItems(mOptionsMenu);
                 }
             });
@@ -460,12 +453,20 @@ public class GroupProfileFragment extends ProfileFragment
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    refreshContact(contact);
-                    updateActionBar();
-                    updateInviteButton();
+                    updateWithContact(contact);
                     configureOptionsMenuItems(mOptionsMenu);
                 }
             });
+        }
+    }
+
+    private void updateWithContact(TalkClientContact contact) {
+        if (contact.isGroupNoLongerJoined()) {
+            getActivity().finish();
+        } else {
+            refreshContact(contact);
+            updateActionBar();
+            updateInviteButton();
         }
     }
 

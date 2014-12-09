@@ -13,7 +13,6 @@ import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * These represent a target of communication
@@ -183,6 +182,10 @@ public class TalkClientContact implements Serializable {
 
     public boolean isGroupJoined() {
         return isGroup() && this.groupMembership != null && this.groupMembership.isJoined();
+    }
+
+    public boolean isGroupNoLongerJoined() {
+        return isGroup() && this.groupMembership != null && !this.groupMembership.isJoined();
     }
 
     // returns true if there is actually a group key locally stored
