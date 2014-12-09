@@ -3,13 +3,17 @@ package com.hoccer.xo.android.backup;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.*;
 import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.LocalBroadcastManager;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.activity.XoPreferenceActivity;
+import com.hoccer.xo.android.util.IntentHelper;
 
 public class BackupService extends Service {
 
@@ -19,6 +23,7 @@ public class BackupService extends Service {
 
     private final IBinder mBinder = new BackupServiceBinder();
 
+    private LocalBroadcastManager mLocalBroadcastManager;
     private Looper mLooper;
     private ServiceHandler mServiceHandler;
 
@@ -55,11 +60,12 @@ public class BackupService extends Service {
 
         mLooper = thread.getLooper();
         mServiceHandler = new ServiceHandler(mLooper);
+
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         final Bundle extras = intent.getExtras();
 
         Message msg = mServiceHandler.obtainMessage();
@@ -80,16 +86,34 @@ public class BackupService extends Service {
             } else if (type.equals(BackupType.DATABASE.toString())) {
                 backup = BackupFactory.createDatabaseBackup(password);
             }
+            broadcastBackupSucceeded();
             triggerBackupCreationSucceededNotification();
         } catch (InterruptedException e) {
+            broadcastBackupCanceled();
             stopForeground(true);
             e.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();
+            broadcastBackupFailed();
             triggerBackupCreationFailedNotification();
+            e.printStackTrace();
         } finally {
             stopSelf();
         }
+    }
+
+    private void broadcastBackupSucceeded() {
+        Intent intent = new Intent(IntentHelper.ACTION_BACKUP_SUCCEEDED);
+        mLocalBroadcastManager.sendBroadcast(intent);
+    }
+
+    private void broadcastBackupCanceled() {
+        Intent intent = new Intent(IntentHelper.ACTION_BACKUP_CANCELED);
+        mLocalBroadcastManager.sendBroadcast(intent);
+    }
+
+    private void broadcastBackupFailed() {
+        Intent intent = new Intent(IntentHelper.ACTION_BACKUP_FAILED);
+        mLocalBroadcastManager.sendBroadcast(intent);
     }
 
     public void cancel() {

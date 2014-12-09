@@ -37,6 +37,9 @@ public class IntentHelper {
     public static final String EXTRA_MEDIA_URI = "com.hoccer.xo.android.extra.MEDIA_URI";
 
     public static final String ACTION_MEDIA_DOWNLOAD_SCANNED = "com.hoccer.xo.android.action.MEDIA_DOWNLOAD_SCANNED";
+    public static final String ACTION_BACKUP_SUCCEEDED = "com.hoccer.xo.android.action.BACKUP_SUCCEEDED";
+    public static final String ACTION_BACKUP_CANCELED = "com.hoccer.xo.android.action.BACKUP_CANCELED";
+    public static final String ACTION_BACKUP_FAILED = "com.hoccer.xo.android.action.BACKUP_FAILED";
 
     // Static Methods ----------------------------------------------------
 
