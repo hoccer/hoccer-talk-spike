@@ -12,7 +12,6 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
@@ -55,6 +54,13 @@ public class BackupFileUtils {
                 LOG.info("Could not cleanup. Failed to delete " + out.getAbsolutePath() + ":" + e1.getMessage());
             }
             throw e;
+        } catch (InterruptedException e) {
+            try {
+                FileUtils.forceDelete(out);
+            } catch (IOException e1) {
+                LOG.info("Could not cleanup. Failed to delete " + out.getAbsolutePath() + ":" + e1.getMessage());
+            }
+            throw e;
         }
     }
 
@@ -65,7 +71,7 @@ public class BackupFileUtils {
         return CryptoJSON.encrypt(bytes, password, DB_CONTENT_TYPE);
     }
 
-    private static void createZip(File zipFile, String metadata, byte[] encryptedDatabase, List<File> attachments) throws IOException {
+    private static void createZip(File zipFile, String metadata, byte[] encryptedDatabase, List<File> attachments) throws IOException, InterruptedException {
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile));
         zos.setLevel(ZipOutputStream.DEFLATED);
         try {
@@ -75,33 +81,37 @@ public class BackupFileUtils {
             addZipEntry(zos, DB_FILENAME_ENCRYPTED, encryptedDatabase);
             addZipEntry(zos, METADATA_FILENAME, metadata);
         } finally {
-            zos.close();
+            IOUtils.closeQuietly(zos);
         }
     }
 
-    private static void addZipEntry(ZipOutputStream zos, File file) throws IOException {
+    private static void addZipEntry(ZipOutputStream zos, File file) throws IOException, InterruptedException {
         InputStream in = new FileInputStream(file);
         addZipEntry(zos, file.getName(), in);
         in.close();
     }
 
-    private static void addZipEntry(ZipOutputStream zos, String filename, byte[] data) throws IOException {
+    private static void addZipEntry(ZipOutputStream zos, String filename, byte[] data) throws IOException, InterruptedException {
         InputStream in = new ByteArrayInputStream(data);
         addZipEntry(zos, filename, in);
         in.close();
     }
 
-    private static void addZipEntry(ZipOutputStream zos, String filename, String data) throws IOException {
+    private static void addZipEntry(ZipOutputStream zos, String filename, String data) throws IOException, InterruptedException {
         InputStream in = new ByteArrayInputStream(data.getBytes("UTF-8"));
         addZipEntry(zos, filename, in);
         in.close();
     }
 
-    private static void addZipEntry(ZipOutputStream zos, String filename, InputStream data) throws IOException {
-        ZipEntry entry = new ZipEntry(filename);
-        zos.putNextEntry(entry);
-        IOUtils.copy(data, zos);
-        zos.closeEntry();
+    private static void addZipEntry(ZipOutputStream zos, String filename, InputStream data) throws IOException, InterruptedException {
+        if (!Thread.interrupted()) {
+            ZipEntry entry = new ZipEntry(filename);
+            zos.putNextEntry(entry);
+            IOUtils.copy(data, zos);
+            zos.closeEntry();
+        } else {
+            throw new InterruptedException();
+        }
     }
 
     public static BackupMetadata extractMetadata(File backupFile) throws IOException {
@@ -134,14 +144,18 @@ public class BackupFileUtils {
     private static void writeDataToFileDecrypted(File target, InputStream is, String password) throws IOException, CryptoJSON.DecryptionException {
         byte[] encrypted = IOUtils.toByteArray(is);
         byte[] decrypted = CryptoJSON.decrypt(encrypted, password, DB_CONTENT_TYPE);
+
         FileUtils.writeByteArrayToFile(target, decrypted);
     }
 
-    public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException {
+    public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException, InterruptedException {
         ZipFile zipFile = new ZipFile(backupFile);
         Enumeration<? extends ZipEntry> entries = zipFile.entries();
 
         while (entries.hasMoreElements()) {
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
+            }
             ZipEntry entry = entries.nextElement();
             if (!entry.getName().equals(DB_FILENAME_ENCRYPTED) && !entry.getName().equals(METADATA_FILENAME)) {
                 File file = new File(targetDir, entry.getName());

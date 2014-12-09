@@ -2,10 +2,9 @@ package com.hoccer.xo.android.util;
 
 import com.hoccer.xo.android.backup.Backup;
 import com.hoccer.xo.android.backup.BackupFileUtils;
-import org.apache.commons.io.FileUtils;
-
 import com.hoccer.xo.android.backup.BackupMetadata;
 import com.hoccer.xo.android.backup.BackupType;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,7 +15,6 @@ import java.util.List;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
-import static junit.framework.TestCase.assertEquals;
 
 
 public class BackupFileUtilsTest {
@@ -78,6 +76,30 @@ public class BackupFileUtilsTest {
 
         boolean deleted = backupFile.delete();
         assertTrue(deleted);
+    }
+
+    @Test
+    public void testCancelCreateDatabaseBackupFileWithAttachments() throws Exception {
+        String filename = BackupFileUtils.createUniqueBackupFilename() + ".zip";
+        final File backupFile = new File(getClass().getResource("").getFile(), filename);
+
+        final BackupMetadata metadata = new BackupMetadata(BackupType.COMPLETE, CLIENT_NAME, new Date());
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    BackupFileUtils.createBackupFile(backupFile, metadata, DATABASE_FILE, PASSWORD, ATTACHMENT_FILES);
+                } catch (InterruptedException e) {
+                    assertTrue(!backupFile.exists());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+        Thread.sleep(100);
+        thread.interrupt();
     }
 
     @Test

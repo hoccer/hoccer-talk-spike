@@ -1,18 +1,14 @@
 package com.hoccer.xo.android.backup;
 
-import com.hoccer.talk.crypto.CryptoJSON;
 import com.hoccer.xo.android.XoApplication;
-import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 
 public class DatabaseBackup extends Backup {
 
     public static final String DB_PATH_NAME = "/data/data/" + XoApplication.getAppPackageName() + "/databases/hoccer-talk.db";
-    private static final String TEMP_DB_PATH_NAME = "/data/data/" + XoApplication.getAppPackageName() + "/databases/hoccer-talk.db.tmp";
 
     protected final BackupMetadata mMetadata;
 
