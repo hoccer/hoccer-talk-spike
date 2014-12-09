@@ -1697,12 +1697,24 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 return failed;
             }
 
+            TalkGroupPresence presence = contact.getGroupPresence();
+
+            if (presence == null) {
+                return failed;
+            }
+
             if (sharedKeyId.equalsIgnoreCase("renew")) {
                 generateGroupKey(contact);
                 isRenewGroupKey = true;
+            } else {
+                if (!sharedKeyId.equals(presence.getSharedKeyId()) || !sharedKeyIdSalt.equals(presence.getSharedKeyIdSalt())) {
+                    return failed;
+                }
             }
 
-            // here we will have a valid group key
+            if (contact.getGroupKey() == null) {
+                return failed;
+            }
 
             // do we have a public key for each group member?
             List<TalkClientContact> clientsInGroup = new ArrayList<TalkClientContact>();
@@ -1725,8 +1737,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
 
             // encrypt group key with each member's public key
-            // TODO: if there is no groupkey to encrypt, create one!
-            // generateGroupKey();
             byte[] rawGroupKey = Base64.decodeBase64(contact.getGroupKey().getBytes(Charset.forName("UTF-8")));
             List<String> encryptedGroupKeys = new ArrayList<String>();
             for (TalkClientContact clientContact : clientsInGroup) {
