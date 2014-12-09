@@ -87,15 +87,15 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mMediaCollectionRelations = mBackend.getDao(TalkClientMediaCollectionRelation.class);
     }
 
-    public void saveCredentials(TalkClientSelf credentials) throws SQLException {
+    public synchronized void saveCredentials(TalkClientSelf credentials) throws SQLException {
         mClientSelfs.createOrUpdate(credentials);
     }
 
-    public void savePublicKey(TalkKey publicKey) throws SQLException {
+    public synchronized void savePublicKey(TalkKey publicKey) throws SQLException {
         mPublicKeys.createOrUpdate(publicKey);
     }
 
-    public void savePrivateKey(TalkPrivateKey privateKey) throws SQLException {
+    public synchronized void savePrivateKey(TalkPrivateKey privateKey) throws SQLException {
         mPrivateKeys.createOrUpdate(privateKey);
     }
 
@@ -103,7 +103,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     //////// Contact Management ////////
     ////////////////////////////////////
 
-    public void saveContact(TalkClientContact contact) throws SQLException {
+    public synchronized void saveContact(TalkClientContact contact) throws SQLException {
         mClientContacts.createOrUpdate(contact);
     }
 
@@ -111,14 +111,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mClientContacts.refresh(contact);
     }
 
-    public void savePresence(TalkPresence presence) throws NoClientIdInPresenceException, SQLException {
+    public synchronized void savePresence(TalkPresence presence) throws NoClientIdInPresenceException, SQLException {
         if (presence.getClientId() == null) {
             throw new NoClientIdInPresenceException("Client id is null for " + presence);
         }
         mPresences.createOrUpdate(presence);
     }
 
-    public void saveRelationship(TalkRelationship relationship) throws SQLException {
+    public synchronized void saveRelationship(TalkRelationship relationship) throws SQLException {
         mRelationships.createOrUpdate(relationship);
     }
 
@@ -197,7 +197,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     //////// Group Management ////////
     //////////////////////////////////
 
-    public void saveGroupPresence(TalkGroupPresence group) throws SQLException {
+    public synchronized void saveGroupPresence(TalkGroupPresence group) throws SQLException {
         mGroupPresences.createOrUpdate(group);
     }
 
@@ -222,7 +222,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contacts.join(memberships).query();
     }
 
-    public void saveGroupMembership(TalkGroupMembership membership) throws SQLException {
+    public synchronized void saveGroupMembership(TalkGroupMembership membership) throws SQLException {
         mGroupMemberships.createOrUpdate(membership);
     }
 
@@ -315,7 +315,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mClientMessages.createOrUpdate(message);
     }
 
-    public void saveMessage(TalkMessage message) throws SQLException {
+    public synchronized void saveMessage(TalkMessage message) throws SQLException {
         mMessages.createOrUpdate(message);
     }
 
@@ -606,7 +606,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             throw new SQLException("cant find record for Delivery: " + delivery.getId());
         }
     }
-    public void saveClientDownload(TalkClientDownload download) throws SQLException {
+    public synchronized void saveClientDownload(TalkClientDownload download) throws SQLException {
         Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
 
         if (result.isCreated()) {
@@ -620,7 +620,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
     }
 
-    public void saveClientUpload(TalkClientUpload upload) throws SQLException {
+    public synchronized void saveClientUpload(TalkClientUpload upload) throws SQLException {
         Dao.CreateOrUpdateStatus result = mClientUploads.createOrUpdate(upload);
 
         if (result.isCreated()) {
