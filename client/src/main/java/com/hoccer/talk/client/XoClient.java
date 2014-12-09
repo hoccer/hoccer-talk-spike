@@ -980,8 +980,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public String createGroup(final String name) {
-        List<String> members = Collections.emptyList();
-        return createGroupWithContacts(name, members);
+        return createGroupWithContacts(name, Collections.<String>emptyList());
     }
 
     public String createGroupWithContacts(final String name, final List<String> members) {
