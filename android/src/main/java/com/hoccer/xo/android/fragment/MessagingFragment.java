@@ -120,6 +120,7 @@ public class MessagingFragment extends XoListFragment
     @Override
     public void onResume() {
         super.onResume();
+        finishIfGroupIsNoLongerJoined(mContact);
 
         setHasOptionsMenu(true);
         mMessageListView = getListView();
@@ -272,7 +273,7 @@ public class MessagingFragment extends XoListFragment
 
     @Override
     public void onContactRemoved(TalkClientContact contact) {
-        if (mContact != null && mContact.getClientContactId() == contact.getClientContactId()) {
+        if (isCurrentContact(contact)) {
             getActivity().finish();
         }
     }
@@ -294,7 +295,19 @@ public class MessagingFragment extends XoListFragment
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        // do nothing
+        if (isCurrentContact(contact)) {
+            finishIfGroupIsNoLongerJoined(contact);
+        }
+    }
+
+    private boolean isCurrentContact(TalkClientContact contact) {
+        return mContact.getClientContactId() == contact.getClientContactId();
+    }
+
+    private void finishIfGroupIsNoLongerJoined(TalkClientContact contact) {
+        if (contact.isGroupNoLongerJoined()) {
+            getActivity().finish();
+        }
     }
 
     public void applicationWillEnterBackground() {
