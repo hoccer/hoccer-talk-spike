@@ -3,7 +3,7 @@
 
     <item
             android:id="@+id/menu_profile_edit"
-            android:icon="@drawable/ic_edit"
+            android:icon="@drawable/ic_action_edit"
             android:orderInCategory="101"
             android:showAsAction="always"
             android:title="@string/menu_group_edit_profile"
@@ -11,21 +11,21 @@
 
     <item
             android:id="@+id/menu_profile_block"
-            android:icon="@drawable/ic_block"
+            android:icon="@drawable/ic_action_block"
             android:orderInCategory="102"
             android:showAsAction="always"
             android:title="@string/profile_user_block_button"/>
 
     <item
             android:id="@+id/menu_profile_unblock"
-            android:icon="@drawable/ic_unblock"
+            android:icon="@drawable/ic_action_unblock"
             android:orderInCategory="103"
             android:showAsAction="always"
             android:title="@string/profile_user_unblock_button"/>
 
     <item
             android:id="@+id/menu_profile_delete"
-            android:icon="@drawable/ic_delete"
+            android:icon="@drawable/ic_action_delete"
             android:orderInCategory="104"
             android:showAsAction="always"
             android:title="@string/profile_user_delete_button"/>

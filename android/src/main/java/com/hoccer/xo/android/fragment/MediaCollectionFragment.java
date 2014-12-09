@@ -115,7 +115,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
         super.onCreateOptionsMenu(menu, inflater);
         mRenameMenuId = R.id.menu_search + 1;
         MenuItem renameItem = menu.add(Menu.NONE, mRenameMenuId, Menu.NONE, R.string.rename_collection);
-        renameItem.setIcon(R.drawable.ic_edit);
+        renameItem.setIcon(R.drawable.ic_action_edit);
         renameItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         renameItem.setOnMenuItemClickListener(mRenameCollectionClickListener);
         updateActionBarTitle();

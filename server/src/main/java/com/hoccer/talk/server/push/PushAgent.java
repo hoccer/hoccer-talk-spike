@@ -237,7 +237,7 @@ public class PushAgent {
             }, delay, interval, TimeUnit.SECONDS);
         }
 
-        mPushProviders.add(new ApnsPushProvider(mApnsServices, mDatabase, mConfig.getApnsDefaultClientName()));
+        mPushProviders.add(new ApnsPushProvider(mApnsServices, mServer, mConfig.getApnsDefaultClientName()));
     }
 
     private void invalidateApns() {

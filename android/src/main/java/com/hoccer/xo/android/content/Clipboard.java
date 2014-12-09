@@ -4,16 +4,16 @@ import com.hoccer.talk.content.IContentObject;
 
 public class Clipboard {
 
-    private static Clipboard INSTANCE = null;
+    private static Clipboard sInstance;
 
     private IContentObject mContent;
 
     public static synchronized Clipboard getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Clipboard();
+        if (sInstance == null) {
+            sInstance = new Clipboard();
         }
 
-        return INSTANCE;
+        return sInstance;
     }
 
     private Clipboard() {
