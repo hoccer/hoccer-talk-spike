@@ -1682,22 +1682,23 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         @Override
         public String[] getEncryptedGroupKeys(String groupId, String sharedKeyId, String sharedKeyIdSalt, String[] clientIds, String[] publicKeyIds) {
             LOG.debug("server: getEncryptedGroupKeys()");
+            String[] failed = new String[0];
 
-            TalkClientContact groupContact = null;
+            TalkClientContact contact = null;
             boolean isRenewGroupKey = false;
 
             try {
-                groupContact = mDatabase.findGroupContactByGroupId(groupId, false);
+                contact = mDatabase.findGroupContactByGroupId(groupId, false);
             } catch (SQLException e) {
                 LOG.error("Error while retrieving group contact from id: " + groupId, e);
             }
 
-            if (groupContact == null) {
-                return new String[0];
+            if (contact == null) {
+                return failed;
             }
 
             if (sharedKeyId.equalsIgnoreCase("renew")) {
-                generateGroupKey(groupContact);
+                generateGroupKey(contact);
                 isRenewGroupKey = true;
             }
 
@@ -1720,13 +1721,13 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
 
             if (clientsInGroup.size() != clientIds.length) {
-                return new String[0];
+                return failed;
             }
 
             // encrypt group key with each member's public key
             // TODO: if there is no groupkey to encrypt, create one!
             // generateGroupKey();
-            byte[] rawGroupKey = Base64.decodeBase64(groupContact.getGroupKey().getBytes(Charset.forName("UTF-8")));
+            byte[] rawGroupKey = Base64.decodeBase64(contact.getGroupKey().getBytes(Charset.forName("UTF-8")));
             List<String> encryptedGroupKeys = new ArrayList<String>();
             for (TalkClientContact clientContact : clientsInGroup) {
                 PublicKey publicKey = clientContact.getPublicKey().getAsNative();
@@ -1742,16 +1743,15 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             }
 
             if (encryptedGroupKeys.size() != clientsInGroup.size()) {
-                return new String[0];
+                return failed;
             }
 
             if (isRenewGroupKey) {
-                encryptedGroupKeys.add(groupContact.getGroupPresence().getSharedKeyId());
-                encryptedGroupKeys.add(groupContact.getGroupPresence().getSharedKeyIdSalt());
+                encryptedGroupKeys.add(presence.getSharedKeyId());
+                encryptedGroupKeys.add(presence.getSharedKeyIdSalt());
             }
 
-            String[] allKeys = encryptedGroupKeys.toArray(new String[encryptedGroupKeys.size()]);
-            return allKeys;
+            return encryptedGroupKeys.toArray(new String[encryptedGroupKeys.size()]);
         }
 
         @Override
