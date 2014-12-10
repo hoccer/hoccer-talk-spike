@@ -123,15 +123,6 @@ public class GroupProfileFragment extends ProfileFragment
         super.onResume();
         mMode = Mode.PROFILE;
 
-        Bundle arguments = getArguments();
-        if (arguments != null) {
-            if (arguments.containsKey(ARG_START_IN_ACTION_MODE)) {
-                if (arguments.getBoolean(ARG_START_IN_ACTION_MODE)) {
-                    getActivity().startActionMode(this);
-                }
-            }
-        }
-
         if (mGroupMemberAdapter == null) {
             mGroupMemberAdapter = new GroupContactsAdapter(getXoActivity(), mGroup.getGroupId());
             mGroupMemberAdapter.setFilter(mInvitedOrJoinedClientFilter);
@@ -140,6 +131,7 @@ public class GroupProfileFragment extends ProfileFragment
             mGroupMembersList.setAdapter(mGroupMemberAdapter);
         }
         mGroupMemberAdapter.requestReload();
+
         if (mGroup != null && mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
             mGroupMembersList.setOnItemClickListener(this);
         } else {
@@ -147,6 +139,15 @@ public class GroupProfileFragment extends ProfileFragment
         }
 
         updateWithContact(mGroup);
+
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            if (arguments.containsKey(ARG_START_IN_ACTION_MODE)) {
+                if (arguments.getBoolean(ARG_START_IN_ACTION_MODE)) {
+                    getActivity().startActionMode(this);
+                }
+            }
+        }
     }
 
     @Override
