@@ -178,9 +178,6 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
     public void onContactAdded(final TalkClientContact contact) {}
 
     @Override
-    public void onContactRemoved(final TalkClientContact contact) {}
-
-    @Override
     public void onClientPresenceChanged(final TalkClientContact contact) {}
 
     @Override

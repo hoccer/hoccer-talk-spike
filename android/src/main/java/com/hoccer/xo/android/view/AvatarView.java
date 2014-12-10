@@ -200,10 +200,6 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-    }
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
         updatePresence();
     }

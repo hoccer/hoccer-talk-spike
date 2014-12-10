@@ -243,10 +243,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-    }
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
         updateView();
     }

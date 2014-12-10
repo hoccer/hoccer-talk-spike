@@ -898,10 +898,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 @Override
                 public void run() {
                     try {
-                        for (IXoContactListener listener : mContactListeners) {
-                            listener.onContactRemoved(contact);
-                        }
-
                         if (contact.isClient() && contact.isClientRelated()) {
                             mServerRpc.depairClient(contact.getClientId());
                         }

@@ -278,9 +278,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {}
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {}
 
     @Override

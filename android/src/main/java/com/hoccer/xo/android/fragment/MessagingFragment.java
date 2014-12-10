@@ -271,13 +271,6 @@ public class MessagingFragment extends XoListFragment
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        if (isCurrentContact(contact)) {
-            getActivity().finish();
-        }
-    }
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
         // do nothing
     }

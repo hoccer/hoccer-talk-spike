@@ -135,11 +135,6 @@ public abstract class ContactsAdapter extends XoAdapter
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        requestReload();
-    }
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
         requestReload();
     }

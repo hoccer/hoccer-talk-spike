@@ -409,9 +409,6 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {}
-
-    @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
         if (mGroupMemberAdapter == null) {
             return;

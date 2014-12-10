@@ -129,9 +129,6 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     public void onContactAdded(TalkClientContact contact) {}
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {}
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {}
 
     @Override

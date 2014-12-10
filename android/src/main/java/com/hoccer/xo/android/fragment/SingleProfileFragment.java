@@ -551,9 +551,6 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {}
-
-    @Override
     public void onClientPresenceChanged(final TalkClientContact contact) {
         if (isCurrentContact(contact)) {
             getActivity().runOnUiThread(new Runnable() {
