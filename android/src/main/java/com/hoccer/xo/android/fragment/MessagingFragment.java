@@ -10,7 +10,6 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ChatAdapter;
@@ -120,7 +119,7 @@ public class MessagingFragment extends XoListFragment
     @Override
     public void onResume() {
         super.onResume();
-        finishIfGroupIsNoLongerJoined(mContact);
+        finishIfContactIsNoLongerRelated(mContact);
 
         setHasOptionsMenu(true);
         mMessageListView = getListView();
@@ -285,7 +284,9 @@ public class MessagingFragment extends XoListFragment
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        // do nothing
+        if (isCurrentContact(contact)) {
+            finishIfContactIsNoLongerRelated(contact);
+        }
     }
 
     @Override
@@ -296,7 +297,7 @@ public class MessagingFragment extends XoListFragment
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
         if (isCurrentContact(contact)) {
-            finishIfGroupIsNoLongerJoined(contact);
+            finishIfContactIsNoLongerRelated(contact);
         }
     }
 
@@ -304,8 +305,8 @@ public class MessagingFragment extends XoListFragment
         return mContact.getClientContactId() == contact.getClientContactId();
     }
 
-    private void finishIfGroupIsNoLongerJoined(TalkClientContact contact) {
-        if (contact.isGroupNoLongerJoined()) {
+    private void finishIfContactIsNoLongerRelated(TalkClientContact contact) {
+        if (contact.isGroupNoLongerJoined() || !contact.isClientRelated() && !contact.isNearby()) {
             getActivity().finish();
         }
     }
