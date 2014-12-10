@@ -114,6 +114,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:key="backup_category"
             android:title="Backups">
         <Preference
                 android:key="preference_chats_backup"

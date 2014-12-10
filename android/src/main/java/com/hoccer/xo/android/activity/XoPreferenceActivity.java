@@ -5,10 +5,7 @@ import android.content.*;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.*;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
+import android.preference.*;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.*;
 import android.widget.Button;
@@ -100,6 +97,26 @@ public class XoPreferenceActivity extends PreferenceActivity
     protected void onResume() {
         super.onResume();
         checkForCrashesIfEnabled();
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            boolean showBackupPreferences = intent.getBooleanExtra("show_backup_preferences", false);
+            if (showBackupPreferences) {
+                for (int i = 0; i < getListView().getAdapter().getCount(); i++) {
+                    Preference preference = (Preference) getListView().getAdapter().getItem(i);
+                    if ("backup_category".equals(preference.getKey())) {
+                        getListView().smoothScrollToPosition(i);
+                        getListView().setSelection(i);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private void checkForCrashesIfEnabled() {
