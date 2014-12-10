@@ -299,7 +299,10 @@ public class MessagingFragment extends XoListFragment
     }
 
     private void finishIfContactIsNoLongerRelated(TalkClientContact contact) {
-        if (contact.isGroupNoLongerJoined() || !contact.isClientRelated() && !contact.isNearby()) {
+        boolean clientNoLongerRelated = contact.isClient() && !contact.isClientRelated() && !contact.isNearby();
+        boolean groupNoLongerRelated = contact.isGroupNoLongerJoined();
+
+        if (clientNoLongerRelated || groupNoLongerRelated) {
             getActivity().finish();
         }
     }
