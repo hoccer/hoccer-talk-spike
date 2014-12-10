@@ -4,9 +4,11 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.*;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
@@ -97,7 +99,18 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             @Override
             public void onClick(View view) {
                 createGroup();
-                mGroupCreateButton.setEnabled(false);
+            }
+        });
+
+        mGroupNameEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    createGroup();
+                    return true;
+                }
+
+                return false;
             }
         });
 
@@ -159,7 +172,13 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     private void createGroup() {
+        mGroupNameEdit.setEnabled(false);
+        mGroupCreateButton.setEnabled(false);
         String groupName = mGroupNameEdit.getText().toString();
+        createGroup(groupName);
+    }
+
+    private void createGroup(String groupName) {
         List<String> memberIds = getClientIdsForContacts(mContactsToInvite);
         mGroupTag = getXoClient().createGroupWithContacts(groupName, memberIds);
     }
