@@ -76,7 +76,7 @@ public class BackupService extends Service {
             mServiceHandler.sendMessage(msg);
         }
 
-        return START_NOT_STICKY; //TODO choose right return value
+        return START_REDELIVER_INTENT; // If process gets killed by os, the last intent will be redelivered.
     }
 
     public void createBackup(final String password, String type) {
