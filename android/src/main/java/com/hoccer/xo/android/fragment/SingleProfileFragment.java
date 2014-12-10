@@ -520,6 +520,11 @@ public class SingleProfileFragment extends ProfileFragment
     private void refreshContact(TalkClientContact newContact) {
         LOG.debug("refreshContact()");
         mContact = newContact;
+
+        if (!mContact.isClientRelated() && !mContact.isNearby()) {
+            getActivity().finish();
+        }
+
         try {
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
             database.refreshClientContact(mContact);
@@ -546,11 +551,7 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        if (isCurrentContact(contact)) {
-            getActivity().finish();
-        }
-    }
+    public void onContactRemoved(TalkClientContact contact) {}
 
     @Override
     public void onClientPresenceChanged(final TalkClientContact contact) {

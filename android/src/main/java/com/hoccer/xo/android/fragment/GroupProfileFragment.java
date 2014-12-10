@@ -409,11 +409,7 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        if (isCurrentGroup(contact)) {
-            getActivity().finish();
-        }
-    }
+    public void onContactRemoved(TalkClientContact contact) {}
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
