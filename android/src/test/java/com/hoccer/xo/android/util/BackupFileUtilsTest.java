@@ -4,10 +4,7 @@ import com.hoccer.xo.android.backup.Backup;
 import com.hoccer.xo.android.backup.BackupFileUtils;
 import com.hoccer.xo.android.backup.BackupMetadata;
 import com.hoccer.xo.android.backup.BackupType;
-import com.jayway.awaitility.Awaitility;
-import com.jayway.awaitility.Duration;
 import org.apache.commons.io.FileUtils;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,16 +12,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.*;
-
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 
 
 public class BackupFileUtilsTest {
