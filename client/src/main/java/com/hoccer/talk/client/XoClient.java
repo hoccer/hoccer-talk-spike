@@ -129,7 +129,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     ScheduledFuture<?> mAutoDisconnectFuture;
     ScheduledFuture<?> mKeepAliveFuture;
 
-    List<IXoContactListener> mContactListeners = Collections.synchronizedList(new ArrayList<IXoContactListener>());
+    List<IXoContactListener> mContactListeners = new ArrayList<IXoContactListener>();
     List<IXoMessageListener> mMessageListeners = new ArrayList<IXoMessageListener>();
     List<IXoStateListener> mStateListeners = new ArrayList<IXoStateListener>();
     List<IXoAlertListener> mAlertListeners = new ArrayList<IXoAlertListener>();
@@ -697,7 +697,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 }
                 mDatabase.savePresence(presence);
 
-                clientPresenceChanged(mSelfContact);
+                for (IXoContactListener listener : mContactListeners) {
+                    listener.onClientPresenceChanged(mSelfContact);
+                }
 
                 if (isLoggedIn())  {
                     sendPresence();
@@ -727,7 +729,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         scheduleIdle();
                     }
 
-                    clientPresenceChanged(mSelfContact);
+                    for (IXoContactListener listener : mContactListeners) {
+                        listener.onClientPresenceChanged(mSelfContact);
+                    }
 
                     if (isLoggedIn()) {
                         sendPresence();
@@ -767,7 +771,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 mSelfContact.setAvatarUpload(upload);
                 mDatabase.savePresence(presence);
                 mDatabase.saveContact(mSelfContact);
-                clientPresenceChanged(mSelfContact);
+                for (IXoContactListener listener : mContactListeners) {
+                    listener.onClientPresenceChanged(mSelfContact);
+                }
                 sendPresence();
             }
         } catch (Exception e) {
@@ -795,10 +801,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                } catch (SQLException e) {
                    LOG.error("sql error", e);
                } catch (JsonRpcClientException e) {
-                   LOG.error("Error while sending new group presence: ", e);
+                   LOG.error("Error while sending new group presence: " , e);
                }
 
-               groupPresenceChanged(group);
+               for (IXoContactListener listener : mContactListeners) {
+                   listener.onGroupPresenceChanged(group);
+               }
            }
        });
     }
@@ -833,7 +841,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                         mDatabase.saveGroupPresence(groupPresence);
                         mDatabase.saveContact(group);
                         mServerRpc.updateGroup(groupPresence);
-                        groupPresenceChanged(group);
+
+                        for (IXoContactListener listener : mContactListeners) {
+                            listener.onGroupPresenceChanged(group);
+                        }
                     }
                 } catch(Exception e){
                     LOG.error("error creating group avatar", e);
@@ -890,7 +901,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 @Override
                 public void run() {
                     try {
-                        contactRemoved(contact);
+                        for (IXoContactListener listener : mContactListeners) {
+                            listener.onContactRemoved(contact);
+                        }
 
                         if (contact.isClient() && contact.isClientRelated()) {
                             mServerRpc.depairClient(contact.getClientId());
@@ -1529,8 +1542,10 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                                         mDatabase.saveGroupMembership(membership);
                                     }
 
-                                    groupMembershipChanged(groupContact);
-                                    groupPresenceChanged(groupContact);
+                                    for (IXoContactListener listener : mContactListeners) {
+                                        listener.onGroupMembershipChanged(groupContact);
+                                        listener.onGroupPresenceChanged(groupContact);
+                                    }
                                 }
 
                             } catch (JsonRpcClientException e) {
@@ -2806,10 +2821,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         if(isNewContact) {
-            contactAdded(clientContact);
+            for (final IXoContactListener listener : mContactListeners) {
+                listener.onContactAdded(clientContact);
+            }
         }
 
-        clientPresenceChanged(clientContact);
+        for (IXoContactListener listener : mContactListeners) {
+            listener.onClientPresenceChanged(clientContact);
+        }
     }
 
     private boolean updateAvatarDownload(TalkClientContact contact, String avatarUrl, String avatarId, Date avatarTimestamp) throws MalformedURLException {
@@ -2917,7 +2936,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("SQL error", e);
         }
 
-        clientRelationshipChanged(clientContact);
+        for (final IXoContactListener listener : mContactListeners) {
+            listener.onClientRelationshipChanged(clientContact);
+        }
     }
 
     private void updateGroupPresence(TalkGroupPresence groupPresence) {
@@ -2974,10 +2995,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.info("updateGroupPresence(" + groupPresence.getGroupId() + ") - saved");
 
         if (isNewGroup) {
-            contactAdded(groupContact);
+            for (IXoContactListener listener : mContactListeners) {
+                listener.onContactAdded(groupContact);
+            }
         }
 
-        groupPresenceChanged(groupContact);
+        for (IXoContactListener listener : mContactListeners) {
+            listener.onGroupPresenceChanged(groupContact);
+        }
     }
 
     private void destroyNearbyGroup(TalkClientContact groupContact) {
@@ -3121,7 +3146,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             LOG.error("sql error", e);
         }
 
-        groupMembershipChanged(groupContact);
+        for (IXoContactListener listener : mContactListeners) {
+            listener.onGroupMembershipChanged(groupContact);
+        }
     }
 
     private void decryptGroupKey(TalkClientContact group, TalkGroupMembership membership) {
@@ -3390,51 +3417,4 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         });
     }
 
-    private void contactAdded(TalkClientContact clientContact) {
-        synchronized (mContactListeners) {
-            for (final IXoContactListener listener : mContactListeners) {
-                listener.onContactAdded(clientContact);
-            }
-        }
-    }
-
-    private void contactRemoved(TalkClientContact contact) {
-        synchronized (mContactListeners) {
-            for (IXoContactListener listener : mContactListeners) {
-                listener.onContactRemoved(contact);
-            }
-        }
-    }
-
-    private void clientPresenceChanged(TalkClientContact contact) {
-        synchronized (mContactListeners) {
-            for (IXoContactListener listener : mContactListeners) {
-                listener.onClientPresenceChanged(contact);
-            }
-        }
-    }
-
-    private void clientRelationshipChanged(TalkClientContact clientContact) {
-        synchronized (mContactListeners) {
-            for (final IXoContactListener listener : mContactListeners) {
-                listener.onClientRelationshipChanged(clientContact);
-            }
-        }
-    }
-
-    private void groupPresenceChanged(TalkClientContact group) {
-        synchronized (mContactListeners) {
-            for (IXoContactListener listener : mContactListeners) {
-                listener.onGroupPresenceChanged(group);
-            }
-        }
-    }
-
-    private void groupMembershipChanged(TalkClientContact groupContact) {
-        synchronized (mContactListeners) {
-            for (IXoContactListener listener : mContactListeners) {
-                listener.onGroupMembershipChanged(groupContact);
-            }
-        }
-    }
 }
