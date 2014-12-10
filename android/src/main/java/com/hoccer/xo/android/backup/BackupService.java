@@ -37,9 +37,11 @@ public class BackupService extends Service {
         @Override
         public void handleMessage(Message msg) {
             Bundle data = msg.getData();
-            String type = data.getString("type");
-            String password = data.getString("password");
-            createBackup(password, type);
+            if (data != null) {
+                String type = data.getString("type");
+                String password = data.getString("password");
+                createBackup(password, type);
+            }
         }
     }
 
