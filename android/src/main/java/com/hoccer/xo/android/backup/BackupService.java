@@ -56,7 +56,7 @@ public class BackupService extends Service {
 
     @Override
     public void onCreate() {
-        HandlerThread thread = new HandlerThread(BACKUP_HANDLER_THREAD_NAME, Process.THREAD_PRIORITY_FOREGROUND);
+        HandlerThread thread = new HandlerThread(BACKUP_HANDLER_THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         mLooper = thread.getLooper();
         mServiceHandler = new ServiceHandler(mLooper);
