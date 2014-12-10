@@ -1,16 +1,20 @@
 package com.hoccer.xo.android.backup;
 
+import android.os.Parcelable;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.Date;
 
-public abstract class Backup {
+public abstract class Backup implements Parcelable {
 
-    protected final File mBackupFile;
+    protected File mBackupFile;
 
     Backup(File backupFile) {
         mBackupFile = backupFile;
+    }
+
+    protected Backup() {
     }
 
     @Nullable

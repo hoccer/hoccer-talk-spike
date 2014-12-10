@@ -1,5 +1,7 @@
 package com.hoccer.xo.android.backup;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.hoccer.xo.android.XoApplication;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,5 +47,33 @@ public class DatabaseBackup extends Backup {
     @Override
     public Date getCreationDate() {
         return mMetadata.getCreationDate();
+    }
+
+    private DatabaseBackup(Parcel source) {
+        mBackupFile = new File(source.readString());
+        mMetadata = source.readParcelable(BackupMetadata.class.getClassLoader());
+    }
+
+    public static final Creator<? extends DatabaseBackup> CREATOR = new Creator<DatabaseBackup>() {
+        @Override
+        public DatabaseBackup createFromParcel(Parcel source) {
+            return new DatabaseBackup(source);
+        }
+
+        @Override
+        public DatabaseBackup[] newArray(int size) {
+            return new DatabaseBackup[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mBackupFile.getAbsolutePath());
+        dest.writeParcelable(mMetadata, flags);
     }
 }

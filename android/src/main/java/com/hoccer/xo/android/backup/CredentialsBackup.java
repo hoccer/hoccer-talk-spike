@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.backup;
 
+import android.os.Parcel;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
@@ -59,5 +60,32 @@ public class CredentialsBackup extends Backup {
         in.read(credentialsData);
         Credentials credentials = Credentials.fromEncryptedBytes(credentialsData, password);
         XoApplication.getXoClient().importCredentials(credentials);
+    }
+
+
+    private CredentialsBackup(Parcel source) {
+        mBackupFile = new File(source.readString());
+    }
+
+    public static final Creator<? extends CredentialsBackup> CREATOR = new Creator<CredentialsBackup>() {
+        @Override
+        public CredentialsBackup createFromParcel(Parcel source) {
+            return new CredentialsBackup(source);
+        }
+
+        @Override
+        public CredentialsBackup[] newArray(int size) {
+            return new CredentialsBackup[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mBackupFile.getAbsolutePath());
     }
 }
