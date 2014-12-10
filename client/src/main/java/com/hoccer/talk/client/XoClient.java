@@ -38,10 +38,7 @@ import java.nio.charset.Charset;
 import java.security.*;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class XoClient implements JsonRpcConnection.Listener, IXoTransferListenerOld {
@@ -129,7 +126,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     ScheduledFuture<?> mAutoDisconnectFuture;
     ScheduledFuture<?> mKeepAliveFuture;
 
-    List<IXoContactListener> mContactListeners = new ArrayList<IXoContactListener>();
+    List<IXoContactListener> mContactListeners = new CopyOnWriteArrayList<IXoContactListener>();
     List<IXoMessageListener> mMessageListeners = new ArrayList<IXoMessageListener>();
     List<IXoStateListener> mStateListeners = new ArrayList<IXoStateListener>();
     List<IXoAlertListener> mAlertListeners = new ArrayList<IXoAlertListener>();
