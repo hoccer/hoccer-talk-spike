@@ -68,7 +68,19 @@ public class XoPreferenceActivity extends PreferenceActivity
             public void onReceive(Context context, Intent intent) {
                 getListView().findViewById(R.id.rl_default_preference).setVisibility(View.VISIBLE);
                 getListView().findViewById(R.id.rl_in_progress).setVisibility(View.GONE);
-//                mBackupService.unbindService(mServiceConnection);
+                getListView().findViewById(R.id.rl_in_progress).setVisibility(View.GONE);
+
+                if (intent.getAction().equals(IntentHelper.ACTION_BACKUP_SUCCEEDED)) {
+                    Backup backup = intent.getParcelableExtra("result");
+
+                    String date = String.format("Date: %s", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(backup.getCreationDate()));
+                    String user = String.format("User: %s", backup.getClientName());
+                    String path = String.format("Path: %s", backup.getFile().getAbsolutePath());
+                    String size = String.format("Size: %s", FileUtils.byteCountToDisplaySize(backup.getSize()));
+
+                    String message = String.format("%s\n%s\n%s\n%s", date, user, path, size);
+                    XoDialogs.showOkDialog("BackupCreatedDialog", "Backup created", message, XoPreferenceActivity.this);
+                }
             }
         };
 
@@ -318,7 +330,6 @@ public class XoPreferenceActivity extends PreferenceActivity
     }
 
     private void createBackup(final String password, BackupType type) {
-
         mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
