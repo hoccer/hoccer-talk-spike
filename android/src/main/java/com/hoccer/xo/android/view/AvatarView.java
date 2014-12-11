@@ -146,15 +146,6 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         setAvatarImage("drawable://" + resourceId);
     }
 
-    /**
-     * Sets the url for the default avatar image. Value can be null.
-     *
-     * @param defaultAvatarImageUrl Url of the given image resource  to load.
-     */
-    private void setDefaultAvatarImageUrl(String defaultAvatarImageUrl) {
-        mDefaultAvatarImageUrl = defaultAvatarImageUrl;
-    }
-
     private void updatePresence() {
         post(new Runnable() {
             @Override
