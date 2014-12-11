@@ -28,6 +28,8 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     private AspectImageView mAvatarImage;
     private View mPresenceIndicatorActive;
     private View mPresenceIndicatorInactive;
+    private boolean mIsAttachedToWindow;
+
 
     private TalkClientContact mContact;
 
@@ -72,10 +74,21 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
 
     public void setContact(TalkClientContact contact) {
+        if (mIsAttachedToWindow) {
+            if (mContact == null) {
+                if(contact != null) {
+                    XoApplication.getXoClient().registerContactListener(this);
+                }
+            } else {
+                if(contact == null) {
+                    XoApplication.getXoClient().unregisterContactListener(this);
+                }
+            }
+        }
+
         mContact = contact;
         updateAvatar();
         updatePresence();
-        XoApplication.getXoClient().registerContactListener(this);
     }
 
     private void updateAvatar() {
@@ -110,6 +123,21 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         super.onAttachedToWindow();
         updateAvatar();
         updatePresence();
+
+        mIsAttachedToWindow = true;
+        if (mContact != null) {
+            XoApplication.getXoClient().registerContactListener(this);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        mIsAttachedToWindow = false;
+        if (mContact != null) {
+            XoApplication.getXoClient().unregisterContactListener(this);
+        }
     }
 
     /**
