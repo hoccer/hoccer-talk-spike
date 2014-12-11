@@ -307,14 +307,6 @@ public class MessagingFragment extends XoListFragment
         }
     }
 
-    public void applicationWillEnterBackground() {
-        if (mContact.isGroup() && mContact.getGroupPresence().isTypeNearby()) {
-            getActivity().finish();
-        } else if (mContact.isClient() && mContact.isNearby()) {
-            getActivity().finish();
-        }
-    }
-
     public void showAudioAttachmentList() {
         Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
         intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, mContact.getClientContactId());

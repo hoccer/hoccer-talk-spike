@@ -136,14 +136,6 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
     }
 
     @Override
-    protected void applicationWillEnterBackground() {
-        super.applicationWillEnterBackground();
-        if (mCurrentFragment instanceof MessagingFragment) {
-            ((MessagingFragment) mCurrentFragment).applicationWillEnterBackground();
-        }
-    }
-
-    @Override
     public void showMessageFragment(int contactId) {
         mCurrentFragment = new MessagingFragment();
 
