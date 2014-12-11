@@ -28,8 +28,6 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
 
     ActionBar mActionBar;
 
-    Fragment mCurrentFragment;
-
     @Override
     protected ActivityComponent[] createComponents() {
         return new ActivityComponent[] { new MediaPlayerActivityComponent(this) };
@@ -137,43 +135,43 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
 
     @Override
     public void showMessageFragment(int contactId) {
-        mCurrentFragment = new MessagingFragment();
+        Fragment messagingFragment = new MessagingFragment();
 
         Bundle bundle = new Bundle();
         bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, contactId);
-        mCurrentFragment.setArguments(bundle);
+        messagingFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, messagingFragment);
         fragmentTransaction.commit();
     }
 
     @Override
     public void showNearbyArchiveFragment() {
-        mCurrentFragment = new NearbyArchiveFragment();
+        Fragment nearbyArchiveFragment = new NearbyArchiveFragment();
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, nearbyArchiveFragment);
         fragmentTransaction.commit();
     }
 
     @Override
     public void showSingleProfileFragment(int clientContactId) {
-        mCurrentFragment = new SingleProfileFragment();
+        Fragment singleProfileFragment = new SingleProfileFragment();
 
         Bundle bundle = new Bundle();
         bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, clientContactId);
-        mCurrentFragment.setArguments(bundle);
+        singleProfileFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, singleProfileFragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 
     @Override
     public void showGroupProfileFragment(int groupContactId, boolean startInActionMode, boolean addToBackStack) {
-        mCurrentFragment = new GroupProfileFragment();
+        Fragment groupProfileFragment = new GroupProfileFragment();
 
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
@@ -182,10 +180,10 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
         } else {
             bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, false);
         }
-        mCurrentFragment.setArguments(bundle);
+        groupProfileFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
 
         if (addToBackStack) {
             fragmentTransaction.addToBackStack(null);
@@ -195,14 +193,14 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
 
     @Override
     public void showGroupProfileCreationFragment(String cloneGroupId) {
-        mCurrentFragment = new GroupProfileCreationFragment();
+        Fragment groupProfileCreationFragment = new GroupProfileCreationFragment();
 
         Bundle bundle = new Bundle();
         bundle.putString(GroupProfileCreationFragment.ARG_CLONE_GROUP_ID, cloneGroupId);
-        mCurrentFragment.setArguments(bundle);
+        groupProfileCreationFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileCreationFragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
