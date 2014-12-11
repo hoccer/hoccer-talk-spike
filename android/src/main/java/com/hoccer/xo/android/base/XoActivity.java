@@ -682,7 +682,7 @@ public abstract class XoActivity extends FragmentActivity {
         Intent intent;
         if (contact.isGroup()) {
             intent = new Intent(this, GroupProfileActivity.class);
-            intent.putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID,
+            intent.putExtra(GroupProfileActivity.EXTRA_SHOW_CLIENT_CONTACT_ID,
                     contact.getClientContactId());
         } else {
             intent = new Intent(this, SingleProfileActivity.class);
@@ -695,7 +695,7 @@ public abstract class XoActivity extends FragmentActivity {
     public void showNewGroup() {
         LOG.debug("showNewGroup()");
         Intent intent = new Intent(this, GroupProfileActivity.class);
-        intent.putExtra(GroupProfileActivity.EXTRA_CLIENT_CREATE_GROUP, true);
+        intent.putExtra(GroupProfileActivity.EXTRA_CREATE_NEW_GROUP, true);
         startActivity(intent);
     }
 

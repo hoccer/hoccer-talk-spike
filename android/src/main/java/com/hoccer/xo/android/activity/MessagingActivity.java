@@ -10,19 +10,19 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.base.IMessagingFragmentManager;
-import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.fragment.*;
+import com.hoccer.xo.android.fragment.MessagingFragment;
+import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 
 
-public class MessagingActivity extends ComposableActivity implements IMessagingFragmentManager, IProfileFragmentManager {
+public class MessagingActivity extends ComposableActivity implements IMessagingFragmentManager {
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
@@ -152,56 +152,6 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_messaging_fragment_container, nearbyArchiveFragment);
-        fragmentTransaction.commit();
-    }
-
-    @Override
-    public void showSingleProfileFragment(int clientContactId) {
-        Fragment singleProfileFragment = new SingleProfileFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, clientContactId);
-        singleProfileFragment.setArguments(bundle);
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, singleProfileFragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
-    }
-
-    @Override
-    public void showGroupProfileFragment(int groupContactId, boolean startInActionMode, boolean addToBackStack) {
-        Fragment groupProfileFragment = new GroupProfileFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
-        if (startInActionMode) {
-            bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, true);
-        } else {
-            bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, false);
-        }
-        groupProfileFragment.setArguments(bundle);
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileFragment);
-
-        if (addToBackStack) {
-            fragmentTransaction.addToBackStack(null);
-        }
-        fragmentTransaction.commit();
-    }
-
-    @Override
-    public void showGroupProfileCreationFragment(String cloneGroupId) {
-        Fragment groupProfileCreationFragment = new GroupProfileCreationFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putString(GroupProfileCreationFragment.ARG_CLONE_GROUP_ID, cloneGroupId);
-        groupProfileCreationFragment.setArguments(bundle);
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, groupProfileCreationFragment);
-        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
 }

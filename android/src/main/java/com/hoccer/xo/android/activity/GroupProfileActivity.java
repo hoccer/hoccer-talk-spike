@@ -3,23 +3,21 @@ package com.hoccer.xo.android.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import com.artcom.hoccer.R;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.fragment.GroupProfileCreationFragment;
 import com.hoccer.xo.android.fragment.GroupProfileFragment;
-import com.artcom.hoccer.R;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Activity wrapping a group profile fragment
  */
-public class GroupProfileActivity extends ComposableActivity implements IProfileFragmentManager {
+public class GroupProfileActivity extends ComposableActivity {
 
-    /* use this extra to open in "client registration" mode */
-    public static final String EXTRA_CLIENT_CREATE_GROUP = "clientCreateGroup";
-
-    /* use this extra to show the given contact */
-    public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
+    public static final String EXTRA_CREATE_NEW_GROUP = "clientCreateGroup";
+    public static final String EXTRA_CLONE_GROUP_ID = "clientCloneGroup";
+    public static final String EXTRA_SHOW_CLIENT_CONTACT_ID = "clientContactId";
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -46,16 +44,26 @@ public class GroupProfileActivity extends ComposableActivity implements IProfile
         Intent intent = getIntent();
 
         if (intent != null) {
-            if (intent.hasExtra(EXTRA_CLIENT_CREATE_GROUP)) {
-                showGroupProfileCreationFragment();
-            } else if (intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
-                int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
+            if (intent.hasExtra(EXTRA_CREATE_NEW_GROUP)) {
+                showGroupProfileCreationFragment(null);
+            } else if (intent.hasExtra(EXTRA_CLONE_GROUP_ID)) {
+                String cloneGroupId = intent.getStringExtra(EXTRA_CLONE_GROUP_ID);
+
+                if (cloneGroupId == null) {
+                    throw new RuntimeException("EXTRA_CLONE_GROUP_ID must be a groupId (String)");
+                } else {
+                    showGroupProfileCreationFragment(cloneGroupId);
+                }
+            } else if (intent.hasExtra(EXTRA_SHOW_CLIENT_CONTACT_ID)) {
+                int contactId = intent.getIntExtra(EXTRA_SHOW_CLIENT_CONTACT_ID, -1);
 
                 if (contactId == -1) {
-                    LOG.error("invalid contact id");
+                    throw new RuntimeException("EXTRA_SHOW_CLIENT_CONTACT_ID must be a clientContactId (int)");
                 } else {
-                    showGroupProfileFragment(contactId, false, false);
+                    showGroupProfileFragment(contactId, false);
                 }
+            } else {
+                throw new RuntimeException("Missing intent extra");
             }
         }
 
@@ -74,19 +82,21 @@ public class GroupProfileActivity extends ComposableActivity implements IProfile
         super.onPause();
     }
 
-    private void showGroupProfileCreationFragment() {
-        GroupProfileCreationFragment groupProfileFragment = new GroupProfileCreationFragment();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fl_group_profile_fragment_container, groupProfileFragment);
-        ft.commit();
+    public void showGroupProfileCreationFragment(@Nullable String cloneGroupId) {
+        GroupProfileCreationFragment groupProfileCreationFragment = new GroupProfileCreationFragment();
+
+        if (cloneGroupId != null) {
+            Bundle bundle = new Bundle();
+            bundle.putString(GroupProfileCreationFragment.ARG_CLONE_GROUP_ID, cloneGroupId);
+            groupProfileCreationFragment.setArguments(bundle);
+        }
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl_group_profile_fragment_container, groupProfileCreationFragment);
+        fragmentTransaction.commit();
     }
 
-    @Override
-    public void showSingleProfileFragment(int clientContactId) {
-    }
-
-    @Override
-    public void showGroupProfileFragment(int groupContactId, boolean startInActionMode, boolean addToBackStack) {
+    public void showGroupProfileFragment(int groupContactId, boolean startInActionMode) {
         Bundle bundle = new Bundle();
         bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
 
@@ -101,23 +111,6 @@ public class GroupProfileActivity extends ComposableActivity implements IProfile
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_group_profile_fragment_container, groupProfileFragment);
-
-        if (addToBackStack) {
-            fragmentTransaction.addToBackStack(null);
-        }
-        fragmentTransaction.commit();
-    }
-
-    @Override
-    public void showGroupProfileCreationFragment(String cloneGroupId) {
-        Bundle bundle = new Bundle();
-        bundle.putString(GroupProfileCreationFragment.ARG_CLONE_GROUP_ID, cloneGroupId);
-
-        GroupProfileCreationFragment groupProfileCreationFragment = new GroupProfileCreationFragment();
-        groupProfileCreationFragment.setArguments(bundle);
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_group_profile_fragment_container, groupProfileCreationFragment);
         fragmentTransaction.commit();
     }
 }

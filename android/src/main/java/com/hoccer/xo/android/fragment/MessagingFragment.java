@@ -8,19 +8,20 @@ import android.view.*;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
+import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ChatAdapter;
-import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import org.apache.log4j.Logger;
 
@@ -203,16 +204,17 @@ public class MessagingFragment extends XoListFragment
     public boolean onOptionsItemSelected(MenuItem item) {
         LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
 
-        IProfileFragmentManager profileFragmentManager = (IProfileFragmentManager) getActivity();
         switch (item.getItemId()) {
             case R.id.menu_profile_single:
-                if (mContact != null && profileFragmentManager != null) {
-                    profileFragmentManager.showSingleProfileFragment(mContact.getClientContactId());
+                if (mContact != null) {
+                    startActivity(new Intent(getActivity(), SingleProfileActivity.class)
+                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
                 }
                 break;
             case R.id.menu_profile_group:
-                if (mContact != null && profileFragmentManager != null) {
-                    profileFragmentManager.showGroupProfileFragment(mContact.getClientContactId(), false, true);
+                if (mContact != null) {
+                    startActivity(new Intent(getActivity(), GroupProfileActivity.class)
+                            .putExtra(GroupProfileActivity.EXTRA_SHOW_CLIENT_CONTACT_ID, mContact.getClientContactId()));
                 }
                 break;
             case R.id.menu_audio_attachment_list:
@@ -221,8 +223,9 @@ public class MessagingFragment extends XoListFragment
                 }
                 break;
             case R.id.menu_group_profile_create_permanent_group:
-                if (mContact != null && profileFragmentManager != null) {
-                    profileFragmentManager.showGroupProfileCreationFragment(mContact.getGroupId());
+                if (mContact != null) {
+                    startActivity(new Intent(getActivity(), GroupProfileActivity.class)
+                            .putExtra(GroupProfileActivity.EXTRA_CLONE_GROUP_ID, mContact.getGroupId()));
                 }
                 break;
             default:

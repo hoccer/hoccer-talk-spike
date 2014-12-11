@@ -18,9 +18,9 @@ import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
-import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.squareup.picasso.Picasso;
@@ -268,8 +268,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             @Override
             public void run() {
                 try {
-                    IProfileFragmentManager profileFragmentManager = (IProfileFragmentManager) getActivity();
-                    profileFragmentManager.showGroupProfileFragment(groupContactId, true, false);
+                    GroupProfileActivity groupProfileActivity = (GroupProfileActivity) getActivity();
+                    groupProfileActivity.showGroupProfileFragment(groupContactId, true);
                 } catch (ClassCastException e) {
                     LOG.error("Activity does not implement interface IProfileFragmentManager ", e);
                 }

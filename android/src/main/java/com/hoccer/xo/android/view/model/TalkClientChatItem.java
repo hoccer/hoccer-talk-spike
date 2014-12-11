@@ -123,7 +123,7 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
                 Intent intent;
                 if (mContact.isGroup()) {
                     intent = new Intent(context, GroupProfileActivity.class);
-                    intent.putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID,
+                    intent.putExtra(GroupProfileActivity.EXTRA_SHOW_CLIENT_CONTACT_ID,
                             mContact.getClientContactId());
                 } else {
                     intent = new Intent(context, SingleProfileActivity.class);
