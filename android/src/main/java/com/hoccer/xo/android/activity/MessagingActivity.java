@@ -14,7 +14,6 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.base.IMessagingFragmentManager;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.fragment.MessagingFragment;
 import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
@@ -22,7 +21,7 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 
 
-public class MessagingActivity extends ComposableActivity implements IMessagingFragmentManager {
+public class MessagingActivity extends ComposableActivity {
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
@@ -133,7 +132,6 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
         mActionBar.setTitle(title);
     }
 
-    @Override
     public void showMessageFragment(int contactId) {
         Fragment messagingFragment = new MessagingFragment();
 
@@ -146,7 +144,6 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
         fragmentTransaction.commit();
     }
 
-    @Override
     public void showNearbyArchiveFragment() {
         Fragment nearbyArchiveFragment = new NearbyArchiveFragment();
 
