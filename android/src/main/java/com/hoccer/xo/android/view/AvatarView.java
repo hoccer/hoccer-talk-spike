@@ -7,12 +7,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
-import com.artcom.hoccer.R;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
@@ -22,7 +22,6 @@ import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
  */
 public class AvatarView extends LinearLayout implements IXoContactListener {
 
-    private Context mContext;
     private String mDefaultAvatarImageUrl;
     private DisplayImageOptions mDefaultOptions;
     private float mCornerRadius = 0.0f;
@@ -35,13 +34,12 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     public AvatarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mContext = context;
-        applyAttributes(context, attrs);
+        applyAttributes(attrs);
         initializeView();
     }
 
     private void initializeView() {
-        View layout = LayoutInflater.from(mContext).inflate(R.layout.view_avatar, null);
+        View layout = LayoutInflater.from(getContext()).inflate(R.layout.view_avatar, null);
         addView(layout);
 
         mAvatarImage = (AspectImageView) this.findViewById(R.id.avatar_image);
@@ -61,8 +59,8 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         setAvatarImage(mDefaultAvatarImageUrl);
     }
 
-    private void applyAttributes(Context context, AttributeSet attributes) {
-        TypedArray a = context.getTheme()
+    private void applyAttributes(AttributeSet attributes) {
+        TypedArray a = getContext().getTheme()
                 .obtainStyledAttributes(attributes, R.styleable.AvatarView, 0, 0);
         try {
             mDefaultAvatarImageUrl = "drawable://" + a.getResourceId(R.styleable.AvatarView_defaultAvatarImageUrl, R.drawable.avatar_default_contact);
