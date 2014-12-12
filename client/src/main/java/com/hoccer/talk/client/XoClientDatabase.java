@@ -14,6 +14,7 @@ import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -675,6 +676,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public void refreshClientUpload(TalkClientUpload upload) throws SQLException {
         mClientUploads.refresh(upload);
+    }
+
+    public List<? extends XoTransfer> findAllTransfers() throws SQLException {
+        List<TalkClientUpload> uploads = mClientUploads.queryForAll();
+        List<TalkClientDownload> downloads = mClientDownloads.queryForAll();
+
+        return ListUtils.union(uploads, downloads);
     }
 
     public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {

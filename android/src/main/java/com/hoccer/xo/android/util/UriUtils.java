@@ -10,8 +10,12 @@ public class UriUtils {
     public static final String CONTENT_URI_PREFIX = "content://";
     public static final String FILE_URI_PREFIX = "file://";
 
-    public static boolean isContentUri(String contentUri) {
-        return contentUri.startsWith(CONTENT_URI_PREFIX);
+    public static boolean isContentUri(String uri) {
+        return uri.startsWith(CONTENT_URI_PREFIX);
+    }
+
+    public static boolean isFileUri(String uri) {
+        return uri.startsWith(FILE_URI_PREFIX);
     }
 
     public static String getFilePathByContentUri(Context context, Uri contentUri) throws CursorNotFoundException {
