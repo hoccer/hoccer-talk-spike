@@ -125,7 +125,8 @@
                 android:layout="@layout/preference_create_backup"/>
         <Preference
                 android:key="preference_import_backup"
-                android:title="Import backup"/>
+                android:title="Import backup"
+                android:layout="@layout/preference_restore_backup"/>
     </PreferenceCategory>
 
     <PreferenceCategory
