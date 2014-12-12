@@ -262,7 +262,7 @@ public class AttachmentListFragment extends SearchableListFragment {
         List<XoTransfer> selectedObjects = mAttachmentAdapter.getSelectedItems();
         for(XoTransfer item : selectedObjects) {
             try {
-                XoApplication.getXoClient().getDatabase().deleteTransferAndMessage(item);
+                XoApplication.getXoClient().getDatabase().deleteTransferAndUpdateMessage(item, getResources().getString(R.string.deleted_attachment));
             } catch (SQLException e) {
                 LOG.error(e);
             }

@@ -52,6 +52,7 @@
     <!-- Deleting attachments -->
     <string name="dialog_attachment_delete_title">Delete Attachment</string>
     <string name="dialog_attachment_delete_message">Delete selected attachments and related chat messages?</string>
+    <string name="deleted_attachment">[Deleted Attachment]</string>
 
     <!-- AudioAttachmentList Fragment -->
     <string name="menu_search">Search</string>

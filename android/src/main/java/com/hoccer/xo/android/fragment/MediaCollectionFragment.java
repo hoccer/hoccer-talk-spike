@@ -338,7 +338,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
             List<XoTransfer> items = mCollectionAdapter.getSelectedItems();
             for (XoTransfer item : items) {
                 try{
-                    mDatabase.deleteTransferAndMessage(item);
+                    mDatabase.deleteTransferAndUpdateMessage(item, getResources().getString(R.string.deleted_attachment));
                 } catch(SQLException e) {
                     LOG.error("Could not delete download", e);
                 }

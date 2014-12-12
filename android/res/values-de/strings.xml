@@ -51,6 +51,7 @@
     <!-- Deleting attachments -->
     <string name="dialog_attachment_delete_title">Anhang Löschen</string>
     <string name="dialog_attachment_delete_message">Willst du die ausgewählten Anhänge wirklich löschen?</string>
+    <string name="deleted_attachment">[Gelöschter Anhang]</string>
 
     <!-- AudioAttachmentList Fragment -->
     <string name="menu_search">Suche</string>

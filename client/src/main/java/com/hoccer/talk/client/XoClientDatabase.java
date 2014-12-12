@@ -936,27 +936,42 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
     }
 
-    public void deleteTransferAndMessage(XoTransfer transfer) throws SQLException {
+    public void deleteTransferAndUpdateMessage(XoTransfer transfer, String messageTextPrefix) throws SQLException {
         switch (transfer.getDirection()) {
             case UPLOAD:
-                deleteClientUploadAndMessage((TalkClientUpload) transfer);
+                deleteClientUploadAndUpdateMessage((TalkClientUpload) transfer, messageTextPrefix);
                 break;
             case DOWNLOAD:
-                deleteClientDownloadAndMessage((TalkClientDownload) transfer);
+                deleteClientDownloadAndUpdateMessage((TalkClientDownload) transfer, messageTextPrefix);
                 break;
         }
     }
 
-    public void deleteClientUploadAndMessage(TalkClientUpload upload) throws SQLException {
+    public void deleteClientUploadAndUpdateMessage(TalkClientUpload upload, String messageTextPrefix) throws SQLException {
         deleteClientUpload(upload);
-        int messageId = findMessageByUploadId(upload.getClientUploadId()).getClientMessageId();
-        deleteMessageById(messageId);
+        TalkClientMessage message = findMessageByUploadId(upload.getClientUploadId());
+        message.setAttachmentUpload(null);
+        updateMessageTextForDeletedTransfer(message, messageTextPrefix);
+        saveClientMessage(message);
     }
 
-    public void deleteClientDownloadAndMessage(TalkClientDownload download) throws SQLException {
+    public void deleteClientDownloadAndUpdateMessage(TalkClientDownload download, String messageTextPrefix) throws SQLException {
         deleteClientDownload(download);
-        int messageId = findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
-        deleteMessageById(messageId);
+        TalkClientMessage message = findMessageByDownloadId(download.getClientDownloadId());
+        message.setAttachmentDownload(null);
+        updateMessageTextForDeletedTransfer(message, messageTextPrefix);
+        saveClientMessage(message);
+    }
+
+    private void updateMessageTextForDeletedTransfer(TalkClientMessage message, String textPrefix) throws SQLException {
+        StringBuilder newText = new StringBuilder(textPrefix);
+        String oldText = message.getText();
+
+        if (oldText != null && !oldText.isEmpty()) {
+            newText.append("\n\n").append(oldText);
+        }
+
+        message.setText(newText.toString());
     }
 
     ////////////////////////////////////////////
