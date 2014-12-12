@@ -14,8 +14,7 @@ public abstract class Backup implements Parcelable {
         mBackupFile = backupFile;
     }
 
-    protected Backup() {
-    }
+    protected Backup() {}
 
     @Nullable
     public abstract String getClientName();
