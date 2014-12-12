@@ -719,21 +719,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return transfers;
     }
 
-    public List<TalkClientDownload> findClientDownloadsByContactId(int contactId) throws SQLException {
-        QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
-        messageQb
-                .orderBy("timestamp", false).where()
-                .eq("senderContact_id", contactId)
-                .or()
-                .eq("conversationContact_id", contactId);
-
-        QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
-        downloadQb.where()
-                .eq("state", TalkClientDownload.State.COMPLETE);
-
-        return downloadQb.join(messageQb).query();
-    }
-
     public List<TalkClientDownload> findClientDownloadsByMediaTypeAndContactId(String mediaType, int contactId) throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
         messageQb
@@ -749,16 +734,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .eq("state", TalkClientDownload.State.COMPLETE);
 
         return downloadQb.join(messageQb).query();
-    }
-
-    public List<XoTransfer> findAllTransfers() throws SQLException {
-        List<TalkClientUpload> uploads = mClientUploads.queryBuilder().where()
-                .isNotNull("contentUrl")
-                .query();
-
-        List<TalkClientDownload> downloads = mClientDownloads.queryForAll();
-
-        return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
     }
 
     public TalkPrivateKey findPrivateKeyByKeyId(String keyId) throws SQLException {

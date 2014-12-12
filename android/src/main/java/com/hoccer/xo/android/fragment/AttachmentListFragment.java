@@ -54,7 +54,6 @@ public class AttachmentListFragment extends SearchableListFragment {
     private SectionedListAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
-    private String mContentMediaTypeFilter = ContentMediaType.AUDIO;
     private TalkClientContact mFilterContact = null;
     private XoClientDatabase mDatabase;
     private ActionMode mCurrentActionMode;
@@ -78,7 +77,7 @@ public class AttachmentListFragment extends SearchableListFragment {
             }
         }
 
-        mAttachmentAdapter = new AttachmentListAdapter(mFilterContact, mContentMediaTypeFilter);
+        mAttachmentAdapter = new AttachmentListAdapter(mFilterContact, ContentMediaType.AUDIO);
 
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
         mSearchContactsAdapter.onCreate();

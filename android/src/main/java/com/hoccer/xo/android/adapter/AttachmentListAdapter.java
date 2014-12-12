@@ -26,12 +26,12 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     private List<XoTransfer> mItems = new ArrayList<XoTransfer>();
 
-    private String mMediaType = null;
-    private TalkClientContact mContact = null;
+    private String mMediaType;
+    private TalkClientContact mContact;
 
     private List<Integer> mSelectedItemIds = new ArrayList<Integer>();
 
-    private boolean mShowDragHandle = false;
+    private boolean mShowDragHandle;
 
     /*
      * Constructor
@@ -107,20 +107,6 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
             refreshView();
         }
-    }
-
-    public void setMediaType(String mediaType) {
-        // do nothing if already set
-        if(areEqual(mMediaType, mediaType)) {
-            return;
-        }
-
-        mMediaType = mediaType;
-        updateItems();
-    }
-
-    public String getMediaType() {
-        return mMediaType;
     }
 
     public void setContact(TalkClientContact contact) {
@@ -243,18 +229,10 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     public void updateItems() {
         try {
-            if (mMediaType != null) {
-                if (mContact != null) {
-                    mItems = new ArrayList<XoTransfer>(XoApplication.getXoClient().getDatabase().findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
-                } else {
-                    mItems = XoApplication.getXoClient().getDatabase().findTransfersByMediaType(mMediaType);
-                }
+            if (mContact != null) {
+                mItems = new ArrayList<XoTransfer>(XoApplication.getXoClient().getDatabase().findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
             } else {
-                if (mContact != null) {
-                    mItems = new ArrayList<XoTransfer>(XoApplication.getXoClient().getDatabase().findClientDownloadsByContactId(mContact.getClientContactId()));
-                } else {
-                    mItems = XoApplication.getXoClient().getDatabase().findAllTransfers();
-                }
+                mItems = XoApplication.getXoClient().getDatabase().findTransfersByMediaType(mMediaType);
             }
         } catch (SQLException e) {
             LOG.error(e);
