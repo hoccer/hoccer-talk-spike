@@ -107,11 +107,11 @@ public class XoPreferenceActivity extends PreferenceActivity
             }
         }
 
-        conncetToBackupService();
+        connectToBackupService();
         createBroadcastReceiver();
     }
 
-    private void conncetToBackupService() {
+    private void connectToBackupService() {
         mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
