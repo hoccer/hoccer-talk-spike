@@ -50,7 +50,7 @@ public class DatabaseBackup extends Backup {
     }
 
     private DatabaseBackup(Parcel source) {
-        mBackupFile = new File(source.readString());
+        super(new File(source.readString()));
         mMetadata = source.readParcelable(BackupMetadata.class.getClassLoader());
     }
 
