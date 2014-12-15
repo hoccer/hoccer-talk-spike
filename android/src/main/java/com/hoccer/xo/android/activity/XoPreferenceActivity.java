@@ -51,6 +51,9 @@ public class XoPreferenceActivity extends PreferenceActivity
     private BackupAndRestoreService mBackupService;
 
     private ServiceConnection mServiceConnection;
+    private View mChatsBackupView;
+    private View mBackupView;
+    private View mRestoreView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +110,14 @@ public class XoPreferenceActivity extends PreferenceActivity
             }
         }
 
+        Preference preferenceChatsBackup = findPreference("preference_chats_backup");
+        Preference preferenceCompleteBackup = findPreference("preference_complete_backup");
+        Preference preferenceImportBackup = findPreference("preference_import_backup");
+
+        mChatsBackupView = getLayoutInflater().inflate(preferenceChatsBackup.getLayoutResource(), null);
+        mBackupView = getLayoutInflater().inflate(preferenceCompleteBackup.getLayoutResource(), null);
+        mRestoreView = getLayoutInflater().inflate(preferenceImportBackup.getLayoutResource(), null);
+
         connectToBackupService();
         createBroadcastReceiver();
     }
@@ -126,7 +137,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 mBackupServiceBound = false;
             }
         };
-        bindService(new Intent(), mServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService(new Intent(this, BackupAndRestoreService.class), mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private void updateBackupPreferenceView() {
@@ -134,10 +145,11 @@ public class XoPreferenceActivity extends PreferenceActivity
         RelativeLayout defaultLayout;
         RelativeLayout inProgressLayout;
         TextView inProgressText;
-        if (mBackupServiceBound) {
-            switch (mBackupService.getOperationInProcess()) {
-                case BACKUP:
-                    wrapper = (LinearLayout) getListView().findViewById(R.id.ll_create_backup);
+
+//        if (mBackupServiceBound) {
+//            switch (mBackupService.getOperationInProcess()) {
+//                case EXTRA_BACKUP:
+                    wrapper = (LinearLayout) mBackupView.findViewById(R.id.ll_create_backup);
                     defaultLayout = (RelativeLayout) wrapper.findViewById(R.id.rl_default_preference);
                     inProgressLayout = (RelativeLayout) wrapper.findViewById(R.id.rl_in_progress);
                     inProgressText = (TextView) wrapper.findViewById(R.id.tv_in_progress);
@@ -145,19 +157,19 @@ public class XoPreferenceActivity extends PreferenceActivity
                     inProgressText.setText("Creating backup ..");
                     defaultLayout.setVisibility(View.GONE);
                     inProgressLayout.setVisibility(View.VISIBLE);
-                    break;
-                case RESTORE:
-                    wrapper = (LinearLayout) getListView().findViewById(R.id.ll_restore_backup);
-                    defaultLayout = (RelativeLayout) wrapper.findViewById(R.id.rl_default_preference);
-                    inProgressLayout = (RelativeLayout) wrapper.findViewById(R.id.rl_in_progress);
-                    inProgressText = (TextView) wrapper.findViewById(R.id.tv_in_progress);
-
-                    inProgressText.setText("Restoring backup ..");
-                    defaultLayout.setVisibility(View.GONE);
-                    inProgressLayout.setVisibility(View.VISIBLE);
-                    break;
-            }
-        }
+//                    break;
+//                case RESTORE:
+//                    wrapper = (LinearLayout) mRestoreView.findViewById(R.id.ll_restore_backup);
+//                    defaultLayout = (RelativeLayout) wrapper.findViewById(R.id.rl_default_preference);
+//                    inProgressLayout = (RelativeLayout) wrapper.findViewById(R.id.rl_in_progress);
+//                    inProgressText = (TextView) wrapper.findViewById(R.id.tv_in_progress);
+//
+//                    inProgressText.setText("Restoring backup ..");
+//                    defaultLayout.setVisibility(View.GONE);
+//                    inProgressLayout.setVisibility(View.VISIBLE);
+//                    break;
+//            }
+//        }
     }
 
     private void createBroadcastReceiver() {
@@ -167,7 +179,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 getListView().findViewById(R.id.rl_default_preference).setVisibility(View.VISIBLE);
                 getListView().findViewById(R.id.rl_in_progress).setVisibility(View.GONE);
 
-                Backup backup = intent.getParcelableExtra("result");
+                Backup backup = intent.getParcelableExtra(BackupAndRestoreService.EXTRA_BACKUP);
                 if (backup != null) {
                     if (intent.getAction().equals(IntentHelper.ACTION_BACKUP_SUCCEEDED)) {
 
@@ -195,6 +207,15 @@ public class XoPreferenceActivity extends PreferenceActivity
         intentFilter.addAction(IntentHelper.ACTION_BACKUP_FAILED);
         intentFilter.addAction(IntentHelper.ACTION_BACKUP_CANCELED);
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mBackupServiceBound) {
+            unbindService(mServiceConnection);
+            mBackupServiceBound = false;
+        }
     }
 
     @Override
@@ -361,7 +382,7 @@ public class XoPreferenceActivity extends PreferenceActivity
 
         startService(intent);
 
-        Button cancelBtn = (Button) getListView().findViewById(R.id.btn_cancel);
+        Button cancelBtn = (Button) mBackupView.findViewById(R.id.btn_cancel);
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -386,7 +407,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         startService(intent);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
-        Button cancelBtn = (Button) getListView().findViewById(R.id.btn_cancel);
+        Button cancelBtn = (Button) mRestoreView.findViewById(R.id.btn_cancel);
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
