@@ -8,7 +8,7 @@ public abstract class CancelableHandlerService extends Service {
 
     protected IBinder mBinder = new ServiceBinder();
 
-    private Looper mLooper;
+    private HandlerThread mThread;
     private ServiceHandler mServiceHandler;
 
     private final class ServiceHandler extends Handler {
@@ -27,10 +27,9 @@ public abstract class CancelableHandlerService extends Service {
 
     @Override
     public void onCreate() {
-        HandlerThread thread = new HandlerThread(getClass().getSimpleName(), android.os.Process.THREAD_PRIORITY_BACKGROUND);
-        thread.start();
-        mLooper = thread.getLooper();
-        mServiceHandler = new ServiceHandler(mLooper);
+        mThread = new HandlerThread(getClass().getSimpleName(), android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        mThread.start();
+        mServiceHandler = new ServiceHandler(mThread.getLooper());
     }
 
     @Override
@@ -57,6 +56,6 @@ public abstract class CancelableHandlerService extends Service {
     }
 
     public void cancel() {
-        mLooper.getThread().interrupt();
+        mThread.interrupt();
     }
 }
