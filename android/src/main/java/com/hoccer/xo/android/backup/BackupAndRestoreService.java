@@ -30,7 +30,6 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         RESTORE, BACKUP
     }
 
-    private static final int BACKUP_RESTORE_NOTIFICATION_ID = 2;
     private static final Logger LOG = Logger.getLogger(BackupAndRestoreService.class.getName());
 
     private LocalBroadcastManager mLocalBroadcastManager;
@@ -174,7 +173,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     }
 
     private void startInForeground(Notification notification) {
-        startForeground(BACKUP_RESTORE_NOTIFICATION_ID, notification);
+        startForeground(NotificationId.BACKUP_RESTORE, notification);
     }
 
     private Notification buildOngoingNotification(String title) {

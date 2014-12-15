@@ -67,9 +67,6 @@ public class XoClientService extends Service {
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
     private static final long NOTIFICATION_ALARM_BACKOFF = 10000;
-    private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
-    private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
-    private static final int NOTIFICATION_PUSH_MESSAGE = 2;
 
     private static final String DEFAULT_TRANSFER_LIMIT = "-1";
 
@@ -503,7 +500,7 @@ public class XoClientService extends Service {
 
         // if we have no messages cancel notification
         if (unseenMessages.size() == 0) {
-            mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
+            mNotificationManager.cancel(NotificationId.UNSEEN_MESSAGES);
             return;
         }
 
@@ -556,7 +553,7 @@ public class XoClientService extends Service {
 
         // if we have no messages after culling cancel notification
         if (contactsMap.size() == 0) {
-            mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
+            mNotificationManager.cancel(NotificationId.UNSEEN_MESSAGES);
             return;
         }
 
@@ -662,7 +659,7 @@ public class XoClientService extends Service {
         }
 
         // update the notification
-        mNotificationManager.notify(NOTIFICATION_UNSEEN_MESSAGES, notification);
+        mNotificationManager.notify(NotificationId.UNSEEN_MESSAGES, notification);
 
         // log all unseen messages found
         StringBuilder logMessage = new StringBuilder("Notifying about unseen messages: ");
@@ -701,7 +698,7 @@ public class XoClientService extends Service {
                 .build();
 
 
-        mNotificationManager.notify(NOTIFICATION_PUSH_MESSAGE, notification);
+        mNotificationManager.notify(NotificationId.PUSH_MESSAGE, notification);
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {

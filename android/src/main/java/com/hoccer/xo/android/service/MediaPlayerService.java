@@ -36,8 +36,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     public static final int UNDEFINED_CONTACT_ID = -1;
 
-    public static final int MUSIC_PLAYER_NOTIFICATION_ID = 1;
-
     private static final String UPDATE_PLAYSTATE_ACTION = "com.hoccer.xo.android.content.audio.UPDATE_PLAYSTATE_ACTION";
     private static final Logger LOG = Logger.getLogger(MediaPlayerService.class);
 
@@ -249,7 +247,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
             mNotificationViews.setImageViewResource(R.id.btn_play_pause, R.drawable.ic_dark_content_play);
         }
         mBuilder.setContent(mNotificationViews);
-        startForeground(MUSIC_PLAYER_NOTIFICATION_ID, mBuilder.build());
+        startForeground(NotificationId.MUSIC_PLAYER, mBuilder.build());
     }
 
     private void createNotification() {
