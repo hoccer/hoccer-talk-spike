@@ -3,7 +3,7 @@
     <item
             android:id="@+id/menu_group_profile_add_person"
             android:title="@string/menu_group_profile_add_person"
-            android:icon="@drawable/ic_contact_new"
+            android:icon="@drawable/ic_action_contact_new"
             android:visible="false"
             android:showAsAction="always"
             android:orderInCategory="200"/>

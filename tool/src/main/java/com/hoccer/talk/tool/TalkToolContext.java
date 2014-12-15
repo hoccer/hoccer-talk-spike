@@ -4,10 +4,7 @@ import better.cli.CLIContext;
 import better.cli.console.Console;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.client.HttpClientWithKeyStore;
-import com.hoccer.talk.client.XoClientSslConfiguration;
 import com.hoccer.talk.tool.client.TalkToolClient;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -28,10 +25,8 @@ public class TalkToolContext extends CLIContext {
     List<TalkToolClient> mClients;
     Hashtable<Integer, TalkToolClient> mClientsById;
     List<TalkToolClient> mSelectedClients;
-    WebSocketClientFactory mWSClientFactory;
 
-
-    private static KeyStore getKeyStore() {
+    public static KeyStore getKeyStore() {
         if (KEYSTORE == null) {
             throw new RuntimeException("SSL security not initialized");
         }
@@ -58,18 +53,6 @@ public class TalkToolContext extends CLIContext {
         }
     }
 
-    private static void configureSsl(WebSocketClientFactory wsClientFactory) {
-        SslContextFactory sslcFactory = wsClientFactory.getSslContextFactory();
-        sslcFactory.setTrustAll(false);
-        sslcFactory.setKeyStore(getKeyStore());
-        sslcFactory.setEnableCRLDP(false);
-        sslcFactory.setEnableOCSP(false);
-        sslcFactory.setSessionCachingEnabled(XoClientSslConfiguration.TLS_SESSION_CACHE_ENABLED);
-        sslcFactory.setSslSessionCacheSize(XoClientSslConfiguration.TLS_SESSION_CACHE_SIZE);
-        sslcFactory.setIncludeCipherSuites(XoClientSslConfiguration.TLS_CIPHERS);
-        sslcFactory.setIncludeProtocols(XoClientSslConfiguration.TLS_PROTOCOLS);
-    }
-
     public TalkToolContext(TalkTool app) {
         super(app);
         Console.debug("- setting up TalkToolContext...");
@@ -80,38 +63,15 @@ public class TalkToolContext extends CLIContext {
         mClients = new Vector<TalkToolClient>();
         mClientsById = new Hashtable<Integer, TalkToolClient>();
         mSelectedClients = new Vector<TalkToolClient>();
-        mWSClientFactory = new WebSocketClientFactory();
     }
 
     public void setupSsl() {
         Console.debug("- setting up ssl...");
         initializeSsl();
-        configureSsl(mWSClientFactory);
-    }
-
-    public void start() {
-        try {
-            Console.debug("- starting WebsocketClientFactory...");
-            mWSClientFactory.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public TalkTool getApplication() {
         return mApplication;
-    }
-
-    public ScheduledExecutorService getExecutor() {
-        return mExecutor;
-    }
-
-    public ObjectMapper getMapper() {
-        return mMapper;
-    }
-
-    public WebSocketClientFactory getWSClientFactory() {
-        return mWSClientFactory;
     }
 
     public List<TalkToolClient> getClients() {

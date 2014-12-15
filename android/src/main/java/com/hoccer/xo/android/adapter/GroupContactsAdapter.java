@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.AvatarView;
 import org.apache.log4j.Logger;
@@ -108,8 +108,8 @@ public class GroupContactsAdapter extends ContactsAdapter {
     private boolean isContactInvitedToGroup(TalkClientContact contact, TalkClientContact group) {
         try {
             if(mGroup.getGroupId() != null) {
-                TalkGroupMember member = mDatabase.findMemberInGroupByClientId(group.getGroupId(), contact.getClientId());
-                return member != null && member.isInvited();
+                TalkGroupMembership membership = mDatabase.findMembershipInGroupByClientId(group.getGroupId(), contact.getClientId());
+                return membership != null && membership.isInvited();
             }
         } catch (SQLException e) {
             LOG.error("isContactInvitedToGroup", e);

@@ -1,14 +1,16 @@
 package com.hoccer.talk.server.filecache;
 
 import better.jsonrpc.client.JsonRpcClient;
-import better.jsonrpc.websocket.JsonRpcWsClient;
+import better.jsonrpc.websocket.jetty.JettyWebSocket;
+import better.jsonrpc.websocket.JsonRpcWsConnection;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.filecache.rpc.ICacheControl;
 import com.hoccer.talk.rpc.ITalkRpcServer;
-import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.TalkServerConfiguration;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -18,33 +20,33 @@ import java.util.concurrent.TimeoutException;
  * This automatically connects to the filecache when needed
  * and performs the requested operations synchronously.
  */
-public class FilecacheClient extends JsonRpcWsClient {
+public class FilecacheClient {
 
     private static final Logger LOG = Logger.getLogger(FilecacheClient.class);
+    public static final String FILECACHE_PROTOCOL = "com.hoccer.talk.filecache.control.v1";
 
-    TalkServer mServer;
+    private TalkServerConfiguration mConfig;
+    private JettyWebSocket mWebSocket;
+    private ICacheControl mRpc;
 
-    TalkServerConfiguration mConfig;
+    public FilecacheClient(TalkServerConfiguration config) {
+        mConfig = config;
+        mWebSocket = new JettyWebSocket();
 
-    JsonRpcClient mClient;
+        JsonRpcWsConnection connection = new JsonRpcWsConnection(mWebSocket, new ObjectMapper());
+        JsonRpcClient client = new JsonRpcClient();
+        client.setRequestTimeout(3000);
+        connection.bindClient(client);
 
-    ICacheControl mRpc;
-
-    public FilecacheClient(TalkServer server) {
-        super(server.getConfiguration().getFilecacheControlUrl(), "com.hoccer.talk.filecache.control.v1");
-        mServer = server;
-        mConfig = mServer.getConfiguration();
-        mClient = new JsonRpcClient();
-        mClient.setRequestTimeout(3000); // XXX constant
-        this.bindClient(mClient);
-        mRpc = this.makeProxy(ICacheControl.class);
+        mRpc = connection.makeProxy(ICacheControl.class);
     }
 
     private synchronized void ensureConnected() {
-        if(!isConnected()) {
+        if(!mWebSocket.isOpen()) {
             LOG.info("filecache not connected, trying to connect");
             try {
-                connect(5, TimeUnit.SECONDS);
+                URI serviceUri = mConfig.getFilecacheControlUrl();
+                mWebSocket.open(serviceUri, FILECACHE_PROTOCOL, 5, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 throw new RuntimeException("Timeout connecting to filecache", e);
             } catch (InterruptedException e) {

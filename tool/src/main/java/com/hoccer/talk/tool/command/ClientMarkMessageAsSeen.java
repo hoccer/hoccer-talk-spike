@@ -14,10 +14,10 @@ import java.util.List;
 @CLICommand(name = "cmarkseen", description = "List unseen messages of clients")
 public class ClientMarkMessageAsSeen extends TalkToolClientCommand {
 
-    private static int DEFAULT_INDEX = 1;
+    private static final int sDefaultIndex = 1;
 
     @Parameter(description = "Message number as indexed (1-based) by cinbox - default is '1'", names = "-m")
-    private int pNumMessageIndex = DEFAULT_INDEX;
+    private int pNumMessageIndex = sDefaultIndex;
 
     @Override
     public void runOnClient(TalkToolContext context, TalkToolClient client) throws SQLException {

@@ -7,24 +7,22 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
 
 public class ContactSelector implements IContentSelector {
 
-    private static final Logger LOG = Logger.getLogger(ContactSelector.class);
-
-    private String mName;
-    private Drawable mIcon;
+    private final String mName;
+    private final Drawable mIcon;
 
     public ContactSelector(Context context) {
         mName = context.getResources().getString(R.string.content_contact);
-        mIcon= ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_contact, true);
+        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_contact, true);
     }
 
     @Override
@@ -49,7 +47,6 @@ public class ContactSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-
         boolean isValidIntent = isValidIntent(context, intent);
         if (!isValidIntent) {
             return null;
@@ -60,37 +57,29 @@ public class ContactSelector implements IContentSelector {
                 ContactsContract.Contacts.LOOKUP_KEY
         };
 
-        Cursor cursor = context.getContentResolver().query(
-                selectedContent, columns, null, null, null);
+        Cursor cursor = context.getContentResolver().query(selectedContent, columns, null, null, null);
         cursor.moveToFirst();
-
-
         int lookupKeyIndex = cursor.getColumnIndex(columns[0]);
         String lookupKey = cursor.getString(lookupKeyIndex);
+        cursor.close();
 
         Uri contentUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookupKey);
         String contentUriPath = contentUri.toString();
 
-        // XXX what the heck!? the android constant seems broken.
         if (contentUriPath.startsWith("content:/com.android.contacts")) {
             contentUriPath = contentUriPath.replace("content:/com.android.contacts", "content://com.android.contacts");
         }
-
-        cursor.close();
 
         SelectedContent contentObject = new SelectedContent(intent, contentUriPath);
         contentObject.setFileName("Contact");
         contentObject.setContentType(ContactsContract.Contacts.CONTENT_VCARD_TYPE);
         contentObject.setContentMediaType(ContentMediaType.VCARD);
 
-
-        AssetFileDescriptor fileDescriptor = null;
+        AssetFileDescriptor fileDescriptor;
         long fileSize = 0;
-
         try {
             fileDescriptor = context.getContentResolver().openAssetFileDescriptor(contentUri, "r");
             fileSize = fileDescriptor.getLength();
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -98,5 +87,4 @@ public class ContactSelector implements IContentSelector {
 
         return contentObject;
     }
-
 }

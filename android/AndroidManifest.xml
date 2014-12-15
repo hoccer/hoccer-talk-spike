@@ -3,7 +3,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.artcom.hoccer"
 
-          android:versionCode="336"
+          android:versionCode="339"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -185,7 +185,7 @@
                 android:exported="true">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.hoccer.xo.android.activity.AudioAttachmentListActivity"/>
+                    android:value="com.hoccer.xo.android.activity.MediaBrowserActivity"/>
         </activity>
 
         <!-- Registration activity -->

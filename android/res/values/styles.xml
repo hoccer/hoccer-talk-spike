@@ -18,6 +18,7 @@
         <item name="android:actionModeBackground">@drawable/cab_background_top_appbasetheme</item>
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_appbasetheme</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.AppBaseTheme</item>
+        <item name="android:actionOverflowButtonStyle">@style/OverFlow.AppBaseTheme</item>
 
         <item name="android:editTextBackground">@drawable/apptheme_edit_text_holo_light</item>
 
@@ -75,4 +76,7 @@
         <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
     </style>
 
+    <style name="OverFlow.AppBaseTheme" parent="@android:style/Widget.Holo.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_action_more</item>
+    </style>
 </resources>

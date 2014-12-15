@@ -54,7 +54,6 @@ public class AttachmentListFragment extends SearchableListFragment {
     private SectionedListAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
-    private String mContentMediaTypeFilter = ContentMediaType.AUDIO;
     private TalkClientContact mFilterContact = null;
     private XoClientDatabase mDatabase;
     private ActionMode mCurrentActionMode;
@@ -78,7 +77,7 @@ public class AttachmentListFragment extends SearchableListFragment {
             }
         }
 
-        mAttachmentAdapter = new AttachmentListAdapter(mFilterContact, mContentMediaTypeFilter);
+        mAttachmentAdapter = new AttachmentListAdapter(mFilterContact, ContentMediaType.AUDIO);
 
         mSearchContactsAdapter = new ContactSearchResultAdapter((XoActivity) getActivity());
         mSearchContactsAdapter.onCreate();
@@ -263,7 +262,7 @@ public class AttachmentListFragment extends SearchableListFragment {
         List<XoTransfer> selectedObjects = mAttachmentAdapter.getSelectedItems();
         for(XoTransfer item : selectedObjects) {
             try {
-                XoApplication.getXoClient().getDatabase().deleteTransferAndMessage(item);
+                XoApplication.getXoClient().getDatabase().deleteTransferAndUpdateMessage(item, getResources().getString(R.string.deleted_attachment));
             } catch (SQLException e) {
                 LOG.error(e);
             }

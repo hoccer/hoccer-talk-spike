@@ -14,8 +14,8 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -80,9 +80,9 @@ public class GroupProfileFragment extends ProfileFragment
         public boolean shouldShow(TalkClientContact contact) {
             try {
                 if(contact.isClient()) {
-                    TalkGroupMember member = getXoActivity().getXoDatabase().findMemberInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
-                    if (member != null) {
-                        return member.isInvited() || member.isJoined();
+                    TalkGroupMembership membership = getXoActivity().getXoDatabase().findMembershipInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
+                    if (membership != null) {
+                        return membership.isInvited() || membership.isJoined();
                     }
                 }
             } catch (SQLException e) {
@@ -367,7 +367,7 @@ public class GroupProfileFragment extends ProfileFragment
     private void updateGroupName() {
         String name = null;
 
-        TalkGroup groupPresence = mGroup.getGroupPresence();
+        TalkGroupPresence groupPresence = mGroup.getGroupPresence();
         if (groupPresence != null) {
             name = groupPresence.getGroupName();
         }
@@ -679,19 +679,14 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void updateAvatar(final IContentObject avatar) {
         if (avatar != null) {
-            XoApplication.getExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    LOG.debug("creating avatar upload");
-                    TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
-                    try {
-                        getXoDatabase().saveClientUpload(upload);
-                        getXoClient().setGroupAvatar(mGroup, upload);
-                    } catch (SQLException e) {
-                        LOG.error("sql error", e);
-                    }
-                }
-            });
+            LOG.debug("creating avatar upload");
+            TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
+            try {
+                getXoDatabase().saveClientUpload(upload);
+                getXoClient().setGroupAvatar(mGroup, upload);
+            } catch (SQLException e) {
+                LOG.error("sql error", e);
+            }
         } else {
             getXoClient().setGroupAvatar(mGroup, null);
         }
@@ -806,7 +801,7 @@ public class GroupProfileFragment extends ProfileFragment
     private String[] getMembersRoles() {
         String[] roles = new String[mContactsToInviteToGroup.size()];
         for (int i = 0; i < mContactsToInviteToGroup.size(); ++i) {
-            roles[i] = TalkGroupMember.ROLE_MEMBER;
+            roles[i] = TalkGroupMembership.ROLE_MEMBER;
         }
 
         return roles;

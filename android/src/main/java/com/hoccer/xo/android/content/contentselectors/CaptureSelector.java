@@ -2,28 +2,22 @@ package com.hoccer.xo.android.content.contentselectors;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.widget.Toast;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -31,10 +25,10 @@ public class CaptureSelector implements IContentSelector {
 
     private static final Logger LOG = Logger.getLogger(CaptureSelector.class);
 
-    private String mName;
-    private Drawable mIcon;
+    private final String mName;
+    private final Drawable mIcon;
     private Uri mFileUri;
-    private Context mContext;
+    private final Context mContext;
 
     public CaptureSelector(Context context) {
         mContext = context;
@@ -79,10 +73,7 @@ public class CaptureSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-
-        File imageFile = new File(mFileUri.getPath());;
-        int orientation;
-
+        File imageFile = new File(mFileUri.getPath());
         MediaScannerConnection.scanFile(mContext, new String[]{imageFile.getPath()},
                 new String[]{ContentMediaType.IMAGE}, new MediaScannerConnection.OnScanCompletedListener() {
                     @Override
@@ -99,7 +90,7 @@ public class CaptureSelector implements IContentSelector {
         int imageWidth = options.outWidth;
         String imageType = options.outMimeType;
 
-        orientation = ImageUtils.retrieveOrientation(context, null, imageFile.getPath());
+        int orientation = ImageUtils.retrieveOrientation(context, null, imageFile.getPath());
         double aspectRatio = ImageUtils.calculateAspectRatio(imageWidth, imageHeight, orientation);
 
         LOG.info("Name: " + imageFile.getName());
@@ -126,10 +117,8 @@ public class CaptureSelector implements IContentSelector {
     }
 
     public class ExternalStorageNotMountedException extends Throwable {
-
         private ExternalStorageNotMountedException(String message) {
             super(message);
         }
     }
-
 }

@@ -45,7 +45,6 @@ public class TalkTool extends CommandLineApplication<TalkToolContext> {
         if (this.isSslEnabled()) {
             mContext.setupSsl();
         }
-        mContext.start();
     }
 
     public static void main(String[] args) {

@@ -4,9 +4,6 @@ import com.hoccer.talk.client.HttpClientWithKeyStore;
 import com.hoccer.talk.client.XoClientSslConfiguration;
 import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.util.thread.ExecutorThreadPool;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -22,39 +19,11 @@ public class XoSsl {
 
     private static KeyStore KEYSTORE = null;
 
-    private static WebSocketClientFactory WS_CLIENT_FACTORY = null;
-
     public static KeyStore getKeyStore() {
         if (KEYSTORE == null) {
             throw new RuntimeException("SSL KeyStore not initialized");
         }
         return KEYSTORE;
-    }
-
-    public static WebSocketClientFactory getWebSocketClientFactory() {
-        if (WS_CLIENT_FACTORY == null) {
-            LOG.info("Creating WebSocketClientFactory");
-
-            ExecutorThreadPool pool = new ExecutorThreadPool(XoApplication.getExecutor());
-            WebSocketClientFactory webSocketClientFactory = new WebSocketClientFactory(pool);
-            SslContextFactory sslContextFactory = webSocketClientFactory.getSslContextFactory();
-            sslContextFactory.setTrustAll(false);
-            sslContextFactory.setKeyStore(getKeyStore());
-            sslContextFactory.setEnableCRLDP(false);
-            sslContextFactory.setEnableOCSP(false);
-            sslContextFactory.setSessionCachingEnabled(XoClientSslConfiguration.TLS_SESSION_CACHE_ENABLED);
-            sslContextFactory.setSslSessionCacheSize(XoClientSslConfiguration.TLS_SESSION_CACHE_SIZE);
-            sslContextFactory.setIncludeCipherSuites(XoClientSslConfiguration.TLS_CIPHERS);
-            sslContextFactory.setIncludeProtocols(XoClientSslConfiguration.TLS_PROTOCOLS);
-
-            try {
-                webSocketClientFactory.start();
-                WS_CLIENT_FACTORY = webSocketClientFactory;
-            } catch (Exception e) {
-                LOG.error("Could not initialize WebSocketClientFactory: ", e);
-            }
-        }
-        return WS_CLIENT_FACTORY;
     }
 
     public static void initialize(XoApplication application) {
@@ -78,5 +47,4 @@ public class XoSsl {
             LOG.error("Error initializing SSL KeyStore: ", e);
         }
     }
-
 }
