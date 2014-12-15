@@ -37,7 +37,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
 
     private NotificationCompat.Builder mNotificationBuilder;
 
-    private OperationInProgress operationInProcess;
+    private OperationInProgress operationInProgress;
 
     @Override
     public void onCreate() {
@@ -91,10 +91,10 @@ public class BackupAndRestoreService extends CancelableHandlerService {
 
     private void restoreBackup(Backup backup, String password) {
         try {
-            setOperationInProcess(RESTORE);
             startRestoreInForeground(backup, password);
             stopForeground(true);
             triggerRestoreSuccessNotification();
+            setOperationInProgress(RESTORE);
             broadcast(ACTION_RESTORE_SUCCEEDED, backup);
         } catch (InterruptedException e) {
             broadcast(ACTION_RESTORE_CANCELED);
@@ -103,7 +103,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             broadcast(ACTION_RESTORE_FAILED);
             LOG.error("Restoring " + backup.getFile().getPath() + " failed", e);
         } finally {
-            setOperationInProcess(null);
+            setOperationInProgress(null);
             stopSelf();
         }
     }
@@ -125,10 +125,10 @@ public class BackupAndRestoreService extends CancelableHandlerService {
 
     private void createBackup(String type, String password) {
         try {
-            setOperationInProcess(BACKUP);
             Backup result = startBackupInForeground(type, password);
             stopForeground(true);
             triggerBackupSuccessNotification();
+            setOperationInProgress(BACKUP);
             broadcast(ACTION_BACKUP_SUCCEEDED, result);
         } catch (InterruptedException e) {
             broadcast(ACTION_BACKUP_CANCELED);
@@ -137,7 +137,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             triggerBackupFailedNotification();
             LOG.error("Creating " + type + " backup failed", e);
         } finally {
-            setOperationInProcess(null);
+            setOperationInProgress(null);
             stopSelf();
         }
     }
@@ -194,11 +194,11 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         mLocalBroadcastManager.sendBroadcast(intent);
     }
 
-    private void setOperationInProcess(OperationInProgress operationInProcess) {
-        this.operationInProcess = operationInProcess;
+    private void setOperationInProgress(OperationInProgress operationInProgress) {
+        this.operationInProgress = operationInProgress;
     }
 
-    public OperationInProgress getOperationInProcess() {
-        return operationInProcess;
+    public OperationInProgress getOperationInProgress() {
+        return operationInProgress;
     }
 }
