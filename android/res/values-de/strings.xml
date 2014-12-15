@@ -436,6 +436,12 @@
     <string name="dialog_not_enough_disk_space_dialog">Leider ist nicht genügend Speicherplatz vorhanden um die
         Sicherung wiederherzustellen.
     </string>
+    <string name="restore_backup_in_progress">Wiederherstellung ...</string>
+    <string name="restore_backup_success">Sicherung erfolgreich eingepielt.</string>
+    <string name="restore_backup_failed">Fehler bei deim einspielen der Sicherung.</string>
+    <string name="create_backup_in_progress">Erstelle Sicherung ...</string>
+    <string name="create_backup_success">Sicherung erfolgreich erstellt.</string>
+    <string name="create_backup_failed">Fehler bei der Datensicherung.</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
