@@ -153,10 +153,13 @@ public class ChatContactItem extends ChatMessageItem {
         if (mVCard != null) {
             return;
         }
+
         InputStream inputStream = openStreamForContentUri(mContent.getContentDataUrl());
         if (inputStream == null) {
             LOG.error("Could not open VCard at " + mContent.getContentDataUrl());
+            return;
         }
+
         try {
             Ezvcard.ParserChainTextReader reader = Ezvcard.parse(inputStream);
             if (reader != null) {
