@@ -9,6 +9,17 @@ import java.io.IOException;
 
 public class BackupFactory {
 
+    public static Backup createBackup(BackupType type, String password) throws Exception {
+        switch (type) {
+            case DATABASE:
+                return createDatabaseBackup(password);
+            case COMPLETE:
+                return createCompleteBackup(password);
+            default:
+                throw new IllegalArgumentException("Unknown BackupType " + type);
+        }
+    }
+
     public static Backup createCredentialsBackup(String password) throws IOException {
         return CredentialsBackup.create(password);
     }
