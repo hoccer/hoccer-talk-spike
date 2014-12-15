@@ -15,11 +15,16 @@ import com.hoccer.xo.android.activity.XoPreferenceActivity;
 import com.hoccer.xo.android.service.CancelableHandlerService;
 import org.apache.log4j.Logger;
 
-import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.BACKUP;
+import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.*;
 import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.RESTORE;
 import static com.hoccer.xo.android.util.IntentHelper.*;
 
 public class BackupAndRestoreService extends CancelableHandlerService {
+
+    public static final String EXTRA_SELECT_BACKUP_PREFERENCES = "select_backup_preferences";
+    public static final String EXTRA_PASSWORD = "password";
+    public static final String EXTRA_BACKUP = "backup";
+    public static final String EXTRA_BACKUP_TYPE = "type";
 
     public enum OperationInProgress {
         RESTORE, BACKUP
@@ -58,8 +63,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
 
     private PendingIntent createPendingIntent() {
         Intent resultIntent = new Intent(this, XoPreferenceActivity.class);
-        resultIntent.putExtra("select_backup_preferences", true);
-
+        resultIntent.putExtra(EXTRA_SELECT_BACKUP_PREFERENCES, true);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this)
                 .addNextIntent(resultIntent);
         return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -69,15 +73,15 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     protected void handleMessage(Message msg) {
         Bundle data = msg.getData();
         if (data != null) {
-            String password = data.getString("password");
+            String password = data.getString(EXTRA_PASSWORD);
             if (password != null) {
-                if (data.containsKey("backup")) {
-                    Backup backup = data.getParcelable("backup");
+                if (data.containsKey(EXTRA_BACKUP)) {
+                    Backup backup = data.getParcelable(EXTRA_BACKUP);
                     if (backup != null) {
                         restoreBackup(backup, password);
                     }
-                } else if (data.containsKey("type")) {
-                    String type = data.getString("type");
+                } else if (data.containsKey(EXTRA_BACKUP_TYPE)) {
+                    String type = data.getString(EXTRA_BACKUP_TYPE);
                     if (type != null) {
                         createBackup(type, password);
                     }
@@ -106,17 +110,17 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     }
 
     private void startRestoreInForeground(Backup backup, String password) throws Exception {
-        startInForeground(buildOngoingNotification("Restoring backup ..."));
+        startInForeground(buildOngoingNotification(getString(R.string.restore_backup_in_progress)));
         backup.restore(password);
     }
 
     private void triggerRestoreSuccessNotification() {
-        Notification notification = buildNotification("Successfully restored backup.");
+        Notification notification = buildNotification(getString(R.string.restore_backup_success));
         notify(notification);
     }
 
     private void triggerRestoreFailedNotification() {
-        Notification notification = buildNotification("Failed restoring backup.");
+        Notification notification = buildNotification(getString(R.string.restore_backup_failed));
         notify(notification);
     }
 
@@ -140,7 +144,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     }
 
     private Backup startBackupInForeground(String type, String password) throws Exception {
-        startInForeground(buildOngoingNotification("Creating backup ..."));
+        startInForeground(buildOngoingNotification(getString(R.string.create_backup_in_progress)));
         Backup backup = null;
         if (type.equals(BackupType.COMPLETE.toString())) {
             backup = BackupFactory.createCompleteBackup(password);
@@ -151,11 +155,11 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     }
 
     private void triggerBackupSuccessNotification() {
-        notify(buildNotification("Successfully created backup."));
+        notify(buildNotification(getString(R.string.create_backup_success)));
     }
 
     private void triggerBackupFailedNotification() {
-        notify(buildNotification("Failed creating backup."));
+        notify(buildNotification(getString(R.string.create_backup_failed)));
     }
 
     private void notify(Notification notification) {
@@ -182,7 +186,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
 
     private void broadcast(String action, Backup backup) {
         Intent intent = new Intent(action);
-        intent.putExtra("result", backup);
+        intent.putExtra(EXTRA_BACKUP, backup);
         mLocalBroadcastManager.sendBroadcast(intent);
     }
 
