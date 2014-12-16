@@ -12,6 +12,7 @@ import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
 import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
+import com.hoccer.xo.android.task.StartupTasks;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -313,6 +314,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         ENVIRONMENT_UPDATER = new EnvironmentUpdater(this, CLIENT);
 
+        StartupTasks.runRegisteredTasks(this);
     }
 
     @Override
