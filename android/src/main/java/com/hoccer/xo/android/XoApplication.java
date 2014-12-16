@@ -311,7 +311,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // create sound pool instance
         SOUND_POOL = new XoSoundPool(this);
 
-        ENVIRONMENT_UPDATER = new EnvironmentUpdater(this, getXoClient());
+        ENVIRONMENT_UPDATER = new EnvironmentUpdater(this, CLIENT);
+
     }
 
     @Override
@@ -430,7 +431,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     public static void enterBackgroundMode() {
         // set presence to inactive
-        getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+        CLIENT.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
 
         // suspend nearby environment
         suspendNearbySession();
@@ -440,7 +441,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     public static void enterForegroundMode() {
         // set presence to active
-        getXoClient().setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+        CLIENT.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
 
         // wake up suspended nearby session
         if (hasCurrentRunningNearbySession) {
