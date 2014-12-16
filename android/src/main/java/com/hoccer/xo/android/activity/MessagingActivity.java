@@ -122,16 +122,6 @@ public class MessagingActivity extends ComposableActivity {
         clipboardText.setPrimaryClip(clip);
     }
 
-    public void setActionBarText(TalkClientContact contact) {
-        String title;
-        if (contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
-            title = getResources().getString(R.string.nearby_text);
-        } else {
-            title = contact.getNickname();
-        }
-        mActionBar.setTitle(title);
-    }
-
     private void showMessageFragment(int contactId) {
         Fragment messagingFragment = new MessagingFragment();
 
