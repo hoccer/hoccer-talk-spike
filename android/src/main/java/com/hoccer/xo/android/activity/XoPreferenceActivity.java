@@ -179,7 +179,7 @@ public class XoPreferenceActivity extends PreferenceActivity
                 getListView().findViewById(R.id.rl_default_preference).setVisibility(View.VISIBLE);
                 getListView().findViewById(R.id.rl_in_progress).setVisibility(View.GONE);
 
-                Backup backup = intent.getParcelableExtra(BackupAndRestoreService.EXTRA_BACKUP);
+                Backup backup = intent.getParcelableExtra(BackupAndRestoreService.EXTRA_CREATED_BACKUP);
                 if (backup != null) {
                     if (intent.getAction().equals(IntentHelper.ACTION_BACKUP_SUCCEEDED)) {
 
