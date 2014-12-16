@@ -94,6 +94,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     private void restoreBackup(Backup backup, String password) {
         try {
             setOperationInProgress(RESTORE);
+            broadcast(ACTION_RESTORE_IN_PROGRESS);
             restoreInForeground(backup, password);
             triggerNotification(R.string.restore_backup_success);
             broadcast(ACTION_RESTORE_SUCCEEDED, backup);
@@ -118,6 +119,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     private void createBackup(BackupType type, String password) {
         try {
             setOperationInProgress(BACKUP);
+            broadcast(ACTION_BACKUP_IN_PROGRESS);
             Backup result = backupInForeground(type, password);
             triggerNotification(R.string.create_backup_success);
             broadcast(ACTION_BACKUP_SUCCEEDED, result);
