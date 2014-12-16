@@ -15,9 +15,13 @@ import org.jetbrains.annotations.Nullable;
  */
 public class GroupProfileActivity extends ComposableActivity {
 
-    public static final String EXTRA_CREATE_NEW_GROUP = "clientCreateGroup";
-    public static final String EXTRA_CLONE_GROUP_ID = "clientCloneGroup";
-    public static final String EXTRA_SHOW_CLIENT_CONTACT_ID = "clientContactId";
+    public static final String ACTION_CREATE = "com.hoccer.xo.android.activity.GroupProfileActivity.CREATE";
+
+    public static final String ACTION_CLONE = "com.hoccer.xo.android.activity.GroupProfileActivity.CLONE";
+    public static final String EXTRA_GROUP_ID = "clientCloneGroup";
+
+    public static final String ACTION_SHOW = "com.hoccer.xo.android.activity.GroupProfileActivity.SHOW";
+    public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -38,33 +42,31 @@ public class GroupProfileActivity extends ComposableActivity {
     protected void onCreate(Bundle savedInstanceState) {
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
-
         enableUpNavigation();
 
         Intent intent = getIntent();
+        String action = intent.getAction();
 
-        if (intent != null) {
-            if (intent.hasExtra(EXTRA_CREATE_NEW_GROUP)) {
-                showGroupProfileCreationFragment(null);
-            } else if (intent.hasExtra(EXTRA_CLONE_GROUP_ID)) {
-                String cloneGroupId = intent.getStringExtra(EXTRA_CLONE_GROUP_ID);
+        if (ACTION_CREATE.equals(action)) {
+            showGroupProfileCreationFragment(null);
+        } else if (ACTION_CLONE.equals(action)) {
+            String cloneGroupId = intent.getStringExtra(EXTRA_GROUP_ID);
 
-                if (cloneGroupId == null) {
-                    throw new RuntimeException("EXTRA_CLONE_GROUP_ID must be a groupId (String)");
-                } else {
-                    showGroupProfileCreationFragment(cloneGroupId);
-                }
-            } else if (intent.hasExtra(EXTRA_SHOW_CLIENT_CONTACT_ID)) {
-                int contactId = intent.getIntExtra(EXTRA_SHOW_CLIENT_CONTACT_ID, -1);
-
-                if (contactId == -1) {
-                    throw new RuntimeException("EXTRA_SHOW_CLIENT_CONTACT_ID must be a clientContactId (int)");
-                } else {
-                    showGroupProfileFragment(contactId, false);
-                }
-            } else {
-                throw new RuntimeException("Missing intent extra");
+            if (cloneGroupId == null) {
+                throw new RuntimeException("EXTRA_CLONE_GROUP_ID must be a groupId (String)");
             }
+
+            showGroupProfileCreationFragment(cloneGroupId);
+        } else if (ACTION_SHOW.equals(action)) {
+            int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
+
+            if (contactId == -1) {
+                throw new RuntimeException("EXTRA_SHOW_CLIENT_CONTACT_ID must be a clientContactId (int)");
+            }
+
+            showGroupProfileFragment(contactId, false);
+        } else {
+            throw new RuntimeException("Unknown or missing action");
         }
 
         getActionBar().setDisplayHomeAsUpEnabled(true);

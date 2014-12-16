@@ -214,7 +214,8 @@ public class MessagingFragment extends XoListFragment
             case R.id.menu_profile_group:
                 if (mContact != null) {
                     startActivity(new Intent(getActivity(), GroupProfileActivity.class)
-                            .putExtra(GroupProfileActivity.EXTRA_SHOW_CLIENT_CONTACT_ID, mContact.getClientContactId()));
+                            .setAction(GroupProfileActivity.ACTION_SHOW)
+                            .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
                 }
                 break;
             case R.id.menu_audio_attachment_list:
@@ -225,7 +226,8 @@ public class MessagingFragment extends XoListFragment
             case R.id.menu_group_profile_create_permanent_group:
                 if (mContact != null) {
                     startActivity(new Intent(getActivity(), GroupProfileActivity.class)
-                            .putExtra(GroupProfileActivity.EXTRA_CLONE_GROUP_ID, mContact.getGroupId()));
+                            .setAction(GroupProfileActivity.ACTION_CLONE)
+                            .putExtra(GroupProfileActivity.EXTRA_GROUP_ID, mContact.getGroupId()));
                 }
                 break;
             default:

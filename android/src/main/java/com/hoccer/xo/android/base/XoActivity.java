@@ -681,9 +681,9 @@ public abstract class XoActivity extends FragmentActivity {
         LOG.debug("showContactProfile(" + contact.getClientContactId() + ")");
         Intent intent;
         if (contact.isGroup()) {
-            intent = new Intent(this, GroupProfileActivity.class);
-            intent.putExtra(GroupProfileActivity.EXTRA_SHOW_CLIENT_CONTACT_ID,
-                    contact.getClientContactId());
+            intent = new Intent(this, GroupProfileActivity.class)
+                    .setAction(GroupProfileActivity.ACTION_SHOW)
+                    .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
         } else {
             intent = new Intent(this, SingleProfileActivity.class);
             intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID,
@@ -694,9 +694,8 @@ public abstract class XoActivity extends FragmentActivity {
 
     public void showNewGroup() {
         LOG.debug("showNewGroup()");
-        Intent intent = new Intent(this, GroupProfileActivity.class);
-        intent.putExtra(GroupProfileActivity.EXTRA_CREATE_NEW_GROUP, true);
-        startActivity(intent);
+        startActivity(new Intent(this, GroupProfileActivity.class)
+                .setAction(GroupProfileActivity.ACTION_CREATE));
     }
 
     public void showContactConversation(TalkClientContact contact) {
