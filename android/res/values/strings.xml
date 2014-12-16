@@ -466,6 +466,7 @@
     <string name="create_backup_in_progress">Creating backup ...</string>
     <string name="create_backup_success">Successfully created backup.</string>
     <string name="create_backup_failed">Failed creating backup.</string>
+    <string name="dialog_backup_title">Create backup</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
