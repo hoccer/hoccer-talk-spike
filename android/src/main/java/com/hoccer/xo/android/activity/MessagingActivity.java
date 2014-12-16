@@ -132,7 +132,7 @@ public class MessagingActivity extends ComposableActivity {
         mActionBar.setTitle(title);
     }
 
-    public void showMessageFragment(int contactId) {
+    private void showMessageFragment(int contactId) {
         Fragment messagingFragment = new MessagingFragment();
 
         Bundle bundle = new Bundle();
@@ -144,7 +144,7 @@ public class MessagingActivity extends ComposableActivity {
         fragmentTransaction.commit();
     }
 
-    public void showNearbyArchiveFragment() {
+    private void showNearbyArchiveFragment() {
         Fragment nearbyArchiveFragment = new NearbyArchiveFragment();
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
