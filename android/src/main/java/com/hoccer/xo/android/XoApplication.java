@@ -455,7 +455,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         LOG.info("Entered background active mode");
     }
 
-    private void renameHoccerClassicAttachmentDirectory() {
+    private static void renameHoccerClassicAttachmentDirectory() {
 
         if (Arrays.asList(EXTERNAL_STORAGE.list()).contains(HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY)) {
 
