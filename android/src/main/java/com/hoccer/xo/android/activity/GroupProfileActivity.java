@@ -53,7 +53,7 @@ public class GroupProfileActivity extends ComposableActivity {
             String cloneGroupId = intent.getStringExtra(EXTRA_GROUP_ID);
 
             if (cloneGroupId == null) {
-                throw new RuntimeException("EXTRA_CLONE_GROUP_ID must be a groupId (String)");
+                throw new RuntimeException("Missing EXTRA_GROUP_ID");
             }
 
             showGroupProfileCreationFragment(cloneGroupId);
@@ -61,7 +61,7 @@ public class GroupProfileActivity extends ComposableActivity {
             int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
 
             if (contactId == -1) {
-                throw new RuntimeException("EXTRA_SHOW_CLIENT_CONTACT_ID must be a clientContactId (int)");
+                throw new RuntimeException("Missing EXTRA_CLIENT_CONTACT_ID");
             }
 
             showGroupProfileFragment(contactId, false);
