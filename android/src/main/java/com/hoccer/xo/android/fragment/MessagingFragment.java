@@ -208,6 +208,7 @@ public class MessagingFragment extends XoListFragment
             case R.id.menu_profile_single:
                 if (mContact != null) {
                     startActivity(new Intent(getActivity(), SingleProfileActivity.class)
+                            .setAction(SingleProfileActivity.ACTION_SHOW)
                             .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
                 }
                 break;

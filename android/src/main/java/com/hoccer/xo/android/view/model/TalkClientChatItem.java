@@ -126,9 +126,9 @@ public class TalkClientChatItem extends BaseChatItem implements SearchAdapter.Se
                             .setAction(GroupProfileActivity.ACTION_SHOW)
                             .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
                 } else {
-                    intent = new Intent(context, SingleProfileActivity.class);
-                    intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID,
-                            mContact.getClientContactId());
+                    intent = new Intent(context, SingleProfileActivity.class)
+                            .setAction(SingleProfileActivity.ACTION_SHOW)
+                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId());
                 }
                 context.startActivity(intent);
             }
