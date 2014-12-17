@@ -96,11 +96,6 @@ public abstract class ContactListAdapter extends BaseAdapter implements IXoConta
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-        updateContactsAndView();
-    }
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
         updateContactsAndView();
     }

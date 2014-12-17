@@ -2742,13 +2742,11 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void updateClientPresence(TalkPresence presence, Set<String> fields) {
         LOG.debug("updateClientPresence(" + presence.getClientId() + ")");
 
-        boolean isNewContact = false;
         TalkClientContact clientContact;
         try {
             clientContact = mDatabase.findContactByClientId(presence.getClientId(), false);
             if (clientContact == null) {
                 clientContact = mDatabase.findContactByClientId(presence.getClientId(), true);
-                isNewContact = true;
             }
         } catch (SQLException e) {
             LOG.error("SQL error", e);
@@ -2811,12 +2809,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
                 updateClientKey(fContact);
             }
         });
-        }
-
-        if(isNewContact) {
-            for (final IXoContactListener listener : mContactListeners) {
-                listener.onContactAdded(clientContact);
-            }
         }
 
         for (IXoContactListener listener : mContactListeners) {
@@ -2938,14 +2930,12 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         LOG.info("updateGroupPresence(" + groupPresence.getGroupId() + ")");
 
         TalkClientContact groupContact;
-        boolean isNewGroup = false;
 
         try {
             synchronized (mGroupCreationLock) {
                 groupContact = mDatabase.findGroupContactByGroupId(groupPresence.getGroupId(), false);
                 if (groupContact == null) {
                     groupContact = mDatabase.findGroupContactByGroupId(groupPresence.getGroupId(), true);
-                    isNewGroup = true;
                 }
             }
         } catch (SQLException e) {
@@ -2986,12 +2976,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         }
 
         LOG.info("updateGroupPresence(" + groupPresence.getGroupId() + ") - saved");
-
-        if (isNewGroup) {
-            for (IXoContactListener listener : mContactListeners) {
-                listener.onContactAdded(groupContact);
-            }
-        }
 
         for (IXoContactListener listener : mContactListeners) {
             listener.onGroupPresenceChanged(groupContact);

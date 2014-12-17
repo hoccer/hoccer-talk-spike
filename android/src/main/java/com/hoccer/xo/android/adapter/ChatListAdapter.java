@@ -172,20 +172,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
      */
 
     @Override
-    public void onContactAdded(final TalkClientContact contact) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mFilter.shouldShow(contact)) {
-                    TalkClientChatItem item = new TalkClientChatItem(contact, mActivity);
-                    mChatItems.add(item);
-                    notifyDataSetChanged();
-                }
-            }
-        });
-    }
-
-    @Override
     public void onClientPresenceChanged(final TalkClientContact contact) {
         runOnUiThread(new Runnable() {
             @Override

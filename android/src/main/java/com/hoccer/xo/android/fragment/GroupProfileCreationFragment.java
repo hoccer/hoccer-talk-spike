@@ -51,6 +51,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     private List<TalkClientContact> mContactsToInvite = Collections.emptyList();
     private String mGroupTag;
+    private boolean mIsGroupCreated;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -243,8 +244,15 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-        if (mGroupTag != null && mGroupTag.equals(contact.getGroupTag())) {
+    public void onClientPresenceChanged(TalkClientContact contact) {}
+
+    @Override
+    public void onClientRelationshipChanged(TalkClientContact contact) {}
+
+    @Override
+    public void onGroupPresenceChanged(TalkClientContact contact) {
+        if (!mIsGroupCreated && mGroupTag != null && mGroupTag.equals(contact.getGroupTag())) {
+            mIsGroupCreated = true;
             uploadAvatar(contact);
             openGroupProfileFragment(contact.getClientContactId());
         }
@@ -276,15 +284,6 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
             }
         });
     }
-
-    @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {}
-
-    @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {}
-
-    @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {}
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {}

@@ -393,22 +393,6 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-        LOG.debug("onContactAdded");
-        if (isCurrentGroup(contact)) {
-            saveEditedGroup();
-
-            final GroupProfileFragment fragment = this;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    getXoActivity().startActionMode(fragment);
-                }
-            });
-        }
-    }
-
-    @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
         if (mGroupMemberAdapter == null) {
             return;

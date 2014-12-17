@@ -272,11 +272,6 @@ public class MessagingFragment extends XoListFragment
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-        // do nothing
-    }
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
         // do nothing
     }

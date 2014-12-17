@@ -170,9 +170,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     public void onClientRelationshipChanged(TalkClientContact contact) {}
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {}
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {}
 
     @Override
