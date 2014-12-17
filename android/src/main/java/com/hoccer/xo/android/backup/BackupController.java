@@ -208,7 +208,7 @@ public class BackupController {
 
     private void restoreBackup(final Backup backup, final String password) {
         mActivity.startService(new Intent(mActivity, BackupAndRestoreService.class)
-                .putExtra(BackupAndRestoreService.EXTRA_CREATE_BACKUP_TYPE, backup)
+                .putExtra(BackupAndRestoreService.EXTRA_RESTORE_BACKUP, backup)
                 .putExtra(BackupAndRestoreService.EXTRA_PASSWORD, password));
     }
 
