@@ -17,7 +17,7 @@ public class StartupTasks {
     private final static Logger LOG = Logger.getLogger(StartupTasks.class);
 
     public static void registerForNextStart(Context context, Class clazz) throws IllegalArgumentException {
-        if (!IStartupTask.class.equals(clazz)) {
+        if (!IStartupTask.class.isAssignableFrom(clazz)) {
             throw new IllegalArgumentException("The provided class does not derive from IStartupTask");
         }
 
