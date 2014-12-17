@@ -1,6 +1,9 @@
 package com.hoccer.xo.android.backup;
 
 import com.hoccer.talk.crypto.CryptoJSON;
+import com.hoccer.xo.android.task.DeleteAvatarsTask;
+import com.hoccer.xo.android.task.DeleteMissingTransfersTask;
+import com.hoccer.xo.android.task.StartupTasks;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -33,6 +36,8 @@ public class DatabaseRestoreOperation {
         } finally {
             cleanup();
         }
+
+        registerStartupTasks();
     }
 
     private void deleteTempFile() throws IOException {
@@ -48,5 +53,10 @@ public class DatabaseRestoreOperation {
 
     private void cleanup() throws IOException {
         deleteTempFile();
+    }
+
+    private static void registerStartupTasks() {
+        StartupTasks.registerForNextStart(DeleteAvatarsTask.class);
+        StartupTasks.registerForNextStart(DeleteMissingTransfersTask.class);
     }
 }

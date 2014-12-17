@@ -1,6 +1,9 @@
 package com.hoccer.xo.android.backup;
 
 import com.hoccer.talk.crypto.CryptoJSON;
+import com.hoccer.xo.android.task.DeleteAvatarsTask;
+import com.hoccer.xo.android.task.DeleteMissingTransfersTask;
+import com.hoccer.xo.android.task.StartupTasks;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -50,6 +53,8 @@ public class CompleteRestoreOperation {
         } finally {
             cleanup();
         }
+
+        registerStartupTasks();
     }
 
     private void restore() throws IOException, CryptoJSON.DecryptionException, InterruptedException {
@@ -123,5 +128,10 @@ public class CompleteRestoreOperation {
     private void cleanup() throws IOException {
         FileUtils.deleteDirectory(mTempDatabaseFile.getParentFile());
         FileUtils.deleteDirectory(mTempAttachmentsDir);
+    }
+
+    private static void registerStartupTasks() {
+        StartupTasks.registerForNextStart(DeleteAvatarsTask.class);
+        StartupTasks.registerForNextStart(DeleteMissingTransfersTask.class);
     }
 }
