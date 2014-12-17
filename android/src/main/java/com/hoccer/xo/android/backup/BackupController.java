@@ -218,7 +218,7 @@ public class BackupController {
 
     private void handleBackupSucceeded(Intent intent) {
         setBackupInProgress(false);
-        Backup backup = intent.getParcelableExtra(BackupAndRestoreService.EXTRA_CREATED_BACKUP);
+        Backup backup = intent.getParcelableExtra(BackupAndRestoreService.EXTRA_BACKUP);
         showBackupSuccessDialog(backup);
     }
 
@@ -255,7 +255,7 @@ public class BackupController {
 
     private void handleRestoreSucceeded(Intent intent) {
         setRestoreInProgress(false);
-        Backup backup = intent.getParcelableExtra(BackupAndRestoreService.EXTRA_CREATED_BACKUP);
+        Backup backup = intent.getParcelableExtra(BackupAndRestoreService.EXTRA_BACKUP);
         showRestoreSuccessDialog(backup);
     }
 
