@@ -463,8 +463,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     private void setContentDescription() {
-        mContentDescription.setText(mContentRegistry.getContentDescription(mContentObject));
-        if (mContentObject.getContentState().equals(ContentState.DOWNLOAD_ON_HOLD)) {
+        mContentDescription.setText(ContentRegistry.getContentDescription(mContentObject));
+        if (mContentObject.getContentState() == ContentState.DOWNLOAD_ON_HOLD) {
             mContentDescription.setVisibility(View.INVISIBLE);
         } else {
             mContentDescription.setVisibility(View.VISIBLE);

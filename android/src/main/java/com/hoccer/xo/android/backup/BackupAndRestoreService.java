@@ -25,9 +25,9 @@ public class BackupAndRestoreService extends CancelableHandlerService {
 
     public static final String EXTRA_SELECT_BACKUP_PREFERENCES = "select_backup_preferences";
     public static final String EXTRA_PASSWORD = "password";
-    public static final String EXTRA_CREATE_BACKUP_TYPE = "type";
-    public static final String EXTRA_CREATED_BACKUP = "createdBackup";
-    public static final String EXTRA_RESTORE_BACKUP = "backup";
+    public static final String EXTRA_CREATE_BACKUP_TYPE = "createBackup";
+    public static final String EXTRA_BACKUP = "backup";
+    public static final String EXTRA_RESTORE_BACKUP = "restoreBackup";
 
     public enum BackupAction {
 
@@ -200,7 +200,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
 
     private void broadcast(BackupAction action, Backup backup) {
         Intent intent = new Intent(action.toString());
-        intent.putExtra(EXTRA_CREATED_BACKUP, backup);
+        intent.putExtra(EXTRA_BACKUP, backup);
         mLocalBroadcastManager.sendBroadcast(intent);
     }
 

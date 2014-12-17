@@ -49,8 +49,8 @@ public class JongoDatabase implements ITalkServerDatabase {
     private MongoCollection mRelationships;
     private MongoCollection mPresences;
     private MongoCollection mKeys;
-    private MongoCollection mGroups;
-    private MongoCollection mGroupMembers;
+    private MongoCollection mGroupPresences;
+    private MongoCollection mGroupMemberships;
     private MongoCollection mEnvironments;
     private MongoCollection mClientHostInfos;
     private MongoCollection mMigrations;
@@ -96,8 +96,8 @@ public class JongoDatabase implements ITalkServerDatabase {
         mRelationships = getCollection("relationship");
         mPresences = getCollection("presence");
         mKeys = getCollection("key");
-        mGroups = getCollection("group");
-        mGroupMembers = getCollection("groupMember");
+        mGroupPresences = getCollection("group");
+        mGroupMemberships = getCollection("groupMember");
         mEnvironments = getCollection("environment");
         mClientHostInfos = getCollection("clientHostInfo");
         mMigrations = getCollection("migrations");
@@ -386,16 +386,16 @@ public class JongoDatabase implements ITalkServerDatabase {
             }
         }
         // collect clients known through groups
-        List<TalkGroupMember> ownMembers = findGroupMembersForClient(clientId);
-        for (TalkGroupMember ownMember : ownMembers) {
-            String groupId = ownMember.getGroupId();
-            if (ownMember.isInvited() || ownMember.isJoined()) {
-                List<TalkGroupMember> otherMembers = findGroupMembersById(groupId);
-                for (TalkGroupMember otherMember : otherMembers) {
-                    if (otherMember.isInvited() || otherMember.isJoined()) {
-                        clients.add(otherMember.getClientId());
-                        if (otherMember.getLastChanged().after(lastKnown) || ownMember.getLastChanged().after(lastKnown)) {
-                            mustInclude.add(otherMember.getClientId());
+        List<TalkGroupMembership> ownMemberships = findGroupMembershipsForClient(clientId);
+        for (TalkGroupMembership ownMembership : ownMemberships) {
+            String groupId = ownMembership.getGroupId();
+            if (ownMembership.isInvited() || ownMembership.isJoined()) {
+                List<TalkGroupMembership> otherMemberships = findGroupMembershipsById(groupId);
+                for (TalkGroupMembership otherMembership : otherMemberships) {
+                    if (otherMembership.isInvited() || otherMembership.isJoined()) {
+                        clients.add(otherMembership.getClientId());
+                        if (otherMembership.getLastChanged().after(lastKnown) || ownMembership.getLastChanged().after(lastKnown)) {
+                            mustInclude.add(otherMembership.getClientId());
                         }
                     }
                 }
@@ -521,88 +521,88 @@ public class JongoDatabase implements ITalkServerDatabase {
     }
 
     @Override
-    public TalkGroup findGroupById(String groupId) {
-        return mGroups.findOne("{groupId:#}", groupId).as(TalkGroup.class);
+    public TalkGroupPresence findGroupPresenceById(String groupId) {
+        return mGroupPresences.findOne("{groupId:#}", groupId).as(TalkGroupPresence.class);
     }
 
     @Override
-    public void deleteGroup(TalkGroup group) {
-        mGroups.remove("{groupId:#}", group.getGroupId());
+    public void deleteGroupPresence(TalkGroupPresence groupPresence) {
+        mGroupPresences.remove("{groupId:#}", groupPresence.getGroupId());
     }
 
 
     @Override
-    public List<TalkGroup> findGroupsByClientIdChangedAfter(String clientId, Date lastKnown) {
+    public List<TalkGroupPresence> findGroupPresencesByClientIdChangedAfter(String clientId, Date lastKnown) {
         return findGroupsByClientIdChangedAfterV1(clientId,lastKnown);
     }
 
 
-    private List<TalkGroup> findGroupsByClientIdChangedAfterV1(String clientId, Date lastKnown) {
+    private List<TalkGroupPresence> findGroupsByClientIdChangedAfterV1(String clientId, Date lastKnown) {
         // indirect query
-        List<TalkGroup> res = new ArrayList<TalkGroup>();
-        List<TalkGroupMember> members = findGroupMembersForClient(clientId);
-        for (TalkGroupMember member : members) {
-            if (member.isMember() || member.isInvited()) {
-                TalkGroup group = findGroupById(member.getGroupId());
-                if (group == null) {
+        List<TalkGroupPresence> res = new ArrayList<TalkGroupPresence>();
+        List<TalkGroupMembership> memberships = findGroupMembershipsForClient(clientId);
+        for (TalkGroupMembership membership : memberships) {
+            if (membership.isMember() || membership.isInvited()) {
+                TalkGroupPresence groupPresence = findGroupPresenceById(membership.getGroupId());
+                if (groupPresence == null) {
                     // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
-                    throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
+                    throw new RuntimeException("Internal inconsistency, could not find group "+membership.getGroupId()+ "for member client "+clientId);
                 }
-                if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {
-                    res.add(group);
+                if(groupPresence.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || groupPresence.getLastChanged().after(lastKnown)) {
+                    res.add(groupPresence);
                 }
              }
         }
         return res;
     }
 
-    private List<TalkGroup> findGroupsByClientIdChangedAfterV2(String clientId, Date lastKnown) {
+    private List<TalkGroupPresence> findGroupsByClientIdChangedAfterV2(String clientId, Date lastKnown) {
         // indirect query
-        List<TalkGroup> res = new ArrayList<TalkGroup>();
-        List<TalkGroupMember> members = findGroupMembersByIdWithStates(clientId, new String[]{TalkGroupMember.STATE_JOINED, TalkGroupMember.STATE_INVITED});
-        for (TalkGroupMember member : members) {
-                TalkGroup group = findGroupById(member.getGroupId());
-                if (group == null) {
+        List<TalkGroupPresence> res = new ArrayList<TalkGroupPresence>();
+        List<TalkGroupMembership> memberships = findGroupMembershipsByIdWithStates(clientId, new String[]{TalkGroupMembership.STATE_JOINED, TalkGroupMembership.STATE_INVITED});
+        for (TalkGroupMembership membership : memberships) {
+                TalkGroupPresence groupPresence = findGroupPresenceById(membership.getGroupId());
+                if (groupPresence == null) {
                     // TODO: Define and throw a dedicated exception instead of using a generic one (from sonarqube)
-                    throw new RuntimeException("Internal inconsistency, could not find group "+member.getGroupId()+ "for member client "+clientId);
+                    throw new RuntimeException("Internal inconsistency, could not find group "+membership.getGroupId()+ "for member client "+clientId);
                 }
-                if(group.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || group.getLastChanged().after(lastKnown)) {
-                    res.add(group);
+                if(groupPresence.getLastChanged() == null || lastKnown == null || lastKnown.getTime() == 0 || groupPresence.getLastChanged().after(lastKnown)) {
+                    res.add(groupPresence);
                 }
         }
         return res;
     }
 
     @Override
-    public void saveGroup(TalkGroup group) {
-        mGroups.save(group);
+    public void saveGroupPresence(TalkGroupPresence groupPresence) {
+        mGroupPresences.save(groupPresence);
     }
 
     @Override
-    public List<TalkGroupMember> findGroupMembersById(String groupId) {
-        Iterator<TalkGroupMember> it = mGroupMembers
+    public List<TalkGroupMembership> findGroupMembershipsById(String groupId) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
                 .find("{groupId:#}", groupId)
-                .as(TalkGroupMember.class)
+                .as(TalkGroupMembership.class)
                 .iterator();
 
         return IteratorUtils.toList(it);
     }
 
     @Override
-    public List<TalkGroupMember> findGroupMembersByIdWithStates(String groupId, String[] states) {
-        Iterator<TalkGroupMember> it = mGroupMembers
+    public List<TalkGroupMembership> findGroupMembershipsByIdWithStates(String groupId, String[] states) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
                 .find("{groupId:#, state: { $in: # }}", groupId, Arrays.asList(states))
-                .as(TalkGroupMember.class)
+                .as(TalkGroupMembership.class)
                 .iterator();
 
         return IteratorUtils.toList(it);
     }
 
     @Override
-    public List<TalkGroupMember> findGroupMembersByIdWithStatesAndRoles(String groupId, String[] states, String [] roles) {
-        Iterator<TalkGroupMember> it = mGroupMembers
+    public List<TalkGroupMembership> findGroupMembershipsByIdWithStatesAndRoles(String groupId, String[] states, String[] roles) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
                 .find("{groupId:#, state: { $in: # }, role: {$in: #}", groupId, Arrays.asList(states), Arrays.asList(roles))
-                .as(TalkGroupMember.class)
+                .as(TalkGroupMembership.class)
                 .iterator();
 
         return IteratorUtils.toList(it);
@@ -610,54 +610,54 @@ public class JongoDatabase implements ITalkServerDatabase {
 
 
     @Override
-    public List<TalkGroupMember> findGroupMembersByIdChangedAfter(String groupId, Date lastKnown) {
-        Iterator<TalkGroupMember> it = mGroupMembers
+    public List<TalkGroupMembership> findGroupMembershipsByIdChangedAfter(String groupId, Date lastKnown) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
                 .find("{groupId:#,lastChanged: {$gt:#}}", groupId, lastKnown)
-                .as(TalkGroupMember.class)
+                .as(TalkGroupMembership.class)
                 .iterator();
 
         return IteratorUtils.toList(it);
     }
 
     @Override
-    public List<TalkGroupMember> findGroupMembersByIdWithStatesChangedAfter(String groupId, String[] states, Date lastKnown) {
-        Iterator<TalkGroupMember> it = mGroupMembers
+    public List<TalkGroupMembership> findGroupMembershipsByIdWithStatesChangedAfter(String groupId, String[] states, Date lastKnown) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
                 .find("{groupId:#, state: { $in: # }, lastChanged: { $gt:# } }", groupId, Arrays.asList(states), lastKnown)
-                .as(TalkGroupMember.class)
+                .as(TalkGroupMembership.class)
                 .iterator();
 
         return IteratorUtils.toList(it);
     }
 
     @Override
-    public List<TalkGroupMember> findGroupMembersForClient(String clientId) {
-        Iterator<TalkGroupMember> it = mGroupMembers
+    public List<TalkGroupMembership> findGroupMembershipsForClient(String clientId) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
                 .find("{clientId:#}", clientId)
-                .as(TalkGroupMember.class)
+                .as(TalkGroupMembership.class)
                 .iterator();
 
         return IteratorUtils.toList(it);
     }
 
     @Override
-    public List<TalkGroupMember> findGroupMembersForClientWithStates(String clientId, String[] states) {
-        Iterator<TalkGroupMember> it = mGroupMembers
+    public List<TalkGroupMembership> findGroupMembershipsForClientWithStates(String clientId, String[] states) {
+        Iterator<TalkGroupMembership> it = mGroupMemberships
                 .find("{clientId:#, state: { $in: # }}", clientId, Arrays.asList(states))
-                .as(TalkGroupMember.class)
+                .as(TalkGroupMembership.class)
                 .iterator();
 
         return IteratorUtils.toList(it);
     }
 
     @Override
-    public TalkGroupMember findGroupMemberForClient(String groupId, String clientId) {
-        return mGroupMembers.findOne("{groupId:#,clientId:#}", groupId, clientId)
-                .as(TalkGroupMember.class);
+    public TalkGroupMembership findGroupMembershipForClient(String groupId, String clientId) {
+        return mGroupMemberships.findOne("{groupId:#,clientId:#}", groupId, clientId)
+                .as(TalkGroupMembership.class);
     }
 
     @Override
-    public void saveGroupMember(TalkGroupMember groupMember) {
-        mGroupMembers.save(groupMember);
+    public void saveGroupMembership(TalkGroupMembership membership) {
+        mGroupMemberships.save(membership);
     }
 
     @Override

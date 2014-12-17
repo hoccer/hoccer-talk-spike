@@ -3,8 +3,8 @@ package com.hoccer.talk.util;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.model.TalkGroup;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.talk.model.TalkGroupPresence;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Security;
@@ -74,7 +74,7 @@ public class TestHelper {
         TalkClientContact newGroup = TalkClientContact.createGroupContact();
         final String groupTag = newGroup.getGroupTag();
 
-        TalkGroup groupPresence = new TalkGroup();
+        TalkGroupPresence groupPresence = new TalkGroupPresence();
         groupPresence.setGroupTag(newGroup.getGroupTag());
         newGroup.updateGroupPresence(groupPresence);
 
@@ -93,12 +93,12 @@ public class TestHelper {
         await("invitedClient knows group via groupId").untilCall(to(invitedClient.getDatabase()).findGroupContactByGroupId(groupId, false), notNullValue());
         TalkClientContact groupContactOfInvitedClient = invitedClient.getDatabase().findGroupContactByGroupId(groupId, false);
 
-        await("invitedClient has received group member update").untilCall(to(groupContactOfInvitedClient).getGroupMember(), notNullValue());
-        assertTrue("invitedClient is invited to group", groupContactOfInvitedClient.getGroupMember().isInvited());
-        assertEquals("invitedClient membership is actually the invitedClient", groupContactOfInvitedClient.getGroupMember().getClientId(), invitedClient.getSelfContact().getClientId());
+        await("invitedClient has received group member update").untilCall(to(groupContactOfInvitedClient).getGroupMembership(), notNullValue());
+        assertTrue("invitedClient is invited to group", groupContactOfInvitedClient.getGroupMembership().isInvited());
+        assertEquals("invitedClient membership is actually the invitedClient", groupContactOfInvitedClient.getGroupMembership().getClientId(), invitedClient.getSelfContact().getClientId());
 
         // only when the invited client has received the shared group key, it is safe to proceed, e.g. to join the group
-        await("invitedClient has a group key").untilCall(to(groupContactOfInvitedClient.getGroupMember()).getSharedKeyId(), notNullValue());
+        await("invitedClient has a group key").untilCall(to(groupContactOfInvitedClient.getGroupMembership()).getSharedKeyId(), notNullValue());
     }
 
     public static void joinGroup(final XoClient joiningClient, final String groupId) {
@@ -108,10 +108,10 @@ public class TestHelper {
                 new Callable<Boolean>() {
                     @Override
                     public Boolean call() throws Exception {
-                        TalkGroupMember groupMember = joiningClient.getDatabase().findGroupContactByGroupId(groupId, false).getGroupMember();
-                        return  groupMember.isJoined() &&
-                                groupMember.getEncryptedGroupKey() != null &&
-                                groupMember.getMemberKeyId() != null;
+                        TalkGroupMembership membership = joiningClient.getDatabase().findGroupContactByGroupId(groupId, false).getGroupMembership();
+                        return  membership.isJoined() &&
+                                membership.getEncryptedGroupKey() != null &&
+                                membership.getMemberKeyId() != null;
                     }
                 }
         );

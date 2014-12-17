@@ -2,13 +2,13 @@ package com.hoccer.talk.util;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.IXoClientHost;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
 import org.junit.Assert;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.KeyStore;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,13 +17,10 @@ public class TestClientHost implements IXoClientHost {
 
     private final ScheduledExecutorService mExecutor;
     private final IXoClientDatabaseBackend mDatabaseBackend;
-    private final WebSocketClientFactory mWSClientFactory;
 
     public TestClientHost() throws Exception {
         mExecutor = Executors.newScheduledThreadPool(10);
         mDatabaseBackend = new TestClientDatabaseBackend();
-        mWSClientFactory = new WebSocketClientFactory();
-        mWSClientFactory.start();
     }
 
     @Override
@@ -42,8 +39,8 @@ public class TestClientHost implements IXoClientHost {
     }
 
     @Override
-    public WebSocketClientFactory getWebSocketFactory() {
-        return mWSClientFactory;
+    public KeyStore getKeyStore() {
+        return null;
     }
 
     @Override

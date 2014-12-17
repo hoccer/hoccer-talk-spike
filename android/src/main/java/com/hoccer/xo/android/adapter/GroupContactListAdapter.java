@@ -15,7 +15,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
-import com.hoccer.talk.model.TalkGroupMember;
+import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.view.AvatarView;
@@ -45,8 +45,8 @@ public class GroupContactListAdapter extends ContactListAdapter {
 
         try {
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
-            invitedMe = database.findGroupContactsByMemberState(TalkGroupMember.STATE_INVITED);
-            joined = database.findGroupContactsByMemberState(TalkGroupMember.STATE_JOINED);
+            invitedMe = database.findGroupContactsByMembershipState(TalkGroupMembership.STATE_INVITED);
+            joined = database.findGroupContactsByMembershipState(TalkGroupMembership.STATE_JOINED);
         } catch (SQLException e) {
             LOG.error("Could not fetch group contacts", e);
             return Collections.emptyList();
@@ -97,12 +97,12 @@ public class GroupContactListAdapter extends ContactListAdapter {
             }
         });
 
-        if (group.isGroup() && group.getGroupMember() != null) {
-            TalkGroupMember member = group.getGroupMember();
+        if (group.isGroup() && group.getGroupMembership() != null) {
+            TalkGroupMembership membership = group.getGroupMembership();
 
-            if (member.isInvited()) {
+            if (membership.isInvited()) {
                 updateViewForInvited(viewHolder);
-            } else if (member.isJoined()) {
+            } else if (membership.isJoined()) {
                 updateViewForJoined(viewHolder, group);
             }
         }
@@ -123,7 +123,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
         try {
             ArrayDeque<String> displayMembers = new ArrayDeque<String>();
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
-            List<TalkClientContact> joinedContacts = database.findContactsInGroupByState(group.getGroupId(), TalkGroupMember.STATE_JOINED);
+            List<TalkClientContact> joinedContacts = database.findContactsInGroupByState(group.getGroupId(), TalkGroupMembership.STATE_JOINED);
             CollectionUtils.filterInverse(joinedContacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
 
             for (TalkClientContact contact : joinedContacts) {
@@ -154,7 +154,7 @@ public class GroupContactListAdapter extends ContactListAdapter {
     private void showConfirmDialog(final TalkClientContact group) {
         XoDialogs.showYesNoDialog("ConfirmDeclineGroupInvitationDialog",
                 mActivity.getString(R.string.group_request_decline_invitation_title),
-                mActivity.getString(R.string.group_request_decline_invitation_message, group.getNickname()),
+                mActivity.getString(R.string.group_request_decline_invitation_message),
                 mActivity,
                 new DialogInterface.OnClickListener() {
                     @Override

@@ -91,18 +91,18 @@ public class ClientStatus extends TalkToolClientCommand {
                 }
                 if (contact.isGroup()) {
                     printInd("contact " + contact.getClientContactId() + ": (group) " + contact.getGroupId(), 1);
-                    TalkGroup group = contact.getGroupPresence();
-                    if (group != null) {
-                        printInd("name: " + group.getGroupName() + ", " +
-                                 "state: " + group.getState() + ", " +
-                                 "type: " + group.getGroupType(), 2);
+                    TalkGroupPresence groupPresence = contact.getGroupPresence();
+                    if (groupPresence != null) {
+                        printInd("name: " + groupPresence.getGroupName() + ", " +
+                                 "state: " + groupPresence.getState() + ", " +
+                                 "type: " + groupPresence.getGroupType(), 2);
                     } else {
                         printInd("no presence", 2);
                     }
-                    TalkGroupMember member = contact.getGroupMember();
-                    if (member != null) {
-                        printInd("state: " + member.getState() + ", " +
-                                 "role: " + member.getRole(), 2);
+                    TalkGroupMembership membership = contact.getGroupMembership();
+                    if (membership != null) {
+                        printInd("state: " + membership.getState() + ", " +
+                                 "role: " + membership.getRole(), 2);
                     } else {
                         printInd("no membership", 2);
                     }

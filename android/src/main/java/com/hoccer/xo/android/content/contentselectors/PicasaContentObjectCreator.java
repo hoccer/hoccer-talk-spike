@@ -9,9 +9,9 @@ import android.provider.MediaStore;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.util.FileUtils;
 import com.hoccer.xo.android.util.ImageUtils;
 import ezvcard.util.org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -54,7 +54,7 @@ public class PicasaContentObjectCreator implements IContentCreator {
                 File imageFile = new File(XoApplication.getAttachmentDirectory(), filename);
 
                 try {
-                    FileUtils.readInputStream(is, imageFile);
+                    FileUtils.copyInputStreamToFile(is, imageFile);
                 } catch (IOException e) {
                     LOG.error("Failed reading input stream from content uri: " + contentUri.getPath());
                     e.printStackTrace();

@@ -314,13 +314,12 @@ public abstract class XoActivity extends FragmentActivity {
 
         if (requestCode == REQUEST_SELECT_AVATAR) {
             if (mAvatarSelection != null) {
-                ImageSelector selector = (ImageSelector) mAvatarSelection.getSelector();
-                startExternalActivityForResult(selector.createCropIntent(this, intent.getData()), REQUEST_CROP_AVATAR);
+                startExternalActivityForResult(ImageSelector.createCropIntent(intent.getData()), REQUEST_CROP_AVATAR);
             }
         } else if (requestCode == REQUEST_CROP_AVATAR) {
             intent = selectedAvatarPreProcessing(intent);
             if (intent != null) {
-                IContentObject contentObject = ContentRegistry.get(this).createSelectedAvatar(mAvatarSelection, intent);
+                IContentObject contentObject = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
                 if (contentObject != null) {
                     LOG.debug("selected avatar " + contentObject.getContentDataUrl());
                     for (IXoFragment fragment : mTalkFragments) {

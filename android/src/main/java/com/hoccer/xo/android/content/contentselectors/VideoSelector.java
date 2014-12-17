@@ -6,16 +6,16 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.artcom.hoccer.R;
 
 public class VideoSelector implements IContentSelector {
 
-    private String mName;
-    private Drawable mIcon;
+    private final String mName;
+    private final Drawable mIcon;
 
     public VideoSelector(Context context) {
         mName = context.getResources().getString(R.string.content_video);
@@ -57,8 +57,7 @@ public class VideoSelector implements IContentSelector {
                 MediaStore.Video.Media.TITLE
         };
 
-        Cursor cursor = context.getContentResolver().query(
-                selectedContent, filePathColumn, null, null, null);
+        Cursor cursor = context.getContentResolver().query(selectedContent, filePathColumn, null, null, null);
         cursor.moveToFirst();
 
         int typeIndex = cursor.getColumnIndex(filePathColumn[0]);
