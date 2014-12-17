@@ -42,15 +42,18 @@ public class StartupTasks {
      */
     public void executeRegisteredTasks() {
         Map<String, ?> preferenceMap = mPreferences.getAll();
-        for (String className : preferenceMap.keySet()) {
-            try {
-                IStartupTask task = (IStartupTask) Class.forName(className).newInstance();
-                task.execute(mApplication);
-            } catch (Exception e) {
-                LOG.error("Could not execute startup task '" + className + "'", e);
+        if(!preferenceMap.isEmpty()) {
+            for (String className : preferenceMap.keySet()) {
+                try {
+                    LOG.debug("Excuting StartupTask '" + className + "'");
+                    IStartupTask task = (IStartupTask) Class.forName(className).newInstance();
+                    task.execute(mApplication);
+                } catch (Exception e) {
+                    LOG.error("Could not execute startup task '" + className + "'", e);
+                }
             }
-        }
 
-        mPreferences.edit().clear().apply();
+            mPreferences.edit().clear().apply();
+        }
     }
 }
