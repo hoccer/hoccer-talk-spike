@@ -17,9 +17,9 @@ import com.hoccer.xo.android.service.CancelableHandlerService;
 import com.hoccer.xo.android.service.NotificationId;
 import org.apache.log4j.Logger;
 
-import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.*;
+import static com.hoccer.xo.android.backup.BackupAndRestoreService.BackupAction.*;
+import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.BACKUP;
 import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.RESTORE;
-import static com.hoccer.xo.android.util.IntentHelper.*;
 
 public class BackupAndRestoreService extends CancelableHandlerService {
 
@@ -28,6 +28,39 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     public static final String EXTRA_CREATE_BACKUP_TYPE = "type";
     public static final String EXTRA_CREATED_BACKUP = "createdBackup";
     public static final String EXTRA_RESTORE_BACKUP = "backup";
+
+    public enum BackupAction {
+
+        ACTION_BACKUP_IN_PROGRESS("com.hoccer.xo.android.action.ACTION_BACKUP_IN_PROGRESS"),
+        ACTION_BACKUP_SUCCEEDED("com.hoccer.xo.android.action.BACKUP_SUCCEEDED"),
+        ACTION_BACKUP_CANCELED("com.hoccer.xo.android.action.BACKUP_CANCELED"),
+        ACTION_BACKUP_FAILED("com.hoccer.xo.android.action.BACKUP_FAILED"),
+
+        ACTION_RESTORE_IN_PROGRESS("com.hoccer.xo.android.action.ACTION_RESTORE_IN_PROGRESS"),
+        ACTION_RESTORE_SUCCEEDED("com.hoccer.xo.android.action.RESTORE_SUCCEEDED"),
+        ACTION_RESTORE_CANCELED("com.hoccer.xo.android.action.RESTORE_CANCELED"),
+        ACTION_RESTORE_FAILED("com.hoccer.xo.android.action.RESTORE_FAILED");
+
+        private final String mString;
+        BackupAction(String string) {
+            mString = string;
+        }
+
+        @Override
+        public String toString() {
+            return mString;
+        }
+
+        public static BackupAction fromString(String string) {
+            for (BackupAction action : BackupAction.values()) {
+                if (action.toString().equals(string)) {
+                    return action;
+                }
+            }
+
+            return null;
+        }
+    }
 
     public enum OperationInProgress {
         RESTORE, BACKUP
@@ -165,14 +198,14 @@ public class BackupAndRestoreService extends CancelableHandlerService {
                 .build();
     }
 
-    private void broadcast(String action, Backup backup) {
-        Intent intent = new Intent(action);
+    private void broadcast(BackupAction action, Backup backup) {
+        Intent intent = new Intent(action.toString());
         intent.putExtra(EXTRA_CREATED_BACKUP, backup);
         mLocalBroadcastManager.sendBroadcast(intent);
     }
 
-    private void broadcast(String action) {
-        Intent intent = new Intent(action);
+    private void broadcast(BackupAction action) {
+        Intent intent = new Intent(action.toString());
         mLocalBroadcastManager.sendBroadcast(intent);
     }
 

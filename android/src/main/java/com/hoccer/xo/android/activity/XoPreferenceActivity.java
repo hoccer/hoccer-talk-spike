@@ -1,26 +1,24 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.Dialog;
-import android.content.*;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.*;
-import android.widget.*;
+import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.*;
-import com.hoccer.xo.android.service.CancelableHandlerService;
-import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
 import net.hockeyapp.android.CrashManager;
 import org.apache.commons.io.FileUtils;
@@ -29,11 +27,6 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.*;
 
 public class XoPreferenceActivity extends PreferenceActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -47,13 +40,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     private Handler mDialogDismisser;
 
     private Dialog mWaitingDialog;
-    private boolean mBackupServiceBound;
-    private BackupAndRestoreService mBackupService;
-
-    private ServiceConnection mServiceConnection;
-    private View mChatsBackupView;
-    private View mBackupView;
-    private View mRestoreView;
+    private BackupController mBackupController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +56,9 @@ public class XoPreferenceActivity extends PreferenceActivity
         }
         getListView().setBackgroundColor(Color.WHITE);
 
+        BackupPreference createBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_create_backup));
+        BackupPreference restoreBackupPreference = (BackupPreference) findPreference(getString(R.string.preference_key_restore_backup));
+        mBackupController = new BackupController(this, createBackupPreference, restoreBackupPreference);
     }
 
     @Override
@@ -89,12 +79,18 @@ public class XoPreferenceActivity extends PreferenceActivity
     protected void onResume() {
         super.onResume();
         checkForCrashesIfEnabled();
+        mBackupController.registerAndBind();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mBackupController.unregisterAndUnbind();
     }
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-
         Intent intent = getIntent();
         if (intent != null) {
             boolean selectBackupPreferences = intent.getBooleanExtra("select_backup_preferences", false);
@@ -108,122 +104,6 @@ public class XoPreferenceActivity extends PreferenceActivity
                     }
                 }
             }
-        }
-
-        Preference preferenceChatsBackup = findPreference("preference_chats_backup");
-        Preference preferenceCompleteBackup = findPreference("preference_complete_backup");
-        Preference preferenceImportBackup = findPreference("preference_import_backup");
-
-        mChatsBackupView = getLayoutInflater().inflate(preferenceChatsBackup.getLayoutResource(), null);
-        mBackupView = getLayoutInflater().inflate(preferenceCompleteBackup.getLayoutResource(), null);
-        mRestoreView = getLayoutInflater().inflate(preferenceImportBackup.getLayoutResource(), null);
-
-        connectToBackupService();
-        createBroadcastReceiver();
-    }
-
-    private void connectToBackupService() {
-        mServiceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                CancelableHandlerService.ServiceBinder binder = (CancelableHandlerService.ServiceBinder) service;
-                mBackupService = (BackupAndRestoreService) binder.getService();
-                mBackupServiceBound = true;
-                updateBackupPreferenceView();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                mBackupServiceBound = false;
-            }
-        };
-        bindService(new Intent(this, BackupAndRestoreService.class), mServiceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    private void updateBackupPreferenceView() {
-        LinearLayout wrapper;
-        RelativeLayout defaultLayout;
-        RelativeLayout inProgressLayout;
-        TextView inProgressText;
-
-//        if (mBackupServiceBound) {
-//            switch (mBackupService.getOperationInProcess()) {
-//                case EXTRA_BACKUP:
-                    wrapper = (LinearLayout) mBackupView.findViewById(R.id.ll_create_backup);
-                    defaultLayout = (RelativeLayout) wrapper.findViewById(R.id.rl_default_preference);
-                    inProgressLayout = (RelativeLayout) wrapper.findViewById(R.id.rl_in_progress);
-                    inProgressText = (TextView) wrapper.findViewById(R.id.tv_in_progress);
-
-                    inProgressText.setText("Creating backup ..");
-                    defaultLayout.setVisibility(View.GONE);
-                    inProgressLayout.setVisibility(View.VISIBLE);
-//                    break;
-//                case RESTORE:
-//                    wrapper = (LinearLayout) mRestoreView.findViewById(R.id.ll_restore_backup);
-//                    defaultLayout = (RelativeLayout) wrapper.findViewById(R.id.rl_default_preference);
-//                    inProgressLayout = (RelativeLayout) wrapper.findViewById(R.id.rl_in_progress);
-//                    inProgressText = (TextView) wrapper.findViewById(R.id.tv_in_progress);
-//
-//                    inProgressText.setText("Restoring backup ..");
-//                    defaultLayout.setVisibility(View.GONE);
-//                    inProgressLayout.setVisibility(View.VISIBLE);
-//                    break;
-//            }
-//        }
-    }
-
-    private void createBroadcastReceiver() {
-        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                getListView().findViewById(R.id.rl_default_preference).setVisibility(View.VISIBLE);
-                getListView().findViewById(R.id.rl_in_progress).setVisibility(View.GONE);
-
-                Backup backup = intent.getParcelableExtra(BackupAndRestoreService.EXTRA_BACKUP);
-                if (backup != null) {
-                    if (intent.getAction().equals(IntentHelper.ACTION_BACKUP_SUCCEEDED)) {
-
-                        String date = String.format("Date: %s", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(backup.getCreationDate()));
-                        String user = String.format("User: %s", backup.getClientName());
-                        String path = String.format("Path: %s", backup.getFile().getAbsolutePath());
-                        String size = String.format("Size: %s", FileUtils.byteCountToDisplaySize(backup.getSize()));
-
-                        String message = String.format("%s\n%s\n%s\n%s", date, user, path, size);
-                        XoDialogs.showOkDialog("BackupCreatedDialog", "Backup created", message, XoPreferenceActivity.this);
-                    } else if (intent.getAction().equals(IntentHelper.ACTION_RESTORE_SUCCEEDED)) {
-
-                        String date = String.format("Date: %s", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(backup.getCreationDate()));
-                        String user = String.format("User: %s", backup.getClientName());
-
-                        String message = String.format("Successfully restored backup:\n\n%s\n%s.\n\nPlease restart Hoccer.", date, user);
-                        XoDialogs.showOkDialog("BackupRestoredDialog", "Backup restored", message, XoPreferenceActivity.this);
-                    }
-                }
-            }
-        };
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(IntentHelper.ACTION_BACKUP_SUCCEEDED);
-        intentFilter.addAction(IntentHelper.ACTION_BACKUP_FAILED);
-        intentFilter.addAction(IntentHelper.ACTION_BACKUP_CANCELED);
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, intentFilter);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mBackupServiceBound) {
-            unbindService(mServiceConnection);
-            mBackupServiceBound = false;
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mBackupServiceBound) {
-            unbindService(mServiceConnection);
-            mBackupServiceBound = false;
         }
     }
 
@@ -310,140 +190,12 @@ public class XoPreferenceActivity extends PreferenceActivity
         } else if ("preference_import".equals(preference.getKey())) {
             showImportCredentialsDialog();
             return true;
-        } else if ("preference_chats_backup".equals(preference.getKey())) {
-            showDatabaseBackupDialog();
-            return true;
-        } else if ("preference_complete_backup".equals(preference.getKey())) {
-            showCompleteBackupDialog();
-            return true;
-        } else if ("preference_import_backup".equals(preference.getKey())) {
-            showImportBackupDialog();
-            return true;
         } else if ("preference_database_dump".equals(preference.getKey())) {
             dumpDatabase();
             return true;
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);
-    }
-
-    private void showImportBackupDialog() {
-        final List<Backup> backups = BackupFileUtils.getBackups(XoApplication.getBackupDirectory());
-
-        List<String> items = new ArrayList<String>(backups.size());
-        for (Backup backup : backups) {
-            String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(backup.getCreationDate());
-            items.add(timestamp + " " + FileUtils.byteCountToDisplaySize(backup.getSize()));
-        }
-
-        XoDialogs.showSingleChoiceDialog("ImportBackupDialog",
-                R.string.dialog_import_credentials_title,
-                items.toArray(new String[items.size()]),
-                this,
-                new XoDialogs.OnSingleSelectionFinishedListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int id, final int selectedItem) {
-
-                        Backup backup = backups.get(selectedItem);
-                        try {
-                            if (BackupFileUtils.isEnoughDiskSpaceAvailable(backup.getFile())) {
-                                XoDialogs.showInputPasswordDialog("ImportBackupPasswordDialog",
-                                        R.string.dialog_import_credentials_title,
-                                        XoPreferenceActivity.this,
-                                        new XoDialogs.OnTextSubmittedListener() {
-
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int id, String password) {
-                                                restoreBackup(backups.get(selectedItem), password);
-                                            }
-                                        }
-                                );
-                            } else {
-                                XoDialogs.showOkDialog("NotEnoughDiskSpaceAvailableDialog",
-                                        R.string.dialog_import_credentials_title,
-                                        R.string.dialog_not_enough_disk_space_dialog, XoPreferenceActivity.this);
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-
-    }
-
-    private void createBackup(final String password, BackupType type) {
-        Bundle bundle = new Bundle();
-        bundle.putString("type", type.toString());
-        bundle.putString("password", password);
-
-        Intent intent = new Intent(this, BackupAndRestoreService.class);
-        intent.putExtras(bundle);
-
-        startService(intent);
-
-        Button cancelBtn = (Button) mBackupView.findViewById(R.id.btn_cancel);
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mBackupServiceBound) {
-                    mBackupService.cancel();
-                }
-            }
-        });
-
-        updateBackupPreferenceView();
-    }
-
-
-    private void restoreBackup(final Backup backup, final String password) {
-
-        Intent intent = new Intent(this, BackupAndRestoreService.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("password", password);
-        bundle.putParcelable("backup", backup);
-        intent.putExtras(bundle);
-
-        startService(intent);
-        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-
-        Button cancelBtn = (Button) mRestoreView.findViewById(R.id.btn_cancel);
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mBackupServiceBound) {
-                    mBackupService.cancel();
-                }
-            }
-        });
-
-        updateBackupPreferenceView();
-    }
-
-    private void showDatabaseBackupDialog() {
-        XoDialogs.showInputPasswordDialog("CreateDatabaseBackupDialog",
-                R.string.dialog_export_credentials_title,
-                this,
-                new XoDialogs.OnTextSubmittedListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id, String password) {
-                        createBackup(password, BackupType.DATABASE);
-                    }
-                }
-        );
-    }
-
-    private void showCompleteBackupDialog() {
-        XoDialogs.showInputPasswordDialog("CreateDatabaseBackupDialog",
-                R.string.dialog_export_credentials_title,
-                this,
-                new XoDialogs.OnTextSubmittedListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id, String password) {
-                        createBackup(password, BackupType.COMPLETE);
-                    }
-                }
-        );
     }
 
     private void showImportCredentialsDialog() {
