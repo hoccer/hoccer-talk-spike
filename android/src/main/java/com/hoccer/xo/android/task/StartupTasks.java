@@ -12,27 +12,23 @@ import java.util.Map;
  */
 public class StartupTasks {
 
-    private final static Logger LOG = Logger.getLogger(StartupTasks.class);
+    private static final Logger LOG = Logger.getLogger(StartupTasks.class);
 
-    private static XoApplication mApplication;
-    private static SharedPreferences mPreferences;
     private static final String PREFERENCE_NAMESPACE = "STARTUP_TASKS";
 
+    private final XoApplication mApplication;
+    private final SharedPreferences mPreferences;
 
-    public static void initialize(XoApplication application) {
-        if(mApplication != null) {
-            throw new IllegalStateException("StartupTasks already initialized");
-        }
-
+    public StartupTasks(XoApplication application) {
         mApplication = application;
         mPreferences = application.getSharedPreferences(PREFERENCE_NAMESPACE, Context.MODE_PRIVATE);
     }
 
     /*
-     * Registers the given class to be executed once on next application start.
+     * Registers the given class to be executed on executeRegisteredTasks().
      * @param clazz Must implement IStartupTask
      */
-    public static void registerForNextStart(Class clazz) throws IllegalArgumentException {
+    public void registerForNextStart(Class clazz) {
         if (!IStartupTask.class.isAssignableFrom(clazz)) {
             throw new IllegalArgumentException("The provided class does not implement IStartupTask");
         }
@@ -44,7 +40,7 @@ public class StartupTasks {
      * Executes all registered tasks once and unregisters all afterwards.
      * @note Should be called once at startup.
      */
-    public static void executeRegisteredTasks() {
+    public void executeRegisteredTasks() {
         Map<String, ?> preferenceMap = mPreferences.getAll();
         for (String className : preferenceMap.keySet()) {
             try {

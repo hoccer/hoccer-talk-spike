@@ -26,14 +26,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
- * Application class
- *
  * This class handles the application lifecycle and is responsible
  * for such things as initializing the logger and setting up the
  * XO client itself. All global initialization should go here.
- *
  */
 public class XoApplication extends Application implements Thread.UncaughtExceptionHandler {
+
+    private static Logger sLog;
 
     /* Directories in internal storage */
     private static final String DOWNLOADS_DIRECTORY = "downloads";
@@ -42,224 +41,99 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     public static final String HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY = "hoccer";
 
+    private static File sExternalStorage;
+    private static File sInternalStorage;
+    private static File sInternalCacheStorage;
+
+    private static String sPackageName;
+
     /**
      * Background executor thread count
-     *
      * AFAIK this must be at least 3 for RPC to work.
      */
-    private static final int CLIENT_THREADS = 100;
+    private static final int CLIENT_THREAD_COUNT = 100;
 
-    /** logger for this class (initialized in onCreate) */
-    private static Logger LOG = null;
+    // global executor for client background activity (initialized in onCreate)
+    private static ScheduledExecutorService sExecutor;
 
-    /** global executor for client background activity (initialized in onCreate) */
-    private static ScheduledExecutorService EXECUTOR = null;
-    /** global executor for incoming connections */
-    private static ScheduledExecutorService INCOMING_EXECUTOR = null;
-    /** global xo host */
-    private static IXoClientHost CLIENT_HOST = null;
-    /** global xo client (initialized in onCreate) */
-    private static XoAndroidClient CLIENT = null;
-    /** global xo configuration (initialized in onCreate) */
-    private static XoAndroidClientConfiguration CONFIGURATION = null;
-    /** global xo sound pool for system sounds (initialized in onCreate) */
-    private static XoSoundPool SOUND_POOL = null;
+    // global executor for incoming connections
+    private static ScheduledExecutorService sIncomingExecutor;
 
-    private static EnvironmentUpdater ENVIRONMENT_UPDATER = null;
-
-    /** root of user-visible storage (initialized in onCreate) */
-    private static File EXTERNAL_STORAGE = null;
-    /** root of app-private storage (initialized in onCreate) */
-    private static File INTERNAL_STORAGE = null;
-    /** root of app-private cache storage (initialized in onCreate) */
-    private static File INTERNAL_CACHE_STORAGE = null;
-
-    private static String PACKAGE_NAME = null;
-
-    /** uncaught exception handler for the client and us */
-    private static Thread.UncaughtExceptionHandler UNCAUGHT_EXCEPTION_HANDLER = null;
-    private static DisplayImageOptions CONTENT_IMAGE_OPTIONS = null;
-    /** @return common executor for background tasks */
-    public static ScheduledExecutorService getExecutor() {
-        return EXECUTOR;
-    }
-    /** @return the xo client */
-    public static XoAndroidClient getXoClient() {
-        return CLIENT;
-    }
-    /** @return the xo configuration */
-    public static XoAndroidClientConfiguration getConfiguration() {
-        return CONFIGURATION;
-    }
-    /** @return the xo sound pool */
-    public static XoSoundPool getXoSoundPool() {
-        return SOUND_POOL;
-    }
-
-    public static EnvironmentUpdater getEnvironmentUpdater() {
-        return ENVIRONMENT_UPDATER;
-    }
-
-    /**
-     * @return user-visible storage directory
-     */
-    public static File getExternalStorage() {
-        return EXTERNAL_STORAGE;
-    }
-
-    public static Thread.UncaughtExceptionHandler getUncaughtExceptionHandler() {
-        return UNCAUGHT_EXCEPTION_HANDLER;
-    }
-
-    public static DisplayImageOptions getContentImageOptions() {
-        return CONTENT_IMAGE_OPTIONS;
-    }
-
-    /**
-     * @return internal storage directory
-     */
-    public static File getInternalStorage() {
-        return INTERNAL_STORAGE;
-    }
-
-    /**
-     * @return internal cache directory
-     */
-    public static File getCacheStorage() {
-        return INTERNAL_CACHE_STORAGE;
-    }
-
+    private static Thread.UncaughtExceptionHandler sUncaughtExceptionHandler;
     private Thread.UncaughtExceptionHandler mPreviousHandler;
 
-    public static File getAttachmentDirectory() {
-        return new File(EXTERNAL_STORAGE, CONFIGURATION.getAttachmentsDirectory());
-    }
+    private static IXoClientHost sClientHost;
+    private static XoAndroidClient sClient;
+    private static XoAndroidClientConfiguration sConfiguration;
+    private static XoSoundPool sSoundPool;
+    private static EnvironmentUpdater sEnvironmentUpdater;
+    private static DisplayImageOptions sImageOptions;
 
-    public static File getBackupDirectory() {
-        return new File(EXTERNAL_STORAGE, CONFIGURATION.getBackupDirectory());
-    }
+    private static boolean sIsNearbySessionRunning;
 
-    public static File getEncryptedDownloadDirectory() {
-        return new File(INTERNAL_STORAGE, DOWNLOADS_DIRECTORY);
-    }
-
-    public static File getGeneratedDirectory() {
-        return new File(INTERNAL_STORAGE, GENERATED_DIRECTORY);
-    }
-
-    public static File getAvatarDirectory() {
-        return new File(EXTERNAL_STORAGE, CONFIGURATION.getAvatarsDirectory());
-    }
-
-    public static File getThumbnailDirectory() {
-        return new File(INTERNAL_STORAGE, THUMBNAILS_DIRECTORY);
-    }
-
-    public static File getAvatarLocation(TalkClientDownload download) {
-        if(download.getState() == TalkClientDownload.State.COMPLETE) {
-            File avatarDir = getAvatarDirectory();
-            ensureDirectory(avatarDir);
-            String dataFile = download.getDataFile();
-            if(dataFile != null) {
-                return new File(avatarDir, dataFile);
-            }
-        }
-        return null;
-    }
-
-    public static File getAvatarLocation(TalkClientUpload upload) {
-        String dataFile = upload.getDataFile();
-        if(dataFile != null) {
-            return new File(dataFile);
-        }
-        return null;
-    }
-
-    public static File getAttachmentLocation(TalkClientDownload download) {
-        if(download.getState() == TalkClientDownload.State.COMPLETE) {
-            File attachmentDir = getAttachmentDirectory();
-            ensureDirectory(attachmentDir);
-            String dataFile = download.getDataFile();
-            if(dataFile != null) {
-                return new File(attachmentDir, dataFile);
-            }
-        }
-        return null;
-    }
-
-    public static File getAttachmentLocation(TalkClientUpload upload) {
-        String dataFile = upload.getDataFile();
-        if(dataFile != null) {
-            return new File(dataFile);
-        }
-        return null;
-    }
-
-    public static String getAppPackageName() {
-        return PACKAGE_NAME;
-    }
+    private static StartupTasks sStartupTasks;
 
     @Override
-	public void onCreate() {
-		super.onCreate();
+    public void onCreate() {
+        super.onCreate();
 
         // currently we use our own instance here
-        UNCAUGHT_EXCEPTION_HANDLER = this;
+        sUncaughtExceptionHandler = this;
 
         // initialize storage roots (do so early for log files)
-        EXTERNAL_STORAGE = Environment.getExternalStorageDirectory();
-        INTERNAL_STORAGE = this.getFilesDir();
-        INTERNAL_CACHE_STORAGE = this.getCacheDir();
+        sExternalStorage = Environment.getExternalStorageDirectory();
+        sInternalStorage = this.getFilesDir();
+        sInternalCacheStorage = this.getCacheDir();
 
         // Initialize configuration
-        CONFIGURATION = new XoAndroidClientConfiguration(this);
+        sConfiguration = new XoAndroidClientConfiguration(this);
 
         // set package name
-        PACKAGE_NAME = getPackageName();
+        sPackageName = getPackageName();
 
         // initialize logging system
-        XoLogging.initialize(this, CONFIGURATION.getAppName().replace(" ", ""));
+        XoLogging.initialize(this, sConfiguration.getAppName().replace(" ", ""));
 
         // configure ormlite to use log4j
         System.setProperty("com.j256.ormlite.logger.type", "LOG4J");
 
         // get logger for this class
-        LOG = Logger.getLogger(XoApplication.class);
+        sLog = Logger.getLogger(XoApplication.class);
 
         // announce sdk version
-        LOG.info("system sdk " + Build.VERSION.SDK_INT);
-        LOG.info("system release " + Build.VERSION.RELEASE);
-        LOG.info("system codename " + Build.VERSION.CODENAME);
-        LOG.info("system revision " + Build.VERSION.INCREMENTAL);
-        LOG.info("system brand " + Build.BRAND);
-        LOG.info("system model " + Build.MODEL);
-        LOG.info("system manufacturer " + Build.MANUFACTURER);
-        LOG.info("system device " + Build.DEVICE);
-        LOG.info("system product " + Build.PRODUCT);
-        LOG.info("system type " + Build.TYPE);
+        sLog.info("system sdk " + Build.VERSION.SDK_INT);
+        sLog.info("system release " + Build.VERSION.RELEASE);
+        sLog.info("system codename " + Build.VERSION.CODENAME);
+        sLog.info("system revision " + Build.VERSION.INCREMENTAL);
+        sLog.info("system brand " + Build.BRAND);
+        sLog.info("system model " + Build.MODEL);
+        sLog.info("system manufacturer " + Build.MANUFACTURER);
+        sLog.info("system device " + Build.DEVICE);
+        sLog.info("system product " + Build.PRODUCT);
+        sLog.info("system type " + Build.TYPE);
 
         // install a default exception handler
-        LOG.info("setting up default exception handler");
+        sLog.info("setting up default exception handler");
         mPreviousHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(this);
 
         // log storage roots
-        LOG.info("internal storage at " + INTERNAL_STORAGE.toString());
-        LOG.info("external storage at " + EXTERNAL_STORAGE.toString());
+        sLog.info("internal storage at " + sInternalStorage.toString());
+        sLog.info("external storage at " + sExternalStorage.toString());
 
         // initialize version information
         XoVersion.initialize(this);
-        LOG.info("application build time " + XoVersion.getBuildTime());
-        LOG.info("application branch " + XoVersion.getBranch());
-        LOG.info("application commit " + XoVersion.getCommitId());
-        LOG.info("application describe " + XoVersion.getCommitDescribe());
+        sLog.info("application build time " + XoVersion.getBuildTime());
+        sLog.info("application branch " + XoVersion.getBranch());
+        sLog.info("application commit " + XoVersion.getCommitId());
+        sLog.info("application describe " + XoVersion.getCommitDescribe());
 
         // configure ssl
         XoSsl.initialize(this);
 
         // configure image loader
-        LOG.info("configuring image loader");
-        CONTENT_IMAGE_OPTIONS = new DisplayImageOptions.Builder()
+        sLog.info("configuring image loader");
+        sImageOptions = new DisplayImageOptions.Builder()
                 .cacheOnDisc(false)
                 .cacheInMemory(false)
                 .imageScaleType(ImageScaleType.IN_SAMPLE_INT)
@@ -276,7 +150,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         renameHoccerClassicAttachmentDirectory();
 
         // set up directories
-        LOG.info("setting up directory structure");
+        sLog.info("setting up directory structure");
         ensureDirectory(getAttachmentDirectory());
         ensureDirectory(getBackupDirectory());
         ensureDirectory(getAvatarDirectory());
@@ -287,185 +161,292 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ensureNoMedia(getEncryptedDownloadDirectory());
 
         // create executor
-        LOG.info("creating background executor");
+        sLog.info("creating background executor");
         ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
         tfb.setNameFormat("client-%d");
         tfb.setUncaughtExceptionHandler(this);
-        EXECUTOR = Executors.newScheduledThreadPool(CLIENT_THREADS, tfb.build());
+        sExecutor = Executors.newScheduledThreadPool(CLIENT_THREAD_COUNT, tfb.build());
         ThreadFactoryBuilder tfb2 = new ThreadFactoryBuilder();
         tfb2.setNameFormat("receiving client-%d");
         tfb2.setUncaughtExceptionHandler(this);
-        INCOMING_EXECUTOR = Executors.newScheduledThreadPool(CLIENT_THREADS, tfb2.build());
+        sIncomingExecutor = Executors.newScheduledThreadPool(CLIENT_THREAD_COUNT, tfb2.build());
 
         // create client instance
-        LOG.info("creating client");
-        CLIENT_HOST = new XoAndroidClientHost(this);
-        XoAndroidClient client = new XoAndroidClient(CLIENT_HOST, CONFIGURATION);
+        sLog.info("creating client");
+        sClientHost = new XoAndroidClientHost(this);
+        XoAndroidClient client = new XoAndroidClient(sClientHost, sConfiguration);
         client.setAvatarDirectory(getAvatarDirectory().toString());
         client.setAttachmentDirectory(getAttachmentDirectory().toString());
         client.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
-        CLIENT = client;
+        sClient = client;
 
         // add srp secret change listener
         client.registerStateListener(new SrpChangeListener(this));
 
         // create sound pool instance
-        SOUND_POOL = new XoSoundPool(this);
+        sSoundPool = new XoSoundPool(this);
 
-        ENVIRONMENT_UPDATER = new EnvironmentUpdater(this, CLIENT);
+        sEnvironmentUpdater = new EnvironmentUpdater(this, sClient);
 
-        StartupTasks.initialize(this);
-        StartupTasks.executeRegisteredTasks();
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        sStartupTasks = new StartupTasks(this);
+        sStartupTasks.executeRegisteredTasks();
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
 
-        LOG.info("deactivating client");
-        if(CLIENT != null) {
-            CLIENT.deactivateNow();
-            CLIENT = null;
+        sLog.info("deactivating client");
+        if (sClient != null) {
+            sClient.deactivateNow();
+            sClient = null;
         }
 
-        LOG.info("removing uncaught exception handler");
-        if(mPreviousHandler != null) {
+        sLog.info("removing uncaught exception handler");
+        if (mPreviousHandler != null) {
             Thread.setDefaultUncaughtExceptionHandler(mPreviousHandler);
             mPreviousHandler = null;
         }
 
-        LOG.info("shutting down executor");
-        if(EXECUTOR != null) {
-            EXECUTOR.shutdownNow();
-            EXECUTOR = null;
+        sLog.info("shutting down executor");
+        if (sExecutor != null) {
+            sExecutor.shutdownNow();
+            sExecutor = null;
         }
     }
 
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        LOG.warn("Received onTrimMemory(" + level + ").");
+        sLog.warn("Received onTrimMemory(" + level + ").");
     }
 
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
-        LOG.error("uncaught exception on thread " + thread.getName(), ex);
-        if(mPreviousHandler != null) {
+        sLog.error("uncaught exception on thread " + thread.getName(), ex);
+        if (mPreviousHandler != null) {
             mPreviousHandler.uncaughtException(thread, ex);
         }
     }
 
     public static void ensureDirectory(File directory) {
-        if(!directory.exists()) {
-            LOG.info("creating directory " + directory.toString());
+        if (!directory.exists()) {
+            sLog.info("creating directory " + directory.toString());
             if (!directory.mkdirs()) {
-                LOG.info("Error creating directory " + directory.toString());
+                sLog.info("Error creating directory " + directory.toString());
             }
         }
     }
 
     public static void ensureNoMedia(File directory) {
-        if(directory.exists()) {
+        if (directory.exists()) {
             File noMedia = new File(directory, ".nomedia");
-            if(!noMedia.exists()) {
-                LOG.info("creating noMedia marker " + noMedia.toString());
+            if (!noMedia.exists()) {
+                sLog.info("creating noMedia marker " + noMedia.toString());
                 try {
                     if (!noMedia.createNewFile()) {
-                        LOG.info("Error creating directory " + noMedia.toString());
+                        sLog.info("Error creating directory " + noMedia.toString());
                     }
                 } catch (IOException e) {
-                    LOG.error("error creating " + noMedia.toString(), e);
+                    sLog.error("error creating " + noMedia.toString(), e);
                 }
             }
         }
     }
 
-    public static ScheduledExecutorService getIncomingExecutor() {
-        return INCOMING_EXECUTOR;
+    public static File getAvatarLocation(TalkClientDownload download) {
+        if (download.getState() == TalkClientDownload.State.COMPLETE) {
+            File avatarDir = getAvatarDirectory();
+            ensureDirectory(avatarDir);
+            String dataFile = download.getDataFile();
+            if (dataFile != null) {
+                return new File(avatarDir, dataFile);
+            }
+        }
+        return null;
+    }
+
+    public static File getAvatarLocation(TalkClientUpload upload) {
+        String dataFile = upload.getDataFile();
+        if (dataFile != null) {
+            return new File(dataFile);
+        }
+        return null;
+    }
+
+    public static File getAttachmentLocation(TalkClientDownload download) {
+        if (download.getState() == TalkClientDownload.State.COMPLETE) {
+            File attachmentDir = getAttachmentDirectory();
+            ensureDirectory(attachmentDir);
+            String dataFile = download.getDataFile();
+            if (dataFile != null) {
+                return new File(attachmentDir, dataFile);
+            }
+        }
+        return null;
+    }
+
+    public static File getAttachmentLocation(TalkClientUpload upload) {
+        String dataFile = upload.getDataFile();
+        if (dataFile != null) {
+            return new File(dataFile);
+        }
+        return null;
     }
 
     public static void reinitializeXoClient() {
-        if(CLIENT != null) {
-            CLIENT.initialize(CLIENT_HOST);
+        if (sClient != null) {
+            sClient.initialize(sClientHost);
         }
     }
 
-    /**
-     * Set to true if a nearby session is currently running.
-     */
-    private static boolean hasCurrentRunningNearbySession;
+    public static void registerForNextStart(Class clazz) {
+        sStartupTasks.registerForNextStart(clazz);
+    }
 
     /**
      * Starts a nearby session if not yet started.
-     * Sets hasCurrentRunningNearbySession = true.
+     * Sets sIsNearbySessionRunning = true.
      */
     public static void startNearbySession(boolean force) {
-        if (!ENVIRONMENT_UPDATER.isEnabled() || force) {
+        if (!sEnvironmentUpdater.isEnabled() || force) {
             try {
-                ENVIRONMENT_UPDATER.startEnvironmentTracking();
-                hasCurrentRunningNearbySession = true;
+                sEnvironmentUpdater.startEnvironmentTracking();
+                sIsNearbySessionRunning = true;
             } catch (EnvironmentUpdaterException e) {
-                LOG.error("Error when starting EnvironmentUpdater: ", e);
+                sLog.error("Error when starting EnvironmentUpdater: ", e);
             }
         }
     }
 
     /**
      * Stops current nearby session if running.
-     * Sets hasCurrentRunningNearbySession = true.
      */
     public static void suspendNearbySession() {
-        if (ENVIRONMENT_UPDATER.isEnabled()) {
-            hasCurrentRunningNearbySession = true;
-            ENVIRONMENT_UPDATER.stopEnvironmentTracking();
+        if (sEnvironmentUpdater.isEnabled()) {
+            sIsNearbySessionRunning = true;
+            sEnvironmentUpdater.stopEnvironmentTracking();
         }
     }
 
     /**
      * Stops current nearby session if running.
-     * Sets hasCurrentRunningNearbySession = false.
      */
     public static void stopNearbySession() {
-        if (hasCurrentRunningNearbySession) {
+        if (sIsNearbySessionRunning) {
             suspendNearbySession();
-            hasCurrentRunningNearbySession = false;
+            sIsNearbySessionRunning = false;
         }
     }
 
     public static void enterBackgroundMode() {
         // set presence to inactive
-        CLIENT.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+        sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
 
         // suspend nearby environment
         suspendNearbySession();
 
-        LOG.info("Entered background mode");
+        sLog.info("Entered background mode");
     }
 
     public static void enterForegroundMode() {
         // set presence to active
-        CLIENT.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+        sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
 
         // wake up suspended nearby session
-        if (hasCurrentRunningNearbySession) {
+        if (sIsNearbySessionRunning) {
             startNearbySession(false);
         }
 
-        LOG.info("Entered foreground mode");
+        sLog.info("Entered foreground mode");
     }
 
     public static void enterBackgroundActiveMode() {
-        LOG.info("Entered background active mode");
+        sLog.info("Entered background active mode");
+    }
+
+    public static ScheduledExecutorService getExecutor() {
+        return sExecutor;
+    }
+
+    public static XoAndroidClient getXoClient() {
+        return sClient;
+    }
+
+    public static XoAndroidClientConfiguration getConfiguration() {
+        return sConfiguration;
+    }
+
+    public static XoSoundPool getXoSoundPool() {
+        return sSoundPool;
+    }
+
+    public static EnvironmentUpdater getEnvironmentUpdater() {
+        return sEnvironmentUpdater;
+    }
+
+    public static File getExternalStorage() {
+        return sExternalStorage;
+    }
+
+    public static Thread.UncaughtExceptionHandler getUncaughtExceptionHandler() {
+        return sUncaughtExceptionHandler;
+    }
+
+    public static DisplayImageOptions getImageOptions() {
+        return sImageOptions;
+    }
+
+    public static File getCacheStorage() {
+        return sInternalCacheStorage;
+    }
+
+    public static File getAttachmentDirectory() {
+        return new File(sExternalStorage, sConfiguration.getAttachmentsDirectory());
+    }
+
+    public static File getBackupDirectory() {
+        return new File(sExternalStorage, sConfiguration.getBackupDirectory());
+    }
+
+    public static File getEncryptedDownloadDirectory() {
+        return new File(sInternalStorage, DOWNLOADS_DIRECTORY);
+    }
+
+    public static File getGeneratedDirectory() {
+        return new File(sInternalStorage, GENERATED_DIRECTORY);
+    }
+
+    public static File getAvatarDirectory() {
+        return new File(sExternalStorage, sConfiguration.getAvatarsDirectory());
+    }
+
+    public static File getThumbnailDirectory() {
+        return new File(sInternalStorage, THUMBNAILS_DIRECTORY);
+    }
+
+    public static String getAppPackageName() {
+        return sPackageName;
+    }
+
+    public static ScheduledExecutorService getIncomingExecutor() {
+        return sIncomingExecutor;
     }
 
     private static void renameHoccerClassicAttachmentDirectory() {
 
-        if (Arrays.asList(EXTERNAL_STORAGE.list()).contains(HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY)) {
+        if (Arrays.asList(sExternalStorage.list()).contains(HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY)) {
 
-            File classicDir = new File(EXTERNAL_STORAGE, HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY);
+            File classicDir = new File(sExternalStorage, HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY);
 
             if (classicDir.exists()) {
-                File tempDir = new File(EXTERNAL_STORAGE, "_" + HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY);
+                File tempDir = new File(sExternalStorage, "_" + HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY);
                 classicDir.renameTo(tempDir);
                 tempDir.renameTo(getAttachmentDirectory());
             }

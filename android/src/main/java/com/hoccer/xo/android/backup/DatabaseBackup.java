@@ -1,8 +1,9 @@
 package com.hoccer.xo.android.backup;
 
 import android.os.Parcel;
-import android.os.Parcelable;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.task.DeleteAvatarsTask;
+import com.hoccer.xo.android.task.DeleteMissingTransfersTask;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -36,6 +37,8 @@ public class DatabaseBackup extends Backup {
     public void restore(String password) throws Exception {
         File databaseTarget = new File(DB_PATH_NAME);
         new DatabaseRestoreOperation(mBackupFile, databaseTarget, password).invoke();
+
+        registerStartupTasks();
     }
 
     @Nullable
@@ -75,5 +78,10 @@ public class DatabaseBackup extends Backup {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mBackupFile.getAbsolutePath());
         dest.writeParcelable(mMetadata, flags);
+    }
+
+    private static void registerStartupTasks() {
+        XoApplication.registerForNextStart(DeleteAvatarsTask.class);
+        XoApplication.registerForNextStart(DeleteMissingTransfersTask.class);
     }
 }
