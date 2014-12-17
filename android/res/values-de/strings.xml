@@ -363,11 +363,14 @@
     <string name="restore_backup_in_progress">Wiederherstellung ...</string>
     <string name="restore_backup_success">Sicherung erfolgreich eingepielt.</string>
     <string name="restore_backup_failed">Fehler bei deim einspielen der Sicherung.</string>
-    <string name="create_backup">Sicherung erstellen</string>
+    <string name="create_backup">Backup erstellen</string>
     <string name="create_backup_in_progress">Erstelle Sicherung ...</string>
     <string name="create_backup_success">Sicherung erfolgreich erstellt.</string>
     <string name="create_backup_failed">Fehler bei der Datensicherung.</string>
     <string name="dialog_backup_title">Erstelle backup</string>
+    <string name="create_backup_dialog_message">Backup speichern unter %1$s.\nWeitere Infos unter FAQ.</string>
+    <string name="create_backup_include_attachments">Auch Anhänge sichern (hoher Verbrauch von Speicher, Batterie &amp; Zeit)</string>
+    <string name="create_backup_dont_forget_password">Falls du dein Password vergisst kann das Backup nicht wiederhergestellt werden.</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

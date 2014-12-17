@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.backup;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.*;
 import android.os.IBinder;
 import android.preference.Preference;
@@ -21,19 +22,16 @@ import static com.hoccer.xo.android.backup.BackupAndRestoreService.BackupAction;
 import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.BACKUP;
 import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.RESTORE;
 
-public class BackupController {
+public class BackupController implements CreateBackupDialogFragment.CreateBackupDialogListener {
 
     private final Activity mActivity;
     private final BackupPreference mCreateBackupPreference;
     private final BackupPreference mRestoreBackupPreference;
 
-    private ServiceConnection mServiceConnection;
     private BackupAndRestoreService mBackupService;
-    private BroadcastReceiver mBroadcastReceiver;
+    private final ServiceConnection mServiceConnection;
+    private final BroadcastReceiver mBroadcastReceiver;
 
-    public interface OnCancelListener {
-        public void onCancel();
-    }
 
     public BackupController(Activity activity, BackupPreference createBackupPreference, BackupPreference restoreBackupPreference) {
         mActivity = activity;
@@ -142,17 +140,9 @@ public class BackupController {
     }
 
     private void showCreateBackupDialog() {
-        XoDialogs.showInputPasswordDialog("BackupDialog",
-                R.string.dialog_backup_title,
-                mActivity,
-                new XoDialogs.OnTextSubmittedListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id, String password) {
-                        createBackup(password, BackupType.COMPLETE);
-                        handleBackupInProgress();
-                    }
-                }
-        );
+        CreateBackupDialogFragment createBackupDialog = new CreateBackupDialogFragment();
+        createBackupDialog.setListener(this);
+        createBackupDialog.show(mActivity.getFragmentManager(), "missiles");
     }
 
     private void createBackup(final String password, BackupType type) {
@@ -283,5 +273,15 @@ public class BackupController {
     private void setRestoreInProgress(boolean inProgress) {
         mCreateBackupPreference.setEnabled(!inProgress);
         mRestoreBackupPreference.setInProgress(inProgress);
+    }
+
+    @Override
+    public void onDialogPositiveClick(String password, boolean includeAttachments) {
+        if (includeAttachments) {
+            createBackup(password, BackupType.COMPLETE);
+        } else {
+            createBackup(password, BackupType.DATABASE);
+        }
+        handleBackupInProgress();
     }
 }
