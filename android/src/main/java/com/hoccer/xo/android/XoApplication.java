@@ -188,12 +188,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         sEnvironmentUpdater = new EnvironmentUpdater(this, sClient);
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
     }
