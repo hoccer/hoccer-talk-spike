@@ -642,6 +642,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             throw new SQLException("cant find record for Delivery: " + delivery.getId());
         }
     }
+
     public void saveClientDownload(TalkClientDownload download) throws SQLException {
         Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
 
@@ -697,7 +698,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
     }
 
-    public void deleteAllAvatarClientDownloads() throws SQLException{
+    public void deleteAllAvatarClientDownloads() throws SQLException {
         DeleteBuilder<TalkClientDownload, Integer> deleteBuilder = mClientDownloads.deleteBuilder();
         deleteBuilder.where()
                 .eq("type", TalkClientDownload.Type.AVATAR);
@@ -978,7 +979,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         saveClientMessage(message);
     }
 
-    private void updateMessageTextForDeletedTransfer(TalkClientMessage message, String textPrefix) throws SQLException {
+    private static void updateMessageTextForDeletedTransfer(TalkClientMessage message, String textPrefix) throws SQLException {
         StringBuilder newText = new StringBuilder(textPrefix);
         String oldText = message.getText();
 
