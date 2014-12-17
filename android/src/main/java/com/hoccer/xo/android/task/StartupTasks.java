@@ -12,31 +12,49 @@ import java.util.Map;
  */
 public class StartupTasks {
 
-    private static final String PREFERENCE_NAMESPACE = "STARTUP_TASKS";
-
     private final static Logger LOG = Logger.getLogger(StartupTasks.class);
 
-    public static void registerForNextStart(Context context, Class clazz) throws IllegalArgumentException {
-        if (!IStartupTask.class.isAssignableFrom(clazz)) {
-            throw new IllegalArgumentException("The provided class does not derive from IStartupTask");
+    private static XoApplication mApplication;
+    private static SharedPreferences mPreferences;
+    private static final String PREFERENCE_NAMESPACE = "STARTUP_TASKS";
+
+
+    public static void initialize(XoApplication application) {
+        if(mApplication != null) {
+            throw new IllegalStateException("StartupTasks already initialized");
         }
 
-        SharedPreferences preferences = context.getSharedPreferences(PREFERENCE_NAMESPACE, Context.MODE_PRIVATE);
-        preferences.edit().putBoolean(clazz.getName(), true).apply();
+        mApplication = application;
+        mPreferences = application.getSharedPreferences(PREFERENCE_NAMESPACE, Context.MODE_PRIVATE);
     }
 
-    public static void runRegisteredTasks(XoApplication application) {
-        SharedPreferences preferences = application.getSharedPreferences(PREFERENCE_NAMESPACE, Context.MODE_PRIVATE);
-        Map<String, ?> preferenceMap = preferences.getAll();
+    /*
+     * Registers the given class to be executed once on next application start.
+     * @param clazz Must implement IStartupTask
+     */
+    public static void registerForNextStart(Class clazz) throws IllegalArgumentException {
+        if (!IStartupTask.class.isAssignableFrom(clazz)) {
+            throw new IllegalArgumentException("The provided class does not implement IStartupTask");
+        }
+
+        mPreferences.edit().putBoolean(clazz.getName(), true).apply();
+    }
+
+    /*
+     * Executes all registered tasks once and unregisters all afterwards.
+     * @note Should be called once at startup.
+     */
+    public static void executeRegisteredTasks() {
+        Map<String, ?> preferenceMap = mPreferences.getAll();
         for (String className : preferenceMap.keySet()) {
             try {
                 IStartupTask task = (IStartupTask) Class.forName(className).newInstance();
-                task.execute(application);
+                task.execute(mApplication);
             } catch (Exception e) {
                 LOG.error("Could not execute startup task '" + className + "'", e);
             }
         }
 
-        preferences.edit().clear().apply();
+        mPreferences.edit().clear().apply();
     }
 }

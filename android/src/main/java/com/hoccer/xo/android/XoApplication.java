@@ -314,7 +314,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
         ENVIRONMENT_UPDATER = new EnvironmentUpdater(this, CLIENT);
 
-        StartupTasks.runRegisteredTasks(this);
+        StartupTasks.initialize(this);
+        StartupTasks.executeRegisteredTasks();
     }
 
     @Override
