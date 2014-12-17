@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.backup;
 
+import android.os.Parcel;
 import com.hoccer.xo.android.XoApplication;
 
 import java.io.File;
@@ -41,4 +42,20 @@ public class CompleteBackup extends DatabaseBackup {
         File attachmentsTargetDir = XoApplication.getAttachmentDirectory();
         new CompleteRestoreOperation(mBackupFile, databaseTarget, attachmentsTargetDir, password).invoke();
     }
+
+    private CompleteBackup(Parcel source) {
+        super(source);
+    }
+
+    public static final Creator<? extends CompleteBackup> CREATOR = new Creator<CompleteBackup>() {
+        @Override
+        public CompleteBackup createFromParcel(Parcel source) {
+            return new CompleteBackup(source);
+        }
+
+        @Override
+        public CompleteBackup[] newArray(int size) {
+            return new CompleteBackup[size];
+        }
+    };
 }
