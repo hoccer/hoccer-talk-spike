@@ -966,17 +966,23 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public void deleteClientUploadAndUpdateMessage(TalkClientUpload upload, String messageTextPrefix) throws SQLException {
         deleteClientUpload(upload);
         TalkClientMessage message = findMessageByUploadId(upload.getClientUploadId());
-        message.setAttachmentUpload(null);
-        updateMessageTextForDeletedTransfer(message, messageTextPrefix);
-        saveClientMessage(message);
+
+        if (message != null) {
+            message.setAttachmentUpload(null);
+            updateMessageTextForDeletedTransfer(message, messageTextPrefix);
+            saveClientMessage(message);
+        }
     }
 
     public void deleteClientDownloadAndUpdateMessage(TalkClientDownload download, String messageTextPrefix) throws SQLException {
         deleteClientDownload(download);
         TalkClientMessage message = findMessageByDownloadId(download.getClientDownloadId());
-        message.setAttachmentDownload(null);
-        updateMessageTextForDeletedTransfer(message, messageTextPrefix);
-        saveClientMessage(message);
+
+        if (message != null) {
+            message.setAttachmentDownload(null);
+            updateMessageTextForDeletedTransfer(message, messageTextPrefix);
+            saveClientMessage(message);
+        }
     }
 
     private static void updateMessageTextForDeletedTransfer(TalkClientMessage message, String textPrefix) throws SQLException {
