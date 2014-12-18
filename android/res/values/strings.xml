@@ -386,10 +386,10 @@
     <string name="create_backup_success">Successfully created backup.</string>
     <string name="create_backup_failed">Failed creating backup.</string>
     <string name="dialog_backup_title">Create backup</string>
-    <string name="create_backup_dialog_message">Save backup now to %1$s.\nFor more information: FAQ</string>
-    <string name="create_backup_include_attachments">Including attachments (High demand of storage, battery &amp; time)</string>
-    <string name="create_backup_dont_forget_password">In case you forget your password, back up cannot be re-stored.
-    </string>
+    <string name="create_backup_dialog_message">Save backup now to %1$s.</string>
+    <string name="create_backup_include_attachments">Including attachments</string>
+    <string name="create_backup_dont_forget_password">In case you forget your password, back up cannot be re-stored.</string>
+    <string name="create_backup_dialog_complete_backup_warning">Caution: High demand of storage, battery &amp; time</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
