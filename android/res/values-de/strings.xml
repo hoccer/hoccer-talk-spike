@@ -356,19 +356,21 @@
     <string name="welcome_hoccer_classic_users">Hoccer hat jetzt eine komplette Messaging Funktion zusätzlich zum direkten Datenaustausch.\nDu kannst wie bisher anonym Daten im \"in der Nähe\" - Modus austauschen oder dich direkt mit deinen Freunden verbinden.</string>
 
     <!-- Backup and Restore -->
-    <string name="dialog_not_enough_disk_space_dialog">Leider ist nicht genügend Speicherplatz vorhanden um die
-        Sicherung wiederherzustellen.
+    <string name="dialog_not_enough_disk_space_dialog">Leider ist nicht genügend Speicherplatz vorhanden. Du brauchst %1$s
+        freien Speicherplatz.
     </string>
     <string name="restore_backup">Backup wiederherstellen</string>
     <string name="restore_backup_in_progress">Wiederherstellung ...</string>
     <string name="restore_backup_success_title">Backup wiederhergestellt</string>
     <string name="restore_backup_success_message">Backup erfolgreich eingepielt.</string>
-    <string name="restore_backup_failed_message">Fehler bei deim einspielen des Backups.</string>
+    <string name="restore_backup_failure_title">Wiederherstellung fehlgeschlagen</string>
+    <string name="restore_backup_failure_message">Fehler bei deim einspielen des Backups.</string>
     <string name="create_backup">Backup erstellen</string>
     <string name="create_backup_in_progress">Erstelle Backup ...</string>
     <string name="create_backup_success_title">Backup erstellt</string>
     <string name="create_backup_success_message">Backup erfolgreich erstellt.</string>
-    <string name="create_backup_failed">Fehler beim Erstellen des Backups.</string>
+    <string name="create_backup_failure_title">Backup fehlgeschlagen</string>
+    <string name="create_backup_failure_message">Fehler beim Erstellen des Backups.</string>
     <string name="dialog_backup_title">Erstelle Backup</string>
     <string name="create_backup_dialog_message">Das Backup wird unter %1$s gespeichert.</string>
     <string name="create_backup_include_attachments">Dateianhänge sichern</string>

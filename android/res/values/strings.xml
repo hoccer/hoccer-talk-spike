@@ -374,19 +374,20 @@
     <string name="welcome_hoccer_classic_users">Hoccer now supports full messaging functions next to nearby data sharing. You can stay anonymous or connect with your friends. Yay.</string>
 
     <!-- Backup and Restore -->
-    <string name="dialog_not_enough_disk_space_dialog">Sorry, not enough free disk space available for restoring
-        backup.
+    <string name="dialog_not_enough_disk_space_dialog">Sorry, not enough free disk space available. You need %1$s free disk space.
     </string>
     <string name="restore_backup">Restore Backup</string>
     <string name="restore_backup_in_progress">Restoring Backup ...</string>
-    <string name="restore_backup_failed_message">Failed restoring backup.</string>
+    <string name="restore_backup_failure_title">Restore failed</string>
+    <string name="restore_backup_failure_message">Failed restoring backup.</string>
     <string name="restore_backup_success_title">Backup restored</string>
     <string name="restore_backup_success_message">Successfully restored backup.</string>
     <string name="create_backup">Create Backup</string>
     <string name="create_backup_in_progress">Creating Backup ...</string>
     <string name="create_backup_success_title">Backup created</string>
     <string name="create_backup_success_message">Successfully created backup.</string>
-    <string name="create_backup_failed">Failed creating backup.</string>
+    <string name="create_backup_failure_title">Backup failed</string>
+    <string name="create_backup_failure_message">Failed creating backup.</string>
     <string name="dialog_backup_title">Create backup</string>
     <string name="create_backup_dialog_message">Save backup now to %1$s.</string>
     <string name="create_backup_include_attachments">Including attachments</string>
