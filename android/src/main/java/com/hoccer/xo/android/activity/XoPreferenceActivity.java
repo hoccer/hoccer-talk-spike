@@ -14,6 +14,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.view.*;
+import android.widget.ListAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
@@ -78,6 +79,7 @@ public class XoPreferenceActivity extends PreferenceActivity
     @Override
     protected void onResume() {
         super.onResume();
+
         checkForCrashesIfEnabled();
         mBackupController.registerAndBind();
     }
@@ -95,12 +97,14 @@ public class XoPreferenceActivity extends PreferenceActivity
         if (intent != null) {
             boolean selectBackupPreferences = intent.getBooleanExtra("select_backup_preferences", false);
             if (selectBackupPreferences) {
-                for (int i = 0; i < getListView().getAdapter().getCount(); i++) {
-                    Preference preference = (Preference) getListView().getAdapter().getItem(i);
-                    if ("backup_category".equals(preference.getKey())) {
-                        getListView().smoothScrollToPosition(i);
-                        getListView().setSelection(i);
-                        break;
+                ListAdapter adapter = getListView().getAdapter();
+                if (adapter != null) {
+                    for (int i = 0; i < adapter.getCount(); i++) {
+                        Preference preference = (Preference) getListView().getAdapter().getItem(i);
+                        if ("backup_category".equals(preference.getKey())) {
+                            getListView().setSelection(i);
+                            break;
+                        }
                     }
                 }
             }
