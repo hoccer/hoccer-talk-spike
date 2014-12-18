@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.backup;
 
 import android.app.Activity;
-import android.app.DialogFragment;
 import android.content.*;
 import android.os.IBinder;
 import android.preference.Preference;
@@ -14,6 +13,7 @@ import com.hoccer.xo.android.service.CancelableHandlerService;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +23,8 @@ import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInPr
 import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.RESTORE;
 
 public class BackupController implements CreateBackupDialogFragment.CreateBackupDialogListener {
+
+    public static final String TIME_PATTERN = "HH:mm";
 
     private final Activity mActivity;
     private final BackupPreference mCreateBackupPreference;
@@ -142,7 +144,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     private void showCreateBackupDialog() {
         CreateBackupDialogFragment createBackupDialog = new CreateBackupDialogFragment();
         createBackupDialog.setListener(this);
-        createBackupDialog.show(mActivity.getFragmentManager(), "missiles");
+        createBackupDialog.show(mActivity.getFragmentManager(), "CreateBackupDialog");
     }
 
     private void createBackup(final String password, BackupType type) {
@@ -156,12 +158,12 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
 
         List<String> items = new ArrayList<String>(backups.size());
         for (Backup backup : backups) {
-            String timestamp = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(backup.getCreationDate());
+            String timestamp = new SimpleDateFormat(getLocalizedDatePattern() + " " + TIME_PATTERN).format(backup.getCreationDate());
             items.add(timestamp + " " + FileUtils.byteCountToDisplaySize(backup.getSize()));
         }
 
         XoDialogs.showSingleChoiceDialog("RestoreDialog",
-                R.string.dialog_import_credentials_title,
+                R.string.restore_choose_backup,
                 items.toArray(new String[items.size()]),
                 mActivity,
                 new XoDialogs.OnSingleSelectionFinishedListener() {
@@ -172,8 +174,8 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
                         Backup backup = backups.get(selectedItem);
                         try {
                             if (BackupFileUtils.isEnoughDiskSpaceAvailable(backup.getFile())) {
-                                XoDialogs.showInputPasswordDialog("ImportBackupPasswordDialog",
-                                        R.string.dialog_import_credentials_title,
+                                XoDialogs.showInputPasswordDialog("RestoreBackupPasswordDialog",
+                                        R.string.restore_backup_enter_password,
                                         mActivity,
                                         new XoDialogs.OnTextSubmittedListener() {
 
@@ -186,7 +188,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
                                 );
                             } else {
                                 XoDialogs.showOkDialog("NotEnoughDiskSpaceAvailableDialog",
-                                        R.string.dialog_import_credentials_title,
+                                        R.string.restore_backup,
                                         R.string.dialog_not_enough_disk_space_dialog, mActivity);
                             }
                         } catch (IOException e) {
@@ -213,12 +215,12 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     }
 
     private void showBackupSuccessDialog(Backup backup) {
-        String date = String.format("Date: %s", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(backup.getCreationDate()));
-        String user = String.format("User: %s", backup.getClientName());
-        String path = String.format("Path: %s", backup.getFile().getAbsolutePath());
-        String size = String.format("Size: %s", FileUtils.byteCountToDisplaySize(backup.getSize()));
+        String date = String.format(mActivity.getString(R.string.date) + ": " + new SimpleDateFormat(getLocalizedDatePattern() + " " + TIME_PATTERN).format(backup.getCreationDate()));
+        String user = String.format(mActivity.getString(R.string.user) + ": " + backup.getClientName());
+        String path = String.format(mActivity.getString(R.string.file) + ": " + backup.getFile().getAbsolutePath());
+        String size = String.format(mActivity.getString(R.string.size) + ": " + FileUtils.byteCountToDisplaySize(backup.getSize()));
         String message = String.format("%s\n%s\n%s\n%s", date, user, path, size);
-        XoDialogs.showOkDialog("BackupCreatedDialog", "Backup created", message, mActivity);
+        XoDialogs.showOkDialog("BackupCreatedDialog", mActivity.getString(R.string.create_backup_success_title), message, mActivity);
     }
 
     private void handleBackupCanceled() {
@@ -250,11 +252,11 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     }
 
     private void showRestoreSuccessDialog(Backup backup) {
-        String date = String.format("Date: %s", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(backup.getCreationDate()));
-        String user = String.format("User: %s", backup.getClientName());
-        String info = "Please restart Hoccer.";
+        String date = String.format(mActivity.getString(R.string.date) + ": " + new SimpleDateFormat(getLocalizedDatePattern() + " " + TIME_PATTERN).format(backup.getCreationDate()));
+        String user = String.format(mActivity.getString(R.string.user) + ": " + backup.getClientName());
+        String info = mActivity.getString(R.string.please_restart_hoccer);
         String message = String.format("%s\n%s\n\n%s", date, user, info);
-        XoDialogs.showOkDialog("BackupRestoredDialog", "Backup restored", message, mActivity);
+        XoDialogs.showOkDialog("BackupRestoredDialog", mActivity.getString(R.string.restore_backup_success_title), message, mActivity);
     }
 
     private void handleRestoreCanceled() {
@@ -283,5 +285,10 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
             createBackup(password, BackupType.DATABASE);
         }
         handleBackupInProgress();
+    }
+
+    private static String getLocalizedDatePattern() {
+        SimpleDateFormat dateFormat = (SimpleDateFormat) DateFormat.getDateInstance();
+        return dateFormat.toLocalizedPattern();
     }
 }

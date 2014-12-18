@@ -129,13 +129,13 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             setOperationInProgress(RESTORE);
             broadcast(ACTION_RESTORE_IN_PROGRESS);
             restoreInForeground(backup, password);
-            triggerNotification(R.string.restore_backup_success);
+            triggerNotification(R.string.restore_backup_success_message);
             broadcast(ACTION_RESTORE_SUCCEEDED, backup);
         } catch (InterruptedException e) {
             broadcast(ACTION_RESTORE_CANCELED);
         } catch (Exception e) {
             broadcast(ACTION_RESTORE_FAILED);
-            triggerNotification(R.string.restore_backup_failed);
+            triggerNotification(R.string.restore_backup_failed_message);
             LOG.error("Restoring " + backup.getFile().getPath() + " failed", e);
         } finally {
             setOperationInProgress(null);
@@ -154,7 +154,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             setOperationInProgress(BACKUP);
             broadcast(ACTION_BACKUP_IN_PROGRESS);
             Backup result = backupInForeground(type, password);
-            triggerNotification(R.string.create_backup_success);
+            triggerNotification(R.string.create_backup_success_message);
             broadcast(ACTION_BACKUP_SUCCEEDED, result);
         } catch (InterruptedException e) {
             broadcast(ACTION_BACKUP_CANCELED);
