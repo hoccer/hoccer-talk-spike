@@ -16,8 +16,6 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 
-import java.io.File;
-
 public class CreateBackupDialogFragment extends DialogFragment {
 
     private AlertDialog mDialog;
@@ -87,7 +85,7 @@ public class CreateBackupDialogFragment extends DialogFragment {
     }
 
     private String getBackupPathInfo() {
-        String path = "sdcard0/" + XoApplication.getAttachmentDirectory().getName() + File.separator + XoApplication.getBackupDirectory().getName();
+        String path = XoApplication.getBackupDirectory().getPath();
         return getString(R.string.create_backup_dialog_message, path);
     }
 
