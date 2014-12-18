@@ -16,10 +16,10 @@ import java.sql.SQLException;
 
 public class DatabaseOperations {
 
-    private static Logger LOG = Logger.getLogger(DatabaseOperations.class);
+    private static final Logger LOG = Logger.getLogger(DatabaseOperations.class);
 
-    private XoClientDatabase mDatabase;
-    private Context mContext;
+    private final XoClientDatabase mDatabase;
+    private final Context mContext;
 
     public DatabaseOperations(XoClientDatabase database, Context context) {
         mDatabase = database;
@@ -34,7 +34,7 @@ public class DatabaseOperations {
                 }
             }
         } catch (SQLException e) {
-            LOG.error("Error while removing missing attachments", e);
+            LOG.error("Error while removing missing transfer", e);
         }
     }
 
@@ -62,10 +62,10 @@ public class DatabaseOperations {
 
     private void removeMissingTransfer(XoTransfer transfer) {
         try {
-            LOG.info("Removing missing attachment " + transfer.getContentDataUrl());
+            LOG.info("Removing missing transfer " + transfer.getContentDataUrl());
             mDatabase.deleteTransferAndUpdateMessage(transfer, mContext.getResources().getString(R.string.deleted_attachment));
         } catch (SQLException e) {
-            LOG.error("Error while removing missing attachment " + transfer.getContentDataUrl(), e);
+            LOG.error("Error while removing missing transfer " + transfer.getContentDataUrl(), e);
         }
     }
 }

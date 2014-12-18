@@ -2,6 +2,7 @@ package com.hoccer.xo.android.backup;
 
 import android.os.Parcel;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.task.DeleteMissingTransfersTask;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,6 +42,8 @@ public class CompleteBackup extends DatabaseBackup {
         File databaseTarget = new File(DB_PATH_NAME);
         File attachmentsTargetDir = XoApplication.getAttachmentDirectory();
         new CompleteRestoreOperation(mBackupFile, databaseTarget, attachmentsTargetDir, password).invoke();
+
+        XoApplication.registerForNextStart(DeleteMissingTransfersTask.class);
     }
 
     private CompleteBackup(Parcel source) {
