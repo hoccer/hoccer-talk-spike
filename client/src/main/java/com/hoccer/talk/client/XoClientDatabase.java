@@ -642,6 +642,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             throw new SQLException("cant find record for Delivery: " + delivery.getId());
         }
     }
+
     public void saveClientDownload(TalkClientDownload download) throws SQLException {
         Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
 
@@ -958,20 +959,26 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     public void deleteClientUploadAndUpdateMessage(TalkClientUpload upload, String messageTextPrefix) throws SQLException {
         deleteClientUpload(upload);
         TalkClientMessage message = findMessageByUploadId(upload.getClientUploadId());
-        message.setAttachmentUpload(null);
-        updateMessageTextForDeletedTransfer(message, messageTextPrefix);
-        saveClientMessage(message);
+
+        if (message != null) {
+            message.setAttachmentUpload(null);
+            updateMessageTextForDeletedTransfer(message, messageTextPrefix);
+            saveClientMessage(message);
+        }
     }
 
     public void deleteClientDownloadAndUpdateMessage(TalkClientDownload download, String messageTextPrefix) throws SQLException {
         deleteClientDownload(download);
         TalkClientMessage message = findMessageByDownloadId(download.getClientDownloadId());
-        message.setAttachmentDownload(null);
-        updateMessageTextForDeletedTransfer(message, messageTextPrefix);
-        saveClientMessage(message);
+
+        if (message != null) {
+            message.setAttachmentDownload(null);
+            updateMessageTextForDeletedTransfer(message, messageTextPrefix);
+            saveClientMessage(message);
+        }
     }
 
-    private void updateMessageTextForDeletedTransfer(TalkClientMessage message, String textPrefix) throws SQLException {
+    private static void updateMessageTextForDeletedTransfer(TalkClientMessage message, String textPrefix) throws SQLException {
         StringBuilder newText = new StringBuilder(textPrefix);
         String oldText = message.getText();
 

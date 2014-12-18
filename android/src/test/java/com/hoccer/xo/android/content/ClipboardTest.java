@@ -41,7 +41,7 @@ public class ClipboardTest {
         assertNull(mClipboard.getContent());
     }
 
-    private SelectedContent createSelectedContentWithData() {
+    private static SelectedContent createSelectedContentWithData() {
         SelectedContent sc = new SelectedContent("hello".getBytes());
         sc.setContentMediaType(ContentMediaType.DATA);
         sc.setFileName("random_content.txt");
