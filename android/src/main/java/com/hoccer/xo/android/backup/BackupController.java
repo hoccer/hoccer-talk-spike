@@ -178,7 +178,6 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
                                         R.string.restore_backup_enter_password,
                                         mActivity,
                                         new XoDialogs.OnTextSubmittedListener() {
-
                                             @Override
                                             public void onClick(DialogInterface dialog, int id, String password) {
                                                 restoreBackup(backups.get(selectedItem), password);
@@ -187,9 +186,11 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
                                         }
                                 );
                             } else {
+                                long size = BackupFileUtils.getUncompressedSize(backup.getFile());
+                                String message = mActivity.getString(R.string.dialog_not_enough_disk_space_dialog,
+                                        FileUtils.byteCountToDisplaySize(size));
                                 XoDialogs.showOkDialog("NotEnoughDiskSpaceAvailableDialog",
-                                        R.string.restore_backup,
-                                        R.string.dialog_not_enough_disk_space_dialog, mActivity);
+                                        mActivity.getString(R.string.restore_backup_failure_title), message, mActivity);
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
