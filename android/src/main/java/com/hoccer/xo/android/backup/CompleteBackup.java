@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.backup;
 
+import android.os.Parcel;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.task.DeleteMissingTransfersTask;
 
@@ -44,4 +45,20 @@ public class CompleteBackup extends DatabaseBackup {
 
         XoApplication.registerForNextStart(DeleteMissingTransfersTask.class);
     }
+
+    private CompleteBackup(Parcel source) {
+        super(source);
+    }
+
+    public static final Creator<? extends CompleteBackup> CREATOR = new Creator<CompleteBackup>() {
+        @Override
+        public CompleteBackup createFromParcel(Parcel source) {
+            return new CompleteBackup(source);
+        }
+
+        @Override
+        public CompleteBackup[] newArray(int size) {
+            return new CompleteBackup[size];
+        }
+    };
 }

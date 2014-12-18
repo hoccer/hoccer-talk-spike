@@ -51,7 +51,7 @@ public class DatabaseBackup extends Backup {
         return mMetadata.getCreationDate();
     }
 
-    private DatabaseBackup(Parcel source) {
+    protected DatabaseBackup(Parcel source) {
         super(new File(source.readString()));
         mMetadata = source.readParcelable(BackupMetadata.class.getClassLoader());
     }

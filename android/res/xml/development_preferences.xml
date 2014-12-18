@@ -115,17 +115,16 @@
     <PreferenceCategory
             android:key="backup_category"
             android:title="Backups">
-        <Preference
-                android:key="preference_chats_backup"
-                android:title="Chats"/>
-        <Preference
-                android:key="preference_complete_backup"
-                android:title="Chats with attachments"
-                android:layout="@layout/preference_create_backup"/>
-        <Preference
-                android:key="preference_import_backup"
-                android:title="Import backup"
-                android:layout="@layout/preference_restore_backup"/>
+        <com.hoccer.xo.android.backup.BackupPreference
+                android:key="@string/preference_key_create_backup"
+                android:layout="@layout/preference_backup"
+                android:title="@string/create_backup"
+                inProgressText="@string/create_backup_in_progress"/>
+        <com.hoccer.xo.android.backup.BackupPreference
+                android:key="@string/preference_key_restore_backup"
+                android:layout="@layout/preference_backup"
+                android:title="@string/restore_backup"
+                inProgressText="@string/restore_backup_in_progress"/>
     </PreferenceCategory>
 
     <PreferenceCategory
