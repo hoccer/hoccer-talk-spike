@@ -1,22 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-            android:id="@+id/menu_group_profile_join"
-            android:title="@string/menu_group_profile_join"
-            android:icon="@drawable/ic_action_enter"
-            android:visible="false"
-            android:showAsAction="always"
-            android:orderInCategory="220"/>
-
-    <item
-            android:id="@+id/menu_group_profile_reject_invitation"
-            android:title="@string/menu_group_profile_reject_invitation"
-            android:icon="@drawable/ic_action_block"
-            android:visible="false"
-            android:showAsAction="always"
-            android:orderInCategory="230"/>
-
-    <item
             android:id="@+id/menu_group_profile_leave"
             android:title="@string/menu_group_profile_leave"
             android:icon="@drawable/ic_action_leave"

@@ -14,6 +14,7 @@ import org.junit.Test;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -160,15 +161,16 @@ public class XoClientDatabaseTest {
     }
 
     private TalkClientContact createGroupContact(TalkClientContact admin, String groupId) throws SQLException {
-        TalkClientContact group = TalkClientContact.createGroupContact();
-        group.setCreatedTimeStamp(new Date());
+        TalkClientContact contact = new TalkClientContact(TalkClientContact.TYPE_GROUP);
+        contact.updateGroupTag(UUID.randomUUID().toString());
+        contact.setCreatedTimeStamp(new Date());
 
         TalkGroupPresence groupPresence = new TalkGroupPresence();
-        groupPresence.setGroupTag(group.getGroupTag());
+        groupPresence.setGroupTag(contact.getGroupTag());
         groupPresence.setGroupId(groupId);
         groupPresence.setGroupName("TestGroup");
         groupPresence.setState(TalkGroupPresence.STATE_EXISTS);
-        group.updateGroupPresence(groupPresence);
+        contact.updateGroupPresence(groupPresence);
 
         TalkGroupMembership membership = new TalkGroupMembership();
         membership.setClientId(admin.getClientId());
@@ -176,13 +178,13 @@ public class XoClientDatabaseTest {
         membership.setState(TalkGroupMembership.STATE_JOINED);
         membership.setMemberKeyId("TestKey");
         membership.setGroupId(groupId);
-        group.updateGroupMembership(membership);
+        contact.updateGroupMembership(membership);
 
         mDatabase.saveGroupMembership(membership);
         mDatabase.saveGroupPresence(groupPresence);
-        mDatabase.saveContact(group);
+        mDatabase.saveContact(contact);
 
-        return group;
+        return contact;
     }
 
     private void addClientContactToGroup(String clientId, String groupId, String state) throws SQLException {

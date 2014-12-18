@@ -41,7 +41,7 @@ public class ITGroupJoin extends IntegrationTest {
         XoClient invitedClient = clients.get("client2");
 
         // create group
-        String groupId = TestHelper.createGroup(invitingClient);
+        String groupId = TestHelper.createGroup(invitingClient, "group");
 
         // invite to group
         TestHelper.inviteToGroup(invitingClient, invitedClient, groupId);
@@ -56,7 +56,7 @@ public class ITGroupJoin extends IntegrationTest {
         XoClient invitedClient = clients.get("client2");
 
         // create group
-        String groupId = TestHelper.createGroup(invitingClient);
+        String groupId = TestHelper.createGroup(invitingClient, "group");
 
         // invite to group
         TestHelper.inviteToGroup(invitingClient, invitedClient, groupId);

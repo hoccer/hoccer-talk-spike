@@ -55,12 +55,6 @@ public class ContactsMenuItemActionProvider extends ActionProvider implements IX
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {}
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {}
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {}
 
     @Override

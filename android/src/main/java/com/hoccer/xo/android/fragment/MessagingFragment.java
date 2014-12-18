@@ -8,20 +8,20 @@ import android.view.*;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
+import com.hoccer.xo.android.activity.SingleProfileActivity;
 import com.hoccer.xo.android.adapter.ChatAdapter;
-import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.base.XoAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionInterpreter;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import org.apache.log4j.Logger;
 
@@ -120,10 +120,7 @@ public class MessagingFragment extends XoListFragment
     @Override
     public void onResume() {
         super.onResume();
-
-        if (mContact.isDeleted()) {
-            getActivity().finish();
-        }
+        finishIfContactIsNoLongerRelated(mContact);
 
         setHasOptionsMenu(true);
         mMessageListView = getListView();
@@ -207,16 +204,19 @@ public class MessagingFragment extends XoListFragment
     public boolean onOptionsItemSelected(MenuItem item) {
         LOG.debug("onOptionsItemSelected(" + item.toString() + ")");
 
-        IProfileFragmentManager profileFragmentManager = (IProfileFragmentManager) getActivity();
         switch (item.getItemId()) {
             case R.id.menu_profile_single:
-                if (mContact != null && profileFragmentManager != null) {
-                    profileFragmentManager.showSingleProfileFragment(mContact.getClientContactId());
+                if (mContact != null) {
+                    startActivity(new Intent(getActivity(), SingleProfileActivity.class)
+                            .setAction(SingleProfileActivity.ACTION_SHOW)
+                            .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
                 }
                 break;
             case R.id.menu_profile_group:
-                if (mContact != null && profileFragmentManager != null) {
-                    profileFragmentManager.showGroupProfileFragment(mContact.getClientContactId(), false, true);
+                if (mContact != null) {
+                    startActivity(new Intent(getActivity(), GroupProfileActivity.class)
+                            .setAction(GroupProfileActivity.ACTION_SHOW)
+                            .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, mContact.getClientContactId()));
                 }
                 break;
             case R.id.menu_audio_attachment_list:
@@ -225,8 +225,10 @@ public class MessagingFragment extends XoListFragment
                 }
                 break;
             case R.id.menu_group_profile_create_permanent_group:
-                if (mContact != null && profileFragmentManager != null) {
-                    profileFragmentManager.showGroupProfileCreationFragment(mContact.getClientContactId(), true);
+                if (mContact != null) {
+                    startActivity(new Intent(getActivity(), GroupProfileActivity.class)
+                            .setAction(GroupProfileActivity.ACTION_CLONE)
+                            .putExtra(GroupProfileActivity.EXTRA_GROUP_ID, mContact.getGroupId()));
                 }
                 break;
             default:
@@ -270,25 +272,15 @@ public class MessagingFragment extends XoListFragment
     }
 
     @Override
-    public void onContactAdded(TalkClientContact contact) {
-        // do nothing
-    }
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        if (mContact != null && mContact.getClientContactId() == contact.getClientContactId()) {
-            getActivity().finish();
-        }
-    }
-
-    @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
         // do nothing
     }
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {
-        // do nothing
+        if (isCurrentContact(contact)) {
+            finishIfContactIsNoLongerRelated(contact);
+        }
     }
 
     @Override
@@ -298,13 +290,20 @@ public class MessagingFragment extends XoListFragment
 
     @Override
     public void onGroupMembershipChanged(TalkClientContact contact) {
-        // do nothing
+        if (isCurrentContact(contact)) {
+            finishIfContactIsNoLongerRelated(contact);
+        }
     }
 
-    public void applicationWillEnterBackground() {
-        if (mContact.isGroup() && mContact.getGroupPresence().isTypeNearby()) {
-            getActivity().finish();
-        } else if (mContact.isClient() && mContact.isNearby()) {
+    private boolean isCurrentContact(TalkClientContact contact) {
+        return mContact.getClientContactId() == contact.getClientContactId();
+    }
+
+    private void finishIfContactIsNoLongerRelated(TalkClientContact contact) {
+        boolean clientNoLongerRelated = contact.isClient() && !contact.isClientRelated() && !contact.isNearby();
+        boolean groupNoLongerRelated = contact.isGroupNoLongerJoined();
+
+        if (clientNoLongerRelated || groupNoLongerRelated) {
             getActivity().finish();
         }
     }

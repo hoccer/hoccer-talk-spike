@@ -10,26 +10,22 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.base.IMessagingFragmentManager;
-import com.hoccer.xo.android.base.IProfileFragmentManager;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.fragment.*;
+import com.hoccer.xo.android.fragment.MessagingFragment;
+import com.hoccer.xo.android.fragment.NearbyArchiveFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 
 
-public class MessagingActivity extends ComposableActivity implements IMessagingFragmentManager, IProfileFragmentManager {
+public class MessagingActivity extends ComposableActivity {
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
 
     ActionBar mActionBar;
-
-    Fragment mCurrentFragment;
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -126,96 +122,23 @@ public class MessagingActivity extends ComposableActivity implements IMessagingF
         clipboardText.setPrimaryClip(clip);
     }
 
-    public void setActionBarText(TalkClientContact contact) {
-        String title;
-        if (contact.isGroup() && contact.getGroupPresence().isTypeNearby()) {
-            title = getResources().getString(R.string.nearby_text);
-        } else {
-            title = contact.getNickname();
-        }
-        mActionBar.setTitle(title);
-    }
-
-    @Override
-    protected void applicationWillEnterBackground() {
-        super.applicationWillEnterBackground();
-        if (mCurrentFragment instanceof MessagingFragment) {
-            ((MessagingFragment) mCurrentFragment).applicationWillEnterBackground();
-        }
-    }
-
-    @Override
-    public void showMessageFragment(int contactId) {
-        mCurrentFragment = new MessagingFragment();
+    private void showMessageFragment(int contactId) {
+        Fragment messagingFragment = new MessagingFragment();
 
         Bundle bundle = new Bundle();
         bundle.putInt(MessagingFragment.ARG_CLIENT_CONTACT_ID, contactId);
-        mCurrentFragment.setArguments(bundle);
+        messagingFragment.setArguments(bundle);
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, messagingFragment);
         fragmentTransaction.commit();
     }
 
-    @Override
-    public void showNearbyArchiveFragment() {
-        mCurrentFragment = new NearbyArchiveFragment();
+    private void showNearbyArchiveFragment() {
+        Fragment nearbyArchiveFragment = new NearbyArchiveFragment();
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
-        fragmentTransaction.commit();
-    }
-
-    @Override
-    public void showSingleProfileFragment(int clientContactId) {
-        mCurrentFragment = new SingleProfileFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(SingleProfileFragment.ARG_CLIENT_CONTACT_ID, clientContactId);
-        mCurrentFragment.setArguments(bundle);
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
-    }
-
-    @Override
-    public void showGroupProfileFragment(int groupContactId, boolean startInActionMode, boolean addToBackStack) {
-        mCurrentFragment = new GroupProfileFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
-        if (startInActionMode) {
-            bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, true);
-        } else {
-            bundle.putBoolean(GroupProfileFragment.ARG_START_IN_ACTION_MODE, false);
-        }
-        mCurrentFragment.setArguments(bundle);
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
-
-        if (addToBackStack) {
-            fragmentTransaction.addToBackStack(null);
-        }
-        fragmentTransaction.commit();
-    }
-
-    @Override
-    public void showGroupProfileCreationFragment(int groupContactId, boolean cloneProfile) {
-        mCurrentFragment = new GroupProfileCreationFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(GroupProfileCreationFragment.ARG_CLIENT_CONTACT_ID, groupContactId);
-        if (cloneProfile) {
-            bundle.putBoolean(GroupProfileCreationFragment.ARG_CLONE_CURRENT_GROUP, true);
-        }
-        mCurrentFragment.setArguments(bundle);
-
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, mCurrentFragment);
-        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.replace(R.id.fl_messaging_fragment_container, nearbyArchiveFragment);
         fragmentTransaction.commit();
     }
 }

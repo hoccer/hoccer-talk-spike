@@ -5,18 +5,28 @@ import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.talk.model.TalkGroupMembership;
+import com.hoccer.talk.model.TalkGroupPresence;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.stmt.DeleteBuilder;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.Transformer;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
 
 public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoClientDatabaseBackend {
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
-    private static final int DATABASE_VERSION = 22;
+    private static final int DATABASE_VERSION = 23;
 
     private static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
@@ -61,8 +71,66 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
                 db.execSQL("ALTER TABLE 'group' RENAME TO 'groupPresence'");
                 db.execSQL("ALTER TABLE 'groupMember' RENAME TO 'groupMembership'");
             }
+
+            if (oldVersion < 23) {
+                deleteDuplicateGroupContacts();
+
+                Collection<String> deletedGroupIds = getDeletedGroupIds();
+                deleteGroupMembershipsForDeletedGroups(deletedGroupIds);
+                deleteGroupContactsForDeletedGroups(deletedGroupIds);
+                deleteGroupPresencesForDeletedGroups(deletedGroupIds);
+             }
         } catch (android.database.SQLException e) {
-            LOG.error("sql error upgrading database", e);
+            LOG.error("Android SQL error upgrading database", e);
+        } catch (SQLException e) {
+            LOG.error("OrmLite SQL error upgrading database", e);
         }
+    }
+
+    private void deleteDuplicateGroupContacts() throws SQLException {
+        Dao<TalkClientContact, ?> contacts = getDao(TalkClientContact.class);
+        DeleteBuilder<TalkClientContact, ?> deleteContacts = contacts.deleteBuilder();
+
+        deleteContacts.where()
+                .eq("contactType", TalkClientContact.TYPE_GROUP)
+                .and()
+                .isNull("groupTag")
+                .and()
+                .isNull("groupPresence_id");
+
+        deleteContacts.delete();
+    }
+
+    private Collection<String> getDeletedGroupIds() throws SQLException {
+        Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
+        List<TalkGroupPresence> deletedGroupPresences = groupPresences.queryForEq("state", TalkGroupPresence.STATE_DELETED);
+
+        return CollectionUtils.collect(deletedGroupPresences, new Transformer<TalkGroupPresence, String>() {
+            @Override
+            public String transform(TalkGroupPresence groupPresence) {
+                return groupPresence.getGroupId();
+            }
+        });
+    }
+
+    private void deleteGroupMembershipsForDeletedGroups(Collection<String> deletedGroupIds) throws SQLException {
+        Dao<TalkGroupMembership, ?> memberships = getDao(TalkGroupMembership.class);
+        DeleteBuilder<TalkGroupMembership, ?> deleteMemberships = memberships.deleteBuilder();
+        deleteMemberships.where().in("groupId", deletedGroupIds);
+        deleteMemberships.delete();
+    }
+
+    private void deleteGroupContactsForDeletedGroups(Collection<String> deletedGroupIds) throws SQLException {
+        Dao<TalkClientContact, ?> contacts = getDao(TalkClientContact.class);
+        DeleteBuilder<TalkClientContact, ?> deleteContacts = contacts.deleteBuilder();
+        deleteContacts.where().in("groupId", deletedGroupIds);
+        deleteContacts.delete();
+    }
+
+    private void deleteGroupPresencesForDeletedGroups(Collection<String> deletedGroupIds) throws SQLException {
+        Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
+        DeleteBuilder<TalkGroupPresence, ?> deleteGroupPresences = groupPresences.deleteBuilder();
+        deleteGroupPresences.where().in("groupId", deletedGroupIds);
+        deleteGroupPresences.delete();
     }
 }

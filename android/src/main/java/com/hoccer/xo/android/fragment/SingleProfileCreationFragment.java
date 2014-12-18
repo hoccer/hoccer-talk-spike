@@ -147,20 +147,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         if (mActionMode == null) {
             mActionMode = getActivity().startActionMode(this);
         }
-        finishActivityIfContactDeleted();
-
         updateView();
-    }
-
-    public void finishActivityIfContactDeleted() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mContact.isDeleted()) {
-                    getActivity().finish();
-                }
-            }
-        });
     }
 
     private void updateView() {
@@ -249,14 +236,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         getXoClient().setClientString(newUserName, "happy");
 
         getActivity().finish();
-    }
-
-    @Override
-    public void onContactAdded(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {
     }
 
     @Override
