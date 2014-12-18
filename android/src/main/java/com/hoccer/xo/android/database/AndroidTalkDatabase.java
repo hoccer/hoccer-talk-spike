@@ -13,9 +13,14 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.Transformer;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
 
 public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoClientDatabaseBackend {
 
@@ -69,9 +74,11 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
             if (oldVersion < 23) {
                 deleteDuplicateGroupContacts();
-                deleteGroupMembershipsForDeletedGroups();
-                deleteGroupContactsForDeletedGroups();
-                deleteGroupPresencesForDeletedGroups();
+
+                Collection<String> deletedGroupIds = getDeletedGroupIds();
+                deleteGroupMembershipsForDeletedGroups(deletedGroupIds);
+                deleteGroupContactsForDeletedGroups(deletedGroupIds);
+                deleteGroupPresencesForDeletedGroups(deletedGroupIds);
              }
         } catch (android.database.SQLException e) {
             LOG.error("Android SQL error upgrading database", e);
@@ -94,37 +101,36 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         deleteContacts.delete();
     }
 
-    private void deleteGroupMembershipsForDeletedGroups() throws SQLException {
+    private Collection<String> getDeletedGroupIds() throws SQLException {
+        Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
+        List<TalkGroupPresence> deletedGroupPresences = groupPresences.queryForEq("state", TalkGroupPresence.STATE_DELETED);
+
+        return CollectionUtils.collect(deletedGroupPresences, new Transformer<TalkGroupPresence, String>() {
+            @Override
+            public String transform(TalkGroupPresence groupPresence) {
+                return groupPresence.getGroupId();
+            }
+        });
+    }
+
+    private void deleteGroupMembershipsForDeletedGroups(Collection<String> deletedGroupIds) throws SQLException {
         Dao<TalkGroupMembership, ?> memberships = getDao(TalkGroupMembership.class);
         DeleteBuilder<TalkGroupMembership, ?> deleteMemberships = memberships.deleteBuilder();
-
-        Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
-        QueryBuilder<TalkGroupPresence, ?> deletedGroupIds = groupPresences.queryBuilder();
-        deletedGroupIds.selectColumns("groupId").where()
-                .eq("state", TalkGroupPresence.STATE_DELETED);
-
         deleteMemberships.where().in("groupId", deletedGroupIds);
         deleteMemberships.delete();
     }
 
-    private void deleteGroupContactsForDeletedGroups() throws SQLException {
+    private void deleteGroupContactsForDeletedGroups(Collection<String> deletedGroupIds) throws SQLException {
         Dao<TalkClientContact, ?> contacts = getDao(TalkClientContact.class);
         DeleteBuilder<TalkClientContact, ?> deleteContacts = contacts.deleteBuilder();
-
-        Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
-        QueryBuilder<TalkGroupPresence, ?> deletedGroupIds = groupPresences.queryBuilder();
-        deletedGroupIds.selectColumns("groupId").where()
-                .eq("state", TalkGroupPresence.STATE_DELETED);
-
         deleteContacts.where().in("groupId", deletedGroupIds);
         deleteContacts.delete();
     }
 
-    private void deleteGroupPresencesForDeletedGroups() throws SQLException {
+    private void deleteGroupPresencesForDeletedGroups(Collection<String> deletedGroupIds) throws SQLException {
         Dao<TalkGroupPresence, ?> groupPresences = getDao(TalkGroupPresence.class);
         DeleteBuilder<TalkGroupPresence, ?> deleteGroupPresences = groupPresences.deleteBuilder();
-
-        deleteGroupPresences.where().eq("state", TalkGroupPresence.STATE_DELETED);
+        deleteGroupPresences.where().in("groupId", deletedGroupIds);
         deleteGroupPresences.delete();
     }
 }

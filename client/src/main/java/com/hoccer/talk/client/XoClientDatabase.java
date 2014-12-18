@@ -249,11 +249,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findContactsInGroup(String groupId) throws SQLException {
-        List<TalkGroupMembership> memberships = mGroupMemberships.queryBuilder()
-                .selectColumns("clientId").where()
-                .eq("groupId", groupId)
-                .query();
-
+        List<TalkGroupMembership> memberships = mGroupMemberships.queryForEq("groupId", groupId);
         return getContactsForMembers(memberships);
     }
 
@@ -275,8 +271,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<TalkClientContact> findContactsInGroupByRole(String groupId, String role) throws SQLException {
-        List<TalkGroupMembership> memberships = mGroupMemberships.queryBuilder()
-                .selectColumns("clientId").where()
+        List<TalkGroupMembership> memberships = mGroupMemberships.queryBuilder().where()
                 .eq("groupId", groupId)
                 .and()
                 .eq("role", role)
