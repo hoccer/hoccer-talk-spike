@@ -2,7 +2,6 @@ package com.hoccer.xo.android.task;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
 
 import java.util.Map;
@@ -16,12 +15,12 @@ public class StartupTasks {
 
     private static final String PREFERENCE_NAMESPACE = "STARTUP_TASKS";
 
-    private final XoApplication mApplication;
+    private final Context mContext;
     private final SharedPreferences mPreferences;
 
-    public StartupTasks(XoApplication application) {
-        mApplication = application;
-        mPreferences = application.getSharedPreferences(PREFERENCE_NAMESPACE, Context.MODE_PRIVATE);
+    public StartupTasks(Context context) {
+        mContext = context;
+        mPreferences = context.getSharedPreferences(PREFERENCE_NAMESPACE, Context.MODE_PRIVATE);
     }
 
     /*
@@ -42,12 +41,12 @@ public class StartupTasks {
      */
     public void executeRegisteredTasks() {
         Map<String, ?> preferenceMap = mPreferences.getAll();
-        if(!preferenceMap.isEmpty()) {
+        if (!preferenceMap.isEmpty()) {
             for (String className : preferenceMap.keySet()) {
                 try {
-                    LOG.debug("Excuting StartupTask '" + className + "'");
+                    LOG.info("Excuting StartupTask '" + className + "'");
                     IStartupTask task = (IStartupTask) Class.forName(className).newInstance();
-                    task.execute(mApplication);
+                    task.execute(mContext);
                 } catch (Exception e) {
                     LOG.error("Could not execute startup task '" + className + "'", e);
                 }
