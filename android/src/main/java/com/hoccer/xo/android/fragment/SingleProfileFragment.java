@@ -521,7 +521,7 @@ public class SingleProfileFragment extends ProfileFragment
         LOG.debug("refreshContact()");
         mContact = newContact;
 
-        if (!mContact.isClientRelated() && !mContact.isNearby()) {
+        if (!mContact.isClientRelated() && !mContact.isNearby() && !mContact.isSelf()) {
             getActivity().finish();
         }
 
