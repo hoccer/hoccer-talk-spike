@@ -372,7 +372,7 @@
     <string name="dialog_backup_title">Erstelle Backup</string>
     <string name="create_backup_dialog_message">Das Backup wird unter %1$s gespeichert.</string>
     <string name="create_backup_include_attachments">Dateianhänge sichern</string>
-    <string name="create_backup_dont_forget_password">Falls du dein Password vergisst kann das Backup nicht wiederhergestellt werden.</string>
+    <string name="create_backup_dont_forget_password">Falls du dein Passwort vergisst kann das Backup nicht wiederhergestellt werden.</string>
     <string name="create_backup_dialog_complete_backup_warning">Achtung: Hoher Verbrauch von Speicher, Batterie &amp; Zeit</string>
     <string name="restore_choose_backup">Backup auswählen</string>
     <string name="restore_backup_enter_password">Passwort eingeben</string>
