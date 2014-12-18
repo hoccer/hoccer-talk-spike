@@ -1,6 +1,8 @@
 package com.hoccer.xo.android.backup;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.*;
 import android.os.IBinder;
 import android.preference.Preference;
@@ -10,6 +12,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.service.CancelableHandlerService;
+import com.hoccer.xo.android.service.NotificationId;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -213,6 +216,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
         setBackupInProgress(false);
         Backup backup = intent.getParcelableExtra(BackupAndRestoreService.EXTRA_BACKUP);
         showBackupSuccessDialog(backup);
+        removeNotification();
     }
 
     private void showBackupSuccessDialog(Backup backup) {
@@ -231,6 +235,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     private void handleBackupFailed() {
         setBackupInProgress(false);
         showBackupFailedDialog();
+        removeNotification();
     }
 
     private void showBackupFailedDialog() {
@@ -250,6 +255,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
         setRestoreInProgress(false);
         Backup backup = intent.getParcelableExtra(BackupAndRestoreService.EXTRA_BACKUP);
         showRestoreSuccessDialog(backup);
+        removeNotification();
     }
 
     private void showRestoreSuccessDialog(Backup backup) {
@@ -267,6 +273,12 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     private void handleRestoreFailed() {
         setRestoreInProgress(false);
         showRestoreFailedDialog();
+        removeNotification();
+    }
+
+    private void removeNotification() {
+        NotificationManager notificationManager = (NotificationManager) mActivity.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(NotificationId.BACKUP_RESTORE);
     }
 
     private void showRestoreFailedDialog() {
