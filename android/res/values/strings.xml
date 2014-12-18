@@ -379,17 +379,26 @@
     </string>
     <string name="restore_backup">Restore Backup</string>
     <string name="restore_backup_in_progress">Restoring Backup ...</string>
-    <string name="restore_backup_success">Successfully restored backup.</string>
-    <string name="restore_backup_failed">Failed restoring backup.</string>
+    <string name="restore_backup_failed_message">Failed restoring backup.</string>
+    <string name="restore_backup_success_title">Backup restored</string>
+    <string name="restore_backup_success_message">Successfully restored backup.</string>
     <string name="create_backup">Create Backup</string>
     <string name="create_backup_in_progress">Creating Backup ...</string>
-    <string name="create_backup_success">Successfully created backup.</string>
+    <string name="create_backup_success_title">Backup created</string>
+    <string name="create_backup_success_message">Successfully created backup.</string>
     <string name="create_backup_failed">Failed creating backup.</string>
     <string name="dialog_backup_title">Create backup</string>
     <string name="create_backup_dialog_message">Save backup now to %1$s.</string>
     <string name="create_backup_include_attachments">Including attachments</string>
     <string name="create_backup_dont_forget_password">In case you forget your password, back up cannot be re-stored.</string>
     <string name="create_backup_dialog_complete_backup_warning">Caution: High demand of storage, battery &amp; time</string>
+    <string name="restore_choose_backup">Choose backup</string>
+    <string name="restore_backup_enter_password">Enter password</string>
+    <string name="date">Date</string>
+    <string name="user">User</string>
+    <string name="file">File</string>
+    <string name="size">File size</string>
+    <string name="please_restart_hoccer">Please restart Hoccer.</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>
