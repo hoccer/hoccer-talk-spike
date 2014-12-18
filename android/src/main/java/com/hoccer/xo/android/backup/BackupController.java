@@ -234,7 +234,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     }
 
     private void showBackupFailedDialog() {
-        XoDialogs.showOkDialog("BackupFailedDialog", "Creating backup failed.", "Creating backup failed.", mActivity);
+        XoDialogs.showOkDialog("BackupFailedDialog", mActivity.getString(R.string.create_backup_failure_title), mActivity.getString(R.string.create_backup_failure_message), mActivity);
     }
 
     private void setBackupInProgress(boolean inProgress) {
@@ -270,7 +270,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     }
 
     private void showRestoreFailedDialog() {
-        XoDialogs.showOkDialog("RestoreFailedDialog", "Restoring backup failed.", "Restoring backup failed.", mActivity);
+        XoDialogs.showOkDialog("RestoreFailedDialog", mActivity.getString(R.string.restore_backup_failure_title), mActivity.getString(R.string.restore_backup_failure_message), mActivity);
     }
 
     private void setRestoreInProgress(boolean inProgress) {
