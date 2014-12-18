@@ -71,8 +71,6 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     private LocalBroadcastManager mLocalBroadcastManager;
     private NotificationManager mNotificationManager;
 
-    private NotificationCompat.Builder mNotificationBuilder;
-
     private OperationInProgress operationInProgress;
 
     @Override
@@ -80,7 +78,6 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         super.onCreate();
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationBuilder = createNotificationBuilder();
     }
 
     @Override
@@ -89,15 +86,11 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         return START_REDELIVER_INTENT; // If process gets killed by os, the last intent will be redelivered.
     }
 
-    private NotificationCompat.Builder createNotificationBuilder() {
-        return new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentIntent(createPendingIntent());
-    }
-
-    private PendingIntent createPendingIntent() {
+    private PendingIntent createPendingIntent(String action, Backup backup) {
         Intent resultIntent = new Intent(this, XoPreferenceActivity.class);
         resultIntent.putExtra(EXTRA_SELECT_BACKUP_PREFERENCES, true);
+        resultIntent.putExtra(EXTRA_BACKUP, backup);
+        resultIntent.setAction(action);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this)
                 .addNextIntent(resultIntent).addParentStack(ChatsActivity.class);
         return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -133,7 +126,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             backup.restore(password);
             stopForeground(true);
 
-            triggerNotification(R.string.restore_backup_success_message);
+            triggerNotification(R.string.restore_backup_success_message, ACTION_RESTORE_SUCCEEDED, backup);
             broadcast(ACTION_RESTORE_SUCCEEDED, backup);
         } catch (InterruptedException e) {
             stopForeground(true);
@@ -141,7 +134,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         } catch (Exception e) {
             stopForeground(true);
             broadcast(ACTION_RESTORE_FAILED);
-            triggerNotification(R.string.restore_backup_failure_message);
+            triggerNotification(R.string.restore_backup_failure_message, ACTION_RESTORE_FAILED, null);
             LOG.error("Restoring " + backup.getFile().getPath() + " failed", e);
         } finally {
             setOperationInProgress(null);
@@ -158,7 +151,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             Backup backup = BackupFactory.createBackup(type, password);
             stopForeground(true);
 
-            triggerNotification(R.string.create_backup_success_message);
+            triggerNotification(R.string.create_backup_success_message, ACTION_BACKUP_SUCCEEDED, backup);
             broadcast(ACTION_BACKUP_SUCCEEDED, backup);
         } catch (InterruptedException e) {
             stopForeground(true);
@@ -166,7 +159,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         } catch (Exception e) {
             stopForeground(true);
             broadcast(ACTION_BACKUP_FAILED);
-            triggerNotification(R.string.create_backup_failure_message);
+            triggerNotification(R.string.create_backup_failure_message, ACTION_BACKUP_FAILED, null);
             LOG.error("Creating " + type + " backup failed", e);
         } finally {
             setOperationInProgress(null);
@@ -174,15 +167,17 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         }
     }
 
-    private void triggerNotification(int stringId) {
-        Notification notification = buildNotification(getString(stringId));
+    private void triggerNotification(int stringId, BackupAction action, Backup backup) {
+        Notification notification = buildNotification(getString(stringId), action, backup);
         mNotificationManager.notify(NotificationId.BACKUP_RESTORE, notification);
     }
 
-    private Notification buildNotification(String title) {
-        return mNotificationBuilder
+    private Notification buildNotification(String title, BackupAction action, Backup backup) {
+        PendingIntent pendingIntent = createPendingIntent(action.toString(), backup);
+        return createNotificationBuilder()
                 .setContentTitle(title)
                 .setOngoing(false)
+                .setContentIntent(pendingIntent)
                 .build();
     }
 
@@ -191,10 +186,16 @@ public class BackupAndRestoreService extends CancelableHandlerService {
     }
 
     private Notification buildOngoingNotification(String title) {
-        return mNotificationBuilder
+        return createNotificationBuilder()
                 .setContentTitle(title)
                 .setOngoing(true)
                 .build();
+    }
+
+    private NotificationCompat.Builder createNotificationBuilder() {
+        return new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentIntent(createPendingIntent(null, null));
     }
 
     private void broadcast(BackupAction action, Backup backup) {

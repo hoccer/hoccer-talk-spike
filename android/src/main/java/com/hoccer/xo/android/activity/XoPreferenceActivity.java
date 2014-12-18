@@ -81,6 +81,7 @@ public class XoPreferenceActivity extends PreferenceActivity
         super.onResume();
 
         checkForCrashesIfEnabled();
+        mBackupController.handleIntent(getIntent());
         mBackupController.registerAndBind();
     }
 

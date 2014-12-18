@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.backup;
 
 import android.app.Activity;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.*;
 import android.os.IBinder;
@@ -112,36 +111,43 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                BackupAction action = BackupAction.fromString(intent.getAction());
-
-                switch (action) {
-                    case ACTION_BACKUP_IN_PROGRESS:
-                        handleBackupInProgress();
-                        break;
-                    case ACTION_BACKUP_SUCCEEDED:
-                        handleBackupSucceeded(intent);
-                        break;
-                    case ACTION_BACKUP_CANCELED:
-                        handleBackupCanceled();
-                        break;
-                    case ACTION_BACKUP_FAILED:
-                        handleBackupFailed();
-                        break;
-                    case ACTION_RESTORE_IN_PROGRESS:
-                        handleRestoreInProgress();
-                        break;
-                    case ACTION_RESTORE_SUCCEEDED:
-                        handleRestoreSucceeded(intent);
-                        break;
-                    case ACTION_RESTORE_CANCELED:
-                        handleRestoreCanceled();
-                        break;
-                    case ACTION_RESTORE_FAILED:
-                        handleRestoreFailed();
-                        break;
-                }
+                handleIntent(intent);
             }
         };
+    }
+
+    public void handleIntent(Intent intent) {
+
+        BackupAction action = BackupAction.fromString(intent.getAction());
+
+        if (action != null) {
+            switch (action) {
+                case ACTION_BACKUP_IN_PROGRESS:
+                    handleBackupInProgress();
+                    break;
+                case ACTION_BACKUP_SUCCEEDED:
+                    handleBackupSucceeded(intent);
+                    break;
+                case ACTION_BACKUP_CANCELED:
+                    handleBackupCanceled();
+                    break;
+                case ACTION_BACKUP_FAILED:
+                    handleBackupFailed();
+                    break;
+                case ACTION_RESTORE_IN_PROGRESS:
+                    handleRestoreInProgress();
+                    break;
+                case ACTION_RESTORE_SUCCEEDED:
+                    handleRestoreSucceeded(intent);
+                    break;
+                case ACTION_RESTORE_CANCELED:
+                    handleRestoreCanceled();
+                    break;
+                case ACTION_RESTORE_FAILED:
+                    handleRestoreFailed();
+                    break;
+            }
+        }
     }
 
     private void showCreateBackupDialog() {
