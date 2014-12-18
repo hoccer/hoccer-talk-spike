@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
@@ -22,7 +23,6 @@ import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
