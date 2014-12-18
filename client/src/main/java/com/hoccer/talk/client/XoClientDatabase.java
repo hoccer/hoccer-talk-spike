@@ -698,13 +698,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
     }
 
-    public void deleteAllAvatarClientDownloads() throws SQLException {
-        DeleteBuilder<TalkClientDownload, Integer> deleteBuilder = mClientDownloads.deleteBuilder();
-        deleteBuilder.where()
-                .eq("type", TalkClientDownload.Type.AVATAR);
-        deleteBuilder.delete();
-    }
-
     public long getAttachmentCountByContactId(int contactId) throws SQLException {
         Where where = mClientMessages.queryBuilder().where();
         return where.and(where.and(where.eq("conversationContact_id", contactId), where.eq("deleted", false)), where.or(where.isNotNull("attachmentUpload_id"), where.isNotNull("attachmentDownload_id"))).countOf();
