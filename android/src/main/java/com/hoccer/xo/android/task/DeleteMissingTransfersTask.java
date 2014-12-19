@@ -6,7 +6,6 @@ import com.hoccer.xo.android.database.DatabaseOperations;
 
 public class DeleteMissingTransfersTask implements IStartupTask {
 
-    @SuppressWarnings("AccessStaticViaInstance")
     @Override
     public void execute(Context context) {
         DatabaseOperations databaseOperations = new DatabaseOperations(XoApplication.getXoClient().getDatabase(), context);
