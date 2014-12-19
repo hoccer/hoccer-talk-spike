@@ -13,7 +13,6 @@ import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * These represent a target of communication
@@ -42,10 +41,10 @@ public class TalkClientContact implements Serializable {
     @DatabaseField
     private String contactType;
 
-    @DatabaseField
+    @Deprecated @DatabaseField
     private boolean deleted;
 
-    @DatabaseField
+    @Deprecated @DatabaseField
     private boolean everRelated;
 
     @DatabaseField(canBeNull = true, foreign = true, foreignAutoRefresh = true)
@@ -117,23 +116,7 @@ public class TalkClientContact implements Serializable {
 
     @SelfMethodOnly
     public boolean isEditable() {
-        return isSelf() || isGroupAdmin() || (isGroup() && !isGroupRegistered());
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void markAsDeleted() {
-        this.deleted = true;
-    }
-
-    public boolean isEverRelated() {
-        return everRelated;
-    }
-
-    public void markAsRelated() {
-        this.everRelated = true;
+        return isSelf() || isGroupAdmin();
     }
 
     public int getClientContactId() {
@@ -177,16 +160,8 @@ public class TalkClientContact implements Serializable {
         return isClient() && this.clientRelationship != null && this.clientRelationship.isFriend();
     }
 
-    public boolean isClientBlocked() {
-        return isClient() && this.clientRelationship != null && this.clientRelationship.isBlocked();
-    }
-
     public boolean isGroup() {
         return this.contactType.equals(TYPE_GROUP);
-    }
-
-    public boolean isGroupRegistered() {
-        return isGroup() && this.groupId != null;
     }
 
     public boolean isGroupExisting() {
@@ -207,6 +182,10 @@ public class TalkClientContact implements Serializable {
 
     public boolean isGroupJoined() {
         return isGroup() && this.groupMembership != null && this.groupMembership.isJoined();
+    }
+
+    public boolean isGroupNoLongerJoined() {
+        return isGroup() && this.groupMembership != null && !this.groupMembership.isJoined();
     }
 
     // returns true if there is actually a group key locally stored
@@ -489,9 +468,6 @@ public class TalkClientContact implements Serializable {
         } else {
             this.clientRelationship.updateWith(relationship);
         }
-        if (this.clientRelationship.isRelated()) {
-            markAsRelated();
-        }
     }
 
     @GroupMethodOnly
@@ -518,16 +494,6 @@ public class TalkClientContact implements Serializable {
         } else {
             this.groupMembership.updateWith(membership);
         }
-        if (this.groupMembership.isInvolved()) {
-            markAsRelated();
-        }
-    }
-
-    public static TalkClientContact createGroupContact() {
-        String groupTag = UUID.randomUUID().toString();
-        TalkClientContact groupContact = new TalkClientContact(TYPE_GROUP);
-        groupContact.updateGroupTag(groupTag);
-        return groupContact;
     }
 
     @Override

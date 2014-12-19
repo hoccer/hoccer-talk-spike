@@ -8,12 +8,9 @@ import android.os.Bundle;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
-import com.hoccer.talk.client.IXoContactListener;
-import com.hoccer.talk.client.IXoMessageListener;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkPresence;
@@ -376,17 +373,6 @@ public class SingleProfileFragment extends ProfileFragment
         });
     }
 
-    public void finishActivityIfContactDeleted() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mContact.isDeleted()) {
-                    getActivity().finish();
-                }
-            }
-        });
-    }
-
     @Override
     protected void updateView() {
         updateAvatar();
@@ -534,6 +520,11 @@ public class SingleProfileFragment extends ProfileFragment
     private void refreshContact(TalkClientContact newContact) {
         LOG.debug("refreshContact()");
         mContact = newContact;
+
+        if (!mContact.isClientRelated() && !mContact.isNearby() && !mContact.isSelf()) {
+            getActivity().finish();
+        }
+
         try {
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
             database.refreshClientContact(mContact);
@@ -555,28 +546,19 @@ public class SingleProfileFragment extends ProfileFragment
         });
     }
 
-    private boolean isMyContact(TalkClientContact contact) {
-        return mContact != null && mContact == contact || mContact.getClientContactId() == contact
-                .getClientContactId();
-    }
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        if (isMyContact(contact)) {
-            getActivity().finish();
-        }
+    private boolean isCurrentContact(TalkClientContact contact) {
+        return mContact != null && (mContact == contact || mContact.getClientContactId() == contact.getClientContactId());
     }
 
     @Override
     public void onClientPresenceChanged(final TalkClientContact contact) {
-        if (isMyContact(contact)) {
+        if (isCurrentContact(contact)) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     refreshContact(contact);
                     getActivity().invalidateOptionsMenu();
                     updateActionBar();
-                    finishActivityIfContactDeleted();
                 }
             });
         }
@@ -584,14 +566,13 @@ public class SingleProfileFragment extends ProfileFragment
 
     @Override
     public void onClientRelationshipChanged(final TalkClientContact contact) {
-        if (isMyContact(contact)) {
+        if (isCurrentContact(contact)) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     refreshContact(contact);
                     getActivity().invalidateOptionsMenu();
                     updateActionBar();
-                    finishActivityIfContactDeleted();
                 }
             });
         }

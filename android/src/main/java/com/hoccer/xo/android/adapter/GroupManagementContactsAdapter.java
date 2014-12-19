@@ -70,13 +70,8 @@ public class GroupManagementContactsAdapter extends ContactsAdapter {
 
         try {
             TalkGroupMembership membership = mDatabase.findMembershipInGroupByClientId(mGroup.getGroupId(), contact.getClientId());
-            if (membership != null) {
-                if (membership.isInvited() || membership.isJoined()) {
-                    checkedTextView.setChecked(true);
-                } else {
-                    checkedTextView.setChecked(false);
-                }
-            }
+            boolean checked = membership != null && (membership.isInvited() || membership.isJoined());
+            checkedTextView.setChecked(checked);
 
             if (mContactsToInvite.contains(contact)) {
                 checkedTextView.setChecked(true);

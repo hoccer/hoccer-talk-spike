@@ -29,7 +29,7 @@ public class ContactSearchResultAdapter extends ContactsAdapter {
         mLastQuery = query.toLowerCase();
 
         if (query.length() > 0) {
-            for (TalkClientContact contact : mClientContacts) {
+            for (TalkClientContact contact : mContacts) {
                 // ignore self
                 if (contact.isSelf()) {
                     continue;

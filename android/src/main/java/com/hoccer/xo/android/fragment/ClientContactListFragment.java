@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Intent;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.SingleProfileActivity;
@@ -20,12 +21,19 @@ public class ClientContactListFragment extends ContactListFragment {
             R.string.placeholder_conversations_text);
 
     public ClientContactListFragment() {
-        super(R.string.contacts_tab_friends, SingleProfileActivity.class, PLACEHOLDER);
+        super(R.string.contacts_tab_friends, PLACEHOLDER);
     }
 
     @Override
     protected ContactListAdapter createAdapter() {
         return new ClientContactListAdapter(getActivity());
+    }
+
+    @Override
+    protected Intent getProfileActivityIntent(TalkClientContact contact) {
+        return new Intent(getActivity(), SingleProfileActivity.class)
+                .setAction(SingleProfileActivity.ACTION_SHOW)
+                .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
     }
 
     @Override
