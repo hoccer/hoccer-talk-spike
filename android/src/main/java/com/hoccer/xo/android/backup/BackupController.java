@@ -286,7 +286,16 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
         String user = String.format(mActivity.getString(R.string.user) + ": " + backup.getClientName());
         String info = mActivity.getString(R.string.restore_restart_hoccer);
         String message = String.format("%s\n%s\n\n%s", date, user, info);
-        XoDialogs.showOkDialog("BackupRestoredDialog", mActivity.getString(R.string.restore_success_title), message, mActivity);
+        XoDialogs.showOkDialog("BackupRestoredDialog", mActivity.getString(R.string.restore_success_title), message, mActivity, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                restartApplication();
+            }
+        });
+    }
+
+    private void restartApplication() {
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     private void handleRestoreCanceled() {
