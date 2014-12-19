@@ -191,6 +191,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         return createNotificationBuilder()
                 .setContentTitle(title)
                 .setContentText(subtitle)
+                .setProgress(0, 0, true)
                 .setOngoing(true)
                 .build();
     }
