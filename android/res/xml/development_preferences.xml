@@ -118,12 +118,12 @@
         <com.hoccer.xo.android.backup.BackupPreference
                 android:key="@string/preference_key_create_backup"
                 android:layout="@layout/preference_backup"
-                android:title="@string/create_backup"
+                android:title="@string/backup_title"
                 inProgressText="@string/create_backup_in_progress"/>
         <com.hoccer.xo.android.backup.BackupPreference
                 android:key="@string/preference_key_restore_backup"
                 android:layout="@layout/preference_backup"
-                android:title="@string/restore_backup"
+                android:title="@string/restore_title"
                 inProgressText="@string/restore_backup_in_progress"/>
     </PreferenceCategory>
 

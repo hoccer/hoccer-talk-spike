@@ -122,11 +122,11 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             setOperationInProgress(RESTORE);
             broadcast(ACTION_RESTORE_IN_PROGRESS);
 
-            startInForeground(buildOngoingNotification(getString(R.string.restore_backup_in_progress)));
+            startInForeground(buildOngoingNotification(getString(R.string.restore_in_progress)));
             backup.restore(password);
             stopForeground(true);
 
-            triggerNotification(R.string.restore_backup_success_message, ACTION_RESTORE_SUCCEEDED, backup);
+            triggerNotification(R.string.restore_success_message, ACTION_RESTORE_SUCCEEDED, backup);
             broadcast(ACTION_RESTORE_SUCCEEDED, backup);
         } catch (InterruptedException e) {
             stopForeground(true);
@@ -134,7 +134,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         } catch (Exception e) {
             stopForeground(true);
             broadcast(ACTION_RESTORE_FAILED);
-            triggerNotification(R.string.restore_backup_failure_message, ACTION_RESTORE_FAILED, null);
+            triggerNotification(R.string.restore_failure_default_message, ACTION_RESTORE_FAILED, null);
             LOG.error("Restoring " + backup.getFile().getPath() + " failed", e);
         } finally {
             setOperationInProgress(null);
@@ -147,11 +147,11 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             setOperationInProgress(BACKUP);
             broadcast(ACTION_BACKUP_IN_PROGRESS);
 
-            startInForeground(buildOngoingNotification(getString(R.string.create_backup_in_progress)));
+            startInForeground(buildOngoingNotification(getString(R.string.backup_in_progress)));
             Backup backup = BackupFactory.createBackup(type, password);
             stopForeground(true);
 
-            triggerNotification(R.string.create_backup_success_message, ACTION_BACKUP_SUCCEEDED, backup);
+            triggerNotification(R.string.backup_success_message, ACTION_BACKUP_SUCCEEDED, backup);
             broadcast(ACTION_BACKUP_SUCCEEDED, backup);
         } catch (InterruptedException e) {
             stopForeground(true);
@@ -159,7 +159,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         } catch (Exception e) {
             stopForeground(true);
             broadcast(ACTION_BACKUP_FAILED);
-            triggerNotification(R.string.create_backup_failure_message, ACTION_BACKUP_FAILED, null);
+            triggerNotification(R.string.backup_failure_message, ACTION_BACKUP_FAILED, null);
             LOG.error("Creating " + type + " backup failed", e);
         } finally {
             setOperationInProgress(null);

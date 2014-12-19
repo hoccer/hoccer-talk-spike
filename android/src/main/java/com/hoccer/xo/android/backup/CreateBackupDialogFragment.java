@@ -74,7 +74,7 @@ public class CreateBackupDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view)
                 .setNegativeButton(R.string.common_cancel, null)
-                .setTitle(R.string.create_backup);
+                .setTitle(R.string.backup_title);
         builder.setPositiveButton(R.string.common_ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -88,7 +88,7 @@ public class CreateBackupDialogFragment extends DialogFragment {
 
     private String getBackupPathInfo() {
         String path = XoApplication.getAttachmentDirectory().getName() + File.separator + XoApplication.getBackupDirectory().getName();
-        return getString(R.string.create_backup_dialog_message, path);
+        return getString(R.string.backup_dialog_message, path);
     }
 
     public void setListener(CreateBackupDialogListener listener) {

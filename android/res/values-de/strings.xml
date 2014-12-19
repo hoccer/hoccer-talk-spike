@@ -356,34 +356,34 @@
     <string name="welcome_hoccer_classic_users">Hoccer hat jetzt eine komplette Messaging Funktion zusätzlich zum direkten Datenaustausch.\nDu kannst wie bisher anonym Daten im \"in der Nähe\" - Modus austauschen oder dich direkt mit deinen Freunden verbinden.</string>
 
     <!-- Backup and Restore -->
-    <string name="dialog_not_enough_disk_space_dialog">Leider ist nicht genügend Speicherplatz vorhanden. Du brauchst %1$s
-        freien Speicherplatz.
-    </string>
-    <string name="restore_backup">Backup wiederherstellen</string>
-    <string name="restore_backup_in_progress">Wiederherstellung ...</string>
-    <string name="restore_backup_success_title">Backup wiederhergestellt</string>
-    <string name="restore_backup_success_message">Backup erfolgreich eingepielt.</string>
-    <string name="restore_backup_failure_title">Wiederherstellung fehlgeschlagen</string>
-    <string name="restore_backup_failure_message">Fehler bei deim einspielen des Backups.</string>
-    <string name="create_backup">Backup erstellen</string>
-    <string name="create_backup_in_progress">Erstelle Backup ...</string>
-    <string name="create_backup_success_title">Backup erstellt</string>
-    <string name="create_backup_success_message">Backup erfolgreich erstellt.</string>
-    <string name="create_backup_failure_title">Backup fehlgeschlagen</string>
-    <string name="create_backup_failure_message">Fehler beim Erstellen des Backups.</string>
-    <string name="dialog_backup_title">Erstelle Backup</string>
-    <string name="create_backup_dialog_message">Das Backup wird unter %1$s gespeichert.</string>
-    <string name="create_backup_include_attachments">Dateianhänge sichern</string>
-    <string name="create_backup_dont_forget_password">Falls du dein Passwort vergisst kann das Backup nicht wiederhergestellt werden.</string>
-    <string name="create_backup_dialog_complete_backup_warning">Achtung: Hoher Verbrauch von Speicher, Batterie &amp; Zeit</string>
+    <string name="backup_title">Backup erstellen</string>
+    <string name="backup_in_progress">Erstelle Backup ..</string>
+    <string name="backup_success_title">Backup erfolgreich</string>
+    <string name="backup_success_message">Backup erfolgreich erstellt.</string>
+    <string name="backup_failure_title">Backup fehlgeschlagen</string>
+    <string name="backup_failure_message">Beim Ertsellen des Backups ist etwas schief gelaufen. Bitte versuche es erneut.</string>
+    <string name="backup_dialog_message">Das Backup wird unter %1$s gespeichert.</string>
+    <string name="backup_dialog_include_attachments">Dateianhänge sichern</string>
+    <string name="backup_dialog_dont_forget_password">Falls du dein Passwort vergisst kann das Backup nicht wiederhergestellt werden.</string>
+    <string name="backup_dialog_complete_backup_warning">Achtung: Hoher Verbrauch von Speicher, Batterie &amp; Zeit</string>
+
     <string name="restore_choose_backup">Backup auswählen</string>
-    <string name="restore_backup_enter_password">Passwort eingeben</string>
+    <string name="restore_title">Backup wiederherstellen</string>
+    <string name="restore_in_progress">Wiederherstellung ..</string>
+    <string name="restore_success_title">Wiederherstellung erfolgreich</string>
+    <string name="restore_success_message">Das Backup wurde erfolgreich eingespielt.</string>
+    <string name="restore_failure_title">Wiederherstellung fehlgeschlagen</string>
+    <string name="restore_failure_default_message">Beim Wiederherstellen ist etwas schief gelaufen. Bitte versuche es erneut.</string>
+    <string name="restore_failure_insufficient_disk_space_message">Nicht genügend Speicherplatz. Bitte Dateien von der SD Karte löschen und erneut versuchen. Du brauchst %1$s freien Speicherplatz.</string>
+    <string name="restore_enter_password">Passwort eingeben</string>
+    <string name="restore_restart_hoccer">Bitte Hoccer neu starten, um die Wiederherstellung zu beenden.</string>
+    <string name="restore_no_backups_found_title">Kein Backup vorhanden</string>
+    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach %1$s kopieren um früheren Hoccer Account wiederherstellen zu können.</string>
+
     <string name="date">Datum</string>
     <string name="user">Benutzer</string>
     <string name="file">Datei</string>
     <string name="size">Dateigröße</string>
-    <string name="please_restart_hoccer">Bitte starte Hoccer neu.</string>
-
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

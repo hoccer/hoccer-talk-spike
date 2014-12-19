@@ -184,7 +184,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
                         try {
                             if (BackupFileUtils.isEnoughDiskSpaceAvailable(backup.getFile())) {
                                 XoDialogs.showInputPasswordDialog("RestoreBackupPasswordDialog",
-                                        R.string.restore_backup_enter_password,
+                                        R.string.restore_enter_password,
                                         mActivity,
                                         new XoDialogs.OnTextSubmittedListener() {
                                             @Override
@@ -196,10 +196,10 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
                                 );
                             } else {
                                 long size = BackupFileUtils.getUncompressedSize(backup.getFile());
-                                String message = mActivity.getString(R.string.dialog_not_enough_disk_space_dialog,
+                                String message = mActivity.getString(R.string.restore_failure_insufficient_disk_space_message,
                                         FileUtils.byteCountToDisplaySize(size));
                                 XoDialogs.showOkDialog("NotEnoughDiskSpaceAvailableDialog",
-                                        mActivity.getString(R.string.restore_backup_failure_title), message, mActivity);
+                                        mActivity.getString(R.string.restore_failure_title), message, mActivity);
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -231,7 +231,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
         String path = String.format(mActivity.getString(R.string.file) + ": " + backup.getFile().getAbsolutePath());
         String size = String.format(mActivity.getString(R.string.size) + ": " + FileUtils.byteCountToDisplaySize(backup.getSize()));
         String message = String.format("%s\n%s\n%s\n%s", date, user, path, size);
-        XoDialogs.showOkDialog("BackupCreatedDialog", mActivity.getString(R.string.create_backup_success_title), message, mActivity);
+        XoDialogs.showOkDialog("BackupCreatedDialog", mActivity.getString(R.string.backup_success_title), message, mActivity);
     }
 
     private void handleBackupCanceled() {
@@ -245,7 +245,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     }
 
     private void showBackupFailedDialog() {
-        XoDialogs.showOkDialog("BackupFailedDialog", mActivity.getString(R.string.create_backup_failure_title), mActivity.getString(R.string.create_backup_failure_message), mActivity);
+        XoDialogs.showOkDialog("BackupFailedDialog", mActivity.getString(R.string.backup_failure_title), mActivity.getString(R.string.backup_failure_message), mActivity);
     }
 
     private void setBackupInProgress(boolean inProgress) {
@@ -267,9 +267,9 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     private void showRestoreSuccessDialog(Backup backup) {
         String date = String.format(mActivity.getString(R.string.date) + ": " + new SimpleDateFormat(getLocalizedDatePattern() + " " + TIME_PATTERN).format(backup.getCreationDate()));
         String user = String.format(mActivity.getString(R.string.user) + ": " + backup.getClientName());
-        String info = mActivity.getString(R.string.please_restart_hoccer);
+        String info = mActivity.getString(R.string.restore_restart_hoccer);
         String message = String.format("%s\n%s\n\n%s", date, user, info);
-        XoDialogs.showOkDialog("BackupRestoredDialog", mActivity.getString(R.string.restore_backup_success_title), message, mActivity);
+        XoDialogs.showOkDialog("BackupRestoredDialog", mActivity.getString(R.string.restore_success_title), message, mActivity);
     }
 
     private void handleRestoreCanceled() {
@@ -288,7 +288,7 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     }
 
     private void showRestoreFailedDialog() {
-        XoDialogs.showOkDialog("RestoreFailedDialog", mActivity.getString(R.string.restore_backup_failure_title), mActivity.getString(R.string.restore_backup_failure_message), mActivity);
+        XoDialogs.showOkDialog("RestoreFailedDialog", mActivity.getString(R.string.restore_failure_title), mActivity.getString(R.string.restore_failure_default_message), mActivity);
     }
 
     private void setRestoreInProgress(boolean inProgress) {
