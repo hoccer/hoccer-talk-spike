@@ -42,6 +42,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         ACTION_RESTORE_FAILED("com.hoccer.xo.android.action.RESTORE_FAILED");
 
         private final String mString;
+
         BackupAction(String string) {
             mString = string;
         }
@@ -122,11 +123,11 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             setOperationInProgress(RESTORE);
             broadcast(ACTION_RESTORE_IN_PROGRESS);
 
-            startInForeground(buildOngoingNotification(getString(R.string.restore_in_progress)));
+            startInForeground(buildOngoingNotification(getString(R.string.restore_in_progress_title), getString(R.string.restore_in_progress_subtitle)));
             backup.restore(password);
             stopForeground(true);
 
-            triggerNotification(R.string.restore_success_message, ACTION_RESTORE_SUCCEEDED, backup);
+            triggerNotification(R.string.restore_success_title, R.string.restore_success_message, ACTION_RESTORE_SUCCEEDED, backup);
             broadcast(ACTION_RESTORE_SUCCEEDED, backup);
         } catch (InterruptedException e) {
             stopForeground(true);
@@ -134,7 +135,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         } catch (Exception e) {
             stopForeground(true);
             broadcast(ACTION_RESTORE_FAILED);
-            triggerNotification(R.string.restore_failure_default_message, ACTION_RESTORE_FAILED, null);
+            triggerNotification(R.string.restore_failure_title, R.string.restore_failure_default_message, ACTION_RESTORE_FAILED, null);
             LOG.error("Restoring " + backup.getFile().getPath() + " failed", e);
         } finally {
             setOperationInProgress(null);
@@ -147,11 +148,11 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             setOperationInProgress(BACKUP);
             broadcast(ACTION_BACKUP_IN_PROGRESS);
 
-            startInForeground(buildOngoingNotification(getString(R.string.backup_in_progress)));
+            startInForeground(buildOngoingNotification(getString(R.string.backup_in_progress_title), getString(R.string.backup_in_progress_subtitle)));
             Backup backup = BackupFactory.createBackup(type, password);
             stopForeground(true);
 
-            triggerNotification(R.string.backup_success_message, ACTION_BACKUP_SUCCEEDED, backup);
+            triggerNotification(R.string.backup_success_title, R.string.backup_success_message, ACTION_BACKUP_SUCCEEDED, backup);
             broadcast(ACTION_BACKUP_SUCCEEDED, backup);
         } catch (InterruptedException e) {
             stopForeground(true);
@@ -159,7 +160,7 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         } catch (Exception e) {
             stopForeground(true);
             broadcast(ACTION_BACKUP_FAILED);
-            triggerNotification(R.string.backup_failure_message, ACTION_BACKUP_FAILED, null);
+            triggerNotification(R.string.backup_failure_title, R.string.backup_failure_message, ACTION_BACKUP_FAILED, null);
             LOG.error("Creating " + type + " backup failed", e);
         } finally {
             setOperationInProgress(null);
@@ -167,15 +168,16 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         }
     }
 
-    private void triggerNotification(int stringId, BackupAction action, Backup backup) {
-        Notification notification = buildNotification(getString(stringId), action, backup);
+    private void triggerNotification(int titleId, int subtitleId, BackupAction action, Backup backup) {
+        Notification notification = buildNotification(getString(titleId), getString(subtitleId), action, backup);
         mNotificationManager.notify(NotificationId.BACKUP_RESTORE, notification);
     }
 
-    private Notification buildNotification(String title, BackupAction action, Backup backup) {
+    private Notification buildNotification(String title, String subtitle, BackupAction action, Backup backup) {
         PendingIntent pendingIntent = createPendingIntent(action.toString(), backup);
         return createNotificationBuilder()
                 .setContentTitle(title)
+                .setContentText(subtitle)
                 .setOngoing(false)
                 .setContentIntent(pendingIntent)
                 .build();
@@ -185,9 +187,10 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         startForeground(NotificationId.BACKUP_RESTORE, notification);
     }
 
-    private Notification buildOngoingNotification(String title) {
+    private Notification buildOngoingNotification(String title, String subtitle) {
         return createNotificationBuilder()
                 .setContentTitle(title)
+                .setContentText(subtitle)
                 .setOngoing(true)
                 .build();
     }

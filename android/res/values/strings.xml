@@ -368,7 +368,8 @@
 
     <!-- Backup and Restore -->
     <string name="backup_title">Create Backup</string>
-    <string name="backup_in_progress">Creating Backup ..</string>
+    <string name="backup_in_progress_title">Creating Backup..</string>
+    <string name="backup_in_progress_subtitle">Creating backup in Progress</string>
     <string name="backup_success_title">Backup successful</string>
     <string name="backup_success_message">Successfully created backup.</string>
     <string name="backup_failure_title">Backup failed</string>
@@ -380,7 +381,8 @@
 
     <string name="restore_choose_backup">Choose backup</string>
     <string name="restore_title">Restore Backup</string>
-    <string name="restore_in_progress">Restoring Backup ..</string>
+    <string name="restore_in_progress_title">Restoring Backup..</string>
+    <string name="restore_in_progress_subtitle">Restoring backup in Progress</string>
     <string name="restore_success_title">Restore successful</string>
     <string name="restore_success_message">Backup was successfully restored.</string>
     <string name="restore_failure_title">Restore failed</string>
@@ -390,6 +392,7 @@
     <string name="restore_restart_hoccer">Please re-start Hoccer to complete restoring your account. </string>
     <string name="restore_no_backups_found_title">No backups found</string>
     <string name="restore_no_backups_found_message">Please copy a backup to %1$s to restore a former Hoccer account.</string>
+
 
     <string name="date">Date</string>
     <string name="user">User</string>

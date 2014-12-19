@@ -351,7 +351,8 @@
 
     <!-- Backup and Restore -->
     <string name="backup_title">Backup erstellen</string>
-    <string name="backup_in_progress">Erstelle Backup ..</string>
+    <string name="backup_in_progress_title">Erstelle Backup..</string>
+    <string name="backup_in_progress_subtitle">Backup Erstellung läuft</string>
     <string name="backup_success_title">Backup erfolgreich</string>
     <string name="backup_success_message">Backup erfolgreich erstellt.</string>
     <string name="backup_failure_title">Backup fehlgeschlagen</string>
@@ -363,7 +364,8 @@
 
     <string name="restore_choose_backup">Backup auswählen</string>
     <string name="restore_title">Backup wiederherstellen</string>
-    <string name="restore_in_progress">Wiederherstellung ..</string>
+    <string name="restore_in_progress_title">Wiederherstellung..</string>
+    <string name="restore_in_progress_subtitle">Wiederherstellung läuft</string>
     <string name="restore_success_title">Wiederherstellung erfolgreich</string>
     <string name="restore_success_message">Das Backup wurde erfolgreich eingespielt.</string>
     <string name="restore_failure_title">Wiederherstellung fehlgeschlagen</string>
