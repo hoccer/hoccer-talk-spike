@@ -26,6 +26,7 @@ import static junit.framework.TestCase.*;
 public class MediaPlaylistTest {
 
     private static final Logger LOG = Logger.getLogger(MediaPlaylistTest.class);
+    public static final String REMOVED_ATTACHMENT_MESSAGE = "removed attachment";
 
     private XoClientDatabase mDatabase;
 
@@ -287,7 +288,7 @@ public class MediaPlaylistTest {
 
         // delete download of user1
         try {
-            mDatabase.deleteTransferAndMessage(playlist1.getItem(1));
+            mDatabase.deleteTransferAndUpdateMessage(playlist1.getItem(1), REMOVED_ATTACHMENT_MESSAGE);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -376,7 +377,7 @@ public class MediaPlaylistTest {
 
         // remove other item (should not bother playlist)
         try {
-            mDatabase.deleteTransferAndMessage(otherItem);
+            mDatabase.deleteTransferAndUpdateMessage(otherItem, REMOVED_ATTACHMENT_MESSAGE);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();
@@ -389,7 +390,7 @@ public class MediaPlaylistTest {
 
         // remove item
         try {
-            mDatabase.deleteTransferAndMessage(item);
+            mDatabase.deleteTransferAndUpdateMessage(item, REMOVED_ATTACHMENT_MESSAGE);
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
             fail();

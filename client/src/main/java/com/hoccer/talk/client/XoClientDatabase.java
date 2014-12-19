@@ -14,6 +14,7 @@ import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.Transformer;
 import org.apache.log4j.Logger;
 
@@ -115,7 +116,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public synchronized void savePresence(TalkPresence presence) throws NoClientIdInPresenceException, SQLException {
         if (presence.getClientId() == null) {
-            throw new NoClientIdInPresenceException("Client id is null for " + presence);
+            throw new NoClientIdInPresenceException("Client id is null.");
         }
         mPresences.createOrUpdate(presence);
     }
@@ -604,6 +605,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
             throw new SQLException("cant find record for Delivery: " + delivery.getId());
         }
     }
+
     public synchronized void saveClientDownload(TalkClientDownload download) throws SQLException {
         Dao.CreateOrUpdateStatus result = mClientDownloads.createOrUpdate(download);
 
@@ -638,6 +640,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public void refreshClientUpload(TalkClientUpload upload) throws SQLException {
         mClientUploads.refresh(upload);
+    }
+
+    public List<? extends XoTransfer> findAllTransfers() throws SQLException {
+        List<TalkClientUpload> uploads = mClientUploads.queryForAll();
+        List<TalkClientDownload> downloads = mClientDownloads.queryForAll();
+
+        return ListUtils.union(uploads, downloads);
     }
 
     public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
@@ -682,21 +691,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return transfers;
     }
 
-    public List<TalkClientDownload> findClientDownloadsByContactId(int contactId) throws SQLException {
-        QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
-        messageQb
-                .orderBy("timestamp", false).where()
-                .eq("senderContact_id", contactId)
-                .or()
-                .eq("conversationContact_id", contactId);
-
-        QueryBuilder<TalkClientDownload, Integer> downloadQb = mClientDownloads.queryBuilder();
-        downloadQb.where()
-                .eq("state", TalkClientDownload.State.COMPLETE);
-
-        return downloadQb.join(messageQb).query();
-    }
-
     public List<TalkClientDownload> findClientDownloadsByMediaTypeAndContactId(String mediaType, int contactId) throws SQLException {
         QueryBuilder<TalkClientMessage, Integer> messageQb = mClientMessages.queryBuilder();
         messageQb
@@ -712,16 +706,6 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .eq("state", TalkClientDownload.State.COMPLETE);
 
         return downloadQb.join(messageQb).query();
-    }
-
-    public List<XoTransfer> findAllTransfers() throws SQLException {
-        List<TalkClientUpload> uploads = mClientUploads.queryBuilder().where()
-                .isNotNull("contentUrl")
-                .query();
-
-        List<TalkClientDownload> downloads = mClientDownloads.queryForAll();
-
-        return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
     }
 
     public TalkPrivateKey findPrivateKeyByKeyId(String keyId) throws SQLException {
@@ -900,27 +884,48 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         }
     }
 
-    public void deleteTransferAndMessage(XoTransfer transfer) throws SQLException {
+    public void deleteTransferAndUpdateMessage(XoTransfer transfer, String messageTextPrefix) throws SQLException {
         switch (transfer.getDirection()) {
             case UPLOAD:
-                deleteClientUploadAndMessage((TalkClientUpload) transfer);
+                deleteClientUploadAndUpdateMessage((TalkClientUpload) transfer, messageTextPrefix);
                 break;
             case DOWNLOAD:
-                deleteClientDownloadAndMessage((TalkClientDownload) transfer);
+                deleteClientDownloadAndUpdateMessage((TalkClientDownload) transfer, messageTextPrefix);
                 break;
         }
     }
 
-    public void deleteClientUploadAndMessage(TalkClientUpload upload) throws SQLException {
+    public void deleteClientUploadAndUpdateMessage(TalkClientUpload upload, String messageTextPrefix) throws SQLException {
         deleteClientUpload(upload);
-        int messageId = findMessageByUploadId(upload.getClientUploadId()).getClientMessageId();
-        deleteMessageById(messageId);
+        TalkClientMessage message = findMessageByUploadId(upload.getClientUploadId());
+
+        if (message != null) {
+            message.setAttachmentUpload(null);
+            updateMessageTextForDeletedTransfer(message, messageTextPrefix);
+            saveClientMessage(message);
+        }
     }
 
-    public void deleteClientDownloadAndMessage(TalkClientDownload download) throws SQLException {
+    public void deleteClientDownloadAndUpdateMessage(TalkClientDownload download, String messageTextPrefix) throws SQLException {
         deleteClientDownload(download);
-        int messageId = findMessageByDownloadId(download.getClientDownloadId()).getClientMessageId();
-        deleteMessageById(messageId);
+        TalkClientMessage message = findMessageByDownloadId(download.getClientDownloadId());
+
+        if (message != null) {
+            message.setAttachmentDownload(null);
+            updateMessageTextForDeletedTransfer(message, messageTextPrefix);
+            saveClientMessage(message);
+        }
+    }
+
+    private static void updateMessageTextForDeletedTransfer(TalkClientMessage message, String textPrefix) throws SQLException {
+        StringBuilder newText = new StringBuilder(textPrefix);
+        String oldText = message.getText();
+
+        if (oldText != null && !oldText.isEmpty()) {
+            newText.append("\n\n").append(oldText);
+        }
+
+        message.setText(newText.toString());
     }
 
     ////////////////////////////////////////////

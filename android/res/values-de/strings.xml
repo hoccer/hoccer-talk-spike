@@ -51,6 +51,7 @@
     <!-- Deleting attachments -->
     <string name="dialog_attachment_delete_title">Anhang Löschen</string>
     <string name="dialog_attachment_delete_message">Willst du die ausgewählten Anhänge wirklich löschen?</string>
+    <string name="deleted_attachment">[Gelöschter Anhang]</string>
 
     <!-- AudioAttachmentList Fragment -->
     <string name="menu_search">Suche</string>
@@ -347,6 +348,38 @@
     <string name="update_hoccer_xo">Aktualisiere Hoccer\u00A0XO</string>
     <string name="hoccer_3_0">Hoccer 3.0</string>
     <string name="welcome_hoccer_classic_users">Hoccer hat jetzt eine komplette Messaging Funktion zusätzlich zum direkten Datenaustausch.\nDu kannst wie bisher anonym Daten im \"in der Nähe\" - Modus austauschen oder dich direkt mit deinen Freunden verbinden.</string>
+
+    <!-- Backup and Restore -->
+    <string name="backup_title">Backup erstellen</string>
+    <string name="backup_in_progress_title">Erstelle Backup..</string>
+    <string name="backup_in_progress_subtitle">Backup Erstellung läuft</string>
+    <string name="backup_success_title">Backup erfolgreich</string>
+    <string name="backup_success_message">Backup erfolgreich erstellt.</string>
+    <string name="backup_failure_title">Backup fehlgeschlagen</string>
+    <string name="backup_failure_message">Beim Ertsellen des Backups ist etwas schief gelaufen. Bitte versuche es erneut.</string>
+    <string name="backup_dialog_message">Das Backup wird unter\n%1$s gespeichert.</string>
+    <string name="backup_dialog_include_attachments">Dateianhänge sichern</string>
+    <string name="backup_dialog_dont_forget_password">Falls du dein Passwort vergisst kann das Backup nicht wiederhergestellt werden.</string>
+    <string name="backup_dialog_complete_backup_warning">Achtung: Hoher Verbrauch von Speicher, Batterie &amp; Zeit</string>
+
+    <string name="restore_choose_backup">Backup auswählen</string>
+    <string name="restore_title">Backup wiederherstellen</string>
+    <string name="restore_in_progress_title">Wiederherstellung..</string>
+    <string name="restore_in_progress_subtitle">Wiederherstellung läuft</string>
+    <string name="restore_success_title">Wiederherstellung erfolgreich</string>
+    <string name="restore_success_message">Das Backup wurde erfolgreich eingespielt.</string>
+    <string name="restore_failure_title">Wiederherstellung fehlgeschlagen</string>
+    <string name="restore_failure_default_message">Beim Wiederherstellen ist etwas schief gelaufen. Bitte versuche es erneut.</string>
+    <string name="restore_failure_insufficient_disk_space_message">Nicht genügend Speicherplatz. Bitte Dateien von der SD Karte löschen und erneut versuchen. Du brauchst %1$s freien Speicherplatz.</string>
+    <string name="restore_enter_password">Passwort eingeben</string>
+    <string name="restore_restart_hoccer">Bitte Hoccer neu starten, um die Wiederherstellung zu beenden.</string>
+    <string name="restore_no_backups_found_title">Kein Backup vorhanden</string>
+    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren Hoccer Account wiederherstellen zu können.</string>
+
+    <string name="date">Datum</string>
+    <string name="user">Benutzer</string>
+    <string name="file">Datei</string>
+    <string name="size">Dateigröße</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

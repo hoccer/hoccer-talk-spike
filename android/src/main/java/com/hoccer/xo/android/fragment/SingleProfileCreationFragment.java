@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.*;
 import android.widget.EditText;
 import android.widget.ImageView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -18,7 +19,6 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.artcom.hoccer.R;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
@@ -147,10 +147,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         if (mActionMode == null) {
             mActionMode = getActivity().startActionMode(this);
         }
-        updateView();
-    }
-
-    private void updateView() {
         updateAvatarView();
     }
 
@@ -240,7 +236,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        updateView();
+        updateAvatarView();
     }
 
     @Override

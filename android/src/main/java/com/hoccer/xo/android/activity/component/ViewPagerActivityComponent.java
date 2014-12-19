@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import com.hoccer.xo.android.fragment.IPagerFragment;
-import org.apache.log4j.Logger;
 
 /**
  * Adds and manages an activity ViewPager.
@@ -20,9 +19,7 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     private final Fragment[] mFragments;
     private final int mViewPagerId;
 
-    private static final Logger LOG = Logger.getLogger(ViewPagerActivityComponent.class);
-
-    public <T extends Fragment & IPagerFragment> ViewPagerActivityComponent(final FragmentActivity activity, final int viewPagerId, final T... fragments) {
+    public <T extends Fragment & IPagerFragment> ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, T... fragments) {
         super(activity);
 
         mFragments = fragments;
@@ -30,14 +27,14 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     }
 
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // create view pager
-        mViewPager = (ViewPager)getActivity().findViewById(mViewPagerId);
+        mViewPager = (ViewPager) getActivity().findViewById(mViewPagerId);
         mViewPager.setAdapter(new FragmentPagerAdapter(getActivity().getSupportFragmentManager()) {
             @Override
-            public Fragment getItem(final int position) {
+            public Fragment getItem(int position) {
                 return mFragments[position];
             }
 
@@ -48,17 +45,17 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         });
         mViewPager.setOnPageChangeListener(new PageChangeListener());
 
-        final ActionBar actionBar = getActivity().getActionBar();
+        ActionBar actionBar = getActivity().getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        for(final Fragment fragment : mFragments) {
-            final ActionBar.Tab tab = actionBar.newTab();
+        for (Fragment fragment : mFragments) {
+            ActionBar.Tab tab = actionBar.newTab();
 
-            final View tabView = ((IPagerFragment)fragment).getCustomTabView(getActivity());
-            if(tabView != null) {
+            View tabView = ((IPagerFragment) fragment).getCustomTabView(getActivity());
+            if (tabView != null) {
                 tab.setCustomView(tabView);
             } else {
-                tab.setText(((IPagerFragment)fragment).getTabName(getActivity().getResources()));
+                tab.setText(((IPagerFragment) fragment).getTabName(getActivity().getResources()));
             }
             tab.setTabListener(new TabListener());
             actionBar.addTab(tab);
@@ -73,13 +70,13 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     @Override
     public void onResume() {
         super.onResume();
-        ((IPagerFragment)mFragments[mViewPager.getCurrentItem()]).onPageResume();
+        ((IPagerFragment) mFragments[mViewPager.getCurrentItem()]).onPageResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ((IPagerFragment)mFragments[mViewPager.getCurrentItem()]).onPagePause();
+        ((IPagerFragment) mFragments[mViewPager.getCurrentItem()]).onPagePause();
     }
 
     @Override
@@ -93,11 +90,11 @@ public class ViewPagerActivityComponent extends ActivityComponent {
 
     private class PageChangeListener implements ViewPager.OnPageChangeListener {
         @Override
-        public void onPageScrolled(final int position, final float positionOffset, final int positionOffsetPixels) {}
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
         @Override
-        public void onPageSelected(final int position) {
-            final ActionBar actionBar = getActivity().getActionBar();
+        public void onPageSelected(int position) {
+            ActionBar actionBar = getActivity().getActionBar();
 
             if (actionBar.getSelectedNavigationIndex() != mViewPager.getCurrentItem()) {
                 getActivity().getActionBar().setSelectedNavigationItem(mViewPager.getCurrentItem());
@@ -105,15 +102,15 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         }
 
         @Override
-        public void onPageScrollStateChanged(final int state) {
-            ((IPagerFragment)mFragments[mViewPager.getCurrentItem()]).onPageScrollStateChanged(state);
+        public void onPageScrollStateChanged(int state) {
+            ((IPagerFragment) mFragments[mViewPager.getCurrentItem()]).onPageScrollStateChanged(state);
         }
     }
 
     private class TabListener implements ActionBar.TabListener {
         @Override
-        public void onTabSelected(final ActionBar.Tab tab, final FragmentTransaction ft) {
-            final int position = tab.getPosition();
+        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+            int position = tab.getPosition();
             mViewPager.setCurrentItem(position);
 
             IPagerFragment fragment = (IPagerFragment) mFragments[position];
@@ -122,8 +119,8 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         }
 
         @Override
-        public void onTabUnselected(final ActionBar.Tab tab, final FragmentTransaction ft) {
-            final int position = tab.getPosition();
+        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+            int position = tab.getPosition();
 
             IPagerFragment fragment = (IPagerFragment) mFragments[position];
             fragment.onPageUnselected();
@@ -131,6 +128,6 @@ public class ViewPagerActivityComponent extends ActivityComponent {
         }
 
         @Override
-        public void onTabReselected(final ActionBar.Tab tab, final FragmentTransaction ft) {}
+        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
     }
 }

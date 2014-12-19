@@ -55,7 +55,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
                     .displayer(new RoundedBitmapDisplayer(pixel)).build();
         } else {
             mDefaultOptions = new DisplayImageOptions.Builder()
-                    .cloneFrom(XoApplication.getContentImageOptions())
+                    .cloneFrom(XoApplication.getImageOptions())
                     .displayer(new RoundedBitmapDisplayer(pixel)).build();
         }
         setAvatarImage(mDefaultAvatarImageUrl);

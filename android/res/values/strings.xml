@@ -52,6 +52,7 @@
     <!-- Deleting attachments -->
     <string name="dialog_attachment_delete_title">Delete Attachment</string>
     <string name="dialog_attachment_delete_message">Delete selected attachments and related chat messages?</string>
+    <string name="deleted_attachment">[Deleted Attachment]</string>
 
     <!-- AudioAttachmentList Fragment -->
     <string name="menu_search">Search</string>
@@ -287,7 +288,7 @@
     <string name="import_credentials_success">Successfully imported your credentials.\nPlease restart the app.</string>
     <string name="import_credentials_failure">Error while importing your credentials.</string>
 
-    <string name="enter_password">Passwort:</string>
+    <string name="enter_password">Password:</string>
     <string name="no_password">Please enter a Password.</string>
     <string name="cant_find_credentials">Can\'t find "credentials.json" on your device.</string>
 
@@ -364,6 +365,39 @@
     <string name="update_hoccer_xo">Update Hoccer XO</string>
     <string name="hoccer_3_0">Hoccer 3.0</string>
     <string name="welcome_hoccer_classic_users">Hoccer now supports full messaging functions next to nearby data sharing. You can stay anonymous or connect with your friends. Yay.</string>
+
+    <!-- Backup and Restore -->
+    <string name="backup_title">Create Backup</string>
+    <string name="backup_in_progress_title">Creating Backup..</string>
+    <string name="backup_in_progress_subtitle">Creating backup in Progress</string>
+    <string name="backup_success_title">Backup successful</string>
+    <string name="backup_success_message">Successfully created backup.</string>
+    <string name="backup_failure_title">Backup failed</string>
+    <string name="backup_failure_message">Oh noes, something went wrong creating your backup. Please try again.</string>
+    <string name="backup_dialog_message">Save backup now to \n%1$s directory.</string>
+    <string name="backup_dialog_include_attachments">Including attachments</string>
+    <string name="backup_dialog_dont_forget_password">In case you forget your password, backup cannot be re-stored.</string>
+    <string name="backup_dialog_complete_backup_warning">Caution: High demand of storage, battery &amp; time</string>
+
+    <string name="restore_choose_backup">Choose backup</string>
+    <string name="restore_title">Restore Backup</string>
+    <string name="restore_in_progress_title">Restoring Backup..</string>
+    <string name="restore_in_progress_subtitle">Restoring backup in Progress</string>
+    <string name="restore_success_title">Restore successful</string>
+    <string name="restore_success_message">Backup was successfully restored.</string>
+    <string name="restore_failure_title">Restore failed</string>
+    <string name="restore_failure_default_message">Oh noes, something went wrong importing the backup. Please try again.</string>
+    <string name="restore_failure_insufficient_disk_space_message">There is not enough free storage to import the chosen backup. Please delete files from SD card and try again. You need %1$s free disk space.</string>
+    <string name="restore_enter_password">Enter password</string>
+    <string name="restore_restart_hoccer">Please re-start Hoccer to complete restoring your account. </string>
+    <string name="restore_no_backups_found_title">No backups found</string>
+    <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former Hoccer account.</string>
+
+
+    <string name="date">Date</string>
+    <string name="user">User</string>
+    <string name="file">File</string>
+    <string name="size">File size</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

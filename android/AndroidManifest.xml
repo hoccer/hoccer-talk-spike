@@ -302,6 +302,8 @@
 
         <service android:name="com.hoccer.xo.android.service.MediaPlayerService"/>
 
+        <service android:name="com.hoccer.xo.android.backup.BackupAndRestoreService" android:exported="false"/>
+
     </application>
 
 </manifest>

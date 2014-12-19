@@ -114,6 +114,21 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:key="backup_category"
+            android:title="Backups">
+        <com.hoccer.xo.android.backup.BackupPreference
+                android:key="@string/preference_key_create_backup"
+                android:layout="@layout/preference_backup"
+                android:title="@string/backup_title"
+                inProgressText="@string/backup_in_progress_title"/>
+        <com.hoccer.xo.android.backup.BackupPreference
+                android:key="@string/preference_key_restore_backup"
+                android:layout="@layout/preference_backup"
+                android:title="@string/restore_title"
+                inProgressText="@string/restore_in_progress_title"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/pref_encryption">
 
         <ListPreference
