@@ -483,7 +483,9 @@ public interface ITalkRpcServer {
      * @talk.statechanges.serverobjects create and store a new group with new unique group id, add connected client as admin member
      * @talk.errors.server
      **/
+    @Deprecated
     String createGroup(TalkGroupPresence groupPresence);
+
     TalkGroupPresence createGroupWithMembers(String groupType, String groupTag, String groupName, String[] members, String[] roles);
 
     /** Retrieve array of groups changed after given date

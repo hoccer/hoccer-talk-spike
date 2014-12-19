@@ -69,20 +69,11 @@ public class TestHelper {
         await("client 2 has client 1's pubkey").untilCall(to(client2.getDatabase().findContactByClientId(client1Id, false)).getPublicKey(), notNullValue());
     }
 
-    public static String createGroup(XoClient client) throws SQLException {
-        /* TODO: ideally this new group and presence creation stuff and eventually calling createGroup should be more graceful in the clients and disappear form this test entirely */
-        TalkClientContact newGroup = TalkClientContact.createGroupContact();
-        final String groupTag = newGroup.getGroupTag();
-
-        TalkGroupPresence groupPresence = new TalkGroupPresence();
-        groupPresence.setGroupTag(newGroup.getGroupTag());
-        newGroup.updateGroupPresence(groupPresence);
-
-        client.createGroup(newGroup);
+    public static String createGroup(XoClient client, String name) throws SQLException {
+        String groupTag = client.createGroup(name);
         await("client knows about created group").untilCall(to(client.getDatabase()).findContactByGroupTag(groupTag), notNullValue());
-        await("created group has a group id").untilCall(to(client.getDatabase().findContactByGroupTag(groupTag)).getGroupId(), notNullValue());
 
-        final String groupId = client.getDatabase().findContactByGroupTag(groupTag).getGroupId();
+        String groupId = client.getDatabase().findContactByGroupTag(groupTag).getGroupId();
         return groupId;
     }
 

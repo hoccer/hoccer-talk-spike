@@ -50,10 +50,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     @Nullable
     private Filter mFilter;
 
-    public ChatListAdapter(XoActivity activity) {
-        this(activity, null);
-    }
-
     public ChatListAdapter(XoActivity activity, @Nullable Filter filter) {
         super(activity);
         mFilter = filter;
@@ -68,7 +64,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    final int oldItemCount = mChatItems.size();
                     mChatItems.clear();
 
                     for (final TalkClientContact contact : filteredContacts) {
@@ -175,38 +170,6 @@ public class ChatListAdapter extends XoAdapter implements IXoContactListener, IX
     /**
      * ******************************* LISTENER IMPLEMENTATIONS ******************************
      */
-
-    @Override
-    public void onContactAdded(final TalkClientContact contact) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mFilter.shouldShow(contact)) {
-                    int oldItemCount = mChatItems.size();
-                    TalkClientChatItem item = new TalkClientChatItem(contact, mActivity);
-                    mChatItems.add(item);
-                    notifyDataSetChanged();
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onContactRemoved(final TalkClientContact contact) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                int oldItemCount = mChatItems.size();
-
-                BaseChatItem item = findChatItemForContent(contact);
-                if (item == null) {
-                    return;
-                }
-                mChatItems.remove(item);
-                notifyDataSetChanged();
-            }
-        });
-    }
 
     @Override
     public void onClientPresenceChanged(final TalkClientContact contact) {

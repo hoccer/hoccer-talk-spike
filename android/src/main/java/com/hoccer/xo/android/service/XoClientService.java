@@ -163,6 +163,7 @@ public class XoClientService extends Service {
             mClientListener = new ClientListener();
             mClient.registerStateListener(mClientListener);
             mClient.registerMessageListener(mClientListener);
+            mClient.registerContactListener(mClientListener);
             mClient.registerTransferListener(mClientListener);
         }
 
@@ -512,8 +513,8 @@ public class XoClientService extends Service {
                     continue;
                 }
 
-                // ignore unseen messages from deleted contacts and contacts we are currently conversing with
-                if (contact.isDeleted() || mCurrentConversationContactId == contact.getClientContactId()) {
+                // ignore unseen messages from contacts we are currently conversing with
+                if (mCurrentConversationContactId == contact.getClientContactId()) {
                     continue;
                 }
 
@@ -701,6 +702,7 @@ public class XoClientService extends Service {
     private class ClientListener implements
             IXoStateListener,
             IXoMessageListener,
+            IXoContactListener,
             IXoTransferListenerOld,
             MediaScannerConnection.OnScanCompletedListener {
 
@@ -730,16 +732,13 @@ public class XoClientService extends Service {
         }
 
         @Override
-        public void onDownloadStateChanged(TalkClientDownload download) {
-        }
+        public void onDownloadStateChanged(TalkClientDownload download) {}
 
         @Override
-        public void onDownloadStarted(TalkClientDownload download) {
-        }
+        public void onDownloadStarted(TalkClientDownload download) {}
 
         @Override
-        public void onDownloadProgress(TalkClientDownload download) {
-        }
+        public void onDownloadProgress(TalkClientDownload download) {}
 
         @Override
         public void onDownloadFinished(TalkClientDownload download) {
@@ -757,29 +756,22 @@ public class XoClientService extends Service {
         }
 
         @Override
-        public void onDownloadFailed(TalkClientDownload downlad) {
-
-        }
+        public void onDownloadFailed(TalkClientDownload download) {}
 
         @Override
-        public void onUploadStarted(TalkClientUpload upload) {
-        }
+        public void onUploadStarted(TalkClientUpload upload) {}
 
         @Override
-        public void onUploadProgress(TalkClientUpload upload) {
-        }
+        public void onUploadProgress(TalkClientUpload upload) {}
 
         @Override
-        public void onUploadFinished(TalkClientUpload upload) {
-        }
+        public void onUploadFinished(TalkClientUpload upload) {}
 
         @Override
-        public void onUploadFailed(TalkClientUpload upload) {
-        }
+        public void onUploadFailed(TalkClientUpload upload) {}
 
         @Override
-        public void onUploadStateChanged(TalkClientUpload upload) {
-        }
+        public void onUploadStateChanged(TalkClientUpload upload) {}
 
         @Override
         public void onScanCompleted(String path, Uri uri) {
@@ -816,6 +808,22 @@ public class XoClientService extends Service {
             if (message.isIncoming()) {
                 updateUnseenMessageNotification(false);
             }
+        }
+
+        @Override
+        public void onClientPresenceChanged(TalkClientContact contact) {}
+
+        @Override
+        public void onClientRelationshipChanged(TalkClientContact contact) {
+            updateUnseenMessageNotification(false);
+        }
+
+        @Override
+        public void onGroupPresenceChanged(TalkClientContact contact) {}
+
+        @Override
+        public void onGroupMembershipChanged(TalkClientContact contact) {
+            updateUnseenMessageNotification(false);
         }
     }
 

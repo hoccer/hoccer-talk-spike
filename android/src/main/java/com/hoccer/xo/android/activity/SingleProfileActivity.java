@@ -16,11 +16,11 @@ import com.artcom.hoccer.R;
  */
 public class SingleProfileActivity extends ComposableActivity {
 
-    /* use this extra to open in "client registration" mode */
-    public static final String EXTRA_CLIENT_CREATE_SELF = "clientCreateSelf";
+    public static final String ACTION_CREATE_SELF = "com.hoccer.xo.android.activity.SingleProfileActivity.CREATE_SELF";
 
-    /* use this extra to show the given contact */
+    public static final String ACTION_SHOW = "com.hoccer.xo.android.activity.SingleProfileActivity.SHOW";
     public static final String EXTRA_CLIENT_CONTACT_ID = "clientContactId";
+
     public static final String SINGLE_PROFILE_CREATION_FRAGMENT = "SINGLE_PROFILE_CREATION_FRAGMENT";
 
     ActionBar mActionBar;
@@ -50,18 +50,20 @@ public class SingleProfileActivity extends ComposableActivity {
         mActionBar = getActionBar();
 
         Intent intent = getIntent();
+        String action = intent.getAction();
 
-        if (intent != null) {
-            if (intent.hasExtra(EXTRA_CLIENT_CREATE_SELF)) {
-                showCreateSingleProfileFragment();
-            } else if (intent.hasExtra(EXTRA_CLIENT_CONTACT_ID)) {
-                int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
-                if (contactId == -1) {
-                    LOG.error("invalid contact id");
-                } else {
-                    showSingleProfileFragment(contactId);
-                }
+        if (ACTION_CREATE_SELF.equals(action)) {
+            showCreateSingleProfileFragment();
+        } else if (ACTION_SHOW.equals(action)) {
+            int contactId = intent.getIntExtra(EXTRA_CLIENT_CONTACT_ID, -1);
+
+            if (contactId == -1) {
+                throw new RuntimeException("Missing EXTRA_CLIENT_CONTACT_ID");
             }
+
+            showSingleProfileFragment(contactId);
+        } else {
+            throw new RuntimeException("Unknown or missing action");
         }
 
         getActionBar().setDisplayHomeAsUpEnabled(true);

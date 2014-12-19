@@ -37,7 +37,7 @@ public class ITGroupInvite extends IntegrationTest {
         XoClient invitedClient = clients.get("client2");
 
         // create group
-        String groupId = TestHelper.createGroup(invitingClient);
+        String groupId = TestHelper.createGroup(invitingClient, "group");
 
         // invite group
         TestHelper.inviteToGroup(invitingClient, invitedClient, groupId);

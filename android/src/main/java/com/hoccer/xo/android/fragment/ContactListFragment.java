@@ -22,7 +22,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private ContactListAdapter mContactListAdapter;
 
     private int mTabNameId;
-    private Class<?> mProfileActivityClass;
     private Placeholder mPlaceholder;
 
     private MenuItem mMenuItemPairing;
@@ -31,9 +30,8 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     private View mTabView;
     private NotificationBadgeTextView mNotificationBadgeTextView;
 
-    public ContactListFragment(int tabNameId, Class<?> profileActivityClass, Placeholder placeholder) {
+    public ContactListFragment(int tabNameId, Placeholder placeholder) {
         mTabNameId = tabNameId;
-        mProfileActivityClass = profileActivityClass;
         mPlaceholder = placeholder;
     }
 
@@ -132,10 +130,10 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
     }
 
     private void startProfileActivity(TalkClientContact contact) {
-        Intent intent = new Intent(getActivity(), mProfileActivityClass);
-        intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
-        startActivity(intent);
+        startActivity(getProfileActivityIntent(contact));
     }
+
+    protected abstract Intent getProfileActivityIntent(TalkClientContact contact);
 
     @Override
     public void onPageResume() {}
@@ -170,12 +168,6 @@ public abstract class ContactListFragment extends SearchableListFragment impleme
 
     @Override
     public void onClientRelationshipChanged(TalkClientContact contact) {}
-
-    @Override
-    public void onContactAdded(TalkClientContact contact) {}
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {}
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {}
