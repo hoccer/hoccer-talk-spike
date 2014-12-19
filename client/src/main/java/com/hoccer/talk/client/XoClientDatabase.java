@@ -14,10 +14,12 @@ import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Transformer;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
@@ -250,13 +252,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
 
     public List<TalkClientContact> findContactsInGroup(String groupId) throws SQLException {
         List<TalkGroupMembership> memberships = mGroupMemberships.queryForEq("groupId", groupId);
-        return getContactsForMembers(memberships);
+        return getContactsForMemberships(memberships);
     }
 
     public List<TalkClientContact> findContactsInGroupByState(String groupId, String state) throws SQLException {
         List<TalkGroupMembership> memberships = findMembershipsInGroupByState(groupId, state);
 
-        return getContactsForMembers(memberships);
+        return getContactsForMemberships(memberships);
     }
 
     public TalkClientContact findAdminInGroup(String groupId) throws SQLException {
@@ -277,7 +279,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .eq("role", role)
                 .query();
 
-        return getContactsForMembers(memberships);
+        return getContactsForMemberships(memberships);
     }
 
     public synchronized TalkClientContact findGroupContactByGroupId(String groupId, boolean create) throws SQLException {
@@ -293,13 +295,14 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return contact;
     }
 
-    private List<TalkClientContact> getContactsForMembers(List<TalkGroupMembership> memberships) throws SQLException {
-        List<TalkClientContact> contacts = new ArrayList<TalkClientContact>(memberships.size());
-        for (TalkGroupMembership membership : memberships) {
-            TalkClientContact contact = findContactByClientId(membership.getClientId(), false);
-            CollectionUtils.addIgnoreNull(contacts, contact);
-        }
-        return contacts;
+    private List<TalkClientContact> getContactsForMemberships(final List<TalkGroupMembership> memberships) throws SQLException {
+        Collection<String> clientIds = CollectionUtils.collect(memberships, new Transformer<TalkGroupMembership, String>() {
+            @Override
+            public String transform(TalkGroupMembership membership) {
+                return membership.getClientId();
+            }
+        });
+        return mClientContacts.queryBuilder().where().in("clientId", clientIds).query();
     }
 
     ////////////////////////////////////
