@@ -14,6 +14,7 @@ import com.hoccer.xo.android.service.CancelableHandlerService;
 import com.hoccer.xo.android.service.NotificationId;
 import org.apache.commons.io.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -164,7 +165,20 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
 
     private void showRestoreBackupDialog() {
         final List<Backup> backups = BackupFileUtils.getBackups(XoApplication.getBackupDirectory());
+        if (backups.isEmpty()) {
+            showNoBackupsDialog();
+        } else {
+            showListBackupsDialog(backups);
+        }
+    }
 
+    private void showNoBackupsDialog() {
+        String message = mActivity.getString(R.string.restore_no_backups_found_message, XoApplication.getAttachmentDirectory().getName()
+                + File.separator + XoApplication.getBackupDirectory().getName());
+        XoDialogs.showOkDialog("NoBackupsFoundDialog", mActivity.getString(R.string.restore_no_backups_found_title), message, mActivity);
+    }
+
+    private void showListBackupsDialog(final List<Backup> backups) {
         List<String> items = new ArrayList<String>(backups.size());
         for (Backup backup : backups) {
             String timestamp = new SimpleDateFormat(getLocalizedDatePattern() + " " + TIME_PATTERN).format(backup.getCreationDate());
