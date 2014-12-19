@@ -7,6 +7,7 @@ import android.os.IBinder;
 import android.preference.Preference;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
+import android.widget.Button;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
@@ -46,6 +47,8 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
         View.OnClickListener cancelListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Button cancelButton = (Button) v;
+                cancelButton.setEnabled(false);
                 mBackupService.cancel();
             }
         };
