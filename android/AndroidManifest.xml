@@ -129,6 +129,7 @@
             </intent-filter>
         </activity>
 
+        <!-- Contacts activity -->
         <activity android:name="com.hoccer.xo.android.activity.ContactsActivity"
                   android:label="@string/contacts_title"
                   android:screenOrientation="portrait"
