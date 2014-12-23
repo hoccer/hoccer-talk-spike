@@ -17,6 +17,8 @@ import com.hoccer.xo.android.service.CancelableHandlerService;
 import com.hoccer.xo.android.service.NotificationId;
 import org.apache.log4j.Logger;
 
+import java.nio.channels.ClosedByInterruptException;
+
 import static com.hoccer.xo.android.backup.BackupAndRestoreService.BackupAction.*;
 import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.BACKUP;
 import static com.hoccer.xo.android.backup.BackupAndRestoreService.OperationInProgress.RESTORE;
@@ -130,6 +132,9 @@ public class BackupAndRestoreService extends CancelableHandlerService {
             triggerNotification(R.string.restore_success_title, R.string.restore_success_message, ACTION_RESTORE_SUCCEEDED, backup);
             broadcast(ACTION_RESTORE_SUCCEEDED, backup);
         } catch (InterruptedException e) {
+            stopForeground(true);
+            broadcast(ACTION_RESTORE_CANCELED);
+        } catch (ClosedByInterruptException e) {
             stopForeground(true);
             broadcast(ACTION_RESTORE_CANCELED);
         } catch (Exception e) {
