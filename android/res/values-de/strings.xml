@@ -381,6 +381,8 @@
     <string name="file">Datei</string>
     <string name="size">Dateigröße</string>
 
+    <string name="progress_cancelling">Beende..</string>
+
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
         <item quantity="other">%d Kontakte</item>

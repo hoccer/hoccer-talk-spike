@@ -9,12 +9,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 
+import static com.hoccer.xo.android.backup.BackupController.OnCancelListener;
+
 public class BackupPreference extends Preference {
 
     private View mView;
     private final String mInProgressText;
 
-    private View.OnClickListener mCancelListener;
+    private OnCancelListener mCancelListener;
     private boolean mInProgress;
 
     public BackupPreference(Context context, AttributeSet attrs) {
@@ -29,7 +31,7 @@ public class BackupPreference extends Preference {
         mInProgressText = getContext().getString(inProgressTextId);
     }
 
-    public void setCancelListener(View.OnClickListener cancelListener) {
+    public void setCancelListener(OnCancelListener cancelListener) {
         mCancelListener = cancelListener;
     }
 
@@ -59,7 +61,7 @@ public class BackupPreference extends Preference {
         if (mView != null) {
             RelativeLayout defaultLayout = (RelativeLayout) mView.findViewById(R.id.rl_default_preference);
             RelativeLayout inProgressLayout = (RelativeLayout) mView.findViewById(R.id.rl_in_progress);
-            TextView inProgressText = (TextView) mView.findViewById(R.id.tv_in_progress);
+            final TextView inProgressText = (TextView) mView.findViewById(R.id.tv_in_progress);
 
             inProgressText.setText(mInProgressText);
             defaultLayout.setVisibility(View.GONE);
@@ -70,7 +72,15 @@ public class BackupPreference extends Preference {
                 cancelBtn.setVisibility(View.GONE);
             } else {
                 cancelBtn.setVisibility(View.VISIBLE);
-                cancelBtn.setOnClickListener(mCancelListener);
+                cancelBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Button cancelButton = (Button) v;
+                        cancelButton.setEnabled(false);
+                        inProgressText.setText(R.string.progress_cancelling);
+                        mCancelListener.onCancel();
+                    }
+                });
             }
         }
     }

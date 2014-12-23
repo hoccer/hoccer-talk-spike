@@ -38,17 +38,18 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
     private final ServiceConnection mServiceConnection;
     private final BroadcastReceiver mBroadcastReceiver;
 
+    public interface OnCancelListener {
+        public void onCancel();
+    }
 
     public BackupController(Activity activity, BackupPreference createBackupPreference, BackupPreference restoreBackupPreference) {
         mActivity = activity;
         mBroadcastReceiver = createBroadcastReceiver();
         mServiceConnection = createServiceConnection();
 
-        View.OnClickListener cancelListener = new View.OnClickListener() {
+        OnCancelListener cancelListener = new OnCancelListener() {
             @Override
-            public void onClick(View v) {
-                Button cancelButton = (Button) v;
-                cancelButton.setEnabled(false);
+            public void onCancel() {
                 mBackupService.cancel();
             }
         };
