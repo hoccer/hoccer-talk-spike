@@ -434,15 +434,16 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     }
 
     private static void renameHoccerClassicAttachmentDirectory() {
+        if (sExternalStorage.list() != null) {
+            if (Arrays.asList(sExternalStorage.list()).contains(HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY)) {
 
-        if (Arrays.asList(sExternalStorage.list()).contains(HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY)) {
+                File classicDir = new File(sExternalStorage, HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY);
 
-            File classicDir = new File(sExternalStorage, HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY);
-
-            if (classicDir.exists()) {
-                File tempDir = new File(sExternalStorage, "_" + HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY);
-                classicDir.renameTo(tempDir);
-                tempDir.renameTo(getAttachmentDirectory());
+                if (classicDir.exists()) {
+                    File tempDir = new File(sExternalStorage, "_" + HOCCER_CLASSIC_ATTACHMENTS_DIRECTORY);
+                    classicDir.renameTo(tempDir);
+                    tempDir.renameTo(getAttachmentDirectory());
+                }
             }
         }
     }
