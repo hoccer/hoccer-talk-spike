@@ -221,7 +221,11 @@
         <activity
                 android:name="com.hoccer.xo.android.activity.XoPreferenceActivity"
                 android:label="@string/actionbar_default_title"
-                android:screenOrientation="portrait">
+                android:screenOrientation="portrait"
+                android:parentActivityName="com.hoccer.xo.android.activity.ChatsActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.hoccer.xo.android.activity.ChatsActivity"/>
         </activity>
 
         <!--Legal Imprint activity-->

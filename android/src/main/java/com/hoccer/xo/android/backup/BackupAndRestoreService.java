@@ -92,8 +92,9 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         resultIntent.putExtra(EXTRA_SELECT_BACKUP_PREFERENCES, true);
         resultIntent.putExtra(EXTRA_BACKUP, backup);
         resultIntent.setAction(action);
+
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this)
-                .addNextIntent(resultIntent).addParentStack(ChatsActivity.class);
+                .addNextIntentWithParentStack(resultIntent);
         return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
