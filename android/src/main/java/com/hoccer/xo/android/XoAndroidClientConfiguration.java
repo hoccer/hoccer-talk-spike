@@ -68,7 +68,7 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     }
 
     public boolean isCrashReportingEnabled() {
-        return isDevelopmentModeEnabled() || mPreferences.getBoolean("preference_crash_report", false);
+        return mPreferences.getBoolean("preference_report_crashes", true);
     }
 
     public String getBackupDirectory() {
