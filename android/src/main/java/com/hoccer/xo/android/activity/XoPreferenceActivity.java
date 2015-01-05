@@ -21,7 +21,6 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.backup.*;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
-import net.hockeyapp.android.CrashManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -80,7 +79,6 @@ public class XoPreferenceActivity extends PreferenceActivity
     protected void onResume() {
         super.onResume();
 
-        checkForCrashesIfEnabled();
         mBackupController.handleIntent(getIntent());
         mBackupController.registerAndBind();
     }
@@ -109,12 +107,6 @@ public class XoPreferenceActivity extends PreferenceActivity
                     }
                 }
             }
-        }
-    }
-
-    private void checkForCrashesIfEnabled() {
-        if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
-            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId());
         }
     }
 
