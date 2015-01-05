@@ -268,6 +268,10 @@
     <string name="pref_support">Support</string>
     <string name="pref_report_crashes">Send crash reports</string>
     <string name="pref_report_crashes_summary">Help us improve ${app.name} by sending your crash logs to the development team. Please find detailed information about crash reports in the FAQ.</string>
+    <string name="dialog_report_crash_title">Crash Data</string>
+    <string name="dialog_report_crash_message">Crash information available. We kindly ask you to send this information to ${app.name} developers and help us improving our service.</string>
+    <string name="dialog_report_crash_negative">Dismiss</string>
+    <string name="dialog_report_crash_positive">Send</string>
     <string name="pref_please_wait">Please wait…</string>
     <string name="up_down_unlimited_option">unlimited</string>
     <string name="up_down_manual_option">manual transfer</string>
