@@ -4,13 +4,11 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.*;
 import android.os.IBinder;
-import android.preference.Preference;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.View;
-import android.widget.Button;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
+import com.hoccer.xo.android.dialog.OnPreferenceClickListenerThrottled;
 import com.hoccer.xo.android.service.CancelableHandlerService;
 import com.hoccer.xo.android.service.NotificationId;
 import org.apache.commons.io.FileUtils;
@@ -56,9 +54,9 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
 
         mCreateBackupPreference = createBackupPreference;
         mCreateBackupPreference.setCancelListener(cancelListener);
-        mCreateBackupPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        mCreateBackupPreference.setOnPreferenceClickListener(new OnPreferenceClickListenerThrottled(500) {
             @Override
-            public boolean onPreferenceClick(Preference preference) {
+            public boolean onPreferenceClickThrottled() {
                 showCreateBackupDialog();
                 return true;
             }
@@ -66,11 +64,11 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
 
         mRestoreBackupPreference = restoreBackupPreference;
         mRestoreBackupPreference.setCancelListener(cancelListener);
-        mRestoreBackupPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        mRestoreBackupPreference.setOnPreferenceClickListener(new OnPreferenceClickListenerThrottled(500) {
             @Override
-            public boolean onPreferenceClick(Preference preference) {
+            public boolean onPreferenceClickThrottled() {
                 showRestoreBackupDialog();
-                return true;
+                return false;
             }
         });
     }
