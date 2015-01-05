@@ -11,8 +11,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import com.artcom.hoccer.R;
-import com.hoccer.xo.android.activity.ChatsActivity;
-import com.hoccer.xo.android.activity.XoPreferenceActivity;
+import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.service.CancelableHandlerService;
 import com.hoccer.xo.android.service.NotificationId;
 import org.apache.log4j.Logger;
@@ -94,8 +93,9 @@ public class BackupAndRestoreService extends CancelableHandlerService {
         resultIntent.putExtra(EXTRA_SELECT_BACKUP_PREFERENCES, true);
         resultIntent.putExtra(EXTRA_BACKUP, backup);
         resultIntent.setAction(action);
+
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this)
-                .addNextIntent(resultIntent).addParentStack(ChatsActivity.class);
+                .addNextIntentWithParentStack(resultIntent);
         return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
