@@ -369,7 +369,7 @@
     <!-- Backup and Restore -->
     <string name="backup_title">Create Backup</string>
     <string name="backup_in_progress_title">Creating Backup..</string>
-    <string name="backup_in_progress_subtitle">Creating backup in Progress</string>
+    <string name="backup_in_progress_subtitle">Creating backup in progress</string>
     <string name="backup_success_title">Backup successful</string>
     <string name="backup_success_message">Successfully created backup.</string>
     <string name="backup_failure_title">Backup failed</string>
