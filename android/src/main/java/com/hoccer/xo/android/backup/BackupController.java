@@ -100,6 +100,9 @@ public class BackupController implements CreateBackupDialogFragment.CreateBackup
                 if (operation != null) {
                     setBackupInProgress(operation == BACKUP);
                     setRestoreInProgress(operation == RESTORE);
+                } else {
+                    setBackupInProgress(false);
+                    setRestoreInProgress(false);
                 }
             }
 
