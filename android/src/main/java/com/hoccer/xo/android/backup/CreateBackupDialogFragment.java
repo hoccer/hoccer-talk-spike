@@ -89,8 +89,7 @@ public class CreateBackupDialogFragment extends DialogFragment {
 
     private String getBackupPathInfo() {
         String path = XoApplication.getAttachmentDirectory().getName() + File.separator + XoApplication.getBackupDirectory().getName();
-        String boldHtmlPath = "<i>" + path + "</i>";
-        return getString(R.string.backup_dialog_message, boldHtmlPath);
+        return getString(R.string.backup_dialog_message, path);
     }
 
     public void setListener(CreateBackupDialogListener listener) {
