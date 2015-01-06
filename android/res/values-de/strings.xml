@@ -252,6 +252,13 @@
     <string name="pref_legal_information">Rechtliches</string>
     <string name="pref_encryption">Verschlüsselung</string>
     <string name="profile_compare_key_description">Für ein Extra an Sicherheit, vergleiche diesen Fingerabdruck mit dem Fingerabdruck, den deine Freunde in deiner Kontaktkarte sehen.</string>
+    <string name="pref_support">Technischer Support</string>
+    <string name="pref_report_crashes">Abstürze melden</string>
+    <string name="pref_report_crashes_summary">Unterstütze ${app.name} bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an ${app.name} geschickt werden, kannst du in der FAQ einsehen.</string>
+    <string name="dialog_report_crash_title">Crash Information</string>
+    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Report an ${app.name}, damit wir den Fehler schnellst möglich beheben können.</string>
+    <string name="dialog_report_crash_negative">Abbrechen</string>
+    <string name="dialog_report_crash_positive">Senden</string>
     <string name="pref_please_wait">Bitte warten…</string>
     <string name="up_down_unlimited_option">unbegrenzt</string>
     <string name="up_down_manual_option">manuell</string>

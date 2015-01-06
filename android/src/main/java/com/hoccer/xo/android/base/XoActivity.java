@@ -21,6 +21,7 @@ import android.text.util.Linkify;
 import android.view.*;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.artcom.hoccer.R;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
@@ -40,8 +41,9 @@ import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
-import com.artcom.hoccer.R;
 import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.CrashManagerListener;
+import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -355,7 +357,23 @@ public abstract class XoActivity extends FragmentActivity {
 
     private void checkForCrashesIfEnabled() {
         if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
-            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId());
+            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId(), new CrashManagerListener() {
+                @Override
+                public String getStringForResource(int resourceID) {
+                    switch (resourceID) {
+                        case Strings.CRASH_DIALOG_TITLE_ID:
+                            return getString(R.string.dialog_report_crash_title);
+                        case Strings.CRASH_DIALOG_MESSAGE_ID:
+                            return getString(R.string.dialog_report_crash_message);
+                        case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_negative);
+                        case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_positive);
+                        default:
+                            return super.getStringForResource(resourceID);
+                    }
+                }
+            });
         }
     }
 

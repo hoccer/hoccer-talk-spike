@@ -264,14 +264,17 @@
     <string name="pref_legal_information">Legal Information</string>
     <string name="pref_about_information">About</string>
     <string name="pref_encryption">Encryption</string>
-    <string name="pref_crash_report">Send report after app crashed</string>
-    <string name="pref_crash_report_switcher">Enable reporting</string>
+    <string name="profile_compare_key_description">For extra security compare this fingerprint with the fingerprint seen by your friends in your contact card.</string>
+    <string name="pref_support">Support</string>
+    <string name="pref_report_crashes">Send crash reports</string>
+    <string name="pref_report_crashes_summary">Help us improve ${app.name} by sending your crash logs to the development team. Please find detailed information about crash reports in the FAQ.</string>
+    <string name="dialog_report_crash_title">Crash Data</string>
+    <string name="dialog_report_crash_message">Crash information available. We kindly ask you to send this information to ${app.name} developers and help us improving our service.</string>
+    <string name="dialog_report_crash_negative">Dismiss</string>
+    <string name="dialog_report_crash_positive">Send</string>
     <string name="pref_please_wait">Please wait…</string>
     <string name="up_down_unlimited_option">unlimited</string>
     <string name="up_down_manual_option">manual transfer</string>
-    <string name="profile_compare_key_description">For extra security compare this fingerprint with
-        the fingerprint seen by your friends in your contact card.
-    </string>
     <string name="my_profile_title">My profile</string>
     <string name="contact_item_received_attachment">Received %1$s attachment</string>
     <string name="contact_item_sent_attachment">Sent %1$s attachment</string>
