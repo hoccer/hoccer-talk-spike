@@ -300,8 +300,12 @@
           <sign>
             <debug>false</debug>
           </sign>
+          <dex>
+            <jvmArguments>
+              <jvmArgument>-Xmx2048m</jvmArgument>
+            </jvmArguments>
+          </dex>
           <proguard>
-            <skip>false</skip>
             <configs>
               <config>${environment.path}/proguard.cfg</config>
               <config>${project.basedir}/proguard.cfg</config>
