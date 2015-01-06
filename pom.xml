@@ -92,7 +92,6 @@
     <android.platform.version>4.4.2_r2</android.platform.version>
     <android.supportv4.version>19.0.1</android.supportv4.version>
     <android.gms.version>14.0.0</android.gms.version>
-    <android.gmaps.version>17_r3</android.gmaps.version>
     <log4j-android.version>1.2.17-1</log4j-android.version>
     <universal.image.loader.version>1.9.0</universal.image.loader.version>
 
