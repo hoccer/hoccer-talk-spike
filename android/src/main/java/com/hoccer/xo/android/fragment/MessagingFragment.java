@@ -165,7 +165,7 @@ public class MessagingFragment extends XoListFragment
         }
 
         // Ensure that all items receive the detach call
-        if(mMessageListView != null) {
+        if (mMessageListView != null) {
             for (int i = 0; i < mMessageListView.getChildCount(); i++) {
                 ChatMessageItem item = (ChatMessageItem) mMessageListView.getChildAt(i).getTag();
                 if (item != null) {
