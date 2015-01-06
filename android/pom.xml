@@ -74,11 +74,22 @@
       <version>${android.gmaps.version}</version>
     </dependency>
 
-    <!-- ez-vcard for vcard reading/writing -->
+    <!-- ez-vcard for vCard reading/writing -->
     <dependency>
       <groupId>com.googlecode.ez-vcard</groupId>
       <artifactId>ez-vcard</artifactId>
       <version>${ez-vcard.version}</version>
+      <exclusions>
+        <!-- hCard functionality not needed -->
+        <exclusion>
+          <groupId>org.jsoup</groupId>
+          <artifactId>jsoup</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.freemarker</groupId>
+          <artifactId>freemarker</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- Universal image loader -->
