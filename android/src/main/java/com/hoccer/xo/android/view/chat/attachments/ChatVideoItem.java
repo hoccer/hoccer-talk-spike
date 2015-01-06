@@ -22,6 +22,7 @@ import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.squareup.picasso.Picasso;
 
@@ -232,10 +233,14 @@ public class ChatVideoItem extends ChatMessageItem {
      */
     private void openVideo(IContentObject contentObject) {
         if (contentObject.isContentAvailable()) {
-            String url = contentObject.getContentUrl();
-            if (url == null) {
+
+            String url;
+            if (isContentUrlValid(contentObject.getContentUrl())) {
+                url = contentObject.getContentUrl();
+            } else {
                 url = contentObject.getContentDataUrl();
             }
+
             if (url != null) {
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -267,5 +272,9 @@ public class ChatVideoItem extends ChatMessageItem {
                 onMediaScanned(uri);
             }
         }
+    }
+
+    private boolean isContentUrlValid(String contentUrl) {
+        return contentUrl != null && !contentUrl.isEmpty() && UriUtils.isValid(mContext, contentUrl);
     }
 }
