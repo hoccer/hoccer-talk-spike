@@ -37,6 +37,13 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.j256.ormlite</groupId>
+      <artifactId>ormlite-jdbc</artifactId>
+      <version>${ormlite.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Awaitility - Test asynchronous code -->
     <dependency>
       <groupId>com.jayway.awaitility</groupId>
@@ -109,12 +116,6 @@
     <dependency>
       <groupId>com.j256.ormlite</groupId>
       <artifactId>ormlite-android</artifactId>
-      <version>${ormlite.version}</version>
-    </dependency>
-    <!-- We include the JDBC variant just for log4j support -->
-    <dependency>
-      <groupId>com.j256.ormlite</groupId>
-      <artifactId>ormlite-jdbc</artifactId>
       <version>${ormlite.version}</version>
     </dependency>
 
