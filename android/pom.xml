@@ -37,6 +37,13 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.j256.ormlite</groupId>
+      <artifactId>ormlite-jdbc</artifactId>
+      <version>${ormlite.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Awaitility - Test asynchronous code -->
     <dependency>
       <groupId>com.jayway.awaitility</groupId>
@@ -67,18 +74,22 @@
       <type>jar</type>
     </dependency>
 
-    <!-- Google Maps API -->
-    <dependency>
-      <groupId>com.google.android.maps</groupId>
-      <artifactId>maps</artifactId>
-      <version>${android.gmaps.version}</version>
-    </dependency>
-
-    <!-- ez-vcard for vcard reading/writing -->
+    <!-- ez-vcard for vCard reading/writing -->
     <dependency>
       <groupId>com.googlecode.ez-vcard</groupId>
       <artifactId>ez-vcard</artifactId>
       <version>${ez-vcard.version}</version>
+      <exclusions>
+        <!-- hCard functionality not needed -->
+        <exclusion>
+          <groupId>org.jsoup</groupId>
+          <artifactId>jsoup</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.freemarker</groupId>
+          <artifactId>freemarker</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- Universal image loader -->
@@ -105,12 +116,6 @@
     <dependency>
       <groupId>com.j256.ormlite</groupId>
       <artifactId>ormlite-android</artifactId>
-      <version>${ormlite.version}</version>
-    </dependency>
-    <!-- We include the JDBC variant just for log4j support -->
-    <dependency>
-      <groupId>com.j256.ormlite</groupId>
-      <artifactId>ormlite-jdbc</artifactId>
       <version>${ormlite.version}</version>
     </dependency>
 
@@ -295,8 +300,12 @@
           <sign>
             <debug>false</debug>
           </sign>
+          <dex>
+            <jvmArguments>
+              <jvmArgument>-Xmx2048m</jvmArgument>
+            </jvmArguments>
+          </dex>
           <proguard>
-            <skip>false</skip>
             <configs>
               <config>${environment.path}/proguard.cfg</config>
               <config>${project.basedir}/proguard.cfg</config>
