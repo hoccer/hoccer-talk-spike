@@ -67,13 +67,6 @@
       <type>jar</type>
     </dependency>
 
-    <!-- Google Maps API -->
-    <dependency>
-      <groupId>com.google.android.maps</groupId>
-      <artifactId>maps</artifactId>
-      <version>${android.gmaps.version}</version>
-    </dependency>
-
     <!-- ez-vcard for vCard reading/writing -->
     <dependency>
       <groupId>com.googlecode.ez-vcard</groupId>
