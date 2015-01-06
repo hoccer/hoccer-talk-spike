@@ -117,7 +117,7 @@ public class ChatImageItem extends ChatMessageItem {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         Uri dataUri;
-        if (isContentUrlValid(contentObject)) {
+        if (isContentUrlValid(contentObject.getContentUrl())) {
             dataUri = Uri.parse(contentObject.getContentUrl());
         } else {
             dataUri = Uri.parse(contentObject.getContentDataUrl());
@@ -132,10 +132,8 @@ public class ChatImageItem extends ChatMessageItem {
         }
     }
 
-    private boolean isContentUrlValid(IContentObject contentObject) {
-        return contentObject.getContentUrl() != null
-                && !contentObject.getContentUrl().isEmpty()
-                && UriUtils.isValid(mContext, contentObject.getContentUrl());
+    private boolean isContentUrlValid(String contentUrl) {
+        return contentUrl != null && !contentUrl.isEmpty() && UriUtils.isValid(mContext, contentUrl);
     }
 }
 
