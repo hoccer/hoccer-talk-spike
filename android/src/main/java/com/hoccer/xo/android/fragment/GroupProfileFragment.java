@@ -68,7 +68,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private Menu mOptionsMenu;
 
-    private List<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
+    private final List<TalkClientContact> mCurrentClientsInGroup = new ArrayList<TalkClientContact>();
     private final ArrayList<TalkClientContact> mContactsToDisinviteAsFriend = new ArrayList<TalkClientContact>();
     private ArrayList<TalkClientContact> mContactsToInviteAsFriend = new ArrayList<TalkClientContact>();
 
@@ -313,7 +313,7 @@ public class GroupProfileFragment extends ProfileFragment
             name = mNameEditText.getText().toString();
         }
 
-        if (this.mGroup.getGroupPresence() != null && this.mGroup.getGroupPresence().isTypeNearby()) {
+        if (mGroup != null && mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
             mNameText.setText(R.string.nearby_text);
         } else {
             mNameText.setText(name);
@@ -374,7 +374,11 @@ public class GroupProfileFragment extends ProfileFragment
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                getActivity().getActionBar().setTitle(mGroup.getNickname());
+                if (mGroup.getGroupPresence().isTypeNearby()) {
+                    getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.nearby_text));
+                } else {
+                    getActivity().getActionBar().setTitle(mGroup.getNickname());
+                }
             }
         });
     }

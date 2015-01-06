@@ -98,7 +98,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
         if (contact.isGroup()) {
-            nameView.setText(contact.getNickname() + " (" + (mNearbyContacts.size() - 1) + ")");
+            nameView.setText(mXoActivity.getResources().getString(R.string.nearby_text) + " (" + (mNearbyContacts.size() - 1) + ")");
         } else {
             nameView.setText(contact.getNickname());
         }
@@ -225,12 +225,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
     private
     @Nullable
     TalkClientContact getActiveNearbyGroup() {
-        TalkClientContact group = mXoActivity.getXoClient().getCurrentNearbyGroup();
-        if(group != null) {
-            group.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
-        }
-
-        return group;
+        return mXoActivity.getXoClient().getCurrentNearbyGroup();
     }
 
     @Override
