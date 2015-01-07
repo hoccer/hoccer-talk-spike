@@ -183,6 +183,7 @@
       <version>2.1.5</version>
     </dependency>
 
+    <!-- Drag-Sort ListView -->
     <dependency>
       <groupId>com.mobeta.android.dslv</groupId>
       <artifactId>drag-sort-listview</artifactId>
