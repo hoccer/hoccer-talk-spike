@@ -36,6 +36,12 @@
       <artifactId>slf4j-log4j12</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
+    <!-- log4j extras to allow compressed rolling log files -->
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>apache-log4j-extras</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
     <!-- Servlet API -->
     <dependency>
       <groupId>javax.servlet</groupId>
