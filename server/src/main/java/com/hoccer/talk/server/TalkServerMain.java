@@ -81,6 +81,7 @@ public class TalkServerMain {
             LOG.info("Server has quit");
         } catch (Exception e) {
             LOG.error("Exception in server", e);
+            System.exit(1);
         }
     }
 
