@@ -65,23 +65,12 @@ public class TalkServerMain {
 
         LOG.info("Initializing jetty");
         final Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
+        webServer.setStopAtShutdown(true);
         setupServerHandlers(webServer, talkServer);
 
         final Server managementServer = new Server(new InetSocketAddress(config.getManagementListenAddress(), config.getManagementListenPort()));
+        managementServer.setStopAtShutdown(true);
         setupManagementServerHandlers(managementServer, talkServer);
-
-        // handle server shutdown gracefully
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    webServer.stop();
-                    managementServer.stop();
-                } catch (Exception e) {
-                    LOG.error("Exception in server shutdown hook", e);
-                }
-            }
-        });
 
         try {
             LOG.info("Starting server");
