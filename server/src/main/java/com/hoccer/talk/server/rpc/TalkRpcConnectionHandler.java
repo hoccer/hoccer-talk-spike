@@ -66,7 +66,7 @@ public class TalkRpcConnectionHandler extends WebSocketHandler {
     }
 
     public static boolean isBinaryProtocol(String protocol) {
-        return protocol.endsWith(".bson");
+        return protocol != null && protocol.endsWith(".bson");
     }
 
     /**

@@ -33,7 +33,13 @@ log4j.logger.com.j256.ormlite.stmt.StatementExecutor = INFO
 log4j.logger.com.j256.ormlite.stmt.SelectIterator = INFO
 
 # Console logging
-log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
-log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
-log4j.appender.CONSOLE.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
+log4j.appender.CONSOLE = org.apache.log4j.ConsoleAppender
+log4j.appender.CONSOLE.layout = org.apache.log4j.PatternLayout
+log4j.appender.CONSOLE.layout.ConversionPattern = %d [%t] %-5p %c - %m%n
 
+# Rolling logfile (weekly, compressed)
+log4j.appender.LOGFILE = org.apache.log4j.rolling.RollingFileAppender
+log4j.appender.LOGFILE.rollingPolicy = org.apache.log4j.rolling.TimeBasedRollingPolicy
+log4j.appender.LOGFILE.rollingPolicy.FileNamePattern = filecache.%d{yyyy-'cw'ww}.log.gz
+log4j.appender.LOGFILE.layout = org.apache.log4j.PatternLayout
+log4j.appender.LOGFILE.layout.ConversionPattern = %d [%t] %-5p %c - %m%n
