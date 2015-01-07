@@ -51,7 +51,6 @@ public class SingleProfileFragment extends ProfileFragment
         return inflater.inflate(R.layout.fragment_single_profile, container, false);
     }
 
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -522,8 +521,8 @@ public class SingleProfileFragment extends ProfileFragment
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                LOG.debug("updating ui");
                 updateView();
+                updateActionBar();
             }
         });
     }
