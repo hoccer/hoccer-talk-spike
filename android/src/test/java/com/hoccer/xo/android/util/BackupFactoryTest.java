@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.util;
 
 import com.hoccer.xo.android.backup.*;
+import net.lingala.zip4j.exception.ZipException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,19 +25,19 @@ public class BackupFactoryTest {
     }
 
     @Test
-    public void testReadCredentialsBackup() throws BackupFactory.BackupTypeNotSupportedException, IOException {
+    public void testReadCredentialsBackup() throws Exception {
         Backup backup = BackupFactory.readBackup(BACKUP_CREDENTIALS_FILE);
         assertTrue(backup instanceof CredentialsBackup);
     }
 
     @Test
-    public void testReadDatabaseBackup() throws BackupFactory.BackupTypeNotSupportedException, IOException {
+    public void testReadDatabaseBackup() throws Exception {
         Backup backup = BackupFactory.readBackup(BACKUP_DB_FILE);
         assertTrue(backup instanceof DatabaseBackup);
     }
 
     @Test
-    public void testReadCompleteBackup() throws BackupFactory.BackupTypeNotSupportedException, IOException {
+    public void testReadCompleteBackup() throws Exception {
         Backup backup = BackupFactory.readBackup(BACKUP_COMPLETE_FILE);
         assertTrue(backup instanceof CompleteBackup);
     }

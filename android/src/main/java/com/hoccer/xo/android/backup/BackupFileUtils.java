@@ -4,6 +4,8 @@ import android.os.Environment;
 import android.os.StatFs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoccer.talk.crypto.CryptoJSON;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -114,29 +116,29 @@ public class BackupFileUtils {
         }
     }
 
-    public static BackupMetadata extractMetadata(File backupFile) throws IOException {
-        ZipFile zipFile = new ZipFile(backupFile);
-        ZipEntry entry = zipFile.getEntry(METADATA_FILENAME);
-        if (entry == null) {
-            throw new FileNotFoundException(METADATA_FILENAME + " not found in " + backupFile.getName());
-        }
+    public static BackupMetadata extractMetadata(File backupFile) throws IOException, ZipException {
 
-        InputStream is = zipFile.getInputStream(entry);
+        BackupMetadata metadata;
+
+        net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(backupFile);
+        InputStream is = zipFile.getInputStream(zipFile.getFileHeader(METADATA_FILENAME));
+
         ObjectMapper objectMapper = new ObjectMapper();
-        BackupMetadata metadata = objectMapper.readValue(is, BackupMetadata.class);
+        try {
+            metadata = objectMapper.readValue(is, BackupMetadata.class);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
         is.close();
 
         return metadata;
     }
 
-    public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws IOException, CryptoJSON.DecryptionException {
-        ZipFile zipFile = new ZipFile(backupFile);
-        ZipEntry entry = zipFile.getEntry(DB_FILENAME_ENCRYPTED);
-        if (entry == null) {
-            throw new FileNotFoundException(DB_FILENAME_ENCRYPTED + " not found in " + backupFile.getName());
-        }
+    public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws IOException, CryptoJSON.DecryptionException, ZipException {
 
-        InputStream is = zipFile.getInputStream(entry);
+        net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(backupFile);
+        InputStream is = zipFile.getInputStream(zipFile.getFileHeader(DB_FILENAME_ENCRYPTED));
         writeDataToFileDecrypted(target, is, password);
         is.close();
     }
@@ -148,18 +150,14 @@ public class BackupFileUtils {
         FileUtils.writeByteArrayToFile(target, decrypted);
     }
 
-    public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException, InterruptedException {
-        ZipFile zipFile = new ZipFile(backupFile);
-        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+    public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException, InterruptedException, ZipException {
 
-        while (entries.hasMoreElements()) {
-            if (Thread.interrupted()) {
-                throw new InterruptedException();
-            }
-            ZipEntry entry = entries.nextElement();
-            if (!entry.getName().equals(DB_FILENAME_ENCRYPTED) && !entry.getName().equals(METADATA_FILENAME)) {
-                File file = new File(targetDir, entry.getName());
-                InputStream is = zipFile.getInputStream(entry);
+        net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(backupFile);
+        List<FileHeader> fileHeaderList = zipFile.getFileHeaders();
+        for (FileHeader fileHeader : fileHeaderList) {
+            if (fileHeader != null) {
+                File file = new File(targetDir, fileHeader.getFileName());
+                InputStream is = zipFile.getInputStream(fileHeader);
                 try {
                     FileUtils.copyInputStreamToFile(is, file);
                 } finally {
@@ -167,6 +165,24 @@ public class BackupFileUtils {
                 }
             }
         }
+
+//        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+//
+//        while (entries.hasMoreElements()) {
+//            if (Thread.interrupted()) {
+//                throw new InterruptedException();
+//            }
+//            ZipEntry entry = entries.nextElement();
+//            if (!entry.getName().equals(DB_FILENAME_ENCRYPTED) && !entry.getName().equals(METADATA_FILENAME)) {
+//                File file = new File(targetDir, entry.getName());
+//                InputStream is = zipFile.getInputStream(entry);
+//                try {
+//                    FileUtils.copyInputStreamToFile(is, file);
+//                } finally {
+//                    is.close();
+//                }
+//            }
+//        }
     }
 
     public static List<Backup> getBackups(File dir) {
@@ -178,10 +194,10 @@ public class BackupFileUtils {
                 try {
                     Backup backup = BackupFactory.readBackup(file);
                     backups.add(backup);
-                } catch (IOException e) {
-                    LOG.info("Ignoring non backup file: " + file.getAbsolutePath());
                 } catch (BackupFactory.BackupTypeNotSupportedException e) {
                     e.printStackTrace();
+                } catch (Exception e) {
+                    LOG.info("Ignoring non backup file: " + file.getAbsolutePath());
                 }
             }
         }
