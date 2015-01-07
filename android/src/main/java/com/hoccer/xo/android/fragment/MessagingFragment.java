@@ -120,7 +120,6 @@ public class MessagingFragment extends XoListFragment
     @Override
     public void onResume() {
         super.onResume();
-        finishIfContactIsNoLongerRelated(mContact);
 
         setHasOptionsMenu(true);
         mMessageListView = getListView();
@@ -276,41 +275,16 @@ public class MessagingFragment extends XoListFragment
     }
 
     @Override
-    public void onClientPresenceChanged(TalkClientContact contact) {
-        // do nothing
-    }
+    public void onClientPresenceChanged(TalkClientContact contact) {}
 
     @Override
-    public void onClientRelationshipChanged(TalkClientContact contact) {
-        if (isCurrentContact(contact)) {
-            finishIfContactIsNoLongerRelated(contact);
-        }
-    }
+    public void onClientRelationshipChanged(TalkClientContact contact) {}
 
     @Override
-    public void onGroupPresenceChanged(TalkClientContact contact) {
-        // do nothing
-    }
+    public void onGroupPresenceChanged(TalkClientContact contact) {}
 
     @Override
-    public void onGroupMembershipChanged(TalkClientContact contact) {
-        if (isCurrentContact(contact)) {
-            finishIfContactIsNoLongerRelated(contact);
-        }
-    }
-
-    private boolean isCurrentContact(TalkClientContact contact) {
-        return mContact.getClientContactId() == contact.getClientContactId();
-    }
-
-    private void finishIfContactIsNoLongerRelated(TalkClientContact contact) {
-        boolean clientNoLongerRelated = contact.isClient() && !contact.isClientRelated() && !contact.isNearby();
-        boolean groupNoLongerRelated = contact.isGroupNoLongerJoined();
-
-        if (clientNoLongerRelated || groupNoLongerRelated) {
-            getActivity().finish();
-        }
-    }
+    public void onGroupMembershipChanged(TalkClientContact contact) {}
 
     public void showAudioAttachmentList() {
         Intent intent = new Intent(getActivity(), MediaBrowserActivity.class);
