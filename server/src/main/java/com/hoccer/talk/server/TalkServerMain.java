@@ -64,14 +64,25 @@ public class TalkServerMain {
         TalkServer talkServer = new TalkServer(config, db);
 
         LOG.info("Initializing jetty");
-        Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
+        final Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
         setupServerHandlers(webServer, talkServer);
 
-        Server managementServer = new Server(new InetSocketAddress(config.getManagementListenAddress(), config.getManagementListenPort()));
+        final Server managementServer = new Server(new InetSocketAddress(config.getManagementListenAddress(), config.getManagementListenPort()));
         setupManagementServerHandlers(managementServer, talkServer);
 
-        // TODO: take care of proper signal handling (?) here. We never see the "Server has quit" line, currently.
-        // run and stop when interrupted
+        // handle server shutdown gracefully
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                try {
+                    webServer.stop();
+                    managementServer.stop();
+                } catch (Exception e) {
+                    LOG.error("Exception in server shutdown hook", e);
+                }
+            }
+        });
+
         try {
             LOG.info("Starting server");
             webServer.start();
