@@ -6,7 +6,7 @@ public abstract class OnPreferenceClickListenerThrottled implements Preference.O
 
     private final long mTimeDelta;
 
-    long mLastClicked;
+    private long mLastClicked;
 
     protected OnPreferenceClickListenerThrottled(long timeDelta) {
         mTimeDelta = timeDelta;
@@ -14,11 +14,13 @@ public abstract class OnPreferenceClickListenerThrottled implements Preference.O
 
     @Override
     public boolean onPreferenceClick(Preference preference) {
-        long delta = Math.abs(mLastClicked - System.currentTimeMillis());
+        long delta = System.currentTimeMillis() - mLastClicked;
+
         if (delta > mTimeDelta) {
             onPreferenceClickThrottled();
             mLastClicked = System.currentTimeMillis();
         }
+
         return true;
     }
 
