@@ -7,6 +7,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
@@ -21,7 +22,6 @@ import java.io.File;
 public class CreateBackupDialogFragment extends DialogFragment {
 
     private AlertDialog mDialog;
-    private TextView mSaveBackupTextView;
     private EditText mPasswordInput;
     private CheckBox mCheckBox;
 
@@ -45,11 +45,12 @@ public class CreateBackupDialogFragment extends DialogFragment {
 
     private View createView() {
         View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_create_backup, null);
-        mSaveBackupTextView = (TextView) view.findViewById(R.id.tv_save_backup_target);
+        TextView saveBackupTextView = (TextView) view.findViewById(R.id.tv_save_backup_target);
+
         mCheckBox = (CheckBox) view.findViewById(R.id.cb_include_attachments);
         mPasswordInput = (EditText) view.findViewById(R.id.et_password);
 
-        mSaveBackupTextView.setText(getBackupPathInfo());
+        saveBackupTextView.setText(Html.fromHtml(getBackupPathInfo()));
         mPasswordInput.addTextChangedListener(new TextWatcher() {
 
             @Override

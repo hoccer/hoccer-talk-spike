@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.backup;
 
-import com.hoccer.talk.crypto.CryptoJSON;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -25,7 +24,7 @@ public class DatabaseRestoreOperation {
         mDatabaseTemp = new File(mDatabaseTarget.getParent(), mDatabaseTarget.getName() + TMP_EXTENSION);
     }
 
-    public void invoke() throws IOException, CryptoJSON.DecryptionException {
+    public void invoke() throws Exception {
         deleteTempFile();
 
         try {
@@ -41,7 +40,7 @@ public class DatabaseRestoreOperation {
         }
     }
 
-    private void restore() throws IOException, CryptoJSON.DecryptionException {
+    private void restore() throws Exception {
         BackupFileUtils.extractAndDecryptDatabase(mBackupFile, mDatabaseTemp, mPassword);
         FileUtils.copyFile(mDatabaseTemp, mDatabaseTarget);
     }

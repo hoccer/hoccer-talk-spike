@@ -12,7 +12,7 @@
               android:text="@string/backup_dialog_message"
               android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"/>
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="5dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp">
 
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
@@ -30,8 +30,8 @@
     <TextView android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:text="@string/backup_dialog_dont_forget_password"
-              android:textSize="12dp"
-              android:padding="6dp"
+              android:textSize="12sp"
+              android:paddingTop="6dp"
               android:layout_marginTop="-10dp"/>
 
     <CheckBox android:id="@+id/cb_include_attachments"
@@ -43,10 +43,7 @@
 
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:text="@string/backup_dialog_complete_backup_warning"
-              android:textSize="12dp"
-              android:paddingLeft="8dp"
-              android:paddingRight="8dp"
+              android:textSize="12sp"
               android:gravity="center_vertical"
-              android:textColor="@color/xo_actionbar_tabtext_color"
               android:layout_marginTop="-4dp"/>
 </LinearLayout>

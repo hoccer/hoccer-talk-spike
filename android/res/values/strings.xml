@@ -372,12 +372,12 @@
     <!-- Backup and Restore -->
     <string name="backup_title">Create Backup</string>
     <string name="backup_in_progress_title">Creating Backup..</string>
-    <string name="backup_in_progress_subtitle">Creating backup in Progress</string>
+    <string name="backup_in_progress_subtitle">Creating backup in progress</string>
     <string name="backup_success_title">Backup successful</string>
     <string name="backup_success_message">Successfully created backup.</string>
     <string name="backup_failure_title">Backup failed</string>
     <string name="backup_failure_message">Oh noes, something went wrong creating your backup. Please try again.</string>
-    <string name="backup_dialog_message">Save backup now to \n%1$s directory.</string>
+    <string name="backup_dialog_message">Save backup now to <![CDATA[<br /><i>%1$s</i>]]> directory.</string>
     <string name="backup_dialog_include_attachments">Including attachments</string>
     <string name="backup_dialog_dont_forget_password">In case you forget your password, backup cannot be re-stored.</string>
     <string name="backup_dialog_complete_backup_warning">Caution: High demand of storage, battery &amp; time</string>
@@ -396,11 +396,12 @@
     <string name="restore_no_backups_found_title">No backups found</string>
     <string name="restore_no_backups_found_message">Please copy a backup to\n%1$s\nto restore a former Hoccer account.</string>
 
-
     <string name="date">Date</string>
     <string name="user">User</string>
     <string name="file">File</string>
     <string name="size">File size</string>
+
+    <string name="progress_cancelling">Cancelling..</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Contact</item>

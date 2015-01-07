@@ -364,7 +364,7 @@
     <string name="backup_success_message">Backup erfolgreich erstellt.</string>
     <string name="backup_failure_title">Backup fehlgeschlagen</string>
     <string name="backup_failure_message">Beim Ertsellen des Backups ist etwas schief gelaufen. Bitte versuche es erneut.</string>
-    <string name="backup_dialog_message">Das Backup wird unter\n%1$s gespeichert.</string>
+    <string name="backup_dialog_message">Das Backup wird unter <![CDATA[<br /><i>%1$s</i>]]> gespeichert.</string>
     <string name="backup_dialog_include_attachments">Dateianhänge sichern</string>
     <string name="backup_dialog_dont_forget_password">Falls du dein Passwort vergisst kann das Backup nicht wiederhergestellt werden.</string>
     <string name="backup_dialog_complete_backup_warning">Achtung: Hoher Verbrauch von Speicher, Batterie &amp; Zeit</string>
@@ -387,6 +387,8 @@
     <string name="user">Benutzer</string>
     <string name="file">Datei</string>
     <string name="size">Dateigröße</string>
+
+    <string name="progress_cancelling">Beende..</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>
