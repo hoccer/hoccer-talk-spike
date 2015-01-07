@@ -77,6 +77,7 @@ public class CacheMain {
             LOG.info("Server has quit");
         } catch (Exception e) {
             LOG.error("Exception in server", e);
+            LOG.error("Server has quit abnormally");
             System.exit(1);
         }
     }
