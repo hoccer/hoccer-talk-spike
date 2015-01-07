@@ -67,15 +67,14 @@ public class BackupPreference extends Preference {
             defaultLayout.setVisibility(View.GONE);
             inProgressLayout.setVisibility(View.VISIBLE);
 
-            Button cancelBtn = (Button) mView.findViewById(R.id.btn_cancel);
+            final Button cancelButton = (Button) mView.findViewById(R.id.btn_cancel);
             if (mCancelListener == null) {
-                cancelBtn.setVisibility(View.GONE);
+                cancelButton.setVisibility(View.GONE);
             } else {
-                cancelBtn.setVisibility(View.VISIBLE);
-                cancelBtn.setOnClickListener(new View.OnClickListener() {
+                cancelButton.setVisibility(View.VISIBLE);
+                cancelButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Button cancelButton = (Button) v;
                         cancelButton.setEnabled(false);
                         inProgressText.setText(R.string.progress_cancelling);
                         mCancelListener.onCancel();
