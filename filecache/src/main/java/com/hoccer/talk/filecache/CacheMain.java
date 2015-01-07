@@ -64,19 +64,8 @@ public class CacheMain {
         // create jetty instance
         final Server s = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
         s.setThreadPool(new QueuedThreadPool(config.getServerThreads()));
+        s.setStopAtShutdown(true);
         setupServer(s, db);
-
-        // handle server shutdown gracefully
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    s.stop();
-                } catch (Exception e) {
-                    LOG.error("Exception in server shutdown hook", e);
-                }
-            }
-        });
 
         // run and stop when interrupted
         try {
@@ -88,6 +77,8 @@ public class CacheMain {
             LOG.info("Server has quit");
         } catch (Exception e) {
             LOG.error("Exception in server", e);
+            LOG.error("Server has quit abnormally");
+            System.exit(1);
         }
     }
 
