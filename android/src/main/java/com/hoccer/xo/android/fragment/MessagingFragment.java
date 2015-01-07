@@ -165,7 +165,7 @@ public class MessagingFragment extends XoListFragment
         }
 
         // Ensure that all items receive the detach call
-        if(mMessageListView != null) {
+        if (mMessageListView != null) {
             for (int i = 0; i < mMessageListView.getChildCount(); i++) {
                 ChatMessageItem item = (ChatMessageItem) mMessageListView.getChildAt(i).getTag();
                 if (item != null) {
@@ -183,7 +183,11 @@ public class MessagingFragment extends XoListFragment
 
         // select client/group profile entry for appropriate icon
         if (mContact != null) {
-            getActivity().getActionBar().setTitle(mContact.getNickname());
+            if (mContact.isGroup() && mContact.getGroupPresence() != null && mContact.getGroupPresence().isTypeNearby()) {
+                getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.nearby_text));
+            } else {
+                getActivity().getActionBar().setTitle(mContact.getNickname());
+            }
 
             MenuItem clientItem = menu.findItem(R.id.menu_profile_single);
             clientItem.setVisible(mContact.isClient());

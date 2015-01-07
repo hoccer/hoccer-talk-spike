@@ -6,12 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -31,8 +31,8 @@ public class NearbyChatAdapter extends ChatAdapter {
         try {
             List<TalkClientMessage> messages = mDatabase.getAllNearbyGroupMessages();
             mChatMessageItems = new ArrayList<ChatMessageItem>(messages.size());
-            for (int i = 0; i < messages.size(); i++) {
-                ChatMessageItem messageItem = getItemForMessage(messages.get(i));
+            for (TalkClientMessage message : messages) {
+                ChatMessageItem messageItem = getItemForMessage(message);
                 mChatMessageItems.add(messageItem);
             }
             runOnUiThread(new Runnable() {
@@ -60,7 +60,7 @@ public class NearbyChatAdapter extends ChatAdapter {
         if (!chatItem.getMessage().isSeen()) {
             markMessageAsSeen(chatItem.getMessage());
         }
-        if (convertView == null || (convertView.getTag()!= null && convertView.getTag().equals(TalkClientMessage.TYPE_SEPARATOR))) {
+        if (convertView == null || (convertView.getTag() != null && convertView.getTag().equals(TalkClientMessage.TYPE_SEPARATOR))) {
             convertView = chatItem.createViewForMessage();
         } else {
             convertView = chatItem.recycleViewForMessage(convertView);
