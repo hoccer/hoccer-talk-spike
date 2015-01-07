@@ -40,7 +40,7 @@ public class UriUtils {
         }
     }
 
-    public static boolean isValid(Context context, String contentUrl) {
+    public static boolean isExistingContentUri(Context context, String contentUrl) {
         try {
             String filePath = getFilePathByContentUri(context, Uri.parse(contentUrl));
             if (new File(filePath).exists()) {

@@ -133,7 +133,7 @@ public class ChatImageItem extends ChatMessageItem {
     }
 
     private boolean isContentUrlValid(String contentUrl) {
-        return contentUrl != null && !contentUrl.isEmpty() && UriUtils.isValid(mContext, contentUrl);
+        return contentUrl != null && !contentUrl.isEmpty() && UriUtils.isExistingContentUri(mContext, contentUrl);
     }
 }
 
