@@ -32,7 +32,7 @@ log4j.appender.CONSOLE.layout.ConversionPattern = %d [%t] %-5p %c - %m%n
 # Rolling logfile (weekly, compressed)
 log4j.appender.LOGFILE = org.apache.log4j.rolling.RollingFileAppender
 log4j.appender.LOGFILE.rollingPolicy = org.apache.log4j.rolling.TimeBasedRollingPolicy
-log4j.appender.LOGFILE.rollingPolicy.FileNamePattern = talkserver.%d{yyyy-'cw'w}.log.gz
+log4j.appender.LOGFILE.rollingPolicy.FileNamePattern = talkserver.%d{yyyy-'cw'ww}.log.gz
 log4j.appender.LOGFILE.layout = org.apache.log4j.PatternLayout
 log4j.appender.LOGFILE.layout.ConversionPattern = %d [%t] %-5p %c - %m%n
 
