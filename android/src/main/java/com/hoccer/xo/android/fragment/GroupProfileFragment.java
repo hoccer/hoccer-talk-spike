@@ -374,7 +374,9 @@ public class GroupProfileFragment extends ProfileFragment
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mGroup.getGroupPresence().isTypeNearby()) {
+                if (mGroup.getGroupPresence() == null) {
+                    getActivity().getActionBar().setTitle("");
+                } else if (mGroup.getGroupPresence().isTypeNearby()) {
                     getActivity().getActionBar().setTitle(getActivity().getResources().getString(R.string.nearby_text));
                 } else {
                     getActivity().getActionBar().setTitle(mGroup.getNickname());
