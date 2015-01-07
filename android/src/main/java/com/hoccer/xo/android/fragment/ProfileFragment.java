@@ -75,13 +75,16 @@ public abstract class ProfileFragment extends XoFragment implements IXoContactLi
     private void setContact() {
         if (getArguments() != null && getArguments().containsKey(ARG_CLIENT_CONTACT_ID)) {
             int clientContactId = getArguments().getInt(ARG_CLIENT_CONTACT_ID);
+
             try {
                 mContact = XoApplication.getXoClient().getDatabase().findContactById(clientContactId);
             } catch (SQLException e) {
                 LOG.error("SQL error while retrieving contact ", e);
             }
-        } else {
-            LOG.error("Creating ProfileFragment without arguments is not supported.");
+        }
+
+        if (mContact == null) {
+            throw new IllegalArgumentException("Contact missing or does not exist.");
         }
     }
 

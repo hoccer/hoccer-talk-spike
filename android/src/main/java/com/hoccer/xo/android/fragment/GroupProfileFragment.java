@@ -132,7 +132,7 @@ public class GroupProfileFragment extends ProfileFragment
         }
         mGroupMemberAdapter.requestReload();
 
-        if (mGroup != null && mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
+        if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
             mGroupMembersList.setOnItemClickListener(this);
         } else {
             mGroupMembersList.setOnItemClickListener(null);
@@ -313,7 +313,7 @@ public class GroupProfileFragment extends ProfileFragment
             name = mNameEditText.getText().toString();
         }
 
-        if (mGroup != null && mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
+        if (mGroup.getGroupPresence() != null && mGroup.getGroupPresence().isTypeNearby()) {
             mNameText.setText(R.string.nearby_text);
         } else {
             mNameText.setText(name);
@@ -393,7 +393,7 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private boolean isCurrentGroup(TalkClientContact contact) {
-        return mGroup != null && (mGroup == contact || mGroup.getClientContactId() == contact.getClientContactId());
+        return mGroup == contact || mGroup.getClientContactId() == contact.getClientContactId();
     }
 
     @Override
@@ -525,7 +525,7 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private void enterAvatarEditMode() {
-        if (mGroup != null && mGroup.isEditable()) {
+        if (mGroup.isEditable()) {
             if (mGroup.getAvatarContentUrl() != null) {
                 XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                         R.string.dialog_avatar_options_title,
