@@ -5,6 +5,7 @@ import android.net.Uri;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.UriUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -43,7 +44,16 @@ public class DatabaseOperations {
 
         if (dataUrl != null) {
             if (UriUtils.isFileUri(dataUrl)) {
-                File dataFile = new File(dataUrl.substring(UriUtils.FILE_URI_PREFIX.length()));
+                File dataFile;
+                if (!dataUrl.startsWith("file://" + XoApplication.getExternalStorage().getAbsolutePath())) {
+                    if (dataUrl.startsWith("file://storage/sdcard/0/")) {
+                        dataUrl.replace("file://storage/sdcard/0/", XoApplication.getExternalStorage().getAbsolutePath());
+                    }
+                    if (dataUrl.startsWith("file://storage/emulated/0/")) {
+                        dataUrl.replace("file://storage/emulated/0/", XoApplication.getExternalStorage().getAbsolutePath());
+                    }
+                }
+                dataFile = new File(dataUrl.substring(UriUtils.FILE_URI_PREFIX.length()));
                 return !dataFile.exists();
             } else if (UriUtils.isContentUri(dataUrl)) {
                 InputStream inputStream = null;

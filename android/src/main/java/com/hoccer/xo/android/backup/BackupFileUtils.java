@@ -117,7 +117,6 @@ public class BackupFileUtils {
     }
 
     public static BackupMetadata extractMetadata(File backupFile) throws IOException, ZipException {
-
         BackupMetadata metadata;
 
         net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(backupFile);
@@ -136,7 +135,6 @@ public class BackupFileUtils {
     }
 
     public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws IOException, CryptoJSON.DecryptionException, ZipException {
-
         net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(backupFile);
         InputStream is = zipFile.getInputStream(zipFile.getFileHeader(DB_FILENAME_ENCRYPTED));
         writeDataToFileDecrypted(target, is, password);
@@ -151,7 +149,6 @@ public class BackupFileUtils {
     }
 
     public static void extractAttachmentFiles(File backupFile, File targetDir) throws IOException, InterruptedException, ZipException {
-
         net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(backupFile);
         List<FileHeader> fileHeaderList = zipFile.getFileHeaders();
         for (FileHeader fileHeader : fileHeaderList) {
@@ -165,24 +162,6 @@ public class BackupFileUtils {
                 }
             }
         }
-
-//        Enumeration<? extends ZipEntry> entries = zipFile.entries();
-//
-//        while (entries.hasMoreElements()) {
-//            if (Thread.interrupted()) {
-//                throw new InterruptedException();
-//            }
-//            ZipEntry entry = entries.nextElement();
-//            if (!entry.getName().equals(DB_FILENAME_ENCRYPTED) && !entry.getName().equals(METADATA_FILENAME)) {
-//                File file = new File(targetDir, entry.getName());
-//                InputStream is = zipFile.getInputStream(entry);
-//                try {
-//                    FileUtils.copyInputStreamToFile(is, file);
-//                } finally {
-//                    is.close();
-//                }
-//            }
-//        }
     }
 
     public static List<Backup> getBackups(File dir) {
