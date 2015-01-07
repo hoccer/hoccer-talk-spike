@@ -566,12 +566,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
                 String filePath = null;
                 String contentUri = upload.getContentUrl();
+
                 if (UriUtils.isContentUri(contentUri)) {
-                    try {
-                        filePath = UriUtils.getFilePathByContentUri(mContext, Uri.parse(contentUri));
-                    } catch (UriUtils.CursorNotFoundException e) {
-                        LOG.error("", e);
-                    }
+                    filePath = UriUtils.getFilePathByContentUri(mContext, Uri.parse(contentUri));
                 } else if (contentUri.startsWith(UriUtils.FILE_URI_PREFIX)) {
                     filePath = contentUri.substring(UriUtils.FILE_URI_PREFIX.length());
                 } else if (contentUri.startsWith("/")) {

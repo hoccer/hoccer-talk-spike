@@ -235,7 +235,7 @@ public class ChatVideoItem extends ChatMessageItem {
         if (contentObject.isContentAvailable()) {
 
             String url;
-            if (isContentUrlValid(contentObject.getContentUrl())) {
+            if (UriUtils.isExistingContentUri(mContext, contentObject.getContentUrl())) {
                 url = contentObject.getContentUrl();
             } else {
                 url = contentObject.getContentDataUrl();
@@ -272,9 +272,5 @@ public class ChatVideoItem extends ChatMessageItem {
                 onMediaScanned(uri);
             }
         }
-    }
-
-    private boolean isContentUrlValid(String contentUrl) {
-        return contentUrl != null && !contentUrl.isEmpty() && UriUtils.isExistingContentUri(mContext, contentUrl);
     }
 }

@@ -23,7 +23,7 @@ public class UriUtils {
         return uri.startsWith(FILE_URI_PREFIX);
     }
 
-    public static String getFilePathByContentUri(Context context, Uri contentUri) throws CursorNotFoundException {
+    public static String getFilePathByContentUri(Context context, Uri contentUri) {
         String[] projection = {
                 MediaStore.Images.Media.DATA,
         };
@@ -32,29 +32,18 @@ public class UriUtils {
 
         if (cursor != null && cursor.moveToFirst()) {
             int dataIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-            String filePath = cursor.getString(dataIndex);
-
-            return filePath;
-        } else {
-            throw new CursorNotFoundException("Couldn't find cursor for content uri: " + contentUri);
+            return cursor.getString(dataIndex);
         }
+
+        return null;
     }
 
     public static boolean isExistingContentUri(Context context, String contentUrl) {
-        try {
+        if (contentUrl != null && !contentUrl.isEmpty()) {
             String filePath = getFilePathByContentUri(context, Uri.parse(contentUrl));
-            if (new File(filePath).exists()) {
-                return true;
-            }
-        } catch (CursorNotFoundException e) {
-            LOG.info(e.getMessage(), e);
+            return filePath != null && new File(filePath).exists();
         }
-        return false;
-    }
 
-    public static class CursorNotFoundException extends Throwable {
-        public CursorNotFoundException(String message) {
-            super(message);
-        }
+        return false;
     }
 }
