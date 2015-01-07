@@ -10,8 +10,6 @@ import java.io.File;
 
 public class UriUtils {
 
-    private static final Logger LOG = Logger.getLogger(UriUtils.class);
-
     public static final String CONTENT_URI_PREFIX = "content://";
     public static final String FILE_URI_PREFIX = "file://";
 
