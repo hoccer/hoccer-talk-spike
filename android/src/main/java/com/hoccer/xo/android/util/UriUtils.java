@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
-import org.apache.log4j.Logger;
+import com.hoccer.xo.android.XoApplication;
 
 import java.io.File;
 
@@ -43,5 +43,12 @@ public class UriUtils {
         }
 
         return false;
+    }
+
+    public static String getAttachmentUri(String path) {
+        if (isContentUri(path) || isFileUri(path)) {
+            return path;
+        }
+        return FILE_URI_PREFIX + XoApplication.getAttachmentDirectory() + "/" + path;
     }
 }

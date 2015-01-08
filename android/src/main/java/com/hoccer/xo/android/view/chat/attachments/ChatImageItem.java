@@ -93,7 +93,9 @@ public class ChatImageItem extends ChatMessageItem {
 
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
-        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
+
+        String fileUri = UriUtils.getAttachmentUri(contentObject.getContentDataUrl());
+        Picasso.with(mContext).load(fileUri)
                 .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
                 .centerInside()

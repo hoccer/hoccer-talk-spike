@@ -14,6 +14,7 @@ import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.artcom.hoccer.R;
 import ezvcard.Ezvcard;
@@ -154,7 +155,9 @@ public class ChatContactItem extends ChatMessageItem {
             return;
         }
 
-        InputStream inputStream = openStreamForContentUri(mContent.getContentDataUrl());
+        String fileUri = UriUtils.getAttachmentUri(mContentObject.getContentDataUrl());
+
+        InputStream inputStream = openStreamForContentUri(fileUri);
         if (inputStream == null) {
             LOG.error("Could not open VCard at " + mContent.getContentDataUrl());
             return;

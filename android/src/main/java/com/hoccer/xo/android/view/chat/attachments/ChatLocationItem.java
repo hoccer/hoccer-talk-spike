@@ -17,6 +17,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.artcom.hoccer.R;
 
@@ -69,10 +70,10 @@ public class ChatLocationItem extends ChatMessageItem {
                 if (contentObject.isContentAvailable()) {
                     String url = contentObject.getContentUrl();
                     if (url == null) {
-                        url = contentObject.getContentDataUrl();
+                        url = UriUtils.getAttachmentUri(contentObject.getContentDataUrl());
                     }
                     if (url != null) {
-                        LatLng location = loadGeoJson(contentObject);
+                        LatLng location = loadGeoJson(contentObject, url);
                         String label = "Received Location";
                         String uriString = "http://maps.google.com/maps?q=loc:"
                                 + location.latitude + "," + location.longitude + " (" + label
@@ -88,7 +89,7 @@ public class ChatLocationItem extends ChatMessageItem {
     }
 
 
-    private LatLng loadGeoJson(IContentObject content) {
+    private LatLng loadGeoJson(IContentObject content, String uri) {
         LatLng result = null;
         try {
             if (!content.isContentAvailable()) {
@@ -104,9 +105,7 @@ public class ChatLocationItem extends ChatMessageItem {
                 }
             }
             if (is == null && content.getContentDataUrl() != null) {
-                is = XoApplication.getXoClient().getHost().openInputStreamForUrl(
-                        content.getContentDataUrl()
-                );
+                is = XoApplication.getXoClient().getHost().openInputStreamForUrl(uri);
             }
             if (is == null) {
                 return null;
