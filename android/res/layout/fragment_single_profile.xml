@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
-
         android:layout_width="match_parent"
         android:background="@color/xo_main_background"
         android:layout_height="match_parent">
-
 
     <RelativeLayout
             android:id="@+id/profile_avatar_layout"
@@ -61,6 +59,5 @@
                 style="@style/ProfileContainerStyle"/>
 
     </RelativeLayout>
-
 
 </ScrollView>
