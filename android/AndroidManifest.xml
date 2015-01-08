@@ -211,7 +211,7 @@
                 android:name="com.hoccer.xo.android.activity.GroupProfileActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait"
-                android:windowSoftInputMode="stateHidden">
+                android:windowSoftInputMode="stateHidden|adjustPan">
         </activity>
 
         <!-- Invitation activity -->
