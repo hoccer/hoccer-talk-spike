@@ -152,7 +152,8 @@ public class BackupFileUtils {
         net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(backupFile);
         List<FileHeader> fileHeaderList = zipFile.getFileHeaders();
         for (FileHeader fileHeader : fileHeaderList) {
-            if (fileHeader != null) {
+
+            if (!fileHeader.getFileName().equals(DB_FILENAME_ENCRYPTED) && !fileHeader.getFileName().equals(METADATA_FILENAME)) {
                 File file = new File(targetDir, fileHeader.getFileName());
                 InputStream is = zipFile.getInputStream(fileHeader);
                 try {
