@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.backup;
 
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
@@ -32,7 +33,7 @@ public class BackupFactory {
         return CompleteBackup.create(password);
     }
 
-    public static Backup readBackup(File backupFile) throws BackupTypeNotSupportedException, IOException {
+    public static Backup readBackup(File backupFile) throws BackupTypeNotSupportedException, IOException, ZipException {
         if (isJson(backupFile)) {
             return new CredentialsBackup(backupFile);
         }

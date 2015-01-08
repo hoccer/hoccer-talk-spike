@@ -104,7 +104,6 @@ public class BackupFileUtilsTest {
         thread.start();
 
         await().atMost(10, SECONDS).untilCall(to(backupFile).exists(), is(true));
-
     }
 
     @Test
