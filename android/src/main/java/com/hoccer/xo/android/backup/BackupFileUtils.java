@@ -125,11 +125,9 @@ public class BackupFileUtils {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             metadata = objectMapper.readValue(is, BackupMetadata.class);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
+        } finally {
+            IOUtils.closeQuietly(is);
         }
-        is.close();
 
         return metadata;
     }
@@ -137,8 +135,11 @@ public class BackupFileUtils {
     public static void extractAndDecryptDatabase(File backupFile, File target, String password) throws IOException, CryptoJSON.DecryptionException, ZipException {
         net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(backupFile);
         InputStream is = zipFile.getInputStream(zipFile.getFileHeader(DB_FILENAME_ENCRYPTED));
-        writeDataToFileDecrypted(target, is, password);
-        is.close();
+        try {
+            writeDataToFileDecrypted(target, is, password);
+        }finally {
+            IOUtils.closeQuietly(is);
+        }
     }
 
     private static void writeDataToFileDecrypted(File target, InputStream is, String password) throws IOException, CryptoJSON.DecryptionException {
@@ -159,7 +160,7 @@ public class BackupFileUtils {
                 try {
                     FileUtils.copyInputStreamToFile(is, file);
                 } finally {
-                    is.close();
+                    IOUtils.closeQuietly(is);
                 }
             }
         }
