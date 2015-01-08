@@ -62,9 +62,7 @@ public class ImportCredentialFragment extends XoFragment {
         mImportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-
                 if (mCredentials != null) {
-
                     // send disconnect request to import package client
                     CredentialImporter.sendDisconnectRequestToImportPackageClient(mRegistrationActivity);
 
@@ -99,7 +97,6 @@ public class ImportCredentialFragment extends XoFragment {
         CredentialImporter.importCredentials(mRegistrationActivity, new CredentialImporter.CredentialImportListener() {
             @Override
             public void onSuccess(final Credentials credentials, final Integer contactCount) {
-
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -113,7 +110,6 @@ public class ImportCredentialFragment extends XoFragment {
 
             @Override
             public void onFailure() {
-
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
