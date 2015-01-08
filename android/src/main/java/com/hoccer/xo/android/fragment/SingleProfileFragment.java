@@ -501,10 +501,6 @@ public class SingleProfileFragment extends ProfileFragment
     private void refreshContact() {
         LOG.debug("refreshContact()");
 
-        if (!mContact.isClientRelated() && !mContact.isNearby() && !mContact.isSelf()) {
-            getActivity().finish();
-        }
-
         try {
             XoClientDatabase database = XoApplication.getXoClient().getDatabase();
             database.refreshClientContact(mContact);
