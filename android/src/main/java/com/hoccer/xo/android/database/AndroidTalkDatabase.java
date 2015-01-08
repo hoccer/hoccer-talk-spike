@@ -8,13 +8,12 @@ import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
+import com.hoccer.xo.android.XoApplication;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
-import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.Transformer;
 import org.apache.log4j.Logger;
 
@@ -26,7 +25,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
-    private static final int DATABASE_VERSION = 23;
+    private static final int DATABASE_VERSION = 24;
 
     private static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
@@ -79,12 +78,24 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
                 deleteGroupMembershipsForDeletedGroups(deletedGroupIds);
                 deleteGroupContactsForDeletedGroups(deletedGroupIds);
                 deleteGroupPresencesForDeletedGroups(deletedGroupIds);
-             }
+            }
+
+            if (oldVersion < 24) {
+                updateXoTransferToRelativeDataFilePath(db);
+            }
+
         } catch (android.database.SQLException e) {
             LOG.error("Android SQL error upgrading database", e);
         } catch (SQLException e) {
             LOG.error("OrmLite SQL error upgrading database", e);
         }
+    }
+
+    private void updateXoTransferToRelativeDataFilePath(SQLiteDatabase db) throws SQLException {
+        String attachmentDirectoryPath = XoApplication.getAttachmentDirectory().getAbsolutePath();
+        int begin = attachmentDirectoryPath.length() + 2;
+        String pattern = attachmentDirectoryPath + "/%";
+        db.execSQL("UPDATE clientDownload SET dataFile = substr(dataFile, " + begin + ") WHERE dataFile LIKE '" + pattern + "'");
     }
 
     private void deleteDuplicateGroupContacts() throws SQLException {
