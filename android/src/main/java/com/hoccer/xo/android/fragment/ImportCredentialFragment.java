@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
  * Fragment shows the credential import information.
  */
 public class ImportCredentialFragment extends XoFragment {
-
     private static final Logger LOG = Logger.getLogger(ImportCredentialFragment.class);
     private RegistrationActivity mRegistrationActivity;
     private Credentials mCredentials;
@@ -32,7 +31,6 @@ public class ImportCredentialFragment extends XoFragment {
     private Button mImportButton;
     private Button mNewClientButton;
     private Integer mContactCount;
-
 
     @Override
     public void onAttach(Activity activity) {
@@ -63,13 +61,9 @@ public class ImportCredentialFragment extends XoFragment {
             @Override
             public void onClick(final View v) {
                 if (mCredentials != null) {
-                    // send disconnect request to import package client
                     CredentialImporter.sendDisconnectRequestToImportPackageClient(mRegistrationActivity);
-
-                    // set flag to change the srp secret on next login
                     CredentialImporter.setSrpChangeOnNextLoginFlag(mRegistrationActivity);
 
-                    // import new credentials
                     try {
                         XoApplication.getXoClient().importCredentials(mCredentials);
                     } catch (Exception e) {
@@ -90,7 +84,6 @@ public class ImportCredentialFragment extends XoFragment {
                 }
             }
         });
-
     }
 
     private void readCredentials() {
@@ -125,7 +118,6 @@ public class ImportCredentialFragment extends XoFragment {
     private void updateView() {
         String count = getResources().getQuantityString(R.plurals.contact_count, mContactCount, mContactCount);
         mContactsCountTextView.setText(count);
-
         mUserNameTextView.setText(mCredentials.getClientName());
         mProgressLayout.setVisibility(View.GONE);
         mXoProfileLayout.setVisibility(View.VISIBLE);
