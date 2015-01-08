@@ -797,7 +797,6 @@ public class TalkDelivery {
 
     public void setTimeChanged(Date timeChanged) {
         this.timeChanged = timeChanged;
-        System.out.println("@@@@" + this + " setTimeChanged(" + (timeChanged != null ? timeChanged.getTime() : "null") + ")");
     }
 
     public Date getTimeUpdatedOut() {
@@ -806,7 +805,6 @@ public class TalkDelivery {
 
     public void setTimeUpdatedOut(Date timeUpdatedOut) {
         this.timeUpdatedOut = timeUpdatedOut;
-        System.out.println("@@@@" + this + " setTimeUpdatedOut(" + (timeUpdatedOut != null ? timeUpdatedOut.getTime() : "null") + ")");
     }
 
     public Date getTimeUpdatedIn() {
@@ -815,7 +813,6 @@ public class TalkDelivery {
 
     public void setTimeUpdatedIn(Date timeUpdatedIn) {
         this.timeUpdatedIn = timeUpdatedIn;
-        System.out.println("@@@@" + this + " setTimeUpdatedIn(" + (timeUpdatedIn != null ? timeUpdatedIn.getTime() : "null") + ")");
     }
 
     public Date getTimeAttachmentReceived() {
