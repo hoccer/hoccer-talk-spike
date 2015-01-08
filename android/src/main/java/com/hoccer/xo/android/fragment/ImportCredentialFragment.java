@@ -8,12 +8,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.RegistrationActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 /**
@@ -87,7 +87,6 @@ public class ImportCredentialFragment extends XoFragment {
         mNewClientButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-
                 if (mRegistrationActivity != null) {
                     mRegistrationActivity.startNewClientRegistration();
                 }
@@ -104,7 +103,6 @@ public class ImportCredentialFragment extends XoFragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
                         LOG.info("Credentials import succeeded");
                         mCredentials = credentials;
                         mContactCount = contactCount;
