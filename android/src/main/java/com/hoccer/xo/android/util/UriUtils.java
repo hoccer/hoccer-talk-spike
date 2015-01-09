@@ -51,4 +51,11 @@ public class UriUtils {
         }
         return FILE_URI_PREFIX + XoApplication.getAttachmentDirectory() + "/" + path;
     }
+
+    public static String getAvatarUri(String path) {
+        if (isContentUri(path) || isFileUri(path)) {
+            return path;
+        }
+        return FILE_URI_PREFIX + XoApplication.getAvatarDirectory() + "/" + path;
+    }
 }

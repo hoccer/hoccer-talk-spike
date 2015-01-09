@@ -13,6 +13,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.util.UriUtils;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
@@ -97,7 +98,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
             return;
         }
         IContentObject avatar = mContact.getAvatar();
-        String avatarUri = avatar == null ? null : avatar.getContentDataUrl();
+        String avatarUri = avatar == null ? null : UriUtils.getAvatarUri(avatar.getContentDataUrl());
 
         if (avatarUri == null) {
             if (mContact.isGroup()) {

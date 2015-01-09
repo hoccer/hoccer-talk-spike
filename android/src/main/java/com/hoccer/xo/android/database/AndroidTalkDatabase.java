@@ -81,7 +81,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             }
 
             if (oldVersion < 24) {
-                updateXoTransferToRelativeDataFilePath(db);
+                updateDownloadsToRelativeDataFilePath(db);
             }
 
         } catch (android.database.SQLException e) {
@@ -91,10 +91,14 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         }
     }
 
-    private void updateXoTransferToRelativeDataFilePath(SQLiteDatabase db) throws SQLException {
-        String attachmentDirectoryPath = XoApplication.getAttachmentDirectory().getAbsolutePath();
-        int begin = attachmentDirectoryPath.length() + 2;
-        String pattern = attachmentDirectoryPath + "/%";
+    private static void updateDownloadsToRelativeDataFilePath(SQLiteDatabase db) throws SQLException {
+        updateDownloadsToRelativeDataFilePath(db, XoApplication.getAttachmentDirectory().getAbsolutePath());
+        updateDownloadsToRelativeDataFilePath(db, XoApplication.getAvatarDirectory().getAbsolutePath());
+    }
+
+    private static void updateDownloadsToRelativeDataFilePath(SQLiteDatabase db, String directoryPath) throws SQLException {
+        int begin = directoryPath.length() + 2;
+        String pattern = directoryPath + "/%";
         db.execSQL("UPDATE clientDownload SET dataFile = substr(dataFile, " + begin + ") WHERE dataFile LIKE '" + pattern + "'");
     }
 

@@ -21,6 +21,7 @@ import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
@@ -431,7 +432,7 @@ public class SingleProfileFragment extends ProfileFragment
             TalkClientDownload avatarDownload = mContact.getAvatarDownload();
             if (avatarDownload != null && avatarDownload.isContentAvailable()) {
                 if (avatarDownload.getDataFile() != null) {
-                    Uri uri = Uri.fromFile(new File(avatarDownload.getDataFile()));
+                    Uri uri = Uri.parse(UriUtils.getAvatarUri(avatarDownload.getContentDataUrl()));
                     avatarUrl = uri.toString();
                 }
             }
