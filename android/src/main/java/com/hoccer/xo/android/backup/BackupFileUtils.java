@@ -111,7 +111,7 @@ public class BackupFileUtils {
         IOUtils.copy(data, zos);
         zos.closeEntry();
 
-        if (!Thread.interrupted()) {
+        if (Thread.interrupted()) {
             throw new InterruptedException();
         }
     }
