@@ -645,7 +645,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                         File newName = new File(destinationPath);
                         if (destination.renameTo(newName)) {
                             this.decryptedFile = destinationFileName;
-                            this.dataFile = destinationPath;
+                            this.dataFile = destinationFileName;
                         } else {
                             LOG.warn("could not rename file");
                         }
