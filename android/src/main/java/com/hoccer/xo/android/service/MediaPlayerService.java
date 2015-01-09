@@ -27,6 +27,7 @@ import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.artcom.hoccer.R;
+import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -302,7 +303,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private void resetAndPrepareMediaPlayer(IContentObject item) {
         try {
             mMediaPlayer.reset();
-            mMediaPlayer.setDataSource(item.getContentDataUrl().replace("file:///", "/"));
+            mMediaPlayer.setDataSource(UriUtils.getAttachmentUri(item.getContentDataUrl()).replace("file:///", "/"));
             mMediaPlayer.prepare();
         } catch (Exception e) {
             LOG.error("setFile: exception setting data source", e);

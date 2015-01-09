@@ -25,6 +25,7 @@ import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -333,7 +334,7 @@ public class GroupProfileFragment extends ProfileFragment
             TalkClientDownload avatarDownload = mGroup.getAvatarDownload();
             if (avatarDownload != null && avatarDownload.isContentAvailable()) {
                 if (avatarDownload.getDataFile() != null) {
-                    Uri uri = Uri.fromFile(new File(avatarDownload.getDataFile()));
+                    Uri uri = Uri.parse(UriUtils.getAvatarUri(avatarDownload.getContentDataUrl()));
                     avatarUrl = uri.toString();
                 }
             }
