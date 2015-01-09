@@ -106,12 +106,12 @@ public class BackupFileUtils {
     }
 
     private static void addZipEntry(ZipOutputStream zos, String filename, InputStream data) throws IOException, InterruptedException {
+        ZipEntry entry = new ZipEntry(filename);
+        zos.putNextEntry(entry);
+        IOUtils.copy(data, zos);
+        zos.closeEntry();
+
         if (!Thread.interrupted()) {
-            ZipEntry entry = new ZipEntry(filename);
-            zos.putNextEntry(entry);
-            IOUtils.copy(data, zos);
-            zos.closeEntry();
-        } else {
             throw new InterruptedException();
         }
     }
@@ -137,7 +137,7 @@ public class BackupFileUtils {
         InputStream is = zipFile.getInputStream(zipFile.getFileHeader(DB_FILENAME_ENCRYPTED));
         try {
             writeDataToFileDecrypted(target, is, password);
-        }finally {
+        } finally {
             IOUtils.closeQuietly(is);
         }
     }
@@ -153,7 +153,6 @@ public class BackupFileUtils {
         net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(backupFile);
         List<FileHeader> fileHeaderList = zipFile.getFileHeaders();
         for (FileHeader fileHeader : fileHeaderList) {
-
             if (!fileHeader.getFileName().equals(DB_FILENAME_ENCRYPTED) && !fileHeader.getFileName().equals(METADATA_FILENAME)) {
                 File file = new File(targetDir, fileHeader.getFileName());
                 InputStream is = zipFile.getInputStream(fileHeader);
@@ -162,6 +161,10 @@ public class BackupFileUtils {
                 } finally {
                     IOUtils.closeQuietly(is);
                 }
+            }
+
+            if (Thread.interrupted()) {
+                throw new InterruptedException();
             }
         }
     }
