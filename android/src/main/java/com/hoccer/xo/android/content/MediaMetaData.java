@@ -8,6 +8,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import com.hoccer.talk.util.WeakListenerArray;
+import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -21,7 +22,7 @@ public class MediaMetaData {
     private static Map<String, MediaMetaData> mMetaDataCache = new HashMap<String, MediaMetaData>();
 
     public static MediaMetaData retrieveMetaData(String mediaFilePath) {
-        String mediaFileUri = Uri.parse(mediaFilePath).getPath();
+        String mediaFileUri = Uri.parse(UriUtils.getAttachmentUri(mediaFilePath)).getPath();
 
         MediaMetaData metaData = null;
         // return cached data if present
@@ -92,7 +93,7 @@ public class MediaMetaData {
     * Private constructor, use MediaMetaData.retrieveMetaData() to create instances
     */
     private MediaMetaData(String filePath) {
-        mFileUri = filePath;
+        mFileUri = UriUtils.getAttachmentUri(filePath);
     }
 
     public String getFileUri() {
