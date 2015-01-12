@@ -23,7 +23,7 @@ public class CredentialResultReceiver extends ResultReceiver {
     private static final int CREDENTIAL_RECEIVE_TIMEOUT_SECONDS = 15;
 
     CredentialImporter.CredentialImportListener mListener;
-    private boolean mAnswerReceived = false;
+    private boolean mAnswerReceived;
 
     public CredentialResultReceiver(final CredentialImporter.CredentialImportListener listener) {
         super(new Handler());
@@ -75,7 +75,7 @@ public class CredentialResultReceiver extends ResultReceiver {
         }
     }
 
-    private byte[] decryptPayload(Bundle resultData) throws Exception {
+    private static byte[] decryptPayload(Bundle resultData) throws Exception {
         final byte[] encryptedPayload = resultData.getByteArray(CredentialExportService.EXTRA_PAYLOAD);
         return CryptoJSON.decrypt(encryptedPayload, CredentialExportService.CREDENTIALS_ENCRYPTION_PASSWORD, CredentialExportService.CREDENTIALS_CONTENT_TYPE);
     }

@@ -3,7 +3,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.artcom.hoccer"
 
-          android:versionCode="340"
+          android:versionCode="341"
           android:versionName="${project.version}">
 
     <!-- We run on 4.0 (14) and up, we use features from up to 4.2 (17) -->
@@ -211,7 +211,7 @@
                 android:name="com.hoccer.xo.android.activity.GroupProfileActivity"
                 android:label="@string/actionbar_default_title"
                 android:screenOrientation="portrait"
-                android:windowSoftInputMode="stateHidden">
+                android:windowSoftInputMode="stateHidden|adjustPan">
         </activity>
 
         <!-- Invitation activity -->

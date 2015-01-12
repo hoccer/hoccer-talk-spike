@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.backup;
 
 import com.hoccer.talk.crypto.CryptoJSON;
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -52,7 +53,7 @@ public class CompleteRestoreOperation {
         }
     }
 
-    private void restore() throws IOException, CryptoJSON.DecryptionException, InterruptedException {
+    private void restore() throws IOException, CryptoJSON.DecryptionException, InterruptedException, ZipException {
         extractAndDecryptDatabaseToTempDir();
         extractAttachmentsToTempDir();
         backupCurrentDatabase();
@@ -61,7 +62,7 @@ public class CompleteRestoreOperation {
         moveAttachmentsToTargetDir();
     }
 
-    private void extractAttachmentsToTempDir() throws IOException, InterruptedException {
+    private void extractAttachmentsToTempDir() throws IOException, InterruptedException, ZipException {
         if (mTempAttachmentsDir.exists()) {
             FileUtils.forceDelete(mTempAttachmentsDir);
         }
@@ -69,7 +70,7 @@ public class CompleteRestoreOperation {
         BackupFileUtils.extractAttachmentFiles(mBackupFile, mTempAttachmentsDir);
     }
 
-    private void extractAndDecryptDatabaseToTempDir() throws IOException, CryptoJSON.DecryptionException {
+    private void extractAndDecryptDatabaseToTempDir() throws IOException, CryptoJSON.DecryptionException, ZipException {
         File tempDatabaseDirectory = mTempDatabaseFile.getParentFile();
         if (tempDatabaseDirectory.exists()) {
             FileUtils.forceDelete(tempDatabaseDirectory);

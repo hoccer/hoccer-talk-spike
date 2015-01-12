@@ -154,6 +154,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         ensureDirectory(getAttachmentDirectory());
         ensureDirectory(getBackupDirectory());
         ensureDirectory(getAvatarDirectory());
+        ensureNoMedia(getAvatarDirectory());
         ensureDirectory(getGeneratedDirectory());
         ensureNoMedia(getGeneratedDirectory());
         ensureDirectory(getThumbnailDirectory());

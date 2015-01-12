@@ -80,7 +80,6 @@ public class CleaningAgent {
         LOG.debug("cleaning client " + clientId);
         doCleanKeysForClient(clientId);
         doCleanTokensForClient(clientId);
-        doCleanRelationshipsForClient(clientId);
     }
 
     private void scheduleCleanAllDeliveries() {
@@ -270,24 +269,6 @@ public class CleaningAgent {
         }
         if (numExpired > 0) {
             LOG.debug("deleted " + numExpired + " expired tokens");
-        }
-    }
-
-    private void doCleanRelationshipsForClient(String clientId) {
-        LOG.debug("cleaning relationships for client " + clientId);
-
-        Date now = new Date();
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(now);
-        cal.add(Calendar.MONTH, -RELATIONSHIP_LIFE_TIME);
-
-        List<TalkRelationship> relationships = mDatabase.findRelationshipsForClientInState(clientId, TalkRelationship.STATE_NONE);
-        for (TalkRelationship relationship : relationships) {
-            if (!cal.after(relationship.getLastChanged())) {
-                continue;
-            }
-            mDatabase.deleteRelationship(relationship);
-            LOG.debug("deleted relationship from clientId '" + relationship.getClientId() + "' to clientID '" + relationship.getOtherClientId() + "'");
         }
     }
 

@@ -139,7 +139,7 @@ public class GroupProfileFragment extends ProfileFragment
             mGroupMembersList.setOnItemClickListener(null);
         }
 
-        updateWithContact(mGroup);
+        updateContact();
 
         Bundle arguments = getArguments();
         if (arguments != null) {
@@ -346,9 +346,7 @@ public class GroupProfileFragment extends ProfileFragment
                 .into(mAvatarImage);
     }
 
-    private void refreshContact(TalkClientContact newContact) {
-        mGroup = newContact;
-
+    private void refreshContact() {
         try {
             getXoDatabase().refreshClientContact(mGroup);
             if (mMode == Mode.PROFILE) {
@@ -425,7 +423,7 @@ public class GroupProfileFragment extends ProfileFragment
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    updateWithContact(contact);
+                    updateContact();
                     configureOptionsMenuItems(mOptionsMenu);
                 }
             });
@@ -438,21 +436,17 @@ public class GroupProfileFragment extends ProfileFragment
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    updateWithContact(contact);
+                    updateContact();
                     configureOptionsMenuItems(mOptionsMenu);
                 }
             });
         }
     }
 
-    private void updateWithContact(TalkClientContact contact) {
-        if (contact.isGroupNoLongerJoined()) {
-            getActivity().finish();
-        } else {
-            refreshContact(contact);
-            updateActionBar();
-            updateInviteButton();
-        }
+    private void updateContact() {
+        refreshContact();
+        updateActionBar();
+        updateInviteButton();
     }
 
     @Override

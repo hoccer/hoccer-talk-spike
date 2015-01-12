@@ -8,19 +8,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.util.Credentials;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.RegistrationActivity;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.credentialtransfer.CredentialImporter;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 /**
  * Fragment shows the credential import information.
  */
 public class ImportCredentialFragment extends XoFragment {
-
     private static final Logger LOG = Logger.getLogger(ImportCredentialFragment.class);
     private RegistrationActivity mRegistrationActivity;
     private Credentials mCredentials;
@@ -32,7 +31,6 @@ public class ImportCredentialFragment extends XoFragment {
     private Button mImportButton;
     private Button mNewClientButton;
     private Integer mContactCount;
-
 
     @Override
     public void onAttach(Activity activity) {
@@ -62,16 +60,10 @@ public class ImportCredentialFragment extends XoFragment {
         mImportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-
                 if (mCredentials != null) {
-
-                    // send disconnect request to import package client
                     CredentialImporter.sendDisconnectRequestToImportPackageClient(mRegistrationActivity);
-
-                    // set flag to change the srp secret on next login
                     CredentialImporter.setSrpChangeOnNextLoginFlag(mRegistrationActivity);
 
-                    // import new credentials
                     try {
                         XoApplication.getXoClient().importCredentials(mCredentials);
                     } catch (Exception e) {
@@ -87,24 +79,20 @@ public class ImportCredentialFragment extends XoFragment {
         mNewClientButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-
                 if (mRegistrationActivity != null) {
                     mRegistrationActivity.startNewClientRegistration();
                 }
             }
         });
-
     }
 
     private void readCredentials() {
         CredentialImporter.importCredentials(mRegistrationActivity, new CredentialImporter.CredentialImportListener() {
             @Override
             public void onSuccess(final Credentials credentials, final Integer contactCount) {
-
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
                         LOG.info("Credentials import succeeded");
                         mCredentials = credentials;
                         mContactCount = contactCount;
@@ -115,7 +103,6 @@ public class ImportCredentialFragment extends XoFragment {
 
             @Override
             public void onFailure() {
-
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -131,7 +118,6 @@ public class ImportCredentialFragment extends XoFragment {
     private void updateView() {
         String count = getResources().getQuantityString(R.plurals.contact_count, mContactCount, mContactCount);
         mContactsCountTextView.setText(count);
-
         mUserNameTextView.setText(mCredentials.getClientName());
         mProgressLayout.setVisibility(View.GONE);
         mXoProfileLayout.setVisibility(View.VISIBLE);
