@@ -301,7 +301,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         String contentRangeValue = "bytes */" + uploadLength;
         LOG.trace("PUT-check range '" + contentRangeValue + "'");
         LOG.trace("PUT-check '" + uploadUrl + "' commencing");
-        logRequestHeaders(checkRequest,"PUT-check request header ");
+        logRequestHeaders(checkRequest, "PUT-check request header ");
 
         try {
             HttpResponse checkResponse = client.execute(checkRequest);
@@ -342,30 +342,30 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
         LOG.info("probe returned uploaded range '" + uploadedRange.toContentRangeString() + "'");
 
-        if(uploadedRange.hasTotal()) {
-            if(uploadedRange.getTotal() != uploadLength) {
+        if (uploadedRange.hasTotal()) {
+            if (uploadedRange.getTotal() != uploadLength) {
                 LOG.error("server returned wrong upload length");
                 return false;
             }
         }
 
-        if(uploadedRange.hasStart()) {
-            if(uploadedRange.getStart() != 0) {
+        if (uploadedRange.hasStart()) {
+            if (uploadedRange.getStart() != 0) {
                 LOG.error("server returned non-zero start");
                 return false;
             }
         }
 
-        if(uploadedRange.hasEnd()) {
-            confirmedProgress = (int)uploadedRange.getEnd() + 1;
+        if (uploadedRange.hasEnd()) {
+            confirmedProgress = (int) uploadedRange.getEnd() + 1;
         }
 
         LOG.info("progress believed " + progress + " confirmed " + confirmedProgress);
         this.progress = confirmedProgress;
         agent.onUploadProgress(this);
 
-        if(uploadedRange.hasStart() && uploadedRange.hasEnd()) {
-            if(uploadedRange.getStart() == 0 && uploadedRange.getEnd() == last) {
+        if (uploadedRange.hasStart() && uploadedRange.hasEnd()) {
+            if (uploadedRange.getStart() == 0 && uploadedRange.getEnd() == last) {
                 LOG.info("upload complete");
                 return true;
             }
@@ -588,7 +588,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     /**********************************************************************************************/
     /**********************************************************************************************/
     /********************************* XoTransfer implementation **********************************/
-    /**********************************************************************************************/
+    /**
+     * ******************************************************************************************
+     */
     @Override
     public int getTransferId() {
         return -1 * getClientUploadId();
@@ -672,14 +674,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     @Override
     public String getContentDataUrl() {
-        if (dataFile != null) {
-            if (dataFile.startsWith("/")) {
-                return "file://" + dataFile;
-            } else {
-                return dataFile;
-            }
-        }
-        return null;
+        return dataFile;
     }
 
     public void setContentDataUrl(String dataUrl) {
