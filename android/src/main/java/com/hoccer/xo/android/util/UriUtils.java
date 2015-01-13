@@ -45,11 +45,11 @@ public class UriUtils {
         return false;
     }
 
-    public static String getAttachmentUri(String path) {
+    public static String getFileUri(String path) {
         if (isContentUri(path) || isFileUri(path)) {
             return path;
         }
-        return FILE_URI_PREFIX + XoApplication.getAttachmentDirectory() + "/" + path;
+        return FILE_URI_PREFIX + XoApplication.getExternalStorage() + "/" + path;
     }
 
     public static String getAvatarUri(String path) {
