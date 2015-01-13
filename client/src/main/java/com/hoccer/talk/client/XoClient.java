@@ -101,12 +101,16 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     /** Directory for avatar images */
     String mAvatarDirectory;
+    String mRelativeAvatarDirectory;
     /** Directory for received attachments */
     String mAttachmentDirectory;
+    String mRelativeAttachmentDirectory;
     /** Directory for encrypted intermediate uploads */
     String mEncryptedUploadDirectory;
     /** Directory for encrypted intermediate downloads */
     String mEncryptedDownloadDirectory;
+
+    String mExternalStorageDirectory;
 
     XoTransferAgent mTransferAgent;
 
@@ -264,12 +268,28 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         this.mAvatarDirectory = avatarDirectory;
     }
 
+    public String getRelativeAvatarDirectory() {
+        return mRelativeAvatarDirectory;
+    }
+
+    public void setRelativeAvatarDirectory(String avatarDirectory) {
+        this.mRelativeAvatarDirectory = avatarDirectory;
+    }
+
     public String getAttachmentDirectory() {
         return mAttachmentDirectory;
     }
 
     public void setAttachmentDirectory(String attachmentDirectory) {
         this.mAttachmentDirectory = attachmentDirectory;
+    }
+
+    public String getRelativeAttachmentDirectory() {
+        return mRelativeAttachmentDirectory;
+    }
+
+    public void setRelativeAttachmentDirectory(String attachmentDirectory) {
+        this.mRelativeAttachmentDirectory = attachmentDirectory;
     }
 
     public String getEncryptedUploadDirectory() {
@@ -286,6 +306,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public void setEncryptedDownloadDirectory(String encryptedDownloadDirectory) {
         this.mEncryptedDownloadDirectory = encryptedDownloadDirectory;
+    }
+
+    public String getExternalStorageDirectory() {
+        return mExternalStorageDirectory;
+    }
+
+    public void setExternalStorageDirectory(String externalStorageDirectory) {
+        this.mExternalStorageDirectory = externalStorageDirectory;
     }
 
     public IXoClientHost getHost() {

@@ -177,8 +177,11 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         sClientHost = new XoAndroidClientHost(this);
         XoAndroidClient client = new XoAndroidClient(sClientHost, sConfiguration);
         client.setAvatarDirectory(getAvatarDirectory().toString());
+        client.setRelativeAvatarDirectory(sConfiguration.getAvatarsDirectory());
         client.setAttachmentDirectory(getAttachmentDirectory().toString());
+        client.setRelativeAttachmentDirectory(sConfiguration.getAttachmentsDirectory());
         client.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
+        client.setExternalStorageDirectory(sExternalStorage.getAbsolutePath());
         sClient = client;
 
         // add srp secret change listener
