@@ -435,6 +435,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             uploadResponse.getEntity().consumeContent();
             if (isUploadComplete(checkRangeHeader)) {
                 switchState(State.COMPLETE);
+                this.dataFile = computeRelativeUploadFilePath(filename);
             } else {
                 LOG.warn("[uploadId: '" + clientUploadId + "'] no range header in upload response");
                 switchState(State.PAUSED);
@@ -446,6 +447,12 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             LOG.error("Exception while performing upload request: ", e);
             switchState(State.PAUSED);
         }
+    }
+
+    private String computeRelativeUploadFilePath(String filePath) {
+        String externalStorageDirectory = mTransferAgent.getClient().getExternalStorageDirectory();
+        int start = filePath.indexOf(externalStorageDirectory) + externalStorageDirectory.length();
+        return filePath.substring(start);
     }
 
     private void doPausedAction() {

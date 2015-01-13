@@ -328,7 +328,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doDownloadingAction() {
-        String downloadFilename = computeDownloadFile(mTransferAgent);
+        String downloadFilename = computeDownloadFile();
         if (downloadFilename == null) {
             LOG.error("[downloadId: '" + clientDownloadId + "'] could not determine download filename");
             return;
@@ -547,8 +547,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doDecryptingAction() {
-        String sourceFile = computeDownloadFile(mTransferAgent);
-        String destinationFile = computeDecryptionFile(mTransferAgent);
+        String sourceFile = computeDownloadFile();
+        String destinationFile = computeDecryptionFile();
 
         LOG.debug("performDecryption(downloadId: '" + clientDownloadId + "', sourceFile: '" + sourceFile + "', " + "destinationFile: '" + destinationFile + "')");
 
@@ -603,11 +603,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         String tempDestinationFilePath;
         String destinationDirectory;
         if (this.decryptedFile != null) {
-            tempDestinationFilePath = computeDecryptionFile(mTransferAgent);
-            destinationDirectory = computeDecryptionDirectory(mTransferAgent);
+            tempDestinationFilePath = computeDecryptionFile();
+            destinationDirectory = computeDecryptionDirectory();
         } else {
-            tempDestinationFilePath = computeDownloadFile(mTransferAgent);
-            destinationDirectory = computeDownloadDirectory(mTransferAgent);
+            tempDestinationFilePath = computeDownloadFile();
+            destinationDirectory = computeDownloadDirectory();
         }
 
         LOG.debug("performDetection(downloadId: '" + clientDownloadId + "', destinationFile: '" + tempDestinationFilePath + "')");
@@ -645,7 +645,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                         File newName = new File(destinationPath);
                         if (destination.renameTo(newName)) {
                             this.decryptedFile = destinationFileName;
-                            this.dataFile = destinationFileName;
+                            this.dataFile = computeRelativeDownloadDirectory() + File.separator + destinationFileName;
                         } else {
                             LOG.warn("could not rename file");
                         }
@@ -667,41 +667,51 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         mTransferAgent.onDownloadFailed(this);
     }
 
-    private String computeDecryptionDirectory(XoTransferAgent agent) {
+    private String computeDecryptionDirectory() {
         String directory = null;
         switch (this.type) {
             case ATTACHMENT:
-                directory = agent.getClient().getAttachmentDirectory();
+                directory = mTransferAgent.getClient().getAttachmentDirectory();
                 break;
         }
         return directory;
     }
 
-    private String computeDownloadDirectory(XoTransferAgent agent) {
+    private String computeDownloadDirectory() {
         String directory = null;
         switch (this.type) {
             case AVATAR:
-                directory = agent.getClient().getAvatarDirectory();
+                directory = mTransferAgent.getClient().getAvatarDirectory();
                 break;
             case ATTACHMENT:
-                directory = agent.getClient().getEncryptedDownloadDirectory();
+                directory = mTransferAgent.getClient().getEncryptedDownloadDirectory();
                 break;
         }
         return directory;
     }
 
-    private String computeDecryptionFile(XoTransferAgent agent) {
+    private String computeRelativeDownloadDirectory() {
+        switch (this.type) {
+            case ATTACHMENT:
+                return mTransferAgent.getClient().getRelativeAttachmentDirectory();
+            case AVATAR:
+                return mTransferAgent.getClient().getRelativeAvatarDirectory();
+        }
+        return null;
+    }
+
+    private String computeDecryptionFile() {
         String file = null;
-        String directory = computeDecryptionDirectory(agent);
+        String directory = computeDecryptionDirectory();
         if (directory != null) {
             file = directory + File.separator + this.decryptedFile;
         }
         return file;
     }
 
-    private String computeDownloadFile(XoTransferAgent agent) {
+    private String computeDownloadFile() {
         String file = null;
-        String directory = computeDownloadDirectory(agent);
+        String directory = computeDownloadDirectory();
         if (directory != null) {
             file = directory + File.separator + this.downloadFile;
         }
