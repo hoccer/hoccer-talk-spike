@@ -121,7 +121,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
             mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
 
-        mCurrentMetaData = MediaMetaData.retrieveMetaData(UriUtils.getAttachmentUri(mItem.getContentDataUrl()));
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(mItem.getContentDataUrl());
         mTitleTextView.setText(mCurrentMetaData.getTitleOrFilename().trim());
 
         String artist = mCurrentMetaData.getArtist();

@@ -98,7 +98,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
             return;
         }
         IContentObject avatar = mContact.getAvatar();
-        String avatarUri = avatar == null ? null : UriUtils.getAvatarUri(avatar.getContentDataUrl());
+        String avatarUri = avatar == null ? null : UriUtils.getFileUri(avatar.getContentDataUrl());
 
         if (avatarUri == null) {
             if (mContact.isGroup()) {

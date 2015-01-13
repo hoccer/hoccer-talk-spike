@@ -88,7 +88,7 @@ public class ChatVideoItem extends ChatMessageItem {
 
         // retrieve thumbnail path if not set already
         if (mThumbnailPath == null) {
-            mThumbnailPath = retrieveThumbnailPath(Uri.parse(contentObject.getContentDataUrl()));
+            mThumbnailPath = retrieveThumbnailPath(Uri.parse(UriUtils.getFileUri(contentObject.getContentDataUrl())));
         }
 
         // adjust width/height based on thumbnail size if it exists

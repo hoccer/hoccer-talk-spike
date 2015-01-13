@@ -334,7 +334,7 @@ public class GroupProfileFragment extends ProfileFragment
             TalkClientDownload avatarDownload = mGroup.getAvatarDownload();
             if (avatarDownload != null && avatarDownload.isContentAvailable()) {
                 if (avatarDownload.getDataFile() != null) {
-                    Uri uri = Uri.parse(UriUtils.getAvatarUri(avatarDownload.getContentDataUrl()));
+                    Uri uri = Uri.parse(UriUtils.getFileUri(avatarDownload.getContentDataUrl()));
                     avatarUrl = uri.toString();
                 }
             }

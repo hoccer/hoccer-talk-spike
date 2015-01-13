@@ -76,7 +76,7 @@ public class ChatAudioItem extends ChatMessageItem {
             fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
         }
 
-        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAttachmentUri(contentObject.getContentDataUrl()));
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(contentObject.getContentDataUrl());
         String displayName;
         if (metaData.getTitle() != null) {
             displayName = metaData.getTitle().trim();

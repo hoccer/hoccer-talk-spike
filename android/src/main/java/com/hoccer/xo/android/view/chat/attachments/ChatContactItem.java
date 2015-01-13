@@ -90,7 +90,7 @@ public class ChatContactItem extends ChatMessageItem {
                 LOG.debug("onClick(importButton)");
                 if (isContentImportable()) {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse(mContent.getContentDataUrl()), mContent.getContentType());
+                    intent.setDataAndType(Uri.parse(UriUtils.getFileUri(mContent.getContentDataUrl())), mContent.getContentType());
                     XoActivity activity = (XoActivity) mContext;
                     activity.startExternalActivity(intent);
                 }
@@ -155,7 +155,7 @@ public class ChatContactItem extends ChatMessageItem {
             return;
         }
 
-        String fileUri = UriUtils.getAttachmentUri(mContentObject.getContentDataUrl());
+        String fileUri = UriUtils.getFileUri(mContentObject.getContentDataUrl());
 
         InputStream inputStream = openStreamForContentUri(fileUri);
         if (inputStream == null) {

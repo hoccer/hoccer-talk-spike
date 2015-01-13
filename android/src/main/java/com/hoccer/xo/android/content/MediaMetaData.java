@@ -22,7 +22,7 @@ public class MediaMetaData {
     private static Map<String, MediaMetaData> mMetaDataCache = new HashMap<String, MediaMetaData>();
 
     public static MediaMetaData retrieveMetaData(String mediaFilePath) {
-        String mediaFileUri = Uri.parse(UriUtils.getAttachmentUri(mediaFilePath)).getPath();
+        String mediaFileUri = Uri.parse(UriUtils.getFileUri(mediaFilePath)).getPath();
 
         MediaMetaData metaData = null;
         // return cached data if present
@@ -93,7 +93,7 @@ public class MediaMetaData {
     * Private constructor, use MediaMetaData.retrieveMetaData() to create instances
     */
     private MediaMetaData(String filePath) {
-        mFileUri = UriUtils.getAttachmentUri(filePath);
+        mFileUri = UriUtils.getFileUri(filePath);
     }
 
     public String getFileUri() {

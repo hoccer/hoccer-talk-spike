@@ -39,7 +39,7 @@ public class DatabaseOperations {
     }
 
     private boolean isMissing(XoTransfer transfer) {
-        String dataUrl = transfer.getContentDataUrl();
+        String dataUrl = UriUtils.getFileUri(transfer.getContentDataUrl());
 
         if (dataUrl != null) {
             if (UriUtils.isFileUri(dataUrl)) {

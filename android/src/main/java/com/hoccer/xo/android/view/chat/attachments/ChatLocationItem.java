@@ -70,7 +70,7 @@ public class ChatLocationItem extends ChatMessageItem {
                 if (contentObject.isContentAvailable()) {
                     String url = contentObject.getContentUrl();
                     if (url == null) {
-                        url = UriUtils.getAttachmentUri(contentObject.getContentDataUrl());
+                        url = UriUtils.getFileUri(contentObject.getContentDataUrl());
                     }
                     if (url != null) {
                         LatLng location = loadGeoJson(contentObject, url);

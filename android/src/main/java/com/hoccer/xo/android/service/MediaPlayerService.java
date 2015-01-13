@@ -303,7 +303,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private void resetAndPrepareMediaPlayer(IContentObject item) {
         try {
             mMediaPlayer.reset();
-            mMediaPlayer.setDataSource(UriUtils.getAttachmentUri(item.getContentDataUrl()).replace("file:///", "/"));
+            mMediaPlayer.setDataSource(UriUtils.getFileUri(item.getContentDataUrl()).replace("file:///", "/"));
             mMediaPlayer.prepare();
         } catch (Exception e) {
             LOG.error("setFile: exception setting data source", e);
