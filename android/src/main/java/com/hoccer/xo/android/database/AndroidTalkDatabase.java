@@ -9,6 +9,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.util.UriUtils;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
@@ -81,7 +82,8 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             }
 
             if (oldVersion < 24) {
-                updateDownloadsToRelativeDataFilePath(db);
+                updateUploadDataFile(db);
+                updateDownloadDataFile(db);
             }
 
         } catch (android.database.SQLException e) {
@@ -91,15 +93,18 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         }
     }
 
-    private static void updateDownloadsToRelativeDataFilePath(SQLiteDatabase db) throws SQLException {
-        updateDownloadsToRelativeDataFilePath(db, XoApplication.getAttachmentDirectory().getAbsolutePath());
-        updateDownloadsToRelativeDataFilePath(db, XoApplication.getAvatarDirectory().getAbsolutePath());
+    private static void updateUploadDataFile(SQLiteDatabase db) {
+        updateTransferDataFile(db, "clientUpload", UriUtils.FILE_URI_PREFIX + XoApplication.getExternalStorage().getAbsolutePath() + "/");
     }
 
-    private static void updateDownloadsToRelativeDataFilePath(SQLiteDatabase db, String directoryPath) throws SQLException {
-        int begin = directoryPath.length() + 2;
-        String pattern = directoryPath + "/%";
-        db.execSQL("UPDATE clientDownload SET dataFile = substr(dataFile, " + begin + ") WHERE dataFile LIKE '" + pattern + "'");
+    private static void updateDownloadDataFile(SQLiteDatabase db) throws SQLException {
+        updateTransferDataFile(db, "clientDownload", XoApplication.getExternalStorage().getAbsolutePath() + "/");
+    }
+
+    private static void updateTransferDataFile(SQLiteDatabase db, String table, String prefixToRemove) {
+        int begin = prefixToRemove.length() + 1;
+        String pattern = prefixToRemove + "%";
+        db.execSQL("UPDATE " + table + " SET dataFile = substr(dataFile, " + begin + ") WHERE dataFile LIKE '" + pattern + "'");
     }
 
     private void deleteDuplicateGroupContacts() throws SQLException {
