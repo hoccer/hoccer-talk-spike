@@ -379,7 +379,7 @@
     <string name="backup_failure_message">Oh noes, something went wrong creating your backup. Please try again.</string>
     <string name="backup_dialog_message">Save backup now to <![CDATA[<br /><i>%1$s</i>]]> directory.</string>
     <string name="backup_dialog_include_attachments">Including attachments</string>
-    <string name="backup_dialog_dont_forget_password">In case you forget your password, backup cannot be re-stored.</string>
+    <string name="backup_dialog_dont_forget_password">In case you forget your password, backup cannot be restored.</string>
     <string name="backup_dialog_complete_backup_warning">Caution: High demand of storage, battery &amp; time</string>
 
     <string name="restore_choose_backup">Choose backup</string>
