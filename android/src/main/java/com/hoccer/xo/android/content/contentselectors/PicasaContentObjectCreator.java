@@ -48,6 +48,11 @@ public class PicasaContentObjectCreator implements IContentCreator {
                     return null;
                 }
 
+                if(is == null) {
+                    LOG.error("Error while creating image from Picasa. InputStream is null");
+                    return null;
+                }
+
                 String uriHash = getHashForContentUriPath(contentUri);
                 String filename = uriHash + "_" + displayName;
                 File imageFile = new File(XoApplication.getAttachmentDirectory(), filename);
