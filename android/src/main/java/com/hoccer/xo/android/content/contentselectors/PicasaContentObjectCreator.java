@@ -24,7 +24,7 @@ import java.security.NoSuchAlgorithmException;
 
 public class PicasaContentObjectCreator implements IContentCreator {
 
-    Logger LOG = Logger.getLogger(getClass());
+    private static final Logger LOG = Logger.getLogger(PicasaContentObjectCreator.class);
 
     @Override
     public SelectedContent apply(Context context, Intent intent) {
@@ -34,13 +34,12 @@ public class PicasaContentObjectCreator implements IContentCreator {
         };
 
         Cursor cursor = context.getContentResolver().query(contentUri, projection, null, null, null);
-
         if (cursor != null) {
             cursor.moveToFirst();
             int displayNameIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
             if (displayNameIndex != -1) {
                 String displayName = cursor.getString(displayNameIndex);
-                InputStream is = null;
+                InputStream is;
                 try {
                     is = context.getContentResolver().openInputStream(contentUri);
                 } catch (FileNotFoundException e) {
@@ -67,7 +66,6 @@ public class PicasaContentObjectCreator implements IContentCreator {
 
                 int fileWidth = options.outWidth;
                 int fileHeight = options.outHeight;
-
                 int orientation = ImageUtils.retrieveOrientation(context, contentUri, imageFile.getAbsolutePath());
                 double aspectRatio = ImageUtils.calculateAspectRatio(fileWidth, fileHeight, orientation);
 
@@ -85,12 +83,12 @@ public class PicasaContentObjectCreator implements IContentCreator {
         return null;
     }
 
-    private String getHashForContentUriPath(Uri contentUri) {
+    private static String getHashForContentUriPath(Uri contentUri) {
         String uriHash = null;
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(contentUri.getPath().getBytes());
-            uriHash = new String(Hex.encodeHexString(md.digest()));
+            uriHash = Hex.encodeHexString(md.digest());
         } catch (NoSuchAlgorithmException e) {
             LOG.error("Couldn't generate Hash for content uri path: " + contentUri.getPath());
             e.printStackTrace();
@@ -98,6 +96,4 @@ public class PicasaContentObjectCreator implements IContentCreator {
         LOG.info("MD5 Hash for the path of the Picasa URI [" + contentUri.getPath() + "] : " + uriHash);
         return uriHash;
     }
-
-
 }
