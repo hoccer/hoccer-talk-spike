@@ -44,8 +44,13 @@ public class ImageFileContentObjectCreator implements IContentCreator {
             filePath = contentUri.toString();
         }
 
-        // Validating file size
         File file = new File(filePath);
+        if (!file.exists()) {
+            LOG.error("The image file at '" + filePath + "' does not exist.");
+            return null;
+        }
+
+        // validating file size
         int realFileSize = (int) file.length();
         if (fileSize != realFileSize) {
             LOG.debug("File size from content database is not actual file size. Reading file size from actual file.");
