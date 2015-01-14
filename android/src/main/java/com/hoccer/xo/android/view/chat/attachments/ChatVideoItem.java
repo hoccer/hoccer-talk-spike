@@ -238,7 +238,7 @@ public class ChatVideoItem extends ChatMessageItem {
             if (UriUtils.isExistingContentUri(mContext, contentObject.getContentUrl())) {
                 url = contentObject.getContentUrl();
             } else {
-                url = contentObject.getContentDataUrl();
+                url = UriUtils.getFileUri(contentObject.getContentDataUrl());
             }
 
             if (url != null) {
