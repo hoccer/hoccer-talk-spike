@@ -902,25 +902,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.fileId = fileId;
     }
 
-    /**
-     * Only used for migrating existing filecache Uris to new host. Delete this Method once
-     * the migration is done!
-     *
-     * @param downloadUrl
-     */
-    @Deprecated
-    public void setDownloadUrl(String downloadUrl) {
-        this.downloadUrl = downloadUrl;
-    }
-
-    public String getDownloadFile() {
-        return downloadFile;
-    }
-
-    public long getDownloadProgress() {
-        return downloadProgress;
-    }
-
     public int getContentLength() {
         return contentLength;
     }
@@ -964,15 +945,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     public int getTransferFailures() {
         return transferFailures;
-    }
-
-    public void setTransferFailures(int transferFailures) {
-        this.transferFailures = transferFailures;
-        if (transferFailures > 16) {
-            // max retries reached. stop download and reset retries
-            LOG.debug("cancel Downloads. No more retries.");
-            this.transferFailures = 0;
-        }
     }
 
     public boolean isAvatar() {

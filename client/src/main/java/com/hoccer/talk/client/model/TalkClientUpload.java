@@ -474,15 +474,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         mTransferAgent.onUploadFailed(this);
     }
 
-    private void doOnHoldAction() {
-        if (mUploadRequest != null) {
-            mUploadRequest.abort();
-            mUploadRequest = null;
-            LOG.debug("aborted current Upload request. Upload can still resume.");
-        }
-        mTransferAgent.onUploadStateChanged(this);
-    }
-
     private boolean isUploadComplete(Header checkRangeHeader) {
         if (checkRangeHeader == null) {
             return false;
@@ -734,10 +725,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         return mediaType;
     }
 
-    public int getEncryptedLength() {
-        return encryptedLength;
-    }
-
     public int getDataLength() {
         return dataLength;
     }
@@ -755,25 +742,12 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         return contentHmac;
     }
 
-    public void setcontentHmac(String hmac) {
-        this.contentHmac = hmac;
-    }
-
     public boolean isAvatar() {
         return type == Type.AVATAR;
     }
 
     public boolean isAttachment() {
         return type == Type.ATTACHMENT;
-    }
-
-    /**
-     * Only used for migrating existing filecache Uris to new host. Delete this Method once
-     * the migration is done!
-     */
-    @Deprecated
-    public void setUploadUrl(String url) {
-        this.uploadUrl = url;
     }
 
     public String getUploadUrl() {
