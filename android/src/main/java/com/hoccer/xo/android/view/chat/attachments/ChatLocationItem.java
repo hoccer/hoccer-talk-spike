@@ -68,18 +68,15 @@ public class ChatLocationItem extends ChatMessageItem {
             @Override
             public void onClick(View view) {
                 if (contentObject.isContentAvailable()) {
-                    String url = contentObject.getContentUrl();
-                    if (url == null) {
-                        url = UriUtils.getFileUri(contentObject.getContentDataUrl());
+                    Uri uri = Uri.parse(contentObject.getContentUrl());
+                    if (uri == null) {
+                        uri = UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl());
                     }
-                    if (url != null) {
-                        LatLng location = loadGeoJson(contentObject, url);
+                    if (uri != null) {
+                        LatLng location = loadGeoJson(contentObject, uri);
                         String label = "Received Location";
-                        String uriString = "http://maps.google.com/maps?q=loc:"
-                                + location.latitude + "," + location.longitude + " (" + label
-                                + ")";
-                        Uri uri = Uri.parse(uriString);
-                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, uri);
+                        Uri locationUri = Uri.parse("http://maps.google.com/maps?q=loc:" + location.latitude + "," + location.longitude + " (" + label + ")");
+                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, locationUri);
                         XoActivity activity = (XoActivity)view.getContext();
                         activity.startExternalActivity(intent);
                     }
@@ -89,14 +86,13 @@ public class ChatLocationItem extends ChatMessageItem {
     }
 
 
-    private LatLng loadGeoJson(IContentObject content, String uri) {
+    private LatLng loadGeoJson(IContentObject content, Uri uri) {
         LatLng result = null;
         try {
             if (!content.isContentAvailable()) {
                 return null;
             }
 
-            // XXX put this somewhere
             InputStream is = null;
             if (content instanceof SelectedContent) {
                 SelectedContent selectedContent = ((SelectedContent) content);
@@ -105,7 +101,7 @@ public class ChatLocationItem extends ChatMessageItem {
                 }
             }
             if (is == null && content.getContentDataUrl() != null) {
-                is = XoApplication.getXoClient().getHost().openInputStreamForUrl(uri);
+                is = XoApplication.getXoClient().getHost().openInputStreamForUrl(uri.toString());
             }
             if (is == null) {
                 return null;

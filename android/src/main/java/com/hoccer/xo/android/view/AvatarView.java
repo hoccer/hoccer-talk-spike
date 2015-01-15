@@ -2,6 +2,7 @@ package com.hoccer.xo.android.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +24,7 @@ import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
  */
 public class AvatarView extends LinearLayout implements IXoContactListener {
 
-    private String mDefaultAvatarImageUrl;
+    private Uri mDefaultAvatarImageUri;
     private DisplayImageOptions mDefaultOptions;
     private float mCornerRadius = 0.0f;
     private AspectImageView mAvatarImage;
@@ -59,14 +60,14 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
                     .cloneFrom(XoApplication.getImageOptions())
                     .displayer(new RoundedBitmapDisplayer(pixel)).build();
         }
-        setAvatarImage(mDefaultAvatarImageUrl);
+        setAvatarImage(mDefaultAvatarImageUri);
     }
 
     private void applyAttributes(AttributeSet attributes) {
         TypedArray a = getContext().getTheme()
                 .obtainStyledAttributes(attributes, R.styleable.AvatarView, 0, 0);
         try {
-            mDefaultAvatarImageUrl = "drawable://" + a.getResourceId(R.styleable.AvatarView_defaultAvatarImageUrl, R.drawable.avatar_default_contact);
+            mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.AvatarView_defaultAvatarImageUrl, R.drawable.avatar_default_contact));
             mCornerRadius = a.getFloat(R.styleable.AvatarView_cornerRadius, 0.0f);
         } finally {
             a.recycle();
@@ -98,7 +99,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
             return;
         }
         IContentObject avatar = mContact.getAvatar();
-        String avatarUri = avatar == null ? null : UriUtils.getFileUri(avatar.getContentDataUrl());
+        Uri avatarUri = avatar == null ? null : UriUtils.getAbsoluteFileUri(avatar.getContentDataUrl());
 
         if (avatarUri == null) {
             if (mContact.isGroup()) {
@@ -145,9 +146,9 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
      * Sets the avatar image. Value can be null. Uses default avatar image url instead (if
      * specified).
      *
-     * @param avatarImageUrl Url of the given image resource  to load.
+     * @param avatarImageUri Url of the given image resource  to load.
      */
-    public void setAvatarImage(final String avatarImageUrl) {
+    public void setAvatarImage(final Uri avatarImageUri) {
         post(new Runnable() {
             @Override
             public void run() {
@@ -156,12 +157,12 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
                     avatar.setImageResource(R.drawable.avatar_default_contact);
                 } else {
                     mAvatarImage.setVisibility(View.VISIBLE);
-                    if (avatarImageUrl != null) {
+                    if (avatarImageUri != null) {
                         ImageLoader.getInstance()
-                                .displayImage(avatarImageUrl, mAvatarImage, mDefaultOptions, null);
-                    } else if (mDefaultAvatarImageUrl != null) {
+                                .displayImage(avatarImageUri.toString(), mAvatarImage, mDefaultOptions, null);
+                    } else if (mDefaultAvatarImageUri != null) {
                         ImageLoader.getInstance()
-                                .displayImage(mDefaultAvatarImageUrl, mAvatarImage, mDefaultOptions,
+                                .displayImage(mDefaultAvatarImageUri.toString(), mAvatarImage, mDefaultOptions,
                                         null);
                     } else {
                         mAvatarImage.setVisibility(View.INVISIBLE);
@@ -172,7 +173,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     }
 
     public void setAvatarImage(int resourceId) {
-        setAvatarImage("drawable://" + resourceId);
+        setAvatarImage(Uri.parse("drawable://" + resourceId));
     }
 
     private void updatePresence() {

@@ -25,7 +25,6 @@ import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.sql.SQLException;
 
 /**
@@ -432,7 +431,7 @@ public class SingleProfileFragment extends ProfileFragment
             TalkClientDownload avatarDownload = mContact.getAvatarDownload();
             if (avatarDownload != null && avatarDownload.isContentAvailable()) {
                 if (avatarDownload.getDataFile() != null) {
-                    Uri uri = Uri.parse(UriUtils.getFileUri(avatarDownload.getContentDataUrl()));
+                    Uri uri = UriUtils.getAbsoluteFileUri(avatarDownload.getContentDataUrl());
                     avatarUrl = uri.toString();
                 }
             }

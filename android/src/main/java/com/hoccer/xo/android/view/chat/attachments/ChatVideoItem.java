@@ -88,7 +88,7 @@ public class ChatVideoItem extends ChatMessageItem {
 
         // retrieve thumbnail path if not set already
         if (mThumbnailPath == null) {
-            mThumbnailPath = retrieveThumbnailPath(Uri.parse(UriUtils.getFileUri(contentObject.getContentDataUrl())));
+            mThumbnailPath = retrieveThumbnailPath(UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl()));
         }
 
         // adjust width/height based on thumbnail size if it exists
@@ -213,11 +213,12 @@ public class ChatVideoItem extends ChatMessageItem {
     private long getVideoId(Uri videoUri) {
         long videoId = -1;
 
+        String videoPath = videoUri.getPath();
         Uri videosUri = MediaStore.Video.Media.getContentUri("external");
         String[] projection = {
                 MediaStore.Video.VideoColumns._ID
         };
-        Cursor cursor = mContext.getContentResolver().query(videosUri, projection, MediaStore.Video.VideoColumns.DATA + " LIKE ?", new String[]{videoUri.getPath()}, null);
+        Cursor cursor = mContext.getContentResolver().query(videosUri, projection, MediaStore.Video.VideoColumns.DATA + " LIKE ?", new String[]{videoPath}, null);
 
         // if we have found a database entry for the video file
         if (cursor.moveToFirst()) {
@@ -234,17 +235,17 @@ public class ChatVideoItem extends ChatMessageItem {
     private void openVideo(IContentObject contentObject) {
         if (contentObject.isContentAvailable()) {
 
-            String url;
-            if (UriUtils.isExistingContentUri(mContext, contentObject.getContentUrl())) {
-                url = contentObject.getContentUrl();
+            Uri videoUri;
+            if (UriUtils.doesContentFileExist(mContext, Uri.parse(contentObject.getContentUrl()))) {
+                videoUri = Uri.parse(contentObject.getContentUrl());
             } else {
-                url = UriUtils.getFileUri(contentObject.getContentDataUrl());
+                videoUri = UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl());
             }
 
-            if (url != null) {
+            if (videoUri != null) {
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse(url), "video/*");
+                    intent.setDataAndType(videoUri, "video/*");
                     XoActivity activity = (XoActivity) mContext;
                     activity.startExternalActivity(intent);
                 } catch (ActivityNotFoundException exception) {

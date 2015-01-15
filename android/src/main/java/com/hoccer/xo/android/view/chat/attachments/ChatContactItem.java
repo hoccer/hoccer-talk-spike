@@ -90,7 +90,7 @@ public class ChatContactItem extends ChatMessageItem {
                 LOG.debug("onClick(importButton)");
                 if (isContentImportable()) {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse(UriUtils.getFileUri(mContent.getContentDataUrl())), mContent.getContentType());
+                    intent.setDataAndType(UriUtils.getAbsoluteFileUri(mContent.getContentDataUrl()), mContent.getContentType());
                     XoActivity activity = (XoActivity) mContext;
                     activity.startExternalActivity(intent);
                 }
@@ -155,7 +155,7 @@ public class ChatContactItem extends ChatMessageItem {
             return;
         }
 
-        String fileUri = UriUtils.getFileUri(mContentObject.getContentDataUrl());
+        Uri fileUri = UriUtils.getAbsoluteFileUri(mContentObject.getContentDataUrl());
 
         InputStream inputStream = openStreamForContentUri(fileUri);
         if (inputStream == null) {
@@ -173,14 +173,14 @@ public class ChatContactItem extends ChatMessageItem {
         }
     }
 
-    private @Nullable InputStream openStreamForContentUri(String contentUri) {
+    private @Nullable InputStream openStreamForContentUri(Uri contentUri) {
         if (contentUri == null) {
             return null;
         }
         InputStream inputStream = null;
         ContentResolver resolver = mContext.getContentResolver();
         try {
-            inputStream = resolver.openInputStream(Uri.parse(contentUri));
+            inputStream = resolver.openInputStream(contentUri);
         } catch (FileNotFoundException e) {
             LOG.error("Could not find VCard at " + contentUri, e);
         }

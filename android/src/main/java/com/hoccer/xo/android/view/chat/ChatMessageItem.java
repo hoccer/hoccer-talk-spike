@@ -565,14 +565,14 @@ public class ChatMessageItem implements AttachmentTransferListener {
             if (upload.getContentDataUrl().contains(XoApplication.getCacheStorage().getPath())) {
 
                 String filePath = null;
-                String contentUri = upload.getContentUrl();
+                Uri contentUri = Uri.parse(upload.getContentUrl());
 
                 if (UriUtils.isContentUri(contentUri)) {
-                    filePath = UriUtils.getFilePathByContentUri(mContext, Uri.parse(contentUri));
-                } else if (contentUri.startsWith(UriUtils.FILE_URI_PREFIX)) {
-                    filePath = contentUri.substring(UriUtils.FILE_URI_PREFIX.length());
-                } else if (contentUri.startsWith("/")) {
-                    filePath = contentUri;
+                    filePath = UriUtils.getFilePathByContentUri(mContext, contentUri);
+                } else if (UriUtils.isFileUri(contentUri)) {
+                    filePath = contentUri.getPath();
+                } else if (contentUri.getPath().startsWith("/")) {
+                    filePath = contentUri.toString();
                 }
 
                 if (filePath != null) {

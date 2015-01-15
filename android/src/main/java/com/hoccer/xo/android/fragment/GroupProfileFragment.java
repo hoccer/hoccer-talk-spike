@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
@@ -30,7 +29,6 @@ import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -334,8 +332,7 @@ public class GroupProfileFragment extends ProfileFragment
             TalkClientDownload avatarDownload = mGroup.getAvatarDownload();
             if (avatarDownload != null && avatarDownload.isContentAvailable()) {
                 if (avatarDownload.getDataFile() != null) {
-                    Uri uri = Uri.parse(UriUtils.getFileUri(avatarDownload.getContentDataUrl()));
-                    avatarUrl = uri.toString();
+                    avatarUrl = UriUtils.getAbsoluteFileUri(avatarDownload.getContentDataUrl()).toString();
                 }
             }
         }

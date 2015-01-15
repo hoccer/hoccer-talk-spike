@@ -39,16 +39,16 @@ public class DatabaseOperations {
     }
 
     private boolean isMissing(XoTransfer transfer) {
-        String dataUrl = UriUtils.getFileUri(transfer.getContentDataUrl());
+        Uri dataUri = UriUtils.getAbsoluteFileUri(transfer.getContentDataUrl());
 
-        if (dataUrl != null) {
-            if (UriUtils.isFileUri(dataUrl)) {
-                File dataFile = new File(dataUrl.substring(UriUtils.FILE_URI_PREFIX.length()));
+        if (dataUri != null) {
+            if (UriUtils.isFileUri(dataUri)) {
+                File dataFile = new File(dataUri.getPath());
                 return !dataFile.exists();
-            } else if (UriUtils.isContentUri(dataUrl)) {
+            } else if (UriUtils.isContentUri(dataUri)) {
                 InputStream inputStream = null;
                 try {
-                    inputStream = mContext.getContentResolver().openInputStream(Uri.parse(dataUrl));
+                    inputStream = mContext.getContentResolver().openInputStream(dataUri);
                 } catch (FileNotFoundException e) {
                     return true;
                 } finally {

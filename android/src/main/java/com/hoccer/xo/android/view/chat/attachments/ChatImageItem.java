@@ -94,7 +94,7 @@ public class ChatImageItem extends ChatMessageItem {
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
 
-        String fileUri = UriUtils.getFileUri(contentObject.getContentDataUrl());
+        Uri fileUri = UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl());
         Picasso.with(mContext).load(fileUri)
                 .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
@@ -119,7 +119,7 @@ public class ChatImageItem extends ChatMessageItem {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         Uri dataUri;
-        if (UriUtils.isExistingContentUri(mContext, contentObject.getContentUrl())) {
+        if (UriUtils.doesContentFileExist(mContext, Uri.parse(contentObject.getContentUrl()))) {
             dataUri = Uri.parse(contentObject.getContentUrl());
         } else {
             dataUri = Uri.parse(contentObject.getContentDataUrl());
