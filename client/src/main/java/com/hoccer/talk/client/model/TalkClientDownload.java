@@ -932,15 +932,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     @Override
     public String getDataFile() {
-        // TODO fix up this field on db upgrade
-        if (dataFile != null) {
-            if (dataFile.startsWith("file://")) {
-                return dataFile.substring(7);
-            } else {
-                return dataFile;
-            }
-        }
-        return null;
+        return dataFile;
     }
 
     public int getTransferFailures() {
