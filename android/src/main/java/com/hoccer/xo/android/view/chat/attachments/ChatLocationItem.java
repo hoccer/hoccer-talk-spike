@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
@@ -19,7 +20,6 @@ import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -68,18 +68,19 @@ public class ChatLocationItem extends ChatMessageItem {
             @Override
             public void onClick(View view) {
                 if (contentObject.isContentAvailable()) {
-                    Uri uri = Uri.parse(contentObject.getContentUrl());
-                    if (uri == null) {
+                    Uri uri;
+                    if (contentObject.getContentUrl() != null) {
+                        uri = Uri.parse(contentObject.getContentUrl());
+                    } else {
                         uri = UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl());
                     }
-                    if (uri != null) {
-                        LatLng location = loadGeoJson(contentObject, uri);
-                        String label = "Received Location";
-                        Uri locationUri = Uri.parse("http://maps.google.com/maps?q=loc:" + location.latitude + "," + location.longitude + " (" + label + ")");
-                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, locationUri);
-                        XoActivity activity = (XoActivity)view.getContext();
-                        activity.startExternalActivity(intent);
-                    }
+
+                    LatLng location = loadGeoJson(contentObject, uri);
+                    String label = "Received Location";
+                    Uri locationUri = Uri.parse("http://maps.google.com/maps?q=loc:" + location.latitude + "," + location.longitude + " (" + label + ")");
+                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW, locationUri);
+                    XoActivity activity = (XoActivity) view.getContext();
+                    activity.startExternalActivity(intent);
                 }
             }
         });
