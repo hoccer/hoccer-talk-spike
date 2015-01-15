@@ -9,9 +9,10 @@ import com.hoccer.xo.android.XoApplication;
 import java.io.File;
 
 public class UriUtils {
-
-    public static final String CONTENT_URI_PREFIX = "content";
-    public static final String FILE_URI_PREFIX = "file";
+    public static final String CONTENT_SCHEMA = "content";
+    public static final String FILE_SCHEMA = "file";
+    public static final String CONTENT_URI_PREFIX = CONTENT_SCHEMA + "://";
+    public static final String FILE_URI_PREFIX = FILE_SCHEMA + "://";
 
     public static Uri getAbsoluteFileUri(String stringUri) {
         Uri uri = Uri.parse(stringUri);
@@ -22,11 +23,11 @@ public class UriUtils {
     }
 
     public static boolean isContentUri(Uri uri) {
-        return CONTENT_URI_PREFIX.equals(uri.getScheme());
+        return CONTENT_SCHEMA.equals(uri.getScheme());
     }
 
     public static boolean isFileUri(Uri uri) {
-        return FILE_URI_PREFIX.equals(uri.getScheme());
+        return FILE_SCHEMA.equals(uri.getScheme());
     }
 
     public static boolean doesContentFileExist(Context context, Uri contentUri) {

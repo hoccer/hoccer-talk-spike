@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ImageUtils;
+import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -67,7 +68,7 @@ public class ImageFileContentObjectCreator implements IContentCreator {
         double aspectRatio = ImageUtils.calculateAspectRatio(fileWidth, fileHeight, orientation);
         LOG.debug("Aspect ratio: " + fileWidth + " x " + fileHeight + " @ " + aspectRatio + " / " + orientation + "°");
 
-        SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
+        SelectedContent contentObject = new SelectedContent(intent, UriUtils.FILE_URI_PREFIX + filePath);
         contentObject.setFileName(fileName);
         contentObject.setContentType(mimeType);
         contentObject.setContentMediaType(ContentMediaType.IMAGE);

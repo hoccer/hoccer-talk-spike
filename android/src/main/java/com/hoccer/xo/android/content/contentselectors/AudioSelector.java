@@ -70,7 +70,7 @@ public class AudioSelector implements IContentSelector {
             return null;
         }
 
-        SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
+        SelectedContent contentObject = new SelectedContent(intent, filePath);
         contentObject.setFileName(fileName);
         contentObject.setContentMediaType(ContentMediaType.AUDIO);
         contentObject.setContentType(fileType);

@@ -21,6 +21,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.DisplayUtils;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.SquaredImageView;
 import com.hoccer.xo.android.view.SquaredRelativeLayout;
 import com.artcom.hoccer.R;
@@ -184,7 +185,7 @@ public class MultiImagePickerActivity extends Activity implements LoaderManager.
                 @Override
                 protected void onPostExecute(String thumbnailPath) {
                     Picasso.with(mContext)
-                            .load("file://" + thumbnailPath)
+                            .load(UriUtils.FILE_URI_PREFIX + thumbnailPath)
                             .placeholder(R.drawable.ic_img_placeholder)
                             .error(R.drawable.ic_img_placeholder_error)
                             .centerCrop()

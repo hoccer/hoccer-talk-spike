@@ -11,6 +11,7 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.UriUtils;
 
 public class VideoSelector implements IContentSelector {
 
@@ -79,7 +80,7 @@ public class VideoSelector implements IContentSelector {
             return null;
         }
 
-        SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
+        SelectedContent contentObject = new SelectedContent(intent, UriUtils.FILE_URI_PREFIX + filePath);
         contentObject.setFileName(fileName);
         contentObject.setContentMediaType(ContentMediaType.VIDEO);
         contentObject.setContentType(fileType);

@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.content;
 
 import android.content.Intent;
+import android.net.Uri;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentDisposition;
@@ -8,6 +9,7 @@ import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -33,9 +35,9 @@ public class SelectedContent implements IContentObject {
     String mFileName;
     String mContentUri;
     String mDataUri;
-    String mContentType = null;
-    String mMediaType = null;
-    String mHmac = null;
+    String mContentType;
+    String mMediaType;
+    String mHmac;
     int mLength = -1;
     double mAspectRatio = 1.0;
 
@@ -44,7 +46,7 @@ public class SelectedContent implements IContentObject {
      * <p/>
      * Converted to a file when selected content becomes an upload.
      */
-    byte[] mData = null;
+    byte[] mData;
 
     public SelectedContent(Intent intent, String dataUri) {
         if (intent != null && intent.getData() != null) {
@@ -191,7 +193,7 @@ public class SelectedContent implements IContentObject {
             os.write(mData);
             os.flush();
             os.close();
-            mDataUri = "file://" + file.toString();
+            mDataUri = UriUtils.FILE_URI_PREFIX + file.toString();
             mData = null;
         } catch (IOException e) {
             LOG.error("error writing content to file", e);

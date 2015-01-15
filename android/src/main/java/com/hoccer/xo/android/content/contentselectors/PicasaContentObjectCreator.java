@@ -10,6 +10,7 @@ import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ImageUtils;
+import com.hoccer.xo.android.util.UriUtils;
 import ezvcard.util.org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -76,7 +77,7 @@ public class PicasaContentObjectCreator implements IContentCreator {
 
                 LOG.debug("Aspect ratio: " + fileWidth + " x " + fileHeight + " @ " + aspectRatio + " / " + orientation + "°");
 
-                SelectedContent contentObject = new SelectedContent(intent, "file://" + imageFile.getAbsolutePath());
+                SelectedContent contentObject = new SelectedContent(intent, UriUtils.FILE_URI_PREFIX + imageFile.getAbsolutePath());
                 contentObject.setFileName(filename);
                 contentObject.setContentType("image/jpeg");
                 contentObject.setContentMediaType(ContentMediaType.IMAGE);
