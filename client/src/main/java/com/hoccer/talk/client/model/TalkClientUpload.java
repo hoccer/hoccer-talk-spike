@@ -34,11 +34,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private final static Logger LOG = Logger.getLogger(TalkClientUpload.class);
 
-    private HttpPut mUploadRequest = null;
+    private HttpPut mUploadRequest;
 
     private XoTransferAgent mTransferAgent;
 
-    private List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
+    private final List<IXoTransferListener> mTransferListeners = new ArrayList<IXoTransferListener>();
 
     public enum State implements IXoTransferState {
         NEW {
@@ -218,7 +218,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
      */
     private void switchState(State newState) {
         if (!state.possibleFollowUps().contains(newState)) {
-            LOG.warn("State " + newState.toString() + " is no possible followup to " + state.toString());
+            LOG.warn("State " + newState + " is no possible followup to " + state);
             return;
         }
         setState(newState);
@@ -252,8 +252,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         saveToDatabase();
 
         LOG.debug("notify all listeners about state change");
-        for (int i = 0; i < mTransferListeners.size(); i++) {
-            IXoTransferListener listener = mTransferListeners.get(i);
+        for (IXoTransferListener listener : mTransferListeners) {
             listener.onStateChanged(state);
         }
     }
@@ -294,8 +293,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         HttpClient client = mTransferAgent.getHttpClient();
 
         LOG.info("[uploadId: '" + clientUploadId + "'] performing check request");
-
-        int last = uploadLength - 1;
 
         HttpPut checkRequest = new HttpPut(uploadUrl);
         String contentRangeValue = "bytes */" + uploadLength;
@@ -375,7 +372,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private void doUploadingAction() {
-        String filename = getContentDataUrl();
+        String filename = dataFile;
         if (filename == null || filename.isEmpty()) {
             LOG.error("filename was empty");
             switchState(State.PAUSED);
@@ -515,17 +512,16 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private void saveToDatabase() {
         try {
-            LOG.debug("save TalkClientUpload (" + getClientUploadId() + ") to database");
+            LOG.debug("save TalkClientUpload (" + clientUploadId + ") to database");
             mTransferAgent.getDatabase().saveClientUpload(this);
         } catch (SQLException e) {
             LOG.error("sql error", e);
         }
     }
 
-    private void logRequestHeaders(HttpMessage httpMessage, String logPrefix) {
+    private static void logRequestHeaders(HttpMessage httpMessage, String logPrefix) {
         Header[] allHeaders = httpMessage.getAllHeaders();
-        for (int i = 0; i < allHeaders.length; i++) {
-            Header header = allHeaders[i];
+        for (Header header : allHeaders) {
             LOG.trace(logPrefix + header.getName() + ": " + header.getValue());
         }
     }
