@@ -431,8 +431,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             Header checkRangeHeader = uploadResponse.getFirstHeader("Range");
             uploadResponse.getEntity().consumeContent();
             if (isUploadComplete(checkRangeHeader)) {
-                switchState(State.COMPLETE);
                 this.dataFile = computeRelativeUploadFilePath(filename);
+                switchState(State.COMPLETE);
             } else {
                 LOG.warn("[uploadId: '" + clientUploadId + "'] no range header in upload response");
                 switchState(State.PAUSED);
