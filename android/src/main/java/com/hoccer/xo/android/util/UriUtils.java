@@ -10,15 +10,15 @@ import java.io.File;
 
 public class UriUtils {
 
-    public static final String CONTENT_URI_PREFIX = "content://";
-    public static final String FILE_URI_PREFIX = "file://";
+    public static final String CONTENT_URI_PREFIX = "content";
+    public static final String FILE_URI_PREFIX = "file";
 
     public static Uri getAbsoluteFileUri(String stringUri) {
         Uri uri = Uri.parse(stringUri);
         if (isContentUri(uri) || isFileUri(uri)) {
             return uri;
         }
-        return Uri.parse(FILE_URI_PREFIX + XoApplication.getExternalStorage() + File.separator + stringUri);
+        return Uri.parse(FILE_URI_PREFIX + "://" + XoApplication.getExternalStorage() + File.separator + stringUri);
     }
 
     public static boolean isContentUri(Uri uri) {
