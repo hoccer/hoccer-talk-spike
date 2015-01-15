@@ -76,11 +76,13 @@ public class ChatLocationItem extends ChatMessageItem {
                     }
 
                     LatLng location = loadGeoJson(contentObject, uri);
-                    String label = "Received Location";
-                    Uri locationUri = Uri.parse("http://maps.google.com/maps?q=loc:" + location.latitude + "," + location.longitude + " (" + label + ")");
-                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW, locationUri);
-                    XoActivity activity = (XoActivity) view.getContext();
-                    activity.startExternalActivity(intent);
+                    if (location != null) {
+                        String label = "Received Location";
+                        Uri locationUri = Uri.parse("http://maps.google.com/maps?q=loc:" + location.latitude + "," + location.longitude + " (" + label + ")");
+                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, locationUri);
+                        XoActivity activity = (XoActivity) view.getContext();
+                        activity.startExternalActivity(intent);
+                    }
                 }
             }
         });
