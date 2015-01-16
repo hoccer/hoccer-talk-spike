@@ -78,17 +78,7 @@ public class ChatAudioItem extends ChatMessageItem {
         }
 
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(contentObject.getContentDataUrl());
-        String displayName;
-        if (metaData.getTitle() != null) {
-            displayName = metaData.getTitle().trim();
-
-            if (metaData.getArtist() != null) {
-                displayName = metaData.getArtist().trim() + " - " + displayName;
-            }
-        } else {
-            displayName = contentObject.getFileName();
-        }
-
+        String displayName = metaData.getTitleOrFilename().trim();
         fileNameTextView.setText(displayName);
 
         mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
