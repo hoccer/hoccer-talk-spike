@@ -14,14 +14,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 
-import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -75,7 +73,7 @@ public class ChatLocationItem extends ChatMessageItem {
                         uri = UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl());
                     }
 
-                    LatLng location = loadGeoJson(contentObject, uri);
+                    LatLng location = loadGeoJson(uri);
                     if (location != null) {
                         String label = "Received Location";
                         Uri locationUri = Uri.parse("http://maps.google.com/maps?q=loc:" + location.latitude + "," + location.longitude + " (" + label + ")");
@@ -88,32 +86,14 @@ public class ChatLocationItem extends ChatMessageItem {
         });
     }
 
-
-    private LatLng loadGeoJson(IContentObject content, Uri uri) {
+    private LatLng loadGeoJson(Uri uri) {
         LatLng result = null;
         try {
-            if (!content.isContentAvailable()) {
-                return null;
-            }
-
-            InputStream is = null;
-            if (content instanceof SelectedContent) {
-                SelectedContent selectedContent = ((SelectedContent) content);
-                if (selectedContent.getData() != null) {
-                    is = new ByteArrayInputStream(selectedContent.getData());
-                }
-            }
-            if (is == null && content.getContentDataUrl() != null) {
-                is = XoApplication.getXoClient().getHost().openInputStreamForUrl(uri.toString());
-            }
-            if (is == null) {
-                return null;
-            }
-
+            InputStream is = new FileInputStream(uri.toString());
             ObjectMapper jsonMapper = new ObjectMapper();
             JsonNode json = jsonMapper.readTree(is);
             if (json != null && json.isObject()) {
-                LOG.info("parsing location: " + json.toString());
+                LOG.info("parsing location: " + json);
                 JsonNode location = json.get("location");
                 if (location != null && location.isObject()) {
                     JsonNode type = location.get("type");
@@ -135,8 +115,6 @@ public class ChatLocationItem extends ChatMessageItem {
             } else {
                 LOG.error("root node is not object");
             }
-
-
         } catch (IOException e) {
             LOG.error("error loading geojson", e);
         }
