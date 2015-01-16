@@ -209,10 +209,15 @@ public class SelectedContent implements IContentObject {
             ((SelectedContent) object).toFile();
         }
 
+        String filePath = null;
+        if(object.getContentDataUrl() != null) {
+            filePath = UriUtils.getAbsoluteFileUri(object.getContentDataUrl()).getPath();
+        }
+
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAvatar(
                 object.getContentUrl(),
-                object.getContentDataUrl(),
+                filePath,
                 object.getContentType(),
                 object.getContentLength());
         return upload;

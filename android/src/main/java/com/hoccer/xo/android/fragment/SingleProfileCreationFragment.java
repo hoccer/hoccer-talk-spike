@@ -19,6 +19,7 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
@@ -154,7 +155,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         if (mContact.isSelf()) {
             TalkClientUpload avatarUpload = mContact.getAvatarUpload();
             if (avatarUpload != null && avatarUpload.isContentAvailable()) {
-                mAvatarUrl = avatarUpload.getContentDataUrl();
+                mAvatarUrl = UriUtils.getAbsoluteFileUri(avatarUpload.getContentDataUrl()).getPath();
             }
         } else {
             TalkClientDownload avatarDownload = mContact.getAvatarDownload();
