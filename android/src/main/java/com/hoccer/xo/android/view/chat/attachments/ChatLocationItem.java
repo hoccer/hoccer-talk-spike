@@ -89,7 +89,7 @@ public class ChatLocationItem extends ChatMessageItem {
     private LatLng loadGeoJson(Uri uri) {
         LatLng result = null;
         try {
-            InputStream is = new FileInputStream(uri.toString());
+            InputStream is = new FileInputStream(uri.getPath());
             ObjectMapper jsonMapper = new ObjectMapper();
             JsonNode json = jsonMapper.readTree(is);
             if (json != null && json.isObject()) {
