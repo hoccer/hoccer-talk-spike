@@ -5,10 +5,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.os.AsyncTask;
 import com.hoccer.talk.util.WeakListenerArray;
-import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -19,22 +17,19 @@ public class MediaMetaData {
 
     private static final Logger LOG = Logger.getLogger(MediaMetaData.class);
 
-    private static Map<String, MediaMetaData> mMetaDataCache = new HashMap<String, MediaMetaData>();
+    private static final Map<String, MediaMetaData> mMetaDataCache = new HashMap<String, MediaMetaData>();
 
     public static MediaMetaData retrieveMetaData(String mediaFilePath) {
-        String mediaFileUri = UriUtils.getAbsoluteFileUri(mediaFilePath).getPath();
-
         MediaMetaData metaData = null;
         // return cached data if present
-        if (mMetaDataCache.containsKey(mediaFileUri)) {
-            metaData = mMetaDataCache.get(mediaFileUri);
+        if (mMetaDataCache.containsKey(mediaFilePath)) {
+            metaData = mMetaDataCache.get(mediaFilePath);
         } else {
 
-            MediaMetadataRetriever retriever = null;
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             try {
-                retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(mediaFileUri);
-                metaData = new MediaMetaData(mediaFileUri);
+                retriever.setDataSource(mediaFilePath);
+                metaData = new MediaMetaData(mediaFilePath);
                 String album = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
                 if (album == null) {
                     album = retriever.extractMetadata(25); // workaround bug on Galaxy S3 and S4
@@ -62,13 +57,12 @@ public class MediaMetaData {
                 if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) != null) {
                     metaData.mHasVideo = true;
                 }
-
             } catch (IllegalArgumentException e) {
-                LOG.info("Could not read meta data for file: " + mediaFileUri, e);
+                LOG.info("Could not read meta data for file: " + mediaFilePath, e);
                 // cache the null object to prevent future retrieval attempts
                 metaData = null;
             } finally {
-                mMetaDataCache.put(mediaFileUri, metaData);
+                mMetaDataCache.put(mediaFilePath, metaData);
                 retriever.release();
             }
         }
@@ -76,7 +70,7 @@ public class MediaMetaData {
         return metaData;
     }
 
-    private final Uri mFileUri;
+    private final String mFilePath;
     private String mTitle;
     private String mArtist;
     private String mAlbumTitle;
@@ -93,11 +87,11 @@ public class MediaMetaData {
     * Private constructor, use MediaMetaData.retrieveMetaData() to create instances
     */
     private MediaMetaData(String filePath) {
-        mFileUri = UriUtils.getAbsoluteFileUri(filePath);
+        mFilePath = filePath;
     }
 
-    public Uri getFileUri() {
-        return mFileUri;
+    public String getFilePath() {
+        return mFilePath;
     }
 
     public String getTitle() {
@@ -106,7 +100,7 @@ public class MediaMetaData {
 
     public String getTitleOrFilename() {
         if (mTitle == null || mTitle.isEmpty()) {
-            File file = new File(mFileUri.getPath());
+            File file = new File(mFilePath);
             return file.getName();
         }
         return mTitle;
@@ -164,15 +158,15 @@ public class MediaMetaData {
                     MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                     Drawable artwork = null;
                     try {
-                        retriever.setDataSource(mFileUri.getPath());
+                        retriever.setDataSource(mFilePath);
                         byte[] artworkRaw = retriever.getEmbeddedPicture();
                         if (artworkRaw != null) {
                             artwork = new BitmapDrawable(resources, BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
                         } else {
-                            LOG.warn("Could not read artwork for file: " + mFileUri);
+                            LOG.warn("Could not read artwork for file: " + mFilePath);
                         }
                     } catch (IllegalArgumentException e) {
-                        LOG.warn("Could not read meta data for file: " + mFileUri, e);
+                        LOG.warn("Could not read meta data for file: " + mFilePath, e);
                     } finally {
                         retriever.release();
                     }

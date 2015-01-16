@@ -26,6 +26,7 @@ import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.ArtworkImageView;
 import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
@@ -196,7 +197,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
             mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
 
-        mCurrentMetaData = MediaMetaData.retrieveMetaData(mMediaPlayerService.getCurrentMediaItem().getContentDataUrl());
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mMediaPlayerService.getCurrentMediaItem().getContentDataUrl()).getPath());
         final String trackArtist;
         final String trackTitle;
         final int totalDuration = mMediaPlayerService.getTotalDuration();
@@ -205,7 +206,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
         final String playlistSize = Integer.toString(mMediaPlayerService.getMediaListSize());
 
         if (mCurrentMetaData.getTitle() == null || mCurrentMetaData.getTitle().isEmpty()) {
-            File file = new File(mCurrentMetaData.getFileUri().getPath());
+            File file = new File(mCurrentMetaData.getFilePath());
             trackTitle = file.getName();
         } else {
             trackTitle = mCurrentMetaData.getTitle().trim();
