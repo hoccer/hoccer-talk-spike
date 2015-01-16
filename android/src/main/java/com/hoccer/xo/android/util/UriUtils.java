@@ -24,7 +24,7 @@ public class UriUtils {
         }
 
         if (uri.getPath().startsWith(File.separator)) {
-            return Uri.parse(FILE_URI_PREFIX + File.separator + stringUri);
+            return Uri.parse(FILE_URI_PREFIX + stringUri);
         } else {
             return Uri.parse(FILE_URI_PREFIX + XoApplication.getExternalStorage() + File.separator + stringUri);
         }
