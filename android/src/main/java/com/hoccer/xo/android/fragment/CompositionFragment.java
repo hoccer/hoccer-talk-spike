@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -447,8 +448,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private IContentObject compressImageAttachment(IContentObject contentObject) {
         IContentObject result = null;
-        String dataPath = contentObject.getContentDataUrl();
-        final File imageFile = new File(dataPath);
+        Uri fileUri = Uri.parse(contentObject.getContentDataUrl());
+        final File imageFile = new File(fileUri.getPath());
         final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
 
         boolean success = false;
