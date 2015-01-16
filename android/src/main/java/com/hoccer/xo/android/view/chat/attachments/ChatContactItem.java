@@ -93,8 +93,11 @@ public class ChatContactItem extends ChatMessageItem {
             }
         });
 
-        // apply data from VCard
-        parseVCard();
+
+        if (mVCard == null) {
+            parseVCard();
+        }
+
         contactName.setText(getContactName());
 
         if (isContentShowable()) {
@@ -139,15 +142,19 @@ public class ChatContactItem extends ChatMessageItem {
     }
 
     private void parseVCard() {
-        if (mVCard != null) {
-            return;
+        Uri uri;
+        if (mContentObject.getContentUrl() != null) {
+            uri = Uri.parse(mContentObject.getContentUrl());
+        } else {
+            uri = Uri.parse(mContentObject.getContentDataUrl());
         }
 
-        InputStream inputStream = null;
+        InputStream inputStream;
         try {
-            inputStream = XoApplication.getXoClient().getHost().openInputStreamForUrl(mContentObject.getContentUrl());
+            inputStream = XoApplication.getXoClient().getHost().openInputStreamForUrl(uri.toString());
         } catch (IOException e) {
             LOG.error("Could not open VCard at " + mContent.getContentDataUrl(), e);
+            return;
         }
 
         try {
