@@ -236,7 +236,7 @@ public class ChatVideoItem extends ChatMessageItem {
         if (contentObject.isContentAvailable()) {
 
             Uri videoUri;
-            if (UriUtils.doesContentFileExist(mContext, Uri.parse(contentObject.getContentUrl()))) {
+            if (UriUtils.contentExists(mContext, Uri.parse(contentObject.getContentUrl()))) {
                 videoUri = Uri.parse(contentObject.getContentUrl());
             } else {
                 videoUri = UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl());
