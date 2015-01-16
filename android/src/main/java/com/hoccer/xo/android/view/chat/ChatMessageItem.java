@@ -32,6 +32,7 @@ import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
 import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -556,44 +557,39 @@ public class ChatMessageItem implements AttachmentTransferListener {
         });
     }
 
-
     @Override
     public void onAttachmentTransferComplete(IContentObject contentObject) {
+        // check for previously cached files and replace them with the original
         if (contentObject instanceof TalkClientUpload) {
-            // check for previously cached files and replace them with the original
             TalkClientUpload upload = (TalkClientUpload) contentObject;
             if (upload.getContentDataUrl() != null && upload.getContentDataUrl().contains(XoApplication.getCacheStorage().getPath())) {
+                FileUtils.deleteQuietly(new File(upload.getDataFile()));
 
-                String filePath = null;
                 Uri contentUri = Uri.parse(upload.getContentUrl());
-
-                if (UriUtils.isContentUri(contentUri)) {
-                    filePath = UriUtils.getFilePathByContentUri(mContext, contentUri);
-                } else if (UriUtils.isFileUri(contentUri)) {
-                    filePath = contentUri.getPath();
-                } else if (contentUri.getPath().startsWith("/")) {
-                    filePath = contentUri.toString();
+                Uri fileUri = UriUtils.getFileUriByContentUri(mContext, contentUri);
+                if(fileUri != null) {
+                    upload.setContentDataUrl(makeRelative(fileUri.getPath()));
+                } else {
+                    upload.setContentDataUrl(null);
                 }
 
-                if (filePath != null) {
-                    File fileToDelete = new File(upload.getDataFile());
-
-                    File master = new File(filePath);
-                    if (master.exists()) {
-                        upload.setContentDataUrl(filePath);
-                        try {
-                            XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
-                            boolean isDeleted = fileToDelete.delete();
-                            LOG.debug("Cached file is deleted " + isDeleted);
-                        } catch (SQLException e) {
-                            LOG.error("Error updating upload with new file path " + filePath);
-                        }
-                    }
+                try {
+                    XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
+                } catch (SQLException e) {
+                    LOG.error("Error updating upload with original file path.");
                 }
             }
         }
-
         displayAttachment(contentObject);
+    }
+
+    private static String makeRelative(String filePath) {
+        String externalStorageDirectory = XoApplication.getExternalStorage().getAbsolutePath();
+        if (filePath.startsWith(externalStorageDirectory)) {
+            return filePath.substring(externalStorageDirectory.length() + 1);
+        } else {
+            return filePath;
+        }
     }
 
     @Override
