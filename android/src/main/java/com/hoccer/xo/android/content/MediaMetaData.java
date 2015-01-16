@@ -164,7 +164,7 @@ public class MediaMetaData {
                     MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                     Drawable artwork = null;
                     try {
-                        retriever.setDataSource(mFileUri.toString());
+                        retriever.setDataSource(mFileUri.getPath());
                         byte[] artworkRaw = retriever.getEmbeddedPicture();
                         if (artworkRaw != null) {
                             artwork = new BitmapDrawable(resources, BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.length));
