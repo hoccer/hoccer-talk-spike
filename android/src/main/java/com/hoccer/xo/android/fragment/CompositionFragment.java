@@ -448,9 +448,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private IContentObject compressImageAttachment(IContentObject contentObject) {
         IContentObject result = null;
         String dataPath = contentObject.getContentDataUrl();
-        if (dataPath.startsWith(UriUtils.FILE_URI_PREFIX)) {
-            dataPath = dataPath.substring(UriUtils.FILE_URI_PREFIX.length());
-        }
         final File imageFile = new File(dataPath);
         final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
 
@@ -464,7 +461,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         ImageUtils.copyExifData(imageFile.getAbsolutePath(), compressedImageFile.getAbsolutePath());
 
         if (success) {
-            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), compressedImageFile.getPath());
+            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), UriUtils.FILE_URI_PREFIX + compressedImageFile.getPath());
             newContent.setFileName(imageFile.getName());
             newContent.setContentMediaType(contentObject.getContentMediaType());
             newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.JPEG.name().toLowerCase());
