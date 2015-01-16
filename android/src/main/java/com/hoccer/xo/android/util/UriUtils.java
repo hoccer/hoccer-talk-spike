@@ -16,10 +16,12 @@ public class UriUtils {
 
     public static Uri getAbsoluteFileUri(String stringUri) {
         Uri uri = Uri.parse(stringUri);
-        if (isContentUri(uri) || isFileUri(uri)) {
+
+        if (uri.getScheme() != null || uri.getPath().startsWith(File.separator)) {
             return uri;
         }
-        return Uri.parse(FILE_URI_PREFIX + "://" + XoApplication.getExternalStorage() + File.separator + stringUri);
+
+        return Uri.parse(FILE_URI_PREFIX + XoApplication.getExternalStorage() + File.separator + stringUri);
     }
 
     public static boolean isContentUri(Uri uri) {
