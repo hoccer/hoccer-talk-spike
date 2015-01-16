@@ -38,7 +38,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     private IContentObject mAvatarToSet;
 
     private TalkClientContact mContact;
-    private String mAvatarUrl;
 
     @Override
     public void onAttach(Activity activity) {
@@ -146,31 +145,23 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     }
 
     private void updateAvatarView() {
+        XoTransfer avatarTransfer;
         if (mContact.isSelf()) {
-            TalkClientUpload avatarUpload = mContact.getAvatarUpload();
-            if (avatarUpload != null && avatarUpload.isContentAvailable()) {
-                mAvatarUrl = UriUtils.getAbsoluteFileUri(avatarUpload.getContentDataUrl()).getPath();
-            }
+            avatarTransfer = mContact.getAvatarUpload();
         } else {
-            TalkClientDownload avatarDownload = mContact.getAvatarDownload();
-            if (avatarDownload != null && avatarDownload.isContentAvailable()) {
-                if (avatarDownload.getDataFile() != null) {
-                    Uri uri = Uri.fromFile(new File(avatarDownload.getDataFile()));
-                    mAvatarUrl = uri.toString();
-                }
-            }
+            avatarTransfer = mContact.getAvatarDownload();
         }
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Picasso.with(getActivity())
-                        .load(mAvatarUrl)
-                        .placeholder(R.drawable.avatar_default_contact_large)
-                        .error(R.drawable.avatar_default_contact_large)
-                        .into(mAvatarImage);
-            }
-        });
+        String avatarUrl = null;
+        if (avatarTransfer != null && avatarTransfer.isContentAvailable() && avatarTransfer.getContentDataUrl() != null) {
+            avatarUrl = UriUtils.getAbsoluteFileUri(avatarTransfer.getContentDataUrl()).toString();
+        }
+
+        Picasso.with(getActivity())
+                .load(avatarUrl)
+                .placeholder(R.drawable.avatar_default_contact_large)
+                .error(R.drawable.avatar_default_contact_large)
+                .into(mAvatarImage);
     }
 
     private void updateAvatar(final IContentObject avatar) {

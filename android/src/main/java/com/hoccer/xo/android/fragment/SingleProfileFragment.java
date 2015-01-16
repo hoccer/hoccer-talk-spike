@@ -9,6 +9,7 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -421,20 +422,16 @@ public class SingleProfileFragment extends ProfileFragment
     }
 
     private void updateAvatar() {
-        String avatarUrl = null;
+        XoTransfer avatarTransfer;
         if (mContact.isSelf()) {
-            TalkClientUpload avatarUpload = mContact.getAvatarUpload();
-            if (avatarUpload != null && avatarUpload.isContentAvailable()) {
-                avatarUrl = avatarUpload.getContentDataUrl();
-            }
+            avatarTransfer = mContact.getAvatarUpload();
         } else {
-            TalkClientDownload avatarDownload = mContact.getAvatarDownload();
-            if (avatarDownload != null && avatarDownload.isContentAvailable()) {
-                if (avatarDownload.getDataFile() != null) {
-                    Uri uri = UriUtils.getAbsoluteFileUri(avatarDownload.getContentDataUrl());
-                    avatarUrl = uri.toString();
-                }
-            }
+            avatarTransfer = mContact.getAvatarDownload();
+        }
+
+        String avatarUrl = null;
+        if (avatarTransfer != null && avatarTransfer.isContentAvailable() && avatarTransfer.getContentDataUrl() != null) {
+            avatarUrl = UriUtils.getAbsoluteFileUri(avatarTransfer.getContentDataUrl()).toString();
         }
 
         Picasso.with(getActivity())

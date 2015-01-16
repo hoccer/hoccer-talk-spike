@@ -9,6 +9,7 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -322,24 +323,22 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     private void updateAvatar() {
-        String avatarUrl = null;
+        XoTransfer avatarTransfer;
         if (mGroup.isGroupAdmin()) {
-            TalkClientUpload avatarUpload = mGroup.getAvatarUpload();
-            if (avatarUpload != null && avatarUpload.isContentAvailable()) {
-                avatarUrl = avatarUpload.getContentDataUrl();
-            }
+            avatarTransfer = mContact.getAvatarUpload();
         } else {
-            TalkClientDownload avatarDownload = mGroup.getAvatarDownload();
-            if (avatarDownload != null && avatarDownload.isContentAvailable()) {
-                if (avatarDownload.getDataFile() != null) {
-                    avatarUrl = UriUtils.getAbsoluteFileUri(avatarDownload.getContentDataUrl()).toString();
-                }
-            }
+            avatarTransfer = mContact.getAvatarDownload();
         }
+
+        String avatarUrl = null;
+        if (avatarTransfer != null && avatarTransfer.isContentAvailable() && avatarTransfer.getContentDataUrl() != null) {
+            avatarUrl = UriUtils.getAbsoluteFileUri(avatarTransfer.getContentDataUrl()).toString();
+        }
+
         Picasso.with(getActivity())
                 .load(avatarUrl)
-                .placeholder(R.drawable.avatar_default_group_large)
-                .error(R.drawable.avatar_default_group_large)
+                .placeholder(R.drawable.avatar_default_contact_large)
+                .error(R.drawable.avatar_default_contact_large)
                 .into(mAvatarImage);
     }
 
