@@ -70,7 +70,11 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
         hideView(view.findViewById(R.id.tv_profile_name));
 
-        init();
+        mContact = getXoClient().getSelfContact();
+        if (mActionMode == null) {
+            mActionMode = getActivity().startActionMode(this);
+        }
+        updateAvatarView();
     }
 
     private static void hideView(View view) {
@@ -134,14 +138,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
                 }
             }
         }
-    }
-
-    private void init() {
-        mContact = getXoClient().getSelfContact();
-        if (mActionMode == null) {
-            mActionMode = getActivity().startActionMode(this);
-        }
-        updateAvatarView();
     }
 
     private void updateAvatarView() {
@@ -222,7 +218,12 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        updateAvatarView();
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateAvatarView();
+            }
+        });
     }
 
     @Override
