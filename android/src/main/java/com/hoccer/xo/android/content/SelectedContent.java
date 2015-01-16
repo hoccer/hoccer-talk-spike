@@ -228,7 +228,7 @@ public class SelectedContent implements IContentObject {
 
         if (object instanceof XoTransfer) {
             XoTransfer transfer = (XoTransfer) object;
-            File file = new File(transfer.getDataFile());
+            File file = new File(UriUtils.getAbsoluteFileUri(transfer.getDataFile()).getPath());
             length = (int) file.length();
 
             // HACK: when re-sending an upload or download, the content url is cleared to exclude it from the music browser
@@ -237,7 +237,7 @@ public class SelectedContent implements IContentObject {
 
         String filePath = null;
         if(object.getContentDataUrl() != null) {
-            filePath = Uri.parse(object.getContentDataUrl()).getPath();
+            filePath = UriUtils.getAbsoluteFileUri(object.getContentDataUrl()).getPath();
         }
 
         TalkClientUpload upload = new TalkClientUpload();
