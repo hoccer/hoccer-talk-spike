@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -85,14 +86,7 @@ public class ChatAudioItem extends ChatMessageItem {
                 displayName = metaData.getArtist().trim() + " - " + displayName;
             }
         } else {
-            try {
-                URI fileUri = new URI(contentObject.getContentDataUrl());
-                File contentFile = new File(fileUri);
-                displayName = contentFile.getName();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-                displayName = contentObject.getFileName();
-            }
+            displayName = contentObject.getFileName();
         }
 
         fileNameTextView.setText(displayName);
