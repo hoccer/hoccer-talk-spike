@@ -580,7 +580,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
                     File master = new File(filePath);
                     if (master.exists()) {
-                        upload.setContentDataUrl(UriUtils.FILE_URI_PREFIX + filePath);
+                        upload.setContentDataUrl(filePath);
                         try {
                             XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
                             boolean isDeleted = fileToDelete.delete();
