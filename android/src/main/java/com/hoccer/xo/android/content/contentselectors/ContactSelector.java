@@ -70,7 +70,7 @@ public class ContactSelector implements IContentSelector {
             contentUriPath = contentUriPath.replace("content:/com.android.contacts", "content://com.android.contacts");
         }
 
-        SelectedContent contentObject = new SelectedContent(intent, contentUriPath);
+        SelectedContent contentObject = new SelectedContent(contentUriPath, null);
         contentObject.setFileName("Contact");
         contentObject.setContentType(ContactsContract.Contacts.CONTENT_VCARD_TYPE);
         contentObject.setContentMediaType(ContentMediaType.VCARD);

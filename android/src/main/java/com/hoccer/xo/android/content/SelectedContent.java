@@ -231,7 +231,11 @@ public class SelectedContent implements IContentObject {
             contentUrl = null;
         }
 
-        String filePath = Uri.parse(object.getContentDataUrl()).getPath();
+        String filePath = null;
+        if(object.getContentDataUrl() != null) {
+            filePath = Uri.parse(object.getContentDataUrl()).getPath();
+        }
+
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(
                 object.getFileName(),

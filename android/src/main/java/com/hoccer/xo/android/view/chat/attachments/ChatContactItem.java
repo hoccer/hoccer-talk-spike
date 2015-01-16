@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,19 +8,18 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.IContentObject;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 import ezvcard.Ezvcard;
 import ezvcard.VCard;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -49,7 +47,6 @@ public class ChatContactItem extends ChatMessageItem {
     @Override
     protected void displayAttachment(IContentObject contentObject) {
         super.displayAttachment(contentObject);
-
         mContent = contentObject;
 
         // add view lazily
@@ -83,7 +80,6 @@ public class ChatContactItem extends ChatMessageItem {
             }
         });
 
-
         importButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,7 +92,6 @@ public class ChatContactItem extends ChatMessageItem {
                 }
             }
         });
-
 
         // apply data from VCard
         parseVCard();
@@ -112,7 +107,6 @@ public class ChatContactItem extends ChatMessageItem {
         } else {
             importButton.setVisibility(View.GONE);
         }
-
     }
 
     private boolean isContentImported() {
@@ -134,12 +128,6 @@ public class ChatContactItem extends ChatMessageItem {
                 && isContentImported();
     }
 
-    private boolean isContentChanged(IContentObject newContent) {
-        return mContent == null
-                || (newContent.getContentDataUrl() != null
-                && !newContent.getContentDataUrl().equals(mContent.getContentDataUrl()));
-    }
-
     private String getContactName() {
         String name;
         if (mVCard != null && mVCard.getFormattedName() != null) {
@@ -155,38 +143,18 @@ public class ChatContactItem extends ChatMessageItem {
             return;
         }
 
-        Uri fileUri = UriUtils.getAbsoluteFileUri(mContentObject.getContentDataUrl());
-
-        InputStream inputStream = openStreamForContentUri(fileUri);
-        if (inputStream == null) {
-            LOG.error("Could not open VCard at " + mContent.getContentDataUrl());
-            return;
+        InputStream inputStream = null;
+        try {
+            inputStream = XoApplication.getXoClient().getHost().openInputStreamForUrl(mContentObject.getContentUrl());
+        } catch (IOException e) {
+            LOG.error("Could not open VCard at " + mContent.getContentDataUrl(), e);
         }
 
         try {
             Ezvcard.ParserChainTextReader reader = Ezvcard.parse(inputStream);
-            if (reader != null) {
-                mVCard = reader.first();
-            }
+            mVCard = reader.first();
         } catch (IOException e) {
             LOG.error("Could not parse VCard", e);
         }
-    }
-
-    private @Nullable InputStream openStreamForContentUri(Uri contentUri) {
-        if (contentUri == null) {
-            return null;
-        }
-        InputStream inputStream = null;
-        ContentResolver resolver = mContext.getContentResolver();
-        try {
-            inputStream = resolver.openInputStream(contentUri);
-        } catch (FileNotFoundException e) {
-            LOG.error("Could not find VCard at " + contentUri, e);
-        }
-        if (inputStream == null) {
-            LOG.error("Do not know how to open " + contentUri);
-        }
-        return inputStream;
     }
 }

@@ -21,6 +21,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -372,13 +373,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private void doUploadingAction() {
-        String filename = dataFile;
-        if (filename == null || filename.isEmpty()) {
-            LOG.error("filename was empty");
-            switchState(State.PAUSED);
-            return;
-        }
-
         LOG.info("[uploadId: '" + clientUploadId + "'] performing upload request");
         int bytesToGo = uploadLength - this.progress;
         LOG.debug("'[uploadId: '" + clientUploadId + "'] bytes to go " + bytesToGo);
@@ -391,7 +385,13 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
         HttpClient client = mTransferAgent.getHttpClient();
         try {
-            InputStream clearIs = mTransferAgent.getClient().getHost().openInputStreamForUrl(filename);
+            InputStream clearIs;
+            if(dataFile != null) {
+                clearIs = new FileInputStream(dataFile);
+            } else {
+                clearIs = mTransferAgent.getClient().getHost().openInputStreamForUrl(contentUrl);
+            }
+
             InputStream encryptingInputStream;
             if (isAttachment()) {
                 byte[] key = Hex.decode(encryptionKey);
@@ -431,7 +431,9 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             Header checkRangeHeader = uploadResponse.getFirstHeader("Range");
             uploadResponse.getEntity().consumeContent();
             if (isUploadComplete(checkRangeHeader)) {
-                this.dataFile = computeRelativeUploadFilePath(filename);
+                if(dataFile != null) {
+                    this.dataFile = computeRelativeUploadFilePath(dataFile);
+                }
                 switchState(State.COMPLETE);
             } else {
                 LOG.warn("[uploadId: '" + clientUploadId + "'] no range header in upload response");
@@ -448,8 +450,11 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private String computeRelativeUploadFilePath(String filePath) {
         String externalStorageDirectory = mTransferAgent.getClient().getExternalStorageDirectory();
-        int start = filePath.indexOf(externalStorageDirectory) + externalStorageDirectory.length();
-        return filePath.substring(start);
+        if(filePath.startsWith(externalStorageDirectory)) {
+            return filePath.substring(externalStorageDirectory.length() + 1);
+        } else {
+            return filePath;
+        }
     }
 
     private void doPausedAction() {
