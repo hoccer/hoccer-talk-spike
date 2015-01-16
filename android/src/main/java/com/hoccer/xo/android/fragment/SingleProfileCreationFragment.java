@@ -4,15 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.EditText;
 import android.widget.ImageView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
@@ -23,14 +22,13 @@ import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.sql.SQLException;
 
 public class SingleProfileCreationFragment extends XoFragment implements IXoContactListener, View.OnClickListener, ActionMode.Callback {
 
     private static final String HOCCER_CLASSIC_PREFERENCES = "com.artcom.hoccer_preferences";
 
-    private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
+    private static final Logger LOG = Logger.getLogger(SingleProfileCreationFragment.class);
 
     private ActionMode mActionMode;
 
@@ -56,11 +54,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
     private boolean hasUpdatedFromHoccerClassic() {
         SharedPreferences preferences = getActivity().getSharedPreferences(HOCCER_CLASSIC_PREFERENCES, Context.MODE_PRIVATE);
-        if (preferences.contains("client_uuid")) {
-            return true;
-        } else {
-            return false;
-        }
+        return preferences.contains("client_uuid");
     }
 
     @Override
@@ -80,7 +74,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         init();
     }
 
-    private void hideView(View view) {
+    private static void hideView(View view) {
         view.setVisibility(View.GONE);
     }
 
