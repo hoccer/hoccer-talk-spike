@@ -34,7 +34,7 @@ import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
-import com.hoccer.xo.android.content.contentselectors.ImageSelector;
+import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;

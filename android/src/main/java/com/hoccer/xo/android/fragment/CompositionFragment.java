@@ -32,7 +32,7 @@ import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.MultiImageSelector;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.content.contentselectors.IContentSelector;
+import com.hoccer.xo.android.content.selector.IContentSelector;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ImageUtils;

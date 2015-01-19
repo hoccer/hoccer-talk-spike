@@ -1,25 +1,20 @@
-package com.hoccer.xo.android.content.contentselectors;
-
+package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 
-public class ClipboardSelector implements IContentSelector {
-
-    private final Clipboard mClipboard;
+public class DataSelector implements IContentSelector {
 
     private final String mName;
     private final Drawable mIcon;
 
-    public ClipboardSelector(Context context) {
-        mName = context.getResources().getString(R.string.content_clipboard);
+    public DataSelector(Context context) {
+        mName = context.getResources().getString(R.string.content_data);
         mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_data, true);
-        mClipboard = Clipboard.getInstance();
     }
 
     @Override
@@ -34,22 +29,20 @@ public class ClipboardSelector implements IContentSelector {
 
     @Override
     public Intent createSelectionIntent(Context context) {
-        return null; // this selector does not use an external activity
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+
+        return Intent.createChooser(intent, context.getString(R.string.file_chooser_string));
     }
 
     @Override
     public IContentObject createObjectFromSelectionResult(Context context, Intent intent) {
-        IContentObject contentObject = mClipboard.getContent();
-        mClipboard.clearContent();
-        return contentObject;
+        return null;
     }
 
     @Override
     public boolean isValidIntent(Context context, Intent intent) {
         return true;
-    }
-
-    public boolean hasContent() {
-        return mClipboard.hasContent();
     }
 }

@@ -6,8 +6,8 @@ import android.net.Uri;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.activity.MultiImagePickerActivity;
-import com.hoccer.xo.android.content.contentselectors.IContentCreator;
-import com.hoccer.xo.android.content.contentselectors.ImageSelector;
+import com.hoccer.xo.android.content.selector.IContentCreator;
+import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import org.apache.log4j.Logger;
 
