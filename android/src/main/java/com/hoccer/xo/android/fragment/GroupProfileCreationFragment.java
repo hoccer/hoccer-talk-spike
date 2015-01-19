@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,6 +24,7 @@ import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -226,21 +228,13 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     private void updateAvatar(final IContentObject avatar) {
+        mAvatar = avatar;
+        Uri avatarUri = mAvatar == null ? null : UriUtils.getAbsoluteFileUri(mAvatar.getContentDataUrl());
         Picasso.with(getActivity())
-                .load(getAvatarUrl(avatar))
+                .load(avatarUri)
                 .placeholder(R.drawable.avatar_default_group_large)
                 .error(R.drawable.avatar_default_group_large)
                 .into(mAvatarImageView);
-
-        mAvatar = avatar;
-    }
-
-    private String getAvatarUrl(IContentObject avatar) {
-        if (avatar != null) {
-            return avatar.getContentDataUrl();
-        }
-
-        return null;
     }
 
     @Override
