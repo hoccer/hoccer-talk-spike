@@ -1,13 +1,14 @@
 package com.hoccer.xo.android.content.selector;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
@@ -15,9 +16,11 @@ import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -64,7 +67,7 @@ public class CaptureSelector implements IContentSelector {
         if (Environment.MEDIA_MOUNTED.equals(state)) {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String fileName = String.format("hoccer_%s.jpg", timestamp);
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), fileName);
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), fileName);
             return Uri.fromFile(file);
         } else {
             throw new ExternalStorageNotMountedException("External storage is not mounted.");
@@ -73,42 +76,49 @@ public class CaptureSelector implements IContentSelector {
 
     @Override
     public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
-        File imageFile = new File(mFileUri.getPath());
-        MediaScannerConnection.scanFile(mContext, new String[]{imageFile.getPath()},
-                new String[]{ContentMediaType.IMAGE}, new MediaScannerConnection.OnScanCompletedListener() {
-                    @Override
-                    public void onScanCompleted(String path, Uri uri) {
-                        LOG.debug("ScanCompleted: " + path + ", " + uri);
-                    }
-                }
-        );
+        String filePath = mFileUri.getPath();
+        String filename = mFileUri.getLastPathSegment();
 
+        Uri contentUri;
+        try {
+            contentUri = Uri.parse(MediaStore.Images.Media.insertImage(context.getContentResolver(), filePath, filename, null));
+        } catch (FileNotFoundException e) {
+            LOG.error("Could not insert image into MediaStore", e);
+            return null;
+        }
+
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(FilenameUtils.getExtension(filePath));
+
+        ImageUtils.ExifData exifData = ImageUtils.getExifData(filePath);
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.ImageColumns.ORIENTATION, String.valueOf(exifData.orientation));
+        values.put(MediaStore.Images.ImageColumns.MIME_TYPE, mimeType);
+        values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, String.valueOf(exifData.dateTime));
+        values.put(MediaStore.Images.ImageColumns.LATITUDE, String.valueOf(exifData.latitude));
+        values.put(MediaStore.Images.ImageColumns.LONGITUDE, String.valueOf(exifData.longitude));
+        context.getContentResolver().update(contentUri, values, null, null);
+
+        File imageFile = new File(filePath);
+        int fileLength = (int) imageFile.length();
+
+        float aspectRatio = (float) calculateAspectRatio(filePath, exifData.orientation);
+
+        SelectedContent contentObject = new SelectedContent(contentUri.toString(), UriUtils.FILE_URI_PREFIX + filePath);
+        contentObject.setFileName(filename);
+        contentObject.setContentMediaType(ContentMediaType.IMAGE);
+        contentObject.setContentType(mimeType);
+        contentObject.setContentLength(fileLength);
+        contentObject.setContentAspectRatio(aspectRatio);
+        return contentObject;
+    }
+
+    private static double calculateAspectRatio(String filePath, int orientation) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+        BitmapFactory.decodeFile(filePath, options);
         int imageHeight = options.outHeight;
         int imageWidth = options.outWidth;
-        String imageType = options.outMimeType;
-
-        int orientation = ImageUtils.retrieveOrientation(context, null, imageFile.getPath());
-        double aspectRatio = ImageUtils.calculateAspectRatio(imageWidth, imageHeight, orientation);
-
-        LOG.info("Name: " + imageFile.getName());
-        LOG.info("Height: " + imageHeight);
-        LOG.info("Width: " + options.outWidth);
-        LOG.info("Image type: " + options.outMimeType);
-        LOG.info("Image orientation: " + orientation);
-        LOG.info("Image aspectRatio: " + aspectRatio);
-
-        // create content object
-        SelectedContent contentObject = new SelectedContent(UriUtils.FILE_URI_PREFIX + imageFile.getPath());
-        contentObject.setFileName(imageFile.getName());
-        contentObject.setContentMediaType(ContentMediaType.IMAGE);
-        contentObject.setContentType(imageType);
-        contentObject.setContentLength((int) imageFile.length());
-        contentObject.setContentAspectRatio(aspectRatio);
-
-        return contentObject;
+        return ImageUtils.calculateAspectRatio(imageWidth, imageHeight, orientation);
     }
 
     @Override

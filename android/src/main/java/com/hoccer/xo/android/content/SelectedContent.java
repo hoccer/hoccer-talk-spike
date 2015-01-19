@@ -66,10 +66,6 @@ public class SelectedContent implements IContentObject {
         mLength = data.length;
     }
 
-    public SelectedContent(String dataUri) {
-        mDataUri = dataUri;
-    }
-
     public void setFileName(String fileName) {
         this.mFileName = fileName;
     }

@@ -72,7 +72,7 @@ public class PicasaContentObjectCreator implements IContentCreator {
 
                 int fileWidth = options.outWidth;
                 int fileHeight = options.outHeight;
-                int orientation = ImageUtils.retrieveOrientation(context, contentUri, imageFile.getAbsolutePath());
+                int orientation = ImageUtils.retrieveOrientation(imageFile.getAbsolutePath());
                 double aspectRatio = ImageUtils.calculateAspectRatio(fileWidth, fileHeight, orientation);
 
                 LOG.debug("Aspect ratio: " + fileWidth + " x " + fileHeight + " @ " + aspectRatio + " / " + orientation + "°");

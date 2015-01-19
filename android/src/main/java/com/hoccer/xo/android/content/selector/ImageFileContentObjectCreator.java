@@ -64,7 +64,7 @@ public class ImageFileContentObjectCreator implements IContentCreator {
 
         int fileWidth = options.outWidth;
         int fileHeight = options.outHeight;
-        int orientation = ImageUtils.retrieveOrientation(context, contentUri, filePath);
+        int orientation = ImageUtils.retrieveOrientation(filePath);
         double aspectRatio = ImageUtils.calculateAspectRatio(fileWidth, fileHeight, orientation);
         LOG.debug("Aspect ratio: " + fileWidth + " x " + fileHeight + " @ " + aspectRatio + " / " + orientation + "°");
 
