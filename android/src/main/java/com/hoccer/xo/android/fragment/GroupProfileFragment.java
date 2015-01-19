@@ -11,7 +11,6 @@ import android.widget.*;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkGroupMembership;
@@ -259,7 +258,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     @Override
     protected void updateView() {
-        updateAvatar();
+        updateAvatarView();
         updateChatContainer();
         updateGroupName();
         updateContentVisibility();
@@ -322,7 +321,7 @@ public class GroupProfileFragment extends ProfileFragment
         mNameEditText.setText(name);
     }
 
-    private void updateAvatar() {
+    private void updateAvatarView() {
         XoTransfer avatarTransfer;
         if (mGroup.isGroupAdmin()) {
             avatarTransfer = mContact.getAvatarUpload();

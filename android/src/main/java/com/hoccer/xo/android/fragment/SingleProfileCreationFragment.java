@@ -101,7 +101,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     @Override
     public void onServiceConnected() {
         if (mAvatarToSet != null) {
-            updateAvatar(mAvatarToSet);
+            uploadAvatar(mAvatarToSet);
             mAvatarToSet = null;
         }
     }
@@ -127,7 +127,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
                                         }
                                         break;
                                         case 1: {
-                                            updateAvatar(null);
+                                            uploadAvatar(null);
                                         }
                                     }
                                 }
@@ -160,7 +160,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
                 .into(mAvatarImage);
     }
 
-    private void updateAvatar(final IContentObject avatar) {
+    private void uploadAvatar(final IContentObject avatar) {
         if (avatar != null) {
             XoApplication.getExecutor().execute(new Runnable() {
                 @Override

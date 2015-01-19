@@ -212,7 +212,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                                 }
                                 break;
                                 case 1: {
-                                    updateAvatar(null);
+                                    updateAvatarView(null);
                                 }
                             }
                         }
@@ -224,10 +224,10 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     @Override
     public void onAvatarSelected(IContentObject contentObject) {
-        updateAvatar(contentObject);
+        updateAvatarView(contentObject);
     }
 
-    private void updateAvatar(final IContentObject avatar) {
+    private void updateAvatarView(final IContentObject avatar) {
         mAvatar = avatar;
         Uri avatarUri = mAvatar == null ? null : UriUtils.getAbsoluteFileUri(mAvatar.getContentDataUrl());
         Picasso.with(getActivity())
