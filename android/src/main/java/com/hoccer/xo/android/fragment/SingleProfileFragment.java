@@ -3,7 +3,6 @@ package com.hoccer.xo.android.fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
@@ -11,7 +10,6 @@ import android.widget.*;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkPresence;
@@ -97,98 +95,11 @@ public class SingleProfileFragment extends ProfileFragment
         });
     }
 
-    private void hideNicknameEdit() {
-        mNicknameEditText.setVisibility(View.GONE);
-        mNicknameTextView.setVisibility(View.VISIBLE);
-        mNicknameEditButton.setImageResource(android.R.drawable.ic_menu_edit);
-        mNicknameEditButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showNicknameEdit();
-                toggleSoftKeyboard();
-            }
-        });
-    }
-
     private void toggleSoftKeyboard() {
         InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
     }
 
-    private void updateInviteButton(final TalkClientContact contact) {
-        Button inviteButton = (Button) getView().findViewById(R.id.btn_profile_invite);
-        if (contact == null || contact.isSelf()) {
-            mInviteButtonContainer.setVisibility(View.GONE);
-            return;
-        } else {
-            mInviteButtonContainer.setVisibility(View.VISIBLE);
-        }
-
-        try {
-            getXoDatabase().refreshClientContact(contact);
-        } catch (SQLException e) {
-            LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
-        }
-
-        if (contact.getClientRelationship() == null || (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_NONE))) {
-            inviteButton.setText(R.string.friend_request_add_as_friend);
-            inviteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    getXoActivity().getXoClient().inviteFriend(contact);
-                }
-            });
-        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED)) {
-            inviteButton.setText(R.string.friend_request_cancel_invitation);
-            inviteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    getXoActivity().getXoClient().disinviteFriend(contact);
-                }
-            });
-        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED_ME)) {
-            inviteButton.setText(R.string.friend_request_accept_invitation);
-            inviteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    getXoActivity().getXoClient().acceptFriend(contact);
-                }
-            });
-        } else {
-            mInviteButtonContainer.setVisibility(View.GONE);
-        }
-    }
-
-    private void updateDeclineButton(final TalkClientContact contact) {
-
-        Button declineButton = (Button) getView().findViewById(R.id.btn_profile_decline);
-        if (contact == null || contact.isSelf()) {
-            declineButton.setVisibility(View.GONE);
-            return;
-        } else {
-            declineButton.setVisibility(View.VISIBLE);
-        }
-
-        try {
-            getXoDatabase().refreshClientContact(contact);
-        } catch (SQLException e) {
-            LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
-        }
-
-        if (contact.getClientRelationship() != null &&
-                contact.getClientRelationship().getState() != null &&
-                contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED_ME)) {
-            declineButton.setText(R.string.friend_request_decline_invitation);
-            declineButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    getXoActivity().getXoClient().declineFriend(contact);
-                }
-            });
-        } else {
-            declineButton.setVisibility(View.GONE);
-        }
-    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
@@ -325,6 +236,21 @@ public class SingleProfileFragment extends ProfileFragment
         }
     }
 
+    @Override
+    protected int getClientContactId() {
+        return mContact.getClientContactId();
+    }
+
+    @Override
+    protected void updateMessageText() {
+        try {
+            int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
+            super.updateMessageText(count);
+        } catch (SQLException e) {
+            LOG.error("Error fetching message count from database.");
+        }
+    }
+
     private void updateAvatar(final IContentObject avatar) {
         if (avatar != null) {
             XoApplication.getExecutor().execute(new Runnable() {
@@ -361,7 +287,7 @@ public class SingleProfileFragment extends ProfileFragment
 
     @Override
     protected void updateView() {
-        updateAvatar();
+        updateAvatarView();
         updateName();
         updateChatContainer();
         updateFingerprint();
@@ -371,57 +297,7 @@ public class SingleProfileFragment extends ProfileFragment
         updateNicknameContainer();
     }
 
-    private void updateChatContainer() {
-        if (mContact.isSelf()) {
-            mChatContainer.setVisibility(View.GONE);
-        } else {
-            updateMessageText();
-            mChatContainer.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    protected int getClientContactId() {
-        return mContact.getClientContactId();
-    }
-
-    @Override
-    protected void updateMessageText() {
-        try {
-            int count = (int) XoApplication.getXoClient().getDatabase().getMessageCountByContactId(mContact.getClientContactId());
-            super.updateMessageText(count);
-        } catch (SQLException e) {
-            LOG.error("Error fetching message count from database.");
-        }
-    }
-
-    private void updateNicknameContainer() {
-        View nickNameContainer = getView().findViewById(R.id.inc_profile_nickname);
-        if (mContact.isSelf()) {
-            nickNameContainer.setVisibility(View.GONE);
-        } else {
-            updateNickname(mContact);
-            nickNameContainer.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void updateName() {
-        // apply data from the contact that needs to recurse
-        String name = getResources().getString(R.string.profile_user_name_unknown);
-        if (mContact.isClient() || mContact.isSelf()) {
-            if (mContact.isSelf() && !mContact.isSelfRegistered()) {
-                name = mContact.getSelf().getRegistrationName();
-            } else {
-                TalkPresence presence = mContact.getClientPresence();
-                if (presence != null) {
-                    name = presence.getClientName();
-                }
-            }
-        }
-        mNameText.setText(name);
-    }
-
-    private void updateAvatar() {
+    private void updateAvatarView() {
         XoTransfer avatarTransfer;
         if (mContact.isSelf()) {
             avatarTransfer = mContact.getAvatarUpload();
@@ -441,16 +317,32 @@ public class SingleProfileFragment extends ProfileFragment
                 .into(mAvatarImage);
     }
 
-    private void updateNickname(TalkClientContact contact) {
-        mNicknameEditText.setText(contact.getNickname());
-        mNicknameTextView.setText(contact.getNickname());
+    private void updateName() {
+        // apply data from the contact that needs to recurse
+        String name = getResources().getString(R.string.profile_user_name_unknown);
+        if (mContact.isClient() || mContact.isSelf()) {
+            if (mContact.isSelf() && !mContact.isSelfRegistered()) {
+                name = mContact.getSelf().getRegistrationName();
+            } else {
+                TalkPresence presence = mContact.getClientPresence();
+                if (presence != null) {
+                    name = presence.getClientName();
+                }
+            }
+        }
+        mNameText.setText(name);
+    }
+
+    private void updateChatContainer() {
+        if (mContact.isSelf()) {
+            mChatContainer.setVisibility(View.GONE);
+        } else {
+            updateMessageText();
+            mChatContainer.setVisibility(View.VISIBLE);
+        }
     }
 
     private void updateFingerprint() {
-        mKeyText.setText(getFingerprint());
-    }
-
-    public String getFingerprint() {
         String keyId = mContact.getPublicKey().getKeyId();
 
         keyId = keyId.toUpperCase();
@@ -466,7 +358,111 @@ public class SingleProfileFragment extends ProfileFragment
 
         }
         builder.deleteCharAt(builder.lastIndexOf(":"));
-        return builder.toString();
+
+        mKeyText.setText(builder.toString());
+    }
+
+    private void updateInviteButton(final TalkClientContact contact) {
+        Button inviteButton = (Button) getView().findViewById(R.id.btn_profile_invite);
+        if (contact == null || contact.isSelf()) {
+            mInviteButtonContainer.setVisibility(View.GONE);
+            return;
+        } else {
+            mInviteButtonContainer.setVisibility(View.VISIBLE);
+        }
+
+        try {
+            getXoDatabase().refreshClientContact(contact);
+        } catch (SQLException e) {
+            LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
+        }
+
+        if (contact.getClientRelationship() == null || (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_NONE))) {
+            inviteButton.setText(R.string.friend_request_add_as_friend);
+            inviteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getXoActivity().getXoClient().inviteFriend(contact);
+                }
+            });
+        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED)) {
+            inviteButton.setText(R.string.friend_request_cancel_invitation);
+            inviteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getXoActivity().getXoClient().disinviteFriend(contact);
+                }
+            });
+        } else if (contact.getClientRelationship().getState() != null && contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED_ME)) {
+            inviteButton.setText(R.string.friend_request_accept_invitation);
+            inviteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getXoActivity().getXoClient().acceptFriend(contact);
+                }
+            });
+        } else {
+            mInviteButtonContainer.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateDeclineButton(final TalkClientContact contact) {
+
+        Button declineButton = (Button) getView().findViewById(R.id.btn_profile_decline);
+        if (contact == null || contact.isSelf()) {
+            declineButton.setVisibility(View.GONE);
+            return;
+        } else {
+            declineButton.setVisibility(View.VISIBLE);
+        }
+
+        try {
+            getXoDatabase().refreshClientContact(contact);
+        } catch (SQLException e) {
+            LOG.error("Error while refreshing client contact: " + contact.getClientId(), e);
+        }
+
+        if (contact.getClientRelationship() != null &&
+                contact.getClientRelationship().getState() != null &&
+                contact.getClientRelationship().getState().equals(TalkRelationship.STATE_INVITED_ME)) {
+            declineButton.setText(R.string.friend_request_decline_invitation);
+            declineButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getXoActivity().getXoClient().declineFriend(contact);
+                }
+            });
+        } else {
+            declineButton.setVisibility(View.GONE);
+        }
+    }
+
+    private void hideNicknameEdit() {
+        mNicknameEditText.setVisibility(View.GONE);
+        mNicknameTextView.setVisibility(View.VISIBLE);
+        mNicknameEditButton.setImageResource(android.R.drawable.ic_menu_edit);
+        mNicknameEditButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showNicknameEdit();
+                toggleSoftKeyboard();
+            }
+        });
+    }
+
+    private void updateNicknameContainer() {
+        View nickNameContainer = getView().findViewById(R.id.inc_profile_nickname);
+        if (mContact.isSelf()) {
+            nickNameContainer.setVisibility(View.GONE);
+        } else {
+            updateNickname(mContact);
+            nickNameContainer.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updateNickname(TalkClientContact contact) {
+        mNicknameEditText.setText(contact.getNickname());
+        mNicknameTextView.setText(contact.getNickname());
     }
 
     private void blockContact() {
