@@ -146,7 +146,7 @@ public class ChatContactItem extends ChatMessageItem {
         if (mContentObject.getContentUrl() != null) {
             uri = Uri.parse(mContentObject.getContentUrl());
         } else {
-            uri = Uri.parse(mContentObject.getContentDataUrl());
+            uri = UriUtils.getAbsoluteFileUri(mContentObject.getContentDataUrl());
         }
 
         InputStream inputStream;
