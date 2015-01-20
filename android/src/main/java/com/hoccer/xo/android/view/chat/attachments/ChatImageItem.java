@@ -113,7 +113,7 @@ public class ChatImageItem extends ChatMessageItem {
 
     private void openImage(IContentObject contentObject) {
         Uri imageUri = getImageUri(contentObject);
-        if(imageUri != null) {
+        if (imageUri != null) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(imageUri, "image/*");
             try {
@@ -128,12 +128,12 @@ public class ChatImageItem extends ChatMessageItem {
     private Uri getImageUri(IContentObject contentObject) {
         if (contentObject.getContentUrl() != null) {
             Uri contentUri = Uri.parse(contentObject.getContentUrl());
-            if(UriUtils.contentExists(mContext, contentUri)){
+            if (UriUtils.contentExists(mContext, contentUri)) {
                 return Uri.parse(contentObject.getContentUrl());
             }
         }
 
-        if(contentObject.getFilePath() != null) {
+        if (contentObject.getFilePath() != null) {
             return UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
         }
 
