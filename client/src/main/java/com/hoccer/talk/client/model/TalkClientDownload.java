@@ -180,13 +180,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         mTransferListeners = new ArrayList<IXoTransferListener>();
     }
 
-    /**
-     * Initialize this download as an avatar download
-     *
-     * @param url       to download
-     * @param id        for avatar, identifying what the avatar belongs to
-     * @param timestamp for avatar, takes care of collisions over id
-     */
     public void initializeAsAvatar(XoTransferAgent agent, String url, String id, Date timestamp) {
         LOG.info("[new] initializeAsAvatar(url: '" + url + "')");
         mTransferAgent = agent;
@@ -242,13 +235,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         switchState(State.ON_HOLD, "put on hold");
     }
 
-    /**********************************************************************************************/
-    /**********************************************************************************************/
-    /************************************** PRIVATE METHODS ***************************************/
-    /**********************************************************************************************/
-    /**
-     * ******************************************************************************************
-     */
     private void switchState(State newState, String reason) {
         if (!state.possibleFollowUps().contains(newState)) {
             LOG.warn("State " + newState + " is no possible followup to " + state);
@@ -775,10 +761,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-    /**********************************************************************************************/
-    /**********************************************************************************************/
-    /********************************* XoTransfer implementation **********************************/
-    /**********************************************************************************************/
     @Override
     public int getTransferId() {
         return getClientDownloadId();
@@ -789,21 +771,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return getClientDownloadId();
     }
 
-    /**
-     * ******************************************************************************************
-     */
     @Override
     public Type getTransferType() {
         return type;
     }
 
-    /**********************************************************************************************/
-    /**********************************************************************************************/
-    /******************************* IContentObject implementation ********************************/
-    /**********************************************************************************************/
-    /**
-     * ******************************************************************************************
-     */
     @Override
     public boolean isContentAvailable() {
         return state == State.COMPLETE;
