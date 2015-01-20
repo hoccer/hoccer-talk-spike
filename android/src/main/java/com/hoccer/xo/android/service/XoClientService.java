@@ -781,7 +781,6 @@ public class XoClientService extends Service {
                 if (download != null) {
                     download.provideContentUrl(mClient.getTransferAgent(), uri.toString());
                 }
-                mScanningDownloads.remove(path);
 
                 // send an intent
                 Intent intent = new Intent();
@@ -789,6 +788,8 @@ public class XoClientService extends Service {
                 intent.putExtra(IntentHelper.EXTRA_MEDIA_URI, uri.toString());
                 sendBroadcast(intent);
             }
+            
+            mScanningDownloads.remove(path);
         }
 
         @Override
