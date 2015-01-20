@@ -337,8 +337,8 @@ public class GroupProfileFragment extends ProfileFragment
 
         Picasso.with(getActivity())
                 .load(avatarUri)
-                .placeholder(R.drawable.avatar_default_contact_large)
-                .error(R.drawable.avatar_default_contact_large)
+                .placeholder(R.drawable.avatar_default_group_large)
+                .error(R.drawable.avatar_default_group_large)
                 .into(mAvatarImage);
     }
 
