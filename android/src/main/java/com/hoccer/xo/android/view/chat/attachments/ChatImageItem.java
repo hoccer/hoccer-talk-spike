@@ -133,8 +133,8 @@ public class ChatImageItem extends ChatMessageItem {
             }
         }
 
-        if(contentObject.getContentDataUrl() != null) {
-            return UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl());
+        if(contentObject.getFilePath() != null) {
+            return UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
         }
 
         return null;

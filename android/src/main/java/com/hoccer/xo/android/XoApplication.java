@@ -262,18 +262,18 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         if (download.getState() == TalkClientDownload.State.COMPLETE) {
             File avatarDir = getAvatarDirectory();
             ensureDirectory(avatarDir);
-            String dataFile = download.getDataFile();
-            if (dataFile != null) {
-                return new File(avatarDir, dataFile);
+            String filePath = download.getFilePath();
+            if (filePath != null) {
+                return new File(avatarDir, filePath);
             }
         }
         return null;
     }
 
     public static File getAvatarLocation(TalkClientUpload upload) {
-        String dataFile = upload.getDataFile();
-        if (dataFile != null) {
-            return new File(dataFile);
+        String filePath = upload.getFilePath();
+        if (filePath != null) {
+            return new File(filePath);
         }
         return null;
     }
@@ -282,18 +282,18 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         if (download.getState() == TalkClientDownload.State.COMPLETE) {
             File attachmentDir = getAttachmentDirectory();
             ensureDirectory(attachmentDir);
-            String dataFile = download.getDataFile();
-            if (dataFile != null) {
-                return new File(attachmentDir, dataFile);
+            String filePath = download.getFilePath();
+            if (filePath != null) {
+                return new File(attachmentDir, filePath);
             }
         }
         return null;
     }
 
     public static File getAttachmentLocation(TalkClientUpload upload) {
-        String dataFile = upload.getDataFile();
-        if (dataFile != null) {
-            return new File(dataFile);
+        String filePath = upload.getFilePath();
+        if (filePath != null) {
+            return new File(filePath);
         }
         return null;
     }

@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.content;
 
 import android.content.Intent;
-import android.net.Uri;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentDisposition;
@@ -34,7 +33,7 @@ public class SelectedContent implements IContentObject {
 
     String mFileName;
     String mContentUri;
-    String mDataUri;
+    String mFilePath;
     String mContentType;
     String mMediaType;
     String mHmac;
@@ -52,12 +51,12 @@ public class SelectedContent implements IContentObject {
         if (intent != null && intent.getData() != null) {
             initWithContentUri(intent.getData().toString(), intent.getType());
         }
-        mDataUri = dataUri;
+        mFilePath = dataUri;
     }
 
     public SelectedContent(String contentUri, String dataUri) {
         initWithContentUri(contentUri, null);
-        mDataUri = dataUri;
+        mFilePath = dataUri;
     }
 
     public SelectedContent(byte[] data) {
@@ -121,8 +120,8 @@ public class SelectedContent implements IContentObject {
     }
 
     @Override
-    public String getContentDataUrl() {
-        return mDataUri;
+    public String getFilePath() {
+        return mFilePath;
     }
 
     @Override
@@ -167,8 +166,8 @@ public class SelectedContent implements IContentObject {
 
     private String computeHmac() {
         try {
-            if (mDataUri != null) {
-                return CryptoUtils.computeHmac(mDataUri);
+            if (mFilePath != null) {
+                return CryptoUtils.computeHmac(mFilePath);
             } else if (mData != null) {
                 return CryptoUtils.computeHmac(mData);
             }
@@ -193,7 +192,7 @@ public class SelectedContent implements IContentObject {
             os.write(mData);
             os.flush();
             os.close();
-            mDataUri = UriUtils.FILE_URI_PREFIX + file.toString();
+            mFilePath = UriUtils.FILE_URI_PREFIX + file.toString();
             mData = null;
         } catch (IOException e) {
             LOG.error("error writing content to file", e);
@@ -206,8 +205,8 @@ public class SelectedContent implements IContentObject {
         }
 
         String filePath = null;
-        if(object.getContentDataUrl() != null) {
-            filePath = UriUtils.getAbsoluteFileUri(object.getContentDataUrl()).getPath();
+        if(object.getFilePath() != null) {
+            filePath = UriUtils.getAbsoluteFileUri(object.getFilePath()).getPath();
         }
 
         TalkClientUpload upload = new TalkClientUpload();
@@ -229,7 +228,7 @@ public class SelectedContent implements IContentObject {
 
         if (object instanceof XoTransfer) {
             XoTransfer transfer = (XoTransfer) object;
-            File file = new File(UriUtils.getAbsoluteFileUri(transfer.getDataFile()).getPath());
+            File file = new File(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath());
             length = (int) file.length();
 
             // HACK: when re-sending an upload or download, the content url is cleared to exclude it from the music browser
@@ -237,8 +236,8 @@ public class SelectedContent implements IContentObject {
         }
 
         String filePath = null;
-        if(object.getContentDataUrl() != null) {
-            filePath = UriUtils.getAbsoluteFileUri(object.getContentDataUrl()).getPath();
+        if(object.getFilePath() != null) {
+            filePath = UriUtils.getAbsoluteFileUri(object.getFilePath()).getPath();
         }
 
         TalkClientUpload upload = new TalkClientUpload();

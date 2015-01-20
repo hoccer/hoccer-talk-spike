@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -23,10 +22,6 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.artcom.hoccer.R;
-
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 
 public class ChatAudioItem extends ChatMessageItem {
@@ -77,7 +72,7 @@ public class ChatAudioItem extends ChatMessageItem {
             fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
         }
 
-        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl()).getPath());
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(contentObject.getFilePath()).getPath());
         String displayName = metaData.getTitleOrFilename().trim();
         fileNameTextView.setText(displayName);
 

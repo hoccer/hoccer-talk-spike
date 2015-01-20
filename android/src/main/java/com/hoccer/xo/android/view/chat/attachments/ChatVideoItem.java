@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
 import android.content.*;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -88,7 +87,7 @@ public class ChatVideoItem extends ChatMessageItem {
 
         // retrieve thumbnail path if not set already
         if (mThumbnailPath == null) {
-            mThumbnailPath = retrieveThumbnailPath(UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl()));
+            mThumbnailPath = retrieveThumbnailPath(UriUtils.getAbsoluteFileUri(contentObject.getFilePath()));
         }
 
         // adjust width/height based on thumbnail size if it exists
@@ -217,7 +216,7 @@ public class ChatVideoItem extends ChatMessageItem {
             if (UriUtils.contentExists(mContext, Uri.parse(contentObject.getContentUrl()))) {
                 videoUri = Uri.parse(contentObject.getContentUrl());
             } else {
-                videoUri = UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl());
+                videoUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
             }
 
             if (videoUri != null) {

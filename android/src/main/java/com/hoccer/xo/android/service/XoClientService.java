@@ -743,7 +743,7 @@ public class XoClientService extends Service {
         @Override
         public void onDownloadFinished(TalkClientDownload download) {
             if (download.isAttachment() && download.isContentAvailable() && download.getContentUrl() == null) {
-                Uri downloadUri = UriUtils.getAbsoluteFileUri(download.getDataFile());
+                Uri downloadUri = UriUtils.getAbsoluteFileUri(download.getFilePath());
                 String[] path = new String[]{downloadUri.getPath()};
                 String[] ctype = new String[]{download.getContentType()};
                 LOG.debug("requesting media scan of " + ctype[0] + " at " + path[0]);

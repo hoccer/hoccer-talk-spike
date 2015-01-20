@@ -448,7 +448,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private IContentObject compressImageAttachment(IContentObject contentObject) {
         IContentObject result = null;
-        Uri fileUri = UriUtils.getAbsoluteFileUri(contentObject.getContentDataUrl());
+        Uri fileUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
         final File imageFile = new File(fileUri.getPath());
         final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
 

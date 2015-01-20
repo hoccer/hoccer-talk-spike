@@ -86,7 +86,7 @@ public class ChatContactItem extends ChatMessageItem {
                 LOG.debug("onClick(importButton)");
                 if (isContentImportable()) {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(UriUtils.getAbsoluteFileUri(mContent.getContentDataUrl()), mContent.getContentType());
+                    intent.setDataAndType(UriUtils.getAbsoluteFileUri(mContent.getFilePath()), mContent.getContentType());
                     XoActivity activity = (XoActivity) mContext;
                     activity.startExternalActivity(intent);
                 }
@@ -146,14 +146,14 @@ public class ChatContactItem extends ChatMessageItem {
         if (mContentObject.getContentUrl() != null) {
             uri = Uri.parse(mContentObject.getContentUrl());
         } else {
-            uri = UriUtils.getAbsoluteFileUri(mContentObject.getContentDataUrl());
+            uri = UriUtils.getAbsoluteFileUri(mContentObject.getFilePath());
         }
 
         InputStream inputStream;
         try {
             inputStream = XoApplication.getXoClient().getHost().openInputStreamForUrl(uri.toString());
         } catch (IOException e) {
-            LOG.error("Could not open VCard at " + mContent.getContentDataUrl(), e);
+            LOG.error("Could not open VCard at " + mContent.getFilePath(), e);
             return;
         }
 

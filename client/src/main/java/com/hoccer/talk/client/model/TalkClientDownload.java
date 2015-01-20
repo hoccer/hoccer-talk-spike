@@ -875,7 +875,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     @Override
-    public String getContentDataUrl() {
+    public String getFilePath() {
         return dataFile;
     }
 
@@ -929,11 +929,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     public int getTransmittedContentLength() {
         return transmittedContentLength;
-    }
-
-    @Override
-    public String getDataFile() {
-        return dataFile;
     }
 
     public int getTransferFailures() {

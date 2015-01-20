@@ -135,7 +135,7 @@ public class TalkClientContact implements Serializable {
     public String getAvatarContentUrl() {
         IContentObject avatar = getAvatar();
         if (avatar != null) {
-            return avatar.getContentDataUrl();
+            return avatar.getFilePath();
         }
         return null;
     }

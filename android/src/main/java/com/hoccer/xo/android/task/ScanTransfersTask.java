@@ -14,7 +14,7 @@ public class ScanTransfersTask implements IStartupTask {
         try {
             List<? extends XoTransfer> allTransfers = XoApplication.getXoClient().getDatabase().findAllTransfers();
             for(XoTransfer transfer : allTransfers) {
-                String[] path = new String[]{transfer.getDataFile()};
+                String[] path = new String[]{transfer.getFilePath()};
                 String[] ctype = new String[]{transfer.getContentType()};
                 MediaScannerConnection.scanFile(context, path, ctype, null);
             }

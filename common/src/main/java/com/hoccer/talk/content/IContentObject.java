@@ -31,7 +31,7 @@ public interface IContentObject {
     public String getContentUrl();
 
     /** Data URL, if available */
-    public String getContentDataUrl();
+    public String getFilePath();
 
     /** Content length */
     public int getContentLength();

@@ -229,7 +229,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     private void updateAvatarView(final IContentObject avatar) {
         mAvatar = avatar;
-        Uri avatarUri = mAvatar == null ? null : UriUtils.getAbsoluteFileUri(mAvatar.getContentDataUrl());
+        Uri avatarUri = mAvatar == null ? null : UriUtils.getAbsoluteFileUri(mAvatar.getFilePath());
         Picasso.with(getActivity())
                 .load(avatarUri)
                 .placeholder(R.drawable.avatar_default_group_large)

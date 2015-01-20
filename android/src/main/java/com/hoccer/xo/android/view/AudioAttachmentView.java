@@ -14,7 +14,6 @@ import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.artcom.hoccer.R;
 import com.hoccer.xo.android.util.UriUtils;
-import org.apache.log4j.Logger;
 
 public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener {
 
@@ -119,7 +118,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
             mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
 
-        mCurrentMetaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mItem.getContentDataUrl()).getPath());
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mItem.getFilePath()).getPath());
         mTitleTextView.setText(mCurrentMetaData.getTitleOrFilename().trim());
 
         String artist = mCurrentMetaData.getArtist();

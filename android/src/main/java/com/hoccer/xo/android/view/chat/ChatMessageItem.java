@@ -562,8 +562,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
         // check for previously cached files and replace them with the original
         if (contentObject instanceof TalkClientUpload) {
             TalkClientUpload upload = (TalkClientUpload) contentObject;
-            if (upload.getContentDataUrl() != null && upload.getContentDataUrl().contains(XoApplication.getCacheStorage().getPath())) {
-                FileUtils.deleteQuietly(new File(upload.getDataFile()));
+            if (upload.getFilePath() != null && upload.getFilePath().contains(XoApplication.getCacheStorage().getPath())) {
+                FileUtils.deleteQuietly(new File(upload.getFilePath()));
 
                 Uri contentUri = Uri.parse(upload.getContentUrl());
                 Uri fileUri = UriUtils.getFileUriByContentUri(mContext, contentUri);

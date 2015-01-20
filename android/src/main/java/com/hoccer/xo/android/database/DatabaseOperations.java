@@ -26,7 +26,7 @@ public class DatabaseOperations {
     public void removeMissingTransfers() {
         try {
             for (XoTransfer transfer : mDatabase.findAllTransfers()) {
-                if (transfer.getContentDataUrl() != null && isMissing(transfer)) {
+                if (transfer.getFilePath() != null && isMissing(transfer)) {
                     removeMissingTransfer(transfer);
                 }
             }
@@ -36,10 +36,9 @@ public class DatabaseOperations {
     }
 
     private static boolean isMissing(XoTransfer transfer) {
-        Uri dataUri = UriUtils.getAbsoluteFileUri(transfer.getContentDataUrl());
-
-        if (dataUri != null) {
-            File dataFile = new File(dataUri.getPath());
+        Uri filePathUri = UriUtils.getAbsoluteFileUri(transfer.getFilePath());
+        if (filePathUri != null) {
+            File dataFile = new File(filePathUri.getPath());
             return !dataFile.exists();
         }
         return false;
@@ -47,10 +46,10 @@ public class DatabaseOperations {
 
     private void removeMissingTransfer(XoTransfer transfer) {
         try {
-            LOG.info("Removing missing transfer " + transfer.getContentDataUrl());
+            LOG.info("Removing missing transfer " + transfer.getFilePath());
             mDatabase.deleteTransferAndUpdateMessage(transfer, mContext.getResources().getString(R.string.deleted_attachment));
         } catch (SQLException e) {
-            LOG.error("Error while removing missing transfer " + transfer.getContentDataUrl(), e);
+            LOG.error("Error while removing missing transfer " + transfer.getFilePath(), e);
         }
     }
 }

@@ -323,7 +323,7 @@ public abstract class XoActivity extends FragmentActivity {
             if (intent != null) {
                 IContentObject contentObject = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
                 if (contentObject != null) {
-                    LOG.debug("selected avatar " + contentObject.getContentDataUrl());
+                    LOG.debug("selected avatar " + contentObject.getFilePath());
                     for (IXoFragment fragment : mTalkFragments) {
                         fragment.onAvatarSelected(contentObject);
                     }

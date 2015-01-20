@@ -3,6 +3,7 @@ package com.hoccer.xo.android.fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
@@ -223,7 +224,7 @@ public class SingleProfileFragment extends ProfileFragment
 
     @Override
     public void onAvatarSelected(IContentObject contentObject) {
-        LOG.debug("onAvatarSelected(" + contentObject.getContentDataUrl() + ")");
+        LOG.debug("onAvatarSelected(" + contentObject.getFilePath() + ")");
         mAvatarToSet = contentObject;
     }
 
@@ -305,13 +306,13 @@ public class SingleProfileFragment extends ProfileFragment
             avatarTransfer = mContact.getAvatarDownload();
         }
 
-        String avatarUrl = null;
-        if (avatarTransfer != null && avatarTransfer.isContentAvailable() && avatarTransfer.getContentDataUrl() != null) {
-            avatarUrl = UriUtils.getAbsoluteFileUri(avatarTransfer.getContentDataUrl()).toString();
+        Uri avatarUri = null;
+        if (avatarTransfer != null && avatarTransfer.isContentAvailable() && avatarTransfer.getFilePath() != null) {
+            avatarUri = UriUtils.getAbsoluteFileUri(avatarTransfer.getFilePath());
         }
 
         Picasso.with(getActivity())
-                .load(avatarUrl)
+                .load(avatarUri)
                 .placeholder(R.drawable.avatar_default_contact_large)
                 .error(R.drawable.avatar_default_contact_large)
                 .into(mAvatarImage);

@@ -24,8 +24,6 @@ public abstract class XoTransfer implements IContentObject {
 
     public abstract int getUploadOrDownloadId();
 
-    public abstract String getDataFile();
-
     public Direction getDirection() {
         return mDirection;
     }

@@ -274,7 +274,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     private void updateMetaDataView(RemoteViews views) {
-        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mCurrentItem.getContentDataUrl()).getPath());
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mCurrentItem.getFilePath()).getPath());
         if (metaData != null) {
             String metaDataTitle = metaData.getTitle();
             String metaDataArtist = metaData.getArtist();
@@ -290,14 +290,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         } else {
             views.setViewVisibility(R.id.filename_text, View.VISIBLE);
             views.setViewVisibility(R.id.media_metadata_layout, View.GONE);
-            views.setTextViewText(R.id.filename_text, mCurrentItem.getContentDataUrl());
+            views.setTextViewText(R.id.filename_text, mCurrentItem.getFilePath());
         }
     }
 
     private void resetAndPrepareMediaPlayer(IContentObject item) {
         try {
             mMediaPlayer.reset();
-            mMediaPlayer.setDataSource(UriUtils.getAbsoluteFileUri(item.getContentDataUrl()).getPath());
+            mMediaPlayer.setDataSource(UriUtils.getAbsoluteFileUri(item.getFilePath()).getPath());
             mMediaPlayer.prepare();
         } catch (Exception e) {
             LOG.error("setFile: exception setting data source", e);
