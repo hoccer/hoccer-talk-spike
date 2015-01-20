@@ -252,7 +252,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                 .addParentStack(FullscreenPlayerActivity.class)
                 .addNextIntent(resultIntent);
 
-        PendingIntent mResultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         mNotificationViews = createNotificationViews();
 
@@ -261,7 +261,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                 .setContent(mNotificationViews)
                 .setAutoCancel(false)
                 .setOngoing(true)
-                .setContentIntent(mResultPendingIntent);
+                .setContentIntent(resultPendingIntent);
 
         mBuilder.setPriority(Notification.PRIORITY_MAX);
     }
