@@ -1,8 +1,11 @@
 package com.hoccer.xo.android.database;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -32,6 +35,8 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static AndroidTalkDatabase sInstance;
 
+    private final Context mContext;
+
     public static AndroidTalkDatabase getInstance(Context applicationContext) {
         if (sInstance == null) {
             sInstance = new AndroidTalkDatabase(applicationContext);
@@ -41,6 +46,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private AndroidTalkDatabase(Context context) {
         super(context, PreferenceManager.getDefaultSharedPreferences(context).getString("preference_database", DATABASE_NAME_DEFAULT), null, DATABASE_VERSION);
+        mContext = context;
     }
 
     @Override
@@ -82,8 +88,9 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             }
 
             if (oldVersion < 24) {
-                updateUploadDataFile(db);
-                updateDownloadDataFile(db);
+                makeTransferDataFileRelative(db);
+                removeContentUriFromClientUploadDataFileColumn(db);
+                replaceFileUriFromImageUploadContentUrlColumn(mContext, db);
             }
 
         } catch (android.database.SQLException e) {
@@ -93,11 +100,8 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         }
     }
 
-    private static void updateUploadDataFile(SQLiteDatabase db) {
+    private static void makeTransferDataFileRelative(SQLiteDatabase db) {
         updateTransferDataFile(db, "clientUpload", UriUtils.FILE_URI_PREFIX + XoApplication.getExternalStorage().getAbsolutePath() + "/");
-    }
-
-    private static void updateDownloadDataFile(SQLiteDatabase db) throws SQLException {
         updateTransferDataFile(db, "clientDownload", XoApplication.getExternalStorage().getAbsolutePath() + "/");
     }
 
@@ -105,6 +109,23 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
         int begin = prefixToRemove.length() + 1;
         String pattern = prefixToRemove + "%";
         db.execSQL("UPDATE " + table + " SET dataFile = substr(dataFile, " + begin + ") WHERE dataFile LIKE '" + pattern + "'");
+    }
+
+    private static void removeContentUriFromClientUploadDataFileColumn(SQLiteDatabase db) {
+        db.execSQL("UPDATE clientUpload SET dataFile = null WHERE dataFile LIKE 'content://%'");
+    }
+
+    private static void replaceFileUriFromImageUploadContentUrlColumn(Context context, SQLiteDatabase db) {
+        Cursor cursor = db.rawQuery("SELECT dataFile FROM clientUpload WHERE contentUrl LIKE 'file:///%' AND mediaType = 'image'", null);
+        while(cursor.moveToNext()) {
+            String dataFile = cursor.getString(cursor.getColumnIndex("dataFile"));
+            Uri contentUri = UriUtils.getContentUriByDataPath(context, MediaStore.Images.Media.getContentUri("external"), UriUtils.getAbsoluteFileUri(dataFile).getPath());
+            if(contentUri != null) {
+                db.execSQL("UPDATE clientUpload SET contentUrl = '" + contentUri + "' WHERE dataFile = '" + dataFile + "'");
+            } else {
+                db.execSQL("UPDATE clientUpload SET contentUrl = null WHERE dataFile = '" + dataFile + "'");
+            }
+        }
     }
 
     private void deleteDuplicateGroupContacts() throws SQLException {

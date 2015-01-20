@@ -3,6 +3,7 @@ package com.hoccer.xo.android.util;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import com.hoccer.xo.android.XoApplication;
 
@@ -42,12 +43,38 @@ public class UriUtils {
         return HTTP_SCHEMA.equals(uri.getScheme()) || HTTPS_SCHEMA.equals(uri.getScheme());
     }
 
+    public static Uri getContentUriByDataPath(Context context, Uri tableUri, String dataPath) {
+        long contentId = getContentIdByDataPath(context, tableUri, dataPath);
+        if(contentId > 0) {
+            return Uri.parse(tableUri + File.separator + contentId);
+        }
+
+        return null;
+    }
+
+    public static long getContentIdByDataPath(Context context, Uri tableUri, String dataPath) {
+        String[] projection = {
+                BaseColumns._ID
+        };
+        Cursor cursor = context.getContentResolver().query(tableUri, projection, MediaStore.MediaColumns.DATA + " LIKE ?", new String[]{dataPath}, null);
+
+        long contentId = -1;
+        if (cursor.moveToFirst()) {
+            contentId = cursor.getLong(0);
+        }
+        cursor.close();
+
+        return contentId;
+    }
+
     public static boolean contentExists(Context context, Uri contentUri) {
         Uri dataUri = getDataUriByContentUri(context, contentUri);
-        if (isFileUri(dataUri)) {
-            return new File(dataUri.getPath()).exists();
-        } else if (isRemoteUri(dataUri)) {
-            return true;
+        if (dataUri != null) {
+            if (isFileUri(dataUri)) {
+                return new File(dataUri.getPath()).exists();
+            } else if (isRemoteUri(dataUri)) {
+                return true;
+            }
         }
 
         return false;
@@ -62,7 +89,7 @@ public class UriUtils {
         }
     }
 
-    public static Uri getDataUriByContentUri(Context context, Uri contentUri) {
+    private static Uri getDataUriByContentUri(Context context, Uri contentUri) {
         String[] projection = {
                 MediaStore.Images.Media.DATA,
         };

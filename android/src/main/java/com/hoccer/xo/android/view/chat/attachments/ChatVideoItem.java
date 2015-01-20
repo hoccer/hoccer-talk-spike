@@ -191,7 +191,7 @@ public class ChatVideoItem extends ChatMessageItem {
      * Tries to retrieve a thumbnail bitmap for the given video and stores it as JPEG file at the given thumbnailPath
      */
     private boolean createVideoThumbnail(Uri videoUri, Uri thumbnailUri) {
-        long videoId = getVideoId(videoUri);
+        long videoId = UriUtils.getContentIdByDataPath(mContext, MediaStore.Video.Media.getContentUri("external"), videoUri.getPath());
         if (videoId > 0) {
             Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(mContext.getContentResolver(), videoId, MediaStore.Video.Thumbnails.MINI_KIND, new BitmapFactory.Options());
             if (thumbnail != null) {
@@ -205,28 +205,6 @@ public class ChatVideoItem extends ChatMessageItem {
         }
 
         return false;
-    }
-
-    /*
-     * Returns the media store video id of the video at the given path or -1 if the video is unknown.
-     */
-    private long getVideoId(Uri videoUri) {
-        long videoId = -1;
-
-        String videoPath = videoUri.getPath();
-        Uri videosUri = MediaStore.Video.Media.getContentUri("external");
-        String[] projection = {
-                MediaStore.Video.VideoColumns._ID
-        };
-        Cursor cursor = mContext.getContentResolver().query(videosUri, projection, MediaStore.Video.VideoColumns.DATA + " LIKE ?", new String[]{videoPath}, null);
-
-        // if we have found a database entry for the video file
-        if (cursor.moveToFirst()) {
-            videoId = cursor.getLong(0);
-        }
-        cursor.close();
-
-        return videoId;
     }
 
     /*
