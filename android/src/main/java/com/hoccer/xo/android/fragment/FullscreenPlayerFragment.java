@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -197,7 +198,8 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
             mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
 
-        mCurrentMetaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mMediaPlayerService.getCurrentMediaItem().getFilePath()).getPath());
+        Uri mediaUri = UriUtils.getAbsoluteFileUri(mMediaPlayerService.getCurrentMediaItem().getFilePath());
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(mediaUri.getPath());
         final String trackArtist;
         final String trackTitle;
         final int totalDuration = mMediaPlayerService.getTotalDuration();
