@@ -42,7 +42,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private ViewPager mViewPager;
 
-    private boolean mNoUserInput = false;
+    private boolean mNoUserInput;
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
 
