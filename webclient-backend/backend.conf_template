@@ -1,0 +1,17 @@
+# Server config
+server.uri = wss://server.talk.hoccer.de/
+server.certificate_file = ssl_bks
+
+# Backend config
+backend.port = 5000
+
+# Client config
+client.contact_name = receiver
+client.avatar_file = ./res/football.jpg
+client.encrypted_attachment_dir = encrypted_attachments
+client.decrypted_attachment_dir = decrypted_attachments
+client.database_dir = database
+
+# Client position
+client.latitude = 50.948613
+client.longitude = 6.908733

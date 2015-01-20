@@ -586,6 +586,10 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         mDownloadListeners.unregisterListener(listener);
     }
 
+    public List<TalkClientDownload> findAllClientDownloads() throws SQLException {
+        return mClientDownloads.queryForAll();
+    }
+
     public TalkClientUpload findClientUploadById(int clientUploadId) throws SQLException {
         return mClientUploads.queryForId(clientUploadId);
     }
@@ -655,9 +659,13 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .and(2)
                 .query();
 
-        List<TalkClientDownload> downloads = mClientDownloads.queryForEq("mediaType", mediaType);
+        List<TalkClientDownload> downloads = findClientDownloadsByMediaType(mediaType);
 
         return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
+    }
+
+    public List<TalkClientDownload> findClientDownloadsByMediaType(String mediaType) throws SQLException {
+        return mClientDownloads.queryForEq("mediaType", mediaType);
     }
 
     public long getAttachmentCountByContactId(int contactId) throws SQLException {

@@ -28,6 +28,7 @@
     <module>tool</module>
     <module>android</module>
     <module>integration-tests</module>
+    <module>webclient-backend</module>
   </modules>
 
   <properties>
