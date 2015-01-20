@@ -16,7 +16,7 @@ import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.content.contentselectors.*;
+import com.hoccer.xo.android.content.selector.*;
 import com.hoccer.xo.android.util.IntentHelper;
 import org.apache.log4j.Logger;
 

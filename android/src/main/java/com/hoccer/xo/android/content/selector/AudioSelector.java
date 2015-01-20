@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.content.contentselectors;
+package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.UriUtils;
 
 public class AudioSelector implements IContentSelector {
 
@@ -70,7 +71,7 @@ public class AudioSelector implements IContentSelector {
             return null;
         }
 
-        SelectedContent contentObject = new SelectedContent(intent, "file://" + filePath);
+        SelectedContent contentObject = new SelectedContent(intent, UriUtils.FILE_URI_PREFIX + filePath);
         contentObject.setFileName(fileName);
         contentObject.setContentMediaType(ContentMediaType.AUDIO);
         contentObject.setContentType(fileType);

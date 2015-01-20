@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.content.contentselectors;
+package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +11,6 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
 
@@ -70,7 +69,7 @@ public class ContactSelector implements IContentSelector {
             contentUriPath = contentUriPath.replace("content:/com.android.contacts", "content://com.android.contacts");
         }
 
-        SelectedContent contentObject = new SelectedContent(intent, contentUriPath);
+        SelectedContent contentObject = new SelectedContent(contentUriPath, null);
         contentObject.setFileName("Contact");
         contentObject.setContentType(ContactsContract.Contacts.CONTENT_VCARD_TYPE);
         contentObject.setContentMediaType(ContentMediaType.VCARD);

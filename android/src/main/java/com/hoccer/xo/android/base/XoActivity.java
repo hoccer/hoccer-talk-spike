@@ -34,7 +34,7 @@ import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
-import com.hoccer.xo.android.content.contentselectors.ImageSelector;
+import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
@@ -323,7 +323,7 @@ public abstract class XoActivity extends FragmentActivity {
             if (intent != null) {
                 IContentObject contentObject = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
                 if (contentObject != null) {
-                    LOG.debug("selected avatar " + contentObject.getContentDataUrl());
+                    LOG.debug("selected avatar " + contentObject.getFilePath());
                     for (IXoFragment fragment : mTalkFragments) {
                         fragment.onAvatarSelected(contentObject);
                     }

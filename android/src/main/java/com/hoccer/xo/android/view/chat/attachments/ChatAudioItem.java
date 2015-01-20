@@ -19,12 +19,9 @@ import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.artcom.hoccer.R;
-
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 
 public class ChatAudioItem extends ChatMessageItem {
@@ -75,25 +72,11 @@ public class ChatAudioItem extends ChatMessageItem {
             fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
         }
 
-        MediaMetaData metaData = MediaMetaData.retrieveMetaData(contentObject.getContentDataUrl());
-        String displayName;
-        if (metaData.getTitle() != null) {
-            displayName = metaData.getTitle().trim();
-
-            if (metaData.getArtist() != null) {
-                displayName = metaData.getArtist().trim() + " - " + displayName;
-            }
-        } else {
-            try {
-                URI fileUri = new URI(contentObject.getContentDataUrl());
-                File contentFile = new File(fileUri);
-                displayName = contentFile.getName();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-                displayName = contentObject.getFileName();
-            }
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(contentObject.getFilePath()).getPath());
+        String displayName = metaData.getTitleOrFilename().trim();
+        if (metaData.getArtist() != null) {
+            displayName = metaData.getArtist().trim() + " - " + displayName;
         }
-
         fileNameTextView.setText(displayName);
 
         mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);

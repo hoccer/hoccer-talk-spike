@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -31,7 +32,7 @@ import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.MultiImageSelector;
 import com.hoccer.xo.android.content.SelectedContent;
-import com.hoccer.xo.android.content.contentselectors.IContentSelector;
+import com.hoccer.xo.android.content.selector.IContentSelector;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ImageUtils;
@@ -447,11 +448,8 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private IContentObject compressImageAttachment(IContentObject contentObject) {
         IContentObject result = null;
-        String dataPath = contentObject.getContentDataUrl();
-        if (dataPath.startsWith(UriUtils.FILE_URI_PREFIX)) {
-            dataPath = dataPath.substring(UriUtils.FILE_URI_PREFIX.length());
-        }
-        final File imageFile = new File(dataPath);
+        Uri fileUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
+        final File imageFile = new File(fileUri.getPath());
         final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
 
         boolean success = false;
@@ -464,7 +462,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         ImageUtils.copyExifData(imageFile.getAbsolutePath(), compressedImageFile.getAbsolutePath());
 
         if (success) {
-            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), compressedImageFile.getPath());
+            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), UriUtils.FILE_URI_PREFIX + compressedImageFile.getPath());
             newContent.setFileName(imageFile.getName());
             newContent.setContentMediaType(contentObject.getContentMediaType());
             newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.JPEG.name().toLowerCase());

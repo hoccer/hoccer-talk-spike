@@ -11,25 +11,25 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.sql.SQLException;
 
 public class SingleProfileCreationFragment extends XoFragment implements IXoContactListener, View.OnClickListener, ActionMode.Callback {
 
     private static final String HOCCER_CLASSIC_PREFERENCES = "com.artcom.hoccer_preferences";
 
-    private static final Logger LOG = Logger.getLogger(SingleProfileFragment.class);
+    private static final Logger LOG = Logger.getLogger(SingleProfileCreationFragment.class);
 
     private ActionMode mActionMode;
 
@@ -39,7 +39,6 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     private IContentObject mAvatarToSet;
 
     private TalkClientContact mContact;
-    private String mAvatarUrl;
 
     @Override
     public void onAttach(Activity activity) {
@@ -55,11 +54,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
     private boolean hasUpdatedFromHoccerClassic() {
         SharedPreferences preferences = getActivity().getSharedPreferences(HOCCER_CLASSIC_PREFERENCES, Context.MODE_PRIVATE);
-        if (preferences.contains("client_uuid")) {
-            return true;
-        } else {
-            return false;
-        }
+        return preferences.contains("client_uuid");
     }
 
     @Override
@@ -76,10 +71,14 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
         hideView(view.findViewById(R.id.tv_profile_name));
 
-        init();
+        mContact = getXoClient().getSelfContact();
+        if (mActionMode == null) {
+            mActionMode = getActivity().startActionMode(this);
+        }
+        updateAvatarView();
     }
 
-    private void hideView(View view) {
+    private static void hideView(View view) {
         view.setVisibility(View.GONE);
     }
 
@@ -103,7 +102,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     @Override
     public void onServiceConnected() {
         if (mAvatarToSet != null) {
-            updateAvatar(mAvatarToSet);
+            uploadAvatar(mAvatarToSet);
             mAvatarToSet = null;
         }
     }
@@ -129,7 +128,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
                                         }
                                         break;
                                         case 1: {
-                                            updateAvatar(null);
+                                            uploadAvatar(null);
                                         }
                                     }
                                 }
@@ -142,43 +141,27 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
         }
     }
 
-    private void init() {
-        mContact = getXoClient().getSelfContact();
-        if (mActionMode == null) {
-            mActionMode = getActivity().startActionMode(this);
-        }
-        updateAvatarView();
-    }
-
     private void updateAvatarView() {
+        XoTransfer avatarTransfer;
         if (mContact.isSelf()) {
-            TalkClientUpload avatarUpload = mContact.getAvatarUpload();
-            if (avatarUpload != null && avatarUpload.isContentAvailable()) {
-                mAvatarUrl = avatarUpload.getContentDataUrl();
-            }
+            avatarTransfer = mContact.getAvatarUpload();
         } else {
-            TalkClientDownload avatarDownload = mContact.getAvatarDownload();
-            if (avatarDownload != null && avatarDownload.isContentAvailable()) {
-                if (avatarDownload.getDataFile() != null) {
-                    Uri uri = Uri.fromFile(new File(avatarDownload.getDataFile()));
-                    mAvatarUrl = uri.toString();
-                }
-            }
+            avatarTransfer = mContact.getAvatarDownload();
         }
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Picasso.with(getActivity())
-                        .load(mAvatarUrl)
-                        .placeholder(R.drawable.avatar_default_contact_large)
-                        .error(R.drawable.avatar_default_contact_large)
-                        .into(mAvatarImage);
-            }
-        });
+        Uri avatarUri = null;
+        if (avatarTransfer != null && avatarTransfer.isContentAvailable() && avatarTransfer.getFilePath() != null) {
+            avatarUri = UriUtils.getAbsoluteFileUri(avatarTransfer.getFilePath());
+        }
+
+        Picasso.with(getActivity())
+                .load(avatarUri)
+                .placeholder(R.drawable.avatar_default_contact_large)
+                .error(R.drawable.avatar_default_contact_large)
+                .into(mAvatarImage);
     }
 
-    private void updateAvatar(final IContentObject avatar) {
+    private void uploadAvatar(final IContentObject avatar) {
         if (avatar != null) {
             XoApplication.getExecutor().execute(new Runnable() {
                 @Override
@@ -236,7 +219,12 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
 
     @Override
     public void onClientPresenceChanged(TalkClientContact contact) {
-        updateAvatarView();
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateAvatarView();
+            }
+        });
     }
 
     @Override

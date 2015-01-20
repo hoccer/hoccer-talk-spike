@@ -16,6 +16,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.RemoteViews;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
@@ -26,7 +27,7 @@ import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.hoccer.xo.android.util.IntentHelper;
-import com.artcom.hoccer.R;
+import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -40,15 +41,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private static final Logger LOG = Logger.getLogger(MediaPlayerService.class);
 
     private AudioManager mAudioManager;
-    private MediaPlayer mMediaPlayer = null;
+    private MediaPlayer mMediaPlayer;
     private NotificationCompat.Builder mBuilder;
 
-    private boolean mPaused = false;
+    private boolean mPaused;
     private boolean mStopped = true;
 
     private IContentObject mCurrentItem;
-
-    private PendingIntent mResultPendingIntent;
 
     private PendingIntent mPlayStateTogglePendingIntent;
     private final IBinder mBinder = new MediaPlayerBinder();
@@ -57,11 +56,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private LocalBroadcastManager mLocalBroadcastManager;
     private BroadcastReceiver mReceiver;
     private BroadcastReceiver mHeadsetStateBroadcastReceiver;
-    private MediaPlaylistController mPlaylistController = new MediaPlaylistController();
+    private final MediaPlaylistController mPlaylistController = new MediaPlaylistController();
 
     @Override
     public void onCurrentItemChanged(IContentObject newItem) {
-        if(newItem != null) {
+        if (newItem != null) {
             playNewTrack(mPlaylistController.getCurrentItem());
         } else {
             reset();
@@ -74,14 +73,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     @Override
-    public void onRepeatModeChanged(MediaPlaylistController.RepeatMode newMode) {
-        // do nothing
-    }
+    public void onRepeatModeChanged(MediaPlaylistController.RepeatMode newMode) {}
 
     @Override
-    public void onShuffleChanged(boolean isShuffled) {
-        // do nothing
-    }
+    public void onShuffleChanged(boolean isShuffled) {}
 
     public class MediaPlayerBinder extends Binder {
         public MediaPlayerService getService() {
@@ -178,7 +173,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         return true;
     }
 
-    private boolean isApplicationSentToBackground(Context context) {
+    private static boolean isApplicationSentToBackground(Context context) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
         if (!tasks.isEmpty()) {
@@ -222,7 +217,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         mMediaPlayer.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
     }
 
-    private OnAudioFocusChangeListener mAudioFocusChangeListener = new OnAudioFocusChangeListener() {
+    private final OnAudioFocusChangeListener mAudioFocusChangeListener = new OnAudioFocusChangeListener() {
 
         public void onAudioFocusChange(int focusChange) {
 
@@ -241,7 +236,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     };
 
     private void updateNotification() {
-        if (!isPaused()) {
+        if (!mPaused) {
             mNotificationViews.setImageViewResource(R.id.btn_play_pause, R.drawable.ic_dark_content_pause);
         } else {
             mNotificationViews.setImageViewResource(R.id.btn_play_pause, R.drawable.ic_dark_content_play);
@@ -257,7 +252,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                 .addParentStack(FullscreenPlayerActivity.class)
                 .addNextIntent(resultIntent);
 
-        mResultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         mNotificationViews = createNotificationViews();
 
@@ -266,7 +261,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                 .setContent(mNotificationViews)
                 .setAutoCancel(false)
                 .setOngoing(true)
-                .setContentIntent(mResultPendingIntent);
+                .setContentIntent(resultPendingIntent);
 
         mBuilder.setPriority(Notification.PRIORITY_MAX);
     }
@@ -279,7 +274,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     private void updateMetaDataView(RemoteViews views) {
-        MediaMetaData metaData = MediaMetaData.retrieveMetaData(mCurrentItem.getContentDataUrl());
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mCurrentItem.getFilePath()).getPath());
         if (metaData != null) {
             String metaDataTitle = metaData.getTitle();
             String metaDataArtist = metaData.getArtist();
@@ -295,14 +290,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
         } else {
             views.setViewVisibility(R.id.filename_text, View.VISIBLE);
             views.setViewVisibility(R.id.media_metadata_layout, View.GONE);
-            views.setTextViewText(R.id.filename_text, mCurrentItem.getContentDataUrl());
+            views.setTextViewText(R.id.filename_text, mCurrentItem.getFilePath());
         }
     }
 
     private void resetAndPrepareMediaPlayer(IContentObject item) {
         try {
             mMediaPlayer.reset();
-            mMediaPlayer.setDataSource(item.getContentDataUrl().replace("file:///", "/"));
+            mMediaPlayer.setDataSource(UriUtils.getAbsoluteFileUri(item.getFilePath()).getPath());
             mMediaPlayer.prepare();
         } catch (Exception e) {
             LOG.error("setFile: exception setting data source", e);
@@ -314,9 +309,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void playItemInPlaylist(IContentObject item, MediaPlaylist playlist) {
-        boolean isCurrentMediaItem = item.equals(getCurrentMediaItem());
-        boolean isCurrentlyPlaying = isCurrentMediaItem && !isPaused() && !isStopped();
-        boolean isCurrentlyPaused = isCurrentMediaItem && isPaused();
+        boolean isCurrentMediaItem = item.equals(mCurrentItem);
+        boolean isCurrentlyPlaying = isCurrentMediaItem && !mPaused && !mStopped;
+        boolean isCurrentlyPaused = isCurrentMediaItem && mPaused;
 
         setPlaylist(playlist);
         setCurrentIndex(playlist.indexOf(item));
@@ -331,7 +326,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public void play() {
-        if (isStopped()) {
+        if (mStopped) {
             mPlaylistController.setCurrentIndex(0);
         }
         play(mPlaylistController.getCurrentItem());
@@ -428,7 +423,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     if (isStopped()) {
-                        mStopped =false;
+                        mStopped = false;
                         mPaused = true;
                     }
                     mMediaPlayer.seekTo(position);
@@ -448,7 +443,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        if(mPlaylistController.canForward()) {
+        if (mPlaylistController.canForward()) {
             forward();
         } else {
             reset();
@@ -464,7 +459,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     }
 
     public int getTotalDuration() {
-        return (isStopped()) ? 0 : mMediaPlayer.getDuration();
+        return (mStopped) ? 0 : mMediaPlayer.getDuration();
     }
 
     public int getCurrentIndex() {
@@ -473,7 +468,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
     public int getCurrentProgress() {
         int result = 0;
-        if(mMediaPlayer != null) {
+        if (mMediaPlayer != null) {
             result = mMediaPlayer.getCurrentPosition();
         }
         return result;
@@ -488,14 +483,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
 
         try {
             TalkClientMessage message;
-            if (getCurrentMediaItem() instanceof TalkClientDownload) {
-                int attachmentId = ((TalkClientDownload) getCurrentMediaItem()).getClientDownloadId();
+            if (mCurrentItem instanceof TalkClientDownload) {
+                int attachmentId = ((TalkClientDownload) mCurrentItem).getClientDownloadId();
                 message = XoApplication.getXoClient().getDatabase().findClientMessageByTalkClientDownloadId(attachmentId);
                 if (message != null) {
                     conversationContactId = message.getSenderContact().getClientContactId();
                 }
-            } else if (getCurrentMediaItem() instanceof TalkClientUpload) {
-                int attachmentId = ((TalkClientUpload) getCurrentMediaItem()).getClientUploadId();
+            } else if (mCurrentItem instanceof TalkClientUpload) {
+                int attachmentId = ((TalkClientUpload) mCurrentItem).getClientUploadId();
                 message = XoApplication.getXoClient().getDatabase().findClientMessageByTalkClientUploadId(attachmentId);
                 if (message != null) {
                     conversationContactId = message.getSenderContact().getClientContactId();

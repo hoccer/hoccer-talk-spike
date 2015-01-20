@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
 import android.content.*;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -88,7 +87,7 @@ public class ChatVideoItem extends ChatMessageItem {
 
         // retrieve thumbnail path if not set already
         if (mThumbnailPath == null) {
-            mThumbnailPath = retrieveThumbnailPath(Uri.parse(contentObject.getContentDataUrl()));
+            mThumbnailPath = retrieveThumbnailPath(UriUtils.getAbsoluteFileUri(contentObject.getFilePath()));
         }
 
         // adjust width/height based on thumbnail size if it exists
@@ -191,7 +190,7 @@ public class ChatVideoItem extends ChatMessageItem {
      * Tries to retrieve a thumbnail bitmap for the given video and stores it as JPEG file at the given thumbnailPath
      */
     private boolean createVideoThumbnail(Uri videoUri, Uri thumbnailUri) {
-        long videoId = getVideoId(videoUri);
+        long videoId = UriUtils.getContentIdByDataPath(mContext, MediaStore.Video.Media.getContentUri("external"), videoUri.getPath());
         if (videoId > 0) {
             Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(mContext.getContentResolver(), videoId, MediaStore.Video.Thumbnails.MINI_KIND, new BitmapFactory.Options());
             if (thumbnail != null) {
@@ -208,43 +207,22 @@ public class ChatVideoItem extends ChatMessageItem {
     }
 
     /*
-     * Returns the media store video id of the video at the given path or -1 if the video is unknown.
-     */
-    private long getVideoId(Uri videoUri) {
-        long videoId = -1;
-
-        Uri videosUri = MediaStore.Video.Media.getContentUri("external");
-        String[] projection = {
-                MediaStore.Video.VideoColumns._ID
-        };
-        Cursor cursor = mContext.getContentResolver().query(videosUri, projection, MediaStore.Video.VideoColumns.DATA + " LIKE ?", new String[]{videoUri.getPath()}, null);
-
-        // if we have found a database entry for the video file
-        if (cursor.moveToFirst()) {
-            videoId = cursor.getLong(0);
-        }
-        cursor.close();
-
-        return videoId;
-    }
-
-    /*
      * Sends an intent to open the video contained in contentObject.
      */
     private void openVideo(IContentObject contentObject) {
         if (contentObject.isContentAvailable()) {
 
-            String url;
-            if (UriUtils.isExistingContentUri(mContext, contentObject.getContentUrl())) {
-                url = contentObject.getContentUrl();
+            Uri videoUri;
+            if (UriUtils.contentExists(mContext, Uri.parse(contentObject.getContentUrl()))) {
+                videoUri = Uri.parse(contentObject.getContentUrl());
             } else {
-                url = contentObject.getContentDataUrl();
+                videoUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
             }
 
-            if (url != null) {
+            if (videoUri != null) {
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse(url), "video/*");
+                    intent.setDataAndType(videoUri, "video/*");
                     XoActivity activity = (XoActivity) mContext;
                     activity.startExternalActivity(intent);
                 } catch (ActivityNotFoundException exception) {

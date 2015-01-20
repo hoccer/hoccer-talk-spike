@@ -25,9 +25,9 @@ import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
 
-import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
@@ -742,9 +742,9 @@ public class XoClientService extends Service {
 
         @Override
         public void onDownloadFinished(TalkClientDownload download) {
-            if (download.isAttachment() && download.isContentAvailable()
-                    && download.getContentUrl() == null) {
-                String[] path = new String[]{download.getDataFile()};
+            if (download.isAttachment() && download.isContentAvailable() && download.getContentUrl() == null) {
+                Uri downloadUri = UriUtils.getAbsoluteFileUri(download.getFilePath());
+                String[] path = new String[]{downloadUri.getPath()};
                 String[] ctype = new String[]{download.getContentType()};
                 LOG.debug("requesting media scan of " + ctype[0] + " at " + path[0]);
                 mScanningDownloads.put(path[0], download);
@@ -775,18 +775,21 @@ public class XoClientService extends Service {
 
         @Override
         public void onScanCompleted(String path, Uri uri) {
-            LOG.debug("media scan of " + path + " completed - uri " + uri.toString());
-            TalkClientDownload download = mScanningDownloads.get(path);
-            if (download != null) {
-                download.provideContentUrl(mClient.getTransferAgent(), uri.toString());
-            }
-            mScanningDownloads.remove(path);
+            if (uri != null) {
+                LOG.debug("media scan of " + path + " completed - uri " + uri);
+                TalkClientDownload download = mScanningDownloads.get(path);
+                if (download != null) {
+                    download.provideContentUrl(mClient.getTransferAgent(), uri.toString());
+                }
 
-            // send an intent
-            Intent intent = new Intent();
-            intent.setAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
-            intent.putExtra(IntentHelper.EXTRA_MEDIA_URI, uri.toString());
-            sendBroadcast(intent);
+                // send an intent
+                Intent intent = new Intent();
+                intent.setAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
+                intent.putExtra(IntentHelper.EXTRA_MEDIA_URI, uri.toString());
+                sendBroadcast(intent);
+            }
+            
+            mScanningDownloads.remove(path);
         }
 
         @Override

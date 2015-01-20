@@ -8,6 +8,7 @@ import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -32,10 +33,10 @@ public class SelectedContent implements IContentObject {
 
     String mFileName;
     String mContentUri;
-    String mDataUri;
-    String mContentType = null;
-    String mMediaType = null;
-    String mHmac = null;
+    String mFilePath;
+    String mContentType;
+    String mMediaType;
+    String mHmac;
     int mLength = -1;
     double mAspectRatio = 1.0;
 
@@ -44,18 +45,18 @@ public class SelectedContent implements IContentObject {
      * <p/>
      * Converted to a file when selected content becomes an upload.
      */
-    byte[] mData = null;
+    byte[] mData;
 
     public SelectedContent(Intent intent, String dataUri) {
         if (intent != null && intent.getData() != null) {
             initWithContentUri(intent.getData().toString(), intent.getType());
         }
-        mDataUri = dataUri;
+        mFilePath = dataUri;
     }
 
     public SelectedContent(String contentUri, String dataUri) {
         initWithContentUri(contentUri, null);
-        mDataUri = dataUri;
+        mFilePath = dataUri;
     }
 
     public SelectedContent(byte[] data) {
@@ -119,8 +120,8 @@ public class SelectedContent implements IContentObject {
     }
 
     @Override
-    public String getContentDataUrl() {
-        return mDataUri;
+    public String getFilePath() {
+        return mFilePath;
     }
 
     @Override
@@ -165,8 +166,8 @@ public class SelectedContent implements IContentObject {
 
     private String computeHmac() {
         try {
-            if (mDataUri != null) {
-                return CryptoUtils.computeHmac(mDataUri);
+            if (mFilePath != null) {
+                return CryptoUtils.computeHmac(mFilePath);
             } else if (mData != null) {
                 return CryptoUtils.computeHmac(mData);
             }
@@ -191,7 +192,7 @@ public class SelectedContent implements IContentObject {
             os.write(mData);
             os.flush();
             os.close();
-            mDataUri = "file://" + file.toString();
+            mFilePath = UriUtils.FILE_URI_PREFIX + file.toString();
             mData = null;
         } catch (IOException e) {
             LOG.error("error writing content to file", e);
@@ -203,10 +204,15 @@ public class SelectedContent implements IContentObject {
             ((SelectedContent) object).toFile();
         }
 
+        String filePath = null;
+        if(object.getFilePath() != null) {
+            filePath = UriUtils.getAbsoluteFileUri(object.getFilePath()).getPath();
+        }
+
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAvatar(
                 object.getContentUrl(),
-                object.getContentDataUrl(),
+                filePath,
                 object.getContentType(),
                 object.getContentLength());
         return upload;
@@ -222,18 +228,23 @@ public class SelectedContent implements IContentObject {
 
         if (object instanceof XoTransfer) {
             XoTransfer transfer = (XoTransfer) object;
-            File file = new File(transfer.getDataFile());
+            File file = new File(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath());
             length = (int) file.length();
 
             // HACK: when re-sending an upload or download, the content url is cleared to exclude it from the music browser
             contentUrl = null;
         }
 
+        String filePath = null;
+        if(object.getFilePath() != null) {
+            filePath = UriUtils.getAbsoluteFileUri(object.getFilePath()).getPath();
+        }
+
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(
                 object.getFileName(),
                 contentUrl,
-                object.getContentDataUrl(),
+                filePath,
                 object.getContentType(),
                 object.getContentMediaType(),
                 object.getContentAspectRatio(),

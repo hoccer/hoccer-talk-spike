@@ -1,71 +1,78 @@
 package com.hoccer.xo.android.util;
 
 
-import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.media.ExifInterface;
-import android.net.Uri;
-import android.provider.MediaStore;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class ImageUtils {
 
     public static final String MIME_TYPE_IMAGE_PREFIX = "image/";
 
-    private static Logger LOG = Logger.getLogger(ImageUtils.class);
+    private static final Logger LOG = Logger.getLogger(ImageUtils.class);
 
-    public static int retrieveOrientation(Context context, Uri contentUri, String filePath) {
-        String[] columns = {
-                MediaStore.Images.Media.ORIENTATION
-        };
+    public static class ExifData {
+        public int orientation;
+        public long dateTime;
+        public double latitude;
+        public double longitude;
+    }
 
-        // Try with content database first
-        Cursor cursor = null;
+    public static ExifData getExifData(String filePath) {
+        ExifData result = new ExifData();
+
         try {
-            cursor = context.getContentResolver().query(contentUri, columns, null, null, null);
-        } catch (Exception e) {
-            LOG.error("Exception while retrieving image orientation " + contentUri);
+            ExifInterface exif = new ExifInterface(filePath);
+            result.orientation = getOrientationInDegree(exif);
+
+            String dateTimeString = exif.getAttribute(ExifInterface.TAG_DATETIME);
+            result.dateTime = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss").parse(dateTimeString).getTime();
+
+            float latLong[] = new float[2];
+            exif.getLatLong(latLong);
+            result.latitude = latLong[0];
+            result.longitude = latLong[1];
+        } catch (IOException e) {
+            LOG.error("IOException while reading image exif data " + filePath, e);
+        } catch (ParseException e) {
+            LOG.error("ParseException while reading image exif data " + filePath, e);
         }
-        if (cursor != null) {
-            cursor.moveToFirst();
-            int orientationIndex = cursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION);
-            return cursor.getInt(orientationIndex);
 
-        } else {
+        return result;
+    }
 
-            // Try exif data instead
-            int degree = 0;
-            ExifInterface exif = null;
-            try {
-                exif = new ExifInterface(filePath);
-            } catch (IOException ex) {
-                LOG.error("IOException while retrieving image orientation " + filePath);
-            }
-            if (exif != null) {
-                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);
-                if (orientation != -1) {
-                    switch (orientation) {
-                        case ExifInterface.ORIENTATION_ROTATE_90:
-                            degree = 90;
-                            break;
-                        case ExifInterface.ORIENTATION_ROTATE_180:
-                            degree = 180;
-                            break;
-                        case ExifInterface.ORIENTATION_ROTATE_270:
-                            degree = 270;
-                            break;
-                    }
-                }
-            }
-            return degree;
+    public static int retrieveOrientation(String filePath) {
+        ExifInterface exif;
+        try {
+            exif = new ExifInterface(filePath);
+        } catch (IOException ex) {
+            LOG.error("IOException while retrieving image orientation " + filePath);
+            return 0;
+        }
+
+        return getOrientationInDegree(exif);
+    }
+
+    private static int getOrientationInDegree(ExifInterface exif) {
+        int orientationId = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
+        switch (orientationId) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return 90;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return 180;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return 270;
+            default:
+                return 0;
         }
     }
 
