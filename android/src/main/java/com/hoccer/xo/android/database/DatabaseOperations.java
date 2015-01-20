@@ -6,12 +6,9 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.xo.android.util.UriUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.sql.SQLException;
 
 public class DatabaseOperations {
@@ -38,25 +35,13 @@ public class DatabaseOperations {
         }
     }
 
-    private boolean isMissing(XoTransfer transfer) {
+    private static boolean isMissing(XoTransfer transfer) {
         Uri dataUri = UriUtils.getAbsoluteFileUri(transfer.getContentDataUrl());
 
         if (dataUri != null) {
-            if (UriUtils.isFileUri(dataUri)) {
-                File dataFile = new File(dataUri.getPath());
-                return !dataFile.exists();
-            } else if (UriUtils.isContentUri(dataUri)) {
-                InputStream inputStream = null;
-                try {
-                    inputStream = mContext.getContentResolver().openInputStream(dataUri);
-                } catch (FileNotFoundException e) {
-                    return true;
-                } finally {
-                    IOUtils.closeQuietly(inputStream);
-                }
-            }
+            File dataFile = new File(dataUri.getPath());
+            return !dataFile.exists();
         }
-
         return false;
     }
 
