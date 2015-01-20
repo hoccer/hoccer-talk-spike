@@ -29,7 +29,7 @@ public class DatabaseOperations {
     public void removeMissingTransfers() {
         try {
             for (XoTransfer transfer : mDatabase.findAllTransfers()) {
-                if (isMissing(transfer)) {
+                if (transfer.getContentDataUrl() != null && isMissing(transfer)) {
                     removeMissingTransfer(transfer);
                 }
             }
