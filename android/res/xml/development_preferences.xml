@@ -156,11 +156,6 @@
     <PreferenceCategory
             android:title="Development">
 
-        <CheckBoxPreference
-                android:key="preference_environment_update"
-                android:title="Enable environment updates"
-                android:defaultValue="true"/>
-
         <Preference
             android:key="preference_database_dump"
             android:title="Dump SQLite Database"/>
