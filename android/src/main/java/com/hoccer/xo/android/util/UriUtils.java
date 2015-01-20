@@ -10,12 +10,12 @@ import com.hoccer.xo.android.XoApplication;
 import java.io.File;
 
 public class UriUtils {
-    public static final String CONTENT_SCHEMA = "content";
-    public static final String FILE_SCHEMA = "file";
-    public static final String HTTP_SCHEMA = "http";
-    public static final String HTTPS_SCHEMA = "https";
-    public static final String CONTENT_URI_PREFIX = CONTENT_SCHEMA + "://";
-    public static final String FILE_URI_PREFIX = FILE_SCHEMA + "://";
+    public static final String CONTENT_SCHEME = "content";
+    public static final String FILE_SCHEME = "file";
+    public static final String HTTP_SCHEME = "http";
+    public static final String HTTPS_SCHEME = "https";
+    public static final String CONTENT_URI_PREFIX = CONTENT_SCHEME + "://";
+    public static final String FILE_URI_PREFIX = FILE_SCHEME + "://";
 
     public static Uri getAbsoluteFileUri(String stringUri) {
         Uri uri = Uri.parse(stringUri);
@@ -32,15 +32,15 @@ public class UriUtils {
     }
 
     public static boolean isContentUri(Uri uri) {
-        return CONTENT_SCHEMA.equals(uri.getScheme());
+        return CONTENT_SCHEME.equals(uri.getScheme());
     }
 
     public static boolean isFileUri(Uri uri) {
-        return FILE_SCHEMA.equals(uri.getScheme()) || uri.toString().startsWith("/");
+        return FILE_SCHEME.equals(uri.getScheme()) || uri.toString().startsWith("/");
     }
 
     public static boolean isRemoteUri(Uri uri) {
-        return HTTP_SCHEMA.equals(uri.getScheme()) || HTTPS_SCHEMA.equals(uri.getScheme());
+        return HTTP_SCHEME.equals(uri.getScheme()) || HTTPS_SCHEME.equals(uri.getScheme());
     }
 
     public static Uri getContentUriByDataPath(Context context, Uri tableUri, String dataPath) {
