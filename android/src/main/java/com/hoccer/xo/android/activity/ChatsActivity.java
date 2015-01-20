@@ -272,8 +272,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         if (fragment instanceof NearbyChatListFragment) {
             if (isLocationServiceEnabled()) {
                 LOG.debug("refreshEnvironmentUpdater:startNearbySession");
-                XoApplication.startNearbySession(force);
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                XoApplication.startNearbySession(this, force);
             }
         } else {
             shutDownNearbySession();
