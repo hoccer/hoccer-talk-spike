@@ -745,7 +745,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
      * @param directory The directory to check
      * @return The file name including running number and extension (foo_1.bar)
      */
-    private String createUniqueFileNameInDirectory(String file, String extension, String directory) {
+    private static String createUniqueFileNameInDirectory(String file, String extension, String directory) {
         if (file == null) {
             file = "unknown_file";
         }
