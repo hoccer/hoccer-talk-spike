@@ -267,17 +267,20 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     }
 
     private void refreshEnvironmentUpdater(boolean force) {
-        LOG.debug("refreshEnvironmentUpdater");
         Fragment fragment = getFragmentAt(mViewPager.getCurrentItem());
         if (fragment instanceof NearbyChatListFragment) {
-            if (mEnvironmentUpdatesEnabled) {
-                if (isLocationServiceEnabled()) {
-                    LOG.debug("refreshEnvironmentUpdater:startNearbySession");
-                    XoApplication.startNearbySession(force);
-                }
-            }
+            startNearbySession(force);
         } else {
             shutDownNearbySession();
+        }
+    }
+
+    private void startNearbySession(boolean force) {
+        if (isLocationServiceEnabled()) {
+            LOG.debug("refreshEnvironmentUpdater:startNearbySession");
+            XoApplication.startNearbySession(force);
+        } else {
+            showEnableLocationServiceDialog();
         }
     }
 
@@ -288,26 +291,21 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private boolean isLocationServiceEnabled() {
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
-                    R.string.dialog_enable_location_service_title,
-                    R.string.dialog_enable_location_service_message,
-                    this,
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                        }
-                    },
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                        }
+        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER) || manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    private void showEnableLocationServiceDialog() {
+        XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
+                R.string.dialog_enable_location_service_title,
+                R.string.dialog_enable_location_service_message,
+                this,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                     }
-            );
-            return false;
-        }
-        return true;
+                }
+        );
     }
 
     private void startMediaBrowserActivity() {
