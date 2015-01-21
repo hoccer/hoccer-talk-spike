@@ -19,47 +19,37 @@ public class TransferListener implements IXoTransferListenerOld {
     }
 
     public void onDownloadRegistered(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadRegistered: " + download.getDownloadFile());
+        LOG.debug("TransferHandler::onDownloadRegistered: " + download.getFileName());
         mClient.requestDownload(download, true);
     }
 
     public void onDownloadStarted(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadStarted: " + download.getDownloadFile());
+        LOG.debug("TransferHandler::onDownloadStarted: " + download.getFileName());
     }
 
     public void onDownloadProgress(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadProgress: " + download.getDownloadFile());
+        LOG.debug("TransferHandler::onDownloadProgress: " + download.getFileName());
     }
 
     public void onDownloadFinished(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadFinished: " + download.getDownloadFile());
+        LOG.debug("TransferHandler::onDownloadFinished: " + download.getFileName());
     }
 
     public void onDownloadFailed(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadFailed" + download.getDownloadFile());
+        LOG.debug("TransferHandler::onDownloadFailed" + download.getFileName());
     }
 
     public void onDownloadStateChanged(TalkClientDownload download) {
-        LOG.debug("TransferHandler::onDownloadStateChanged: " + download.getDownloadFile());
+        LOG.debug("TransferHandler::onDownloadStateChanged: " + download.getFileName());
     }
 
-    public void onUploadStarted(TalkClientUpload upload) {
-        LOG.debug("TransferHandler::onUploadStarted: " + upload.getDownloadUrl());
-    }
+    public void onUploadStarted(TalkClientUpload upload) {}
 
-    public void onUploadProgress(TalkClientUpload upload) {
-        LOG.debug("TransferHandler::onUploadProgress: " + upload.getDownloadUrl());
-    }
+    public void onUploadProgress(TalkClientUpload upload) {}
 
-    public void onUploadFinished(TalkClientUpload upload) {
-        LOG.debug("TransferHandler::onUploadFinished: " + upload.getDownloadUrl());
-    }
+    public void onUploadFinished(TalkClientUpload upload) {}
 
-    public void onUploadFailed(TalkClientUpload upload) {
-        LOG.debug("TransferHandler::onUploadFailed: " + upload.getDownloadUrl());
-    }
+    public void onUploadFailed(TalkClientUpload upload) {}
 
-    public void onUploadStateChanged(TalkClientUpload upload) {
-        LOG.debug("TransferHandler::onUploadStateChanged: " + upload.getDownloadUrl());
-    }
+    public void onUploadStateChanged(TalkClientUpload upload) {}
 }
