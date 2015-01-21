@@ -235,6 +235,16 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if (isBackgroundActive) {
+            applicationWillEnterBackgroundActive();
+        } else {
+            applicationWillEnterBackground();
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         setBackOrUpPressed();
         super.onBackPressed();
@@ -248,19 +258,11 @@ public abstract class XoActivity extends FragmentActivity {
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
+        isWindowFocused = hasFocus;
         if (isBackOrUpPressed && !hasFocus) {
             isBackOrUpPressed = false;
             isWindowFocused = true;
         }
-
-        if (!hasFocus) {
-            if (isBackgroundActive) {
-                applicationWillEnterBackgroundActive();
-            } else {
-                applicationWillEnterBackground();
-            }
-        }
-
         super.onWindowFocusChanged(hasFocus);
     }
 
