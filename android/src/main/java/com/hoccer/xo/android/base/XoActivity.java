@@ -160,7 +160,7 @@ public abstract class XoActivity extends FragmentActivity {
         LOG.debug("Application will enter foreground.");
         isAppInBackground = false;
         isBackgroundActive = false;
-        XoApplication.enterForegroundMode(this);
+        XoApplication.enterForegroundMode();
     }
 
     protected void applicationWillEnterBackground() {
@@ -194,7 +194,7 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     public void startExternalActivityForResult(Intent intent, int requestCode) {
-        LOG.debug(getClass() + " starting external activity " + intent.toString() + " for request code: " + requestCode);
+        LOG.debug(getClass() + " starting external activity " +  intent.toString() + " for request code: " + requestCode);
         if (!canStartActivity(intent)) {
             return;
         }
@@ -206,7 +206,6 @@ public abstract class XoActivity extends FragmentActivity {
             e.printStackTrace();
         }
     }
-
     public boolean canStartActivity(Intent intent) {
         if (intent != null) {
             ComponentName componentName = intent.resolveActivity(getPackageManager());
@@ -237,10 +236,12 @@ public abstract class XoActivity extends FragmentActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (isBackgroundActive) {
-            applicationWillEnterBackgroundActive();
-        } else {
-            applicationWillEnterBackground();
+        if (!isWindowFocused) {
+            if (isBackgroundActive) {
+                applicationWillEnterBackgroundActive();
+            } else {
+                applicationWillEnterBackground();
+            }
         }
     }
 

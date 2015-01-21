@@ -1,11 +1,9 @@
 package com.hoccer.xo.android;
 
 import android.app.Application;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
-import android.os.PowerManager;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.model.TalkClientDownload;
@@ -63,8 +61,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     private static Thread.UncaughtExceptionHandler sUncaughtExceptionHandler;
     private Thread.UncaughtExceptionHandler mPreviousHandler;
-    private static IXoClientHost sClientHost;
 
+    private static IXoClientHost sClientHost;
     private static XoAndroidClient sClient;
     private static XoAndroidClientConfiguration sConfiguration;
     private static XoSoundPool sSoundPool;
@@ -72,8 +70,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static DisplayImageOptions sImageOptions;
 
     private static boolean sIsNearbySessionRunning;
-
-    private static PowerManager.WakeLock mScreenDimWakeLock;
 
     private static StartupTasks sStartupTasks;
 
@@ -316,18 +312,24 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
      * Starts a nearby session if not yet started.
      * Sets sIsNearbySessionRunning = true.
      */
-    public static void startNearbySession(Context context, boolean force) {
+    public static void startNearbySession(boolean force) {
         if (!sEnvironmentUpdater.isEnabled() || force) {
             try {
                 sEnvironmentUpdater.startEnvironmentTracking();
                 sIsNearbySessionRunning = true;
-
-                PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-                mScreenDimWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "ScreenDimWakeLock");
-                mScreenDimWakeLock.acquire();
             } catch (EnvironmentUpdaterException e) {
                 sLog.error("Error when starting EnvironmentUpdater: ", e);
             }
+        }
+    }
+
+    /**
+     * Stops current nearby session if running.
+     */
+    public static void suspendNearbySession() {
+        if (sEnvironmentUpdater.isEnabled()) {
+            sIsNearbySessionRunning = true;
+            sEnvironmentUpdater.stopEnvironmentTracking();
         }
     }
 
@@ -341,18 +343,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         }
     }
 
-    /**
-     * Stops current nearby session if running.
-     */
-    public static void suspendNearbySession() {
-        if (sEnvironmentUpdater.isEnabled()) {
-            sIsNearbySessionRunning = true;
-            sEnvironmentUpdater.stopEnvironmentTracking();
-
-            mScreenDimWakeLock.release();
-        }
-    }
-
     public static void enterBackgroundMode() {
         // set presence to inactive
         sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
@@ -363,13 +353,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         sLog.info("Entered background mode");
     }
 
-    public static void enterForegroundMode(Context context) {
+    public static void enterForegroundMode() {
         // set presence to active
         sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
 
         // wake up suspended nearby session
         if (sIsNearbySessionRunning) {
-            startNearbySession(context, false);
+            startNearbySession(false);
         }
 
         sLog.info("Entered foreground mode");
