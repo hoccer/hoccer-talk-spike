@@ -1,13 +1,16 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.activity.MessagingActivity;
 import com.hoccer.xo.android.adapter.NearbyChatListAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
+import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.Placeholder;
 import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
@@ -68,7 +71,10 @@ public class NearbyChatListFragment extends XoListFragment {
         Object item = listView.getItemAtPosition(position);
         if (item instanceof TalkClientContact) {
             TalkClientContact contact = (TalkClientContact) item;
-            getXoActivity().showContactConversation(contact);
+            Intent intent = new Intent(getActivity(), MessagingActivity.class);
+            intent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
+            intent.putExtra(MessagingActivity.EXTRA_IS_NEARBY_CONTACT, true);
+            startActivity(intent);
         }
     }
 }

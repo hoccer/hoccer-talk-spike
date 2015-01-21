@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.PopupMenu;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -24,6 +25,7 @@ import com.hoccer.xo.android.view.chat.ChatMessageItem;
 public class MessagingActivity extends ComposableActivity {
 
     public static final String EXTRA_NEARBY_ARCHIVE = "com.hoccer.xo.android.intent.extra.NEARBY_ARCHIVE";
+    public static final String EXTRA_IS_NEARBY_CONTACT = "com.hoccer.xo.android.extra.EXTRA_IS_NEARBY_CONTACT";
 
     ActionBar mActionBar;
 
@@ -60,6 +62,9 @@ public class MessagingActivity extends ComposableActivity {
                 LOG.error("invalid contact id");
             } else {
                 showMessageFragment(contactId);
+            }
+            if (intent.hasExtra(EXTRA_IS_NEARBY_CONTACT)) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             }
         } else if (intent != null && intent.hasExtra(EXTRA_NEARBY_ARCHIVE)) {
             showNearbyArchiveFragment();
