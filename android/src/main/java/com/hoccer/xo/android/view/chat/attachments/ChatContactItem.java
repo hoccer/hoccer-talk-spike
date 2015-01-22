@@ -10,7 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.ContentDisposition;
+import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
@@ -59,76 +59,29 @@ public class ChatContactItem extends ChatMessageItem {
         TextView contactName = (TextView) mContentWrapper.findViewById(R.id.tv_vcard_name);
         TextView contactDescription = (TextView) mContentWrapper.findViewById(R.id.tv_vcard_description);
         ImageButton showButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_show_button);
-        ImageButton importButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_import_button);
 
         int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.xo_incoming_message_textColor) : mContext.getResources().getColor(R.color.xo_compose_message_textColor);
 
         contactName.setTextColor(textColor);
         contactDescription.setTextColor(textColor);
         showButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_contact, mMessage.isIncoming()));
-        importButton.setBackgroundDrawable(showButton.getBackground());
 
         showButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 LOG.debug("onClick(showButton)");
-                if (isContentShowable()) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mContent.getContentUrl()));
-                    XoActivity activity = (XoActivity) mContext;
-                    activity.startExternalActivity(intent);
-                }
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(UriUtils.getAbsoluteFileUri(mContent.getFilePath()), mContent.getContentType());
+                XoActivity activity = (XoActivity) mContext;
+                activity.startExternalActivity(intent);
             }
         });
-
-        importButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LOG.debug("onClick(importButton)");
-                if (isContentImportable()) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(UriUtils.getAbsoluteFileUri(mContent.getFilePath()), mContent.getContentType());
-                    XoActivity activity = (XoActivity) mContext;
-                    activity.startExternalActivity(intent);
-                }
-            }
-        });
-
 
         if (mVCard == null) {
             parseVCard();
         }
 
         contactName.setText(getContactName());
-
-        if (isContentShowable()) {
-            showButton.setVisibility(View.VISIBLE);
-        } else {
-            showButton.setVisibility(View.GONE);
-        }
-        if (isContentImportable()) {
-            importButton.setVisibility(View.VISIBLE);
-        } else {
-            importButton.setVisibility(View.GONE);
-        }
-    }
-
-    private boolean isContentImported() {
-        return mContent != null
-                && mContent.getContentUrl() != null
-                && !mContent.getContentUrl().startsWith("file://")
-                && !mContent.getContentUrl().startsWith("content://media/external/file");
-    }
-
-    private boolean isContentImportable() {
-        return mContent != null
-                && mContent.getContentDisposition() == ContentDisposition.DOWNLOAD
-                && !isContentImported();
-    }
-
-    private boolean isContentShowable() {
-        return mContent != null
-                && mContent.getContentDisposition() != ContentDisposition.SELECTED
-                && isContentImported();
     }
 
     private String getContactName() {
@@ -142,16 +95,10 @@ public class ChatContactItem extends ChatMessageItem {
     }
 
     private void parseVCard() {
-        Uri uri;
-        if (mContentObject.getContentUrl() != null) {
-            uri = Uri.parse(mContentObject.getContentUrl());
-        } else {
-            uri = UriUtils.getAbsoluteFileUri(mContentObject.getFilePath());
-        }
-
+        Uri fileUri = UriUtils.getAbsoluteFileUri(mContentObject.getFilePath());
         InputStream inputStream;
         try {
-            inputStream = XoApplication.getXoClient().getHost().openInputStreamForUrl(uri.toString());
+            inputStream = XoApplication.getXoClient().getHost().openInputStreamForUrl(fileUri.toString());
         } catch (IOException e) {
             LOG.error("Could not open VCard at " + mContent.getFilePath(), e);
             return;

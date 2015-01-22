@@ -9,12 +9,20 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ContactSelector implements IContentSelector {
+
+    private static final Logger LOG = Logger.getLogger(ContactSelector.class);
 
     private final String mName;
     private final Drawable mIcon;
@@ -51,38 +59,26 @@ public class ContactSelector implements IContentSelector {
             return null;
         }
 
-        Uri selectedContent = intent.getData();
-        String[] columns = {
-                ContactsContract.Contacts.LOOKUP_KEY
-        };
+        String lookupUri = intent.getDataString();
+        String vcardUri = lookupUri.replace(ContactsContract.Contacts.CONTENT_LOOKUP_URI.toString(), ContactsContract.Contacts.CONTENT_VCARD_URI.toString());
+        vcardUri = vcardUri.substring(0, vcardUri.lastIndexOf(File.separator));
 
-        Cursor cursor = context.getContentResolver().query(selectedContent, columns, null, null, null);
-        cursor.moveToFirst();
-        int lookupKeyIndex = cursor.getColumnIndex(columns[0]);
-        String lookupKey = cursor.getString(lookupKeyIndex);
-        cursor.close();
-
-        Uri contentUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookupKey);
-        String contentUriPath = contentUri.toString();
-
-        if (contentUriPath.startsWith("content:/com.android.contacts")) {
-            contentUriPath = contentUriPath.replace("content:/com.android.contacts", "content://com.android.contacts");
+        InputStream is = null;
+        byte[] contactData;
+        try {
+            is = XoApplication.getXoClient().getHost().openInputStreamForUrl(vcardUri);
+            contactData = IOUtils.toByteArray(is);
+        } catch (IOException e) {
+            LOG.error("Could not read contact details for selected contact: " + intent.getData());
+            return null;
+        } finally {
+            IOUtils.closeQuietly(is);
         }
 
-        SelectedContent contentObject = new SelectedContent(contentUriPath, null);
+        SelectedContent contentObject = new SelectedContent(contactData);
         contentObject.setFileName("Contact");
         contentObject.setContentType(ContactsContract.Contacts.CONTENT_VCARD_TYPE);
         contentObject.setContentMediaType(ContentMediaType.VCARD);
-
-        AssetFileDescriptor fileDescriptor;
-        long fileSize = 0;
-        try {
-            fileDescriptor = context.getContentResolver().openAssetFileDescriptor(contentUri, "r");
-            fileSize = fileDescriptor.getLength();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        contentObject.setContentLength((int) fileSize);
 
         return contentObject;
     }
