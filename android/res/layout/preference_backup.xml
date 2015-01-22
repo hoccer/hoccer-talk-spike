@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingLeft="6dip"
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:paddingRight="?android:attr/scrollbarSize">
+
+    <RelativeLayout
+            android:id="@+id/rl_default_preference"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="0dip"
+            android:paddingRight="6dip"
+            android:paddingTop="6dip"
+            android:paddingBottom="6dip"
+            android:layout_weight="1">
+
+        <TextView android:id="@android:id/title"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:singleLine="true"
+                  android:textAppearance="?android:attr/textAppearanceMedium"
+                  android:ellipsize="marquee"
+                  android:fadingEdge="horizontal"/>
+
+        <TextView android:id="@android:id/summary"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@android:id/title"
+                  android:layout_alignLeft="@android:id/title"
+                  android:textAppearance="?android:attr/textAppearanceSmall"
+                  android:textColor="?android:attr/textColorSecondary"
+                  android:maxLines="4"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+            android:id="@+id/rl_in_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+        <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"/>
+
+        <TextView
+                android:id="@+id/tv_in_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_toRightOf="@id/progressBar"
+                android:layout_toLeftOf="@+id/btn_cancel"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_centerVertical="true"/>
+
+        <Button
+                android:id="@+id/btn_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/common_cancel"
+                style="@style/ButtonAppBaseTheme"
+                android:layout_alignParentRight="true"/>
+
+    </RelativeLayout>
+
+    <!-- Preference should place its actual preference widget here. -->
+    <LinearLayout android:id="@android:id/widget_frame"
+                  android:layout_width="wrap_content"
+                  android:layout_height="match_parent"
+                  android:minWidth="48dp"
+                  android:gravity="center"
+                  android:orientation="vertical"/>
+</RelativeLayout>

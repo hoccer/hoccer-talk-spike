@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.artcom.hoccer.R;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -18,8 +19,6 @@ import com.google.zxing.common.BitMatrix;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
-import com.artcom.hoccer.R;
-import sun.security.util.Resources_sv;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -173,12 +172,6 @@ public class QrCodeGeneratorFragment extends Fragment implements IPagerFragment,
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
         return bitmap;
     }
-
-    @Override
-    public void onContactAdded(final TalkClientContact contact) {}
-
-    @Override
-    public void onContactRemoved(final TalkClientContact contact) {}
 
     @Override
     public void onClientPresenceChanged(final TalkClientContact contact) {}

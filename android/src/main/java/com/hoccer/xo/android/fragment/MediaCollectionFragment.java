@@ -115,7 +115,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
         super.onCreateOptionsMenu(menu, inflater);
         mRenameMenuId = R.id.menu_search + 1;
         MenuItem renameItem = menu.add(Menu.NONE, mRenameMenuId, Menu.NONE, R.string.rename_collection);
-        renameItem.setIcon(R.drawable.ic_edit);
+        renameItem.setIcon(R.drawable.ic_action_edit);
         renameItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         renameItem.setOnMenuItemClickListener(mRenameCollectionClickListener);
         updateActionBarTitle();
@@ -338,7 +338,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
             List<XoTransfer> items = mCollectionAdapter.getSelectedItems();
             for (XoTransfer item : items) {
                 try{
-                    mDatabase.deleteTransferAndMessage(item);
+                    mDatabase.deleteTransferAndUpdateMessage(item, getResources().getString(R.string.deleted_attachment));
                 } catch(SQLException e) {
                     LOG.error("Could not delete download", e);
                 }

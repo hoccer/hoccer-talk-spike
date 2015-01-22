@@ -37,8 +37,8 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
     private static final Logger LOG = Logger.getLogger(NearbyChatListAdapter.class);
     private static final long RATE_LIMIT_MSECS = 1000;
 
-    private XoClientDatabase mDatabase;
-    private XoActivity mXoActivity;
+    private final XoClientDatabase mDatabase;
+    private final XoActivity mXoActivity;
     private final ScheduledExecutorService mExecutor;
     private ScheduledFuture<?> mNotifyFuture;
     private long mNotifyTimestamp;
@@ -98,7 +98,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
         TextView unseenView = (TextView) view.findViewById(R.id.contact_unseen_messages);
 
         if (contact.isGroup()) {
-            nameView.setText(contact.getNickname() + " (" + (mNearbyContacts.size() - 1) + ")");
+            nameView.setText(mXoActivity.getResources().getString(R.string.nearby_text) + " (" + (mNearbyContacts.size() - 1) + ")");
         } else {
             nameView.setText(contact.getNickname());
         }
@@ -133,7 +133,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
             lastMessageTimeView.setText(lastMessageTime);
             if (message.getAttachmentDownload() != null) {
                 TalkClientDownload attachment = message.getAttachmentDownload();
-                lastMessageText.setText(chooseAttachmentType(view.getContext(),
+                lastMessageText.setText(getAttachmentReceivedText(view.getContext(),
                         attachment.getMediaType()));
             } else {
                 lastMessageText.setText(message.getText());
@@ -153,7 +153,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
         });
     }
 
-    private String chooseAttachmentType(Context context, String attachmentType) {
+    private static String getAttachmentReceivedText(Context context, String attachmentType) {
         String text = context.getResources().getString(R.string.contact_item_received_attachment);
         return String.format(text, attachmentType);
     }
@@ -198,7 +198,6 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
             CollectionUtils.filterInverse(nearbyContacts, TalkClientContactPredicates.IS_SELF_PREDICATE);
 
             if (!nearbyContacts.isEmpty()) {
-                group.setNickname(mXoActivity.getResources().getString(R.string.nearby_text));
                 nearbyContacts.add(0, group);
             }
 
@@ -226,19 +225,7 @@ public class NearbyChatListAdapter extends BaseAdapter implements IXoContactList
     private
     @Nullable
     TalkClientContact getActiveNearbyGroup() {
-        if (mXoActivity != null) {
-            return mXoActivity.getXoClient().getCurrentNearbyGroup();
-        }
-        return null;
-    }
-
-    @Override
-    public void onContactAdded(TalkClientContact contact) {
-
-    }
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {
+        return mXoActivity.getXoClient().getCurrentNearbyGroup();
     }
 
     @Override

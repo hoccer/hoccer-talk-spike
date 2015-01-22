@@ -2,17 +2,19 @@ package com.hoccer.xo.android.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
-import com.artcom.hoccer.R;
+import com.hoccer.xo.android.util.UriUtils;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
@@ -22,26 +24,26 @@ import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
  */
 public class AvatarView extends LinearLayout implements IXoContactListener {
 
-    private Context mContext;
-    private String mDefaultAvatarImageUrl;
+    private Uri mDefaultAvatarImageUri;
     private DisplayImageOptions mDefaultOptions;
     private float mCornerRadius = 0.0f;
     private AspectImageView mAvatarImage;
     private View mPresenceIndicatorActive;
     private View mPresenceIndicatorInactive;
+    private boolean mIsAttachedToWindow;
+
 
     private TalkClientContact mContact;
 
     public AvatarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mContext = context;
-        applyAttributes(context, attrs);
+        applyAttributes(attrs);
         initializeView();
     }
 
     private void initializeView() {
-        View layout = LayoutInflater.from(mContext).inflate(R.layout.view_avatar, null);
+        View layout = LayoutInflater.from(getContext()).inflate(R.layout.view_avatar, null);
         addView(layout);
 
         mAvatarImage = (AspectImageView) this.findViewById(R.id.avatar_image);
@@ -55,17 +57,17 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
                     .displayer(new RoundedBitmapDisplayer(pixel)).build();
         } else {
             mDefaultOptions = new DisplayImageOptions.Builder()
-                    .cloneFrom(XoApplication.getContentImageOptions())
+                    .cloneFrom(XoApplication.getImageOptions())
                     .displayer(new RoundedBitmapDisplayer(pixel)).build();
         }
-        setAvatarImage(mDefaultAvatarImageUrl);
+        setAvatarImage(mDefaultAvatarImageUri);
     }
 
-    private void applyAttributes(Context context, AttributeSet attributes) {
-        TypedArray a = context.getTheme()
+    private void applyAttributes(AttributeSet attributes) {
+        TypedArray a = getContext().getTheme()
                 .obtainStyledAttributes(attributes, R.styleable.AvatarView, 0, 0);
         try {
-            mDefaultAvatarImageUrl = "drawable://" + a.getResourceId(R.styleable.AvatarView_defaultAvatarImageUrl, R.drawable.avatar_default_contact);
+            mDefaultAvatarImageUri = Uri.parse("drawable://" + a.getResourceId(R.styleable.AvatarView_defaultAvatarImageUrl, R.drawable.avatar_default_contact));
             mCornerRadius = a.getFloat(R.styleable.AvatarView_cornerRadius, 0.0f);
         } finally {
             a.recycle();
@@ -74,10 +76,21 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
 
 
     public void setContact(TalkClientContact contact) {
+        if (mIsAttachedToWindow) {
+            if (mContact == null) {
+                if(contact != null) {
+                    XoApplication.getXoClient().registerContactListener(this);
+                }
+            } else {
+                if(contact == null) {
+                    XoApplication.getXoClient().unregisterContactListener(this);
+                }
+            }
+        }
+
         mContact = contact;
         updateAvatar();
         updatePresence();
-        XoApplication.getXoClient().registerContactListener(this);
     }
 
     private void updateAvatar() {
@@ -86,7 +99,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
             return;
         }
         IContentObject avatar = mContact.getAvatar();
-        String avatarUri = avatar == null ? null : avatar.getContentDataUrl();
+        Uri avatarUri = avatar == null ? null : UriUtils.getAbsoluteFileUri(avatar.getFilePath());
 
         if (avatarUri == null) {
             if (mContact.isGroup()) {
@@ -112,15 +125,30 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
         super.onAttachedToWindow();
         updateAvatar();
         updatePresence();
+
+        mIsAttachedToWindow = true;
+        if (mContact != null) {
+            XoApplication.getXoClient().registerContactListener(this);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        mIsAttachedToWindow = false;
+        if (mContact != null) {
+            XoApplication.getXoClient().unregisterContactListener(this);
+        }
     }
 
     /**
      * Sets the avatar image. Value can be null. Uses default avatar image url instead (if
      * specified).
      *
-     * @param avatarImageUrl Url of the given image resource  to load.
+     * @param avatarImageUri Url of the given image resource  to load.
      */
-    public void setAvatarImage(final String avatarImageUrl) {
+    public void setAvatarImage(final Uri avatarImageUri) {
         post(new Runnable() {
             @Override
             public void run() {
@@ -129,12 +157,12 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
                     avatar.setImageResource(R.drawable.avatar_default_contact);
                 } else {
                     mAvatarImage.setVisibility(View.VISIBLE);
-                    if (avatarImageUrl != null) {
+                    if (avatarImageUri != null) {
                         ImageLoader.getInstance()
-                                .displayImage(avatarImageUrl, mAvatarImage, mDefaultOptions, null);
-                    } else if (mDefaultAvatarImageUrl != null) {
+                                .displayImage(avatarImageUri.toString(), mAvatarImage, mDefaultOptions, null);
+                    } else if (mDefaultAvatarImageUri != null) {
                         ImageLoader.getInstance()
-                                .displayImage(mDefaultAvatarImageUrl, mAvatarImage, mDefaultOptions,
+                                .displayImage(mDefaultAvatarImageUri.toString(), mAvatarImage, mDefaultOptions,
                                         null);
                     } else {
                         mAvatarImage.setVisibility(View.INVISIBLE);
@@ -145,16 +173,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     }
 
     public void setAvatarImage(int resourceId) {
-        setAvatarImage("drawable://" + resourceId);
-    }
-
-    /**
-     * Sets the url for the default avatar image. Value can be null.
-     *
-     * @param defaultAvatarImageUrl Url of the given image resource  to load.
-     */
-    private void setDefaultAvatarImageUrl(String defaultAvatarImageUrl) {
-        mDefaultAvatarImageUrl = defaultAvatarImageUrl;
+        setAvatarImage(Uri.parse("drawable://" + resourceId));
     }
 
     private void updatePresence() {
@@ -193,14 +212,6 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
     private void hidePresenceIndicator() {
         mPresenceIndicatorActive.setVisibility(View.INVISIBLE);
         mPresenceIndicatorInactive.setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    public void onContactAdded(TalkClientContact contact) {
-    }
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {
     }
 
     @Override

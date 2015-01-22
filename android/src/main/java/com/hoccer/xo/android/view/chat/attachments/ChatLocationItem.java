@@ -8,19 +8,18 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 
-import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -67,19 +66,19 @@ public class ChatLocationItem extends ChatMessageItem {
             @Override
             public void onClick(View view) {
                 if (contentObject.isContentAvailable()) {
-                    String url = contentObject.getContentUrl();
-                    if (url == null) {
-                        url = contentObject.getContentDataUrl();
+                    Uri uri;
+                    if (contentObject.getContentUrl() != null) {
+                        uri = Uri.parse(contentObject.getContentUrl());
+                    } else {
+                        uri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
                     }
-                    if (url != null) {
-                        LatLng location = loadGeoJson(contentObject);
+
+                    LatLng location = loadGeoJson(uri);
+                    if (location != null) {
                         String label = "Received Location";
-                        String uriString = "http://maps.google.com/maps?q=loc:"
-                                + location.latitude + "," + location.longitude + " (" + label
-                                + ")";
-                        Uri uri = Uri.parse(uriString);
-                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, uri);
-                        XoActivity activity = (XoActivity)view.getContext();
+                        Uri locationUri = Uri.parse("http://maps.google.com/maps?q=loc:" + location.latitude + "," + location.longitude + " (" + label + ")");
+                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, locationUri);
+                        XoActivity activity = (XoActivity) view.getContext();
                         activity.startExternalActivity(intent);
                     }
                 }
@@ -87,35 +86,14 @@ public class ChatLocationItem extends ChatMessageItem {
         });
     }
 
-
-    private LatLng loadGeoJson(IContentObject content) {
+    private LatLng loadGeoJson(Uri uri) {
         LatLng result = null;
         try {
-            if (!content.isContentAvailable()) {
-                return null;
-            }
-
-            // XXX put this somewhere
-            InputStream is = null;
-            if (content instanceof SelectedContent) {
-                SelectedContent selectedContent = ((SelectedContent) content);
-                if (selectedContent.getData() != null) {
-                    is = new ByteArrayInputStream(selectedContent.getData());
-                }
-            }
-            if (is == null && content.getContentDataUrl() != null) {
-                is = XoApplication.getXoClient().getHost().openInputStreamForUrl(
-                        content.getContentDataUrl()
-                );
-            }
-            if (is == null) {
-                return null;
-            }
-
+            InputStream is = new FileInputStream(uri.getPath());
             ObjectMapper jsonMapper = new ObjectMapper();
             JsonNode json = jsonMapper.readTree(is);
             if (json != null && json.isObject()) {
-                LOG.info("parsing location: " + json.toString());
+                LOG.info("parsing location: " + json);
                 JsonNode location = json.get("location");
                 if (location != null && location.isObject()) {
                     JsonNode type = location.get("type");
@@ -137,8 +115,6 @@ public class ChatLocationItem extends ChatMessageItem {
             } else {
                 LOG.error("root node is not object");
             }
-
-
         } catch (IOException e) {
             LOG.error("error loading geojson", e);
         }

@@ -185,17 +185,11 @@ public class ChatListFragment extends SearchableListFragment {
             @Override
             public boolean shouldShow(TalkClientContact contact) {
                 if (contact.isGroup()) {
-                    if (contact.isGroupJoined() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()))) {
-                        return true;
-                    }
+                    return contact.isGroupJoined() && contact.isGroupExisting() && !(contact.getGroupPresence() != null && (contact.getGroupPresence().isTypeNearby() || contact.getGroupPresence().isKept()));
                 } else if (contact.isClient()) {
-                    if (contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship()
-                            .isBlocked())) {
-                        return true;
-                    }
-                } else if (contact.isEverRelated()) {
-                    return true;
+                    return contact.isClientRelated() && (contact.getClientRelationship().isFriend() || contact.getClientRelationship().isBlocked());
                 }
+
                 return false;
             }
         };

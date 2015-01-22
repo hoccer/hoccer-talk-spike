@@ -12,7 +12,7 @@ public abstract class ActivityComponent {
 
     private final FragmentActivity mActivity;
 
-    protected ActivityComponent(final FragmentActivity activity) {
+    protected ActivityComponent(FragmentActivity activity) {
         mActivity = activity;
     }
 
@@ -21,7 +21,7 @@ public abstract class ActivityComponent {
     }
 
     @SuppressWarnings("unused")
-    public void onCreate(final Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
     }
 
     public void onStart() {
@@ -39,11 +39,11 @@ public abstract class ActivityComponent {
     public void onDestroy() {
     }
 
-    public boolean onCreateOptionsMenu(final Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) {
         return true;
     }
 
-    public boolean onOptionsItemSelected(final MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         return false;
     }
 }

@@ -42,8 +42,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:singleLine="true"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-        android:text="123 Messages"/>
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"/>
 
     <ImageView
         android:id="@+id/iv_go_to_chats_indicator"

@@ -29,7 +29,7 @@ public class CredentialImporter {
      * @return Whether the package is installed or not.
      * @see XoApplication#getConfiguration()#getCredentialImportPackage()
      */
-    public static boolean isCredentialImportPackageInstalled(final Context context) {
+    public static boolean isCredentialImportPackageInstalled(Context context) {
         return getCredentialImportPackageInfo(context) != null;
     }
 
@@ -41,13 +41,13 @@ public class CredentialImporter {
      * @return Whether credential import is supported by the credential import package.
      * @see XoApplication#getConfiguration()#getCredentialImportPackage()
      */
-    public static boolean isCredentialImportSupported(final Context context) {
-        final PackageInfo packageInfo = getCredentialImportPackageInfo(context);
+    public static boolean isCredentialImportSupported(Context context) {
+        PackageInfo packageInfo = getCredentialImportPackageInfo(context);
         if (packageInfo == null) {
             return false;
         }
 
-        final int versionCode = packageInfo.versionCode;
+        int versionCode = packageInfo.versionCode;
         return versionCode >= SUPPORTED_EXPORT_VERSION;
     }
 
@@ -57,13 +57,13 @@ public class CredentialImporter {
      * @param context Used to retrieve package information.
      * @return The package info instance or null.
      */
-    private static PackageInfo getCredentialImportPackageInfo(final Context context) {
+    private static PackageInfo getCredentialImportPackageInfo(Context context) {
         PackageInfo result = null;
-        final String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
+        String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
         if (packageName != null) {
             try {
                 result = context.getPackageManager().getPackageInfo(packageName, 0);
-            } catch (final PackageManager.NameNotFoundException e) {
+            } catch (PackageManager.NameNotFoundException e) {
                 // package not installed
             }
         }
@@ -85,12 +85,12 @@ public class CredentialImporter {
      * @param context  Used to send the import broadcast to the import package.
      * @param listener Gets called on success or failure.
      */
-    public static void importCredentials(final Context context, final CredentialImportListener listener) {
+    public static void importCredentials(Context context, CredentialImportListener listener) {
         LOG.info("Try to import credentials");
-        final String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
+        String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
         if (packageName != null) {
-            final Intent intent = new Intent();
-            final String className = CredentialTransferReceiver.class.getName();
+            Intent intent = new Intent();
+            String className = CredentialTransferReceiver.class.getName();
             intent.setClassName(packageName, className);
             intent.setAction(CredentialExportService.INTENT_ACTION_FILTER);
             intent.putExtra(CredentialExportService.EXTRA_RECEIVER, new CredentialResultReceiver(listener));
@@ -103,12 +103,12 @@ public class CredentialImporter {
      *
      * @param context Used to send the import broadcast to the import package.
      */
-    public static void sendDisconnectRequestToImportPackageClient(final Context context) {
+    public static void sendDisconnectRequestToImportPackageClient(Context context) {
         LOG.info("Try to disconnect import package client");
-        final String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
+        String packageName = XoApplication.getConfiguration().getCredentialImportPackage();
         if (packageName != null) {
-            final Intent intent = new Intent();
-            final String className = CredentialTransferReceiver.class.getName();
+            Intent intent = new Intent();
+            String className = CredentialTransferReceiver.class.getName();
             intent.setClassName(packageName, className);
             intent.setAction(DisconnectService.INTENT_ACTION_FILTER);
             context.sendBroadcast(intent);
@@ -121,9 +121,9 @@ public class CredentialImporter {
      * @param context Needed to get the shared preferences.
      * @see com.hoccer.xo.android.credentialtransfer.SrpChangeListener
      */
-    public static void setSrpChangeOnNextLoginFlag(final Context context) {
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        final SharedPreferences.Editor editor = preferences.edit();
+    public static void setSrpChangeOnNextLoginFlag(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(CHANGE_SRP_SECRET_PROPERTY, true);
         editor.apply();
     }

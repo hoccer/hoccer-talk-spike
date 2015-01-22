@@ -114,6 +114,21 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:key="backup_category"
+            android:title="Backups">
+        <com.hoccer.xo.android.backup.BackupPreference
+                android:key="@string/preference_key_create_backup"
+                android:layout="@layout/preference_backup"
+                android:title="@string/backup_title"
+                inProgressText="@string/backup_in_progress_title"/>
+        <com.hoccer.xo.android.backup.BackupPreference
+                android:key="@string/preference_key_restore_backup"
+                android:layout="@layout/preference_backup"
+                android:title="@string/restore_title"
+                inProgressText="@string/restore_in_progress_title"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/pref_encryption">
 
         <ListPreference
@@ -127,6 +142,16 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+            android:title="@string/pref_support">
+
+        <CheckBoxPreference
+                android:key="preference_report_crashes"
+                android:title="@string/pref_report_crashes"
+                android:summary="@string/pref_report_crashes_summary"
+                android:defaultValue="true"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
             android:title="@string/pref_legal_information">
         <Preference
                 android:title="@string/menu_licenses"
@@ -137,15 +162,6 @@
                 <extra android:name="xo_legal_imprint_display_mode" android:value="LICENSES"></extra>
             </intent>
         </Preference>
-    </PreferenceCategory>
-
-    <PreferenceCategory
-            android:title="@string/pref_crash_report">
-
-        <CheckBoxPreference
-                android:key="preference_crash_report"
-                android:title="@string/pref_crash_report_switcher"
-                android:defaultValue="false"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

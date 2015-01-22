@@ -28,10 +28,10 @@ public abstract class ComposableActivity extends XoActivity {
     }
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        for (final ActivityComponent component : mComponents) {
+        for (ActivityComponent component : mComponents) {
             component.onCreate(savedInstanceState);
         }
     }
@@ -39,7 +39,7 @@ public abstract class ComposableActivity extends XoActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        for (final ActivityComponent component : mComponents) {
+        for (ActivityComponent component : mComponents) {
             component.onStart();
         }
     }
@@ -47,7 +47,7 @@ public abstract class ComposableActivity extends XoActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        for (final ActivityComponent component : mComponents) {
+        for (ActivityComponent component : mComponents) {
             component.onResume();
         }
     }
@@ -61,7 +61,7 @@ public abstract class ComposableActivity extends XoActivity {
         boolean result = super.onCreateOptionsMenu(menu);
 
         if (result) {
-            for (final ActivityComponent component : mComponents) {
+            for (ActivityComponent component : mComponents) {
                 if (!component.onCreateOptionsMenu(menu)) {
                     return false;
                 }
@@ -77,7 +77,7 @@ public abstract class ComposableActivity extends XoActivity {
         boolean isConsumed = super.onOptionsItemSelected(item);
 
         if (!isConsumed) {
-            for (final ActivityComponent component : mComponents) {
+            for (ActivityComponent component : mComponents) {
                 if (component.onOptionsItemSelected(item)) {
                     return true;
                 }

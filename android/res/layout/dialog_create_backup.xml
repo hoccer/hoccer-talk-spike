@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="16dp">
+
+    <TextView android:id="@+id/tv_save_backup_target"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/backup_dialog_message"
+              android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"/>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp">
+
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="@string/enter_password"
+                  android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"/>
+
+        <EditText android:id="@+id/et_password"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:singleLine="true"
+                  android:maxLines="1"
+                  android:inputType="textPassword"/>
+    </LinearLayout>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/backup_dialog_dont_forget_password"
+              android:textSize="12sp"
+              android:paddingTop="6dp"
+              android:layout_marginTop="-10dp"/>
+
+    <CheckBox android:id="@+id/cb_include_attachments"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/backup_dialog_include_attachments"
+              android:textAppearance="@android:style/TextAppearance.Medium"
+              android:layout_marginTop="6dp"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="@string/backup_dialog_complete_backup_warning"
+              android:textSize="12sp"
+              android:gravity="center_vertical"
+              android:layout_marginTop="-4dp"/>
+</LinearLayout>

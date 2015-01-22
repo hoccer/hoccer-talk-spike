@@ -1,5 +1,6 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Intent;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
@@ -20,12 +21,19 @@ public class GroupContactListFragment extends ContactListFragment {
             R.string.placeholder_groups_text);
 
     public GroupContactListFragment() {
-        super(R.string.contacts_tab_groups, GroupProfileActivity.class, PLACEHOLDER);
+        super(R.string.contacts_tab_groups, PLACEHOLDER);
     }
 
     @Override
     protected ContactListAdapter createAdapter() {
         return new GroupContactListAdapter(getActivity());
+    }
+
+    @Override
+    protected Intent getProfileActivityIntent(TalkClientContact contact) {
+        return new Intent(getActivity(), GroupProfileActivity.class)
+                .setAction(GroupProfileActivity.ACTION_SHOW)
+                .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
     }
 
     @Override

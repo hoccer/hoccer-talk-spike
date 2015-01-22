@@ -12,6 +12,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.base.XoAdapter;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -55,7 +56,7 @@ public abstract class ContactsAdapter extends XoAdapter
 
     Filter mFilter;
 
-    List<TalkClientContact> mClientContacts = new ArrayList<TalkClientContact>();
+    List<TalkClientContact> mContacts = new ArrayList<TalkClientContact>();
 
     public Filter getFilter() {
         return mFilter;
@@ -89,22 +90,22 @@ public abstract class ContactsAdapter extends XoAdapter
         super.onReloadRequest();
         synchronized (this) {
             try {
-                List<TalkClientContact> newClients = mDatabase.findAllContactsExceptSelfOrderedByRecentMessage();
-                LOG.debug("found " + newClients.size() + " contacts");
+                List<TalkClientContact> newContacts = mDatabase.findAllContactsExceptSelfOrderedByRecentMessage();
+                LOG.debug("found " + newContacts.size() + " contacts");
 
                 if (mFilter != null) {
-                    newClients = filter(newClients, mFilter);
+                    newContacts = filter(newContacts, mFilter);
                 }
-                LOG.debug("filtered " + newClients.size() + " contacts");
+                LOG.debug("filtered " + newContacts.size() + " contacts");
 
-                for (TalkClientContact contact : newClients) {
+                for (TalkClientContact contact : newContacts) {
                     TalkClientDownload avatarDownload = contact.getAvatarDownload();
                     if (avatarDownload != null) {
                         mDatabase.refreshClientDownload(avatarDownload);
                     }
                 }
 
-                mClientContacts = newClients;
+                mContacts = newContacts;
             } catch (SQLException e) {
                 LOG.error("SQL error", e);
             }
@@ -126,16 +127,6 @@ public abstract class ContactsAdapter extends XoAdapter
             }
         }
         return res;
-    }
-
-    @Override
-    public void onContactAdded(TalkClientContact c) {
-        requestReload();
-    }
-
-    @Override
-    public void onContactRemoved(TalkClientContact contact) {
-        requestReload();
     }
 
     @Override
@@ -233,7 +224,7 @@ public abstract class ContactsAdapter extends XoAdapter
     @Override
     public int getCount() {
         int count = 0;
-        count += mClientContacts.size();
+        count += mContacts.size();
 
         // add saved nearby messages
         if (showNearbyHistory) {
@@ -253,8 +244,8 @@ public abstract class ContactsAdapter extends XoAdapter
 
     @Override
     public Object getItem(int position) {
-        if (position >= 0 && position < mClientContacts.size()) {
-            return mClientContacts.get(position);
+        if (position >= 0 && position < mContacts.size()) {
+            return mContacts.get(position);
         }
 
         // TODO: only if nearby history was found in db
@@ -266,7 +257,7 @@ public abstract class ContactsAdapter extends XoAdapter
 
     @Override
     public int getItemViewType(int position) {
-        if (position >= 0 && position < mClientContacts.size()) {
+        if (position >= 0 && position < mContacts.size()) {
             return VIEW_TYPE_CLIENT;
         }
 
@@ -342,13 +333,8 @@ public abstract class ContactsAdapter extends XoAdapter
         separator.setText((String) getItem(position));
     }
 
-    public String[] getMembersIds() {
-        String[] ids = new String[mClientContacts.size()];
-        int i = 0;
-        for (TalkClientContact contact : mClientContacts) {
-            ids[i++] = contact.getClientId();
-        }
-        return ids;
+    public List<TalkClientContact> getContacts() {
+        return ListUtils.unmodifiableList(mContacts);
     }
 
     public interface Filter {

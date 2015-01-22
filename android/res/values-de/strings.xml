@@ -3,14 +3,11 @@
 
     <string name="app_name">${app.name}</string>
 
-    <string name="demo_message">Lorem ipsum dolor…</string>
-
     <!-- common strings -->
     <string name="common_ok">OK</string>
     <string name="common_cancel">Abbrechen</string>
     <string name="common_yes">Ja</string>
     <string name="common_no">Nein</string>
-    <string name="common_done">Fertig</string>
     <string name="common_decline">Ablehnen</string>
     <string name="common_accept">Annehmen</string>
     <string name="common_delete">Löschen</string>
@@ -21,13 +18,11 @@
     <string name="menu_pair">Kontakt hinzufügen</string>
     <string name="menu_group_profile_add_person">Hinzufügen</string>
     <string name="menu_new_group">Gruppe erstellen</string>
-    <string name="menu_add_attachment">Anhang hinzufügen</string>
     <string name="menu_profile">Profil</string>
     <string name="menu_settings">Einstellungen</string>
     <string name="menu_about">Über ${app.name}</string>
     <string name="menu_music_viewer">Medien</string>
     <string name="menu_reconnect">erneut verbinden</string>
-    <string name="menu_quit">schließen</string>
     <string name="menu_clear_conversation">Chat löschen</string>
     <string name="menu_contacts">Kontakte</string>
 
@@ -37,11 +32,6 @@
 
     <!-- Contacts fragment -->
     <string name="contacts_title">Kontakte</string>
-    <string name="contacts_category_friends">Freunde</string>
-    <string name="contacts_category_groups">Gruppen</string>
-    <string name="contacts_empty_info">Du hast noch keine Kontakte hinzugefügt</string>
-    <string name="contacts_empty_pairing">Kontakt hinzufügen</string>
-    <string name="dialog_token_invitation_title">Einladung</string>
     <string name="blocked_contact">Blockierter Kontakt</string>
 
     <!-- Friend decline invitation dialog -->
@@ -61,12 +51,10 @@
     <!-- Deleting attachments -->
     <string name="dialog_attachment_delete_title">Anhang Löschen</string>
     <string name="dialog_attachment_delete_message">Willst du die ausgewählten Anhänge wirklich löschen?</string>
+    <string name="deleted_attachment">[Gelöschter Anhang]</string>
 
     <!-- AudioAttachmentList Fragment -->
-    <string name="audio_attachment_list_all">Alle</string>
-    <string name="audio_attachment_list_unknown">Unbekannt</string>
     <string name="menu_search">Suche</string>
-    <string name="search_hint">Suche Attachments</string>
 
     <string-array name="delete_options">
         <item>Aus Sammlung entfernen</item>
@@ -76,8 +64,6 @@
     <!-- Nearby location request -->
     <string name="dialog_enable_location_service_title">Ortungsdienste</string>
     <string name="dialog_enable_location_service_message">Um diese Funktion nutzen zu können musst Du Ortungsdienste aktivieren. (GPS oder Netzwerkposition). Willst Du es aktivieren?</string>
-    <string name="nearby_yes">Ja</string>
-    <string name="nearby_no">Nein</string>
 
     <!-- Contact list items -->
     <string name="contact_name_new_client">Neuer Kontakt</string>
@@ -92,14 +78,12 @@
     <string name="attachment_over_limit_title">Nachricht versenden?</string>
     <string name="attachment_over_limit_upload_question">Der Anhang ist %1$s groß. Willst du die Nachricht wirklich versenden?</string>
     <string name="attachment_over_limit_confirm">Senden</string>
-    <string name="attachment_on_hold_upload_question">%1$s hochladen?</string>
     <string name="attachment_on_hold_download_question">%1$s runterladen?</string>
-  <string name="attachment_encoding_error">Fehler während der Dateiverarbeitung. Anhang kann nicht versendet werden.</string>
+    <string name="attachment_encoding_error">Fehler während der Dateiverarbeitung. Anhang kann nicht versendet werden.</string>
 
     <!-- Messaging fragment -->
     <string name="messaging_loading">Lädt…</string>
     <string name="messaging_no_messages">Keine Nachrichten</string>
-    <string name="messaging_invited_join">Gruppe beitreten</string>
     <string name="context_menu_copy_message">Kopieren</string>
     <string name="context_menu_delete_message">Löschen</string>
 
@@ -126,22 +110,13 @@
     <string name="or_insert_code">Oder Code eingeben</string>
 
     <!-- Profile fragment -->
-    <string name="profile_avatar_set_button">Mein Bild ändern</string>
     <string name="dialog_avatar_options_title">Avatar Optionen</string>
     <string name="dialog_set_avatar_option">Ändere Avatar</string>
     <string name="dialog_delete_avatar_option">Lösche Avatar</string>
     <string name="profile_name_title">Name</string>
     <string name="profile_name_hint">Dein Name</string>
-    <string name="profile_status_text">Status</string>
-    <string name="profile_name_edit">Name ändern</string>
-    <string name="profile_name_set_button">Neuen Nutzernahmen wählen</string>
-    <string name="profile_status_edit">Hallo!</string>
-    <string name="profile_status_set_button">Neuen Status auswählen</string>
-    <string name="profile_self_register_button">Registrieren</string>
-    <string name="profile_user_block_status">Dieser User ist geblockt. Bitte entblockieren, um Nachrichten zu empfangen.</string>
     <string name="profile_user_block_button">User blockieren</string>
     <string name="profile_user_unblock_button">User entblockieren</string>
-    <string name="profile_user_depair_button">Verbindung aufheben</string>
     <string name="profile_user_delete_button">Kontakt löschen</string>
     <string name="profile_user_name_unknown">unbekannt</string>
     <string name="profile_self_initial_name">anonym</string>
@@ -155,32 +130,19 @@
     <string name="group_name_hint">Gruppenname</string>
     <string name="profile_group_members_title">Mitglieder</string>
     <string name="profile_group_create_button">Gruppe erstellen</string>
-    <string name="profile_group_permanent_button">Permanente Gruppe erstellen</string>
-    <string name="profile_group_join_button">Gruppe beitreten</string>
-    <string name="profile_group_invite_button">Mitglieder einladen</string>
-    <string name="profile_group_leave_button">Gruppe verlassen</string>
-    <string name="profile_group_kick_button">User aus der Gruppe entfernen</string>
-    <string name="profile_group_disband_button">Gruppe auflösen</string>
-    <string name="profile_group_delete_button">Gruppe löschen</string>
-    <string name="profile_group_permanent_nearby">Neue Gruppe</string>
 
     <!-- Messages -->
     <string name="message_text">Deine Nachricht</string>
 
     <!-- Notifications -->
     <string name="unseen_messages_notification_text">\u0020neue Nachrichten</string>
-    <string name="unconfirmed_invitations_notification_text">\u0020unbestätigte Einladungen</string>
 
     <!-- Content -->
-    <string name="content_downloading">Downloading…</string>
-    <string name="content_uploading">Uploading…</string>
-
     <string name="content_images">Bild</string>
     <string name="content_multi_images">Mehrere Bilder</string>
     <string name="content_video">Video</string>
     <string name="content_capture">Foto aufnehmen</string>
     <string name="content_music">Andere Medien</string>
-    <string name="content_ringtone">Klingelton</string>
     <string name="content_contact">Kontakt</string>
     <string name="content_location">Ort</string>
     <string name="content_data">Dokument</string>
@@ -189,42 +151,16 @@
     <string name="content_not_supported_audio_title">Nicht unterstütztes Format</string>
     <string name="content_not_supported_audio_msg">Dieser Audio-Anhang kann nicht wiedergegeben werden.</string>
 
-    <!-- Client states (used in status fragment) -->
-    <string name="client_state_idle">Idle</string>
-    <string name="client_state_inactive">Inaktiv</string>
-    <string name="client_state_active">Fertig</string>
-    <string name="client_state_syncing">Synchronisieren</string>
-    <string name="client_state_reconnecting">Erneut verbinden</string>
-    <string name="client_state_registering">Registrierung</string>
-    <string name="client_state_login">Einloggen</string>
-    <string name="client_state_connecting">Verbinden</string>
-    <string name="client_state_unknown">unbekannt</string>
-
     <!-- FullscreenPlayer -->
-    <string name="track_number_filler">von</string>
     <string name="deleted_contact_name">Entfernter Kontakt</string>
 
     <!-- Attachment type selection dialog -->
     <string name="selectattachment_title">Anhang auswählen</string>
 
-    <!-- Name setting dialog -->
-    <string name="setname_title">Benutzername ändern</string>
-
     <!-- Contact deletion dialog -->
     <string name="dialog_delete_contact_title">Kontakt wirklich löschen?</string>
     <string name="dialog_delete_contact_message">Bist du sicher, dass du diesen Kontakt löschen möchtest? Alle Nachrichten werden dann unwiderruflich gelöscht.
     </string>
-
-    <!-- Depair dialog -->
-    <string name="depaircontact_title">Verbindung auflösen?</string>
-    <string name="depaircontact_question">Bist du sicher, dass du die Verbindung auflösen möchtest? Es können dann keine Nachrichten ausgetauscht werden, bis ihr euch erneut verbindet.
-    </string>
-
-    <!-- Group kick selection dialog -->
-    <string name="kick_title">Aus der Gruppe werfen</string>
-
-    <!-- Group invite selection dialog -->
-    <string name="invite_title">In Gruppe einladen</string>
 
     <!-- Group manage selection dialog -->
     <string name="dialog_manage_group_title">Gruppenmitglieder verwalten</string>
@@ -239,9 +175,6 @@
     <!-- Group leave dialog -->
     <string name="dialog_delete_group_title">Gruppe löschen</string>
     <string name="dialog_delete_group_message">Bist du dir sicher, dass du die Gruppe löschen möchtest?</string>
-    <string name="dialog_reject_group_invitation_title">Einladung ablehnen</string>
-    <string name="dialog_reject_group_invitation_message">Bist du dir sicher, dass du die Einladung ablehnen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können.
-    </string>
     <string name="dialog_leave_group_title">Gruppe verlassen</string>
     <string name="dialog_leave_group_message">Bist du dir sicher, dass du die Gruppe verlassen möchtest? Du musst erneut eingeladen werden, um wieder teilnehmen zu können.
     </string>
@@ -249,23 +182,16 @@
     <string name="common_group_invite">Eingeladen</string>
     <string name="common_friend">Freund</string>
     <string name="menu_licenses">Lizenzen</string>
-    <string name="feature_not_available">Diese Funktion ist noch nicht verfügbar</string>
     <string name="file_chooser_string">Datei auswählen</string>
-    <string name="open_file">Datei öffnen</string>
-    <string name="error_no_such_app">keine installierte App kann diese Datei öffnen</string>
     <string name="error_no_videoplayer">Video nicht abspielbar. Bitte anderen Videoplayer installieren.
     </string>
     <string name="menu_group_delete_profile">Gruppe schließen</string>
     <string name="menu_group_edit_profile">Gruppe bearbeiten</string>
-    <string name="menu_group_profile_reject_invitation">Einladung ablehnen</string>
-    <string name="menu_group_profile_join">Gruppe beitreten</string>
     <string name="menu_group_profile_leave">Gruppe verlassen</string>
     <string name="menu_group_profile_permanent">Permanente Gruppe erstellen</string>
 
     <string name="location">Standort</string>
-    <string name="video">Video</string>
     <string name="show_location_instruction">Standort anzeigen</string>
-    <string name="play_video_instruction">Video abspielen</string>
     <string name="vcard_description">Alle Kontaktdetails</string>
     <string name="profile_name_text">Name</string>
     <string name="profile_key_text">Schlüssel</string>
@@ -300,7 +226,6 @@
     <string name="share_with_contact">Teilen</string>
     <string name="added_attachment_to_collection">%1$s zur Sammlung \'%2$s\' hinzugefügt</string>
     <string name="select_recipients">Empfänger auswählen</string>
-    <string name="error_could_not_find_file_for_sending">Datei \'%1$s\' konnte nicht gefunden und gesendet werden</string>
     <string name="rename_collection">Sammlung umbenennen</string>
     <string name="dialog_delete_collection_title">Sammlungen entfernen</string>
     <string name="dialog_delete_collection_message">Bist du dir sicher, dass du die ausgewählte(n) Sammlung(en) entfernen möchtest? Die
@@ -327,8 +252,14 @@
     <string name="pref_legal_information">Rechtliches</string>
     <string name="pref_encryption">Verschlüsselung</string>
     <string name="profile_compare_key_description">Für ein Extra an Sicherheit, vergleiche diesen Fingerabdruck mit dem Fingerabdruck, den deine Freunde in deiner Kontaktkarte sehen.</string>
+    <string name="pref_support">Technischer Support</string>
+    <string name="pref_report_crashes">Abstürze melden</string>
+    <string name="pref_report_crashes_summary">Unterstütze ${app.name} bei der Weiterentwicklung indem du deine Abstürze meldest. Welche Informationen an ${app.name} geschickt werden, kannst du in den FAQ einsehen.</string>
+    <string name="dialog_report_crash_title">Crash Information</string>
+    <string name="dialog_report_crash_message">Es wurde eine Aufzeichnung des letzten Crashs gefunden. Bitte schicke diesen Report an ${app.name}, damit wir den Fehler schnellst möglich beheben können.</string>
+    <string name="dialog_report_crash_negative">Abbrechen</string>
+    <string name="dialog_report_crash_positive">Senden</string>
     <string name="pref_please_wait">Bitte warten…</string>
-    <string name="pref_up_down_limit">Up/Download Limit</string>
     <string name="up_down_unlimited_option">unbegrenzt</string>
     <string name="up_down_manual_option">manuell</string>
     <string name="my_profile_title">Mein Profil</string>
@@ -357,12 +288,9 @@
     <string name="actionbar_default_title">${app.name.short}</string>
     <string name="content_audio_caption">Medien</string>
     <string name="content_audio_by_contact_caption">Medien von %1$s</string>
-    <string name="nearby_info_usercount">%1$d Benutzer in der Nähe</string>
     <string name="profile_nickname_text">Anzeigename</string>
     <string name="nearby_text">Alle nahebei</string>
-    <string name="error_send_message">Die Nachricht konnte nicht gesendet werden.</string>
     <string name="pref_privacy_title">Privatspähre</string>
-    <string name="error_send_message_empty_group">Diese Gruppe ist leer.</string>
     <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
     <string name="multi_invitation_button">weiter</string>
 
@@ -378,10 +306,7 @@
     <string name="qr_code_tab_generate">GENERIEREN</string>
 
     <string name="search_section_caption_contacts">Kontakte</string>
-    <string name="search_section_caption_files">Dateien</string>
-    <string name="search_section_caption_images">Bilddateien</string>
     <string name="search_section_caption_audio_files">Audiodateien</string>
-    <string name="search_section_caption_video_files">Videodateien</string>
 
     <string name="about_advert_text">${app.name} \n- dein sicherer Multimedia Messenger\n\nWir legen größten Wert auf Sicherheit, Datenschutz und Privatsphäre. Dank modernster Verschlüsselungs- und Übertragungstechnologien setzt ${app.name} neue Standards in der mobilen Datenübertragung und definiert Privatsphäre im mobilen Messaging Sektor neu. ${app.name} ermöglicht einen einfachen und unbegrenzten Datenaustausch zwischen Smartphones und Tablets ohne vorherige Eingabe von vertraulichen Nutzerdaten.\n\nShare hugs \u0026 kisses</string>
     <string name="about_version_description">Version %1$s (%2$d)</string>
@@ -408,7 +333,6 @@
     <string name="message_rejected_text">zurückgewiesen</string>
 
     <string name="nearby_saved">Nahebei gespeichert</string>
-    <string name="attachment_failed">Beim Herunterladen ist ein Fehler aufgetreten.</string>
     <string name="error_compatible_app_unavailable">Keine App zum öffnen des gewählten Objekts gefunden.</string>
     <string name="toast_stored_file_in_clipboard">Die Datei wurde in der Zwischenablage gespeichert.</string>
     <string name="toast_failed_to_store_file_in_clipboard">Diese Datei konnte leider nicht in der Zwischenablage gespeichert werden.</string>
@@ -431,6 +355,40 @@
     <string name="update_hoccer_xo">Aktualisiere Hoccer\u00A0XO</string>
     <string name="hoccer_3_0">Hoccer 3.0</string>
     <string name="welcome_hoccer_classic_users">Hoccer hat jetzt eine komplette Messaging Funktion zusätzlich zum direkten Datenaustausch.\nDu kannst wie bisher anonym Daten im \"in der Nähe\" - Modus austauschen oder dich direkt mit deinen Freunden verbinden.</string>
+
+    <!-- Backup and Restore -->
+    <string name="backup_title">Backup erstellen</string>
+    <string name="backup_in_progress_title">Erstelle Backup..</string>
+    <string name="backup_in_progress_subtitle">Backup Erstellung läuft</string>
+    <string name="backup_success_title">Backup erfolgreich</string>
+    <string name="backup_success_message">Backup erfolgreich erstellt.</string>
+    <string name="backup_failure_title">Backup fehlgeschlagen</string>
+    <string name="backup_failure_message">Beim Ertsellen des Backups ist etwas schief gelaufen. Bitte versuche es erneut.</string>
+    <string name="backup_dialog_message">Das Backup wird unter <![CDATA[<br /><i>%1$s</i>]]> gespeichert.</string>
+    <string name="backup_dialog_include_attachments">Dateianhänge sichern</string>
+    <string name="backup_dialog_dont_forget_password">Falls du dein Passwort vergisst, kann das Backup nicht wiederhergestellt werden.</string>
+    <string name="backup_dialog_complete_backup_warning">Achtung: Hoher Verbrauch von Speicher, Batterie &amp; Zeit</string>
+
+    <string name="restore_choose_backup">Backup auswählen</string>
+    <string name="restore_title">Backup wiederherstellen</string>
+    <string name="restore_in_progress_title">Wiederherstellung..</string>
+    <string name="restore_in_progress_subtitle">Wiederherstellung läuft</string>
+    <string name="restore_success_title">Wiederherstellung erfolgreich</string>
+    <string name="restore_success_message">Das Backup wurde erfolgreich eingespielt.</string>
+    <string name="restore_failure_title">Wiederherstellung fehlgeschlagen</string>
+    <string name="restore_failure_default_message">Beim Wiederherstellen ist etwas schief gelaufen. Bitte versuche es erneut.</string>
+    <string name="restore_failure_insufficient_disk_space_message">Nicht genügend Speicherplatz. Bitte Dateien von der SD Karte löschen und erneut versuchen. Du brauchst %1$s freien Speicherplatz.</string>
+    <string name="restore_enter_password">Passwort eingeben</string>
+    <string name="restore_restart_hoccer">Bitte Hoccer neu starten, um die Wiederherstellung zu beenden.</string>
+    <string name="restore_no_backups_found_title">Kein Backup vorhanden</string>
+    <string name="restore_no_backups_found_message">Bitte bestehendes Backup nach\n%1$s\nkopieren um früheren Hoccer Account wiederherstellen zu können.</string>
+
+    <string name="date">Datum</string>
+    <string name="user">Benutzer</string>
+    <string name="file">Datei</string>
+    <string name="size">Dateigröße</string>
+
+    <string name="progress_cancelling">Beende..</string>
 
     <plurals name="contact_count">
         <item quantity="one">1 Kontakt</item>

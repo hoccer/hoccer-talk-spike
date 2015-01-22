@@ -18,7 +18,7 @@ public class TalkGroupPresence {
     public static final String FIELD_STATE = "state";
     public static final String FIELD_LAST_CHANGED = "lastChanged";
 
-    public static final String STATE_NONE = "none";
+    public static final String STATE_DELETED = "none";
     public static final String STATE_EXISTS = "exists";
     public static final String STATE_KEPT = "kept";
 

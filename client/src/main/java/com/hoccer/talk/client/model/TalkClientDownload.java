@@ -180,13 +180,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         mTransferListeners = new ArrayList<IXoTransferListener>();
     }
 
-    /**
-     * Initialize this download as an avatar download
-     *
-     * @param url       to download
-     * @param id        for avatar, identifying what the avatar belongs to
-     * @param timestamp for avatar, takes care of collisions over id
-     */
     public void initializeAsAvatar(XoTransferAgent agent, String url, String id, Date timestamp) {
         LOG.info("[new] initializeAsAvatar(url: '" + url + "')");
         mTransferAgent = agent;
@@ -242,13 +235,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         switchState(State.ON_HOLD, "put on hold");
     }
 
-    /**********************************************************************************************/
-    /**********************************************************************************************/
-    /************************************** PRIVATE METHODS ***************************************/
-    /**********************************************************************************************/
-    /**
-     * ******************************************************************************************
-     */
     private void switchState(State newState, String reason) {
         if (!state.possibleFollowUps().contains(newState)) {
             LOG.warn("State " + newState + " is no possible followup to " + state);
@@ -328,7 +314,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doDownloadingAction() {
-        String downloadFilename = computeDownloadFile(mTransferAgent);
+        String downloadFilename = computeDownloadFile();
         if (downloadFilename == null) {
             LOG.error("[downloadId: '" + clientDownloadId + "'] could not determine download filename");
             return;
@@ -547,8 +533,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void doDecryptingAction() {
-        String sourceFile = computeDownloadFile(mTransferAgent);
-        String destinationFile = computeDecryptionFile(mTransferAgent);
+        String sourceFile = computeDownloadFile();
+        String destinationFile = computeDecryptionFile();
 
         LOG.debug("performDecryption(downloadId: '" + clientDownloadId + "', sourceFile: '" + sourceFile + "', " + "destinationFile: '" + destinationFile + "')");
 
@@ -603,11 +589,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         String tempDestinationFilePath;
         String destinationDirectory;
         if (this.decryptedFile != null) {
-            tempDestinationFilePath = computeDecryptionFile(mTransferAgent);
-            destinationDirectory = computeDecryptionDirectory(mTransferAgent);
+            tempDestinationFilePath = computeDecryptionFile();
+            destinationDirectory = computeDecryptionDirectory();
         } else {
-            tempDestinationFilePath = computeDownloadFile(mTransferAgent);
-            destinationDirectory = computeDownloadDirectory(mTransferAgent);
+            tempDestinationFilePath = computeDownloadFile();
+            destinationDirectory = computeDownloadDirectory();
         }
 
         LOG.debug("performDetection(downloadId: '" + clientDownloadId + "', destinationFile: '" + tempDestinationFilePath + "')");
@@ -645,7 +631,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                         File newName = new File(destinationPath);
                         if (destination.renameTo(newName)) {
                             this.decryptedFile = destinationFileName;
-                            this.dataFile = destinationPath;
+                            this.fileName = destinationFileName;
+                            this.dataFile = computeRelativeDownloadDirectory() + File.separator + destinationFileName;
                         } else {
                             LOG.warn("could not rename file");
                         }
@@ -667,41 +654,51 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         mTransferAgent.onDownloadFailed(this);
     }
 
-    private String computeDecryptionDirectory(XoTransferAgent agent) {
+    private String computeDecryptionDirectory() {
         String directory = null;
         switch (this.type) {
             case ATTACHMENT:
-                directory = agent.getClient().getAttachmentDirectory();
+                directory = mTransferAgent.getClient().getAttachmentDirectory();
                 break;
         }
         return directory;
     }
 
-    private String computeDownloadDirectory(XoTransferAgent agent) {
+    private String computeDownloadDirectory() {
         String directory = null;
         switch (this.type) {
             case AVATAR:
-                directory = agent.getClient().getAvatarDirectory();
+                directory = mTransferAgent.getClient().getAvatarDirectory();
                 break;
             case ATTACHMENT:
-                directory = agent.getClient().getEncryptedDownloadDirectory();
+                directory = mTransferAgent.getClient().getEncryptedDownloadDirectory();
                 break;
         }
         return directory;
     }
 
-    private String computeDecryptionFile(XoTransferAgent agent) {
+    private String computeRelativeDownloadDirectory() {
+        switch (this.type) {
+            case ATTACHMENT:
+                return mTransferAgent.getClient().getRelativeAttachmentDirectory();
+            case AVATAR:
+                return mTransferAgent.getClient().getRelativeAvatarDirectory();
+        }
+        return null;
+    }
+
+    private String computeDecryptionFile() {
         String file = null;
-        String directory = computeDecryptionDirectory(agent);
+        String directory = computeDecryptionDirectory();
         if (directory != null) {
             file = directory + File.separator + this.decryptedFile;
         }
         return file;
     }
 
-    private String computeDownloadFile(XoTransferAgent agent) {
+    private String computeDownloadFile() {
         String file = null;
-        String directory = computeDownloadDirectory(agent);
+        String directory = computeDownloadDirectory();
         if (directory != null) {
             file = directory + File.separator + this.downloadFile;
         }
@@ -734,7 +731,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
      * @param directory The directory to check
      * @return The file name including running number and extension (foo_1.bar)
      */
-    private String createUniqueFileNameInDirectory(String file, String extension, String directory) {
+    private static String createUniqueFileNameInDirectory(String file, String extension, String directory) {
         if (file == null) {
             file = "unknown_file";
         }
@@ -764,10 +761,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-    /**********************************************************************************************/
-    /**********************************************************************************************/
-    /********************************* XoTransfer implementation **********************************/
-    /**********************************************************************************************/
     @Override
     public int getTransferId() {
         return getClientDownloadId();
@@ -778,21 +771,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return getClientDownloadId();
     }
 
-    /**
-     * ******************************************************************************************
-     */
     @Override
     public Type getTransferType() {
         return type;
     }
 
-    /**********************************************************************************************/
-    /**********************************************************************************************/
-    /******************************* IContentObject implementation ********************************/
-    /**********************************************************************************************/
-    /**
-     * ******************************************************************************************
-     */
     @Override
     public boolean isContentAvailable() {
         return state == State.COMPLETE;
@@ -864,16 +847,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     @Override
-    public String getContentDataUrl() {
-        // TODO fix up this field on db upgrade
-        if (dataFile != null) {
-            if (dataFile.startsWith("file://")) {
-                return dataFile;
-            } else {
-                return "file://" + dataFile;
-            }
-        }
-        return null;
+    public String getFilePath() {
+        return dataFile;
     }
 
     public int getClientDownloadId() {
@@ -898,25 +873,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     public void setFileId(String fileId) {
         this.fileId = fileId;
-    }
-
-    /**
-     * Only used for migrating existing filecache Uris to new host. Delete this Method once
-     * the migration is done!
-     *
-     * @param downloadUrl
-     */
-    @Deprecated
-    public void setDownloadUrl(String downloadUrl) {
-        this.downloadUrl = downloadUrl;
-    }
-
-    public String getDownloadFile() {
-        return downloadFile;
-    }
-
-    public long getDownloadProgress() {
-        return downloadProgress;
     }
 
     public int getContentLength() {
@@ -947,30 +903,8 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return transmittedContentLength;
     }
 
-    @Override
-    public String getDataFile() {
-        // TODO fix up this field on db upgrade
-        if (dataFile != null) {
-            if (dataFile.startsWith("file://")) {
-                return dataFile.substring(7);
-            } else {
-                return dataFile;
-            }
-        }
-        return null;
-    }
-
     public int getTransferFailures() {
         return transferFailures;
-    }
-
-    public void setTransferFailures(int transferFailures) {
-        this.transferFailures = transferFailures;
-        if (transferFailures > 16) {
-            // max retries reached. stop download and reset retries
-            LOG.debug("cancel Downloads. No more retries.");
-            this.transferFailures = 0;
-        }
     }
 
     public boolean isAvatar() {

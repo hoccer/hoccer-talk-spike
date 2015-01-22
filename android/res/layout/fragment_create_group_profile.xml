@@ -4,6 +4,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:background="@color/xo_main_background"
         android:orientation="vertical"
+        android:focusableInTouchMode="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -29,21 +30,6 @@
             android:layout_width="fill_parent"
             style="@style/AppBaseTheme.Group.HorizontalDivider"/>
 
-    <TextView
-            android:id="@+id/profile_group_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="45dp"
-            android:layout_marginRight="45dp"
-            android:layout_marginTop="5dp"
-            android:visibility="visible"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:singleLine="true"
-            style="@style/AppBaseTheme.Group.Name"/>
-
     <EditText
             android:id="@+id/profile_group_name_edit"
             android:hint="@string/group_name_hint"
@@ -55,8 +41,8 @@
             android:layout_marginRight="35dp"
             android:lines="1"
             android:inputType="text|textNoSuggestions"
+            android:focusableInTouchMode="true"
             android:maxLength="25"
-            android:visibility="gone"
             style="@style/AppBaseTheme.Group.Name"/>
 
     <Button
@@ -64,8 +50,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="gone"
             android:text="@string/profile_group_create_button"
+            android:enabled="false"
             style="@style/AppBaseTheme.Group.CreateButton"/>
 
     <LinearLayout

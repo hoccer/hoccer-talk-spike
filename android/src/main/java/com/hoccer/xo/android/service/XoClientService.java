@@ -25,9 +25,9 @@ import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.util.UriUtils;
 import org.apache.log4j.Logger;
 
-import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
@@ -67,9 +67,6 @@ public class XoClientService extends Service {
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
     private static final long NOTIFICATION_ALARM_BACKOFF = 10000;
-    private static final int NOTIFICATION_UNSEEN_MESSAGES = 0;
-    private static final int NOTIFICATION_UNCONFIRMED_INVITATIONS = 1;
-    private static final int NOTIFICATION_PUSH_MESSAGE = 2;
 
     private static final String DEFAULT_TRANSFER_LIMIT = "-1";
 
@@ -166,6 +163,7 @@ public class XoClientService extends Service {
             mClientListener = new ClientListener();
             mClient.registerStateListener(mClientListener);
             mClient.registerMessageListener(mClientListener);
+            mClient.registerContactListener(mClientListener);
             mClient.registerTransferListener(mClientListener);
         }
 
@@ -491,7 +489,7 @@ public class XoClientService extends Service {
 
         // if we have no messages cancel notification
         if (unseenMessages.size() == 0) {
-            mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
+            mNotificationManager.cancel(NotificationId.UNSEEN_MESSAGES);
             return;
         }
 
@@ -515,8 +513,8 @@ public class XoClientService extends Service {
                     continue;
                 }
 
-                // ignore unseen messages from deleted contacts and contacts we are currently conversing with
-                if (contact.isDeleted() || mCurrentConversationContactId == contact.getClientContactId()) {
+                // ignore unseen messages from contacts we are currently conversing with
+                if (mCurrentConversationContactId == contact.getClientContactId()) {
                     continue;
                 }
 
@@ -544,7 +542,7 @@ public class XoClientService extends Service {
 
         // if we have no messages after culling cancel notification
         if (contactsMap.size() == 0) {
-            mNotificationManager.cancel(NOTIFICATION_UNSEEN_MESSAGES);
+            mNotificationManager.cancel(NotificationId.UNSEEN_MESSAGES);
             return;
         }
 
@@ -650,7 +648,7 @@ public class XoClientService extends Service {
         }
 
         // update the notification
-        mNotificationManager.notify(NOTIFICATION_UNSEEN_MESSAGES, notification);
+        mNotificationManager.notify(NotificationId.UNSEEN_MESSAGES, notification);
 
         // log all unseen messages found
         StringBuilder logMessage = new StringBuilder("Notifying about unseen messages: ");
@@ -689,7 +687,7 @@ public class XoClientService extends Service {
                 .build();
 
 
-        mNotificationManager.notify(NOTIFICATION_PUSH_MESSAGE, notification);
+        mNotificationManager.notify(NotificationId.PUSH_MESSAGE, notification);
     }
 
     private class ConnectivityReceiver extends BroadcastReceiver {
@@ -704,6 +702,7 @@ public class XoClientService extends Service {
     private class ClientListener implements
             IXoStateListener,
             IXoMessageListener,
+            IXoContactListener,
             IXoTransferListenerOld,
             MediaScannerConnection.OnScanCompletedListener {
 
@@ -733,22 +732,19 @@ public class XoClientService extends Service {
         }
 
         @Override
-        public void onDownloadStateChanged(TalkClientDownload download) {
-        }
+        public void onDownloadStateChanged(TalkClientDownload download) {}
 
         @Override
-        public void onDownloadStarted(TalkClientDownload download) {
-        }
+        public void onDownloadStarted(TalkClientDownload download) {}
 
         @Override
-        public void onDownloadProgress(TalkClientDownload download) {
-        }
+        public void onDownloadProgress(TalkClientDownload download) {}
 
         @Override
         public void onDownloadFinished(TalkClientDownload download) {
-            if (download.isAttachment() && download.isContentAvailable()
-                    && download.getContentUrl() == null) {
-                String[] path = new String[]{download.getDataFile()};
+            if (download.isAttachment() && download.isContentAvailable() && download.getContentUrl() == null) {
+                Uri downloadUri = UriUtils.getAbsoluteFileUri(download.getFilePath());
+                String[] path = new String[]{downloadUri.getPath()};
                 String[] ctype = new String[]{download.getContentType()};
                 LOG.debug("requesting media scan of " + ctype[0] + " at " + path[0]);
                 mScanningDownloads.put(path[0], download);
@@ -760,44 +756,40 @@ public class XoClientService extends Service {
         }
 
         @Override
-        public void onDownloadFailed(TalkClientDownload downlad) {
-
-        }
+        public void onDownloadFailed(TalkClientDownload download) {}
 
         @Override
-        public void onUploadStarted(TalkClientUpload upload) {
-        }
+        public void onUploadStarted(TalkClientUpload upload) {}
 
         @Override
-        public void onUploadProgress(TalkClientUpload upload) {
-        }
+        public void onUploadProgress(TalkClientUpload upload) {}
 
         @Override
-        public void onUploadFinished(TalkClientUpload upload) {
-        }
+        public void onUploadFinished(TalkClientUpload upload) {}
 
         @Override
-        public void onUploadFailed(TalkClientUpload upload) {
-        }
+        public void onUploadFailed(TalkClientUpload upload) {}
 
         @Override
-        public void onUploadStateChanged(TalkClientUpload upload) {
-        }
+        public void onUploadStateChanged(TalkClientUpload upload) {}
 
         @Override
         public void onScanCompleted(String path, Uri uri) {
-            LOG.debug("media scan of " + path + " completed - uri " + uri.toString());
-            TalkClientDownload download = mScanningDownloads.get(path);
-            if (download != null) {
-                download.provideContentUrl(mClient.getTransferAgent(), uri.toString());
-            }
-            mScanningDownloads.remove(path);
+            if (uri != null) {
+                LOG.debug("media scan of " + path + " completed - uri " + uri);
+                TalkClientDownload download = mScanningDownloads.get(path);
+                if (download != null) {
+                    download.provideContentUrl(mClient.getTransferAgent(), uri.toString());
+                }
 
-            // send an intent
-            Intent intent = new Intent();
-            intent.setAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
-            intent.putExtra(IntentHelper.EXTRA_MEDIA_URI, uri.toString());
-            sendBroadcast(intent);
+                // send an intent
+                Intent intent = new Intent();
+                intent.setAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
+                intent.putExtra(IntentHelper.EXTRA_MEDIA_URI, uri.toString());
+                sendBroadcast(intent);
+            }
+            
+            mScanningDownloads.remove(path);
         }
 
         @Override
@@ -819,6 +811,22 @@ public class XoClientService extends Service {
             if (message.isIncoming()) {
                 updateUnseenMessageNotification(false);
             }
+        }
+
+        @Override
+        public void onClientPresenceChanged(TalkClientContact contact) {}
+
+        @Override
+        public void onClientRelationshipChanged(TalkClientContact contact) {
+            updateUnseenMessageNotification(false);
+        }
+
+        @Override
+        public void onGroupPresenceChanged(TalkClientContact contact) {}
+
+        @Override
+        public void onGroupMembershipChanged(TalkClientContact contact) {
+            updateUnseenMessageNotification(false);
         }
     }
 

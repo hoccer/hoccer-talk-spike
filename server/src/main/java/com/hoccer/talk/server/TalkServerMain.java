@@ -64,14 +64,14 @@ public class TalkServerMain {
         TalkServer talkServer = new TalkServer(config, db);
 
         LOG.info("Initializing jetty");
-        Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
+        final Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
+        webServer.setStopAtShutdown(true);
         setupServerHandlers(webServer, talkServer);
 
-        Server managementServer = new Server(new InetSocketAddress(config.getManagementListenAddress(), config.getManagementListenPort()));
+        final Server managementServer = new Server(new InetSocketAddress(config.getManagementListenAddress(), config.getManagementListenPort()));
+        managementServer.setStopAtShutdown(true);
         setupManagementServerHandlers(managementServer, talkServer);
 
-        // TODO: take care of proper signal handling (?) here. We never see the "Server has quit" line, currently.
-        // run and stop when interrupted
         try {
             LOG.info("Starting server");
             webServer.start();
@@ -81,6 +81,8 @@ public class TalkServerMain {
             LOG.info("Server has quit");
         } catch (Exception e) {
             LOG.error("Exception in server", e);
+            LOG.error("Server has quit abnormally");
+            System.exit(1);
         }
     }
 

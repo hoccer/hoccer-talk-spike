@@ -62,9 +62,9 @@ public class CacheMain {
         CacheBackend db = initializeBackend(config);
 
         // create jetty instance
-        Server s = new Server(new InetSocketAddress(config.getListenAddress(),
-                                                    config.getListenPort()));
+        final Server s = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
         s.setThreadPool(new QueuedThreadPool(config.getServerThreads()));
+        s.setStopAtShutdown(true);
         setupServer(s, db);
 
         // run and stop when interrupted
@@ -77,6 +77,8 @@ public class CacheMain {
             LOG.info("Server has quit");
         } catch (Exception e) {
             LOG.error("Exception in server", e);
+            LOG.error("Server has quit abnormally");
+            System.exit(1);
         }
     }
 

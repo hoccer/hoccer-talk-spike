@@ -29,6 +29,7 @@ public class TalkClient {
     public static final String FIELD_TIME_LAST_PUSH       = "timeLastPush";
     public static final String FIELD_TIME_READY           = "timeReady";
     public static final String FIELD_LAST_PUSH_MESSAGE    = "lastPushMessage";
+    public static final String FIELD_PUSH_ALERT_MESSAGE   = "pushAlertMessage";
 
     /** Object ID for jongo */
     private String _id;
@@ -84,6 +85,10 @@ public class TalkClient {
     /** Some identifier that describes the content of the last message, typically number of out outstanding messages */
     @DatabaseField(columnName = FIELD_LAST_PUSH_MESSAGE, canBeNull = true)
     String lastPushMessage;
+
+    /** Next push message to be displayed to the user when connected */
+    @DatabaseField(columnName = FIELD_PUSH_ALERT_MESSAGE, canBeNull = true)
+    String pushAlertMessage;
 
     public TalkClient() {
     }
@@ -215,5 +220,13 @@ public class TalkClient {
 
     public void setLastPushMessage(String lastPushMessage) {
         this.lastPushMessage = lastPushMessage;
+    }
+
+    public String getPushAlertMessage() {
+        return pushAlertMessage;
+    }
+
+    public void setPushAlertMessage(String pushAlertMessage) {
+        this.pushAlertMessage = pushAlertMessage;
     }
 }

@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.client.model.TalkClientContact;
@@ -27,8 +28,11 @@ import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.AvatarView;
-import com.hoccer.xo.android.view.chat.attachments.*;
-import com.artcom.hoccer.R;
+import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
+import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
+import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
+import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -134,7 +138,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     protected void configureViewForMessage(View view) {
         // if there is an old item attached to this view destroy it now
         ChatMessageItem item = (ChatMessageItem) view.getTag();
-        if(item != null) {
+        if (item != null) {
             item.detachView();
         }
 
@@ -269,7 +273,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return myDelivery.getState();
     }
 
-    private int statusColorId(TalkDelivery myDelivery) {
+    private static int statusColorId(TalkDelivery myDelivery) {
         if (myDelivery.isFailure()) {
             return R.color.xo_message_failed_color;
         }
@@ -292,7 +296,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         setMessageStatusText(deliveryInfo, statusText, statusColor);
     }
 
-    private void setMessageStatusText(TextView messageStatusLabel, String text, int colorId) {
+    private static void setMessageStatusText(TextView messageStatusLabel, String text, int colorId) {
         messageStatusLabel.setVisibility(View.VISIBLE);
         messageStatusLabel.setText(text);
         messageStatusLabel.setTextColor(messageStatusLabel.getResources().getColor(colorId));
@@ -300,7 +304,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     public Drawable getOutgoingBackgroundDrawable() {
         String currentState = mMessage.getOutgoingDelivery().getState();
-        Drawable background = null;
+        Drawable background;
         if (currentState != null) {
             if (TalkDelivery.isFailureState(currentState)) {
                 background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
@@ -316,7 +320,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     public Drawable getIncomingBackgroundDrawable() {
         String currentState = mMessage.getIncomingDelivery().getState();
-        Drawable background = null;
+        Drawable background;
         if (currentState != null) {
             if (TalkDelivery.isFailureState(currentState)) {
                 background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_incoming);
@@ -330,8 +334,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return background;
     }
 
-    private String getMessageTimestamp(TalkClientMessage message) {
-        StringBuffer result = new StringBuffer();
+    private static String getMessageTimestamp(TalkClientMessage message) {
+        StringBuilder result = new StringBuilder();
         Date timeStamp = message.getTimestamp();
 
         if (timeStamp != null) {
@@ -352,7 +356,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         return result.toString();
     }
 
-    private long getTimeAtStartOfDay(Date time) {
+    private static long getTimeAtStartOfDay(Date time) {
         Calendar calendar = Calendar.getInstance();
 
         calendar.setTime(time);
@@ -403,11 +407,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         mContentWrapper = (LinearLayout) mAttachmentView.findViewById(R.id.ll_content_wrapper);
 
-        TalkDelivery delivery;
-
         // adjust layout for incoming / outgoing attachment
         if (mMessage.isIncoming()) {
-            delivery = mMessage.getIncomingDelivery();
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentView.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
             float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
@@ -415,7 +416,6 @@ public class ChatMessageItem implements AttachmentTransferListener {
             layoutParams.rightMargin = (int) marginRight;
             mAttachmentView.setLayoutParams(layoutParams);
         } else {
-            delivery = mMessage.getOutgoingDelivery();
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mAttachmentView.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
             float marginRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
@@ -557,47 +557,39 @@ public class ChatMessageItem implements AttachmentTransferListener {
         });
     }
 
-
     @Override
     public void onAttachmentTransferComplete(IContentObject contentObject) {
+        // check for previously cached files and replace them with the original
         if (contentObject instanceof TalkClientUpload) {
-            // check for previously cached files and replace them with the original
             TalkClientUpload upload = (TalkClientUpload) contentObject;
-            if (upload.getContentDataUrl().contains(XoApplication.getCacheStorage().getPath())) {
+            if (upload.getFilePath() != null && upload.getFilePath().contains(XoApplication.getCacheStorage().getPath())) {
+                FileUtils.deleteQuietly(new File(upload.getFilePath()));
 
-                String filePath = null;
-                String contentUri = upload.getContentUrl();
-                if (UriUtils.isContentUri(contentUri)) {
-                    try {
-                        filePath = UriUtils.getFilePathByContentUri(mContext, Uri.parse(contentUri));
-                    } catch (UriUtils.CursorNotFoundException e) {
-                        LOG.error("", e);
-                    }
-                } else if (contentUri.startsWith(UriUtils.FILE_URI_PREFIX)) {
-                    filePath = contentUri.substring(UriUtils.FILE_URI_PREFIX.length());
-                } else if (contentUri.startsWith("/")) {
-                    filePath = contentUri;
+                Uri contentUri = Uri.parse(upload.getContentUrl());
+                Uri fileUri = UriUtils.getFileUriByContentUri(mContext, contentUri);
+                if(fileUri != null) {
+                    upload.setContentDataUrl(makeRelative(fileUri.getPath()));
+                } else {
+                    upload.setContentDataUrl(null);
                 }
 
-                if (filePath != null) {
-                    File fileToDelete = new File(upload.getDataFile());
-
-                    File master = new File(filePath);
-                    if (master.exists()) {
-                        upload.setContentDataUrl(UriUtils.FILE_URI_PREFIX + filePath);
-                        try {
-                            XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
-                            boolean isDeleted = fileToDelete.delete();
-                            LOG.debug("Cached file is deleted " + isDeleted);
-                        } catch (SQLException e) {
-                            LOG.error("Error updating upload with new file path " + filePath);
-                        }
-                    }
+                try {
+                    XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
+                } catch (SQLException e) {
+                    LOG.error("Error updating upload with original file path.");
                 }
             }
         }
-
         displayAttachment(contentObject);
+    }
+
+    private static String makeRelative(String filePath) {
+        String externalStorageDirectory = XoApplication.getExternalStorage().getAbsolutePath();
+        if (filePath.startsWith(externalStorageDirectory)) {
+            return filePath.substring(externalStorageDirectory.length() + 1);
+        } else {
+            return filePath;
+        }
     }
 
     @Override
@@ -611,7 +603,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
         ChatMessageItem that = (ChatMessageItem) o;
 
-        return mMessage != null && that.getMessage() != null && mMessage.equals(that.getMessage());
+        return mMessage != null && that.mMessage != null && mMessage.equals(that.mMessage);
     }
 
     @Override
@@ -632,7 +624,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
     }
 
     public int getMediaTextResource() {
-        int stringResource = -1;
+        int stringResource;
         ChatItemType type = getType();
         switch (type) {
             case ChatItemWithImage:

@@ -4,14 +4,14 @@
   <item
       android:id="@+id/menu_pair"
       android:title="@string/menu_pair"
-      android:icon="@drawable/ic_contact_new"
+      android:icon="@drawable/ic_action_contact_new"
       android:showAsAction="always"
       android:orderInCategory="220"/>
 
   <item
       android:id="@+id/menu_new_group"
       android:title="@string/menu_new_group"
-      android:icon="@drawable/ic_group_new"
+      android:icon="@drawable/ic_action_group_new"
       android:showAsAction="always"
       android:orderInCategory="230"/>
 </menu>

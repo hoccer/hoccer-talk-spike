@@ -21,6 +21,7 @@ import android.text.util.Linkify;
 import android.view.*;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.artcom.hoccer.R;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
@@ -33,15 +34,16 @@ import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
-import com.hoccer.xo.android.content.contentselectors.ImageSelector;
+import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView;
-import com.artcom.hoccer.R;
 import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.CrashManagerListener;
+import net.hockeyapp.android.Strings;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -321,7 +323,7 @@ public abstract class XoActivity extends FragmentActivity {
             if (intent != null) {
                 IContentObject contentObject = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
                 if (contentObject != null) {
-                    LOG.debug("selected avatar " + contentObject.getContentDataUrl());
+                    LOG.debug("selected avatar " + contentObject.getFilePath());
                     for (IXoFragment fragment : mTalkFragments) {
                         fragment.onAvatarSelected(contentObject);
                     }
@@ -355,7 +357,23 @@ public abstract class XoActivity extends FragmentActivity {
 
     private void checkForCrashesIfEnabled() {
         if (XoApplication.getConfiguration().isCrashReportingEnabled()) {
-            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId());
+            CrashManager.register(this, XoApplication.getConfiguration().getHockeyAppId(), new CrashManagerListener() {
+                @Override
+                public String getStringForResource(int resourceID) {
+                    switch (resourceID) {
+                        case Strings.CRASH_DIALOG_TITLE_ID:
+                            return getString(R.string.dialog_report_crash_title);
+                        case Strings.CRASH_DIALOG_MESSAGE_ID:
+                            return getString(R.string.dialog_report_crash_message);
+                        case Strings.CRASH_DIALOG_NEGATIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_negative);
+                        case Strings.CRASH_DIALOG_POSITIVE_BUTTON_ID:
+                            return getString(R.string.dialog_report_crash_positive);
+                        default:
+                            return super.getStringForResource(resourceID);
+                    }
+                }
+            });
         }
     }
 
@@ -681,22 +699,21 @@ public abstract class XoActivity extends FragmentActivity {
         LOG.debug("showContactProfile(" + contact.getClientContactId() + ")");
         Intent intent;
         if (contact.isGroup()) {
-            intent = new Intent(this, GroupProfileActivity.class);
-            intent.putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID,
-                    contact.getClientContactId());
+            intent = new Intent(this, GroupProfileActivity.class)
+                    .setAction(GroupProfileActivity.ACTION_SHOW)
+                    .putExtra(GroupProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
         } else {
-            intent = new Intent(this, SingleProfileActivity.class);
-            intent.putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID,
-                    contact.getClientContactId());
+            intent = new Intent(this, SingleProfileActivity.class)
+                    .setAction(SingleProfileActivity.ACTION_SHOW)
+                    .putExtra(SingleProfileActivity.EXTRA_CLIENT_CONTACT_ID, contact.getClientContactId());
         }
         startActivity(intent);
     }
 
     public void showNewGroup() {
         LOG.debug("showNewGroup()");
-        Intent intent = new Intent(this, GroupProfileActivity.class);
-        intent.putExtra(GroupProfileActivity.EXTRA_CLIENT_CREATE_GROUP, true);
-        startActivity(intent);
+        startActivity(new Intent(this, GroupProfileActivity.class)
+                .setAction(GroupProfileActivity.ACTION_CREATE));
     }
 
     public void showContactConversation(TalkClientContact contact) {

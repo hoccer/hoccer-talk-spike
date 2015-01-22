@@ -1664,7 +1664,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         if (!TalkGroupPresence.GROUP_TYPE_USER.equals(groupType)) {
             throw new RuntimeException("illegal group type:"+groupType);
         }
-        if (groupName == null || groupTag == null || groupName.length() > 32) {
+        if (groupName == null || groupTag == null) {
             throw new RuntimeException("group name or tag missing");
         }
         if (groupName.length() > 32) {
@@ -1790,7 +1790,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
         }
 
         // mark the group as deleted
-        groupPresence.setState(TalkGroupPresence.STATE_NONE);
+        groupPresence.setState(TalkGroupPresence.STATE_DELETED);
         changedGroupPresence(groupPresence, new Date());
 
         // walk the group and make everyone have a "none" relationship to it
@@ -2427,7 +2427,7 @@ public class TalkRpcHandler implements ITalkRpcServer {
             if (membershipsLeft.size() - removedCount <= 0) {
                 logCall("destroyEnvironment: last member left, removing group " + groupPresence.getGroupId());
                 // last member removed, remove group
-                groupPresence.setState(TalkGroupPresence.STATE_NONE);
+                groupPresence.setState(TalkGroupPresence.STATE_DELETED);
                 changedGroupPresence(groupPresence, now);
                 // explicitly request a group updated notification for the last removed client because
                 // calling changedGroupPresence only will not send out "groupUpdated" notifications to members with state "none"

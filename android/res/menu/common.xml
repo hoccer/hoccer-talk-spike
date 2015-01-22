@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/menu_my_profile"
-        android:icon="@drawable/ic_profile"
+        android:icon="@drawable/ic_action_profile"
         android:visible="true"
         android:orderInCategory="100"
         android:showAsAction="never"

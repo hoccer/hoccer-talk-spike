@@ -41,7 +41,7 @@ public class ITGroupMessage extends IntegrationTest {
         XoClient client2 = clients.get("client2");
 
         // create group
-        String groupId = TestHelper.createGroup(client1);
+        String groupId = TestHelper.createGroup(client1, "group");
 
         assertNull("client2 is unknown for client1", client1.getDatabase().findContactByClientId(client2.getSelfContact().getClientId(), false));
 

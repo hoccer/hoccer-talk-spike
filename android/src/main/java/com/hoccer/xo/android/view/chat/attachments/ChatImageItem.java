@@ -9,14 +9,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
 import com.hoccer.xo.android.util.ImageUtils;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 import com.squareup.picasso.Picasso;
 
 
@@ -92,7 +93,9 @@ public class ChatImageItem extends ChatMessageItem {
 
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
-        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
+
+        Uri imageUri = getImageUri(contentObject);
+        Picasso.with(mContext).load(imageUri)
                 .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
                 .centerInside()
@@ -109,20 +112,32 @@ public class ChatImageItem extends ChatMessageItem {
     }
 
     private void openImage(IContentObject contentObject) {
-        if (contentObject.getContentDataUrl() == null && contentObject.getContentUrl() == null) {
-            return;
+        Uri imageUri = getImageUri(contentObject);
+        if (imageUri != null) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(imageUri, "image/*");
+            try {
+                XoActivity activity = (XoActivity) mContext;
+                activity.startExternalActivity(intent);
+            } catch (ClassCastException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private Uri getImageUri(IContentObject contentObject) {
+        if (contentObject.getContentUrl() != null) {
+            Uri contentUri = Uri.parse(contentObject.getContentUrl());
+            if (UriUtils.contentExists(mContext, contentUri)) {
+                return Uri.parse(contentObject.getContentUrl());
+            }
         }
 
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        Uri dataUri = Uri.parse(contentObject.getContentUrl() != null && !contentObject.getContentUrl().isEmpty() ?
-                contentObject.getContentUrl() : contentObject.getContentDataUrl());
-        intent.setDataAndType(dataUri, "image/*");
-        try {
-            XoActivity activity = (XoActivity) mContext;
-            activity.startExternalActivity(intent);
-        } catch (ClassCastException e) {
-            e.printStackTrace();
+        if (contentObject.getFilePath() != null) {
+            return UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
         }
+
+        return null;
     }
 }
 

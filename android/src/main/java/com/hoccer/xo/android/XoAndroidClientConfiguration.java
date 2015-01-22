@@ -3,10 +3,11 @@ package com.hoccer.xo.android;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import com.hoccer.talk.client.XoDefaultClientConfiguration;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoDefaultClientConfiguration;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -67,9 +68,12 @@ public class XoAndroidClientConfiguration extends XoDefaultClientConfiguration {
     }
 
     public boolean isCrashReportingEnabled() {
-        return isDevelopmentModeEnabled() || mPreferences.getBoolean("preference_crash_report", false);
+        return mPreferences.getBoolean("preference_report_crashes", true);
     }
 
+    public String getBackupDirectory() {
+        return getAttachmentsDirectory() + File.separator + "Backups";
+    }
     public String getAttachmentsDirectory() {
         return mAppName;
     }

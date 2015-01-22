@@ -9,17 +9,16 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.AdapterView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.adapter.NearbyChatAdapter;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
-
 
 public class NearbyArchiveFragment extends ListFragment {
 
@@ -27,7 +26,7 @@ public class NearbyArchiveFragment extends ListFragment {
 
     private NearbyChatAdapter mAdapter;
 
-    private DataSetObserver mDataSetObserver = new DataSetObserver() {
+    private final DataSetObserver mDataSetObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
             super.onChanged();
