@@ -200,7 +200,6 @@ public class XoTransferAgent implements IXoTransferListenerOld {
 
     public void startOrRestartUpload(final TalkClientUpload upload) {
         LOG.info("startOrRestartUpload(), dataurl: " + upload.getFilePath() +
-                " | contenturl: " + upload.getContentUrl() +
                 " | datafile: " + upload.getFilePath() +
                 " | contenttype: " + upload.getContentType() +
                 " | clientUploadId: " + upload.getClientUploadId());

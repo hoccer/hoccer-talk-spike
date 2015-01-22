@@ -94,7 +94,7 @@ public class ChatImageItem extends ChatMessageItem {
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
 
-        Uri imageUri = getImageUri(contentObject);
+        Uri imageUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
         Picasso.with(mContext).load(imageUri)
                 .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
@@ -112,8 +112,8 @@ public class ChatImageItem extends ChatMessageItem {
     }
 
     private void openImage(IContentObject contentObject) {
-        Uri imageUri = getImageUri(contentObject);
-        if (imageUri != null) {
+        if (contentObject.isContentAvailable()) {
+            Uri imageUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(imageUri, "image/*");
             try {
@@ -123,21 +123,6 @@ public class ChatImageItem extends ChatMessageItem {
                 e.printStackTrace();
             }
         }
-    }
-
-    private Uri getImageUri(IContentObject contentObject) {
-        if (contentObject.getContentUrl() != null) {
-            Uri contentUri = Uri.parse(contentObject.getContentUrl());
-            if (UriUtils.contentExists(mContext, contentUri)) {
-                return Uri.parse(contentObject.getContentUrl());
-            }
-        }
-
-        if (contentObject.getFilePath() != null) {
-            return UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
-        }
-
-        return null;
     }
 }
 

@@ -211,24 +211,15 @@ public class ChatVideoItem extends ChatMessageItem {
      */
     private void openVideo(IContentObject contentObject) {
         if (contentObject.isContentAvailable()) {
-
-            Uri videoUri;
-            if (UriUtils.contentExists(mContext, Uri.parse(contentObject.getContentUrl()))) {
-                videoUri = Uri.parse(contentObject.getContentUrl());
-            } else {
-                videoUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
-            }
-
-            if (videoUri != null) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(videoUri, "video/*");
-                    XoActivity activity = (XoActivity) mContext;
-                    activity.startExternalActivity(intent);
-                } catch (ActivityNotFoundException exception) {
-                    Toast.makeText(mContext, R.string.error_no_videoplayer, Toast.LENGTH_LONG).show();
-                    LOG.error("Exception while starting external activity ", exception);
-                }
+            Uri videoUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(videoUri, "video/*");
+                XoActivity activity = (XoActivity) mContext;
+                activity.startExternalActivity(intent);
+            } catch (ActivityNotFoundException exception) {
+                Toast.makeText(mContext, R.string.error_no_videoplayer, Toast.LENGTH_LONG).show();
+                LOG.error("Exception while starting external activity ", exception);
             }
         }
     }

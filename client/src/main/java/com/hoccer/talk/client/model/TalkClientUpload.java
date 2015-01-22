@@ -378,13 +378,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
         HttpClient client = mTransferAgent.getHttpClient();
         try {
-            InputStream clearIs;
-            if(dataFile != null) {
-                clearIs = new FileInputStream(dataFile);
-            } else {
-                clearIs = mTransferAgent.getClient().getHost().openInputStreamForUrl(contentUrl);
-            }
-
+            InputStream clearIs = new FileInputStream(dataFile);
             InputStream encryptingInputStream;
             if (isAttachment()) {
                 byte[] key = Hex.decode(encryptionKey);

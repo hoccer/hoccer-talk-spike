@@ -66,13 +66,7 @@ public class ChatLocationItem extends ChatMessageItem {
             @Override
             public void onClick(View view) {
                 if (contentObject.isContentAvailable()) {
-                    Uri uri;
-                    if (contentObject.getContentUrl() != null) {
-                        uri = Uri.parse(contentObject.getContentUrl());
-                    } else {
-                        uri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
-                    }
-
+                    Uri uri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
                     LatLng location = loadGeoJson(uri);
                     if (location != null) {
                         String label = "Received Location";
