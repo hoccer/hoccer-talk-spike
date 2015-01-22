@@ -201,9 +201,10 @@
   </dependencies>
 
   <properties>
-    <!-- Can be overridden by calling `mvn -Denvironment=ENVIRONMENT` -->
+    <!-- Can be overridden by calling `mvn -Denvironment=ENVIRONMENT -Dlabel=LABEL` -->
+    <label>hoccer</label>
     <environment>development</environment>
-    <environment.path>${project.basedir}/environments/${environment}</environment.path>
+    <environment.path>${project.basedir}/label/${label}/${environment}</environment.path>
 
     <!-- Can be overridden by calling `mvn -Dapk.sign=false` -->
     <apk.sign>true</apk.sign>
