@@ -180,7 +180,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
         // do nothing
     }
 
-    private MenuItem.OnMenuItemClickListener mRenameCollectionClickListener = new MenuItem.OnMenuItemClickListener() {
+    private final MenuItem.OnMenuItemClickListener mRenameCollectionClickListener = new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {
             XoDialogs.showInputTextDialog("rename_collection", R.string.rename_collection, getActivity(),
@@ -188,7 +188,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
             return false;
         }
 
-        private XoDialogs.OnTextSubmittedListener mTextSubmittedListener = new XoDialogs.OnTextSubmittedListener() {
+        private final XoDialogs.OnTextSubmittedListener mTextSubmittedListener = new XoDialogs.OnTextSubmittedListener() {
             @Override
             public void onClick(DialogInterface dialog, int id, String text) {
                 if (text != null && !text.isEmpty()) {
@@ -217,7 +217,7 @@ public class MediaCollectionFragment extends SearchableListFragment {
 
     private void addSelectedItemsToCollection(Integer mediaCollectionId) {
         List<XoTransfer> selectedItems = mCollectionAdapter.getSelectedItems();
-        if(selectedItems.size() > 0) {
+        if(!selectedItems.isEmpty()) {
             try {
                 TalkClientMediaCollection mediaCollection = mDatabase.findMediaCollectionById(mediaCollectionId);
                 List<String> addedFilenames = new ArrayList<String>();
