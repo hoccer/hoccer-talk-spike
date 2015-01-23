@@ -39,8 +39,13 @@ public class WebClientBackend implements IXoStateListener {
 
         mClient = new XoClient(mClientHost, mConfiguration);
         mClient.getSelfContact().getSelf().setRegistrationName(mConfiguration.getContactName());
+
+        String workingDir = System.getProperty("user.dir");
+
         mClient.setEncryptedDownloadDirectory(mConfiguration.getEncAttachmentDir());
-        mClient.setAttachmentDirectory(mConfiguration.getDecAttachmentDir());
+        mClient.setRelativeAttachmentDirectory(mConfiguration.getDecAttachmentDir());
+        mClient.setAttachmentDirectory(workingDir + File.separator + mClient.getRelativeAttachmentDirectory());
+        mClient.setExternalStorageDirectory(workingDir);
 
         // create and register client event handler
         mTransferListener = new TransferListener(mClient);
