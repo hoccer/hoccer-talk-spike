@@ -488,7 +488,7 @@ public class XoClientService extends Service {
         }
 
         // if we have no messages cancel notification
-        if (unseenMessages.size() == 0) {
+        if (unseenMessages.isEmpty()) {
             mNotificationManager.cancel(NotificationId.UNSEEN_MESSAGES);
             return;
         }
@@ -541,7 +541,7 @@ public class XoClientService extends Service {
         }
 
         // if we have no messages after culling cancel notification
-        if (contactsMap.size() == 0) {
+        if (contactsMap.isEmpty()) {
             mNotificationManager.cancel(NotificationId.UNSEEN_MESSAGES);
             return;
         }
@@ -788,7 +788,7 @@ public class XoClientService extends Service {
                 intent.putExtra(IntentHelper.EXTRA_MEDIA_URI, uri.toString());
                 sendBroadcast(intent);
             }
-            
+
             mScanningDownloads.remove(path);
         }
 
@@ -862,8 +862,8 @@ public class XoClientService extends Service {
     }
 
     private class ContactUnseenMessageHolder {
-        private TalkClientContact mContact;
-        private List<TalkClientMessage> mUnseenMessages;
+        private final TalkClientContact mContact;
+        private final List<TalkClientMessage> mUnseenMessages;
 
         public ContactUnseenMessageHolder(TalkClientContact contact) {
             mContact = contact;
