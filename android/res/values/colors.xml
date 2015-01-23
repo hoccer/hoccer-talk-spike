@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="primary">#4dbfac</color>
+    <color name="secondary">#ffc8c8c8</color>
+    <color name="tertiary">#004ce5</color>
 
     <color name="background_primary">#ffffff</color>
     <color name="background_selected">#ffc8c8c8</color>
 
-    <color name="message_background_incoming">#ffc8c8c8</color>
+    <color name="message_background_incoming">@color/secondary</color>
     <color name="message_text_incoming">#000000</color>
     <color name="message_delivery_failed">#ff0000</color>
 
@@ -14,7 +16,7 @@
     <color name="compose_message_divider">#ffbfbfbf</color>
     <color name="compose_message_text">#ffffff</color>
 
-    <color name="attachment_incoming">#004ce5</color>
+    <color name="attachment_incoming">@color/tertiary</color>
     <color name="attachment_outgoing">#77000000</color>
 
     <color name="media_player_text_secondary">#aaaaaaaa</color>
