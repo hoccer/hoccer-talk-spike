@@ -42,9 +42,20 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private ViewPager mViewPager;
 
+    private boolean mEnvironmentUpdatesEnabled;
     private boolean mNoUserInput = false;
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
+
+    private SharedPreferences.OnSharedPreferenceChangeListener mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals("preference_environment_update")) {
+                mEnvironmentUpdatesEnabled = sharedPreferences.getBoolean("preference_environment_update", true);
+                refreshEnvironmentUpdater(false);
+            }
+        }
+    };
 
     @Override
     protected ActivityComponent[] createComponents() {
@@ -67,6 +78,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         initViewPager();
         initActionBar();
+        determineRegistrationForEnvironmentUpdates();
 
         handleIntent(getIntent());
     }
@@ -157,6 +169,12 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         }
 
         mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
+    }
+
+    private void determineRegistrationForEnvironmentUpdates() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        pref.registerOnSharedPreferenceChangeListener(mPreferencesListener);
+        mEnvironmentUpdatesEnabled = pref.getBoolean("preference_environment_update", true);
     }
 
     private void showProfileIfClientIsNotRegistered() {
@@ -270,9 +288,11 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         LOG.debug("refreshEnvironmentUpdater");
         Fragment fragment = getFragmentAt(mViewPager.getCurrentItem());
         if (fragment instanceof NearbyChatListFragment) {
-            if (isLocationServiceEnabled()) {
-                LOG.debug("refreshEnvironmentUpdater:startNearbySession");
-                XoApplication.startNearbySession(this, force);
+            if (mEnvironmentUpdatesEnabled) {
+                if (isLocationServiceEnabled()) {
+                    LOG.debug("refreshEnvironmentUpdater:startNearbySession");
+                    XoApplication.startNearbySession(force);
+                }
             }
         } else {
             shutDownNearbySession();
