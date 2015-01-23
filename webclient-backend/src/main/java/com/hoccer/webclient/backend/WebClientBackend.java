@@ -48,7 +48,7 @@ public class WebClientBackend implements IXoStateListener {
         mClient.setExternalStorageDirectory(workingDir);
 
         // create and register client event handler
-        mTransferListener = new TransferListener(mClient);
+        mTransferListener = new TransferListener(mClient, mConfiguration);
         mClient.registerTransferListener(mTransferListener);
         mClient.registerStateListener(this);
 

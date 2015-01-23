@@ -11,6 +11,7 @@ client.avatar_file = ./res/football.jpg
 client.encrypted_attachment_dir = encrypted_attachments
 client.decrypted_attachment_dir = decrypted_attachments
 client.database_dir = database
+client.approve_all_downloads = false
 
 # Client position
 client.latitude = 50.948613
