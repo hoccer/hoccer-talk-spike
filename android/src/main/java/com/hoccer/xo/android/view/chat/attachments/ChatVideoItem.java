@@ -139,7 +139,7 @@ public class ChatVideoItem extends ChatMessageItem {
         if (doListen) {
             if (mMediaScannedReceiver == null) {
                 IntentFilter filter = new IntentFilter(MediaScannedReceiver.class.getName());
-                filter.addAction(IntentHelper.ACTION_MEDIA_DOWNLOAD_SCANNED);
+                filter.addAction(IntentHelper.ACTION_DOWNLOAD_SCANNED);
                 mMediaScannedReceiver = new MediaScannedReceiver();
                 mContext.registerReceiver(mMediaScannedReceiver, filter);
             }
@@ -186,9 +186,6 @@ public class ChatVideoItem extends ChatMessageItem {
         }
     }
 
-    /*
-     * Tries to retrieve a thumbnail bitmap for the given video and stores it as JPEG file at the given thumbnailPath
-     */
     private boolean createVideoThumbnail(Uri videoUri, Uri thumbnailUri) {
         long videoId = UriUtils.getContentIdByDataPath(mContext, MediaStore.Video.Media.getContentUri("external"), videoUri.getPath());
         if (videoId > 0) {
@@ -206,9 +203,6 @@ public class ChatVideoItem extends ChatMessageItem {
         return false;
     }
 
-    /*
-     * Sends an intent to open the video contained in contentObject.
-     */
     private void openVideo(IContentObject contentObject) {
         if (contentObject.isContentAvailable()) {
             Uri videoUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
@@ -224,21 +218,16 @@ public class ChatVideoItem extends ChatMessageItem {
         }
     }
 
-    private void onMediaScanned(String uri) {
-        // call display attachment again assuming that the file is now known
-        // be aware that this callback is invoked on every scan of the target file as long as thumbnail could be created
-        if (uri.equals(mContentObject.getContentUrl())) {
-            displayAttachment(mContentObject);
-            listenToMediaScannedIntent(false);
-        }
-    }
-
     private class MediaScannedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context arg0, Intent intent) {
-            String uri = intent.getStringExtra(IntentHelper.EXTRA_MEDIA_URI);
-            if (uri != null) {
-                onMediaScanned(uri);
+
+            // call displayAttachment assuming that Android has scanned it and can generate a thumbnail
+            Uri scannedFileUri = intent.getParcelableExtra(IntentHelper.EXTRA_ATTACHMENT_FILE_URI);
+            Uri videoFileUri = UriUtils.getAbsoluteFileUri(mContentObject.getFilePath());
+            if (scannedFileUri.equals(videoFileUri)) {
+                displayAttachment(mContentObject);
+                listenToMediaScannedIntent(false);
             }
         }
     }

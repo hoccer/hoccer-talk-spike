@@ -34,9 +34,9 @@ public class IntentHelper {
     public static final String EXTRA_CONTACT_ID = "com.hoccer.xo.android.extra.CONTACT_ID";
     public static final String EXTRA_PUSH_MESSAGE = "com.hoccer.xo.android.extra.PUSH_MESSAGE";
     public static final String EXTRA_TALK_CLIENT_MESSAGE_ID = "com.hoccer.xo.android.extra.TALK_CLIENT_MESSAGE_ID";
-    public static final String EXTRA_MEDIA_URI = "com.hoccer.xo.android.extra.MEDIA_URI";
+    public static final String EXTRA_ATTACHMENT_FILE_URI = "com.hoccer.xo.android.extra.ATTACHMENT_FILE_URI";
 
-    public static final String ACTION_MEDIA_DOWNLOAD_SCANNED = "com.hoccer.xo.android.action.MEDIA_DOWNLOAD_SCANNED";
+    public static final String ACTION_DOWNLOAD_SCANNED = "com.hoccer.xo.android.action.DOWNLOAD_SCANNED";
 
     // Static Methods ----------------------------------------------------
 
