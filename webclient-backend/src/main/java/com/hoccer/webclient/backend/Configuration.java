@@ -107,14 +107,14 @@ public class Configuration extends XoDefaultClientConfiguration {
         LOG.info("Current configuration:" +
             MessageFormat.format("\n  TalkServer URI:              ''{0}''", mServerUri) +
             MessageFormat.format("\n  Trusted Certificate File:    ''{0}''", mTrustedCertFile) +
-            MessageFormat.format("\n  Backend Port:                ''{0}''", Integer.toString(mBackendPort)) +
+            MessageFormat.format("\n  Backend Port:                {0}", Integer.toString(mBackendPort)) +
             MessageFormat.format("\n  Contact Name:                ''{0}''", mContactName) +
             MessageFormat.format("\n  Avatar File:                 ''{0}''", mAvatarFile) +
             MessageFormat.format("\n  Encrypted Attachment Folder: ''{0}''", mEncAttDir) +
             MessageFormat.format("\n  Decrypted Attachment Folder: ''{0}''", mDecAttDir) +
             MessageFormat.format("\n  Database Folder:             ''{0}''", mDatabaseDir) +
-            MessageFormat.format("\n  Latitude:                    ''{0}''", Double.toString(mLatitude)) +
-            MessageFormat.format("\n  Longitude:                   ''{0}''", Double.toString(mLongitude)) +
+            MessageFormat.format("\n  Latitude:                    {0}", Double.toString(mLatitude)) +
+            MessageFormat.format("\n  Longitude:                   {0}", Double.toString(mLongitude)) +
             "\n-------------------------------------------------------------------------");
     }
 }
