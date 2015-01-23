@@ -16,7 +16,7 @@
         <item name="android:layout_marginLeft">30dp</item>
         <item name="android:layout_marginRight">30dp</item>
         <item name="android:layout_height">1dp</item>
-        <item name="android:background">@color/xo_content_horizontal_divider</item>
+        <item name="android:background">@color/content_horizontal_divider</item>
     </style>
     <style name="AppBaseTheme.Group.CreateButton" parent="AppBaseTheme.Group">
         <item name="android:layout_marginLeft">30dp</item>
@@ -28,12 +28,12 @@
         <item name="android:layout_marginLeft">45dp</item>
     </style>
     <style name="AppBaseTheme.Group.Members.Dialog" parent="AppBaseTheme.Group">
-        <item name="android:background">@color/xo_app_main_color</item>
+        <item name="android:background">@color/primary</item>
     </style>
 
     <style name="AppBaseTheme.Group.List" parent="AppBaseTheme.Group">
         <item name="android:dividerHeight">1dp</item>
-        <item name="android:divider">@color/xo_content_horizontal_divider</item>
+        <item name="android:divider">@color/content_horizontal_divider</item>
         <item name="android:layout_marginLeft">30dp</item>
         <item name="android:layout_marginRight">30dp</item>
     </style>

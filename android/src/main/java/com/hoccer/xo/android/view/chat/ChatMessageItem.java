@@ -170,8 +170,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
                 messageText.setBackgroundDrawable(getIncomingBackgroundDrawable());
             }
 
-            messageText.setTextColor(mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
-            messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.xo_incoming_message_textColor));
+            messageText.setTextColor(mContext.getResources().getColorStateList(R.color.message_text_incoming));
+            messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.message_text_incoming));
 
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, mContext.getResources().getDisplayMetrics());
@@ -193,8 +193,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
                 messageText.setBackgroundDrawable(getOutgoingBackgroundDrawable());
             }
 
-            messageText.setTextColor(mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
-            messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.xo_compose_message_textColor));
+            messageText.setTextColor(mContext.getResources().getColorStateList(R.color.compose_message_text));
+            messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.compose_message_text));
 
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
@@ -225,7 +225,7 @@ public class ChatMessageItem implements AttachmentTransferListener {
         deliveryInfo.setVisibility(View.VISIBLE);
 
         if (incomingDelivery.isFailure()) {
-            setMessageStatusText(deliveryInfo, stateStringForDelivery(incomingDelivery, view), R.color.xo_message_failed_color);
+            setMessageStatusText(deliveryInfo, stateStringForDelivery(incomingDelivery, view), R.color.message_delivery_failed);
         } else {
             deliveryInfo.setVisibility(View.GONE);
         }
@@ -275,9 +275,9 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     private static int statusColorId(TalkDelivery myDelivery) {
         if (myDelivery.isFailure()) {
-            return R.color.xo_message_failed_color;
+            return R.color.message_delivery_failed;
         }
-        return R.color.xo_app_main_color;
+        return R.color.primary;
     }
 
     private void updateOutgoingMessageStatus(View view) {

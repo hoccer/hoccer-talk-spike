@@ -4,7 +4,7 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:gravity="center_horizontal"
-        android:background="@color/xo_group_members_divder">
+        android:background="@color/separator">
 
     <TextView
             android:id="@+id/tv_header"

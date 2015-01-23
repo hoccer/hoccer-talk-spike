@@ -4,14 +4,14 @@
     </style>
 
     <style name="AppBaseTheme.Message.Incoming" parent="AppBaseTheme.Message">
-        <item name="android:textColor">@color/xo_incoming_message_textColor</item>
-        <item name="android:textColorLink">@color/xo_incoming_message_textColor</item>
+        <item name="android:textColor">@color/message_text_incoming</item>
+        <item name="android:textColorLink">@color/message_text_incoming</item>
         <item name="android:background">@drawable/chat_bubble_incoming</item>
     </style>
 
     <style name="AppBaseTheme.Message.Outgoing" parent="AppBaseTheme.Message">
-        <item name="android:textColor">@color/xo_compose_message_textColor</item>
-        <item name="android:textColorLink">@color/xo_compose_message_textColor</item>
+        <item name="android:textColor">@color/compose_message_text</item>
+        <item name="android:textColorLink">@color/compose_message_text</item>
         <item name="android:background">@drawable/chat_bubble_outgoing</item>
     </style>
 </resources>

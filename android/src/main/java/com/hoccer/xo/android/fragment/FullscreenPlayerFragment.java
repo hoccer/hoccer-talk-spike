@@ -169,7 +169,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
                             mBlinkAnimation.cancel();
                         }
 
-                        mCurrentTimeLabel.setTextColor(getResources().getColor(R.color.xo_media_player_secondary_text));
+                        mCurrentTimeLabel.setTextColor(getResources().getColor(R.color.media_player_text_secondary));
                         mPlayButton.setChecked(!isPlaying);
                     }
                 }
@@ -273,8 +273,8 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
     }
 
     private void setupBlinkAnimation() {
-        int colorFrom = getResources().getColor(R.color.xo_media_player_secondary_text);
-        int colorTo = getResources().getColor(R.color.xo_app_main_color);
+        int colorFrom = getResources().getColor(R.color.media_player_text_secondary);
+        int colorTo = getResources().getColor(R.color.primary);
         mBlinkAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
         mBlinkAnimation.setDuration(500);
         mBlinkAnimation.setRepeatMode(Animation.REVERSE);
@@ -421,7 +421,7 @@ public class FullscreenPlayerFragment extends Fragment implements MediaMetaData.
                 mBlinkAnimation.cancel();
             }
 
-            mCurrentTimeLabel.setTextColor(getResources().getColor(R.color.xo_media_player_secondary_text));
+            mCurrentTimeLabel.setTextColor(getResources().getColor(R.color.media_player_text_secondary));
         }
     }
 

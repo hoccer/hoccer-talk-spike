@@ -2,7 +2,7 @@
 
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:background="@color/xo_main_background"
+        android:background="@color/background_primary"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -46,7 +46,7 @@
     <EditText
             android:id="@+id/profile_group_name_edit"
             android:hint="@string/group_name_hint"
-            android:textColorHint="@color/xo_content_description_text"
+            android:textColorHint="@color/text_hint"
             android:gravity="left"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

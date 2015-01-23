@@ -65,11 +65,11 @@ public class ChatAudioItem extends ChatMessageItem {
         setPlayButton();
 
         if(mMessage.isIncoming()) {
-            captionTextView.setTextColor(mContext.getResources().getColor(R.color.xo_incoming_message_textColor));
-            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_incoming_message_textColor));
+            captionTextView.setTextColor(mContext.getResources().getColor(R.color.message_text_incoming));
+            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.message_text_incoming));
         } else {
-            captionTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
-            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
+            captionTextView.setTextColor(mContext.getResources().getColor(R.color.compose_message_text));
+            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.compose_message_text));
         }
 
         MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(contentObject.getFilePath()).getPath());
