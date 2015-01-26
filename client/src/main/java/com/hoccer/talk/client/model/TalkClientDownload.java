@@ -160,12 +160,14 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     @DatabaseField(width = 128)
     private String contentHmac;
 
-	@DatabaseField
+    @DatabaseField
     private ApprovalState approvalState;
 
     private HttpGet mDownloadRequest = null;
 
-    /** Only for display purposes, the real content length will be retrieved from server since after encryption this value will differ */
+    /**
+     * Only for display purposes, the real content length will be retrieved from server since after encryption this value will differ
+     */
     @DatabaseField
     private int transmittedContentLength = -1;
 
@@ -276,7 +278,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-	public TalkClientDownload.ApprovalState getApprovalState() {
+    public TalkClientDownload.ApprovalState getApprovalState() {
         if (approvalState == null) {
             return ApprovalState.PENDING;
         } else {
@@ -752,7 +754,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     private void saveToDatabase() {
-        LOG.debug("save TalkClientDownload (" + getClientDownloadId() + ") to database");
+        LOG.debug("save TalkClientDownload (" + clientDownloadId + ") to database");
         try {
             mTransferAgent.getDatabase().saveClientDownload(this);
         } catch (SQLException e) {
@@ -762,12 +764,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     @Override
     public int getTransferId() {
-        return getClientDownloadId();
+        return clientDownloadId;
     }
 
     @Override
     public int getUploadOrDownloadId() {
-        return getClientDownloadId();
+        return clientDownloadId;
     }
 
     @Override
@@ -806,7 +808,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-	public enum ApprovalState {
+    public enum ApprovalState {
         APPROVED, DECLINED, PENDING
     }
 
@@ -937,7 +939,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof TalkClientDownload && (clientDownloadId == ((TalkClientDownload)obj).getClientDownloadId())) {
+        if (obj instanceof TalkClientDownload && (clientDownloadId == ((TalkClientDownload) obj).clientDownloadId)) {
             return true;
         } else {
             return false;

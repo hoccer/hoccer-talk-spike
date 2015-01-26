@@ -199,7 +199,7 @@ public class SelectedContent implements IContentObject {
         }
 
         String filePath = null;
-        if(object.getFilePath() != null) {
+        if (object.getFilePath() != null) {
             filePath = UriUtils.getAbsoluteFileUri(object.getFilePath()).getPath();
         }
 
@@ -230,7 +230,7 @@ public class SelectedContent implements IContentObject {
         }
 
         String filePath = null;
-        if(object.getFilePath() != null) {
+        if (object.getFilePath() != null) {
             filePath = UriUtils.getAbsoluteFileUri(object.getFilePath()).getPath();
         }
 

@@ -417,7 +417,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             Header checkRangeHeader = uploadResponse.getFirstHeader("Range");
             uploadResponse.getEntity().consumeContent();
             if (isUploadComplete(checkRangeHeader)) {
-                if(dataFile != null) {
+                if (dataFile != null) {
                     this.dataFile = computeRelativeUploadFilePath(dataFile);
                 }
                 switchState(State.COMPLETE);
@@ -436,7 +436,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private String computeRelativeUploadFilePath(String filePath) {
         String externalStorageDirectory = mTransferAgent.getClient().getExternalStorageDirectory();
-        if(filePath.startsWith(externalStorageDirectory)) {
+        if (filePath.startsWith(externalStorageDirectory)) {
             return filePath.substring(externalStorageDirectory.length() + 1);
         } else {
             return filePath;
@@ -542,10 +542,10 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     @Override
     public void onProgress(int progress) {
-        LOG.trace("upload (" + getClientUploadId() + ") progress: " + progress + " of " + uploadLength);
+        LOG.trace("upload (" + clientUploadId + ") progress: " + progress + " of " + uploadLength);
 
         if (progress > uploadLength) {
-            LOG.error("upload (" + getClientUploadId() + ") progress greater than upload size: " + progress + " > " + uploadLength);
+            LOG.error("upload (" + clientUploadId + ") progress greater than upload size: " + progress + " > " + uploadLength);
         }
 
         this.progress = progress;
@@ -557,12 +557,12 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     @Override
     public int getTransferId() {
-        return -1 * getClientUploadId();
+        return -1 * clientUploadId;
     }
 
     @Override
     public int getUploadOrDownloadId() {
-        return getClientUploadId();
+        return clientUploadId;
     }
 
     @Override
