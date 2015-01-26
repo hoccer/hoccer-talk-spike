@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
@@ -21,15 +23,14 @@ import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
-import com.artcom.hoccer.R;
 
 
 public class ChatAudioItem extends ChatMessageItem {
 
     private ImageButton mPlayPauseButton;
-    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
+    private final MediaPlayerServiceConnector mMediaPlayerServiceConnector;
     private IContentObject mAudioContentObject;
-    private boolean mIsPlayable = false;
+    private boolean mIsPlayable;
 
     public ChatAudioItem(Context context, TalkClientMessage message) {
         super(context, message);
@@ -48,14 +49,13 @@ public class ChatAudioItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(final IContentObject contentObject) {
-        super.displayAttachment(contentObject);
+    protected void displayAttachment(final XoTransfer attachment) {
+        super.displayAttachment(attachment);
 
         // add view lazily
-        if (mContentWrapper.getChildCount() == 0)
-        {
+        if (mContentWrapper.getChildCount() == 0) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-            View v =  inflater.inflate(R.layout.content_audio, null);
+            View v = inflater.inflate(R.layout.content_audio, null);
             mContentWrapper.addView(v);
         }
         LinearLayout audioLayout = (LinearLayout) mContentWrapper.getChildAt(0);
@@ -64,7 +64,7 @@ public class ChatAudioItem extends ChatMessageItem {
         mPlayPauseButton = (ImageButton) audioLayout.findViewById(R.id.ib_content_audio_play);
         setPlayButton();
 
-        if(mMessage.isIncoming()) {
+        if (mMessage.isIncoming()) {
             captionTextView.setTextColor(mContext.getResources().getColor(R.color.xo_incoming_message_textColor));
             fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_incoming_message_textColor));
         } else {
@@ -72,7 +72,7 @@ public class ChatAudioItem extends ChatMessageItem {
             fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
         }
 
-        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(contentObject.getFilePath()).getPath());
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(attachment.getFilePath()).getPath());
         String displayName = metaData.getTitleOrFilename().trim();
         if (metaData.getArtist() != null) {
             displayName = metaData.getArtist().trim() + " - " + displayName;
@@ -100,7 +100,7 @@ public class ChatAudioItem extends ChatMessageItem {
             }
         });
 
-        mAudioContentObject = contentObject;
+        mAudioContentObject = attachment;
         mIsPlayable = mAudioContentObject != null;
         updatePlayPauseView();
 
@@ -126,18 +126,18 @@ public class ChatAudioItem extends ChatMessageItem {
         }
     }
 
-    private void setPlayButton(){
+    private void setPlayButton() {
         mPlayPauseButton.setBackgroundDrawable(null);
         mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_play, mMessage.isIncoming()));
     }
 
-    private void setPauseButton(){
+    private void setPauseButton() {
         mPlayPauseButton.setBackgroundDrawable(null);
         mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getRepaintedAttachmentDrawable(mContext, R.drawable.ic_light_pause, mMessage.isIncoming()));
     }
 
     public void updatePlayPauseView() {
-        if(mPlayPauseButton != null && mMessage != null) {
+        if (mPlayPauseButton != null && mMessage != null) {
             if (isActive()) {
                 setPauseButton();
             } else {
@@ -156,7 +156,7 @@ public class ChatAudioItem extends ChatMessageItem {
         return isActive;
     }
 
-    private void initializeMediaPlayerService(){
+    private void initializeMediaPlayerService() {
         mMediaPlayerServiceConnector.connect(
                 IntentHelper.ACTION_PLAYER_STATE_CHANGED,
                 new MediaPlayerServiceConnector.Listener() {
@@ -164,9 +164,11 @@ public class ChatAudioItem extends ChatMessageItem {
                     public void onConnected(MediaPlayerService service) {
                         updatePlayPauseView();
                     }
+
                     @Override
                     public void onDisconnected() {
                     }
+
                     @Override
                     public void onAction(String action, MediaPlayerService service) {
                         updatePlayPauseView();

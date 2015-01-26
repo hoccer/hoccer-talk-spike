@@ -12,8 +12,8 @@ import com.artcom.hoccer.R;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.maps.model.LatLng;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.UriUtils;
@@ -45,8 +45,8 @@ public class ChatLocationItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(final IContentObject contentObject) {
-        super.displayAttachment(contentObject);
+    protected void displayAttachment(final XoTransfer attachment) {
+        super.displayAttachment(attachment);
 
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
@@ -68,8 +68,8 @@ public class ChatLocationItem extends ChatMessageItem {
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (contentObject.isContentAvailable()) {
-                    Uri uri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
+                if (attachment.isContentAvailable()) {
+                    Uri uri = UriUtils.getAbsoluteFileUri(attachment.getFilePath());
                     LatLng location = loadGeoJson(uri);
                     if (location != null) {
                         String label = "Received Location";
@@ -83,7 +83,7 @@ public class ChatLocationItem extends ChatMessageItem {
         });
     }
 
-    private LatLng loadGeoJson(Uri uri) {
+    private static LatLng loadGeoJson(Uri uri) {
         LatLng result = null;
         try {
             InputStream is = new FileInputStream(uri.getPath());

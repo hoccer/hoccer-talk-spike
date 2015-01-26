@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
@@ -55,8 +56,8 @@ public class ChatVideoItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(final IContentObject contentObject) {
-        super.displayAttachment(contentObject);
+    protected void displayAttachment(final XoTransfer attachment) {
+        super.displayAttachment(attachment);
 
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
@@ -70,14 +71,14 @@ public class ChatVideoItem extends ChatMessageItem {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openVideo(contentObject);
+                openVideo(attachment);
             }
         });
 
         mContentWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openVideo(contentObject);
+                openVideo(attachment);
             }
         });
 
@@ -90,7 +91,7 @@ public class ChatVideoItem extends ChatMessageItem {
 
         // retrieve thumbnail path if not set already
         if (mThumbnailPath == null) {
-            mThumbnailPath = retrieveThumbnailPath(UriUtils.getAbsoluteFileUri(contentObject.getFilePath()));
+            mThumbnailPath = retrieveThumbnailPath(UriUtils.getAbsoluteFileUri(attachment.getFilePath()));
         }
 
         // adjust width/height based on thumbnail size if it exists
@@ -227,9 +228,9 @@ public class ChatVideoItem extends ChatMessageItem {
 
             // call displayAttachment assuming that Android has scanned it and can generate a thumbnail
             Uri scannedFileUri = intent.getParcelableExtra(IntentHelper.EXTRA_ATTACHMENT_FILE_URI);
-            Uri videoFileUri = UriUtils.getAbsoluteFileUri(mContentObject.getFilePath());
+            Uri videoFileUri = UriUtils.getAbsoluteFileUri(mAttachment.getFilePath());
             if (scannedFileUri.equals(videoFileUri)) {
-                displayAttachment(mContentObject);
+                displayAttachment(mAttachment);
                 listenToMediaScannedIntent(false);
             }
         }

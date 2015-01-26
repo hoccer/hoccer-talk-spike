@@ -9,9 +9,8 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.ColorSchemeManager;
@@ -27,7 +26,6 @@ import java.io.InputStream;
 
 public class ChatContactItem extends ChatMessageItem {
 
-    private IContentObject mContent;
     private final static Logger LOG = Logger.getLogger(ChatContactItem.class);
 
     private VCard mVCard;
@@ -48,9 +46,8 @@ public class ChatContactItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(IContentObject contentObject) {
-        super.displayAttachment(contentObject);
-        mContent = contentObject;
+    protected void displayAttachment(XoTransfer attachment) {
+        super.displayAttachment(attachment);
 
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
@@ -74,7 +71,7 @@ public class ChatContactItem extends ChatMessageItem {
             public void onClick(View v) {
                 LOG.debug("onClick(showButton)");
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(UriUtils.getAbsoluteFileUri(mContent.getFilePath()), mContent.getContentType());
+                intent.setDataAndType(UriUtils.getAbsoluteFileUri(mAttachment.getFilePath()), mAttachment.getContentType());
                 XoActivity activity = (XoActivity) mContext;
                 activity.startExternalActivity(intent);
             }
@@ -98,12 +95,12 @@ public class ChatContactItem extends ChatMessageItem {
     }
 
     private void parseVCard() {
-        Uri fileUri = UriUtils.getAbsoluteFileUri(mContentObject.getFilePath());
+        Uri fileUri = UriUtils.getAbsoluteFileUri(mAttachment.getFilePath());
         InputStream inputStream;
         try {
             inputStream = XoApplication.getXoClient().getHost().openInputStreamForUrl(fileUri.toString());
         } catch (IOException e) {
-            LOG.error("Could not open VCard at " + mContent.getFilePath(), e);
+            LOG.error("Could not open VCard at " + mAttachment.getFilePath(), e);
             return;
         }
 

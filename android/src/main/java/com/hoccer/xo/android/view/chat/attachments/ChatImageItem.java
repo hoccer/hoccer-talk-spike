@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
@@ -48,8 +49,8 @@ public class ChatImageItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(final IContentObject contentObject) {
-        super.displayAttachment(contentObject);
+    protected void displayAttachment(final XoTransfer attachment) {
+        super.displayAttachment(attachment);
 
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
@@ -61,7 +62,7 @@ public class ChatImageItem extends ChatMessageItem {
         mContentWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openImage(contentObject);
+                openImage(attachment);
             }
         });
 
@@ -69,7 +70,7 @@ public class ChatImageItem extends ChatMessageItem {
         double widthScaleFactor = mAvatarView.getVisibility() == View.VISIBLE ? WIDTH_AVATAR_SCALE_FACTOR : WIDTH_SCALE_FACTOR;
         int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * widthScaleFactor);
         int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * HEIGHT_SCALE_FACTOR);
-        double aspectRatio = contentObject.getContentAspectRatio();
+        double aspectRatio = attachment.getContentAspectRatio();
         Point boundImageSize = ImageUtils.getImageSizeInBounds(aspectRatio, maxWidth, maxHeight);
         int width = boundImageSize.x;
         int height = boundImageSize.y;
@@ -97,7 +98,7 @@ public class ChatImageItem extends ChatMessageItem {
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
 
-        Uri imageUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
+        Uri imageUri = UriUtils.getAbsoluteFileUri(attachment.getFilePath());
         Picasso.with(mContext).load(imageUri)
                 .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
@@ -114,9 +115,9 @@ public class ChatImageItem extends ChatMessageItem {
         }
     }
 
-    private void openImage(IContentObject contentObject) {
-        if (contentObject.isContentAvailable()) {
-            Uri imageUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
+    private void openImage(XoTransfer transfer) {
+        if (transfer.isContentAvailable()) {
+            Uri imageUri = UriUtils.getAbsoluteFileUri(transfer.getFilePath());
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(imageUri, "image/*");
             try {
