@@ -813,12 +813,12 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     @Override
-    public int getTransferLength() {
+    public long getTransferLength() {
         return contentLength;
     }
 
     @Override
-    public int getTransferProgress() {
+    public long getTransferProgress() {
         return downloadProgress;
     }
 
@@ -871,7 +871,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.fileId = fileId;
     }
 
-    public int getContentLength() {
+    public long getContentLength() {
         return contentLength;
     }
 

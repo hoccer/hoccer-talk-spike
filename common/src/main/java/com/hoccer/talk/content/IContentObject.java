@@ -9,9 +9,9 @@ public interface IContentObject {
 
     public ContentState getContentState();
 
-    public int getTransferLength();
+    public long getTransferLength();
 
-    public int getTransferProgress();
+    public long getTransferProgress();
 
     public String getContentMediaType();
 
@@ -25,7 +25,7 @@ public interface IContentObject {
 
     public String getFilePath();
 
-    public int getContentLength();
+    public long getContentLength();
 
     public String getContentHmac();
 }

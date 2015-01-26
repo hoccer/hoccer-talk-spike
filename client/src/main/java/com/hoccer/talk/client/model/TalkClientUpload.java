@@ -88,23 +88,20 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     @DatabaseField
     private String fileName;
 
-    /**
-     * Plain data file
-     */
     @DatabaseField(width = 2000)
     private String dataFile;
 
-    /**
-     * Plain data size
-     */
+    @DatabaseField(width = 2000)
+    private String cachedDataFile;
+
     @DatabaseField
-    private int dataLength;
+    private long dataLength;
 
     @DatabaseField(width = 2000)
     private String encryptedFile;
 
     @DatabaseField
-    private int encryptedLength = -1;
+    private long encryptedLength = -1;
 
     @DatabaseField
     @Nullable
@@ -114,7 +111,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
      * Size of upload
      */
     @DatabaseField
-    private int uploadLength;
+    private long uploadLength;
 
     /**
      * URL for upload
@@ -147,7 +144,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private double aspectRatio;
 
     @DatabaseField
-    private int progress;
+    private long progress;
 
     public TalkClientUpload() {
         super(Direction.UPLOAD);
@@ -325,7 +322,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private boolean checkCompletion(XoTransferAgent agent, Header checkRangeHeader) {
-        int last = uploadLength - 1;
+        long last = uploadLength - 1;
         int confirmedProgress = 0;
 
         ByteRange uploadedRange = ByteRange.parseContentRange(checkRangeHeader.getValue());
@@ -466,7 +463,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         if (checkRangeHeader == null) {
             return false;
         }
-        int last = uploadLength - 1;
+        long last = uploadLength - 1;
         int confirmedProgress = 0;
 
         ByteRange uploadedRange = ByteRange.parseContentRange(checkRangeHeader.getValue());
@@ -526,8 +523,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     private HttpPut createHttpUploadRequest() {
-        int last = uploadLength - 1;
-        int bytesToGo = uploadLength - this.progress;
+        long last = uploadLength - 1;
+        long bytesToGo = uploadLength - progress;
 
         LOG.trace("PUT-upload '" + uploadUrl + "' '" + bytesToGo + "' bytes to go ");
         String uploadRange = "bytes " + this.progress + "-" + last + "/" + uploadLength;
@@ -597,12 +594,12 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     @Override
-    public int getTransferLength() {
+    public long getTransferLength() {
         return encryptedLength;
     }
 
     @Override
-    public int getTransferProgress() {
+    public long getTransferProgress() {
         return progress;
     }
 
@@ -631,7 +628,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     @Override
-    public int getContentLength() {
+    public long getContentLength() {
         return dataLength;
     }
 
@@ -670,7 +667,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         return mediaType;
     }
 
-    public int getDataLength() {
+    public long getDataLength() {
         return dataLength;
     }
 
@@ -678,7 +675,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         return aspectRatio;
     }
 
-    public int getProgress() {
+    public long getProgress() {
         return progress;
     }
 

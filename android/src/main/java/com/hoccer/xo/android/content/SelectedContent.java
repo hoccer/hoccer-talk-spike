@@ -119,7 +119,7 @@ public class SelectedContent implements IContentObject {
     }
 
     @Override
-    public int getContentLength() {
+    public long getContentLength() {
         return mLength;
     }
 
@@ -143,12 +143,12 @@ public class SelectedContent implements IContentObject {
     }
 
     @Override
-    public int getTransferLength() {
+    public long getTransferLength() {
         return 0;
     }
 
     @Override
-    public int getTransferProgress() {
+    public long getTransferProgress() {
         return 0;
     }
 
