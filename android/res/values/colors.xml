@@ -18,6 +18,7 @@
 
     <color name="attachment_incoming">@color/tertiary</color>
     <color name="attachment_outgoing">#77000000</color>
+    <color name="attachment_transfer_control">@color/tertiary</color>
 
     <color name="media_player_text_secondary">#aaaaaaaa</color>
 
