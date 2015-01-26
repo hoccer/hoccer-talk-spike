@@ -911,18 +911,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return type == Type.ATTACHMENT;
     }
 
-    public void provideContentUrl(XoTransferAgent agent, String url) {
-        if (url.startsWith("file://")) {
-            return;
-        }
-        if (url.startsWith("content://media/external/file")) {
-            return;
-        }
-        this.contentUrl = url;
-        saveToDatabase();
-        agent.onDownloadStateChanged(this);
-    }
-
     @Override
     public void registerTransferListener(IXoTransferListener listener) {
         if (!mTransferListeners.contains(listener)) {
