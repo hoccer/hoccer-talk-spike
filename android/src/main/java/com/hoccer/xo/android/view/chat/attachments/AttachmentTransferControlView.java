@@ -11,118 +11,109 @@ import android.util.AttributeSet;
 import android.view.View;
 import com.artcom.hoccer.R;
 
-import org.apache.log4j.Logger;
 
 public class AttachmentTransferControlView extends View {
 
-    private static final Logger LOG = Logger.getLogger(AttachmentTransferControlView.class);
-
-    private final float SPINNER_LENGTH = 50;
-    private final float SPINNER_STEP = 1.5f;
+    private static final float SPINNER_LENGTH = 50;
+    private static final float SPINNER_STEP = 1.5f;
 
     private RectF mInnerWheel = new RectF();
     private RectF mOuterWheel = new RectF();
 
-    private Paint mInnerWheelPaint = new Paint();
-    private Paint mOuterWheelPaint = new Paint();
-    private Paint mTextPaint = new Paint();
+    private final Paint mInnerWheelPaint = new Paint();
+    private final Paint mOuterWheelPaint = new Paint();
+    private final Paint mTextPaint = new Paint();
 
     private float mProgressCompleted = 360;
-    private float mSpinnerLength = 0;
-    private float mSpinningProgress = 0;
-    private float mShownProgress = 0;
+    private float mSpinnerLength;
+    private float mSpinningProgress;
+    private float mShownProgress;
     private int mLayoutWidth;
     private int mLayoutHeight;
     private int mFileSize;
 
-    private int mOuterWheelSize = 0;
-    private int mInnerWheelSize = 0;
-    private int mWheelDiameter = 0;
-    private int mWheelColor = 0;
+    private int mOuterWheelSize;
+    private int mInnerWheelSize;
+    private int mWheelDiameter;
+    private int mWheelColor;
 
     private float[] mArrowPause;
     private float[] mArrowDownload;
     private float[] mArrowUpload;
 
-    private boolean mIsInitialized = false;
-    private boolean mPause = false;
-    private boolean mGone = false;
+    private boolean mIsInitialized;
+    private boolean mPause;
+    private boolean mGone;
     private boolean mIsDownloadingProcess;
     private boolean mStopSpinning;
     private float mStepInDegrees = 0.5f;
-    private boolean mGoneAfterFinished = false;
-    private boolean mIsSpinning = false;
+    private boolean mGoneAfterFinished;
+    private boolean mIsSpinning;
     private boolean mIsStatesEnable = true;
     private boolean mIsEncrypting = true;
 
-    private Handler progressHandler;
-
-
-    {
-        progressHandler = new Handler() {
-
-            @Override
-            public void handleMessage(Message msg) {
-                invalidate();
-                if (mPause) {
-                    return;
-                }
-                if (mShownProgress < mProgressCompleted) {
-                    mShownProgress += mStepInDegrees;
-                    progressHandler.sendEmptyMessageDelayed(0, 1);
-                    return;
-                } else if (mGoneAfterFinished) {
-                    mGone = true;
-                    return;
-                }
-                //spinning
-                if (mIsSpinning) {
-                    if (mIsEncrypting) {
-                        spinEncrypting();
-                    } else {
-                        spinDecrypting();
-                    }
-                }
+    private final Handler progressHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            invalidate();
+            if (mPause) {
+                return;
             }
-
-            private void spinEncrypting() {
-                if (mSpinnerLength < SPINNER_LENGTH) {
-                    mSpinnerLength += SPINNER_STEP;
-                } else {
-                    mSpinningProgress += SPINNER_STEP;
-                }
-                if (mSpinningProgress > 360) {
-                    mSpinningProgress = 0;
-                }
-                if (mStopSpinning && mSpinningProgress == 0) {
-                    mIsSpinning = false;
-                    mShownProgress = SPINNER_LENGTH;
-                    return;
-                }
+            if (mShownProgress < mProgressCompleted) {
+                mShownProgress += mStepInDegrees;
                 progressHandler.sendEmptyMessageDelayed(0, 1);
+                return;
+            } else if (mGoneAfterFinished) {
+                mGone = true;
+                return;
             }
-
-            private void spinDecrypting() {
-                if (mSpinnerLength > SPINNER_LENGTH) {
-                    mSpinnerLength -= SPINNER_STEP;
-                    mSpinningProgress += SPINNER_STEP;
+            //spinning
+            if (mIsSpinning) {
+                if (mIsEncrypting) {
+                    spinEncrypting();
                 } else {
-                    mSpinnerLength += SPINNER_STEP;
+                    spinDecrypting();
                 }
-                if (mSpinningProgress > 360) {
-                    mSpinningProgress = 0;
-                }
-                if (mStopSpinning && mSpinningProgress == 0) {
-                    clean();
-                    mGone = true;
-                    mIsInitialized = false;
-                    return;
-                }
-                progressHandler.sendEmptyMessageDelayed(0, 1);
-
             }
-        };
-    }
+        }
+
+        private void spinEncrypting() {
+            if (mSpinnerLength < SPINNER_LENGTH) {
+                mSpinnerLength += SPINNER_STEP;
+            } else {
+                mSpinningProgress += SPINNER_STEP;
+            }
+            if (mSpinningProgress > 360) {
+                mSpinningProgress = 0;
+            }
+            if (mStopSpinning && mSpinningProgress == 0) {
+                mIsSpinning = false;
+                mShownProgress = SPINNER_LENGTH;
+                return;
+            }
+            progressHandler.sendEmptyMessageDelayed(0, 1);
+        }
+
+        private void spinDecrypting() {
+            if (mSpinnerLength > SPINNER_LENGTH) {
+                mSpinnerLength -= SPINNER_STEP;
+                mSpinningProgress += SPINNER_STEP;
+            } else {
+                mSpinnerLength += SPINNER_STEP;
+            }
+            if (mSpinningProgress > 360) {
+                mSpinningProgress = 0;
+            }
+            if (mStopSpinning && mSpinningProgress == 0) {
+                clean();
+                mGone = true;
+                mIsInitialized = false;
+                return;
+            }
+            progressHandler.sendEmptyMessageDelayed(0, 1);
+
+        }
+    };
 
     private int mTextMargin;
     private int mTextSize;
@@ -145,13 +136,13 @@ public class AttachmentTransferControlView extends View {
     }
 
     private void parseAttributes(TypedArray a) {
-        mOuterWheelSize = (int) a.getDimension(R.styleable.TransferWheel_outerWheelSize, mOuterWheelSize);
-        mInnerWheelSize = (int) a.getDimension(R.styleable.TransferWheel_innerWheelSize, mInnerWheelSize);
-        mWheelDiameter = (int) a.getDimension(R.styleable.TransferWheel_wheelDiameter, mWheelDiameter);
-        mTextMargin = (int) a.getDimension(R.styleable.TransferWheel_textMargin, mTextMargin);
-        mTextSize = a.getInt(R.styleable.TransferWheel_textSize, mTextSize);
+        mOuterWheelSize = (int) a.getDimension(R.styleable.TransferWheel_outerWheelSize, 0);
+        mInnerWheelSize = (int) a.getDimension(R.styleable.TransferWheel_innerWheelSize, 0);
+        mWheelDiameter = (int) a.getDimension(R.styleable.TransferWheel_wheelDiameter, 0);
+        mTextMargin = (int) a.getDimension(R.styleable.TransferWheel_textMargin, 0);
+        mTextSize = a.getInt(R.styleable.TransferWheel_textSize, 0);
         mText = a.getString(R.styleable.TransferWheel_text);
-        mWheelColor = a.getColor(R.styleable.TransferWheel_wheelColor, mWheelColor);
+        mWheelColor = a.getColor(R.styleable.TransferWheel_wheelColor, 0);
         mIsStatesEnable = a.getBoolean(R.styleable.TransferWheel_enableStates, mIsStatesEnable);
         a.recycle();
     }
@@ -226,13 +217,6 @@ public class AttachmentTransferControlView extends View {
         mFileSize = length;
     }
 
-    public void setProgress(int progress) {
-        mPause = false;
-        float percentage = progress / (float) mFileSize;
-        mProgressCompleted = 360 * percentage;
-        progressHandler.sendEmptyMessage(0);
-    }
-
     public void setProgressImmediately(int progress) {
         float percentage = progress / (float) mFileSize;
         mPause = false;
@@ -254,7 +238,6 @@ public class AttachmentTransferControlView extends View {
             mIsInitialized = true;
             mIsDownloadingProcess = true;
             prepareToDecrypt();
-//            clean();
         }
     }
 
