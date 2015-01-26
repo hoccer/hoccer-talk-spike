@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.xo.android.XoApplication;
+import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.CameraPreviewView;
 import com.artcom.hoccer.R;
 import net.sourceforge.zbar.*;
@@ -148,7 +149,7 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     }
 
     private void hideSoftKeyboard() {
-        final InputMethodManager inputMethodManager = (InputMethodManager)getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        final InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(getView().getWindowToken(), 0);
     }
 
@@ -219,10 +220,12 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
     }
 
     @Override
-    public void onPageSelected() {}
+    public void onPageSelected() {
+    }
 
     @Override
-    public void onPageUnselected() {}
+    public void onPageUnselected() {
+    }
 
     @Override
     public void onPagePause() {
