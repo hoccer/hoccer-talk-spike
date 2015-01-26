@@ -61,18 +61,8 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
                     final String code = symbol.getData();
 
                     if (!mScannedCodes.contains(code)) {
-                        if (code.startsWith(XoApplication.getXoClient().getConfiguration().getUrlScheme())) {
-                            final String pairingToken = code.replace(XoApplication.getXoClient().getConfiguration().getUrlScheme(), "");
-                            XoApplication.getXoClient().performTokenPairing(pairingToken, QrCodeScannerFragment.this);
-                        } else {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getActivity(), getResources().getString(R.string.toast_pairing_failed), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                        }
-
+                        final String pairingToken = UriUtils.getAbsoluteFileUri(code).getAuthority();
+                        XoApplication.getXoClient().performTokenPairing(pairingToken, QrCodeScannerFragment.this);
                         mScannedCodes.add(code);
                     }
                 }
@@ -95,9 +85,9 @@ public class QrCodeScannerFragment extends Fragment implements IPagerFragment, I
 
     @Override
     public void onViewCreated(final View view, final Bundle savedInstanceState) {
-        mCameraPreviewView = (CameraPreviewView)view.findViewById(R.id.cpv_camera_preview);
-        mPairingTokenEditText = (EditText)view.findViewById(R.id.et_pairing_token);
-        mConfirmCodeButton = (Button)view.findViewById(R.id.b_confirm_code);
+        mCameraPreviewView = (CameraPreviewView) view.findViewById(R.id.cpv_camera_preview);
+        mPairingTokenEditText = (EditText) view.findViewById(R.id.et_pairing_token);
+        mConfirmCodeButton = (Button) view.findViewById(R.id.b_confirm_code);
 
         mPairingTokenEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
