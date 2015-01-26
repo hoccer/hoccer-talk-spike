@@ -192,7 +192,7 @@ public class SelectedContent implements IContentObject {
             os.write(mData);
             os.flush();
             os.close();
-            mFilePath = UriUtils.FILE_URI_PREFIX + file.toString();
+            mFilePath = UriUtils.FILE_URI_PREFIX + file;
             mData = null;
         } catch (IOException e) {
             LOG.error("error writing content to file", e);
