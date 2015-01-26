@@ -1,6 +1,7 @@
 package com.hoccer.xo.android;
 
 import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
@@ -73,9 +74,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     private static StartupTasks sStartupTasks;
 
+    private static Context mContext;
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        mContext = this;
 
         // currently we use our own instance here
         sUncaughtExceptionHandler = this;
@@ -231,6 +236,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         if (mPreviousHandler != null) {
             mPreviousHandler.uncaughtException(thread, ex);
         }
+    }
+
+    public static Context getContext() {
+        return mContext;
     }
 
     public static void ensureDirectory(File directory) {

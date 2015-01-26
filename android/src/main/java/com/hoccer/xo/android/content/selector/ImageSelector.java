@@ -24,7 +24,7 @@ public class ImageSelector implements IContentSelector {
 
     public ImageSelector(Context context) {
         mName = context.getResources().getString(R.string.content_images);
-        mIcon = ColorSchemeManager.getRepaintedDrawable(context.getResources(), R.drawable.ic_attachment_select_image, true);
+        mIcon = ColorSchemeManager.getInkedDrawable(R.drawable.ic_attachment_select_image, R.color.primary);
     }
 
     @Override
