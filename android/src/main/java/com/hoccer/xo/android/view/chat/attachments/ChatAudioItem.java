@@ -65,8 +65,8 @@ public class ChatAudioItem extends ChatMessageItem {
         setPlayButton();
 
         if(mMessage.isIncoming()) {
-            captionTextView.setTextColor(mContext.getResources().getColor(R.color.message_text_incoming));
-            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.message_text_incoming));
+            captionTextView.setTextColor(mContext.getResources().getColor(R.color.message_incoming_text));
+            fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.message_incoming_text));
         } else {
             captionTextView.setTextColor(mContext.getResources().getColor(R.color.compose_message_text));
             fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.compose_message_text));

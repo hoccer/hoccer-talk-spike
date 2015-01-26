@@ -61,7 +61,7 @@ public class ChatContactItem extends ChatMessageItem {
         ImageButton showButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_show_button);
         ImageButton importButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_vcard_import_button);
 
-        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.message_text_incoming) : mContext.getResources().getColor(R.color.compose_message_text);
+        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.message_incoming_text) : mContext.getResources().getColor(R.color.compose_message_text);
 
         contactName.setTextColor(textColor);
         contactDescription.setTextColor(textColor);

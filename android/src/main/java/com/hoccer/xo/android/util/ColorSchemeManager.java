@@ -14,7 +14,7 @@ public abstract class ColorSchemeManager{
     private static final SparseArray<Drawable> mRepaintedOutgoingDrawable = new SparseArray<Drawable>();
 
     public static Drawable getRepaintedDrawable(Resources resources, int bgId, boolean primaryColor) {
-        int custom_color = (primaryColor) ? resources.getColor(R.color.primary) : resources.getColor(R.color.message_background_incoming);
+        int custom_color = (primaryColor) ? resources.getColor(R.color.primary) : resources.getColor(R.color.message_incoming_background);
 
         Drawable myBG = resources.getDrawable(bgId);
         myBG.setColorFilter(custom_color, PorterDuff.Mode.MULTIPLY);

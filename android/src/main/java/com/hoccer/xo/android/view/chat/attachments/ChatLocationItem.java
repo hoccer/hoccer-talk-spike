@@ -55,7 +55,7 @@ public class ChatLocationItem extends ChatMessageItem {
         TextView locationTitleView = (TextView) mContentWrapper.findViewById(R.id.tv_location_title);
         ImageButton locationButton = (ImageButton) mContentWrapper.findViewById(R.id.ib_content_location);
 
-        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.message_text_incoming) : mContext.getResources().getColor(R.color.compose_message_text);
+        int textColor = (mMessage.isIncoming()) ? mContext.getResources().getColor(R.color.message_incoming_text) : mContext.getResources().getColor(R.color.compose_message_text);
 
         locationTextView.setTextColor(textColor);
         locationTitleView.setTextColor(textColor);
