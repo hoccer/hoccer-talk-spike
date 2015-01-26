@@ -71,7 +71,7 @@ public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaC
         if (mSelectedItems.get(position)) {
             convertView.setBackgroundColor(parent.getResources().getColor(R.color.background_selected));
         } else {
-            convertView.setBackgroundColor(parent.getResources().getColor(R.color.background_primary));
+            convertView.setBackgroundColor(parent.getResources().getColor(R.color.background_default));
         }
 
         if (mSelectedItems.size() > 0) {

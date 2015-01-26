@@ -9,6 +9,6 @@
             android:state_selected="true"
             android:drawable="@color/background_selected">
     </item>
-    <item android:drawable="@color/background_primary">
+    <item android:drawable="@color/background_default">
     </item>
 </selector>

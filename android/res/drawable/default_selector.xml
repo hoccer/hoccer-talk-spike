@@ -4,6 +4,6 @@
 
   <item android:state_focused="true" android:drawable="@color/primary"/>
   <item android:state_pressed="true" android:drawable="@color/primary" />
-  <item android:drawable="@color/background_primary"/>
+  <item android:drawable="@color/background_default"/>
 
 </selector>
