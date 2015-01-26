@@ -11,7 +11,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/profile_text_margin"
             android:text="@string/profile_nickname_text"
-            style="@style/AppBaseTheme.DescriptiveText"/>
+            style="@style/BaseTheme.DescriptiveText"/>
 
     <View
             android:id="@+id/v_profile_nickname_delimiter"
