@@ -19,6 +19,7 @@ import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import ezvcard.Ezvcard;
 import ezvcard.VCard;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,8 @@ import java.io.InputStream;
 public class ChatContactItem extends ChatMessageItem {
 
     private IContentObject mContent;
+    private final static Logger LOG = Logger.getLogger(ChatContactItem.class);
+
     private VCard mVCard;
 
     public ChatContactItem(Context context, TalkClientMessage message) {

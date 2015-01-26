@@ -24,6 +24,7 @@ import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.squareup.picasso.Picasso;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,6 +32,8 @@ import java.io.FileOutputStream;
 
 
 public class ChatVideoItem extends ChatMessageItem {
+
+    private final static Logger LOG = Logger.getLogger(ChatVideoItem.class);
 
     private String mThumbnailPath;
     private ImageView mTargetView;

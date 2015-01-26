@@ -46,7 +46,7 @@ import java.util.Date;
  */
 public class ChatMessageItem implements AttachmentTransferListener {
 
-    protected Logger LOG = Logger.getLogger(getClass());
+    private final static Logger LOG = Logger.getLogger(ChatMessageItem.class);
 
     protected Context mContext;
     protected AttachmentTransferHandler mAttachmentTransferHandler;

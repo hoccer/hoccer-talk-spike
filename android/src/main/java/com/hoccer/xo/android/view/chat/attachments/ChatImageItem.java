@@ -19,9 +19,12 @@ import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.squareup.picasso.Picasso;
+import org.apache.log4j.Logger;
 
 
 public class ChatImageItem extends ChatMessageItem {
+
+    private final static Logger LOG = Logger.getLogger(ChatImageItem.class);
 
     public static final double HEIGHT_SCALE_FACTOR = 0.6;
     public static final double WIDTH_SCALE_FACTOR = 0.85;

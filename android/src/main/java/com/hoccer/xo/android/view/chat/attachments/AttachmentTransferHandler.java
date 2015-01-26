@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
  */
 public class AttachmentTransferHandler implements View.OnClickListener, IXoTransferListener {
 
-    protected Logger LOG = Logger.getLogger(AttachmentTransferHandler.class);
+    private static final Logger LOG = Logger.getLogger(AttachmentTransferHandler.class);
 
     public enum TransferAction {
         NONE,
