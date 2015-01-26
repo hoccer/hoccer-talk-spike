@@ -3,7 +3,6 @@ package com.hoccer.xo.android.content;
 import android.content.Intent;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.content.IContentObject;
 import com.hoccer.talk.crypto.CryptoUtils;
@@ -97,11 +96,6 @@ public class SelectedContent implements IContentObject {
     @Override
     public ContentState getContentState() {
         return ContentState.SELECTED;
-    }
-
-    @Override
-    public ContentDisposition getContentDisposition() {
-        return ContentDisposition.SELECTED;
     }
 
     @Override

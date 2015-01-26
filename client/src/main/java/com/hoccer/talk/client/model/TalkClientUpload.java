@@ -5,7 +5,6 @@ import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.XoTransferAgent;
-import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.rpc.ITalkRpcServer;
@@ -595,11 +594,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             default:
                 throw new IllegalArgumentException("Unknown upload state '" + state + "'");
         }
-    }
-
-    @Override
-    public ContentDisposition getContentDisposition() {
-        return ContentDisposition.UPLOAD;
     }
 
     @Override

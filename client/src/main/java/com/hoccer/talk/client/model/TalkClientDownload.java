@@ -4,7 +4,6 @@ import com.google.appengine.api.blobstore.ByteRange;
 import com.hoccer.talk.client.IXoTransferListener;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.XoTransferAgent;
-import com.hoccer.talk.content.ContentDisposition;
 import com.hoccer.talk.content.ContentState;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.TalkAttachment;
@@ -809,11 +808,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
 
 	public enum ApprovalState {
         APPROVED, DECLINED, PENDING
-    }
-
-    @Override
-    public ContentDisposition getContentDisposition() {
-        return ContentDisposition.DOWNLOAD;
     }
 
     @Override
