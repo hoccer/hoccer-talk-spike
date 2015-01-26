@@ -5,7 +5,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.util.SparseArray;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.model.TalkDelivery;
 import com.hoccer.xo.android.XoApplication;
 
 public abstract class ColorSchemeManager {
