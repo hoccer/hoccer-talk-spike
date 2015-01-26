@@ -1101,7 +1101,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         });
     }
 
-    //TODO: messages which fail will be sent after the next sync
     public void sendMessage(String talkMessageTag) {
         try {
             TalkClientMessage message = mDatabase.findMessageByMessageTag(talkMessageTag, false);
@@ -2732,7 +2731,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             attachment = new TalkAttachment();
             attachment.setFileName(upload.getFileName());
             attachment.setUrl(upload.getDownloadUrl());
-            attachment.setContentSize(Integer.toString(upload.getDataLength()));
+            attachment.setContentSize(Long.toString(upload.getDataLength()));
             attachment.setMediaType(upload.getMediaType());
             attachment.setMimeType(upload.getContentType());
             attachment.setAspectRatio(upload.getAspectRatio());

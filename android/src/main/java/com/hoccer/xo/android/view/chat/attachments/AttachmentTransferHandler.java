@@ -4,15 +4,16 @@ package com.hoccer.xo.android.view.chat.attachments;
 import android.content.res.Resources;
 import android.text.format.Formatter;
 import android.view.View;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoTransferListener;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.IXoTransferState;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.ContentState;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
+
 
 /**
  * This class handles interactions with an AttachmentTransferControlView.
@@ -35,13 +36,13 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
     private final AttachmentTransferControlView mTransferControl;
     private TransferAction mTransferAction = TransferAction.NONE;
 
-    private final IContentObject mContent;
+    private final XoTransfer mTransfer;
 
-    public AttachmentTransferHandler(AttachmentTransferControlView transferProgress, IContentObject content, AttachmentTransferListener listener) {
+    public AttachmentTransferHandler(AttachmentTransferControlView transferProgress, XoTransfer transfer, AttachmentTransferListener listener) {
         mListener = listener;
         mTransferControl = transferProgress;
-        mContent = content;
-        setTransferAction(mContent.getContentState());
+        mTransfer = transfer;
+        setTransferAction(mTransfer.getContentState());
     }
 
     @Override
@@ -50,33 +51,33 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    setTransferAction(mContent.getContentState());
+                    setTransferAction(mTransfer.getContentState());
                     switch (mTransferAction) {
                         case REQUEST_DOWNLOAD:
-                            if (mContent instanceof TalkClientDownload) {
-                                LOG.debug("Will resume download for " + ((TalkClientDownload) mContent).getDownloadUrl());
-                                TalkClientDownload download = (TalkClientDownload) mContent;
+                            if (mTransfer instanceof TalkClientDownload) {
+                                LOG.debug("Will resume download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
+                                TalkClientDownload download = (TalkClientDownload) mTransfer;
                                 XoApplication.getXoClient().requestDownload(download, true);
                             }
                             break;
                         case CANCEL_DOWNLOAD:
-                            if (mContent instanceof TalkClientDownload) {
-                                LOG.debug("Will pause download for " + ((TalkClientDownload) mContent).getDownloadUrl());
-                                TalkClientDownload download = (TalkClientDownload) mContent;
+                            if (mTransfer instanceof TalkClientDownload) {
+                                LOG.debug("Will pause download for " + ((TalkClientDownload) mTransfer).getDownloadUrl());
+                                TalkClientDownload download = (TalkClientDownload) mTransfer;
                                 XoApplication.getXoClient().getTransferAgent().pauseDownload(download);
                             }
                             break;
                         case REQUEST_UPLOAD:
-                            if (mContent instanceof TalkClientUpload) {
-                                LOG.debug("Will resume upload for " + ((TalkClientUpload) mContent).getUploadUrl());
-                                TalkClientUpload upload = (TalkClientUpload) mContent;
+                            if (mTransfer instanceof TalkClientUpload) {
+                                LOG.debug("Will resume upload for " + ((TalkClientUpload) mTransfer).getUploadUrl());
+                                TalkClientUpload upload = (TalkClientUpload) mTransfer;
                                 XoApplication.getXoClient().getTransferAgent().startOrRestartUpload(upload);
                             }
                             break;
                         case CANCEL_UPLOAD:
-                            if (mContent instanceof TalkClientUpload) {
-                                LOG.debug("Will pause upload for " + ((TalkClientUpload) mContent).getUploadUrl());
-                                TalkClientUpload upload = (TalkClientUpload) mContent;
+                            if (mTransfer instanceof TalkClientUpload) {
+                                LOG.debug("Will pause upload for " + ((TalkClientUpload) mTransfer).getUploadUrl());
+                                TalkClientUpload upload = (TalkClientUpload) mTransfer;
                                 XoApplication.getXoClient().getTransferAgent().pauseUpload(upload);
                             }
                     }
@@ -101,7 +102,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                 mTransferAction = TransferAction.REQUEST_DOWNLOAD;
                 break;
             case DOWNLOAD_DETECTING:
-                //mContentTransferControl.setEnabled(false); // TODO: is this needed / balanced?
                 break;
             case DOWNLOAD_DECRYPTING:
             case DOWNLOAD_DOWNLOADING:
@@ -112,7 +112,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                 mTransferAction = TransferAction.REQUEST_UPLOAD;
                 break;
             case UPLOAD_REGISTERING:
-                //mContentTransferControl.setEnabled(false); // TODO: is this needed / balanced?
                 break;
             case UPLOAD_ENCRYPTING:
             case UPLOAD_UPLOADING:
@@ -144,10 +143,10 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
         mTransferControl.post(new Runnable() {
             @Override
             public void run() {
-                int length = 0;
-                int progress = 0;
+                long length;
+                long progress;
                 Resources res = mTransferControl.getResources();
-                ContentState contentState = mContent.getContentState();
+                ContentState contentState = mTransfer.getContentState();
                 String fileSize;
                 switch (contentState) {
                     case DOWNLOAD_DETECTING:
@@ -161,8 +160,8 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         break;
 
                     case DOWNLOAD_PAUSED:
-                        length = mContent.getTransferLength();
-                        progress = mContent.getTransferProgress();
+                        length = mTransfer.getTransferLength();
+                        progress = mTransfer.getTransferProgress();
                         mTransferControl.setMax(length);
                         mTransferControl.setProgressImmediately(progress);
                         mTransferControl.setText(res.getString(R.string.transfer_state_pause));
@@ -171,11 +170,11 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         break;
 
                     case DOWNLOAD_ON_HOLD:
-                        length = mContent.getTransferLength();
-                        progress = mContent.getTransferProgress();
+                        length = mTransfer.getTransferLength();
+                        progress = mTransfer.getTransferProgress();
                         mTransferControl.setMax(length);
                         mTransferControl.setProgressImmediately(progress);
-                        TalkClientDownload download = (TalkClientDownload)mContent;
+                        TalkClientDownload download = (TalkClientDownload) mTransfer;
                         fileSize = Formatter.formatShortFileSize(mTransferControl.getContext(), download.getTransmittedContentLength());
                         mTransferControl.setText(res.getString(R.string.attachment_on_hold_download_question, fileSize));
                         mTransferControl.prepareToDownload();
@@ -183,11 +182,10 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         break;
 
                     case DOWNLOAD_DOWNLOADING:
-                        length = mContent.getTransferLength();
-                        progress = mContent.getTransferProgress();
+                        length = mTransfer.getTransferLength();
+                        progress = mTransfer.getTransferProgress();
                         if (length == 0 || progress == 0) {
                             length = 360;
-//                            progress = 18;
                         }
                         mTransferControl.prepareToDownload();
                         mTransferControl.setText(res.getString(R.string.transfer_state_downloading));
@@ -198,12 +196,11 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                     case DOWNLOAD_DECRYPTING:
                         mTransferControl.setText(res.getString(R.string.transfer_state_decrypting));
                         mTransferControl.spin();
-//                mWaitUntilOperationIsFinished = true;
                         break;
 
                     case DOWNLOAD_COMPLETE:
                         mTransferControl.finishSpinningAndProceed();
-                        mListener.onAttachmentTransferComplete(mContent);
+                        mListener.onAttachmentTransferComplete(mTransfer);
                         break;
 
                     case UPLOAD_REGISTERING:
@@ -223,8 +220,8 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                         break;
 
                     case UPLOAD_PAUSED:
-                        length = mContent.getTransferLength();
-                        progress = mContent.getTransferProgress();
+                        length = mTransfer.getTransferLength();
+                        progress = mTransfer.getTransferProgress();
                         mTransferControl.setMax(length);
                         mTransferControl.setProgressImmediately(progress);
                         mTransferControl.setText(res.getString(R.string.transfer_state_pause));
@@ -234,37 +231,35 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
                     case UPLOAD_UPLOADING:
                         mTransferControl.finishSpinningAndProceed();
                         mTransferControl.setText(res.getString(R.string.transfer_state_uploading));
-                        //mWaitUntilOperationIsFinished = true;
-                        length = mContent.getTransferLength();
-                        progress = mContent.getTransferProgress();
+                        length = mTransfer.getTransferLength();
+                        progress = mTransfer.getTransferProgress();
                         mTransferControl.setMax(length);
                         mTransferControl.setProgressImmediately(progress);
                         break;
 
                     case UPLOAD_COMPLETE:
                         mTransferControl.completeAndGone();
-                        mListener.onAttachmentTransferComplete(mContent);
+                        mListener.onAttachmentTransferComplete(mTransfer);
                         break;
 
                     default:
                         mTransferControl.setVisibility(View.GONE);
-                        mListener.onAttachmentTransferComplete(mContent);
+                        mListener.onAttachmentTransferComplete(mTransfer);
                         break;
                 }
-
             }
         });
     }
 
     @Override
     public void onStateChanged(IXoTransferState state) {
-        LOG.debug("transfer state changed to " + state.toString() + ". Update ControlView");
-        setTransferAction(mContent.getContentState());
+        LOG.debug("transfer state changed to " + state + ". Update ControlView");
+        setTransferAction(mTransfer.getContentState());
     }
 
     @Override
-    public void onProgressUpdated(int progress, int max) {
-        setTransferAction(mContent.getContentState());
+    public void onProgressUpdated(long progress, long max) {
+        setTransferAction(mTransfer.getContentState());
         mTransferControl.setMax(max);
     }
 

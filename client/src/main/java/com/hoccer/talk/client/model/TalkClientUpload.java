@@ -155,7 +155,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         this.encryptedLength = -1;
     }
 
-    public void initializeAsAvatar(String contentUrl, String filePath, String contentType, int contentLength) {
+    public void initializeAsAvatar(String contentUrl, String filePath, String contentType, long contentLength) {
         LOG.info("[new] initializing as avatar: '" + filePath + "', length: " + contentLength);
         this.type = Type.AVATAR;
         this.contentUrl = contentUrl;
@@ -166,7 +166,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     public void initializeAsAttachment(String fileName, String contentUrl, String filePath, String contentType, String mediaType, double aspectRatio,
-                                       int contentLength, String hmac) {
+                                       long contentLength, String hmac) {
         LOG.info("[new] initializing as attachment: '" + filePath + "', length: " + contentLength);
         this.type = Type.ATTACHMENT;
         this.contentUrl = contentUrl;

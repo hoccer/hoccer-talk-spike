@@ -217,7 +217,7 @@ public class SelectedContent implements IContentObject {
             ((SelectedContent) object).toFile();
         }
 
-        int length = object.getContentLength();
+        long length = object.getContentLength();
         String contentUrl = object.getContentUrl();
 
         if (object instanceof XoTransfer) {

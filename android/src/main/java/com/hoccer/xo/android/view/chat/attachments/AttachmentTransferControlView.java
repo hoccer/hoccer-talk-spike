@@ -30,7 +30,7 @@ public class AttachmentTransferControlView extends View {
     private float mShownProgress;
     private int mLayoutWidth;
     private int mLayoutHeight;
-    private int mFileSize;
+    private long mFileSize;
 
     private int mOuterWheelSize;
     private int mInnerWheelSize;
@@ -213,11 +213,11 @@ public class AttachmentTransferControlView extends View {
         canvas.drawText(mText, mLayoutWidth / 2, mLayoutHeight / 2 + mWheelDiameter / 2.0f + mTextMargin, mTextPaint);
     }
 
-    public void setMax(int length) {
+    public void setMax(long length) {
         mFileSize = length;
     }
 
-    public void setProgressImmediately(int progress) {
+    public void setProgressImmediately(long progress) {
         float percentage = progress / (float) mFileSize;
         mPause = false;
         mShownProgress = 360 * percentage;
