@@ -135,7 +135,7 @@ public class ClientMessage extends TalkToolCommand {
             String contentHmac = getContentHmac("file://" + url);
 
             TalkClientUpload attachmentUpload = new TalkClientUpload();
-            attachmentUpload.initializeAsAttachment(fileName, url, url, contentType, mediaType, aspectRatio, contentLength, contentHmac);
+            attachmentUpload.initializeAsAttachment(fileName, url, url, contentType, mediaType, aspectRatio, contentHmac);
             return attachmentUpload;
         }
     }

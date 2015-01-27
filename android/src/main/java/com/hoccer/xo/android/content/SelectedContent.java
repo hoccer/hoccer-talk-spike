@@ -207,8 +207,8 @@ public class SelectedContent implements IContentObject {
         upload.initializeAsAvatar(
                 object.getContentUrl(),
                 filePath,
-                object.getContentType(),
-                object.getContentLength());
+                object.getContentType()
+        );
         return upload;
     }
 
@@ -217,14 +217,9 @@ public class SelectedContent implements IContentObject {
             ((SelectedContent) object).toFile();
         }
 
-        long length = object.getContentLength();
         String contentUrl = object.getContentUrl();
 
         if (object instanceof XoTransfer) {
-            XoTransfer transfer = (XoTransfer) object;
-            File file = new File(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath());
-            length = (int) file.length();
-
             // HACK: when re-sending an upload or download, the content url is cleared to exclude it from the music browser
             contentUrl = null;
         }
@@ -242,7 +237,6 @@ public class SelectedContent implements IContentObject {
                 object.getContentType(),
                 object.getContentMediaType(),
                 object.getContentAspectRatio(),
-                length,
                 object.getContentHmac());
 
         return upload;

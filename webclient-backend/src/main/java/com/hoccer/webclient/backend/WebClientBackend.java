@@ -110,8 +110,8 @@ public class WebClientBackend implements IXoStateListener {
         upload.initializeAsAvatar(
                 absoluteFilePath,
                 absoluteFilePath,
-                "image/jpeg",
-                length);
+                "image/jpeg"
+        );
 
         // upload and register avatar
         try {
