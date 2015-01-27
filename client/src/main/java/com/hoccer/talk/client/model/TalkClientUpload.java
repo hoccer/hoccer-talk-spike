@@ -263,7 +263,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
                 uploadLength = fileLength;
                 handles = talkClient.getServerRpc().createFileForStorage((int) uploadLength);
             } else {
-                encryptedLength = AESCryptor.calcEncryptedSize((int) uploadLength, AESCryptor.NULL_SALT, AESCryptor.NULL_SALT);
+                encryptedLength = AESCryptor.calcEncryptedSize((int) fileLength, AESCryptor.NULL_SALT, AESCryptor.NULL_SALT);
                 uploadLength = encryptedLength;
                 handles = talkClient.getServerRpc().createFileForTransfer((int) encryptedLength);
             }
@@ -542,6 +542,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
             LOG.error("upload (" + clientUploadId + ") progress greater than upload size: " + progress + " > " + uploadLength);
         }
 
+        this.progress = progress;
         for (IXoTransferListener listener : mTransferListeners) {
             listener.onProgressUpdated(progress, uploadLength);
         }
