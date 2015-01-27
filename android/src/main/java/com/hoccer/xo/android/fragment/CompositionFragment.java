@@ -41,6 +41,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -282,35 +283,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         updateAttachmentButton();
     }
 
-    private void validateAndSendComposedMessage() {
-        String messageText = mTextField.getText().toString();
-        if (messageText != null && !"".equals(messageText)) {
-            mLastMessage = messageText;
-        }
-
-        TalkClientUpload upload = null;
-        ArrayList<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>();
-        if (mAttachments != null) {
-            for (IContentObject attachment : mAttachments) {
-                uploads.add(SelectedContent.createAttachmentUpload(attachment));
-            }
-        }
-
-        if (isBlocked()) {
-            Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
-            TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText, upload);
-            getXoClient().markMessageAsAborted(message);
-            clearComposedMessage();
-            return;
-        }
-
-        if (mContact.isGroup() && isGroupEmpty(mContact)) {
-            showAlertSendMessageNotPossible();
-            return;
-        }
-        sendComposedMessage(messageText, uploads);
-    }
-
     private static boolean isGroupEmpty(TalkClientContact contact) {
         final List<TalkClientContact> otherContactsInGroup;
         try {
@@ -324,42 +296,128 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private void processMessage() {
-        if (!mAttachments.isEmpty() && getXoClient().isEncodingNecessary()) {
-            compressAndSendAttachments(mAttachments);
+        if (mContact.isGroup() && isGroupEmpty(mContact)) {
+            showAlertGroupIsEmpty();
+            return;
+        }
+
+        if (isBlocked()) {
+            Toast.makeText(getXoActivity(), R.string.error_send_message_blocked, Toast.LENGTH_LONG).show();
+            clearComposedMessage();
+            return;
+        }
+
+        if (mAttachments.isEmpty()) {
+            sendMessage();
         } else {
-            if (handleTransferLimit()) {
-                return;
-            }
-            validateAndSendComposedMessage();
+            sendMessageWithAttachments();
         }
     }
 
-    private void sendComposedMessage(String messageText, List<TalkClientUpload> uploads) {
-        List<TalkClientMessage> messages = getXoClient().composeClientMessageWithMultipleAttachments(mContact, messageText, uploads);
+    private void sendMessage() {
+        String messageText = mTextField.getText().toString();
+        TalkClientMessage message = getXoClient().composeClientMessage(mContact, messageText);
+        getXoClient().sendMessage(message.getMessageTag());
+        clearComposedMessage();
+    }
+
+    private void sendMessageWithAttachments() {
+        List<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>(mAttachments.size());
+
+        for (IContentObject attachment : mAttachments) {
+            uploads.add(SelectedContent.createAttachmentUpload(attachment));
+        }
+
+        AsyncTask<List<TalkClientUpload>, Void, List<TalkClientUpload>> asyncTask = new AsyncTask<List<TalkClientUpload>, Void, List<TalkClientUpload>>() {
+            @Override
+            protected List<TalkClientUpload> doInBackground(List<TalkClientUpload>... args) {
+                List<TalkClientUpload> uploads = args[0];
+                try {
+                    if (getXoClient().isEncodingNecessary()) {
+                        for (TalkClientUpload upload : uploads) {
+                            if (upload.getContentMediaType().equals(ContentMediaType.IMAGE)) {
+                                compressImageAttachment(upload);
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    cancel(false);
+                }
+                return uploads;
+            }
+
+            @Override
+            protected void onPostExecute(List<TalkClientUpload> uploads) {
+                long attachmentSize = calculateAttachmentSize(uploads);
+                if (sizeExceedsUploadLimit(attachmentSize)) {
+                    showTransferLimitExceededDialog(attachmentSize, uploads);
+                } else {
+                    sendMessageWithAttachments(uploads);
+                }
+            }
+
+            @Override
+            protected void onCancelled() {
+                LOG.error("Error encoding bitmap(s) for upload.");
+                Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
+            }
+        };
+        asyncTask.execute(uploads);
+    }
+
+    private void showTransferLimitExceededDialog(long attachmentSize, final List<TalkClientUpload> uploads) {
+        String fileSize = Formatter.formatShortFileSize(getXoActivity(), attachmentSize);
+        XoDialogs.showPositiveNegativeDialog("TransferLimitExceededDialog",
+                getString(R.string.attachment_over_limit_title),
+                getString(R.string.attachment_over_limit_upload_question, fileSize),
+                getXoActivity(),
+                R.string.attachment_over_limit_confirm,
+                R.string.common_no,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        sendMessageWithAttachments(uploads);
+                    }
+                },
+                null);
+    }
+
+    private void sendMessageWithAttachments(List<TalkClientUpload> uploads) {
+        String messageText = mTextField.getText().toString();
+        List<TalkClientMessage> messages = getXoClient().composeClientMessage(mContact, messageText, uploads);
         List<String> messageTags = new ArrayList<String>();
 
         for (TalkClientMessage message : messages) {
             messageTags.add(message.getMessageTag());
+
         }
         getXoClient().sendMessages(messageTags);
-
         clearComposedMessage();
     }
 
-    private boolean handleTransferLimit() {
-        if (!mAttachments.isEmpty()) {
-            if (uploadExceedsTransferLimit(mAttachments)) {
-                String alertTitle = getString(R.string.attachment_over_limit_title);
-                String fileSize = Formatter.formatShortFileSize(getXoActivity(), calculateAttachmentSize(mAttachments));
-                String alertMessage = getString(R.string.attachment_over_limit_upload_question, fileSize);
-                showAlertTransferLimitExceeded(alertTitle, alertMessage);
+    private boolean sizeExceedsUploadLimit(long attachmentSize) {
+        int transferLimit = getXoClient().getUploadLimit();
+        if (transferLimit < 0) {
+            if (transferLimit == -1) {
+                return false;
+            }
+            if (transferLimit == -2) {
                 return true;
             }
         }
-        return false;
+        return attachmentSize >= transferLimit;
     }
 
-    private void showAlertSendMessageNotPossible() {
+    private static long calculateAttachmentSize(List<TalkClientUpload> uploads) {
+        long fileSize = 0;
+        for (TalkClientUpload upload : uploads) {
+            File fileToUpload = new File(upload.getCachedFilePath() != null ? upload.getCachedFilePath() : upload.getFilePath());
+            fileSize += fileToUpload.length();
+        }
+        return fileSize;
+    }
+
+    private void showAlertGroupIsEmpty() {
         XoDialogs.showOkDialog("EmptyGroupDialog",
                 R.string.dialog_empty_group_title,
                 R.string.dialog_empty_group_message,
@@ -372,114 +430,23 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         );
     }
 
-    private void showAlertTransferLimitExceeded(String alertTitle, String alertMessage) {
-        XoDialogs.showPositiveNegativeDialog("TransferLimitExceededDialog",
-                alertTitle,
-                alertMessage,
-                getXoActivity(),
-                R.string.attachment_over_limit_confirm,
-                R.string.common_no,
-                new SendOversizeAttachmentCallbackHandler(),
-                null);
-    }
-
-    private boolean uploadExceedsTransferLimit(List<IContentObject> uploads) {
-        int transferLimit = getXoClient().getUploadLimit();
-
-        if (transferLimit == -2) {
-            return true;
-        }
-        if (transferLimit == -1) {
-            return false;
-        }
-
-        long fileSize = calculateAttachmentSize(uploads);
-        return (transferLimit >= 0 && fileSize >= transferLimit);
-    }
-
-    private static long calculateAttachmentSize(List<IContentObject> attachments) {
-        long fileSize = 0;
-        for (IContentObject upload : attachments) {
-            fileSize += upload.getContentLength();
-        }
-        return fileSize;
-    }
-
-    private void compressAndSendAttachments(List<IContentObject> contentObjects) {
-        AsyncTask<List<IContentObject>, Void, List<IContentObject>> asyncTask = new AsyncTask<List<IContentObject>, Void, List<IContentObject>>() {
-
-            @Override
-            protected List<IContentObject> doInBackground(List<IContentObject>... objects) {
-
-                List<IContentObject> contentObjects = objects[0];
-
-                List<IContentObject> result = new ArrayList<IContentObject>();
-                for (IContentObject contentObject : contentObjects) {
-
-                    if (contentObject.getContentMediaType().equals(ContentMediaType.IMAGE)) {
-                        IContentObject compressedImageAttachment = compressImageAttachment(contentObject);
-                        if (compressedImageAttachment != null) {
-                            result.add(compressedImageAttachment);
-                        }
-                    } else {
-                        result.add(contentObject);
-                    }
-                }
-                return result;
-            }
-
-            @Override
-            protected void onPostExecute(List<IContentObject> result) {
-                mAttachments = result;
-                if (handleTransferLimit()) {
-                    return;
-                }
-                validateAndSendComposedMessage();
-            }
-
-            @Override
-            protected void onCancelled() {
-                LOG.error("Error encoding bitmap(s) for upload.");
-                Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
-            }
-        };
-        asyncTask.execute(contentObjects);
-    }
-
-    private IContentObject compressImageAttachment(IContentObject contentObject) {
-        IContentObject result = null;
-        Uri fileUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
+    private void compressImageAttachment(TalkClientUpload upload) throws IOException {
+        Uri fileUri = UriUtils.getAbsoluteFileUri(upload.getFilePath());
         final File imageFile = new File(fileUri.getPath());
         final File compressedImageFile = new File(XoApplication.getCacheStorage(), imageFile.getName());
 
-        boolean success = false;
         Bitmap bitmap = ImageUtils.resizeImageToMaxPixelCount(imageFile, getXoClient().getImageUploadMaxPixelCount());
-        if (bitmap != null) {
-            LOG.error(getXoClient().getImageUploadEncodingQuality());
-            success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, getXoClient().getImageUploadEncodingQuality(), Bitmap.CompressFormat.JPEG);
+        if (bitmap == null) {
+            throw new IOException("Could not resize image '" + imageFile.getAbsolutePath() + "' to bitmap");
+        }
+
+        boolean success = ImageUtils.compressBitmapToFile(bitmap, compressedImageFile, getXoClient().getImageUploadEncodingQuality(), Bitmap.CompressFormat.JPEG);
+        if (!success) {
+            throw new IOException("Could not compress bitmap to '" + compressedImageFile.getAbsolutePath() + "'");
         }
 
         ImageUtils.copyExifData(imageFile.getAbsolutePath(), compressedImageFile.getAbsolutePath());
-
-        if (success) {
-            SelectedContent newContent = new SelectedContent(contentObject.getContentUrl(), UriUtils.FILE_URI_PREFIX + compressedImageFile.getPath());
-            newContent.setFileName(imageFile.getName());
-            newContent.setContentMediaType(contentObject.getContentMediaType());
-            newContent.setContentType(ImageUtils.MIME_TYPE_IMAGE_PREFIX + Bitmap.CompressFormat.JPEG.name().toLowerCase());
-            newContent.setContentAspectRatio(contentObject.getContentAspectRatio());
-            newContent.setContentLength((int) compressedImageFile.length());
-            result = newContent;
-        } else {
-            LOG.error("Error encoding bitmap for upload.");
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getActivity(), R.string.attachment_encoding_error, Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-
-        return result;
+        upload.setCachedFilePath(compressedImageFile.getAbsolutePath());
     }
 
     private void showSelectAttachmentDialog() {
@@ -550,13 +517,6 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         @Override
         public void afterTextChanged(Editable s) {
             updateSendButton();
-        }
-    }
-
-    private class SendOversizeAttachmentCallbackHandler implements DialogInterface.OnClickListener {
-        @Override
-        public void onClick(DialogInterface dialogInterface, int i) {
-            validateAndSendComposedMessage();
         }
     }
 }
