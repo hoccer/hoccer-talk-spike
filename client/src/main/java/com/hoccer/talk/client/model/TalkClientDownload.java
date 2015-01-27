@@ -114,7 +114,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     private String contentUrl;
 
     @DatabaseField
-    private int contentLength;
+    private long contentLength;
 
     @DatabaseField(width = 128)
     private String contentType;
@@ -169,7 +169,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
      * Only for display purposes, the real content length will be retrieved from server since after encryption this value will differ
      */
     @DatabaseField
-    private int transmittedContentLength = -1;
+    private long transmittedContentLength = -1;
 
     public TalkClientDownload() {
         super(Direction.DOWNLOAD);
@@ -198,7 +198,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.contentType = attachment.getMimeType();
         this.mediaType = attachment.getMediaType();
         this.aspectRatio = attachment.getAspectRatio();
-        this.transmittedContentLength = attachment.getContentSizeAsInt();
+        this.transmittedContentLength = attachment.getContentLength();
         this.downloadUrl = attachment.getUrl();
         this.downloadFile = id;
         this.decryptedFile = UUID.randomUUID().toString();
@@ -360,11 +360,11 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 return;
             }
 
-            int bytesToGo = getContentLengthFromResponse(response);
+            long bytesToGo = getContentLengthFromResponse(response);
             ByteRange contentRange = getContentRange(response);
             setContentTypeByResponse(response);
 
-            int bytesStart = downloadProgress;
+            long bytesStart = downloadProgress;
             if (!isValidContentRange(contentRange, bytesToGo) || contentLength == -1) {
                 LOG.debug("invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
                 checkTransferFailure(transferFailures + 1, "invalid contentRange or content length is -1 - contentLength: '" + contentLength + "'");
@@ -414,10 +414,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         }
     }
 
-    private boolean copyData(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
+    private boolean copyData(long bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
         boolean success = false;
         try {
-            success = copyDataImpl(bytesToGo, randomAccessFile, fileDescriptor, inputStream);
+            success = copyDataImpl(bytesToGo, randomAccessFile, inputStream);
         } finally {
             try {
                 fileDescriptor.sync();
@@ -430,13 +430,13 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return success;
     }
 
-    private boolean copyDataImpl(int bytesToGo, RandomAccessFile randomAccessFile, FileDescriptor fileDescriptor, InputStream inputStream) throws IOException {
+    private boolean copyDataImpl(long bytesToGo, RandomAccessFile randomAccessFile, InputStream inputStream) throws IOException {
         byte[] buffer = new byte[1 << 12]; // length == 4096 == 2^12
         while (bytesToGo > 0) {
             logGetTrace("bytesToGo: '" + bytesToGo + "'");
             logGetTrace("downloadProgress: '" + downloadProgress + "'");
             // determine how much to copy
-            int bytesToRead = Math.min(buffer.length, bytesToGo);
+            int bytesToRead = (int)Math.min((long)buffer.length, bytesToGo);
             // perform the copy
             int bytesRead = inputStream.read(buffer, 0, bytesToRead);
             logGetTrace("reading: '" + bytesToRead + "' bytes, returned: '" + bytesRead + "' bytes");
@@ -447,23 +447,21 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             randomAccessFile.write(buffer, 0, bytesRead);
             downloadProgress += bytesRead;
             bytesToGo -= bytesRead;
-            for (int i = 0; i < mTransferListeners.size(); i++) {
-                IXoTransferListener listener = mTransferListeners.get(i);
-                // TODO: try/catch here? What happens if a listener call produces exception?
-                listener.onProgressUpdated(downloadProgress, getTransferLength());
+            for (IXoTransferListener listener : mTransferListeners) {
+                listener.onProgressUpdated(downloadProgress, contentLength);
             }
         }
         return true;
     }
 
-    private boolean isValidContentRange(ByteRange contentRange, int bytesToGo) {
+    private boolean isValidContentRange(ByteRange contentRange, long bytesToGo) {
         if (contentRange != null) {
             if (contentRange.getStart() != downloadProgress) {
                 logGetError("server returned wrong offset");
                 return false;
             }
             if (contentRange.hasEnd()) {
-                int rangeSize = (int) (contentRange.getEnd() - contentRange.getStart() + 1);
+                long rangeSize = (int) (contentRange.getEnd() - contentRange.getStart() + 1);
                 if (rangeSize != bytesToGo) {
                     logGetError("server returned range not corresponding to content length");
                     return false;
@@ -473,7 +471,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
                 if (contentLength == -1) {
                     long total = contentRange.getTotal();
                     logGetDebug("inferred content length '" + total + "' from range");
-                    contentLength = (int) total;
+                    contentLength = total;
                 }
             }
         }
@@ -501,9 +499,9 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return null;
     }
 
-    private int getContentLengthFromResponse(HttpResponse response) {
+    private long getContentLengthFromResponse(HttpResponse response) {
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
-        int contentLengthValue = this.contentLength;
+        long contentLengthValue = this.contentLength;
         if (contentLengthHeader != null) {
             String contentLengthString = contentLengthHeader.getValue();
             contentLengthValue = Integer.valueOf(contentLengthString);
@@ -895,7 +893,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         this.contentHmac = hmac;
     }
 
-    public int getTransmittedContentLength() {
+    public long getTransmittedContentLength() {
         return transmittedContentLength;
     }
 
