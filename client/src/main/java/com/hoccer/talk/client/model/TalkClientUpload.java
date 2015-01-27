@@ -618,8 +618,12 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         return dataFile;
     }
 
-    public void setContentDataUrl(String dataUrl) {
-        dataFile = dataUrl;
+    public String getCachedFilePath() {
+        return cachedDataFile;
+    }
+
+    public void setCachedFilePath(String cachedFilePath) {
+        cachedDataFile = cachedFilePath;
     }
 
     @Override
