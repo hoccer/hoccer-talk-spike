@@ -2727,7 +2727,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             attachment = new TalkAttachment();
             attachment.setFileName(upload.getFileName());
             attachment.setUrl(upload.getDownloadUrl());
-            attachment.setContentSize(Long.toString(upload.getDataLength()));
+            attachment.setContentSize(Long.toString(upload.getContentLength()));
             attachment.setMediaType(upload.getMediaType());
             attachment.setMimeType(upload.getContentType());
             attachment.setAspectRatio(upload.getAspectRatio());
