@@ -83,6 +83,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private State state;
 
     @DatabaseField
+    @Deprecated
     private String contentUrl;
 
     @DatabaseField

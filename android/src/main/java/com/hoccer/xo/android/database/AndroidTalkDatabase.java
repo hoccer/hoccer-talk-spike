@@ -29,7 +29,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
 
     private static final Logger LOG = Logger.getLogger(AndroidTalkDatabase.class);
 
-    private static final int DATABASE_VERSION = 24;
+    private static final int DATABASE_VERSION = 25;
 
     private static final String DATABASE_NAME_DEFAULT = "hoccer-talk.db";
 
@@ -91,6 +91,10 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
                 makeTransferDataFileRelative(db);
                 removeContentUriFromClientUploadDataFileColumn(db);
                 replaceFileUriFromImageUploadContentUrlColumn(mContext, db);
+            }
+
+            if(oldVersion < 25) {
+                db.execSQL("ALTER TABLE 'clientUpload' ADD COLUMN 'cachedDataFile' TEXT");
             }
 
         } catch (android.database.SQLException e) {
