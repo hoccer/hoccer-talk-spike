@@ -23,6 +23,7 @@ public class InvitationServlet extends HttpServlet {
     private TalkServerConfiguration mConfig;
 
     private static final HashMap<String, Map<String, Object>> LOCALIZED_MESSAGES = new HashMap<String, Map<String, Object>>();
+
     static {
         LOCALIZED_MESSAGES.put("en", loadMessages("messages-en.properties"));
         LOCALIZED_MESSAGES.put("de", loadMessages("messages-de.properties"));
@@ -35,6 +36,7 @@ public class InvitationServlet extends HttpServlet {
     }
 
     private static final HashMap<Platform, String> DOWNLOAD_LINKS = new HashMap<Platform, String>();
+
     static {
         DOWNLOAD_LINKS.put(Platform.IOS, "https://itunes.apple.com/app/hoccer/id340180776");
         DOWNLOAD_LINKS.put(Platform.ANDROID, "https://play.google.com/store/apps/details?id=com.artcom.hoccer");
@@ -54,14 +56,14 @@ public class InvitationServlet extends HttpServlet {
             LOG.error("Error loading localized messages", e);
         }
 
-        return (Map)properties;
+        return (Map) properties;
     }
 
     @Override
     public void init() throws ServletException {
         mTemplate = loadTemplate("inviteTemplate.html");
 
-        TalkServer server = (TalkServer)getServletContext().getAttribute("server");
+        TalkServer server = (TalkServer) getServletContext().getAttribute("server");
         mConfig = server.getConfiguration();
     }
 
