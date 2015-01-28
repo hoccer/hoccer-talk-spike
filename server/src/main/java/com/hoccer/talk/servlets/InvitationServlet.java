@@ -40,17 +40,11 @@ public class InvitationServlet extends HttpServlet {
         LABELS.put("strmd", Label.STROEER);
     }
 
-    private final HashMap<Platform, String> mDownloadLinks = new HashMap<Platform, String>();
     private final Engine mEngine = new Engine();
-
     private String mTemplate;
 
     @Override
     public void init() throws ServletException {
-        mDownloadLinks.put(Platform.IOS, "https://itunes.apple.com/app/hoccer/id340180776");
-        mDownloadLinks.put(Platform.ANDROID, "https://play.google.com/store/apps/details?id=com.artcom.hoccer");
-        mDownloadLinks.put(Platform.OTHER, "http://hoccer.com");
-
         mTemplate = loadTemplate("inviteTemplate.html");
         mEngine.setModelAdaptor(new ResourceBundleModelAdapter());
     }
@@ -68,15 +62,17 @@ public class InvitationServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String userAgent = request.getHeader("User-Agent");
-        Platform platform = determinePlatform(userAgent);
         UrlParameters parameters = new UrlParameters(request.getPathInfo());
         Label label = LABELS.get(parameters.scheme);
 
         if (label != null) {
+            ResourceBundle resourceBundle = getResourceBundle(label, request.getLocale());
+            String userAgent = request.getHeader("User-Agent");
+            Platform platform = determinePlatform(userAgent);
+
             HashMap<String, Object> model = new HashMap<String, Object>();
-            model.put("messages", getResourceBundle(label, request.getLocale()));
-            model.put("downloadLink", mDownloadLinks.get(platform));
+            model.put("messages", resourceBundle);
+            model.put("downloadLink", resourceBundle.getString("downloadLink" + platform));
             model.put("inviteLink", parameters.scheme + "://" + parameters.token);
 
             String body = mEngine.transform(mTemplate, model);
