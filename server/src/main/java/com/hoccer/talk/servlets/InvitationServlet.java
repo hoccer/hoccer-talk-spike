@@ -114,16 +114,20 @@ public class InvitationServlet extends HttpServlet {
     }
 
     private class UrlParameters {
-        @Nullable public String scheme;
-        @Nullable public String token;
+        @Nullable public final String scheme;
+        @Nullable public final String token;
 
         public UrlParameters(String pathInfo) {
+            // pathInfo is expected to look like this: "/<scheme>/<token>"
             String[] components = pathInfo.split("/");
 
             if (components.length > 2) {
-                // pathInfo is expected to look like this: "/<scheme>/<token>", components[0] is an empty string
+                // components[0] is an empty string
                 scheme = components[1];
                 token = components[2];
+            } else {
+                scheme = null;
+                token = null;
             }
         }
     }
