@@ -7,10 +7,10 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.content.SelectedFile;
 import com.hoccer.xo.android.util.ImageUtils;
-import com.hoccer.xo.android.util.UriUtils;
 import ezvcard.util.org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -28,7 +28,7 @@ public class PicasaContentObjectCreator implements IContentCreator {
     private static final Logger LOG = Logger.getLogger(PicasaContentObjectCreator.class);
 
     @Override
-    public SelectedContent apply(Context context, Intent intent) {
+    public SelectedAttachment apply(Context context, Intent intent) {
         final Uri contentUri = intent.getData();
         final String[] projection = {
                 MediaStore.MediaColumns.DISPLAY_NAME,
@@ -49,7 +49,7 @@ public class PicasaContentObjectCreator implements IContentCreator {
                     return null;
                 }
 
-                if(is == null) {
+                if (is == null) {
                     LOG.error("Error while creating image from Picasa. InputStream is null");
                     return null;
                 }
@@ -75,15 +75,7 @@ public class PicasaContentObjectCreator implements IContentCreator {
                 int orientation = ImageUtils.retrieveOrientation(imageFile.getAbsolutePath());
                 double aspectRatio = ImageUtils.calculateAspectRatio(fileWidth, fileHeight, orientation);
 
-                LOG.debug("Aspect ratio: " + fileWidth + " x " + fileHeight + " @ " + aspectRatio + " / " + orientation + "°");
-
-                SelectedContent contentObject = new SelectedContent(intent, UriUtils.FILE_URI_PREFIX + imageFile.getAbsolutePath());
-                contentObject.setFileName(filename);
-                contentObject.setContentType("image/jpeg");
-                contentObject.setContentMediaType(ContentMediaType.IMAGE);
-                contentObject.setContentLength((int) imageFile.length());
-                contentObject.setContentAspectRatio(aspectRatio);
-                return contentObject;
+                return new SelectedFile(imageFile.getAbsolutePath(), "image/jpeg", ContentMediaType.IMAGE, aspectRatio);
             }
         }
         return null;

@@ -12,7 +12,6 @@ import android.widget.RelativeLayout;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;

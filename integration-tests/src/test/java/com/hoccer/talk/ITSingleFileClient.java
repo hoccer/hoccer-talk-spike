@@ -48,7 +48,7 @@ public class ITSingleFileClient extends IntegrationTest {
         final TalkClientUpload upload = new TalkClientUpload();
         URL r1 = getClass().getResource("/test.png");
 
-        upload.initializeAsAvatar(r1.toString(), r1.toString(), "image/png");
+        upload.initializeAsAvatar(r1.toString(), "image/png");
         c.setClientAvatar(upload);
         // wait for upload to start
         await().untilCall(to(c.getTransferAgent()).isUploadActive(upload), is(true));

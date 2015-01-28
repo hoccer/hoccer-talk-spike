@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.content.MediaPlaylist;
@@ -29,7 +28,7 @@ public class ChatAudioItem extends ChatMessageItem {
 
     private ImageButton mPlayPauseButton;
     private final MediaPlayerServiceConnector mMediaPlayerServiceConnector;
-    private IContentObject mAudioContentObject;
+    private XoTransfer mAudioContentObject;
     private boolean mIsPlayable;
 
     public ChatAudioItem(Context context, TalkClientMessage message) {

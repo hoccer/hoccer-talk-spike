@@ -14,7 +14,8 @@ import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.selector.*;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -121,9 +122,9 @@ public class ContentRegistry {
         }
     }
 
-    public static String getContentDescription(IContentObject object) {
+    public static String getContentDescription(XoTransfer transfer) {
         String mediaTypeString = "Unknown file";
-        String mediaType = object.getContentMediaType();
+        String mediaType = transfer.getContentMediaType();
         if ("image".equals(mediaType)) {
             mediaTypeString = "Image";
         } else if ("audio".equals(mediaType)) {
@@ -139,10 +140,10 @@ public class ContentRegistry {
         }
 
         String sizeString = "";
-        if (object.getContentLength() > 0) {
-            sizeString = " — " + humanReadableByteCount(object.getContentLength(), true);
-        } else if (object.getTransferLength() > 0) {
-            sizeString = " — " + humanReadableByteCount(object.getTransferLength(), true);
+        if (transfer.getContentLength() > 0) {
+            sizeString = " — " + humanReadableByteCount(transfer.getContentLength(), true);
+        } else if (transfer.getTransferLength() > 0) {
+            sizeString = " — " + humanReadableByteCount(transfer.getTransferLength(), true);
         }
 
         return mediaTypeString + sizeString;
@@ -175,7 +176,7 @@ public class ContentRegistry {
      * @param intent    returned from the selector
      * @return content object for selected avatar
      */
-    public static IContentObject createSelectedAvatar(ContentSelection selection, Intent intent) {
+    public static SelectedAttachment createSelectedAvatar(ContentSelection selection, Intent intent) {
         return selection.getSelector().createObjectFromSelectionResult(selection.getActivity(), intent);
     }
 

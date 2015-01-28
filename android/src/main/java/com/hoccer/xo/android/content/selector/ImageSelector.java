@@ -8,8 +8,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import org.apache.log4j.Logger;
 
@@ -46,7 +46,7 @@ public class ImageSelector implements IContentSelector {
     }
 
     @Override
-    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+    public SelectedAttachment createObjectFromSelectionResult(Context context, Intent intent) {
         boolean isValidIntent = isValidIntent(context, intent);
         if (!isValidIntent) {
             return null;

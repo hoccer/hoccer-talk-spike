@@ -9,11 +9,11 @@ import android.text.Html;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.content.SelectedFile;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -32,7 +32,9 @@ public class ContactOperations {
     }
 
     public static void sendTransferToContact(XoTransfer transfer, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
-        TalkClientUpload upload = SelectedContent.createAttachmentUpload(transfer);
+        SelectedAttachment selection = new SelectedFile(transfer.getFilePath(), transfer.getContentType(), transfer.getContentMediaType(), transfer.getContentAspectRatio());
+        TalkClientUpload upload = new TalkClientUpload();
+        upload.initializeAsAttachment(selection);
 
         String messageTag = XoApplication.getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
         LOG.debug("Sending Attachment " + upload + " to contact " + contact);
@@ -43,8 +45,8 @@ public class ContactOperations {
         LOG.debug("Sending SMS with message: " + message);
 
         String recipientString = "";
-        for(int i = 0; i < recipients.length;i++) {
-            recipientString += recipients[i] + ";";
+        for (String recipient : recipients) {
+            recipientString += recipient + ";";
         }
 
         Intent intent;
@@ -57,8 +59,7 @@ public class ContactOperations {
             if (defaultSmsPackageName != null) { // Can be null in case that there is no default, then the user would be able to choose any app that supports this intent.
                 intent.setPackage(defaultSmsPackageName);
             }
-        }
-        else {
+        } else {
             intent = new Intent(Intent.ACTION_VIEW);
             intent.setType("vnd.android-dir/mms-sms");
             intent.putExtra("address", recipientString);

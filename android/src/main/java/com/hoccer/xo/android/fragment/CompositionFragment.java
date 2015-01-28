@@ -22,7 +22,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
@@ -31,7 +31,6 @@ import com.hoccer.xo.android.base.XoFragment;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
 import com.hoccer.xo.android.content.MultiImageSelector;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.content.selector.IContentSelector;
 import com.hoccer.xo.android.gesture.Gestures;
 import com.hoccer.xo.android.gesture.MotionGestureListener;
@@ -74,7 +73,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private ContentSelection mAttachmentSelection;
     private EnumMap<AttachmentSelectionType, View> mAttachmentTypeViews;
-    private List<IContentObject> mAttachments;
+    private List<SelectedAttachment> mAttachments;
     private TalkClientContact mContact;
     private String mLastMessage;
 
@@ -95,7 +94,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             throw new IllegalArgumentException("MessagingFragment requires valid contact.");
         }
 
-        mAttachments = new ArrayList<IContentObject>();
+        mAttachments = new ArrayList<SelectedAttachment>();
     }
 
     @Override
@@ -187,7 +186,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                     mAttachments = selector.createObjectsFromSelectionResult(getActivity(), intent);
                 } else {
                     IContentSelector selector = mAttachmentSelection.getSelector();
-                    IContentObject attachment = selector.createObjectFromSelectionResult(getActivity(), intent);
+                    SelectedAttachment attachment = selector.createObjectFromSelectionResult(getActivity(), intent);
                     CollectionUtils.addIgnoreNull(mAttachments, attachment);
                 }
 
@@ -324,8 +323,10 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private void sendMessageWithAttachments() {
         List<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>(mAttachments.size());
 
-        for (IContentObject attachment : mAttachments) {
-            uploads.add(SelectedContent.createAttachmentUpload(attachment));
+        for (SelectedAttachment attachment : mAttachments) {
+            TalkClientUpload upload = new TalkClientUpload();
+            upload.initializeAsAttachment(attachment);
+            uploads.add(upload);
         }
 
         AsyncTask<List<TalkClientUpload>, Void, List<TalkClientUpload>> asyncTask = new AsyncTask<List<TalkClientUpload>, Void, List<TalkClientUpload>>() {

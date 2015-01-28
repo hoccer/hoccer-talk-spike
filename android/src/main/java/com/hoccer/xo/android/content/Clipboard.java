@@ -1,12 +1,14 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.xo.android.util.UriUtils;
 
 public class Clipboard {
 
     private static Clipboard sInstance;
 
-    private IContentObject mContent;
+    private SelectedAttachment mContent;
 
     public static synchronized Clipboard getInstance() {
         if (sInstance == null) {
@@ -24,12 +26,16 @@ public class Clipboard {
         return (mContent != null);
     }
 
-    public IContentObject getContent() {
+    public SelectedAttachment getContent() {
         return mContent;
     }
 
-    public void setContent(IContentObject contentObject) {
+    public void setContent(SelectedAttachment contentObject) {
         mContent = contentObject;
+    }
+
+    public void setContent(XoTransfer transfer) {
+        mContent = new SelectedFile(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath(), transfer.getContentType(), transfer.getContentMediaType(), transfer.getContentAspectRatio());
     }
 
     public void clearContent() {

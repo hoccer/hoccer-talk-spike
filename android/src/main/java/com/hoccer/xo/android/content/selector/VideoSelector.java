@@ -8,10 +8,9 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.IContentObject;
-import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.xo.android.content.SelectedFile;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.util.UriUtils;
 
 public class VideoSelector implements IContentSelector {
 
@@ -41,8 +40,7 @@ public class VideoSelector implements IContentSelector {
     }
 
     @Override
-    public IContentObject createObjectFromSelectionResult(Context context, Intent intent) {
-
+    public SelectedAttachment createObjectFromSelectionResult(Context context, Intent intent) {
         boolean isValidIntent = isValidIntent(context, intent);
         if (!isValidIntent) {
             return null;
@@ -52,44 +50,29 @@ public class VideoSelector implements IContentSelector {
         String[] filePathColumn = {
                 MediaStore.Video.Media.MIME_TYPE,
                 MediaStore.Video.Media.DATA,
-                MediaStore.Video.Media.SIZE,
                 MediaStore.Video.Media.WIDTH,
-                MediaStore.Video.Media.HEIGHT,
-                MediaStore.Video.Media.TITLE
+                MediaStore.Video.Media.HEIGHT
         };
 
         Cursor cursor = context.getContentResolver().query(selectedContent, filePathColumn, null, null, null);
         cursor.moveToFirst();
 
         int typeIndex = cursor.getColumnIndex(filePathColumn[0]);
-        String fileType = cursor.getString(typeIndex);
+        String mimeType = cursor.getString(typeIndex);
         int dataIndex = cursor.getColumnIndex(filePathColumn[1]);
         String filePath = cursor.getString(dataIndex);
-        int sizeIndex = cursor.getColumnIndex(filePathColumn[2]);
-        int fileSize = cursor.getInt(sizeIndex);
-        int widthIndex = cursor.getColumnIndex(filePathColumn[3]);
-        int fileWidth = cursor.getInt(widthIndex);
-        int heightIndex = cursor.getColumnIndex(filePathColumn[4]);
-        int fileHeight = cursor.getInt(heightIndex);
-        int fileNameIndex = cursor.getColumnIndex(filePathColumn[5]);
-        String fileName = cursor.getString(fileNameIndex);
-
+        int widthIndex = cursor.getColumnIndex(filePathColumn[2]);
+        int width = cursor.getInt(widthIndex);
+        int heightIndex = cursor.getColumnIndex(filePathColumn[3]);
+        int height = cursor.getInt(heightIndex);
         cursor.close();
 
         if (filePath == null) {
             return null;
         }
 
-        SelectedContent contentObject = new SelectedContent(intent, UriUtils.FILE_URI_PREFIX + filePath);
-        contentObject.setFileName(fileName);
-        contentObject.setContentMediaType(ContentMediaType.VIDEO);
-        contentObject.setContentType(fileType);
-        contentObject.setContentLength(fileSize);
-        if (fileWidth > 0 && fileHeight > 0) {
-            contentObject.setContentAspectRatio(((float) fileWidth) / ((float) fileHeight));
-        }
-
-        return contentObject;
+        double aspectRatio = ((double) width) / ((double) height);
+        return new SelectedFile(filePath, mimeType, ContentMediaType.VIDEO, aspectRatio);
     }
 
     @Override

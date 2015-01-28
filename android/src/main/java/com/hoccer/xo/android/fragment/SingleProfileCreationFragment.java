@@ -14,11 +14,10 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
@@ -36,7 +35,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     private ImageView mAvatarImage;
     private EditText mEditName;
 
-    private IContentObject mAvatarToSet;
+    private SelectedAttachment mAvatarToSet;
 
     private TalkClientContact mContact;
 
@@ -95,7 +94,7 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
     }
 
     @Override
-    public void onAvatarSelected(IContentObject contentObject) {
+    public void onAvatarSelected(SelectedAttachment contentObject) {
         mAvatarToSet = contentObject;
     }
 
@@ -161,13 +160,14 @@ public class SingleProfileCreationFragment extends XoFragment implements IXoCont
                 .into(mAvatarImage);
     }
 
-    private void uploadAvatar(final IContentObject avatar) {
+    private void uploadAvatar(final SelectedAttachment avatar) {
         if (avatar != null) {
             XoApplication.getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     LOG.debug("creating avatar upload");
-                    TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
+                    TalkClientUpload upload = new TalkClientUpload();
+                    upload.initializeAsAvatar(avatar);
                     try {
                         getXoDatabase().saveClientUpload(upload);
                         if (mContact.isSelf()) {

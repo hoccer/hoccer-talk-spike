@@ -10,8 +10,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.UriUtils;
@@ -98,7 +99,7 @@ public class AvatarView extends LinearLayout implements IXoContactListener {
             resetAvatar();
             return;
         }
-        IContentObject avatar = mContact.getAvatar();
+        XoTransfer avatar = mContact.getAvatar();
         Uri avatarUri = avatar == null ? null : UriUtils.getAbsoluteFileUri(avatar.getFilePath());
 
         if (avatarUri == null) {

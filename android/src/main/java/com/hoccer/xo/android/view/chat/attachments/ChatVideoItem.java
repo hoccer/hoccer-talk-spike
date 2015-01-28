@@ -16,7 +16,7 @@ import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
@@ -207,9 +207,9 @@ public class ChatVideoItem extends ChatMessageItem {
         return false;
     }
 
-    private void openVideo(IContentObject contentObject) {
-        if (contentObject.isContentAvailable()) {
-            Uri videoUri = UriUtils.getAbsoluteFileUri(contentObject.getFilePath());
+    private void openVideo(XoTransfer attachment) {
+        if (attachment.isContentAvailable()) {
+            Uri videoUri = UriUtils.getAbsoluteFileUri(attachment.getFilePath());
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(videoUri, "video/*");

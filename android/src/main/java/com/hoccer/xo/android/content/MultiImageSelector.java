@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.activity.MultiImagePickerActivity;
 import com.hoccer.xo.android.content.selector.IContentCreator;
 import com.hoccer.xo.android.content.selector.ImageSelector;
@@ -34,8 +34,8 @@ public class MultiImageSelector extends ImageSelector {
         return new Intent(context, MultiImagePickerActivity.class);
     }
 
-    public ArrayList<IContentObject> createObjectsFromSelectionResult(Context context, Intent intent) {
-        ArrayList<IContentObject> result = new ArrayList<IContentObject>();
+    public ArrayList<SelectedAttachment> createObjectsFromSelectionResult(Context context, Intent intent) {
+        ArrayList<SelectedAttachment> result = new ArrayList<SelectedAttachment>();
         if (!isValidIntent(context, intent)) {
             return result;
         }
@@ -50,9 +50,9 @@ public class MultiImageSelector extends ImageSelector {
 
             Intent dataIntent = new Intent();
             dataIntent.setDataAndType(Uri.parse(uri), "image/*");
-            SelectedContent selectedContent = creator.apply(context, dataIntent);
-            if (selectedContent != null) {
-                result.add(selectedContent);
+            SelectedAttachment selectedImage = creator.apply(context, dataIntent);
+            if (selectedImage != null) {
+                result.add(selectedImage);
             }
         }
 

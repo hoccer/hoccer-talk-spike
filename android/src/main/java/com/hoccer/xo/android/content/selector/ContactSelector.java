@@ -2,23 +2,15 @@ package com.hoccer.xo.android.content.selector;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
-import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.provider.ContactsContract;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.xo.android.content.SelectedContact;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class ContactSelector implements IContentSelector {
 
@@ -53,7 +45,7 @@ public class ContactSelector implements IContentSelector {
     }
 
     @Override
-    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+    public SelectedAttachment createObjectFromSelectionResult(Context context, Intent intent) {
         boolean isValidIntent = isValidIntent(context, intent);
         if (!isValidIntent) {
             return null;
@@ -62,24 +54,6 @@ public class ContactSelector implements IContentSelector {
         String lookupUri = intent.getDataString();
         String vcardUri = lookupUri.replace(ContactsContract.Contacts.CONTENT_LOOKUP_URI.toString(), ContactsContract.Contacts.CONTENT_VCARD_URI.toString());
         vcardUri = vcardUri.substring(0, vcardUri.lastIndexOf(File.separator));
-
-        InputStream is = null;
-        byte[] contactData;
-        try {
-            is = XoApplication.getXoClient().getHost().openInputStreamForUrl(vcardUri);
-            contactData = IOUtils.toByteArray(is);
-        } catch (IOException e) {
-            LOG.error("Could not read contact details for selected contact: " + intent.getData());
-            return null;
-        } finally {
-            IOUtils.closeQuietly(is);
-        }
-
-        SelectedContent contentObject = new SelectedContent(contactData);
-        contentObject.setFileName("Contact");
-        contentObject.setContentType(ContactsContract.Contacts.CONTENT_VCARD_TYPE);
-        contentObject.setContentMediaType(ContentMediaType.VCARD);
-
-        return contentObject;
+        return new SelectedContact(vcardUri);
     }
 }

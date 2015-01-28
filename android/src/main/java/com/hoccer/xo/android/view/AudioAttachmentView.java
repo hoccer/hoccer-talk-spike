@@ -7,7 +7,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
@@ -18,7 +19,7 @@ import com.hoccer.xo.android.util.UriUtils;
 public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener {
 
     private final Context mContext;
-    private IContentObject mItem;
+    private XoTransfer mItem;
     private final MediaPlayerServiceConnector mMediaPlayerServiceConnector;
 
     private final TextView mTitleTextView;
@@ -41,7 +42,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
         mDragHandleView = (ImageView) findViewById(R.id.list_drag_handle);
     }
 
-    public void setMediaItem(IContentObject audioAttachmentItem) {
+    public void setMediaItem(XoTransfer audioAttachmentItem) {
         if (mItem == null || !mItem.equals(audioAttachmentItem)) {
             mItem = audioAttachmentItem;
             updateAudioView();
@@ -51,7 +52,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     public boolean isActive() {
         if (mMediaPlayerServiceConnector.isConnected()) {
             MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            IContentObject currentItem = service.getCurrentMediaItem();
+            XoTransfer currentItem = service.getCurrentMediaItem();
             return !service.isPaused() && !service.isStopped() && (mItem.equals(currentItem));
         } else {
             return false;

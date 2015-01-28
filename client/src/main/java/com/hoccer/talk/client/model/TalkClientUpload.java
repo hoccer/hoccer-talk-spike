@@ -6,7 +6,9 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.content.ContentState;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.talk.crypto.AESCryptor;
+import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.talk.rpc.ITalkRpcServer;
 import com.hoccer.talk.util.IProgressListener;
 import com.hoccer.talk.util.ProgressOutputHttpEntity;
@@ -156,26 +158,24 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         this.encryptedLength = -1;
     }
 
-    public void initializeAsAvatar(String contentUrl, String filePath, String contentType) {
-        LOG.info("[new] initializing as avatar: '" + filePath + "'");
+    public void initializeAsAvatar(SelectedAttachment selection) {
+        LOG.info("[new] initializing as avatar: '" + selection.getFilePath() + "'");
         this.type = Type.AVATAR;
-        this.contentUrl = contentUrl;
-        this.dataFile = filePath;
-        this.contentType = contentType;
-        this.mediaType = "image";
+        this.dataFile = selection.getFilePath();
+        this.contentType = selection.getContentType();
+        this.mediaType = selection.getContentMediaType();
+        this.aspectRatio = selection.getAspectRatio();
     }
 
-    public void initializeAsAttachment(String fileName, String contentUrl, String filePath, String contentType, String mediaType, double aspectRatio,
-                                       String hmac) {
-        LOG.info("[new] initializing as attachment: '" + filePath + "'");
+    public void initializeAsAttachment(SelectedAttachment selection) {
+        LOG.info("[new] initializing as attachment: '" + selection.getFilePath() + "'");
         this.type = Type.ATTACHMENT;
-        this.contentUrl = contentUrl;
-        this.fileName = fileName;
-        this.dataFile = filePath;
-        this.contentHmac = hmac;
-        this.contentType = contentType;
-        this.mediaType = mediaType;
-        this.aspectRatio = aspectRatio;
+        this.dataFile = selection.getFilePath();
+        this.fileName = dataFile.substring(dataFile.lastIndexOf(File.separator));
+        this.contentHmac = computeHmac(dataFile);
+        this.contentType = selection.getContentType();
+        this.mediaType = selection.getContentMediaType();
+        this.aspectRatio = selection.getAspectRatio();
     }
 
     @Override
@@ -666,10 +666,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         return mediaType;
     }
 
-    public long getDataLength() {
-        return dataLength;
-    }
-
     public double getAspectRatio() {
         return aspectRatio;
     }
@@ -715,5 +711,15 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     public boolean isEncryptionKeySet() {
         return encryptionKey != null;
+    }
+
+    private static String computeHmac(String filePath) {
+        try {
+            return CryptoUtils.computeHmac(filePath);
+        } catch (Exception e) {
+            LOG.error("Error computing HMAC", e);
+        }
+
+        return null;
     }
 }

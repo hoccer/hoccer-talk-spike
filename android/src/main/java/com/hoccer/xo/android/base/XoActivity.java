@@ -27,7 +27,7 @@ import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.XoSoundPool;
@@ -321,7 +321,7 @@ public abstract class XoActivity extends FragmentActivity {
         } else if (requestCode == REQUEST_CROP_AVATAR) {
             intent = selectedAvatarPreProcessing(intent);
             if (intent != null) {
-                IContentObject contentObject = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
+                SelectedAttachment contentObject = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
                 if (contentObject != null) {
                     LOG.debug("selected avatar " + contentObject.getFilePath());
                     for (IXoFragment fragment : mTalkFragments) {
