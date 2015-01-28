@@ -653,19 +653,26 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
     }
 
     public List<XoTransfer> findTransfersByMediaType(String mediaType) throws SQLException {
-        List<TalkClientUpload> uploads = mClientUploads.queryBuilder().where()
-                .eq("mediaType", mediaType)
-                .isNotNull("contentUrl")
-                .and(2)
-                .query();
-
+        List<TalkClientUpload> uploads = findClientUploadsByMediaType(mediaType);
         List<TalkClientDownload> downloads = findClientDownloadsByMediaType(mediaType);
 
         return mergeUploadsAndDownloadsByMessageTimestamp(uploads, downloads);
     }
 
+    public List<TalkClientUpload> findClientUploadsByMediaType(String mediaType) throws SQLException {
+        return mClientUploads.queryBuilder().where()
+                .eq("mediaType", mediaType)
+                .and()
+                .eq("state", TalkClientDownload.State.COMPLETE)
+                .query();
+    }
+
     public List<TalkClientDownload> findClientDownloadsByMediaType(String mediaType) throws SQLException {
-        return mClientDownloads.queryForEq("mediaType", mediaType);
+        return mClientDownloads.queryBuilder().where()
+                .eq("mediaType", mediaType)
+                .and()
+                .eq("state", TalkClientDownload.State.COMPLETE)
+                .query();
     }
 
     public long getAttachmentCountByContactId(int contactId) throws SQLException {

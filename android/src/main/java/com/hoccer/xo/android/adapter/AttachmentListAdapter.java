@@ -14,10 +14,13 @@ import com.hoccer.talk.client.model.*;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.AudioAttachmentView;
 import com.mobeta.android.dslv.DragSortListView;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class AttachmentListAdapter extends BaseAdapter implements DragSortListView.DropListener, IXoUploadListener, IXoDownloadListener {
@@ -232,7 +235,8 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
             if (mContact != null) {
                 mItems = new ArrayList<XoTransfer>(XoApplication.getXoClient().getDatabase().findClientDownloadsByMediaTypeAndContactId(mMediaType, mContact.getClientContactId()));
             } else {
-                mItems = XoApplication.getXoClient().getDatabase().findTransfersByMediaType(mMediaType);
+                List<XoTransfer> items = XoApplication.getXoClient().getDatabase().findTransfersByMediaType(mMediaType);
+                mItems = filterDuplicateFiles(items);
             }
         } catch (SQLException e) {
             LOG.error(e);
@@ -241,14 +245,29 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
         refreshView();
     }
 
+    private static List<XoTransfer> filterDuplicateFiles(List<XoTransfer> transfers) {
+        List<XoTransfer> filteredTransfers = new ArrayList<XoTransfer>();
+        HashSet<String> filePathes = new HashSet<String>();
+
+        for(int i = transfers.size()-1; i >= 0; i--) {
+            XoTransfer transfer = transfers.get(i);
+            if(!filePathes.contains(transfer.getFilePath())) {
+                filteredTransfers.add(0, transfer);
+                filePathes.add(transfer.getFilePath());
+            }
+        }
+
+        return filteredTransfers;
+    }
+
     private boolean shouldItemBeAdded(XoTransfer transfer) {
-        // check if item is already in the list
-        if (mItems.contains(transfer)) {
+        // check if mediaType matches
+        if(mMediaType != null && !mMediaType.equals(transfer.getContentMediaType())) {
             return false;
         }
 
-        // check if mediaType matches
-        if(mMediaType != null && !mMediaType.equals(transfer.getContentMediaType())) {
+        // check if item is already in the list
+        if (mItems.contains(transfer)) {
             return false;
         }
 
@@ -265,6 +284,13 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
                 }
             } catch (SQLException e) {
                 LOG.error(e.getMessage(), e);
+            }
+        }
+
+        // check if it is a duplicate file
+        for(XoTransfer item : mItems) {
+            if(item.getFilePath().equals(transfer.getFilePath())) {
+                return false;
             }
         }
 
