@@ -675,6 +675,29 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
                 .query();
     }
 
+    public List<? extends XoTransfer> findTransfersByFilePath(String filePath) throws SQLException {
+        List<TalkClientUpload> uploads = findClientUploadsByFilePath(filePath);
+        List<TalkClientDownload> downloads = findClientDownloadsByFilePath(filePath);
+
+        return ListUtils.union(uploads, downloads);
+    }
+
+    public List<TalkClientUpload> findClientUploadsByFilePath(String filePath) throws SQLException {
+        return mClientUploads.queryBuilder().where()
+                .eq("dataFile", filePath)
+                .and()
+                .eq("state", TalkClientDownload.State.COMPLETE)
+                .query();
+    }
+
+    public List<TalkClientDownload> findClientDownloadsByFilePath(String filePath) throws SQLException {
+        return mClientDownloads.queryBuilder().where()
+                .eq("dataFile", filePath)
+                .and()
+                .eq("state", TalkClientDownload.State.COMPLETE)
+                .query();
+    }
+
     public long getAttachmentCountByContactId(int contactId) throws SQLException {
         Where where = mClientMessages.queryBuilder().where();
         return where.and(where.and(where.eq("conversationContact_id", contactId), where.eq("deleted", false)), where.or(where.isNotNull("attachmentUpload_id"), where.isNotNull("attachmentDownload_id"))).countOf();
