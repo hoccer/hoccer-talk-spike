@@ -23,16 +23,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 @CLICommand(name = "cmessage", description = "Send a text message from one client to another, " +
-                                             "use: cmessage <sender_id> <recipient_id> " +
-                                                   "-m <message_string> " +
-                                                   "-f <path_to_file> " +
-                                                   // the -n option is currently broken when running in non-ssl mode,
-                                                   // see: https://github.com/hoccer/scrum/issues/139
-                                                   "-n <number_of_messages_to_send>")
+        "use: cmessage <sender_id> <recipient_id> " +
+        "-m <message_string> " +
+        "-f <path_to_file> " +
+        // the -n option is currently broken when running in non-ssl mode,
+        // see: https://github.com/hoccer/scrum/issues/139
+        "-n <number_of_messages_to_send>")
 public class ClientMessage extends TalkToolCommand {
 
-    private final String DEFAULT_MESSAGE = "Hello World";
-    private final String ATTACHMENT_CLONES_PATH = "files/clones";
+    private static final String DEFAULT_MESSAGE = "Hello World";
+    private static final String ATTACHMENT_CLONES_PATH = "files/clones";
 
     private final Executor mExecutor = Executors.newScheduledThreadPool(16);
 
@@ -112,7 +112,7 @@ public class ClientMessage extends TalkToolCommand {
         return null;
     }
 
-    private String getContentHmac(String contentDataUrl) {
+    private static String getContentHmac(String contentDataUrl) {
         try {
             return CryptoUtils.computeHmac(contentDataUrl);
         } catch (Exception e) {
@@ -121,7 +121,7 @@ public class ClientMessage extends TalkToolCommand {
         }
     }
 
-    private TalkClientUpload createAttachment(File fileToUpload) {
+    private static TalkClientUpload createAttachment(File fileToUpload) {
         if (fileToUpload == null) {
             return null;
         } else {
@@ -141,7 +141,7 @@ public class ClientMessage extends TalkToolCommand {
     }
 
     // TODO: put this into XOClient?!
-    private TalkClientContact getContactForClient(TalkToolClient client, String clientOrGroupId) {
+    private static TalkClientContact getContactForClient(TalkToolClient client, String clientOrGroupId) {
         TalkClientContact contact = null;
         try {
             contact = client.getDatabase().findContactByClientId(clientOrGroupId, false);
@@ -159,7 +159,7 @@ public class ClientMessage extends TalkToolCommand {
         return contact;
     }
 
-    private void sendMessage(TalkToolClient sender, String recipientId, String messageText, TalkClientUpload attachment) {
+    private static void sendMessage(TalkToolClient sender, String recipientId, String messageText, TalkClientUpload attachment) {
         Console.info("<ClientMessage::sendMessage> sender-id: '" + sender.getClientId() + "', recipient-id: '" + recipientId + "', message: '" + messageText + "'");
 
         TalkClientContact recipientContact = getContactForClient(sender, recipientId);
