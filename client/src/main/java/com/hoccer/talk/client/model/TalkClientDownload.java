@@ -111,6 +111,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     private String fileName;
 
     @DatabaseField
+    @Deprecated
     private String contentUrl;
 
     @DatabaseField
