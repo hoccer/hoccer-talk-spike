@@ -37,8 +37,6 @@ public abstract class XoTransfer {
 
     public abstract String getFileName();
 
-    public abstract String getContentUrl();
-
     public abstract String getFilePath();
 
     public abstract long getContentLength();

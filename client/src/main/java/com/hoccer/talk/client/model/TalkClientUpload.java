@@ -609,11 +609,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     @Override
-    public String getContentUrl() {
-        return contentUrl;
-    }
-
-    @Override
     public String getFilePath() {
         return dataFile;
     }

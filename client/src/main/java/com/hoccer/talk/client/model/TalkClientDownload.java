@@ -831,11 +831,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     @Override
-    public String getContentUrl() {
-        return contentUrl;
-    }
-
-    @Override
     public String getFileName() {
         return fileName;
     }
@@ -931,5 +926,4 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             return false;
         }
     }
-
 }
