@@ -133,7 +133,7 @@ public class TalkClientContact implements Serializable {
         return null;
     }
 
-    public String getAvatarContentUrl() {
+    public String getAvatarFilePath() {
         XoTransfer avatar = getAvatar();
         if (avatar != null) {
             return avatar.getFilePath();

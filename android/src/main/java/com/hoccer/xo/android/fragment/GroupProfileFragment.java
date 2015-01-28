@@ -518,7 +518,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void enterAvatarEditMode() {
         if (mGroup.isEditable()) {
-            if (mGroup.getAvatarContentUrl() != null) {
+            if (mGroup.getAvatarFilePath() != null) {
                 XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                         R.string.dialog_avatar_options_title,
                         new String[]{
