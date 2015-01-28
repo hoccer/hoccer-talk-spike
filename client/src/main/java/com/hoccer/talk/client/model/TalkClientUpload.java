@@ -710,7 +710,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
     private static String computeHmac(String filePath) {
         try {
-            return CryptoUtils.computeHmac(filePath);
+            return CryptoUtils.computeHmac("file://" + filePath);
         } catch (Exception e) {
             LOG.error("Error computing HMAC", e);
         }
