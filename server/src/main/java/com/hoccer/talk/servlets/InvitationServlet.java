@@ -20,20 +20,17 @@ import java.util.Properties;
 public class InvitationServlet extends HttpServlet {
 
     private static final Logger LOG = Logger.getLogger(InvitationServlet.class);
-    private TalkServerConfiguration mConfig;
-
-    private static final HashMap<String, Map<String, Object>> LOCALIZED_MESSAGES = new HashMap<String, Map<String, Object>>();
-
-    static {
-        LOCALIZED_MESSAGES.put("en", loadMessages("messages-en.properties"));
-        LOCALIZED_MESSAGES.put("de", loadMessages("messages-de.properties"));
-    }
 
     private enum Platform {
         IOS,
         ANDROID,
         OTHER
     }
+
+    private TalkServerConfiguration mConfig;
+    private final HashMap<String, Map<String, Object>> mLocalizedMessages = new HashMap<String, Map<String, Object>>();
+    private final Engine mEngine = new Engine();
+    private String mTemplate;
 
     private static final HashMap<Platform, String> DOWNLOAD_LINKS = new HashMap<Platform, String>();
 
@@ -43,8 +40,6 @@ public class InvitationServlet extends HttpServlet {
         DOWNLOAD_LINKS.put(Platform.OTHER, "http://hoccer.com");
     }
 
-    private Engine mEngine = new Engine();
-    private String mTemplate;
 
     private static Map<String, Object> loadMessages(String filename) {
         Properties properties = new Properties();
@@ -61,6 +56,8 @@ public class InvitationServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+        mLocalizedMessages.put("en", loadMessages("messages-en.properties"));
+        mLocalizedMessages.put("de", loadMessages("messages-de.properties"));
         mTemplate = loadTemplate("inviteTemplate.html");
 
         TalkServer server = (TalkServer) getServletContext().getAttribute("server");
@@ -85,7 +82,7 @@ public class InvitationServlet extends HttpServlet {
         String language = determineLanguage(request.getLocale(), "en");
 
         HashMap<String, Object> model = new HashMap<String, Object>();
-        model.put("messages", LOCALIZED_MESSAGES.get(language));
+        model.put("messages", mLocalizedMessages.get(language));
         model.put("downloadLink", DOWNLOAD_LINKS.get(platform));
         model.put("inviteLink", extractInviteLink(request.getPathInfo()));
 
@@ -113,10 +110,10 @@ public class InvitationServlet extends HttpServlet {
         return null;
     }
 
-    private static String determineLanguage(Locale locale, String defaultLanguage) {
+    private String determineLanguage(Locale locale, String defaultLanguage) {
         String language = locale.getLanguage();
 
-        if (language.isEmpty() || !LOCALIZED_MESSAGES.containsKey(language)) {
+        if (language.isEmpty() || !mLocalizedMessages.containsKey(language)) {
             language = defaultLanguage;
         }
 
