@@ -4,5 +4,9 @@
     <color name="secondary">#ab2218</color>
     <color name="tertiary">#bbbbbb</color>
 
+    <color name="attachment_incoming">@color/tertiary</color>
     <color name="attachment_outgoing">@color/tertiary</color>
+
+    <color name="message_incoming_text">#000000</color>
+    <color name="message_outgoing_text">#ffffff</color>
 </resources>

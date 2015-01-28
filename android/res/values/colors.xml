@@ -12,15 +12,16 @@
     <color name="message_incoming_background">@color/secondary</color>
     <color name="message_incoming_text">#000000</color>
     <color name="message_outgoing_background">@color/primary</color>
+    <color name="message_outgoing_text">#ffffff</color>
     <color name="message_delivery_failed">#ff0000</color>
-
-    <color name="compose_message_no_state">#ffffff</color>
-    <color name="compose_message_bad_state">#ffe51f1b</color>
-    <color name="compose_message_text">#ffffff</color>
 
     <color name="attachment_incoming">@color/tertiary</color>
     <color name="attachment_outgoing">@color/black_transparency_50_percent</color>
     <color name="attachment_transfer_control">@color/tertiary</color>
+
+    <color name="compose_message_no_state">#ffffff</color>
+    <color name="compose_message_bad_state">#ffe51f1b</color>
+    <color name="compose_message_text">#ffffff</color>
 
     <color name="media_player_text_secondary">#aaaaaaaa</color>
 

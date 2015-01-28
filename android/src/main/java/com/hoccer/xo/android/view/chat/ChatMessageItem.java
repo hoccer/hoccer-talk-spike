@@ -193,8 +193,8 @@ public class ChatMessageItem implements AttachmentTransferListener {
                 messageText.setBackgroundDrawable(getOutgoingBackgroundDrawable());
             }
 
-            messageText.setTextColor(mContext.getResources().getColorStateList(R.color.compose_message_text));
-            messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.compose_message_text));
+            messageText.setTextColor(mContext.getResources().getColorStateList(R.color.message_outgoing_text));
+            messageText.setLinkTextColor(mContext.getResources().getColorStateList(R.color.message_incoming_text));
 
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) messageText.getLayoutParams();
             float marginLeft = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
