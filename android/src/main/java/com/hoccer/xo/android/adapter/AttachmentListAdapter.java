@@ -26,10 +26,10 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     private List<XoTransfer> mItems = new ArrayList<XoTransfer>();
 
-    private String mMediaType;
+    private final String mMediaType;
     private TalkClientContact mContact;
 
-    private List<Integer> mSelectedItemIds = new ArrayList<Integer>();
+    private final List<Integer> mSelectedItemIds = new ArrayList<Integer>();
 
     private boolean mShowDragHandle;
 
