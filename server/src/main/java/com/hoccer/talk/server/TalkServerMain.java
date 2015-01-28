@@ -130,7 +130,6 @@ public class TalkServerMain {
         // handler for invitation landing pages
         ServletContextHandler invitationContextHandler = new ServletContextHandler();
         invitationContextHandler.setContextPath("/invite");
-        invitationContextHandler.setAttribute("server", talkServer);
         invitationContextHandler.addServlet(InvitationServlet.class, "/*");
 
         // handler for static files

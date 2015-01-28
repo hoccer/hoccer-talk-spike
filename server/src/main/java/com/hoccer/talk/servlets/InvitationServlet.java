@@ -2,10 +2,9 @@ package com.hoccer.talk.servlets;
 
 import com.floreysoft.jmte.DefaultModelAdaptor;
 import com.floreysoft.jmte.Engine;
-import com.hoccer.talk.server.TalkServer;
-import com.hoccer.talk.server.TalkServerConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class InvitationServlet extends HttpServlet {
@@ -26,10 +26,23 @@ public class InvitationServlet extends HttpServlet {
         OTHER
     }
 
+    private enum Label {
+        HOCCER,
+        STROEER
+    }
+
+    private static final HashMap<String, Label> LABELS = new HashMap<String, Label>();
+
+    static {
+        LABELS.put("hcr", Label.HOCCER);
+        LABELS.put("hcrd", Label.HOCCER);
+        LABELS.put("strm", Label.STROEER);
+        LABELS.put("strmd", Label.STROEER);
+    }
+
     private final HashMap<Platform, String> mDownloadLinks = new HashMap<Platform, String>();
     private final Engine mEngine = new Engine();
 
-    private TalkServerConfiguration mConfig;
     private String mTemplate;
 
     @Override
@@ -37,9 +50,6 @@ public class InvitationServlet extends HttpServlet {
         mDownloadLinks.put(Platform.IOS, "https://itunes.apple.com/app/hoccer/id340180776");
         mDownloadLinks.put(Platform.ANDROID, "https://play.google.com/store/apps/details?id=com.artcom.hoccer");
         mDownloadLinks.put(Platform.OTHER, "http://hoccer.com");
-
-        TalkServer server = (TalkServer) getServletContext().getAttribute("server");
-        mConfig = server.getConfiguration();
 
         mTemplate = loadTemplate("inviteTemplate.html");
         mEngine.setModelAdaptor(new ResourceBundleModelAdapter());
@@ -60,34 +70,23 @@ public class InvitationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String userAgent = request.getHeader("User-Agent");
         Platform platform = determinePlatform(userAgent);
+        UrlParameters parameters = new UrlParameters(request.getPathInfo());
+        Label label = LABELS.get(parameters.scheme);
 
-        HashMap<String, Object> model = new HashMap<String, Object>();
-        model.put("messages", ResourceBundle.getBundle("messages/messages", request.getLocale()));
-        model.put("downloadLink", mDownloadLinks.get(platform));
-        model.put("inviteLink", extractInviteLink(request.getPathInfo()));
+        if (label != null) {
+            HashMap<String, Object> model = new HashMap<String, Object>();
+            model.put("messages", getResourceBundle(label, request.getLocale()));
+            model.put("downloadLink", mDownloadLinks.get(platform));
+            model.put("inviteLink", parameters.scheme + "://" + parameters.token);
 
-        String body = mEngine.transform(mTemplate, model);
+            String body = mEngine.transform(mTemplate, model);
 
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("text/html; charset=UTF-8");
-        response.getWriter().println(body);
-    }
-
-    private String extractInviteLink(String pathInfo) {
-        String[] components = pathInfo.split("/");
-
-        if (components.length > 2) {
-            // pathInfo is expected to look like this: "/<scheme>/<token>"
-            // components[0] is an empty string
-            String scheme = components[1];
-            String token = components[2];
-
-            if (mConfig.getAllowedInviteUriSchemes().contains(scheme)) {
-                return scheme + "://" + token;
-            }
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("text/html; charset=UTF-8");
+            response.getWriter().println(body);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
-
-        return null;
     }
 
     private static Platform determinePlatform(String userAgent) {
@@ -102,6 +101,10 @@ public class InvitationServlet extends HttpServlet {
         return platform;
     }
 
+    private ResourceBundle getResourceBundle(Label label, Locale locale) {
+        return ResourceBundle.getBundle("label/" + label.toString().toLowerCase() + "/messages", locale);
+    }
+
     private class ResourceBundleModelAdapter extends DefaultModelAdaptor {
         @Override
         protected Object getPropertyValue(Object o, String propertyName) {
@@ -110,6 +113,21 @@ public class InvitationServlet extends HttpServlet {
             }
 
             return super.getPropertyValue(o, propertyName);
+        }
+    }
+
+    private class UrlParameters {
+        @Nullable public String scheme;
+        @Nullable public String token;
+
+        public UrlParameters(String pathInfo) {
+            String[] components = pathInfo.split("/");
+
+            if (components.length > 2) {
+                // pathInfo is expected to look like this: "/<scheme>/<token>", components[0] is an empty string
+                scheme = components[1];
+                token = components[2];
+            }
         }
     }
 }
