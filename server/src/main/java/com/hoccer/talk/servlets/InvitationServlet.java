@@ -41,13 +41,7 @@ public class InvitationServlet extends HttpServlet {
     }
 
     private final Engine mEngine = new Engine();
-    private String mTemplate;
-
-    @Override
-    public void init() throws ServletException {
-        mTemplate = loadTemplate("inviteTemplate.html");
-        mEngine.setModelAdaptor(new ResourceBundleModelAdapter());
-    }
+    private final String mTemplate = loadTemplate("inviteTemplate.html");
 
     private static String loadTemplate(String name) {
         InputStream stream = InvitationServlet.class.getResourceAsStream("/templates/" + name);
@@ -58,6 +52,11 @@ public class InvitationServlet extends HttpServlet {
             LOG.error("Error loading invitation template", e);
             return "";
         }
+    }
+
+    @Override
+    public void init() throws ServletException {
+        mEngine.setModelAdaptor(new ResourceBundleModelAdapter());
     }
 
     @Override
