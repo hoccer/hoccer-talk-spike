@@ -7,18 +7,10 @@
 </head>
 <body>
 <div id="main">
-    <p>
-        ${if inviteLink}
-            ${messages.invitationText}
-        ${else}
-            ${messages.invitationError}
-        ${end}
-    </p>
+    <p>${messages.invitationText}</p>
 
     <a class="button" id="download" href="${downloadLink}">${messages.invitationButtonDownload}</a>
-    ${if inviteLink}
-        <a class="button" id="pairing" href="${inviteLink}">${messages.invitationButtonAccept}</a>
-    ${end}
+    <a class="button" id="pairing" href="${inviteLink}">${messages.invitationButtonAccept}</a>
 </div>
 </body>
 </html>
