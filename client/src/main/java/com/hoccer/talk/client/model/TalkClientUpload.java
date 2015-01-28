@@ -171,7 +171,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         LOG.info("[new] initializing as attachment: '" + selection.getFilePath() + "'");
         this.type = Type.ATTACHMENT;
         this.dataFile = selection.getFilePath();
-        this.fileName = dataFile.substring(dataFile.lastIndexOf(File.separator));
+        this.fileName = dataFile.substring(dataFile.lastIndexOf(File.separator) + 1);
         this.contentHmac = computeHmac(dataFile);
         this.contentType = selection.getContentType();
         this.mediaType = selection.getContentMediaType();
