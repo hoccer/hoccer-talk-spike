@@ -27,19 +27,12 @@ public class InvitationServlet extends HttpServlet {
         OTHER
     }
 
-    private TalkServerConfiguration mConfig;
+    private final HashMap<Platform, String> mDownloadLinks = new HashMap<Platform, String>();
     private final HashMap<String, Map<String, Object>> mLocalizedMessages = new HashMap<String, Map<String, Object>>();
     private final Engine mEngine = new Engine();
+
+    private TalkServerConfiguration mConfig;
     private String mTemplate;
-
-    private static final HashMap<Platform, String> DOWNLOAD_LINKS = new HashMap<Platform, String>();
-
-    static {
-        DOWNLOAD_LINKS.put(Platform.IOS, "https://itunes.apple.com/app/hoccer/id340180776");
-        DOWNLOAD_LINKS.put(Platform.ANDROID, "https://play.google.com/store/apps/details?id=com.artcom.hoccer");
-        DOWNLOAD_LINKS.put(Platform.OTHER, "http://hoccer.com");
-    }
-
 
     private static Map<String, Object> loadMessages(String filename) {
         Properties properties = new Properties();
@@ -56,12 +49,17 @@ public class InvitationServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+        mDownloadLinks.put(Platform.IOS, "https://itunes.apple.com/app/hoccer/id340180776");
+        mDownloadLinks.put(Platform.ANDROID, "https://play.google.com/store/apps/details?id=com.artcom.hoccer");
+        mDownloadLinks.put(Platform.OTHER, "http://hoccer.com");
+
         mLocalizedMessages.put("en", loadMessages("messages-en.properties"));
         mLocalizedMessages.put("de", loadMessages("messages-de.properties"));
-        mTemplate = loadTemplate("inviteTemplate.html");
 
         TalkServer server = (TalkServer) getServletContext().getAttribute("server");
         mConfig = server.getConfiguration();
+
+        mTemplate = loadTemplate("inviteTemplate.html");
     }
 
     private static String loadTemplate(String name) {
@@ -83,7 +81,7 @@ public class InvitationServlet extends HttpServlet {
 
         HashMap<String, Object> model = new HashMap<String, Object>();
         model.put("messages", mLocalizedMessages.get(language));
-        model.put("downloadLink", DOWNLOAD_LINKS.get(platform));
+        model.put("downloadLink", mDownloadLinks.get(platform));
         model.put("inviteLink", extractInviteLink(request.getPathInfo()));
 
         String body = mEngine.transform(mTemplate, model);
