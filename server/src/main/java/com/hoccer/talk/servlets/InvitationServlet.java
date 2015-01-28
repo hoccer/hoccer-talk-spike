@@ -1,5 +1,6 @@
 package com.hoccer.talk.servlets;
 
+import com.floreysoft.jmte.DefaultModelAdaptor;
 import com.floreysoft.jmte.Engine;
 import com.hoccer.talk.server.TalkServer;
 import com.hoccer.talk.server.TalkServerConfiguration;
@@ -13,9 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.ResourceBundle;
 
 public class InvitationServlet extends HttpServlet {
 
@@ -28,24 +27,10 @@ public class InvitationServlet extends HttpServlet {
     }
 
     private final HashMap<Platform, String> mDownloadLinks = new HashMap<Platform, String>();
-    private final HashMap<String, Map<String, Object>> mLocalizedMessages = new HashMap<String, Map<String, Object>>();
     private final Engine mEngine = new Engine();
 
     private TalkServerConfiguration mConfig;
     private String mTemplate;
-
-    private static Map<String, Object> loadMessages(String filename) {
-        Properties properties = new Properties();
-
-        try {
-            InputStream inputStream = InvitationServlet.class.getResourceAsStream("/messages/" + filename);
-            properties.load(inputStream);
-        } catch (IOException e) {
-            LOG.error("Error loading localized messages", e);
-        }
-
-        return (Map) properties;
-    }
 
     @Override
     public void init() throws ServletException {
@@ -53,13 +38,11 @@ public class InvitationServlet extends HttpServlet {
         mDownloadLinks.put(Platform.ANDROID, "https://play.google.com/store/apps/details?id=com.artcom.hoccer");
         mDownloadLinks.put(Platform.OTHER, "http://hoccer.com");
 
-        mLocalizedMessages.put("en", loadMessages("messages-en.properties"));
-        mLocalizedMessages.put("de", loadMessages("messages-de.properties"));
-
         TalkServer server = (TalkServer) getServletContext().getAttribute("server");
         mConfig = server.getConfiguration();
 
         mTemplate = loadTemplate("inviteTemplate.html");
+        mEngine.setModelAdaptor(new ResourceBundleModelAdapter());
     }
 
     private static String loadTemplate(String name) {
@@ -77,10 +60,9 @@ public class InvitationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String userAgent = request.getHeader("User-Agent");
         Platform platform = determinePlatform(userAgent);
-        String language = determineLanguage(request.getLocale(), "en");
 
         HashMap<String, Object> model = new HashMap<String, Object>();
-        model.put("messages", mLocalizedMessages.get(language));
+        model.put("messages", ResourceBundle.getBundle("messages/messages", request.getLocale()));
         model.put("downloadLink", mDownloadLinks.get(platform));
         model.put("inviteLink", extractInviteLink(request.getPathInfo()));
 
@@ -108,16 +90,6 @@ public class InvitationServlet extends HttpServlet {
         return null;
     }
 
-    private String determineLanguage(Locale locale, String defaultLanguage) {
-        String language = locale.getLanguage();
-
-        if (language.isEmpty() || !mLocalizedMessages.containsKey(language)) {
-            language = defaultLanguage;
-        }
-
-        return language;
-    }
-
     private static Platform determinePlatform(String userAgent) {
         Platform platform = Platform.OTHER;
 
@@ -128,5 +100,16 @@ public class InvitationServlet extends HttpServlet {
         }
 
         return platform;
+    }
+
+    private class ResourceBundleModelAdapter extends DefaultModelAdaptor {
+        @Override
+        protected Object getPropertyValue(Object o, String propertyName) {
+            if (o instanceof ResourceBundle) {
+                return ((ResourceBundle) o).getString(propertyName);
+            }
+
+            return super.getPropertyValue(o, propertyName);
+        }
     }
 }
