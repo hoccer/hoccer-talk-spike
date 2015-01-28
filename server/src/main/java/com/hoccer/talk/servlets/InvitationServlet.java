@@ -71,6 +71,7 @@ public class InvitationServlet extends HttpServlet {
             Platform platform = determinePlatform(userAgent);
 
             HashMap<String, Object> model = new HashMap<String, Object>();
+            model.put("label", label.toString().toLowerCase());
             model.put("messages", resourceBundle);
             model.put("downloadLink", resourceBundle.getString("downloadLink" + platform));
             model.put("inviteLink", parameters.scheme + "://" + parameters.token);
