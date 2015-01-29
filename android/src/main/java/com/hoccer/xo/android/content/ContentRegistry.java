@@ -15,6 +15,7 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
+import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.selector.*;
@@ -125,17 +126,17 @@ public class ContentRegistry {
     public static String getContentDescription(XoTransfer transfer) {
         String mediaTypeString = "Unknown file";
         String mediaType = transfer.getMediaType();
-        if ("image".equals(mediaType)) {
+        if (ContentMediaType.IMAGE.equals(mediaType)) {
             mediaTypeString = "Image";
-        } else if ("audio".equals(mediaType)) {
+        } else if (ContentMediaType.AUDIO.equals(mediaType)) {
             mediaTypeString = "Audio";
-        } else if ("video".equals(mediaType)) {
+        } else if (ContentMediaType.VIDEO.equals(mediaType)) {
             mediaTypeString = "Video";
-        } else if ("contact".equals(mediaType)) {
+        } else if (ContentMediaType.VCARD.equals(mediaType)) {
             mediaTypeString = "Contact";
-        } else if ("location".equals(mediaType)) {
+        } else if (ContentMediaType.LOCATION.equals(mediaType)) {
             mediaTypeString = "Location";
-        } else if ("data".equals(mediaType)) {
+        } else if (ContentMediaType.DATA.equals(mediaType)) {
             mediaTypeString = "Data";
         }
 
