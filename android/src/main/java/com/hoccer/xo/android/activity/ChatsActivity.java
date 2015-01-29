@@ -210,11 +210,11 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private void handleShareIntent(Intent intent) {
         Uri contentUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-        SelectedContent content = getAttachment(contentUri, intent.getType());
+        SelectedContent content = getContent(contentUri, intent.getType());
         addSharedContentToClipboard(content);
     }
 
-    private SelectedContent getAttachment(Uri contentUri, String type) {
+    private SelectedContent getContent(Uri contentUri, String type) {
         IContentSelector selector = determineContentSelectorForType(type);
 
         Intent intent = new Intent();
