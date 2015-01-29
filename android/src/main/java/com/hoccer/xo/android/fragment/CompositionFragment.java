@@ -412,8 +412,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private static long calculateAttachmentSize(List<TalkClientUpload> uploads) {
         long fileSize = 0;
         for (TalkClientUpload upload : uploads) {
-            File fileToUpload = new File(upload.getCachedFilePath() != null ? upload.getCachedFilePath() : upload.getFilePath());
-            fileSize += fileToUpload.length();
+            fileSize += upload.getContentLength();
         }
         return fileSize;
     }
