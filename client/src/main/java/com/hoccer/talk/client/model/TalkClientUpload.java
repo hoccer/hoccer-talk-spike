@@ -259,13 +259,12 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         XoClient talkClient = mTransferAgent.getClient();
         LOG.info("[uploadId: '" + clientUploadId + "'] performing registration");
         try {
-            long fileLength = new File(cachedDataFile != null ? cachedDataFile : dataFile).length();
             ITalkRpcServer.FileHandles handles;
             if (isAvatar()) {
-                uploadLength = fileLength;
+                uploadLength = getContentLength();
                 handles = talkClient.getServerRpc().createFileForStorage((int) uploadLength);
             } else {
-                encryptedLength = AESCryptor.calcEncryptedSize((int) fileLength, AESCryptor.NULL_SALT, AESCryptor.NULL_SALT);
+                encryptedLength = AESCryptor.calcEncryptedSize((int) getContentLength(), AESCryptor.NULL_SALT, AESCryptor.NULL_SALT);
                 uploadLength = encryptedLength;
                 handles = talkClient.getServerRpc().createFileForTransfer((int) encryptedLength);
             }
