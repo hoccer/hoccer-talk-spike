@@ -69,11 +69,11 @@ public class TalkServerMain {
         LOG.info("Initializing jetty");
         final Server webServer = new Server(new InetSocketAddress(config.getListenAddress(), config.getListenPort()));
         webServer.setStopAtShutdown(true);
-        setupServerHandlers(webServer, talkServer);
+        webServer.setHandler(createServerHandler(talkServer));
 
         final Server managementServer = new Server(new InetSocketAddress(config.getManagementListenAddress(), config.getManagementListenPort()));
         managementServer.setStopAtShutdown(true);
-        setupManagementServerHandlers(managementServer, talkServer);
+        managementServer.setHandler(createManagementServerHandler(talkServer));
 
         try {
             LOG.info("Starting server");
@@ -111,7 +111,7 @@ public class TalkServerMain {
         }
     }
 
-    private void setupServerHandlers(Server server, TalkServer talkServer) {
+    private HandlerCollection createServerHandler(TalkServer talkServer) {
         HandlerCollection handlerCollection = new HandlerCollection();
 
         addMetricsServlets(handlerCollection, talkServer);
@@ -120,7 +120,7 @@ public class TalkServerMain {
         addStaticResourceHandlers(handlerCollection);
         addTalkRpcConnectionHandler(handlerCollection, talkServer);
 
-        server.setHandler(handlerCollection);
+        return handlerCollection;
     }
 
     private void addMetricsServlets(HandlerCollection handlerCollection, TalkServer talkServer) {
@@ -183,10 +183,10 @@ public class TalkServerMain {
         handlerCollection.addHandler(clientHandler);
     }
 
-    private void setupManagementServerHandlers(Server managementServer, TalkServer talkServer) {
+    private HandlerCollection createManagementServerHandler(TalkServer talkServer) {
         HandlerCollection handlerCollection = new HandlerCollection();
         addPushMessageServlet(handlerCollection, talkServer);
-        managementServer.setHandler(handlerCollection);
+        return handlerCollection;
     }
 
     private void addPushMessageServlet(HandlerCollection handlerCollection, TalkServer talkServer) {
