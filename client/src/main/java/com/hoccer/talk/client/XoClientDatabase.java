@@ -663,7 +663,7 @@ public class XoClientDatabase implements IXoMediaCollectionDatabase {
         return mClientUploads.queryBuilder().where()
                 .eq("mediaType", mediaType)
                 .and()
-                .eq("state", TalkClientDownload.State.COMPLETE)
+                .eq("state", TalkClientUpload.State.COMPLETE)
                 .query();
     }
 
