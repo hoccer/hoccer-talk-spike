@@ -99,7 +99,7 @@
         <TextView
                 android:id="@+id/tv_player_track_artist"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:textColor="@color/xo_media_player_secondary_text"
                 android:textSize="@dimen/media_player_text_small"

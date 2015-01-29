@@ -29,7 +29,6 @@
                   android:layout_height="wrap_content"
                   android:orientation="vertical"
                   android:layout_toRightOf="@+id/fl_artwork"
-                  android:layout_toLeftOf="@+id/iv_playing_status"
                   android:layout_centerVertical="true">
 
         <TextView

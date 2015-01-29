@@ -76,7 +76,7 @@ public class AttachmentSearchResultAdapter extends BaseAdapter {
 
     private View createAttachmentView(Context context, XoTransfer attachment) {
         View attachmentView = View.inflate(context, R.layout.item_attachment_search_result, null);
-        String type = attachment.getContentMediaType();
+        String type = attachment.getMediaType();
         if (type.equals(ContentMediaType.AUDIO)) {
             attachmentView = setupAudioAttachmentView(context, attachmentView, attachment);
         }

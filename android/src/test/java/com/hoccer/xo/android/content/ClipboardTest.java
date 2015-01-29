@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.content.ContentMediaType;
-import org.apache.tika.mime.MimeTypes;
+import com.hoccer.talk.content.SelectedContent;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +14,7 @@ public class ClipboardTest {
     @Before
     public void setUp() throws Exception {
         mClipboard = Clipboard.getInstance();
-        mTestContent = createSelectedContentWithData();
+        mTestContent = new SelectedLocation("hello".getBytes());
     }
 
     @Test
@@ -39,13 +38,5 @@ public class ClipboardTest {
 
         assertFalse(mClipboard.hasContent());
         assertNull(mClipboard.getContent());
-    }
-
-    private static SelectedContent createSelectedContentWithData() {
-        SelectedContent sc = new SelectedContent("hello".getBytes());
-        sc.setContentMediaType(ContentMediaType.DATA);
-        sc.setFileName("random_content.txt");
-        sc.setContentType(MimeTypes.PLAIN_TEXT);
-        return sc;
     }
 }

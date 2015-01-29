@@ -1,10 +1,9 @@
 package com.hoccer.xo.android.view.chat.attachments;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 
 
@@ -26,17 +25,7 @@ public class ChatDataItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(IContentObject contentObject) {
-        super.displayAttachment(contentObject);
-
-        // add view lazily
-        if (mContentWrapper.getChildCount() == 0) {
-            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            //RelativeLayout dataLayout = (RelativeLayout) inflater.inflate(R.layout.content_data, null);
-            //mContentWrapper.addView(dataLayout);
-        }
-
-
+    protected void displayAttachment(XoTransfer attachment) {
+        super.displayAttachment(attachment);
     }
-
 }

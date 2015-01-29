@@ -109,9 +109,8 @@ public class WebClientBackend implements IXoStateListener {
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAvatar(
                 absoluteFilePath,
-                absoluteFilePath,
-                "image/jpeg",
-                length);
+                "image/jpeg"
+        );
 
         // upload and register avatar
         try {

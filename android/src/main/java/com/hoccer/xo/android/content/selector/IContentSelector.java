@@ -3,7 +3,7 @@ package com.hoccer.xo.android.content.selector;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 
 /**
  * Content selectors allow the user to select content from some source via intents
@@ -22,6 +22,5 @@ public interface IContentSelector {
     public abstract Intent createSelectionIntent(Context context);
 
     /** Handles the intent result, returning a content object */
-    public abstract IContentObject createObjectFromSelectionResult(Context context, Intent intent);
-
+    public abstract SelectedContent createObjectFromSelectionResult(Context context, Intent intent);
 }

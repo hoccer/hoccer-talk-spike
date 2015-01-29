@@ -35,13 +35,6 @@
                 android:layout_width="@dimen/default_attachment_icon_dim"
                 android:layout_height="@dimen/default_attachment_icon_dim"
                 android:background="@android:color/transparent"/>
-
-        <ImageButton
-                android:id="@+id/ib_vcard_import_button"
-                android:scaleType="fitXY"
-                android:layout_width="@dimen/default_attachment_icon_dim"
-                android:layout_height="@dimen/default_attachment_icon_dim"
-                android:background="@android:color/transparent"/>
     </LinearLayout>
 
 </RelativeLayout>

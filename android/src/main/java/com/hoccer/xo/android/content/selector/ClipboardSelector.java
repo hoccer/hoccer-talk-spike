@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 
@@ -38,10 +38,10 @@ public class ClipboardSelector implements IContentSelector {
     }
 
     @Override
-    public IContentObject createObjectFromSelectionResult(Context context, Intent intent) {
-        IContentObject contentObject = mClipboard.getContent();
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
+        SelectedContent content = mClipboard.getContent();
         mClipboard.clearContent();
-        return contentObject;
+        return content;
     }
 
     @Override

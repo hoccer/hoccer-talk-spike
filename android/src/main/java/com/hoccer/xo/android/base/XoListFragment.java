@@ -3,7 +3,7 @@ package com.hoccer.xo.android.base;
 import android.app.Activity;
 import android.support.v4.app.ListFragment;
 import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.service.IXoClientService;
 import org.apache.log4j.Logger;
 
@@ -73,6 +73,6 @@ public abstract class XoListFragment extends ListFragment implements IXoFragment
     }
 
     @Override
-    public void onAvatarSelected(IContentObject co) {
+    public void onAvatarSelected(SelectedContent co) {
     }
 }

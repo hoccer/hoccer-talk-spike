@@ -1,8 +1,9 @@
 package com.hoccer.talk.client;
 
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.ContentState;
 
-public abstract class XoTransfer implements IContentObject {
+
+public abstract class XoTransfer {
 
     public enum State {}
 
@@ -19,6 +20,28 @@ public abstract class XoTransfer implements IContentObject {
     protected XoTransfer(Direction direction) {
         mDirection = direction;
     }
+
+    public abstract boolean isContentAvailable();
+
+    public abstract ContentState getContentState();
+
+    public abstract long getTransferLength();
+
+    public abstract long getTransferProgress();
+
+    public abstract String getMediaType();
+
+    public abstract double getContentAspectRatio();
+
+    public abstract String getMimeType();
+
+    public abstract String getFileName();
+
+    public abstract String getFilePath();
+
+    public abstract long getContentLength();
+
+    public abstract String getContentHmac();
 
     public abstract int getTransferId();
 

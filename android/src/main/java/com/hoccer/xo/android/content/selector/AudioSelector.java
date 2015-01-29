@@ -8,9 +8,9 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.xo.android.util.ColorSchemeManager;
-import com.hoccer.xo.android.util.UriUtils;
 
 public class AudioSelector implements IContentSelector {
 
@@ -47,37 +47,24 @@ public class AudioSelector implements IContentSelector {
         Uri selectedContent = intent.getData();
         String[] filePathColumn = {
                 MediaStore.Audio.Media.MIME_TYPE,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.SIZE,
-                MediaStore.Audio.Media.TITLE
+                MediaStore.Audio.Media.DATA
         };
 
         Cursor cursor = context.getContentResolver().query(
                 selectedContent, filePathColumn, null, null, null);
         cursor.moveToFirst();
 
-        int typeIndex = cursor.getColumnIndex(filePathColumn[0]);
-        String fileType = cursor.getString(typeIndex);
+        int mimeTypeIndex = cursor.getColumnIndex(filePathColumn[0]);
+        String mimeType = cursor.getString(mimeTypeIndex);
         int dataIndex = cursor.getColumnIndex(filePathColumn[1]);
         String filePath = cursor.getString(dataIndex);
-        int sizeIndex = cursor.getColumnIndex(filePathColumn[2]);
-        int fileSize = cursor.getInt(sizeIndex);
-        int fileNameIndex = cursor.getColumnIndex(filePathColumn[3]);
-        String fileName = cursor.getString(fileNameIndex);
-
         cursor.close();
 
         if (filePath == null) {
             return null;
         }
 
-        SelectedContent contentObject = new SelectedContent(intent, UriUtils.FILE_URI_PREFIX + filePath);
-        contentObject.setFileName(fileName);
-        contentObject.setContentMediaType(ContentMediaType.AUDIO);
-        contentObject.setContentType(fileType);
-        contentObject.setContentLength(fileSize);
-
-        return contentObject;
+        return new SelectedFile(filePath, mimeType, ContentMediaType.AUDIO);
     }
 
     @Override

@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.content.Clipboard;
@@ -104,8 +103,8 @@ public class MessagingActivity extends ComposableActivity {
     private void popupItemSelected(MenuItem item, ChatMessageItem messageItem) {
         switch (item.getItemId()) {
             case R.id.menu_copy_message:
-                if (messageItem.getContent() != null && messageItem.getContent().isContentAvailable()) {
-                    Clipboard.getInstance().setContent(messageItem.getContent());
+                if (messageItem.getAttachment() != null && messageItem.getAttachment().isContentAvailable()) {
+                    Clipboard.getInstance().setContent(messageItem.getAttachment());
                 } else {
                     putMessageTextInSystemClipboard(messageItem);
                 }

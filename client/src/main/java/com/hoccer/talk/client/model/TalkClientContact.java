@@ -1,6 +1,6 @@
 package com.hoccer.talk.client.model;
 
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.field.DatabaseField;
@@ -123,7 +123,7 @@ public class TalkClientContact implements Serializable {
         return clientContactId;
     }
 
-    public IContentObject getAvatar() {
+    public XoTransfer getAvatar() {
         if (avatarDownload != null && avatarDownload.isContentAvailable()) {
             return avatarDownload;
         } else if (avatarUpload != null && avatarUpload.isContentAvailable()) {
@@ -132,8 +132,8 @@ public class TalkClientContact implements Serializable {
         return null;
     }
 
-    public String getAvatarContentUrl() {
-        IContentObject avatar = getAvatar();
+    public String getAvatarFilePath() {
+        XoTransfer avatar = getAvatar();
         if (avatar != null) {
             return avatar.getFilePath();
         }

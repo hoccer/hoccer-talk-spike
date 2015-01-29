@@ -1,8 +1,7 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.client.IXoDownloadListener;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientDownload;
-import com.hoccer.talk.content.IContentObject;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -23,25 +22,25 @@ public class EmptyPlaylist extends MediaPlaylist {
     }
 
     @Override
-    public boolean hasItem(IContentObject item) {
+    public boolean hasItem(XoTransfer item) {
         return false;
     }
 
     @Override
-    public int indexOf(IContentObject item) {
+    public int indexOf(XoTransfer item) {
         return -1;
     }
 
     @Override
-    public Iterator<IContentObject> iterator() {
-        return new Iterator<IContentObject>() {
+    public Iterator<XoTransfer> iterator() {
+        return new Iterator<XoTransfer>() {
             @Override
             public boolean hasNext() {
                 return false;
             }
 
             @Override
-            public IContentObject next() {
+            public XoTransfer next() {
                 throw new NoSuchElementException("There is no next item in playlist.");
             }
 
