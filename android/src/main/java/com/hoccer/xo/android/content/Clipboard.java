@@ -35,7 +35,7 @@ public class Clipboard {
     }
 
     public void setContent(XoTransfer transfer) {
-        mContent = new SelectedFile(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath(), transfer.getContentType(), transfer.getContentMediaType(), transfer.getContentAspectRatio());
+        mContent = new SelectedFile(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath(), transfer.getMimeType(), transfer.getMediaType(), transfer.getContentAspectRatio());
     }
 
     public void clearContent() {

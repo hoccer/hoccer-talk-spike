@@ -185,26 +185,26 @@ public class ChatAdapter extends XoAdapter implements IXoMessageListener, IXoTra
      */
     private static ChatItemType getListItemTypeForMessage(TalkClientMessage message) {
         ChatItemType chatItemType = ChatItemType.ChatItemWithText;
-        String contentType = null;
+        String mediaType = null;
 
         if (message.getAttachmentDownload() != null) {
-            contentType = message.getAttachmentDownload().getContentMediaType();
+            mediaType = message.getAttachmentDownload().getMediaType();
         } else if (message.getAttachmentUpload() != null) {
-            contentType = message.getAttachmentUpload().getContentMediaType();
+            mediaType = message.getAttachmentUpload().getMediaType();
         }
 
-        if (contentType != null) {
-            if (contentType.equalsIgnoreCase(ContentMediaType.IMAGE)) {
+        if (mediaType != null) {
+            if (mediaType.equalsIgnoreCase(ContentMediaType.IMAGE)) {
                 chatItemType = ChatItemType.ChatItemWithImage;
-            } else if (contentType.equalsIgnoreCase(ContentMediaType.VIDEO)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.VIDEO)) {
                 chatItemType = ChatItemType.ChatItemWithVideo;
-            } else if (contentType.equalsIgnoreCase(ContentMediaType.AUDIO)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.AUDIO)) {
                 chatItemType = ChatItemType.ChatItemWithAudio;
-            } else if (contentType.equalsIgnoreCase(ContentMediaType.DATA)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.DATA)) {
                 chatItemType = ChatItemType.ChatItemWithData;
-            } else if (contentType.equalsIgnoreCase(ContentMediaType.VCARD)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.VCARD)) {
                 chatItemType = ChatItemType.ChatItemWithContact;
-            } else if (contentType.equalsIgnoreCase(ContentMediaType.LOCATION)) {
+            } else if (mediaType.equalsIgnoreCase(ContentMediaType.LOCATION)) {
                 chatItemType = ChatItemType.ChatItemWithLocation;
             }
         }

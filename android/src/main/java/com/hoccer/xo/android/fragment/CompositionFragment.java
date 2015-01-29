@@ -234,19 +234,19 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         if (mSelectedContent.isEmpty()) {
             updateAttachmentButtonImage(AttachmentSelectionType.NONE);
         } else if (mSelectedContent.size() == 1) {
-            String contentType = mSelectedContent.get(0).getContentMediaType();
+            String mediaType = mSelectedContent.get(0).getMediaType();
 
-            if (ContentMediaType.IMAGE.equals(contentType)) {
+            if (ContentMediaType.IMAGE.equals(mediaType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.IMAGE);
-            } else if (ContentMediaType.VIDEO.equals(contentType)) {
+            } else if (ContentMediaType.VIDEO.equals(mediaType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.VIDEO);
-            } else if (ContentMediaType.VCARD.equals(contentType)) {
+            } else if (ContentMediaType.VCARD.equals(mediaType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.CONTACT);
-            } else if (ContentMediaType.LOCATION.equals(contentType)) {
+            } else if (ContentMediaType.LOCATION.equals(mediaType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.LOCATION);
-            } else if (ContentMediaType.DATA.equals(contentType)) {
+            } else if (ContentMediaType.DATA.equals(mediaType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.DATA);
-            } else if (ContentMediaType.AUDIO.equals(contentType)) {
+            } else if (ContentMediaType.AUDIO.equals(mediaType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.AUDIO);
             } else {
                 updateAttachmentButtonImage(AttachmentSelectionType.ERROR);
@@ -336,7 +336,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                 try {
                     if (getXoClient().isEncodingNecessary()) {
                         for (TalkClientUpload upload : uploads) {
-                            if (upload.getContentMediaType().equals(ContentMediaType.IMAGE)) {
+                            if (upload.getMediaType().equals(ContentMediaType.IMAGE)) {
                                 compressImageAttachment(upload);
                             }
                         }

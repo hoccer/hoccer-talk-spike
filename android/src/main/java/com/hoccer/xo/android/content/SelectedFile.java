@@ -5,28 +5,28 @@ import com.hoccer.talk.content.SelectedContent;
 
 public class SelectedFile extends SelectedContent {
 
-    private final String mContentType;
+    private final String mMimeType;
     private final String mContentMediaType;
     private final double mAspectRatio;
 
-    public SelectedFile(String filePath, String contentType, String contentMediaType) {
-        this(filePath, contentType, contentMediaType, 0);
+    public SelectedFile(String filePath, String mimeType, String contentMediaType) {
+        this(filePath, mimeType, contentMediaType, 0);
     }
 
-    public SelectedFile(String filePath, String contentType, String contentMediaType, double aspectRatio) {
+    public SelectedFile(String filePath, String mimeType, String contentMediaType, double aspectRatio) {
         super(filePath);
 
-        mContentType = contentType;
+        mMimeType = mimeType;
         mContentMediaType = contentMediaType;
         mAspectRatio = aspectRatio;
     }
 
-    public String getContentMediaType() {
+    public String getMediaType() {
         return mContentMediaType;
     }
 
-    public String getContentType() {
-        return mContentType;
+    public String getMimeType() {
+        return mMimeType;
     }
 
     public double getAspectRatio() {

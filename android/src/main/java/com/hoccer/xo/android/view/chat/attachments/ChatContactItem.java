@@ -71,7 +71,7 @@ public class ChatContactItem extends ChatMessageItem {
             public void onClick(View v) {
                 LOG.debug("onClick(showButton)");
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(UriUtils.getAbsoluteFileUri(mAttachment.getFilePath()), mAttachment.getContentType());
+                intent.setDataAndType(UriUtils.getAbsoluteFileUri(mAttachment.getFilePath()), mAttachment.getMimeType());
                 XoActivity activity = (XoActivity) mContext;
                 activity.startExternalActivity(intent);
             }

@@ -124,7 +124,7 @@ public class ContentRegistry {
 
     public static String getContentDescription(XoTransfer transfer) {
         String mediaTypeString = "Unknown file";
-        String mediaType = transfer.getContentMediaType();
+        String mediaType = transfer.getMediaType();
         if ("image".equals(mediaType)) {
             mediaTypeString = "Image";
         } else if ("audio".equals(mediaType)) {

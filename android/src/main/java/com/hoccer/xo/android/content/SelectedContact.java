@@ -40,12 +40,12 @@ public class SelectedContact extends SelectedContent {
     }
 
     @Override
-    public String getContentMediaType() {
+    public String getMediaType() {
         return ContentMediaType.VCARD;
     }
 
     @Override
-    public String getContentType() {
+    public String getMimeType() {
         return ContactsContract.Contacts.CONTENT_VCARD_TYPE;
     }
 

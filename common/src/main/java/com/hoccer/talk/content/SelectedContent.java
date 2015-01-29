@@ -24,9 +24,9 @@ public abstract class SelectedContent {
 
     protected abstract String writeToFile();
 
-    public abstract String getContentMediaType();
+    public abstract String getMediaType();
 
-    public abstract String getContentType();
+    public abstract String getMimeType();
 
     public abstract double getAspectRatio();
 }

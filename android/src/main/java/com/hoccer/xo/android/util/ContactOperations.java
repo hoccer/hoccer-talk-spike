@@ -32,7 +32,7 @@ public class ContactOperations {
     }
 
     public static void sendTransferToContact(XoTransfer transfer, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
-        SelectedContent content = new SelectedFile(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath(), transfer.getContentType(), transfer.getContentMediaType(), transfer.getContentAspectRatio());
+        SelectedContent content = new SelectedFile(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath(), transfer.getMimeType(), transfer.getMediaType(), transfer.getContentAspectRatio());
         TalkClientUpload upload = new TalkClientUpload();
         upload.initializeAsAttachment(content);
 

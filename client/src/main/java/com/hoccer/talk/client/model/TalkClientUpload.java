@@ -162,8 +162,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         LOG.info("[new] initializing as avatar: '" + content.getFilePath() + "'");
         this.type = Type.AVATAR;
         this.dataFile = content.getFilePath();
-        this.contentType = content.getContentType();
-        this.mediaType = content.getContentMediaType();
+        this.contentType = content.getMimeType();
+        this.mediaType = content.getMediaType();
         this.aspectRatio = content.getAspectRatio();
     }
 
@@ -173,8 +173,8 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         this.dataFile = content.getFilePath();
         this.fileName = dataFile.substring(dataFile.lastIndexOf(File.separator) + 1);
         this.contentHmac = computeHmac(dataFile);
-        this.contentType = content.getContentType();
-        this.mediaType = content.getContentMediaType();
+        this.contentType = content.getMimeType();
+        this.mediaType = content.getMediaType();
         this.aspectRatio = content.getAspectRatio();
     }
 
@@ -599,11 +599,6 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     @Override
-    public String getContentMediaType() {
-        return mediaType;
-    }
-
-    @Override
     public double getContentAspectRatio() {
         return aspectRatio;
     }
@@ -653,7 +648,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     @Override
-    public String getContentType() {
+    public String getMimeType() {
         return contentType;
     }
 

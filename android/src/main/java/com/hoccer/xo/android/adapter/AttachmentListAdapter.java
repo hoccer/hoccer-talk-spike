@@ -14,8 +14,6 @@ import com.hoccer.talk.client.model.*;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.view.AudioAttachmentView;
 import com.mobeta.android.dslv.DragSortListView;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.log4j.Logger;
 
 import java.sql.SQLException;
@@ -139,7 +137,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     public void deselectItem(int itemId) {
         if(mSelectedItemIds.contains(itemId)) {
-            mSelectedItemIds.remove((Integer)itemId);
+            mSelectedItemIds.remove((Integer) itemId);
             refreshView();
         }
     }
@@ -262,7 +260,7 @@ public class AttachmentListAdapter extends BaseAdapter implements DragSortListVi
 
     private boolean shouldItemBeAdded(XoTransfer transfer) {
         // check if mediaType matches
-        if(mMediaType != null && !mMediaType.equals(transfer.getContentMediaType())) {
+        if(mMediaType != null && !mMediaType.equals(transfer.getMediaType())) {
             return false;
         }
 

@@ -54,8 +54,8 @@ public class AudioSelector implements IContentSelector {
                 selectedContent, filePathColumn, null, null, null);
         cursor.moveToFirst();
 
-        int typeIndex = cursor.getColumnIndex(filePathColumn[0]);
-        String fileType = cursor.getString(typeIndex);
+        int mimeTypeIndex = cursor.getColumnIndex(filePathColumn[0]);
+        String mimeType = cursor.getString(mimeTypeIndex);
         int dataIndex = cursor.getColumnIndex(filePathColumn[1]);
         String filePath = cursor.getString(dataIndex);
         cursor.close();
@@ -64,7 +64,7 @@ public class AudioSelector implements IContentSelector {
             return null;
         }
 
-        return new SelectedFile(filePath, fileType, ContentMediaType.AUDIO);
+        return new SelectedFile(filePath, mimeType, ContentMediaType.AUDIO);
     }
 
     @Override

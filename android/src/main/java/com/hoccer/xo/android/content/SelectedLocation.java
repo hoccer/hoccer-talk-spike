@@ -35,12 +35,12 @@ public class SelectedLocation extends SelectedContent {
     }
 
     @Override
-    public String getContentMediaType() {
+    public String getMediaType() {
         return ContentMediaType.LOCATION;
     }
 
     @Override
-    public String getContentType() {
+    public String getMimeType() {
         return "application/json";
     }
 

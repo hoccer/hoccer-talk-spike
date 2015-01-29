@@ -745,7 +745,7 @@ public class XoClientService extends Service {
             if (download.isAttachment()) {
                 Uri downloadUri = UriUtils.getAbsoluteFileUri(download.getFilePath());
                 String[] filePathes = new String[]{downloadUri.getPath()};
-                String[] mimeTypes = new String[]{download.getContentType()};
+                String[] mimeTypes = new String[]{download.getMimeType()};
 
                 LOG.debug("requesting media scan of " + mimeTypes[0] + " at " + filePathes[0]);
                 MediaScannerConnection.scanFile(

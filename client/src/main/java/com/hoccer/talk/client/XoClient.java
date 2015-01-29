@@ -2729,7 +2729,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             attachment.setUrl(upload.getDownloadUrl());
             attachment.setContentSize(Long.toString(upload.getContentLength()));
             attachment.setMediaType(upload.getMediaType());
-            attachment.setMimeType(upload.getContentType());
+            attachment.setMimeType(upload.getMimeType());
             attachment.setAspectRatio(upload.getAspectRatio());
             attachment.setHmac(upload.getContentHmac());
             attachment.setFileId(upload.getFileId());

@@ -29,11 +29,11 @@ public abstract class XoTransfer {
 
     public abstract long getTransferProgress();
 
-    public abstract String getContentMediaType();
+    public abstract String getMediaType();
 
     public abstract double getContentAspectRatio();
 
-    public abstract String getContentType();
+    public abstract String getMimeType();
 
     public abstract String getFileName();
 

@@ -616,10 +616,10 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
             fileInputStream.close();
 
             if (detectedMediaType != null) {
-                String detectedMediaTypeName = detectedMediaType.toString();
-                LOG.info("[downloadId: '" + clientDownloadId + "'] detected mime-type '" + detectedMediaTypeName + "'");
-                this.contentType = detectedMediaTypeName;
-                MimeType detectedMimeType = MimeTypes.getDefaultMimeTypes().getRegisteredMimeType(detectedMediaTypeName);
+                String mediaTypeName = detectedMediaType.toString();
+                LOG.info("[downloadId: '" + clientDownloadId + "'] detected mime-type '" + mediaTypeName + "'");
+                this.contentType = mediaTypeName;
+                MimeType detectedMimeType = MimeTypes.getDefaultMimeTypes().getRegisteredMimeType(mediaTypeName);
                 if (detectedMimeType != null) {
                     String extension = detectedMimeType.getExtension();
                     if (extension != null) {
@@ -822,11 +822,6 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
     }
 
     @Override
-    public String getContentMediaType() {
-        return mediaType;
-    }
-
-    @Override
     public double getContentAspectRatio() {
         return aspectRatio;
     }
@@ -869,7 +864,7 @@ public class TalkClientDownload extends XoTransfer implements IXoTransferObject 
         return contentLength;
     }
 
-    public String getContentType() {
+    public String getMimeType() {
         return contentType;
     }
 
