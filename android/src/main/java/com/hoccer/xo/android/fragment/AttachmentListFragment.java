@@ -57,7 +57,7 @@ public class AttachmentListFragment extends SearchableListFragment {
     private SectionedListAdapter mResultsAdapter;
     private ContactSearchResultAdapter mSearchContactsAdapter;
     private AttachmentSearchResultAdapter mSearchAttachmentAdapter;
-    private TalkClientContact mFilterContact = null;
+    private TalkClientContact mFilterContact;
     private XoClientDatabase mDatabase;
     private ActionMode mCurrentActionMode;
 
