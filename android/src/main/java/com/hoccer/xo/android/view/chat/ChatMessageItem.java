@@ -560,10 +560,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
         if (attachment instanceof TalkClientUpload) {
             TalkClientUpload upload = (TalkClientUpload) attachment;
 
-            String temporaryFilePath = upload.getCachedFilePath();
+            String temporaryFilePath = upload.getTempCompressedFilePath();
             if (temporaryFilePath != null) {
                 try {
-                    upload.setCachedFilePath(null);
+                    upload.setTempCompressedFilePath(null);
                     XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
                     FileUtils.deleteQuietly(new File(temporaryFilePath));
                 } catch (SQLException e) {

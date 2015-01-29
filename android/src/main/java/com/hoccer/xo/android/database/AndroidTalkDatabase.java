@@ -94,7 +94,7 @@ public class AndroidTalkDatabase extends OrmLiteSqliteOpenHelper implements IXoC
             }
 
             if(oldVersion < 25) {
-                db.execSQL("ALTER TABLE 'clientUpload' ADD COLUMN 'cachedDataFile' TEXT");
+                db.execSQL("ALTER TABLE 'clientUpload' ADD COLUMN 'tempCompressedDataFile' TEXT");
             }
 
         } catch (android.database.SQLException e) {

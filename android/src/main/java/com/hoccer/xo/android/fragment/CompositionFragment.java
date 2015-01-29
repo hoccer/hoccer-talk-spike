@@ -391,7 +391,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private static void deleteCachedFiles(List<TalkClientUpload> uploads) {
         for(TalkClientUpload upload : uploads) {
-            FileUtils.deleteQuietly(new File(upload.getCachedFilePath()));
+            FileUtils.deleteQuietly(new File(upload.getTempCompressedFilePath()));
         }
     }
 
@@ -458,7 +458,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         }
 
         ImageUtils.copyExifData(imageFile.getAbsolutePath(), compressedImageFile.getAbsolutePath());
-        upload.setCachedFilePath(compressedImageFile.getAbsolutePath());
+        upload.setTempCompressedFilePath(compressedImageFile.getAbsolutePath());
     }
 
     private void showSelectAttachmentDialog() {

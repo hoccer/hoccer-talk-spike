@@ -95,7 +95,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     private String dataFile;
 
     @DatabaseField(width = 2000)
-    private String cachedDataFile;
+    private String tempCompressedDataFile;
 
     @DatabaseField
     @Deprecated
@@ -374,7 +374,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
 
         HttpClient client = mTransferAgent.getHttpClient();
         try {
-            InputStream clearIs = new FileInputStream(cachedDataFile != null ? cachedDataFile : dataFile);
+            InputStream clearIs = new FileInputStream(tempCompressedDataFile != null ? tempCompressedDataFile : dataFile);
             InputStream encryptingInputStream;
             if (isAttachment()) {
                 byte[] key = Hex.decode(encryptionKey);
@@ -609,17 +609,17 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         return dataFile;
     }
 
-    public String getCachedFilePath() {
-        return cachedDataFile;
+    public String getTempCompressedFilePath() {
+        return tempCompressedDataFile;
     }
 
-    public void setCachedFilePath(String cachedFilePath) {
-        cachedDataFile = cachedFilePath;
+    public void setTempCompressedFilePath(String filePath) {
+        tempCompressedDataFile = filePath;
     }
 
     @Override
     public long getContentLength() {
-        return new File(cachedDataFile != null ? cachedDataFile : dataFile).length();
+        return new File(tempCompressedDataFile != null ? tempCompressedDataFile : dataFile).length();
     }
 
 
