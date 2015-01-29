@@ -2,6 +2,7 @@ package com.hoccer.xo.android.content;
 
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.content.SelectedContent;
+import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.xo.android.util.UriUtils;
 
 public class Clipboard {

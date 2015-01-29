@@ -13,7 +13,7 @@ import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.content.SelectedFile;
+import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.ImageUtils;
 import org.apache.commons.io.FilenameUtils;

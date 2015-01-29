@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.content.SelectedFile;
+import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.xo.android.util.ImageUtils;
 import org.apache.log4j.Logger;
 

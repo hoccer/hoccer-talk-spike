@@ -9,7 +9,7 @@ import android.provider.MediaStore;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.SelectedFile;
+import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.xo.android.util.ImageUtils;
 import ezvcard.util.org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;

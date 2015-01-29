@@ -11,7 +11,7 @@ import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
-import com.hoccer.xo.android.content.SelectedFile;
+import com.hoccer.talk.content.SelectedFile;
 import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;

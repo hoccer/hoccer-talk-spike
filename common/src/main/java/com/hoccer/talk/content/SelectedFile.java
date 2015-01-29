@@ -1,4 +1,4 @@
-package com.hoccer.xo.android.content;
+package com.hoccer.talk.content;
 
 import com.hoccer.talk.content.SelectedContent;
 
