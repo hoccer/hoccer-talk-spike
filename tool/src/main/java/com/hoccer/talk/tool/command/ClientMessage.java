@@ -6,6 +6,7 @@ import com.beust.jcommander.Parameter;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.talk.tool.TalkToolCommand;
 import com.hoccer.talk.tool.TalkToolContext;
@@ -112,30 +113,19 @@ public class ClientMessage extends TalkToolCommand {
         return null;
     }
 
-    private static String getContentHmac(String contentDataUrl) {
-        try {
-            return CryptoUtils.computeHmac(contentDataUrl);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     private static TalkClientUpload createAttachment(File fileToUpload) {
         if (fileToUpload == null) {
             return null;
         } else {
             Console.info("<ClientMessage::createAttachment> Creating attachment for file: '" + fileToUpload.getAbsolutePath() + "'");
-            String url = fileToUpload.getAbsolutePath();
-            String fileName = fileToUpload.getName();
+            String filePath = fileToUpload.getAbsolutePath();
             String contentType = "image/*"; // XXX TODO: calculate filetype
             String mediaType = "image"; // seems to be only needed in android
             double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
-            String contentHmac = getContentHmac(url);
 
             TalkClientUpload attachmentUpload = new TalkClientUpload();
-
-            attachmentUpload.initializeAsAttachment(fileName, url, url, contentType, mediaType, aspectRatio, contentHmac);
+            SelectedFile content = new SelectedFile(filePath, contentType, mediaType, aspectRatio);
+            attachmentUpload.initializeAsAttachment(content);
             return attachmentUpload;
         }
     }
