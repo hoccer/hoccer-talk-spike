@@ -26,8 +26,10 @@ import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.ChatsActivity;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.util.UriUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -765,7 +767,19 @@ public class XoClientService extends Service {
         public void onUploadProgress(TalkClientUpload upload) {}
 
         @Override
-        public void onUploadFinished(TalkClientUpload upload) {}
+        public void onUploadFinished(TalkClientUpload upload) {
+            // delete tempCompressed files now
+            String temporaryFilePath = upload.getTempCompressedFilePath();
+            if (temporaryFilePath != null) {
+                try {
+                    upload.setTempCompressedFilePath(null);
+                    XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
+                    FileUtils.deleteQuietly(new File(temporaryFilePath));
+                } catch (SQLException e) {
+                    LOG.error("Error updating upload with original file path.");
+                }
+            }
+        }
 
         @Override
         public void onUploadFailed(TalkClientUpload upload) {}

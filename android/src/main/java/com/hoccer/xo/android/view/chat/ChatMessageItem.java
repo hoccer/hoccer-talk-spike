@@ -29,11 +29,8 @@ import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferControlView
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferHandler;
 import com.hoccer.xo.android.view.chat.attachments.AttachmentTransferListener;
 import com.hoccer.xo.android.view.chat.attachments.ChatItemType;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -556,21 +553,6 @@ public class ChatMessageItem implements AttachmentTransferListener {
 
     @Override
     public void onAttachmentTransferComplete(XoTransfer attachment) {
-        // check for previously cached files and replace them with the original
-        if (attachment instanceof TalkClientUpload) {
-            TalkClientUpload upload = (TalkClientUpload) attachment;
-
-            String temporaryFilePath = upload.getTempCompressedFilePath();
-            if (temporaryFilePath != null) {
-                try {
-                    upload.setTempCompressedFilePath(null);
-                    XoApplication.getXoClient().getDatabase().saveClientUpload(upload);
-                    FileUtils.deleteQuietly(new File(temporaryFilePath));
-                } catch (SQLException e) {
-                    LOG.error("Error updating upload with original file path.");
-                }
-            }
-        }
         displayAttachment(attachment);
     }
 
