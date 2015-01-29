@@ -12,6 +12,8 @@ import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.content.SelectedFile;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 
+import java.io.File;
+
 public class VideoSelector implements IContentSelector {
 
     private final String mName;
@@ -67,7 +69,7 @@ public class VideoSelector implements IContentSelector {
         int height = cursor.getInt(heightIndex);
         cursor.close();
 
-        if (filePath == null) {
+        if (filePath == null || !new File(filePath).exists()) {
             return null;
         }
 
