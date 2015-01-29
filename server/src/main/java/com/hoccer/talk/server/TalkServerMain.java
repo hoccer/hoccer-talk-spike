@@ -109,8 +109,14 @@ public class TalkServerMain {
     }
 
     private void setupServerHandlers(Server server, TalkServer talkServer) {
+        // use handler collection to add multiple handlers
+        HandlerCollection handlerCollection = new HandlerCollection();
+        server.setHandler(handlerCollection);
+
         // all metrics servlets are handled here
         ServletContextHandler metricsContextHandler = new ServletContextHandler();
+        handlerCollection.addHandler(metricsContextHandler);
+
         metricsContextHandler.setContextPath("/metrics");
         metricsContextHandler.setInitParameter("show-jvm-metrics", "true");
 
@@ -122,6 +128,8 @@ public class TalkServerMain {
 
         // handler for additional status information about the server
         ServletContextHandler serverInfoContextHandler = new ServletContextHandler();
+        handlerCollection.addHandler(serverInfoContextHandler);
+
         serverInfoContextHandler.setContextPath("/server");
         serverInfoContextHandler.setAttribute("server", talkServer);
         serverInfoContextHandler.addServlet(ServerInfoServlet.class, "/info");
@@ -129,37 +137,36 @@ public class TalkServerMain {
 
         // handler for invitation landing pages
         ServletContextHandler invitationContextHandler = new ServletContextHandler();
+        handlerCollection.addHandler(invitationContextHandler);
+
         invitationContextHandler.setContextPath("/invite");
         invitationContextHandler.addServlet(InvitationServlet.class, "/*");
 
         // handler for static files
         ContextHandler staticHandler = new ContextHandler("/static");
+        handlerCollection.addHandler(staticHandler);
+
         ResourceHandler staticResourceHandler = new ResourceHandler();
         staticResourceHandler.setResourceBase(getClass().getResource("/static").toExternalForm());
         staticHandler.setHandler(staticResourceHandler);
 
         // handler for talk websocket connections
         WebSocketHandler clientHandler = new TalkRpcConnectionHandler(talkServer);
-
-        // set server handlers
-        HandlerCollection handlerCollection = new HandlerCollection();
         handlerCollection.addHandler(clientHandler);
-        handlerCollection.addHandler(invitationContextHandler);
-        handlerCollection.addHandler(staticHandler);
-        handlerCollection.addHandler(serverInfoContextHandler);
-        handlerCollection.addHandler(metricsContextHandler);
-        server.setHandler(handlerCollection);
     }
 
     private void setupManagementServerHandlers(Server managementServer, TalkServer talkServer) {
+        HandlerCollection handlerCollection = new HandlerCollection();
+        managementServer.setHandler(handlerCollection);
+
+        // handler for generic push messages
         ServletContextHandler pushMessageHandler = new ServletContextHandler();
+        handlerCollection.addHandler(pushMessageHandler);
+
         pushMessageHandler.setContextPath("/push");
         pushMessageHandler.setAttribute("server", talkServer);
         pushMessageHandler.addServlet(PushMessageServlet.class, "/*");
 
-        HandlerCollection handlerCollection = new HandlerCollection();
-        handlerCollection.addHandler(pushMessageHandler);
-        managementServer.setHandler(handlerCollection);
     }
 
     private void migrateDatabase(ITalkServerDatabase database) {
