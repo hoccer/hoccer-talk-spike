@@ -1,32 +1,47 @@
 package com.hoccer.talk.content;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Base for user selected attachments.
  */
 public abstract class SelectedContent {
 
+    @Nullable
     protected String mFilePath;
+    private final String mMimeType;
+    private final String mMediaType;
 
-    protected SelectedContent() {}
-
-    protected SelectedContent(String filePath) {
+    protected SelectedContent(@Nullable String filePath, String mimeType, String mediaType) {
         mFilePath = filePath;
+        mMimeType = mimeType;
+        mMediaType = mediaType;
     }
 
-    // Returns the file path of the attachment.
-    // @note If the attachment is not represented as file it will be created first.
+    @Nullable
     public String getFilePath() {
-        if (mFilePath == null) {
-            mFilePath = writeToFile();
-        }
         return mFilePath;
     }
 
-    protected abstract String writeToFile();
+    public void createContentFile() {
+        if(mFilePath == null) {
+            mFilePath = writeContentToFile();
+        }
+    }
 
-    public abstract String getMediaType();
+    protected String writeContentToFile() {
+        return mFilePath;
+    }
 
-    public abstract String getMimeType();
+    public String getMediaType() {
+        return mMediaType;
+    }
 
-    public abstract double getAspectRatio();
+    public String getMimeType() {
+        return mMimeType;
+    }
+
+    public double getAspectRatio() {
+        return 0;
+    }
 }

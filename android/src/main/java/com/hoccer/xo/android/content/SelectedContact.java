@@ -21,11 +21,12 @@ public class SelectedContact extends SelectedContent {
     private final String mVcardContentUri;
 
     public SelectedContact(String vcardContentUri) {
+        super(null, ContactsContract.Contacts.CONTENT_VCARD_TYPE, ContentMediaType.VCARD);
         mVcardContentUri = vcardContentUri;
     }
 
     @Override
-    protected String writeToFile() {
+    public String writeContentToFile() {
         InputStream is = null;
         File file = new File(XoApplication.getAttachmentDirectory(), UUID.randomUUID().toString());
         try {
@@ -36,21 +37,7 @@ public class SelectedContact extends SelectedContent {
         } finally {
             IOUtils.closeQuietly(is);
         }
+
         return file.getPath();
-    }
-
-    @Override
-    public String getMediaType() {
-        return ContentMediaType.VCARD;
-    }
-
-    @Override
-    public String getMimeType() {
-        return ContactsContract.Contacts.CONTENT_VCARD_TYPE;
-    }
-
-    @Override
-    public double getAspectRatio() {
-        return 0;
     }
 }

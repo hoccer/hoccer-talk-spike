@@ -3,49 +3,35 @@ package com.hoccer.xo.android.content;
 import com.hoccer.talk.content.ContentMediaType;
 import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.UUID;
 
 
 public class SelectedLocation extends SelectedContent {
 
+    private static final Logger LOG = Logger.getLogger(SelectedLocation.class);
+
     private final byte[] mData;
 
     public SelectedLocation(byte[] data) {
+        super(null, "application/json", ContentMediaType.LOCATION);
         mData = data;
     }
 
     @Override
-    protected String writeToFile() {
+    public String writeContentToFile() {
         File file = new File(XoApplication.getAttachmentDirectory(), UUID.randomUUID().toString());
         try {
             file.createNewFile();
-            OutputStream os = new FileOutputStream(file);
-            os.write(mData);
-            os.flush();
-            os.close();
+            FileUtils.writeByteArrayToFile(file, mData);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Could not save location to file", e);
         }
+
         return file.getPath();
-    }
-
-    @Override
-    public String getMediaType() {
-        return ContentMediaType.LOCATION;
-    }
-
-    @Override
-    public String getMimeType() {
-        return "application/json";
-    }
-
-    @Override
-    public double getAspectRatio() {
-        return 0.0f;
     }
 }

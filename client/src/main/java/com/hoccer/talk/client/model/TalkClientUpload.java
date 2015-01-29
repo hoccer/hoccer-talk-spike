@@ -159,6 +159,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     public void initializeAsAvatar(SelectedContent content) {
+        content.createContentFile();
         LOG.info("[new] initializing as avatar: '" + content.getFilePath() + "'");
         this.type = Type.AVATAR;
         this.dataFile = content.getFilePath();
@@ -168,6 +169,7 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
     }
 
     public void initializeAsAttachment(SelectedContent content) {
+        content.createContentFile();
         LOG.info("[new] initializing as attachment: '" + content.getFilePath() + "'");
         this.type = Type.ATTACHMENT;
         this.dataFile = content.getFilePath();
