@@ -8,15 +8,10 @@ import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
 import com.hoccer.talk.servlets.CertificateInfoServlet;
 import com.hoccer.talk.servlets.InvitationServlet;
 import com.hoccer.talk.servlets.ServerInfoServlet;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-
-import java.io.IOException;
-import java.util.List;
 
 public class TalkServerHandler extends HandlerCollection {
 
@@ -66,14 +61,9 @@ public class TalkServerHandler extends HandlerCollection {
     private HandlerCollection createStaticResourceHandler() {
         HandlerCollection handlerCollection = new HandlerCollection();
 
-        try {
-            List<String> directories = IOUtils.readLines(getClass().getResourceAsStream("/invite/"), Charsets.UTF_8);
-
-            for (String directory : directories) {
-                handlerCollection.addHandler(createStaticResourceHandler(directory));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load static resource paths", e);
+        handlerCollection.addHandler(createStaticResourceHandler("common"));
+        for (InvitationServlet.Label label : InvitationServlet.Label.values()) {
+            handlerCollection.addHandler(createStaticResourceHandler(label.toString().toLowerCase()));
         }
 
         return handlerCollection;

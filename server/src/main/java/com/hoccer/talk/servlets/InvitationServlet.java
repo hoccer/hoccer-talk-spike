@@ -26,7 +26,7 @@ public class InvitationServlet extends HttpServlet {
         OTHER
     }
 
-    private enum Label {
+    public enum Label {
         HOCCER,
         STROEER
     }
