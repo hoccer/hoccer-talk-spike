@@ -41,10 +41,10 @@ public class InvitationServlet extends HttpServlet {
     }
 
     private final Engine mEngine = new Engine();
-    private final String mTemplate = loadTemplate("inviteTemplate.html");
+    private final String mTemplate = loadTemplate("/invite/common/inviteTemplate.html");
 
-    private static String loadTemplate(String name) {
-        InputStream stream = InvitationServlet.class.getResourceAsStream("/templates/" + name);
+    private static String loadTemplate(String path) {
+        InputStream stream = InvitationServlet.class.getResourceAsStream(path);
 
         try {
             return IOUtils.toString(stream);
@@ -99,7 +99,7 @@ public class InvitationServlet extends HttpServlet {
     }
 
     private ResourceBundle getResourceBundle(Label label, Locale locale) {
-        return ResourceBundle.getBundle("label/" + label.toString().toLowerCase() + "/messages", locale);
+        return ResourceBundle.getBundle("invite/" + label.toString().toLowerCase() + "/messages", locale);
     }
 
     private class ResourceBundleModelAdapter extends DefaultModelAdaptor {

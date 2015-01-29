@@ -7,16 +7,18 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.hoccer.scm.GitInfo;
+import com.hoccer.talk.server.cryptoutils.P12CertificateChecker;
 import com.hoccer.talk.server.database.JongoDatabase;
 import com.hoccer.talk.server.database.migrations.DatabaseMigrationManager;
 import com.hoccer.talk.server.push.ApnsConfiguration;
 import com.hoccer.talk.server.push.PushAgent;
 import com.hoccer.talk.server.rpc.TalkRpcConnectionHandler;
-import com.hoccer.talk.server.cryptoutils.*;
 import com.hoccer.talk.servlets.CertificateInfoServlet;
 import com.hoccer.talk.servlets.InvitationServlet;
 import com.hoccer.talk.servlets.PushMessageServlet;
 import com.hoccer.talk.servlets.ServerInfoServlet;
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -32,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -142,13 +145,23 @@ public class TalkServerMain {
         invitationContextHandler.setContextPath("/invite");
         invitationContextHandler.addServlet(InvitationServlet.class, "/*");
 
-        // handler for static files
-        ContextHandler staticHandler = new ContextHandler("/static");
-        handlerCollection.addHandler(staticHandler);
+        // handlers for static files
+        try {
+            List<String> directories = IOUtils.readLines(getClass().getResourceAsStream("/invite/"), Charsets.UTF_8);
 
-        ResourceHandler staticResourceHandler = new ResourceHandler();
-        staticResourceHandler.setResourceBase(getClass().getResource("/static").toExternalForm());
-        staticHandler.setHandler(staticResourceHandler);
+            for (String directory : directories) {
+                ContextHandler staticHandler = new ContextHandler("/static/" + directory);
+                handlerCollection.addHandler(staticHandler);
+
+                ResourceHandler staticResourceHandler = new ResourceHandler();
+                String resourceBase = getClass().getResource("/invite/" + directory + "/static").toExternalForm();
+                staticResourceHandler.setResourceBase(resourceBase);
+                staticHandler.setHandler(staticResourceHandler);
+            }
+        } catch (IOException e) {
+            LOG.fatal("Failed to load static resources", e);
+            System.exit(1);
+        }
 
         // handler for talk websocket connections
         WebSocketHandler clientHandler = new TalkRpcConnectionHandler(talkServer);
