@@ -131,9 +131,10 @@ public class ClientMessage extends TalkToolCommand {
             String contentType = "image/*"; // XXX TODO: calculate filetype
             String mediaType = "image"; // seems to be only needed in android
             double aspectRatio = 1.0; // XXX TODO: calculate ((float)fileWidth) / ((float)fileHeight)
-            String contentHmac = getContentHmac("file://" + url);
+            String contentHmac = getContentHmac(url);
 
             TalkClientUpload attachmentUpload = new TalkClientUpload();
+
             attachmentUpload.initializeAsAttachment(fileName, url, url, contentType, mediaType, aspectRatio, contentHmac);
             return attachmentUpload;
         }
