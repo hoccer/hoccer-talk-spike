@@ -37,6 +37,7 @@ import com.hoccer.xo.android.gesture.MotionGestureListener;
 import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -380,7 +381,18 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
                         sendMessageWithAttachments(uploads);
                     }
                 },
-                null);
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteCachedFiles(uploads);
+                    }
+                });
+    }
+
+    private static void deleteCachedFiles(List<TalkClientUpload> uploads) {
+        for(TalkClientUpload upload : uploads) {
+            FileUtils.deleteQuietly(new File(upload.getCachedFilePath()));
+        }
     }
 
     private void sendMessageWithAttachments(List<TalkClientUpload> uploads) {
