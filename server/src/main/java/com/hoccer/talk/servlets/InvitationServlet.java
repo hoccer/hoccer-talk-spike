@@ -64,25 +64,26 @@ public class InvitationServlet extends HttpServlet {
         UrlParameters parameters = new UrlParameters(request.getPathInfo());
         Label label = LABELS.get(parameters.scheme);
 
-        if (label != null) {
-            ResourceBundle resourceBundle = getResourceBundle(label, request.getLocale());
-            String userAgent = request.getHeader("User-Agent");
-            Platform platform = determinePlatform(userAgent);
-
-            HashMap<String, Object> model = new HashMap<String, Object>();
-            model.put("label", label.toString().toLowerCase());
-            model.put("messages", resourceBundle);
-            model.put("downloadLink", resourceBundle.getString("downloadLink" + platform));
-            model.put("inviteLink", parameters.scheme + "://" + parameters.token);
-
-            String body = mEngine.transform(mTemplate, model);
-
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("text/html; charset=UTF-8");
-            response.getWriter().println(body);
-        } else {
+        if (label == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
         }
+
+        ResourceBundle resourceBundle = getResourceBundle(label, request.getLocale());
+        String userAgent = request.getHeader("User-Agent");
+        Platform platform = determinePlatform(userAgent);
+
+        HashMap<String, Object> model = new HashMap<String, Object>();
+        model.put("label", label.toString().toLowerCase());
+        model.put("messages", resourceBundle);
+        model.put("downloadLink", resourceBundle.getString("downloadLink" + platform));
+        model.put("inviteLink", parameters.scheme + "://" + parameters.token);
+
+        String body = mEngine.transform(mTemplate, model);
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/html; charset=UTF-8");
+        response.getWriter().println(body);
     }
 
     private static Platform determinePlatform(String userAgent) {
