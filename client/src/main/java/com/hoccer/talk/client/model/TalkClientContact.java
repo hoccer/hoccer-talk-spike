@@ -1,7 +1,6 @@
 package com.hoccer.talk.client.model;
 
 import com.hoccer.talk.client.XoTransfer;
-import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.model.*;
 import com.j256.ormlite.field.DatabaseField;

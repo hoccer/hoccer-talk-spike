@@ -22,7 +22,7 @@ import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkRelationship;
 import com.hoccer.xo.android.XoApplication;
@@ -73,7 +73,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
 
     private ContentSelection mAttachmentSelection;
     private EnumMap<AttachmentSelectionType, View> mAttachmentTypeViews;
-    private List<SelectedAttachment> mAttachments;
+    private List<SelectedContent> mSelectedContent;
     private TalkClientContact mContact;
     private String mLastMessage;
 
@@ -94,7 +94,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             throw new IllegalArgumentException("MessagingFragment requires valid contact.");
         }
 
-        mAttachments = new ArrayList<SelectedAttachment>();
+        mSelectedContent = new ArrayList<SelectedContent>();
     }
 
     @Override
@@ -178,19 +178,19 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (requestCode == REQUEST_SELECT_ATTACHMENT) {
-            mAttachments.clear();
+            mSelectedContent.clear();
 
             if (resultCode == Activity.RESULT_OK) {
                 if (mAttachmentSelection.getSelector() instanceof MultiImageSelector) {
                     MultiImageSelector selector = (MultiImageSelector) mAttachmentSelection.getSelector();
-                    mAttachments = selector.createObjectsFromSelectionResult(getActivity(), intent);
+                    mSelectedContent = selector.createObjectsFromSelectionResult(getActivity(), intent);
                 } else {
                     IContentSelector selector = mAttachmentSelection.getSelector();
-                    SelectedAttachment attachment = selector.createObjectFromSelectionResult(getActivity(), intent);
-                    CollectionUtils.addIgnoreNull(mAttachments, attachment);
+                    SelectedContent content = selector.createObjectFromSelectionResult(getActivity(), intent);
+                    CollectionUtils.addIgnoreNull(mSelectedContent, content);
                 }
 
-                if (mAttachments.isEmpty()) {
+                if (mSelectedContent.isEmpty()) {
                     Toast.makeText(getActivity(), R.string.error_attachment_selection, Toast.LENGTH_LONG).show();
                 }
             }
@@ -217,7 +217,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private boolean isComposed() {
-        return (mTextField.getText().length() > 0 || mAttachments != null);
+        return (mTextField.getText().length() > 0 || mSelectedContent != null);
     }
 
     private boolean isBlocked() {
@@ -231,10 +231,10 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private void updateAttachmentButton() {
-        if (mAttachments.isEmpty()) {
+        if (mSelectedContent.isEmpty()) {
             updateAttachmentButtonImage(AttachmentSelectionType.NONE);
-        } else if (mAttachments.size() == 1) {
-            String contentType = mAttachments.get(0).getContentMediaType();
+        } else if (mSelectedContent.size() == 1) {
+            String contentType = mSelectedContent.get(0).getContentMediaType();
 
             if (ContentMediaType.IMAGE.equals(contentType)) {
                 updateAttachmentButtonImage(AttachmentSelectionType.IMAGE);
@@ -265,7 +265,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
         mAttachmentTypeViews.get(type).setVisibility(View.VISIBLE);
 
         if (type == AttachmentSelectionType.MULTIPLE) {
-            mAttachmentButtonText.setText(String.valueOf(mAttachments.size()));
+            mAttachmentButtonText.setText(String.valueOf(mSelectedContent.size()));
         } else {
             mAttachmentButtonText.setText("");
         }
@@ -278,7 +278,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private void clearAttachment() {
-        mAttachments.clear();
+        mSelectedContent.clear();
         updateAttachmentButton();
     }
 
@@ -306,7 +306,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
             return;
         }
 
-        if (mAttachments.isEmpty()) {
+        if (mSelectedContent.isEmpty()) {
             sendMessage();
         } else {
             sendMessageWithAttachments();
@@ -321,11 +321,11 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     }
 
     private void sendMessageWithAttachments() {
-        List<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>(mAttachments.size());
+        List<TalkClientUpload> uploads = new ArrayList<TalkClientUpload>(mSelectedContent.size());
 
-        for (SelectedAttachment attachment : mAttachments) {
+        for (SelectedContent content : mSelectedContent) {
             TalkClientUpload upload = new TalkClientUpload();
-            upload.initializeAsAttachment(attachment);
+            upload.initializeAsAttachment(content);
             uploads.add(upload);
         }
 
@@ -480,7 +480,7 @@ public class CompositionFragment extends XoFragment implements MotionGestureList
     private class AttachmentButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            if (mAttachments.isEmpty()) {
+            if (mSelectedContent.isEmpty()) {
                 showSelectAttachmentDialog();
             } else {
                 showEditAttachmentDialog();

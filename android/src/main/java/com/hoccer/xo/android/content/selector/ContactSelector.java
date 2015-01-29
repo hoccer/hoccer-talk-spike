@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.provider.ContactsContract;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.content.SelectedContact;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import org.apache.log4j.Logger;
@@ -45,7 +45,7 @@ public class ContactSelector implements IContentSelector {
     }
 
     @Override
-    public SelectedAttachment createObjectFromSelectionResult(Context context, Intent intent) {
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
         boolean isValidIntent = isValidIntent(context, intent);
         if (!isValidIntent) {
             return null;

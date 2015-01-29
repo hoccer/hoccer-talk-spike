@@ -1,7 +1,7 @@
 package com.hoccer.xo.android.base;
 
 import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 
 /**
  * Base interface for our fragments
@@ -18,5 +18,5 @@ public interface IXoFragment {
     public void onServiceConnected();
     public void onServiceDisconnected();
 
-    public void onAvatarSelected(SelectedAttachment co);
+    public void onAvatarSelected(SelectedContent co);
 }

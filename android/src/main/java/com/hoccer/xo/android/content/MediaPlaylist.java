@@ -1,7 +1,6 @@
 package com.hoccer.xo.android.content;
 
 import com.hoccer.talk.client.XoTransfer;
-import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.talk.util.WeakListenerArray;
 
 /**

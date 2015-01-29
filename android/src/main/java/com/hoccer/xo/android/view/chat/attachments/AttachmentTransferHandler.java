@@ -134,11 +134,6 @@ public class AttachmentTransferHandler implements View.OnClickListener, IXoTrans
         updateTransferControl();
     }
 
-    /**
-     * Updates the AttachmentTransferControlView from a given IContentObject
-     * <p/>
-     * TODO: move this into the AttachmentTransferControlView class.
-     */
     protected void updateTransferControl() {
         mTransferControl.post(new Runnable() {
             @Override

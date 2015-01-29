@@ -28,7 +28,6 @@ public class ChatAudioItem extends ChatMessageItem {
 
     private ImageButton mPlayPauseButton;
     private final MediaPlayerServiceConnector mMediaPlayerServiceConnector;
-    private XoTransfer mAudioContentObject;
     private boolean mIsPlayable;
 
     public ChatAudioItem(Context context, TalkClientMessage message) {
@@ -48,8 +47,8 @@ public class ChatAudioItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(final XoTransfer attachment) {
-        super.displayAttachment(attachment);
+    protected void displayAttachment(final XoTransfer transfer) {
+        super.displayAttachment(transfer);
 
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
@@ -71,7 +70,7 @@ public class ChatAudioItem extends ChatMessageItem {
             fileNameTextView.setTextColor(mContext.getResources().getColor(R.color.xo_compose_message_textColor));
         }
 
-        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(attachment.getFilePath()).getPath());
+        MediaMetaData metaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath());
         String displayName = metaData.getTitleOrFilename().trim();
         if (metaData.getArtist() != null) {
             displayName = metaData.getArtist().trim() + " - " + displayName;
@@ -99,8 +98,7 @@ public class ChatAudioItem extends ChatMessageItem {
             }
         });
 
-        mAudioContentObject = attachment;
-        mIsPlayable = mAudioContentObject != null;
+        mIsPlayable = mAttachment != null;
         updatePlayPauseView();
 
         initializeMediaPlayerService();
@@ -120,8 +118,8 @@ public class ChatAudioItem extends ChatMessageItem {
     private void startPlaying() {
         if (mMediaPlayerServiceConnector.isConnected()) {
             MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAudioContentObject);
-            service.playItemInPlaylist(mAudioContentObject, playlist);
+            MediaPlaylist playlist = new SingleItemPlaylist(XoApplication.getXoClient().getDatabase(), mAttachment);
+            service.playItemInPlaylist(mAttachment, playlist);
         }
     }
 
@@ -147,9 +145,9 @@ public class ChatAudioItem extends ChatMessageItem {
 
     public boolean isActive() {
         boolean isActive = false;
-        if (mAudioContentObject != null && mMediaPlayerServiceConnector.isConnected()) {
+        if (mAttachment != null && mMediaPlayerServiceConnector.isConnected()) {
             MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            isActive = !service.isPaused() && !service.isStopped() && mAudioContentObject.equals(service.getCurrentMediaItem());
+            isActive = !service.isPaused() && !service.isStopped() && mAttachment.equals(service.getCurrentMediaItem());
         }
 
         return isActive;

@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.content.SelectedFile;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 
@@ -38,7 +38,7 @@ public class AudioSelector implements IContentSelector {
     }
 
     @Override
-    public SelectedAttachment createObjectFromSelectionResult(Context context, Intent intent) {
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
         boolean isValidIntent = isValidIntent(context, intent);
         if (!isValidIntent) {
             return null;

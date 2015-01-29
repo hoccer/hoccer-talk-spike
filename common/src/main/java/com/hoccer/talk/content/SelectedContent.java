@@ -3,13 +3,13 @@ package com.hoccer.talk.content;
 /**
  * Base for user selected attachments.
  */
-public abstract class SelectedAttachment {
+public abstract class SelectedContent {
 
     protected String mFilePath;
 
-    protected SelectedAttachment() {}
+    protected SelectedContent() {}
 
-    protected SelectedAttachment(String filePath) {
+    protected SelectedContent(String filePath) {
         mFilePath = filePath;
     }
 

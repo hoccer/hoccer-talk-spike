@@ -8,7 +8,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.hoccer.talk.client.XoTransfer;
-import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;

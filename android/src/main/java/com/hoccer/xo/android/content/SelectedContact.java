@@ -2,7 +2,7 @@ package com.hoccer.xo.android.content;
 
 import android.provider.ContactsContract;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 
-public class SelectedContact extends SelectedAttachment {
+public class SelectedContact extends SelectedContent {
 
     private static final Logger LOG = Logger.getLogger(SelectedContact.class);
 

@@ -6,7 +6,7 @@ import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.XoTransferAgent;
 import com.hoccer.talk.content.ContentState;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.crypto.AESCryptor;
 import com.hoccer.talk.crypto.CryptoUtils;
 import com.hoccer.talk.rpc.ITalkRpcServer;
@@ -158,24 +158,24 @@ public class TalkClientUpload extends XoTransfer implements IXoTransferObject, I
         this.encryptedLength = -1;
     }
 
-    public void initializeAsAvatar(SelectedAttachment selection) {
-        LOG.info("[new] initializing as avatar: '" + selection.getFilePath() + "'");
+    public void initializeAsAvatar(SelectedContent content) {
+        LOG.info("[new] initializing as avatar: '" + content.getFilePath() + "'");
         this.type = Type.AVATAR;
-        this.dataFile = selection.getFilePath();
-        this.contentType = selection.getContentType();
-        this.mediaType = selection.getContentMediaType();
-        this.aspectRatio = selection.getAspectRatio();
+        this.dataFile = content.getFilePath();
+        this.contentType = content.getContentType();
+        this.mediaType = content.getContentMediaType();
+        this.aspectRatio = content.getAspectRatio();
     }
 
-    public void initializeAsAttachment(SelectedAttachment selection) {
-        LOG.info("[new] initializing as attachment: '" + selection.getFilePath() + "'");
+    public void initializeAsAttachment(SelectedContent content) {
+        LOG.info("[new] initializing as attachment: '" + content.getFilePath() + "'");
         this.type = Type.ATTACHMENT;
-        this.dataFile = selection.getFilePath();
+        this.dataFile = content.getFilePath();
         this.fileName = dataFile.substring(dataFile.lastIndexOf(File.separator) + 1);
         this.contentHmac = computeHmac(dataFile);
-        this.contentType = selection.getContentType();
-        this.mediaType = selection.getContentMediaType();
-        this.aspectRatio = selection.getAspectRatio();
+        this.contentType = content.getContentType();
+        this.mediaType = content.getContentMediaType();
+        this.aspectRatio = content.getAspectRatio();
     }
 
     @Override

@@ -12,7 +12,7 @@ import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.content.SelectedFile;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import com.hoccer.xo.android.util.ImageUtils;
@@ -79,7 +79,7 @@ public class CaptureSelector implements IContentSelector {
     }
 
     @Override
-    public SelectedAttachment createObjectFromSelectionResult(Context context, Intent intent) {
+    public SelectedContent createObjectFromSelectionResult(Context context, Intent intent) {
         String filePath = mFileUri.getPath();
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(FilenameUtils.getExtension(filePath));
 

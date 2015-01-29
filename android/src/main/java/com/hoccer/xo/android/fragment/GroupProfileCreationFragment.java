@@ -16,7 +16,7 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
@@ -47,7 +47,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     private ListView mGroupMembersList;
     private ContactsAdapter mGroupMemberAdapter;
 
-    private SelectedAttachment mAvatar;
+    private SelectedContent mAvatar;
     private ImageView mAvatarImageView;
 
     private List<TalkClientContact> mContactsToInvite = Collections.emptyList();
@@ -222,11 +222,11 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     @Override
-    public void onAvatarSelected(SelectedAttachment contentObject) {
-        updateAvatarView(contentObject);
+    public void onAvatarSelected(SelectedContent content) {
+        updateAvatarView(content);
     }
 
-    private void updateAvatarView(final SelectedAttachment avatar) {
+    private void updateAvatarView(final SelectedContent avatar) {
         mAvatar = avatar;
         Uri avatarUri = mAvatar == null ? null : UriUtils.getAbsoluteFileUri(mAvatar.getFilePath());
         Picasso.with(getActivity())

@@ -1,7 +1,7 @@
 package com.hoccer.xo.android.content;
 
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 
 import java.io.File;
@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 
-public class SelectedLocation extends SelectedAttachment {
+public class SelectedLocation extends SelectedContent {
 
     private final byte[] mData;
 

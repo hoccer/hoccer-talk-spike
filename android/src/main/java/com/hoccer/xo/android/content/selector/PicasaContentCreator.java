@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedFile;
 import com.hoccer.xo.android.util.ImageUtils;
@@ -23,12 +23,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 
-public class PicasaContentObjectCreator implements IContentCreator {
+public class PicasaContentCreator implements IContentCreator {
 
-    private static final Logger LOG = Logger.getLogger(PicasaContentObjectCreator.class);
+    private static final Logger LOG = Logger.getLogger(PicasaContentCreator.class);
 
     @Override
-    public SelectedAttachment apply(Context context, Intent intent) {
+    public SelectedContent apply(Context context, Intent intent) {
         final Uri contentUri = intent.getData();
         final String[] projection = {
                 MediaStore.MediaColumns.DISPLAY_NAME,

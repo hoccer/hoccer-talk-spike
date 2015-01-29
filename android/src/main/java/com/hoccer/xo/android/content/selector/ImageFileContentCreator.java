@@ -7,19 +7,19 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import com.hoccer.talk.content.ContentMediaType;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.content.SelectedFile;
 import com.hoccer.xo.android.util.ImageUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 
-public class ImageFileContentObjectCreator implements IContentCreator {
+public class ImageFileContentCreator implements IContentCreator {
 
-    private static final Logger LOG = Logger.getLogger(ImageFileContentObjectCreator.class);
+    private static final Logger LOG = Logger.getLogger(ImageFileContentCreator.class);
 
     @Override
-    public SelectedAttachment apply(Context context, Intent intent) {
+    public SelectedContent apply(Context context, Intent intent) {
         Uri contentUri = intent.getData();
 
         String[] projection = {

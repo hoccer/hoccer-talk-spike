@@ -12,7 +12,6 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.util.UriUtils;

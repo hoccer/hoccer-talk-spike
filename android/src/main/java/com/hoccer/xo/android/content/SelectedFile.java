@@ -1,9 +1,9 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 
 
-public class SelectedFile extends SelectedAttachment {
+public class SelectedFile extends SelectedContent {
 
     private final String mContentType;
     private final String mContentMediaType;

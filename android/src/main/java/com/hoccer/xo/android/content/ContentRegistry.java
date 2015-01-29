@@ -15,7 +15,7 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.content.selector.*;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -176,7 +176,7 @@ public class ContentRegistry {
      * @param intent    returned from the selector
      * @return content object for selected avatar
      */
-    public static SelectedAttachment createSelectedAvatar(ContentSelection selection, Intent intent) {
+    public static SelectedContent createSelectedAvatar(ContentSelection selection, Intent intent) {
         return selection.getSelector().createObjectFromSelectionResult(selection.getActivity(), intent);
     }
 

@@ -13,7 +13,7 @@ import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkRelationship;
@@ -63,7 +63,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private TalkClientContact mGroup;
 
-    private SelectedAttachment mAvatarToSet;
+    private SelectedContent mAvatarToSet;
 
     private Menu mOptionsMenu;
 
@@ -547,8 +547,8 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onAvatarSelected(SelectedAttachment contentObject) {
-        mAvatarToSet = contentObject;
+    public void onAvatarSelected(SelectedContent content) {
+        mAvatarToSet = content;
     }
 
     @Override
@@ -560,7 +560,7 @@ public class GroupProfileFragment extends ProfileFragment
         }
     }
 
-    private void updateAvatar(final SelectedAttachment avatar) {
+    private void updateAvatar(final SelectedContent avatar) {
         if (avatar != null) {
             LOG.debug("creating avatar upload");
             TalkClientUpload upload = new TalkClientUpload();

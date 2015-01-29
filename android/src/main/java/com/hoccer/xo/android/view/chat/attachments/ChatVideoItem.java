@@ -16,7 +16,6 @@ import android.widget.Toast;
 import com.artcom.hoccer.R;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;

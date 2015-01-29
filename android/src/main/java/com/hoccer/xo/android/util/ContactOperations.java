@@ -9,7 +9,7 @@ import android.text.Html;
 import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.content.SelectedFile;
 import org.apache.log4j.Logger;
@@ -32,9 +32,9 @@ public class ContactOperations {
     }
 
     public static void sendTransferToContact(XoTransfer transfer, TalkClientContact contact) throws FileNotFoundException, URISyntaxException {
-        SelectedAttachment selection = new SelectedFile(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath(), transfer.getContentType(), transfer.getContentMediaType(), transfer.getContentAspectRatio());
+        SelectedContent content = new SelectedFile(UriUtils.getAbsoluteFileUri(transfer.getFilePath()).getPath(), transfer.getContentType(), transfer.getContentMediaType(), transfer.getContentAspectRatio());
         TalkClientUpload upload = new TalkClientUpload();
-        upload.initializeAsAttachment(selection);
+        upload.initializeAsAttachment(content);
 
         String messageTag = XoApplication.getXoClient().composeClientMessage(contact, "", upload).getMessageTag();
         LOG.debug("Sending Attachment " + upload + " to contact " + contact);

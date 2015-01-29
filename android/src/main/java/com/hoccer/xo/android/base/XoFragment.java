@@ -3,7 +3,7 @@ package com.hoccer.xo.android.base;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 import com.hoccer.talk.client.XoClientDatabase;
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoAndroidClient;
 import com.hoccer.xo.android.XoApplication;
 import org.apache.log4j.Logger;
@@ -63,6 +63,6 @@ public abstract class XoFragment extends Fragment implements IXoFragment {
     public void onServiceDisconnected() {
     }
 
-    public void onAvatarSelected(SelectedAttachment contentObject) {
+    public void onAvatarSelected(SelectedContent content) {
     }
 }

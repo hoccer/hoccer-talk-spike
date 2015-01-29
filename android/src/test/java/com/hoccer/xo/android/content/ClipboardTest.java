@@ -1,6 +1,6 @@
 package com.hoccer.xo.android.content;
 
-import com.hoccer.talk.content.SelectedAttachment;
+import com.hoccer.talk.content.SelectedContent;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -8,7 +8,7 @@ import static junit.framework.TestCase.*;
 
 public class ClipboardTest {
 
-    private SelectedAttachment mTestContent;
+    private SelectedContent mTestContent;
     private Clipboard mClipboard;
 
     @Before

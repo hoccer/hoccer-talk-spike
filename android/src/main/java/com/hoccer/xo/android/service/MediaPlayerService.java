@@ -21,7 +21,6 @@ import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMessage;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.SelectedAttachment;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.activity.FullscreenPlayerActivity;
 import com.hoccer.xo.android.content.MediaMetaData;
