@@ -1,6 +1,7 @@
 package com.hoccer.xo.android.fragment;
 
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,14 +16,14 @@ import com.hoccer.talk.client.IXoContactListener;
 import com.hoccer.talk.client.model.TalkClientContact;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.client.predicates.TalkClientContactPredicates;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.GroupProfileActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
 import com.hoccer.xo.android.base.XoFragment;
-import com.hoccer.xo.android.content.SelectedContent;
+import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -46,7 +47,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     private ListView mGroupMembersList;
     private ContactsAdapter mGroupMemberAdapter;
 
-    private IContentObject mAvatar;
+    private SelectedContent mAvatar;
     private ImageView mAvatarImageView;
 
     private List<TalkClientContact> mContactsToInvite = Collections.emptyList();
@@ -210,7 +211,7 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
                                 }
                                 break;
                                 case 1: {
-                                    updateAvatar(null);
+                                    updateAvatarView(null);
                                 }
                             }
                         }
@@ -221,26 +222,18 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
     }
 
     @Override
-    public void onAvatarSelected(IContentObject contentObject) {
-        updateAvatar(contentObject);
+    public void onAvatarSelected(SelectedContent content) {
+        updateAvatarView(content);
     }
 
-    private void updateAvatar(final IContentObject avatar) {
+    private void updateAvatarView(final SelectedContent avatar) {
+        mAvatar = avatar;
+        Uri avatarUri = mAvatar == null ? null : UriUtils.getAbsoluteFileUri(mAvatar.getFilePath());
         Picasso.with(getActivity())
-                .load(getAvatarUrl(avatar))
+                .load(avatarUri)
                 .placeholder(R.drawable.avatar_default_group_large)
                 .error(R.drawable.avatar_default_group_large)
                 .into(mAvatarImageView);
-
-        mAvatar = avatar;
-    }
-
-    private String getAvatarUrl(IContentObject avatar) {
-        if (avatar != null) {
-            return avatar.getContentDataUrl();
-        }
-
-        return null;
     }
 
     @Override
@@ -260,7 +253,8 @@ public class GroupProfileCreationFragment extends XoFragment implements IXoConta
 
     private void uploadAvatar(TalkClientContact group) {
         if (mAvatar != null) {
-            TalkClientUpload upload = SelectedContent.createAvatarUpload(mAvatar);
+            TalkClientUpload upload = new TalkClientUpload();
+            upload.initializeAsAvatar(mAvatar);
 
             try {
                 getXoDatabase().saveClientUpload(upload);

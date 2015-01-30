@@ -10,10 +10,10 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.talk.model.TalkGroupMembership;
 import com.hoccer.talk.model.TalkGroupPresence;
 import com.hoccer.talk.model.TalkRelationship;
@@ -22,14 +22,13 @@ import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.MediaBrowserActivity;
 import com.hoccer.xo.android.adapter.ContactsAdapter;
 import com.hoccer.xo.android.adapter.GroupContactsAdapter;
-import com.hoccer.xo.android.content.SelectedContent;
 import com.hoccer.xo.android.dialog.GroupManageDialog;
 import com.hoccer.xo.android.util.IntentHelper;
+import com.hoccer.xo.android.util.UriUtils;
 import com.squareup.picasso.Picasso;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +63,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private TalkClientContact mGroup;
 
-    private IContentObject mAvatarToSet;
+    private SelectedContent mAvatarToSet;
 
     private Menu mOptionsMenu;
 
@@ -259,7 +258,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     @Override
     protected void updateView() {
-        updateAvatar();
+        updateAvatarView();
         updateChatContainer();
         updateGroupName();
         updateContentVisibility();
@@ -322,24 +321,21 @@ public class GroupProfileFragment extends ProfileFragment
         mNameEditText.setText(name);
     }
 
-    private void updateAvatar() {
-        String avatarUrl = null;
+    private void updateAvatarView() {
+        XoTransfer avatarTransfer;
         if (mGroup.isGroupAdmin()) {
-            TalkClientUpload avatarUpload = mGroup.getAvatarUpload();
-            if (avatarUpload != null && avatarUpload.isContentAvailable()) {
-                avatarUrl = avatarUpload.getContentDataUrl();
-            }
+            avatarTransfer = mContact.getAvatarUpload();
         } else {
-            TalkClientDownload avatarDownload = mGroup.getAvatarDownload();
-            if (avatarDownload != null && avatarDownload.isContentAvailable()) {
-                if (avatarDownload.getDataFile() != null) {
-                    Uri uri = Uri.fromFile(new File(avatarDownload.getDataFile()));
-                    avatarUrl = uri.toString();
-                }
-            }
+            avatarTransfer = mContact.getAvatarDownload();
         }
+
+        Uri avatarUri = null;
+        if (avatarTransfer != null && avatarTransfer.isContentAvailable() && avatarTransfer.getFilePath() != null) {
+            avatarUri = UriUtils.getAbsoluteFileUri(avatarTransfer.getFilePath());
+        }
+
         Picasso.with(getActivity())
-                .load(avatarUrl)
+                .load(avatarUri)
                 .placeholder(R.drawable.avatar_default_group_large)
                 .error(R.drawable.avatar_default_group_large)
                 .into(mAvatarImage);
@@ -522,7 +518,7 @@ public class GroupProfileFragment extends ProfileFragment
 
     private void enterAvatarEditMode() {
         if (mGroup.isEditable()) {
-            if (mGroup.getAvatarContentUrl() != null) {
+            if (mGroup.getAvatarFilePath() != null) {
                 XoDialogs.showRadioSingleChoiceDialog("AvatarSelection",
                         R.string.dialog_avatar_options_title,
                         new String[]{
@@ -551,8 +547,8 @@ public class GroupProfileFragment extends ProfileFragment
     }
 
     @Override
-    public void onAvatarSelected(IContentObject contentObject) {
-        mAvatarToSet = contentObject;
+    public void onAvatarSelected(SelectedContent content) {
+        mAvatarToSet = content;
     }
 
     @Override
@@ -564,10 +560,11 @@ public class GroupProfileFragment extends ProfileFragment
         }
     }
 
-    private void updateAvatar(final IContentObject avatar) {
+    private void updateAvatar(final SelectedContent avatar) {
         if (avatar != null) {
             LOG.debug("creating avatar upload");
-            TalkClientUpload upload = SelectedContent.createAvatarUpload(avatar);
+            TalkClientUpload upload = new TalkClientUpload();
+            upload.initializeAsAvatar(avatar);
             try {
                 getXoDatabase().saveClientUpload(upload);
                 getXoClient().setGroupAvatar(mGroup, upload);

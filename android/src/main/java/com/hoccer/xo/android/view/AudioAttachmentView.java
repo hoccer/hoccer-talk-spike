@@ -7,28 +7,26 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.xo.android.content.MediaMetaData;
 import com.hoccer.xo.android.service.MediaPlayerService;
 import com.hoccer.xo.android.service.MediaPlayerServiceConnector;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.artcom.hoccer.R;
-import org.apache.log4j.Logger;
+import com.hoccer.xo.android.util.UriUtils;
 
 public class AudioAttachmentView extends LinearLayout implements View.OnClickListener, MediaMetaData.ArtworkRetrieverListener {
 
-    private Context mContext;
-    private IContentObject mItem;
-    private MediaPlayerServiceConnector mMediaPlayerServiceConnector;
+    private final Context mContext;
+    private XoTransfer mItem;
+    private final MediaPlayerServiceConnector mMediaPlayerServiceConnector;
 
-    private TextView mTitleTextView;
-    private TextView mArtistTextView;
-    private ImageView mArtworkImageView;
-    private View mPlayStatusView;
-    private ImageView mDragHandleView;
+    private final TextView mTitleTextView;
+    private final TextView mArtistTextView;
+    private final ImageView mArtworkImageView;
+    private final View mPlayStatusView;
+    private final ImageView mDragHandleView;
     private MediaMetaData mCurrentMetaData;
-
-    private static final Logger LOG = Logger.getLogger(AudioAttachmentView.class);
 
     public AudioAttachmentView(Context context) {
         super(context.getApplicationContext());
@@ -43,7 +41,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
         mDragHandleView = (ImageView) findViewById(R.id.list_drag_handle);
     }
 
-    public void setMediaItem(IContentObject audioAttachmentItem) {
+    public void setMediaItem(XoTransfer audioAttachmentItem) {
         if (mItem == null || !mItem.equals(audioAttachmentItem)) {
             mItem = audioAttachmentItem;
             updateAudioView();
@@ -53,7 +51,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
     public boolean isActive() {
         if (mMediaPlayerServiceConnector.isConnected()) {
             MediaPlayerService service = mMediaPlayerServiceConnector.getService();
-            IContentObject currentItem = service.getCurrentMediaItem();
+            XoTransfer currentItem = service.getCurrentMediaItem();
             return !service.isPaused() && !service.isStopped() && (mItem.equals(currentItem));
         } else {
             return false;
@@ -120,7 +118,7 @@ public class AudioAttachmentView extends LinearLayout implements View.OnClickLis
             mCurrentMetaData.unregisterArtworkRetrievalListener(this);
         }
 
-        mCurrentMetaData = MediaMetaData.retrieveMetaData(mItem.getContentDataUrl());
+        mCurrentMetaData = MediaMetaData.retrieveMetaData(UriUtils.getAbsoluteFileUri(mItem.getFilePath()).getPath());
         mTitleTextView.setText(mCurrentMetaData.getTitleOrFilename().trim());
 
         String artist = mCurrentMetaData.getArtist();

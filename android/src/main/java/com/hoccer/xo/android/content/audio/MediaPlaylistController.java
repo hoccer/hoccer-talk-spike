@@ -1,19 +1,25 @@
 package com.hoccer.xo.android.content.audio;
 
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.util.WeakListenerArray;
 import com.hoccer.xo.android.content.EmptyPlaylist;
 import com.hoccer.xo.android.content.MediaPlaylist;
 import org.apache.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public class MediaPlaylistController implements MediaPlaylist.Listener {
 
     public interface Listener {
-        void onCurrentItemChanged(IContentObject newItem);
+        void onCurrentItemChanged(XoTransfer newItem);
+
         void onPlaylistChanged(MediaPlaylist newPlaylist);
+
         void onRepeatModeChanged(RepeatMode newMode);
+
         void onShuffleChanged(boolean isShuffled);
     }
 
@@ -28,9 +34,9 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
 
 
     private int mCurrentIndex;
-    private IContentObject mCurrentItem;
+    private XoTransfer mCurrentItem;
 
-    private boolean mShuffleActive = false;
+    private boolean mShuffleActive;
 
     private RepeatMode mRepeatMode = RepeatMode.NO_REPEAT;
 
@@ -41,7 +47,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
     }
 
     public void setCurrentIndex(int index) {
-        if(isIndexInBounds(index)) {
+        if (isIndexInBounds(index)) {
             mCurrentIndex = mPlaylistOrder.indexOf(index);
             setNewCurrentItem(mPlaylist.getItem(index));
             createPlaylistIndexes();
@@ -51,7 +57,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
     }
 
     public int getCurrentIndex() {
-        if(isIndexInBounds(mCurrentIndex)) {
+        if (isIndexInBounds(mCurrentIndex)) {
             return mPlaylistOrder.get(mCurrentIndex);
         } else {
             return -1;
@@ -71,7 +77,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
                     return false;
                 }
             case REPEAT_ALL:
-                if(mPlaylist.size() > 0) {
+                if (mPlaylist.size() > 0) {
                     return true;
                 } else {
                     return false;
@@ -92,7 +98,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
                     return false;
                 }
             case REPEAT_ALL:
-                if(mPlaylist.size() > 0) {
+                if (mPlaylist.size() > 0) {
                     return true;
                 } else {
                     return false;
@@ -104,8 +110,8 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
         }
     }
 
-    public IContentObject backward() {
-        if(!canBackward()) {
+    public XoTransfer backward() {
+        if (!canBackward()) {
             mCurrentIndex = -1;
             setNewCurrentItem(null);
         } else {
@@ -118,7 +124,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
                     if (mCurrentIndex - 1 < 0) {
                         mCurrentIndex = mPlaylist.size() - 1;
                         setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
-                        if(mShuffleActive) {
+                        if (mShuffleActive) {
                             createPlaylistIndexes();  // reshuffle playlist
                         }
                     } else {
@@ -135,8 +141,8 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
         return mCurrentItem;
     }
 
-    public IContentObject forward() {
-        if(!canForward()) {
+    public XoTransfer forward() {
+        if (!canForward()) {
             mCurrentIndex = -1;
             setNewCurrentItem(null);
         } else {
@@ -149,7 +155,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
                     if (mCurrentIndex + 1 >= mPlaylist.size()) {
                         mCurrentIndex = 0;
                         setNewCurrentItem(mPlaylist.getItem(mPlaylistOrder.get(mCurrentIndex)));
-                        if(mShuffleActive) {
+                        if (mShuffleActive) {
                             createPlaylistIndexes();  // reshuffle playlist
                         }
                     } else {
@@ -166,7 +172,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
         return mCurrentItem;
     }
 
-    public IContentObject getCurrentItem() {
+    public XoTransfer getCurrentItem() {
         return mCurrentItem;
     }
 
@@ -176,7 +182,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
         mPlaylist.registerListener(this);
 
         // set initial item
-        if(playlist.size() > 0) {
+        if (playlist.size() > 0) {
             if (mShuffleActive) {
                 Random rnd = new Random(System.nanoTime());
                 mCurrentIndex = rnd.nextInt(playlist.size());
@@ -191,7 +197,7 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
 
         createPlaylistIndexes();
 
-        for(Listener listener : mListener) {
+        for (Listener listener : mListener) {
             listener.onPlaylistChanged(mPlaylist);
         }
     }
@@ -205,13 +211,13 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
     }
 
     public void setRepeatMode(RepeatMode repeatMode) {
-        if(mRepeatMode == repeatMode) {
+        if (mRepeatMode == repeatMode) {
             return;
         }
 
         this.mRepeatMode = repeatMode;
 
-        for(Listener listener : mListener) {
+        for (Listener listener : mListener) {
             listener.onRepeatModeChanged(mRepeatMode);
         }
     }
@@ -221,14 +227,14 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
     }
 
     public void setShuffleActive(boolean shuffleActive) {
-        if(mShuffleActive == shuffleActive) {
+        if (mShuffleActive == shuffleActive) {
             return;
         }
 
         mShuffleActive = shuffleActive;
         createPlaylistIndexes();
 
-        for(Listener listener : mListener) {
+        for (Listener listener : mListener) {
             listener.onShuffleChanged(mShuffleActive);
         }
     }
@@ -239,12 +245,12 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
             mPlaylistOrder.add(i);
         }
 
-        if(mShuffleActive) {
+        if (mShuffleActive) {
             Random rnd = new Random(System.nanoTime());
             Collections.shuffle(mPlaylistOrder, rnd);
 
             // move current item index to first shuffle position
-            if(mCurrentItem != null) {
+            if (mCurrentItem != null) {
                 int playlistIndex = mPlaylist.indexOf(mCurrentItem);
                 int shuffledIndex = mPlaylistOrder.indexOf(playlistIndex);
                 int firstShuffledPlaylistIndex = mPlaylistOrder.get(0);
@@ -279,8 +285,8 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
     }
 
     @Override
-    public void onItemRemoved(MediaPlaylist playlist, IContentObject itemRemoved) {
-        if(mCurrentItem != null) {
+    public void onItemRemoved(MediaPlaylist playlist, XoTransfer itemRemoved) {
+        if (mCurrentItem != null) {
             if (mPlaylist.size() > 0) {
                 if (itemRemoved == mCurrentItem) {
                     // the current title was removed move on to next based on repeat mode
@@ -316,29 +322,29 @@ public class MediaPlaylistController implements MediaPlaylist.Listener {
         }
 
         createPlaylistIndexes();
-        for(Listener listener : mListener) {
+        for (Listener listener : mListener) {
             listener.onPlaylistChanged(mPlaylist);
         }
     }
 
-    private void setNewCurrentItem(IContentObject newItem) {
+    private void setNewCurrentItem(XoTransfer newItem) {
         // do nothing if there is no change
-        if(mCurrentItem == newItem) {
+        if (mCurrentItem == newItem) {
             return;
         }
 
         mCurrentItem = newItem;
 
-        for(Listener listener : mListener) {
+        for (Listener listener : mListener) {
             listener.onCurrentItemChanged(mCurrentItem);
         }
     }
 
     @Override
-    public void onItemAdded(MediaPlaylist playlist, IContentObject itemAdded) {
+    public void onItemAdded(MediaPlaylist playlist, XoTransfer itemAdded) {
         createPlaylistIndexes();
 
-        for(Listener listener : mListener) {
+        for (Listener listener : mListener) {
             listener.onPlaylistChanged(mPlaylist);
         }
     }

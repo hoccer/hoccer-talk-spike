@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import com.artcom.hoccer.R;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.activity.MultiImagePickerActivity;
-import com.hoccer.xo.android.content.contentselectors.IContentCreator;
-import com.hoccer.xo.android.content.contentselectors.ImageSelector;
+import com.hoccer.xo.android.content.selector.IContentCreator;
+import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.util.ColorSchemeManager;
 import org.apache.log4j.Logger;
 
@@ -34,15 +34,15 @@ public class MultiImageSelector extends ImageSelector {
         return new Intent(context, MultiImagePickerActivity.class);
     }
 
-    public ArrayList<IContentObject> createObjectsFromSelectionResult(Context context, Intent intent) {
-        ArrayList<IContentObject> result = new ArrayList<IContentObject>();
+    public ArrayList<SelectedContent> createObjectsFromSelectionResult(Context context, Intent intent) {
+        ArrayList<SelectedContent> result = new ArrayList<SelectedContent>();
         if (!isValidIntent(context, intent)) {
             return result;
         }
 
         String[] uris = intent.getStringArrayExtra(MultiImagePickerActivity.EXTRA_IMAGES);
         for (String uri : uris) {
-            IContentCreator creator = findContentObjectCreator(Uri.parse(uri));
+            IContentCreator creator = findContentCreator(Uri.parse(uri));
             if (creator == null) {
                 LOG.warn("No IContentCreator found for url '" + uri + "'");
                 return result;
@@ -50,9 +50,9 @@ public class MultiImageSelector extends ImageSelector {
 
             Intent dataIntent = new Intent();
             dataIntent.setDataAndType(Uri.parse(uri), "image/*");
-            SelectedContent selectedContent = creator.apply(context, dataIntent);
-            if (selectedContent != null) {
-                result.add(selectedContent);
+            SelectedContent selectedImage = creator.apply(context, dataIntent);
+            if (selectedImage != null) {
+                result.add(selectedImage);
             }
         }
 

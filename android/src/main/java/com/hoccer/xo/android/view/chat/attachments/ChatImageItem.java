@@ -10,8 +10,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import com.artcom.hoccer.R;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientMessage;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.base.XoActivity;
 import com.hoccer.xo.android.util.DisplayUtils;
@@ -19,9 +19,12 @@ import com.hoccer.xo.android.util.ImageUtils;
 import com.hoccer.xo.android.util.UriUtils;
 import com.hoccer.xo.android.view.chat.ChatMessageItem;
 import com.squareup.picasso.Picasso;
+import org.apache.log4j.Logger;
 
 
 public class ChatImageItem extends ChatMessageItem {
+
+    private final static Logger LOG = Logger.getLogger(ChatImageItem.class);
 
     public static final double HEIGHT_SCALE_FACTOR = 0.6;
     public static final double WIDTH_SCALE_FACTOR = 0.85;
@@ -45,8 +48,8 @@ public class ChatImageItem extends ChatMessageItem {
     }
 
     @Override
-    protected void displayAttachment(final IContentObject contentObject) {
-        super.displayAttachment(contentObject);
+    protected void displayAttachment(final XoTransfer attachment) {
+        super.displayAttachment(attachment);
 
         // add view lazily
         if (mContentWrapper.getChildCount() == 0) {
@@ -58,7 +61,7 @@ public class ChatImageItem extends ChatMessageItem {
         mContentWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openImage(contentObject);
+                openImage(attachment);
             }
         });
 
@@ -66,7 +69,7 @@ public class ChatImageItem extends ChatMessageItem {
         double widthScaleFactor = mAvatarView.getVisibility() == View.VISIBLE ? WIDTH_AVATAR_SCALE_FACTOR : WIDTH_SCALE_FACTOR;
         int maxWidth = (int) (DisplayUtils.getDisplaySize(mContext).x * widthScaleFactor);
         int maxHeight = (int) (DisplayUtils.getDisplaySize(mContext).y * HEIGHT_SCALE_FACTOR);
-        double aspectRatio = contentObject.getContentAspectRatio();
+        double aspectRatio = attachment.getContentAspectRatio();
         Point boundImageSize = ImageUtils.getImageSizeInBounds(aspectRatio, maxWidth, maxHeight);
         int width = boundImageSize.x;
         int height = boundImageSize.y;
@@ -93,7 +96,9 @@ public class ChatImageItem extends ChatMessageItem {
 
         mTargetView = (ImageView) rootView.findViewById(R.id.iv_picture);
         Picasso.with(mContext).setLoggingEnabled(XoApplication.getConfiguration().isDevelopmentModeEnabled());
-        Picasso.with(mContext).load(mContentObject.getContentDataUrl())
+
+        Uri imageUri = UriUtils.getAbsoluteFileUri(attachment.getFilePath());
+        Picasso.with(mContext).load(imageUri)
                 .error(R.drawable.ic_img_placeholder)
                 .resize((int) (width * IMAGE_SCALE_FACTOR), (int) (height * IMAGE_SCALE_FACTOR))
                 .centerInside()
@@ -109,26 +114,17 @@ public class ChatImageItem extends ChatMessageItem {
         }
     }
 
-    private void openImage(IContentObject contentObject) {
-        if (contentObject.getContentDataUrl() == null && contentObject.getContentUrl() == null) {
-            return;
-        }
-
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-
-        Uri dataUri;
-        if (UriUtils.isExistingContentUri(mContext, contentObject.getContentUrl())) {
-            dataUri = Uri.parse(contentObject.getContentUrl());
-        } else {
-            dataUri = Uri.parse(contentObject.getContentDataUrl());
-        }
-
-        intent.setDataAndType(dataUri, "image/*");
-        try {
-            XoActivity activity = (XoActivity) mContext;
-            activity.startExternalActivity(intent);
-        } catch (ClassCastException e) {
-            e.printStackTrace();
+    private void openImage(XoTransfer transfer) {
+        if (transfer.isContentAvailable()) {
+            Uri imageUri = UriUtils.getAbsoluteFileUri(transfer.getFilePath());
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(imageUri, "image/*");
+            try {
+                XoActivity activity = (XoActivity) mContext;
+                activity.startExternalActivity(intent);
+            } catch (ClassCastException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

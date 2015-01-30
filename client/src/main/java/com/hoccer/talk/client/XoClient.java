@@ -101,12 +101,16 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     /** Directory for avatar images */
     String mAvatarDirectory;
+    String mRelativeAvatarDirectory;
     /** Directory for received attachments */
     String mAttachmentDirectory;
+    String mRelativeAttachmentDirectory;
     /** Directory for encrypted intermediate uploads */
     String mEncryptedUploadDirectory;
     /** Directory for encrypted intermediate downloads */
     String mEncryptedDownloadDirectory;
+
+    String mExternalStorageDirectory;
 
     XoTransferAgent mTransferAgent;
 
@@ -264,12 +268,28 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         this.mAvatarDirectory = avatarDirectory;
     }
 
+    public String getRelativeAvatarDirectory() {
+        return mRelativeAvatarDirectory;
+    }
+
+    public void setRelativeAvatarDirectory(String avatarDirectory) {
+        this.mRelativeAvatarDirectory = avatarDirectory;
+    }
+
     public String getAttachmentDirectory() {
         return mAttachmentDirectory;
     }
 
     public void setAttachmentDirectory(String attachmentDirectory) {
         this.mAttachmentDirectory = attachmentDirectory;
+    }
+
+    public String getRelativeAttachmentDirectory() {
+        return mRelativeAttachmentDirectory;
+    }
+
+    public void setRelativeAttachmentDirectory(String attachmentDirectory) {
+        this.mRelativeAttachmentDirectory = attachmentDirectory;
     }
 
     public String getEncryptedUploadDirectory() {
@@ -286,6 +306,14 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
 
     public void setEncryptedDownloadDirectory(String encryptedDownloadDirectory) {
         this.mEncryptedDownloadDirectory = encryptedDownloadDirectory;
+    }
+
+    public String getExternalStorageDirectory() {
+        return mExternalStorageDirectory;
+    }
+
+    public void setExternalStorageDirectory(String externalStorageDirectory) {
+        this.mExternalStorageDirectory = externalStorageDirectory;
     }
 
     public IXoClientHost getHost() {
@@ -1073,7 +1101,6 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         });
     }
 
-    //TODO: messages which fail will be sent after the next sync
     public void sendMessage(String talkMessageTag) {
         try {
             TalkClientMessage message = mDatabase.findMessageByMessageTag(talkMessageTag, false);
@@ -1596,33 +1623,33 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public TalkClientMessage composeClientMessage(TalkClientContact contact, String messageText) {
-        return composeClientMessage(contact, messageText, null);
-    }
-
-    public List<TalkClientMessage> composeClientMessageWithMultipleAttachments(TalkClientContact contact, String messageText, List<TalkClientUpload> uploads) {
-
-        ArrayList<TalkClientMessage> messages = new ArrayList<TalkClientMessage>();
-        if (messageText != null && !messageText.equals("")) {
-            messages.add(composeClientMessage(contact, messageText, null));
-        }
-
-        for (TalkClientUpload upload : uploads) {
-            messages.add(composeClientMessage(contact, "", upload));
-        }
-        return messages;
+        return createClientMessage(contact, messageText, null);
     }
 
     public TalkClientMessage composeClientMessage(TalkClientContact contact, String messageText, TalkClientUpload upload) {
-        XoClientDatabase db = getDatabase();
-        // construct message and delivery objects
+        return createClientMessage(contact, messageText, upload);
+    }
+
+    public List<TalkClientMessage> composeClientMessage(TalkClientContact contact, String messageText, List<TalkClientUpload> uploads) {
+        ArrayList<TalkClientMessage> messages = new ArrayList<TalkClientMessage>();
+        if (messageText != null && !"".equals(messageText)) {
+            messages.add(createClientMessage(contact, messageText, null));
+        }
+
+        for (TalkClientUpload upload : uploads) {
+            messages.add(createClientMessage(contact, "", upload));
+        }
+
+        return messages;
+    }
+
+    private TalkClientMessage createClientMessage(TalkClientContact contact, String messageText, TalkClientUpload upload) {
         final TalkClientMessage clientMessage = new TalkClientMessage();
         final TalkMessage message = new TalkMessage();
         final TalkDelivery delivery = new TalkDelivery(true);
 
         final String messageTag = message.generateMessageTag();
-//        message.setBody(messageText);
-        message.setSenderId(getSelfContact().getClientId());
-
+        message.setSenderId(mSelfContact.getClientId());
         delivery.setMessageTag(messageTag);
 
         if (contact.isGroup()) {
@@ -1636,27 +1663,23 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
         clientMessage.setText(messageText);
         clientMessage.setMessageTag(messageTag);
         clientMessage.setConversationContact(contact);
-        clientMessage.setSenderContact(getSelfContact());
+        clientMessage.setSenderContact(mSelfContact);
         clientMessage.setMessage(message);
         clientMessage.setOutgoingDelivery(delivery);
-
-        if (upload != null) {
-            clientMessage.setAttachmentUpload(upload);
-        }
+        clientMessage.setAttachmentUpload(upload);
 
         try {
             if (upload != null) {
-                db.saveClientUpload(upload);
+                mDatabase.saveClientUpload(upload);
             }
-            db.saveMessage(message);
-            db.saveDelivery(delivery);
-            db.saveClientMessage(clientMessage);
+            mDatabase.saveMessage(message);
+            mDatabase.saveDelivery(delivery);
+            mDatabase.saveClientMessage(clientMessage);
         } catch (SQLException e) {
             LOG.error("sql error", e);
         }
 
-        // log to help debugging
-        LOG.debug("created message with id " + clientMessage.getClientMessageId() + " and tag " + message.getMessageTag());
+        LOG.debug("Created message with id " + clientMessage.getClientMessageId() + " and tag " + message.getMessageTag());
 
         return clientMessage;
     }
@@ -2704,9 +2727,9 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
             attachment = new TalkAttachment();
             attachment.setFileName(upload.getFileName());
             attachment.setUrl(upload.getDownloadUrl());
-            attachment.setContentSize(Integer.toString(upload.getDataLength()));
+            attachment.setContentSize(Long.toString(upload.getContentLength()));
             attachment.setMediaType(upload.getMediaType());
-            attachment.setMimeType(upload.getContentType());
+            attachment.setMimeType(upload.getMimeType());
             attachment.setAspectRatio(upload.getAspectRatio());
             attachment.setHmac(upload.getContentHmac());
             attachment.setFileId(upload.getFileId());

@@ -18,15 +18,14 @@
             android:layout_height="wrap_content">
 
         <Button
-                android:id="@+id/maps_location_ok"
-                android:text="@string/common_ok"
+                android:id="@+id/maps_location_cancel"
+                android:text="@string/common_cancel"
                 android:layout_weight="1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
-
         <Button
-                android:id="@+id/maps_location_cancel"
-                android:text="@string/common_cancel"
+                android:id="@+id/maps_location_ok"
+                android:text="@string/common_ok"
                 android:layout_weight="1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>

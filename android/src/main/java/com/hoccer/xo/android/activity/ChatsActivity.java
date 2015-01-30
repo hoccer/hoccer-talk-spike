@@ -19,16 +19,16 @@ import android.widget.Toast;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
 import com.hoccer.xo.android.adapter.ChatsPageAdapter;
 import com.hoccer.xo.android.content.Clipboard;
-import com.hoccer.xo.android.content.contentselectors.IContentSelector;
-import com.hoccer.xo.android.content.contentselectors.ImageSelector;
-import com.hoccer.xo.android.content.contentselectors.VideoSelector;
+import com.hoccer.xo.android.content.selector.IContentSelector;
+import com.hoccer.xo.android.content.selector.ImageSelector;
+import com.hoccer.xo.android.content.selector.VideoSelector;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
@@ -192,14 +192,13 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private void handleShareIntent(Intent intent) {
         Uri contentUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-        IContentObject contentObject = getContentObject(contentUri, intent.getType());
-        addSharedContentToClipboard(contentObject);
+        SelectedContent content = getContent(contentUri, intent.getType());
+        addSharedContentToClipboard(content);
     }
 
-    private IContentObject getContentObject(Uri contentUri, String type) {
+    private SelectedContent getContent(Uri contentUri, String type) {
         IContentSelector selector = determineContentSelectorForType(type);
 
-        // Factory method in IContentSelector expects content to  be in intent extra field 'data'
         Intent intent = new Intent();
         intent.setData(contentUri);
 
@@ -217,9 +216,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         return selector;
     }
 
-    private void addSharedContentToClipboard(IContentObject contentObject) {
-        if (contentObject != null) {
-            Clipboard.getInstance().setContent(contentObject);
+    private void addSharedContentToClipboard(SelectedContent content) {
+        if (content != null) {
+            Clipboard.getInstance().setContent(content);
             Toast.makeText(this, getString(R.string.toast_stored_file_in_clipboard), Toast.LENGTH_LONG).show();
         } else {
             Clipboard.getInstance().clearContent();

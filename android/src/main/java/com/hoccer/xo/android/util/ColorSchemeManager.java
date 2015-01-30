@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
+import android.util.SparseArray;
 import com.hoccer.talk.model.TalkDelivery;
 import com.artcom.hoccer.R;
 
@@ -11,8 +12,8 @@ import java.util.HashMap;
 
 public abstract class ColorSchemeManager{
 
-    private static HashMap<Integer, Drawable> mRepaintedIncomingDrawable = new HashMap<Integer, Drawable>();
-    private static HashMap<Integer, Drawable> mRepaintedOutgoingDrawable = new HashMap<Integer, Drawable>();
+    private static final SparseArray<Drawable> mRepaintedIncomingDrawable = new SparseArray<Drawable>();
+    private static final SparseArray<Drawable> mRepaintedOutgoingDrawable = new SparseArray<Drawable>();
 
     public static Drawable getRepaintedDrawable(Resources resources, int bgId, boolean primaryColor) {
         int custom_color = (primaryColor) ? resources.getColor(R.color.xo_app_main_color) : resources.getColor(R.color.xo_app_incoming_message_color);

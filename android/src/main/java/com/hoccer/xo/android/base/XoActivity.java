@@ -27,14 +27,14 @@ import com.hoccer.talk.client.IXoAlertListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.XoClientDatabase;
 import com.hoccer.talk.client.model.TalkClientContact;
-import com.hoccer.talk.content.IContentObject;
+import com.hoccer.talk.content.SelectedContent;
 import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.XoSoundPool;
 import com.hoccer.xo.android.activity.*;
 import com.hoccer.xo.android.content.ContentRegistry;
 import com.hoccer.xo.android.content.ContentSelection;
-import com.hoccer.xo.android.content.contentselectors.ImageSelector;
+import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.fragment.DeviceContactsInvitationFragment;
 import com.hoccer.xo.android.service.IXoClientService;
 import com.hoccer.xo.android.service.XoClientService;
@@ -315,11 +315,11 @@ public abstract class XoActivity extends FragmentActivity {
         } else if (requestCode == REQUEST_CROP_AVATAR) {
             intent = selectedAvatarPreProcessing(intent);
             if (intent != null) {
-                IContentObject contentObject = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
-                if (contentObject != null) {
-                    LOG.debug("selected avatar " + contentObject.getContentDataUrl());
+                SelectedContent content = ContentRegistry.createSelectedAvatar(mAvatarSelection, intent);
+                if (content != null) {
+                    LOG.debug("selected avatar " + content.getFilePath());
                     for (IXoFragment fragment : mTalkFragments) {
-                        fragment.onAvatarSelected(contentObject);
+                        fragment.onAvatarSelected(content);
                     }
                 }
             } else {

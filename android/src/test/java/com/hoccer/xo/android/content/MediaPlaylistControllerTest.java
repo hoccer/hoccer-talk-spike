@@ -2,9 +2,9 @@ package com.hoccer.xo.android.content;
 
 import com.hoccer.talk.client.IXoClientDatabaseBackend;
 import com.hoccer.talk.client.XoClientDatabase;
+import com.hoccer.talk.client.XoTransfer;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientMediaCollection;
-import com.hoccer.talk.content.IContentObject;
 import com.hoccer.xo.android.content.audio.MediaPlaylistController;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -66,7 +66,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testRemoveBeforeCurrentItem() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mCollection.removeItem(0);
@@ -85,7 +85,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testRemoveAtCurrentItem() {
         mPlaylistController.setCurrentIndex(2);
-        IContentObject expectedCurrentItem = mCollection.getItem(3);
+        XoTransfer expectedCurrentItem = mCollection.getItem(3);
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mCollection.removeItem(2);
@@ -105,7 +105,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testRemoveAfterCurrentItem() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mCollection.removeItem(2);
@@ -124,7 +124,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testAddBeforeCurrentItem() {
         mPlaylistController.setCurrentIndex(2);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         TalkClientDownload item = null;
@@ -151,7 +151,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testAddAtCurrentItem() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         TalkClientDownload item = null;
@@ -178,7 +178,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testAddAfterCurrentItem() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         TalkClientDownload item = null;
@@ -223,7 +223,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testReorderPlaylistFromCurrent() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mCollection.reorderItemIndex(1, 3);
@@ -242,7 +242,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testReorderPlaylistToCurrent() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mCollection.reorderItemIndex(3, 1);
@@ -261,7 +261,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testReorderPlaylistOthers() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mCollection.reorderItemIndex(0, 2);
@@ -280,11 +280,11 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testNextWithNoRepeat() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mCollection.getItem(2);
+        XoTransfer expectedCurrentItem = mCollection.getItem(2);
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.NO_REPEAT);
-        IContentObject actualCurrentItem = mPlaylistController.forward();
+        XoTransfer actualCurrentItem = mPlaylistController.forward();
         assertEquals(expectedCurrentItem, actualCurrentItem);
 
         int expectedCurrentIndex = 2;
@@ -302,11 +302,11 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testNextWithNoRepeatAtEnd() {
         mPlaylistController.setCurrentIndex(3);
-        IContentObject expectedCurrentItem = null;
+        XoTransfer expectedCurrentItem = null;
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.NO_REPEAT);
-        IContentObject actualCurrentItem = mPlaylistController.forward();
+        XoTransfer actualCurrentItem = mPlaylistController.forward();
         assertEquals(null, actualCurrentItem);
 
         int expectedCurrentIndex = -1;
@@ -324,11 +324,11 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testNextWithRepeatAll() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mCollection.getItem(2);
+        XoTransfer expectedCurrentItem = mCollection.getItem(2);
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ALL);
-        IContentObject actualCurrentItem = mPlaylistController.forward();
+        XoTransfer actualCurrentItem = mPlaylistController.forward();
         assertEquals(expectedCurrentItem, actualCurrentItem);
 
         int expectedCurrentIndex = 2;
@@ -347,11 +347,11 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testNextWithRepeatAllAtEnd() {
         mPlaylistController.setCurrentIndex(3);
-        IContentObject expectedCurrentItem = mCollection.getItem(0);
+        XoTransfer expectedCurrentItem = mCollection.getItem(0);
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ALL);
-        IContentObject actualCurrentItem = mPlaylistController.forward();
+        XoTransfer actualCurrentItem = mPlaylistController.forward();
         assertEquals(expectedCurrentItem, actualCurrentItem);
 
         int expectedCurrentIndex = 0;
@@ -369,11 +369,11 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testNextWithRepeatItem() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ITEM);
-        IContentObject actualCurrentItem = mPlaylistController.forward();
+        XoTransfer actualCurrentItem = mPlaylistController.forward();
         assertEquals(expectedCurrentItem, actualCurrentItem);
 
         int expectedCurrentIndex = 1;
@@ -390,11 +390,11 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testPreviousWithNoRepeat() {
         mPlaylistController.setCurrentIndex(2);
-        IContentObject expectedCurrentItem = mCollection.getItem(1);
+        XoTransfer expectedCurrentItem = mCollection.getItem(1);
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.NO_REPEAT);
-        IContentObject actualCurrentItem = mPlaylistController.backward();
+        XoTransfer actualCurrentItem = mPlaylistController.backward();
         assertEquals(expectedCurrentItem, actualCurrentItem);
 
         int expectedCurrentIndex = 1;
@@ -412,11 +412,11 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testPreviousWithNoRepeatAtBeginning() {
         mPlaylistController.setCurrentIndex(0);
-        IContentObject expectedCurrentItem = null;
+        XoTransfer expectedCurrentItem = null;
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.NO_REPEAT);
-        IContentObject actualCurrentItem = mPlaylistController.backward();
+        XoTransfer actualCurrentItem = mPlaylistController.backward();
         assertEquals(null, actualCurrentItem);
 
         int expectedCurrentIndex = -1;
@@ -434,11 +434,11 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testPreviousWithRepeatAll() {
         mPlaylistController.setCurrentIndex(2);
-        IContentObject expectedCurrentItem = mCollection.getItem(1);
+        XoTransfer expectedCurrentItem = mCollection.getItem(1);
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ALL);
-        IContentObject actualCurrentItem = mPlaylistController.backward();
+        XoTransfer actualCurrentItem = mPlaylistController.backward();
         assertEquals(expectedCurrentItem, actualCurrentItem);
 
         int expectedCurrentIndex = 1;
@@ -456,11 +456,11 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testPreviousWithRepeatAllAtBeginning() {
         mPlaylistController.setCurrentIndex(0);
-        IContentObject expectedCurrentItem = mCollection.getItem(3);
+        XoTransfer expectedCurrentItem = mCollection.getItem(3);
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ALL);
-        IContentObject actualCurrentItem = mPlaylistController.backward();
+        XoTransfer actualCurrentItem = mPlaylistController.backward();
         assertEquals(expectedCurrentItem, actualCurrentItem);
 
         int expectedCurrentIndex = 3;
@@ -478,11 +478,11 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testPreviousWithRepeatItem() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setRepeatMode(MediaPlaylistController.RepeatMode.REPEAT_ITEM);
-        IContentObject actualCurrentItem = mPlaylistController.backward();
+        XoTransfer actualCurrentItem = mPlaylistController.backward();
         assertEquals(expectedCurrentItem, actualCurrentItem);
 
         int expectedCurrentIndex = 1;
@@ -499,7 +499,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testAddShuffled() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setShuffleActive(true);
@@ -529,7 +529,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testRemoveShuffled() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = mPlaylistController.getCurrentItem();
+        XoTransfer expectedCurrentItem = mPlaylistController.getCurrentItem();
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.setShuffleActive(true);
@@ -551,7 +551,7 @@ public class MediaPlaylistControllerTest {
     @Test
     public void testReset() {
         mPlaylistController.setCurrentIndex(1);
-        IContentObject expectedCurrentItem = null;
+        XoTransfer expectedCurrentItem = null;
         ListenerTester listenerTest = new ListenerTester(mPlaylistController);
 
         mPlaylistController.reset();
@@ -590,7 +590,7 @@ public class MediaPlaylistControllerTest {
         public ListenerTester(MediaPlaylistController playlist) {
             MediaPlaylistController.Listener listener = new MediaPlaylistController.Listener() {
                 @Override
-                public void onCurrentItemChanged(IContentObject newItem) {
+                public void onCurrentItemChanged(XoTransfer newItem) {
                     currentItemChangedCalls.add(new Call(newItem));
                 }
 

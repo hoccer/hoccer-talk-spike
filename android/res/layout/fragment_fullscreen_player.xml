@@ -19,8 +19,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/media_player_text_medium"
-                android:textStyle="bold"
-                android:text="28"/>
+                android:textStyle="bold"/>
 
         <TextView
                 android:id="@+id/tv_player_playlist_track_divider"
@@ -40,9 +39,7 @@
                 android:textColor="@android:color/white"
                 android:layout_marginLeft="5dp"
                 android:textSize="@dimen/media_player_text_medium"
-                android:textStyle="bold"
-                android:text="46"/>
-
+                android:textStyle="bold"/>
     </RelativeLayout>
 
     <TextView android:id="@+id/tv_conversation_name"
@@ -59,26 +56,26 @@
               android:ellipsize="end"
               android:textSize="@dimen/media_player_text_medium"/>
 
-<FrameLayout android:id="@+id/fl_player_artwork"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:layout_below="@id/rl_player_playlist_track_container"
-             android:gravity="center"
-             android:layout_marginLeft="@dimen/media_player_layout_margin"
-             android:layout_marginRight="@dimen/media_player_layout_margin"
-             android:layout_marginTop="@dimen/media_player_layout_margin">
+    <FrameLayout android:id="@+id/fl_player_artwork"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:layout_below="@id/rl_player_playlist_track_container"
+                 android:gravity="center"
+                 android:layout_marginLeft="@dimen/media_player_layout_margin"
+                 android:layout_marginRight="@dimen/media_player_layout_margin"
+                 android:layout_marginTop="@dimen/media_player_layout_margin">
 
-    <com.hoccer.xo.android.view.ArtworkImageView
-            android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:src="@drawable/media_cover_art_default"/>
+        <com.hoccer.xo.android.view.ArtworkImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/media_cover_art_default"/>
 
-    <com.hoccer.xo.android.view.ArtworkImageView
-               android:id="@+id/iv_player_artwork"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:src="@null"/>
-</FrameLayout>
+        <com.hoccer.xo.android.view.ArtworkImageView
+                android:id="@+id/iv_player_artwork"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@null"/>
+    </FrameLayout>
 
     <LinearLayout
             android:id="@+id/ll_player_track_description"
@@ -102,7 +99,7 @@
         <TextView
                 android:id="@+id/tv_player_track_artist"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:textColor="@color/xo_media_player_secondary_text"
                 android:textSize="@dimen/media_player_text_small"
@@ -111,8 +108,7 @@
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:fadingEdge="horizontal"
-                android:gravity="center_horizontal"/>"
-
+                android:gravity="center_horizontal"/>
     </LinearLayout>
 
     <RelativeLayout
@@ -134,7 +130,6 @@
                 android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
                 android:textSize="@dimen/media_player_text_medium"
-                android:text="0:00"
                 android:background="@null"/>
 
         <SeekBar
@@ -160,11 +155,8 @@
                 android:layout_centerVertical="true"
                 android:textColor="@color/xo_media_player_secondary_text"
                 android:textSize="@dimen/media_player_text_medium"
-                android:text="0:00"
                 android:layout_alignParentRight="true"
                 android:background="@null"/>
-
-
     </RelativeLayout>
 
     <!-- Player Footer -->
@@ -206,7 +198,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/btn_player_play"
-                android:text=""
                 android:textOff=""
                 android:textOn=""
                 android:layout_centerInParent="true"/>
@@ -229,8 +220,5 @@
                 android:background="@null"
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"/>
-
     </RelativeLayout>
-
-
 </RelativeLayout>

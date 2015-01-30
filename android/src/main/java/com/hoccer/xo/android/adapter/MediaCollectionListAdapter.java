@@ -94,7 +94,7 @@ public class MediaCollectionListAdapter extends BaseAdapter implements IXoMediaC
         notifyDataSetChanged();
     }
 
-    public List<TalkClientMediaCollection> getSelecteddItems() {
+    public List<TalkClientMediaCollection> getSelectedItems() {
         List<TalkClientMediaCollection> collections = new ArrayList<TalkClientMediaCollection>();
         for (int i = 0; i < mMediaCollections.size(); ++i) {
             if (mSelectedItems.get(i)) {

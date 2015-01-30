@@ -10,11 +10,9 @@ public class ProgressOutputHttpEntity extends InputStreamEntity {
 
     private final IProgressListener mProgressListener;
 
-    private final int mOffset;
+    private final long mOffset;
 
-    private ProgressOutputStream mProgressStream = null;
-
-    public ProgressOutputHttpEntity(InputStream istream, int length, IProgressListener listener, int offset) {
+    public ProgressOutputHttpEntity(InputStream istream, long length, IProgressListener listener, long offset) {
         super(istream, length);
         mProgressListener = listener;
         mOffset = offset;
@@ -22,8 +20,7 @@ public class ProgressOutputHttpEntity extends InputStreamEntity {
 
     @Override
     public void writeTo(OutputStream outstream) throws IOException {
-        mProgressStream = new ProgressOutputStream(outstream, mProgressListener, mOffset);
+        ProgressOutputStream mProgressStream = new ProgressOutputStream(outstream, mProgressListener, (int)mOffset);
         super.writeTo(mProgressStream);
     }
-
 }

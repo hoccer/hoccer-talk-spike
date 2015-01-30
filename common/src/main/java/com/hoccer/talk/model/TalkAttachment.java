@@ -83,13 +83,9 @@ public class TalkAttachment {
         this.mimeType = mimeType;
     }
 
-    public String getContentSize() {
-        return contentSize;
-    }
-
-    public int getContentSizeAsInt(){
+    public long getContentLength(){
         try {
-            return Integer.parseInt(contentSize);
+            return Long.parseLong(contentSize);
         } catch (NumberFormatException e) {
             return -1;
         }
