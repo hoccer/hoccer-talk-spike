@@ -1,16 +1,19 @@
 package com.hoccer.xo.android;
 
+import android.app.Activity;
 import android.app.Application;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
+import com.artcom.hoccer.R;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
 import com.hoccer.talk.client.model.TalkClientDownload;
 import com.hoccer.talk.client.model.TalkClientUpload;
 import com.hoccer.talk.model.TalkPresence;
 import com.hoccer.xo.android.credentialtransfer.SrpChangeListener;
-import com.hoccer.xo.android.error.EnvironmentUpdaterException;
 import com.hoccer.xo.android.nearby.EnvironmentUpdater;
 import com.hoccer.xo.android.task.StartupTasks;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -30,7 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * for such things as initializing the logger and setting up the
  * XO client itself. All global initialization should go here.
  */
-public class XoApplication extends Application implements Thread.UncaughtExceptionHandler {
+public class XoApplication extends Application implements Thread.UncaughtExceptionHandler, ApplicationBackgroundManager.Listener {
 
     private static Logger sLog;
 
@@ -66,12 +69,13 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static XoAndroidClient sClient;
     private static XoAndroidClientConfiguration sConfiguration;
     private static XoSoundPool sSoundPool;
-    private static EnvironmentUpdater sEnvironmentUpdater;
     private static DisplayImageOptions sImageOptions;
 
-    private static boolean sIsNearbySessionRunning;
+    private EnvironmentUpdater mEnvironmentUpdater;
 
+    private ApplicationBackgroundManager mBackgroundManager;
     private static StartupTasks sStartupTasks;
+    private boolean mStayActiveInBackground;
 
     @Override
     public void onCreate() {
@@ -175,22 +179,24 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         // create client instance
         sLog.info("creating client");
         sClientHost = new XoAndroidClientHost(this);
-        XoAndroidClient client = new XoAndroidClient(sClientHost, sConfiguration);
-        client.setAvatarDirectory(getAvatarDirectory().toString());
-        client.setRelativeAvatarDirectory(sConfiguration.getAvatarsDirectory());
-        client.setAttachmentDirectory(getAttachmentDirectory().toString());
-        client.setRelativeAttachmentDirectory(sConfiguration.getAttachmentsDirectory());
-        client.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
-        client.setExternalStorageDirectory(sExternalStorage.getAbsolutePath());
-        sClient = client;
+        sClient = new XoAndroidClient(sClientHost, sConfiguration);
+        sClient.setAvatarDirectory(getAvatarDirectory().toString());
+        sClient.setRelativeAvatarDirectory(sConfiguration.getAvatarsDirectory());
+        sClient.setAttachmentDirectory(getAttachmentDirectory().toString());
+        sClient.setRelativeAttachmentDirectory(sConfiguration.getAttachmentsDirectory());
+        sClient.setEncryptedDownloadDirectory(getEncryptedDownloadDirectory().toString());
+        sClient.setExternalStorageDirectory(sExternalStorage.getAbsolutePath());
 
         // add srp secret change listener
-        client.registerStateListener(new SrpChangeListener(this));
+        sClient.registerStateListener(new SrpChangeListener(this));
 
         // create sound pool instance
         sSoundPool = new XoSoundPool(this);
 
-        sEnvironmentUpdater = new EnvironmentUpdater(this, sClient);
+        mBackgroundManager = new ApplicationBackgroundManager(this);
+        mBackgroundManager.registerListener(this);
+
+        mEnvironmentUpdater = new EnvironmentUpdater(this, XoApplication.sClient);
 
         sStartupTasks = new StartupTasks(this);
         sStartupTasks.executeRegisteredTasks();
@@ -308,65 +314,30 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         sStartupTasks.registerForNextStart(clazz);
     }
 
-    /**
-     * Starts a nearby session if not yet started.
-     * Sets sIsNearbySessionRunning = true.
-     */
-    public static void startNearbySession(boolean force) {
-        if (!sEnvironmentUpdater.isEnabled() || force) {
-            try {
-                sEnvironmentUpdater.startEnvironmentTracking();
-                sIsNearbySessionRunning = true;
-            } catch (EnvironmentUpdaterException e) {
-                sLog.error("Error when starting EnvironmentUpdater: ", e);
-            }
+    public void startNearbySession(Activity activity) {
+        if (mEnvironmentUpdater.locationServicesEnabled()) {
+            mEnvironmentUpdater.start();
+        } else {
+            showLocationServiceDialog(activity);
         }
     }
 
-    /**
-     * Stops current nearby session if running.
-     */
-    public static void stopNearbySession() {
-        if (sIsNearbySessionRunning) {
-            suspendNearbySession();
-            sIsNearbySessionRunning = false;
-        }
+    private void showLocationServiceDialog(Activity activity) {
+        XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
+                R.string.dialog_enable_location_service_title,
+                R.string.dialog_enable_location_service_message,
+                activity,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                }
+        );
     }
 
-    /**
-     * Stops current nearby session if running.
-     */
-    private static void suspendNearbySession() {
-        if (sEnvironmentUpdater.isEnabled()) {
-            sIsNearbySessionRunning = true;
-            sEnvironmentUpdater.stopEnvironmentTracking();
-        }
-    }
-
-    public static void enterBackgroundMode() {
-        // set presence to inactive
-        sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
-
-        // suspend nearby environment
-        suspendNearbySession();
-
-        sLog.info("Entered background mode");
-    }
-
-    public static void enterForegroundMode() {
-        // set presence to active
-        sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
-
-        // wake up suspended nearby session
-        if (sIsNearbySessionRunning) {
-            startNearbySession(false);
-        }
-
-        sLog.info("Entered foreground mode");
-    }
-
-    public static void enterBackgroundActiveMode() {
-        sLog.info("Entered background active mode");
+    public void stopNearbySession() {
+        mEnvironmentUpdater.stop();
     }
 
     public static ScheduledExecutorService getExecutor() {
@@ -383,10 +354,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     public static XoSoundPool getXoSoundPool() {
         return sSoundPool;
-    }
-
-    public static EnvironmentUpdater getEnvironmentUpdater() {
-        return sEnvironmentUpdater;
     }
 
     public static File getExternalStorage() {
@@ -449,6 +416,23 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
                     tempDir.renameTo(getAttachmentDirectory());
                 }
             }
+        }
+    }
+
+    public void stayActiveInBackground() {
+        mStayActiveInBackground = true;
+    }
+
+    @Override
+    public void onBecameForeground() {
+        sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
+        mStayActiveInBackground = false;
+    }
+
+    @Override
+    public void onBecameBackground() {
+        if (!mStayActiveInBackground) {
+            sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
         }
     }
 }

@@ -325,7 +325,16 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
         @Override
         public void onPageSelected(int position) {
-            refreshEnvironmentUpdater(false);
+            updateNearbySession();
+        }
+
+        private void updateNearbySession() {
+            Fragment fragment = getFragmentAt(mViewPager.getCurrentItem());
+            if (fragment instanceof NearbyChatListFragment) {
+                ((XoApplication) getApplication()).startNearbySession(ChatsActivity.this);
+            } else {
+                ((XoApplication) getApplication()).stopNearbySession();
+            }
         }
 
         @Override

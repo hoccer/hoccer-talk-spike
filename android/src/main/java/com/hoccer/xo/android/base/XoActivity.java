@@ -63,9 +63,9 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class XoActivity extends FragmentActivity {
 
-    public final static int REQUEST_SELECT_AVATAR = 23;
     private static final Logger LOG = Logger.getLogger(XoActivity.class);
 
+    public final static int REQUEST_SELECT_AVATAR = 23;
     public final static int REQUEST_CROP_AVATAR = 24;
 
     /**
@@ -101,16 +101,13 @@ public abstract class XoActivity extends FragmentActivity {
     /**
      * Ongoing avatar selection
      */
-    ContentSelection mAvatarSelection = null;
+    ContentSelection mAvatarSelection;
 
-    boolean mUpEnabled = false;
-
-    private ActionBar mActionBar;
+    boolean mUpEnabled;
 
     private AttachmentTransferControlView mSpinner;
     private Handler mDialogDismisser;
     private Dialog mDialog;
-    private ScreenReceiver mScreenListener;
     private XoAlertListener mAlertListener;
 
     private boolean mOptionsMenuEnabled = true;
@@ -143,42 +140,13 @@ public abstract class XoActivity extends FragmentActivity {
         mTalkFragments.remove(fragment);
     }
 
-
-    // Application background/foreground observation
-    private static boolean isAppInBackground = false;
-    private static boolean isWindowFocused = false;
-    private static boolean isBackOrUpPressed = false;
-    private static boolean isBackgroundActive = false;
-
-    protected void applicationWillEnterForeground() {
-        LOG.debug("Application will enter foreground.");
-        isAppInBackground = false;
-        isBackgroundActive = false;
-        XoApplication.enterForegroundMode();
-    }
-
-    protected void applicationWillEnterBackground() {
-        LOG.debug("Application will enter background.");
-        isAppInBackground = true;
-        XoApplication.enterBackgroundMode();
-    }
-
-    protected void applicationWillEnterBackgroundActive() {
-        LOG.debug("Application will enter background active.");
-        isAppInBackground = false;
-        XoApplication.enterBackgroundActiveMode();
-    }
-
-    public void setBackgroundActive() {
-        isBackgroundActive = true;
-    }
-
     public void startExternalActivity(Intent intent) {
-        LOG.debug(getClass() + " starting external activity " + intent.toString());
+        LOG.debug(getClass() + " starting external activity " + intent);
         if (!canStartActivity(intent)) {
             return;
         }
-        setBackgroundActive();
+
+        ((XoApplication)getApplication()).stayActiveInBackground();
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException e) {
@@ -188,11 +156,12 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     public void startExternalActivityForResult(Intent intent, int requestCode) {
-        LOG.debug(getClass() + " starting external activity " +  intent.toString() + " for request code: " + requestCode);
+        LOG.debug(getClass() + " starting external activity " + intent + " for request code: " + requestCode);
         if (!canStartActivity(intent)) {
             return;
         }
-        setBackgroundActive();
+
+        ((XoApplication)getApplication()).stayActiveInBackground();
         try {
             startActivityForResult(intent, requestCode);
         } catch (ActivityNotFoundException e) {
@@ -200,6 +169,7 @@ public abstract class XoActivity extends FragmentActivity {
             e.printStackTrace();
         }
     }
+
     public boolean canStartActivity(Intent intent) {
         if (intent != null) {
             ComponentName componentName = intent.resolveActivity(getPackageManager());
@@ -210,7 +180,7 @@ public abstract class XoActivity extends FragmentActivity {
                 if (activityName != null && activityName.equals(MapsLocationActivity.class.getName())) {
                     int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
                     if (result > 0) {
-                        LOG.warn(getClass() + " aborting start of external activity " + intent.toString() + " because Google Play Services returned code " + result);
+                        LOG.warn(getClass() + " aborting start of external activity " + intent + " because Google Play Services returned code " + result);
                         showGooglePlayServicesErrorDialog(result);
                         return false;
                     }
@@ -228,52 +198,6 @@ public abstract class XoActivity extends FragmentActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        if (!isWindowFocused) {
-            if (isBackgroundActive) {
-                applicationWillEnterBackgroundActive();
-            } else {
-                applicationWillEnterBackground();
-            }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        setBackOrUpPressed();
-        super.onBackPressed();
-    }
-
-    private void setBackOrUpPressed() {
-        if (!(this instanceof ChatsActivity)) {
-            isBackOrUpPressed = true;
-        }
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        isWindowFocused = hasFocus;
-        if (isBackOrUpPressed && !hasFocus) {
-            isBackOrUpPressed = false;
-            isWindowFocused = true;
-        }
-        super.onWindowFocusChanged(hasFocus);
-    }
-
-    /*@Override
-    public boolean onMenuItemSelected(int featureId, android.view.MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                break;
-        }
-        return true;
-    }*/
-
-    //--------
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         LOG.debug("onCreate()");
         super.onCreate(savedInstanceState);
@@ -288,13 +212,8 @@ public abstract class XoActivity extends FragmentActivity {
         setContentView(getLayoutResource());
 
         // get and configure the action bar
-        mActionBar = getActionBar();
-        mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-
-        // screen state listener
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-        mScreenListener = new ScreenReceiver();
-        registerReceiver(mScreenListener, filter);
+        ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 
         mAlertListener = new XoAlertListener(this);
     }
@@ -332,10 +251,6 @@ public abstract class XoActivity extends FragmentActivity {
     protected void onResume() {
         LOG.debug("onResume()");
         super.onResume();
-
-        if (isAppInBackground || isBackgroundActive) {
-            applicationWillEnterForeground();
-        }
 
         checkForCrashesIfEnabled();
 
@@ -468,20 +383,9 @@ public abstract class XoActivity extends FragmentActivity {
     @Override
     protected void onDestroy() {
         LOG.debug("onDestroy()");
-        unregisterReceiver(mScreenListener);
         super.onDestroy();
     }
 
-    private class ScreenReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(final Context context, final Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                if (!isAppInBackground) {
-                    applicationWillEnterBackground();
-                }
-            }
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -611,8 +515,6 @@ public abstract class XoActivity extends FragmentActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && mUpEnabled) {
             Intent upIntent = getParentActivityIntent();
             if (upIntent != null) {
-                setBackOrUpPressed();
-
                 // we have a parent, navigate up
                 if (shouldUpRecreateTask(upIntent)) {
                     // we are not on our own task stack, so create one
@@ -639,18 +541,19 @@ public abstract class XoActivity extends FragmentActivity {
      */
     private void scheduleKeepAlive() {
         shutdownKeepAlive();
-        mKeepAliveTimer = mBackgroundExecutor.scheduleAtFixedRate(new Runnable() {
-                                                                      @Override
-                                                                      public void run() {
-                                                                          if (mService != null) {
-                                                                              try {
-                                                                                  mService.keepAlive();
-                                                                              } catch (RemoteException e) {
-                                                                                  e.printStackTrace();
-                                                                              }
-                                                                          }
-                                                                      }
-                                                                  },
+        mKeepAliveTimer = mBackgroundExecutor.scheduleAtFixedRate(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mService != null) {
+                            try {
+                                mService.keepAlive();
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                },
                 XoClientService.SERVICE_KEEPALIVE_PING_DELAY,
                 XoClientService.SERVICE_KEEPALIVE_PING_INTERVAL,
                 TimeUnit.SECONDS
@@ -884,5 +787,4 @@ public abstract class XoActivity extends FragmentActivity {
             ((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
         }
     }
-
 }

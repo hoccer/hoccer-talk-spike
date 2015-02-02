@@ -88,21 +88,6 @@ public class MapsLocationActivity extends XoActivity
         update();
     }
 
-    @Override
-    protected void applicationWillEnterForeground() {
-
-    }
-
-    @Override
-    protected void applicationWillEnterBackground() {
-
-    }
-
-    @Override
-    protected void applicationWillEnterBackgroundActive() {
-
-    }
-
     private void setupMap() {
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationButtonClickListener(this);
