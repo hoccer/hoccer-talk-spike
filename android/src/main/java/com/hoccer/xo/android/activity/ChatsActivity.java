@@ -2,20 +2,16 @@ package com.hoccer.xo.android.activity;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
@@ -33,7 +29,6 @@ import com.hoccer.xo.android.fragment.NearbyChatListFragment;
 import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
@@ -75,9 +70,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     protected void onResume() {
         super.onResume();
         showProfileIfClientIsNotRegistered();
-        refreshEnvironmentUpdater(false);
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
+        updateNearbySession();
     }
 
     @Override
@@ -127,16 +122,9 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     @Override
     public void onClientStateChange(XoClient client, int state) {
-        LOG.debug("onClientStateChange:" + state);
-        if (!client.isAwake()) {
-            shutDownNearbySession();
-        } else if (client.isActive()) {
-            refreshEnvironmentUpdater(true);
-
-            if (mPairingToken != null) {
-                performTokenPairing(mPairingToken);
-                mPairingToken = null;
-            }
+        if (mPairingToken != null && client.isActive()) {
+            performTokenPairing(mPairingToken);
+            mPairingToken = null;
         }
     }
 
@@ -265,48 +253,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         });
     }
 
-    private void refreshEnvironmentUpdater(boolean force) {
-        Fragment fragment = getFragmentAt(mViewPager.getCurrentItem());
-        if (fragment instanceof NearbyChatListFragment) {
-            startNearbySession(force);
-        } else {
-            shutDownNearbySession();
-        }
-    }
-
-    private void startNearbySession(boolean force) {
-        if (isLocationServiceEnabled()) {
-            LOG.debug("refreshEnvironmentUpdater:startNearbySession");
-            XoApplication.startNearbySession(force);
-        } else {
-            showEnableLocationServiceDialog();
-        }
-    }
-
-    private void shutDownNearbySession() {
-        LOG.debug("shutDownNearbySession");
-        XoApplication.stopNearbySession();
-    }
-
-    private boolean isLocationServiceEnabled() {
-        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER) || manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    }
-
-    private void showEnableLocationServiceDialog() {
-        XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
-                R.string.dialog_enable_location_service_title,
-                R.string.dialog_enable_location_service_message,
-                this,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                }
-        );
-    }
-
     private void startMediaBrowserActivity() {
         Intent intent = new Intent(this, MediaBrowserActivity.class);
         startActivity(intent);
@@ -314,6 +260,15 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
 
     private Fragment getFragmentAt(int position) {
         return ((FragmentPagerAdapter) mViewPager.getAdapter()).getItem(position);
+    }
+
+    private void updateNearbySession() {
+        Fragment fragment = getFragmentAt(mViewPager.getCurrentItem());
+        if (fragment instanceof NearbyChatListFragment) {
+            ((XoApplication) getApplication()).startNearbySession(ChatsActivity.this);
+        } else {
+            ((XoApplication) getApplication()).stopNearbySession();
+        }
     }
 
     private class ConversationsPageListener implements ViewPager.OnPageChangeListener {
@@ -326,15 +281,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         @Override
         public void onPageSelected(int position) {
             updateNearbySession();
-        }
-
-        private void updateNearbySession() {
-            Fragment fragment = getFragmentAt(mViewPager.getCurrentItem());
-            if (fragment instanceof NearbyChatListFragment) {
-                ((XoApplication) getApplication()).startNearbySession(ChatsActivity.this);
-            } else {
-                ((XoApplication) getApplication()).stopNearbySession();
-            }
         }
 
         @Override
