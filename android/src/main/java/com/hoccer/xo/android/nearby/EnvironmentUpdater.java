@@ -29,7 +29,7 @@ public class EnvironmentUpdater implements LocationListener {
     private final LocationManager mLocationManager;
     private final WifiManager mWifiManager;
 
-    private boolean mIsEnabled = false;
+    private boolean mIsEnabled;
 
     public EnvironmentUpdater(Context context, XoClient client) {
         mClient = client;
@@ -38,7 +38,7 @@ public class EnvironmentUpdater implements LocationListener {
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
-    public void startEnvironmentTracking() throws EnvironmentUpdaterException {
+    public void start() throws EnvironmentUpdaterException {
         // TODO: handle failed startups
         mIsEnabled = true;
 
@@ -57,7 +57,7 @@ public class EnvironmentUpdater implements LocationListener {
         sendEnvironmentUpdate();
     }
 
-    public void stopEnvironmentTracking() {
+    public void stop() {
         mLocationManager.removeUpdates(this);
         mClient.sendDestroyEnvironment(TalkEnvironment.TYPE_NEARBY);
         mIsEnabled = false;
