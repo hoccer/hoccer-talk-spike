@@ -322,7 +322,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         }
     }
 
-    private void showLocationServiceDialog(Activity activity) {
+    private void showLocationServiceDialog(final Activity activity) {
         XoDialogs.showYesNoDialog("EnableLocationServiceDialog",
                 R.string.dialog_enable_location_service_title,
                 R.string.dialog_enable_location_service_message,
@@ -330,7 +330,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        activity.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                     }
                 }
         );
