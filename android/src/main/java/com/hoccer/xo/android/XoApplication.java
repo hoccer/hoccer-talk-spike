@@ -346,6 +346,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     public static void enterBackgroundMode() {
         // set presence to inactive
         sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+
+        // suspend nearby environment
+        suspendNearbySession();
+
         sLog.info("Entered background mode");
     }
 
