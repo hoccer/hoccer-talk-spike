@@ -64,10 +64,9 @@ import java.util.concurrent.TimeUnit;
 public abstract class XoActivity extends FragmentActivity {
 
     public final static int REQUEST_SELECT_AVATAR = 23;
+    private static final Logger LOG = Logger.getLogger(XoActivity.class);
 
     public final static int REQUEST_CROP_AVATAR = 24;
-
-    protected Logger LOG = null;
 
     /**
      * Executor for background tasks
@@ -115,11 +114,6 @@ public abstract class XoActivity extends FragmentActivity {
     private XoAlertListener mAlertListener;
 
     private boolean mOptionsMenuEnabled = true;
-
-
-    public XoActivity() {
-        LOG = Logger.getLogger(getClass());
-    }
 
     protected abstract int getLayoutResource();
 

@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hoccer.xo.android.base.XoActivity;
 import com.artcom.hoccer.R;
+import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -32,6 +33,8 @@ public class MapsLocationActivity extends XoActivity
                GoogleMap.OnMapLongClickListener,
                GoogleMap.OnMyLocationChangeListener,
                View.OnClickListener {
+
+    private static final Logger LOG = Logger.getLogger(MapsLocationActivity.class);
 
     public static final String EXTRA_GEOJSON = "com.hoccer.xo.android.GEOJSON";
 
