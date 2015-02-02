@@ -326,20 +326,20 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     /**
      * Stops current nearby session if running.
      */
-    public static void suspendNearbySession() {
-        if (sEnvironmentUpdater.isEnabled()) {
-            sIsNearbySessionRunning = true;
-            sEnvironmentUpdater.stopEnvironmentTracking();
+    public static void stopNearbySession() {
+        if (sIsNearbySessionRunning) {
+            suspendNearbySession();
+            sIsNearbySessionRunning = false;
         }
     }
 
     /**
      * Stops current nearby session if running.
      */
-    public static void stopNearbySession() {
-        if (sIsNearbySessionRunning) {
-            suspendNearbySession();
-            sIsNearbySessionRunning = false;
+    private static void suspendNearbySession() {
+        if (sEnvironmentUpdater.isEnabled()) {
+            sIsNearbySessionRunning = true;
+            sEnvironmentUpdater.stopEnvironmentTracking();
         }
     }
 
