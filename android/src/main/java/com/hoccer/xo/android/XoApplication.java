@@ -206,6 +206,8 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     public void onTerminate() {
         super.onTerminate();
 
+        mBackgroundManager.unregisterListener(this);
+
         sLog.info("deactivating client");
         if (sClient != null) {
             sClient.deactivateNow();
