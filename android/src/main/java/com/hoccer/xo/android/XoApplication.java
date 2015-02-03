@@ -76,6 +76,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private ApplicationBackgroundManager mBackgroundManager;
     private static StartupTasks sStartupTasks;
     private boolean mStayActiveInBackground;
+    private boolean mNearbyEnabled;
 
     @Override
     public void onCreate() {
@@ -319,6 +320,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     public void startNearbySession(Activity activity) {
         if (mEnvironmentUpdater.locationServicesEnabled()) {
             mEnvironmentUpdater.start();
+            mNearbyEnabled = true;
         } else {
             showLocationServiceDialog(activity);
         }
@@ -340,6 +342,7 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
 
     public void stopNearbySession() {
         mEnvironmentUpdater.stop();
+        mNearbyEnabled = false;
     }
 
     public static ScheduledExecutorService getExecutor() {
@@ -429,12 +432,17 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     public void onBecameForeground() {
         sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
         mStayActiveInBackground = false;
+
+        if(mNearbyEnabled) {
+            mEnvironmentUpdater.start();
+        }
     }
 
     @Override
     public void onBecameBackground() {
         if (!mStayActiveInBackground) {
             sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
+            mEnvironmentUpdater.stop();
         }
     }
 }
