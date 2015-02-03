@@ -298,8 +298,8 @@
           <resourceDirectory>${project.basedir}/res</resourceDirectory>
           <resourceOverlayDirectories>
             <directory>${project.build.directory}/generated-resources</directory>
-              <directory>${label.environment.path}/res</directory>
-              <directory>${label.path}/res</directory>
+            <directory>${label.environment.path}/res</directory>
+            <directory>${label.path}/res</directory>
             <directory>${project.build.directory}/res</directory>
           </resourceOverlayDirectories>
           <nativeLibrariesDirectory>${project.basedir}/libs</nativeLibrariesDirectory>
