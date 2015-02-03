@@ -523,8 +523,8 @@ public class XoClientService extends Service {
                     continue;
                 }
 
-                // ignore clients with whom we are not befriended
-                if (contact.isClient() && !contact.isClientFriend()) {
+                // ignore clients with whom we are not befriended or nearby
+                if (contact.isClient() && (!contact.isClientFriend() && !contact.isNearby())) {
                     continue;
                 }
 
