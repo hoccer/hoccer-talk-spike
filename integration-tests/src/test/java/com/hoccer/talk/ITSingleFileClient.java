@@ -2,6 +2,8 @@ package com.hoccer.talk;
 
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.client.model.TalkClientUpload;
+import com.hoccer.talk.content.ContentMediaType;
+import com.hoccer.talk.content.SelectedFile;
 import com.hoccer.talk.util.IntegrationTest;
 import com.hoccer.talk.util.TestFileCache;
 import com.hoccer.talk.util.TestHelper;
@@ -48,7 +50,7 @@ public class ITSingleFileClient extends IntegrationTest {
         final TalkClientUpload upload = new TalkClientUpload();
         URL r1 = getClass().getResource("/test.png");
 
-        upload.initializeAsAvatar(r1.toString(), "image/png");
+        upload.initializeAsAvatar(new SelectedFile(r1.toString(), "image/png", ContentMediaType.IMAGE));
         c.setClientAvatar(upload);
         // wait for upload to start
         await().untilCall(to(c.getTransferAgent()).isUploadActive(upload), is(true));
