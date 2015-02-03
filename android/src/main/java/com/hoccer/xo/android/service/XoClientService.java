@@ -583,35 +583,19 @@ public class XoClientService extends Service {
             builder.setNumber(unseenMessagesCount);
         }
 
-        // fill in content
         if (contactsMap.size() == 1) {
-            // create intent to start the messaging activity for the right contact
             ContactUnseenMessageHolder holder = contactsMap.values().iterator().next();
             TalkClientContact contact = holder.getContact();
 
-            Intent messagingIntent = new Intent(this, ChatsActivity.class);
-            messagingIntent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
+            Intent activityIntent = new Intent(this, ChatsActivity.class);
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            activityIntent.putExtra(IntentHelper.EXTRA_CONTACT_ID, contact.getClientContactId());
 
-            // make a pending intent with correct back-stack
-            PendingIntent pendingIntent;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                pendingIntent =
-                        TaskStackBuilder.create(this)
-                                .addParentStack(ChatsActivity.class)
-                                .addNextIntentWithParentStack(messagingIntent)
-                                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            } else {
-                pendingIntent = PendingIntent
-                        .getActivity(this, 0, messagingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            }
-
-            // add the intent to the notification
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, activityIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.setContentIntent(pendingIntent);
 
-            // title is always the contact name
             builder.setContentTitle(contact.getNickname());
 
-            // text depends on number of messages
             if (holder.getUnseenMessages().size() == 1) {
                 TalkClientMessage singleMessage = holder.getUnseenMessages().get(0);
                 builder.setContentText(singleMessage.getText());
@@ -619,32 +603,21 @@ public class XoClientService extends Service {
                 builder.setContentText(holder.getUnseenMessages().size() + getResources().getString(R.string.unseen_messages_notification_text));
             }
         } else {
-            // create pending intent
-            Intent contactsIntent = new Intent(this, ChatsActivity.class);
-            PendingIntent pendingIntent;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                pendingIntent =
-                        TaskStackBuilder.create(this)
-                                .addNextIntent(contactsIntent)
-                                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            } else {
-                pendingIntent = PendingIntent
-                        .getActivity(this, 0, contactsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            }
+            Intent activityIntent = new Intent(this, ChatsActivity.class);
+            activityIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, activityIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.setContentIntent(pendingIntent);
 
-            // concatenate contact names
             StringBuilder sb = new StringBuilder();
             for (ContactUnseenMessageHolder holder : contactsMap.values()) {
                 sb.append(holder.getContact().getNickname()).append(CONTACT_DELIMETER);
             }
 
-            // set fields
             builder.setContentTitle(sb.substring(0, sb.length() - 2));
             builder.setContentText(unseenMessagesCount + getResources().getString(R.string.unseen_messages_notification_text));
         }
 
-        // finish up
         Notification notification;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             notification = builder.build();
@@ -669,17 +642,7 @@ public class XoClientService extends Service {
         pushMessageIntent.putExtra(IntentHelper.EXTRA_PUSH_MESSAGE, message);
 
         // make a pending intent with correct back-stack
-        PendingIntent pendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            pendingIntent =
-                    TaskStackBuilder.create(this)
-                            .addParentStack(ChatsActivity.class)
-                            .addNextIntentWithParentStack(pushMessageIntent)
-                            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        } else {
-            pendingIntent = PendingIntent
-                    .getActivity(this, 0, pushMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, pushMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_notification)

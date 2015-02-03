@@ -107,6 +107,15 @@ public abstract class ComposableActivity extends XoActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle instanceState) {
+        super.onSaveInstanceState(instanceState);
+
+        for (ActivityComponent component : mComponents) {
+            component.onSaveInstanceState(instanceState);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
