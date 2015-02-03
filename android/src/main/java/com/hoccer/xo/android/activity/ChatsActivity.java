@@ -1,6 +1,5 @@
 package com.hoccer.xo.android.activity;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
