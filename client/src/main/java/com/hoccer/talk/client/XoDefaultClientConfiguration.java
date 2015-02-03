@@ -47,6 +47,11 @@ public abstract class XoDefaultClientConfiguration implements IXoClientConfigura
     }
 
     @Override
+    public int getBackgroundNearbyTimeout() {
+        return 5 * 60;
+    }
+
+    @Override
     public int getBackgroundDisconnectTimeout() {
         return 6 * 60;
     }

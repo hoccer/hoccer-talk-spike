@@ -14,6 +14,7 @@ public interface IXoClientConfiguration {
     public String getJsonProtocolString();
     public int getTransferThreads();
     public int getConnectTimeout();
+    public int getBackgroundNearbyTimeout();
     public int getBackgroundDisconnectTimeout();
 
     public boolean getKeepAliveEnabled();

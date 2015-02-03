@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import com.artcom.hoccer.R;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hoccer.talk.client.IXoClientHost;
@@ -77,6 +78,10 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private static StartupTasks sStartupTasks;
     private boolean mStayActiveInBackground;
     private boolean mNearbyEnabled;
+
+    private static final int NEARBY_TIMEOUT = 10 * 1000;
+    private final Handler mNearbyTimeoutHandler = new Handler();
+    private Runnable mNearbyTimeout;
 
     @Override
     public void onCreate() {
@@ -433,8 +438,14 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
         sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_ONLINE);
         mStayActiveInBackground = false;
 
-        if(mNearbyEnabled) {
+        if (mNearbyTimeout != null) {
+            mNearbyTimeoutHandler.removeCallbacks(mNearbyTimeout);
+            mNearbyTimeout = null;
+        }
+
+        if (mNearbyEnabled) {
             mEnvironmentUpdater.start();
+            sLog.info("Nearby mode restarted.");
         }
     }
 
@@ -442,7 +453,17 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     public void onBecameBackground() {
         if (!mStayActiveInBackground) {
             sClient.setClientConnectionStatus(TalkPresence.CONN_STATUS_BACKGROUND);
-            mEnvironmentUpdater.stop();
+
+            final int timeout = sConfiguration.getBackgroundNearbyTimeout();
+            mNearbyTimeout = new Runnable() {
+                @Override
+                public void run() {
+                    mEnvironmentUpdater.stop();
+                    mNearbyTimeout = null;
+                    sLog.info("Nearby mode timed out after " + timeout + " seconds.");
+                }
+            };
+            mNearbyTimeoutHandler.postDelayed(mNearbyTimeout, timeout * 1000);
         }
     }
 }
