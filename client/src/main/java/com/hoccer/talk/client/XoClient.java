@@ -407,7 +407,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     }
 
     public boolean isIdle() {
-        int timeout = mClientConfiguration.getIdleTimeout();
+        int timeout = mClientConfiguration.getBackgroundDisconnectTimeout();
 
         if (timeout > 0) {
             return (System.currentTimeMillis() - mLastActivity) > (timeout * 1000);
@@ -1355,7 +1355,7 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void scheduleIdle() {
         shutdownIdle();
 
-        int timeout = mClientConfiguration.getIdleTimeout();
+        int timeout = mClientConfiguration.getBackgroundDisconnectTimeout();
 
         if (mState > STATE_CONNECTING && timeout > 0) {
             mAutoDisconnectFuture = mExecutor.schedule(new Runnable() {
@@ -2174,8 +2174,8 @@ public class XoClient implements JsonRpcConnection.Listener, IXoTransferListener
     private void updateOutgoingDelivery(final TalkDelivery delivery) {
         LOG.debug("updateOutgoingDelivery(" + delivery.getMessageId() + ")");
 
-        TalkClientContact clientContact = null;
-        TalkClientContact groupContact = null;
+        TalkClientContact clientContact;
+        TalkClientContact groupContact;
         TalkClientMessage clientMessage = null;
         try {
             String receiverId = delivery.getReceiverId();
