@@ -294,10 +294,8 @@
     <string name="error_send_message_blocked">Sie haben diesen Kontakt blockiert. Die Nachricht wird nicht gesendet.</string>
     <string name="multi_invitation_button">weiter</string>
 
-    <string-array name="tab_names">
-        <item>CHATS</item>
-        <item>IN DER NÄHE</item>
-    </string-array>
+    <string name="chats_tab_name">CHATS</string>
+    <string name="nearby_tab_name">IN DER NÄHE</string>
 
     <string name="contacts_tab_friends">FREUNDE</string>
     <string name="contacts_tab_groups">GRUPPEN</string>

@@ -1,13 +1,9 @@
 package com.hoccer.xo.android.activity;
 
 import android.app.ActionBar;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -16,34 +12,33 @@ import com.hoccer.talk.client.IXoPairingListener;
 import com.hoccer.talk.client.IXoStateListener;
 import com.hoccer.talk.client.XoClient;
 import com.hoccer.talk.content.SelectedContent;
-import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.XoDialogs;
 import com.hoccer.xo.android.activity.component.ActivityComponent;
 import com.hoccer.xo.android.activity.component.MediaPlayerActivityComponent;
-import com.hoccer.xo.android.adapter.ChatsPageAdapter;
+import com.hoccer.xo.android.activity.component.ViewPagerActivityComponent;
 import com.hoccer.xo.android.content.Clipboard;
 import com.hoccer.xo.android.content.selector.IContentSelector;
 import com.hoccer.xo.android.content.selector.ImageSelector;
 import com.hoccer.xo.android.content.selector.VideoSelector;
+import com.hoccer.xo.android.fragment.ChatListFragment;
 import com.hoccer.xo.android.fragment.NearbyChatListFragment;
-import com.hoccer.xo.android.fragment.SearchableListFragment;
 import com.hoccer.xo.android.util.IntentHelper;
 import com.hoccer.xo.android.view.ContactsMenuItemActionProvider;
-import org.apache.log4j.Logger;
 
 public class ChatsActivity extends ComposableActivity implements IXoStateListener, IXoPairingListener {
 
-    private final static Logger LOG = Logger.getLogger(ChatsActivity.class);
-
-    private ViewPager mViewPager;
-
-    private boolean mNoUserInput;
     private String mPairingToken;
     private ContactsMenuItemActionProvider mContactsMenuItemActionProvider;
 
     @Override
     protected ActivityComponent[] createComponents() {
-        return new ActivityComponent[]{new MediaPlayerActivityComponent(this)};
+        return new ActivityComponent[]{
+                new MediaPlayerActivityComponent(this),
+                new ViewPagerActivityComponent(this,
+                        R.id.pager,
+                        new ChatListFragment(),
+                        new NearbyChatListFragment())
+        };
     }
 
     @Override
@@ -59,10 +54,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        initViewPager();
         initActionBar();
-
         handleIntent(getIntent());
     }
 
@@ -72,7 +64,6 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         showProfileIfClientIsNotRegistered();
         registerListeners();
         mContactsMenuItemActionProvider.updateNotificationBadge();
-        updateNearbySession();
     }
 
     @Override
@@ -128,22 +119,7 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
         }
     }
 
-    private void initViewPager() {
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setOnPageChangeListener(new ConversationsPageListener());
-        mViewPager.setAdapter(new ChatsPageAdapter(getSupportFragmentManager()));
-    }
-
     private void initActionBar() {
-        ActionBar ab = getActionBar();
-        ab.setHomeButtonEnabled(false);
-        ab.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-        String[] tabNames = getResources().getStringArray(R.array.tab_names);
-        for (String tabName : tabNames) {
-            ab.addTab(ab.newTab().setText(tabName).setTabListener(new ConversationsTabListener()));
-        }
-
         mContactsMenuItemActionProvider = new ContactsMenuItemActionProvider(this);
     }
 
@@ -256,64 +232,5 @@ public class ChatsActivity extends ComposableActivity implements IXoStateListene
     private void startMediaBrowserActivity() {
         Intent intent = new Intent(this, MediaBrowserActivity.class);
         startActivity(intent);
-    }
-
-    private Fragment getFragmentAt(int position) {
-        return ((FragmentPagerAdapter) mViewPager.getAdapter()).getItem(position);
-    }
-
-    private void updateNearbySession() {
-        Fragment fragment = getFragmentAt(mViewPager.getCurrentItem());
-        if (fragment instanceof NearbyChatListFragment) {
-            ((XoApplication) getApplication()).startNearbySession(ChatsActivity.this);
-        } else {
-            ((XoApplication) getApplication()).stopNearbySession();
-        }
-    }
-
-    private class ConversationsPageListener implements ViewPager.OnPageChangeListener {
-
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-            updateNearbySession();
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-            if (state == ViewPager.SCROLL_STATE_IDLE) {
-                mNoUserInput = true;
-                getActionBar().setSelectedNavigationItem(mViewPager.getCurrentItem());
-                mNoUserInput = false;
-            }
-        }
-    }
-
-    private class ConversationsTabListener implements ActionBar.TabListener {
-
-        @Override
-        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-            if (!mNoUserInput) {
-                mViewPager.setCurrentItem(tab.getPosition());
-            }
-            getXoClient().wake();
-        }
-
-        @Override
-        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            Fragment fragment = getFragmentAt(tab.getPosition());
-            if (fragment instanceof SearchableListFragment) {
-                ((SearchableListFragment) fragment).leaveSearchMode();
-            }
-        }
-
-        @Override
-        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-
-        }
     }
 }

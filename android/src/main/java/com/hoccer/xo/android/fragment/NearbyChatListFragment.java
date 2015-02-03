@@ -1,20 +1,25 @@
 package com.hoccer.xo.android.fragment;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import com.artcom.hoccer.R;
 import com.hoccer.talk.client.model.TalkClientContact;
+import com.hoccer.xo.android.XoApplication;
 import com.hoccer.xo.android.adapter.NearbyChatListAdapter;
 import com.hoccer.xo.android.base.XoListFragment;
 import com.hoccer.xo.android.view.Placeholder;
-import com.artcom.hoccer.R;
 import org.apache.log4j.Logger;
 
 
-public class NearbyChatListFragment extends XoListFragment {
+public class NearbyChatListFragment extends XoListFragment implements IPagerFragment {
+
     private static final Logger LOG = Logger.getLogger(NearbyChatListFragment.class);
+
     private static final Placeholder PLACEHOLDER = new Placeholder(
             R.drawable.placeholder_nearby,
             R.drawable.placeholder_nearby_point,
@@ -71,4 +76,33 @@ public class NearbyChatListFragment extends XoListFragment {
             getXoActivity().showContactConversation(contact);
         }
     }
+
+    @Override
+    public View getCustomTabView(Context context) {
+        return null;
+    }
+
+    @Override
+    public String getTabName(Resources resources) {
+        return resources.getString(R.string.nearby_tab_name);
+    }
+
+    @Override
+    public void onPageSelected() {
+        ((XoApplication) getActivity().getApplication()).startNearbySession(getActivity());
+    }
+
+    @Override
+    public void onPageUnselected() {
+        ((XoApplication) getActivity().getApplication()).stopNearbySession();
+    }
+
+    @Override
+    public void onPageResume() {}
+
+    @Override
+    public void onPagePause() {}
+
+    @Override
+    public void onPageScrollStateChanged(int state) {}
 }
