@@ -18,7 +18,7 @@ public class ClipboardSelector implements IContentSelector {
 
     public ClipboardSelector(Context context) {
         mName = context.getResources().getString(R.string.content_clipboard);
-        mIcon = ColorSchemeManager.getInkedDrawable(R.drawable.ic_attachment_select_data, R.color.primary);
+        mIcon = ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_data, R.color.primary);
         mClipboard = Clipboard.getInstance();
     }
 

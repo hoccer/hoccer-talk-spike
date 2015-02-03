@@ -19,7 +19,7 @@ public class AudioSelector implements IContentSelector {
 
     public AudioSelector(Context context) {
         mName = context.getResources().getString(R.string.content_music);
-        mIcon = ColorSchemeManager.getInkedDrawable(R.drawable.ic_attachment_select_media, R.color.primary);
+        mIcon = ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_media, R.color.primary);
     }
 
     @Override

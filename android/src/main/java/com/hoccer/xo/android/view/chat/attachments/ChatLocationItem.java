@@ -60,7 +60,12 @@ public class ChatLocationItem extends ChatMessageItem {
         locationTextView.setTextColor(textColor);
         locationTitleView.setTextColor(textColor);
 
-        locationButton.setBackgroundDrawable(ColorSchemeManager.getInkedAttachmentDrawable(R.drawable.ic_light_location, mMessage.isIncoming()));
+        if (mMessage.isIncoming()) {
+            locationButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_location, R.color.attachment_incoming));
+        } else {
+            locationButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_location, R.color.attachment_outgoing));
+        }
+
 
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override

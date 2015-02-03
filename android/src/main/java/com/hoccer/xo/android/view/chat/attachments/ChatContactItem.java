@@ -65,7 +65,12 @@ public class ChatContactItem extends ChatMessageItem {
 
         contactName.setTextColor(textColor);
         contactDescription.setTextColor(textColor);
-        showButton.setBackgroundDrawable(ColorSchemeManager.getInkedAttachmentDrawable(R.drawable.ic_light_contact, mMessage.isIncoming()));
+
+        if (mMessage.isIncoming()) {
+            showButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_contact, R.color.attachment_incoming));
+        } else {
+            showButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_contact, R.color.attachment_outgoing));
+        }
         importButton.setBackgroundDrawable(showButton.getBackground());
 
         showButton.setOnClickListener(new View.OnClickListener() {

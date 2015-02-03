@@ -16,7 +16,7 @@ public class LocationSelector implements IContentSelector {
 
     public LocationSelector(Context context) {
         mName = context.getResources().getString(R.string.content_location);
-        mIcon = ColorSchemeManager.getInkedDrawable(R.drawable.ic_attachment_select_location, R.color.primary);
+        mIcon = ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_location, R.color.primary);
     }
 
     @Override

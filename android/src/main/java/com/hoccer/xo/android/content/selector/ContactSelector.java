@@ -21,7 +21,7 @@ public class ContactSelector implements IContentSelector {
 
     public ContactSelector(Context context) {
         mName = context.getResources().getString(R.string.content_contact);
-        mIcon = ColorSchemeManager.getInkedDrawable(R.drawable.ic_attachment_select_contact, R.color.primary);
+        mIcon = ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_contact, R.color.primary);
     }
 
     @Override

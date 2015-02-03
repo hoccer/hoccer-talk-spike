@@ -309,10 +309,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
             if (TalkDelivery.isFailureState(currentState)) {
                 background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
             } else {
-                background = ColorSchemeManager.getInkedDrawable(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
+                background = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
             }
         } else {
-            background = ColorSchemeManager.getInkedDrawable(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
+            background = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
         }
 
         return background;
@@ -325,10 +325,10 @@ public class ChatMessageItem implements AttachmentTransferListener {
             if (TalkDelivery.isFailureState(currentState)) {
                 background = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_incoming);
             } else {
-                background = ColorSchemeManager.getInkedDrawable(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
+                background = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
             }
         } else {
-            background = ColorSchemeManager.getInkedDrawable(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
+            background = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
         }
 
         return background;
@@ -477,13 +477,13 @@ public class ChatMessageItem implements AttachmentTransferListener {
             if (clientMessage.getIncomingDelivery().isFailure()) {
                 bubbleForMessage = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_incoming);
             } else {
-                bubbleForMessage = ColorSchemeManager.getInkedDrawable(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
+                bubbleForMessage = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_incoming, R.color.message_incoming_background);
             }
         } else {
             if (clientMessage.getOutgoingDelivery().isFailure()) {
                 bubbleForMessage = mContext.getResources().getDrawable(R.drawable.chat_bubble_error_outgoing);
             } else {
-                bubbleForMessage = ColorSchemeManager.getInkedDrawable(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
+                bubbleForMessage = ColorSchemeManager.createInkedDrawable(R.drawable.chat_bubble_outgoing, R.color.message_outgoing_background);
             }
         }
         return bubbleForMessage;

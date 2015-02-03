@@ -127,13 +127,19 @@ public class ChatAudioItem extends ChatMessageItem {
     }
 
     private void setPlayButton(){
-        mPlayPauseButton.setBackgroundDrawable(null);
-        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getInkedAttachmentDrawable(R.drawable.ic_light_play, mMessage.isIncoming()));
+        if (mMessage.isIncoming()) {
+            mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_play, R.color.attachment_incoming));
+        } else {
+            mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_play, R.color.attachment_outgoing));
+        }
     }
 
     private void setPauseButton(){
-        mPlayPauseButton.setBackgroundDrawable(null);
-        mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getInkedAttachmentDrawable(R.drawable.ic_light_pause, mMessage.isIncoming()));
+        if (mMessage.isIncoming()) {
+            mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_pause, R.color.attachment_incoming));
+        } else {
+            mPlayPauseButton.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_light_pause, R.color.attachment_outgoing));
+        }
     }
 
     public void updatePlayPauseView() {

@@ -20,7 +20,7 @@ public class VideoSelector implements IContentSelector {
 
     public VideoSelector(Context context) {
         mName = context.getResources().getString(R.string.content_video);
-        mIcon = ColorSchemeManager.getInkedDrawable(R.drawable.ic_attachment_select_video, R.color.primary);
+        mIcon = ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_video, R.color.primary);
     }
 
     @Override

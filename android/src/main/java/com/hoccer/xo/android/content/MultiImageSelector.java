@@ -20,7 +20,7 @@ public class MultiImageSelector extends ImageSelector {
     public MultiImageSelector(Context context) {
         super(context);
         setName(context.getResources().getString(R.string.content_multi_images));
-        setIcon(ColorSchemeManager.getInkedDrawable(R.drawable.ic_attachment_select_image, R.color.primary));
+        setIcon(ColorSchemeManager.getInkedDrawableCached(R.drawable.ic_attachment_select_image, R.color.primary));
     }
 
     @Override

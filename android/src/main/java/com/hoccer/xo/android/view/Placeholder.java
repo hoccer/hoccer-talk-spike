@@ -30,10 +30,10 @@ public class Placeholder {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             placeholderImageFrame.setBackground(resources.getDrawable(mImageId));
-            placeholderImage.setBackground(ColorSchemeManager.getInkedDrawable(mHeadImageId, R.color.primary));
+            placeholderImage.setBackground(ColorSchemeManager.getInkedDrawableCached(mHeadImageId, R.color.primary));
         } else {
             placeholderImageFrame.setBackgroundDrawable(resources.getDrawable(mImageId));
-            placeholderImage.setBackgroundDrawable(ColorSchemeManager.getInkedDrawable(mHeadImageId, R.color.primary));
+            placeholderImage.setBackgroundDrawable(ColorSchemeManager.getInkedDrawableCached(mHeadImageId, R.color.primary));
         }
 
         String text = resources.getString(mTextId);
