@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import com.artcom.hoccer.R;
@@ -37,9 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Android service for Hoccer Talk
@@ -56,8 +52,6 @@ public class XoClientService extends Service {
     public static final String CONTACT_DELIMETER = ", ";
 
     private static final Logger LOG = Logger.getLogger(XoClientService.class);
-
-    private static final AtomicInteger ID_COUNTER = new AtomicInteger();
 
     private static final long NOTIFICATION_ALARM_BACKOFF = 10000;
 

@@ -10,11 +10,11 @@ import com.hoccer.xo.android.util.IntentHelper;
  */
 public class MediaPlayerServiceConnector {
 
-    private Context mContext;
-    private String mIntent = null;
-    private Listener mListener = null;
+    private final Context mContext;
+    private String mIntent;
+    private Listener mListener;
 
-    private boolean mIsConnected = false;
+    private boolean mIsConnected;
 
     private MediaPlayerService mMediaPlayerService;
     private ServiceConnection mMediaPlayerServiceConnection;

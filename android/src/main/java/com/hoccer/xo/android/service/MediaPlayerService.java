@@ -164,8 +164,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnErrorLi
     private boolean isApplicationKilled(Context context) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RecentTaskInfo> runningTasks = am.getRecentTasks(1000, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
-        for (int i = 0; i < runningTasks.size(); ++i) {
-            ActivityManager.RecentTaskInfo info = runningTasks.get(i);
+        for (ActivityManager.RecentTaskInfo info : runningTasks) {
             if (info.baseIntent.getComponent().getPackageName().equalsIgnoreCase(getApplication().getPackageName())) {
                 return false;
             }
