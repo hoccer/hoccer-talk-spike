@@ -15,12 +15,9 @@ import com.hoccer.xo.android.fragment.IPagerFragment;
  */
 public class ViewPagerActivityComponent extends ActivityComponent {
 
-    private static final String CURRENT_ITEM_STATE_ID = "ViewPagerActivityComponent.currentItem";
-
     private ViewPager mViewPager;
     private final Fragment[] mFragments;
     private final int mViewPagerId;
-
 
     public <T extends Fragment & IPagerFragment> ViewPagerActivityComponent(FragmentActivity activity, int viewPagerId, T... fragments) {
         super(activity);
@@ -63,10 +60,6 @@ public class ViewPagerActivityComponent extends ActivityComponent {
             tab.setTabListener(new TabListener());
             actionBar.addTab(tab);
         }
-
-        if(savedInstanceState != null) {
-            mViewPager.setCurrentItem(savedInstanceState.getInt(CURRENT_ITEM_STATE_ID, 0));
-        }
     }
 
     @Override
@@ -89,12 +82,6 @@ public class ViewPagerActivityComponent extends ActivityComponent {
     @Override
     public void onDestroy() {
         super.onDestroy();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle instanceState) {
-        super.onSaveInstanceState(instanceState);
-        instanceState.putInt(CURRENT_ITEM_STATE_ID, mViewPager.getCurrentItem());
     }
 
     public Fragment getSelectedFragment() {

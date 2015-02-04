@@ -104,6 +104,7 @@
                 android:label="@string/actionbar_default_title"
                 android:configChanges="keyboardHidden|orientation|screenSize"
                 android:screenOrientation="portrait"
+                android:launchMode="singleTask"
                 android:windowSoftInputMode="adjustPan">
 
             <!-- Show in launcher -->

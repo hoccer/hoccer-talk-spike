@@ -33,8 +33,6 @@ public abstract class ActivityComponent {
 
     public void onDestroy() {}
 
-    @SuppressWarnings("unused")
-    public void onSaveInstanceState(Bundle instanceState) {}
 
     @SuppressWarnings("unused")
     public boolean onCreateOptionsMenu(Menu menu) {
