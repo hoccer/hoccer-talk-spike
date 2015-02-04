@@ -433,13 +433,6 @@ public abstract class XoActivity extends FragmentActivity {
             case R.id.menu_settings:
                 showPreferences();
                 break;
-            case R.id.menu_reconnect:
-                try {
-                    mService.reconnect();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
