@@ -79,7 +79,6 @@ public class XoApplication extends Application implements Thread.UncaughtExcepti
     private boolean mStayActiveInBackground;
     private boolean mNearbyEnabled;
 
-    private static final int NEARBY_TIMEOUT = 10 * 1000;
     private final Handler mNearbyTimeoutHandler = new Handler();
     private Runnable mNearbyTimeout;
 
